@@ -16,10 +16,10 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-// instuctive change begin
+// instructive change begin
 // no need import the CustomSpan
 import { hookBaseEventGetModifierKeyState, hookTouchEventGetModifierKeyState, hookDragEventGetSummary, hookDragEventStartDataLoading, hookDragEventSetDataLoadParams, hookEnableInternalDropAnimation, hookDragEventGetModifierKeyState, extractors, hookKeyEventGetModifierKeyState, DrawModifier, GestureModifier, GestureType, WrappedBuilder, GestureControl, hookId, hookStateStyleImpl, hookGesture, hookPriorityGesture, hookParallelGesture, hookGestureModifier, hookCustomPropertyImpl, hookDrawModifier, hookAllowDrop, hookDragPreviewOptions, CustomStyles, initializers, ContentModifier, hookCommonMethodAttributeModifier, AttributeModifier, AttributeUpdater, hookCommonShapeMethodAttributeModifier, hookScrollableCommonMethodAttributeModifier } from '#handwritten'
-// instuctive change end
+// instructive change end
 import { SerializerBase, DeserializerBase, Finalizable, RuntimeType, toPeerPtr, KPointer, MaterializedBase, MaterializedBaseTag, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, resourceFinalizerRegister } from '@koalaui/interop'
 import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
 import { ArkUIGeneratedNativeModule } from '#components'
@@ -115,53 +115,129 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    public target: EventTarget
-    public timestamp: int64
-    public source: SourceType
-    public axisHorizontal?: double | undefined
-    public axisVertical?: double | undefined
-    public pressure: double
-    public tiltX: double
-    public tiltY: double
-    public rollAngle?: double | undefined
-    public sourceTool: SourceTool
-    public getModifierKeyState?: ModifierKeyStateGetter | undefined
-    public deviceId?: int32 | undefined
-    public targetDisplayId?: int32 | undefined
-    public axisPinch?: double | undefined
+    // instructive change begin
+    get target(): EventTarget {
+        return this.getTarget()
+    }
+    set target(target: EventTarget) {
+        this.setTarget(target)
+    }
+    get timestamp(): int64 {
+        return this.getTimestamp()
+    }
+    set timestamp(timestamp: int64) {
+        this.setTimestamp(timestamp)
+    }
+    get source(): SourceType {
+        return this.getSource()
+    }
+    set source(source: SourceType) {
+        this.setSource(source)
+    }
+    get axisHorizontal(): double | undefined {
+        return this.getAxisHorizontal()
+    }
+    set axisHorizontal(axisHorizontal: double | undefined) {
+        this.setAxisHorizontal(axisHorizontal)
+    }
+    get axisVertical(): double | undefined {
+        return this.getAxisVertical()
+    }
+    set axisVertical(axisVertical: double | undefined) {
+        this.setAxisVertical(axisVertical)
+    }
+    get pressure(): double {
+        return this.getPressure()
+    }
+    set pressure(pressure: double) {
+        this.setPressure(pressure)
+    }
+    get tiltX(): double {
+        return this.getTiltX()
+    }
+    set tiltX(tiltX: double) {
+        this.setTiltX(tiltX)
+    }
+    get tiltY(): double {
+        return this.getTiltY()
+    }
+    set tiltY(tiltY: double) {
+        this.setTiltY(tiltY)
+    }
+    get rollAngle(): double | undefined {
+        return this.getRollAngle()
+    }
+    set rollAngle(rollAngle: double | undefined) {
+        this.setRollAngle(rollAngle)
+    }
+    get sourceTool(): SourceTool {
+        return this.getSourceTool()
+    }
+    set sourceTool(sourceTool: SourceTool) {
+        this.setSourceTool(sourceTool)
+    }
+    get getModifierKeyState(): ModifierKeyStateGetter | undefined {
+        return this.getGetModifierKeyState()
+    }
+    set getModifierKeyState(getModifierKeyState: ModifierKeyStateGetter | undefined) {
+        this.setGetModifierKeyState(getModifierKeyState)
+    }
+    get deviceId(): int32 | undefined {
+        return this.getDeviceId()
+    }
+    set deviceId(deviceId: int32 | undefined) {
+        this.setDeviceId(deviceId)
+    }
+    get targetDisplayId(): int32 | undefined {
+        return this.getTargetDisplayId()
+    }
+    set targetDisplayId(targetDisplayId: int32 | undefined) {
+        this.setTargetDisplayId(targetDisplayId)
+    }
+    get axisPinch(): double | undefined {
+        return this.getAxisPinch()
+    }
+    set axisPinch(axisPinch: double | undefined) {
+        this.setAxisPinch(axisPinch)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, BaseEventInternal.getFinalizer())
-        this.target = this.getTarget()
-        this.timestamp = this.getTimestamp()
-        this.source = this.getSource()
-        this.axisHorizontal = this.getAxisHorizontal()
-        this.axisVertical = this.getAxisVertical()
-        this.pressure = this.getPressure()
-        this.tiltX = this.getTiltX()
-        this.tiltY = this.getTiltY()
-        this.rollAngle = this.getRollAngle()
-        this.sourceTool = this.getSourceTool()
-        this.getModifierKeyState = this.getGetModifierKeyState()
-        this.deviceId = this.getDeviceId()
-        this.targetDisplayId = this.getTargetDisplayId()
-        this.axisPinch = this.getAxisPinch()
+        // instructive change begin
+        // this.target = this.getTarget()
+        // this.timestamp = this.getTimestamp()
+        // this.source = this.getSource()
+        // this.axisHorizontal = this.getAxisHorizontal()
+        // this.axisVertical = this.getAxisVertical()
+        // this.pressure = this.getPressure()
+        // this.tiltX = this.getTiltX()
+        // this.tiltY = this.getTiltY()
+        // this.rollAngle = this.getRollAngle()
+        // this.sourceTool = this.getSourceTool()
+        // this.getModifierKeyState = this.getGetModifierKeyState()
+        // this.deviceId = this.getDeviceId()
+        // this.targetDisplayId = this.getTargetDisplayId()
+        // this.axisPinch = this.getAxisPinch()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, BaseEventInternal.construct())
-        this.target = this.getTarget()
-        this.timestamp = this.getTimestamp()
-        this.source = this.getSource()
-        this.axisHorizontal = this.getAxisHorizontal()
-        this.axisVertical = this.getAxisVertical()
-        this.pressure = this.getPressure()
-        this.tiltX = this.getTiltX()
-        this.tiltY = this.getTiltY()
-        this.rollAngle = this.getRollAngle()
-        this.sourceTool = this.getSourceTool()
-        this.getModifierKeyState = this.getGetModifierKeyState()
-        this.deviceId = this.getDeviceId()
-        this.targetDisplayId = this.getTargetDisplayId()
-        this.axisPinch = this.getAxisPinch()
+        // instructive change begin
+        // this.target = this.getTarget()
+        // this.timestamp = this.getTimestamp()
+        // this.source = this.getSource()
+        // this.axisHorizontal = this.getAxisHorizontal()
+        // this.axisVertical = this.getAxisVertical()
+        // this.pressure = this.getPressure()
+        // this.tiltX = this.getTiltX()
+        // this.tiltY = this.getTiltY()
+        // this.rollAngle = this.getRollAngle()
+        // this.sourceTool = this.getSourceTool()
+        // this.getModifierKeyState = this.getGetModifierKeyState()
+        // this.deviceId = this.getDeviceId()
+        // this.targetDisplayId = this.getTargetDisplayId()
+        // this.axisPinch = this.getAxisPinch()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._BaseEvent_construct()
@@ -552,14 +628,25 @@ export class DismissContentCoverActionInternal implements MaterializedBase,Dismi
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    public reason: DismissReason
+    // instructive change begin
+    get reason(): DismissReason {
+        return this.getReason()
+    }
+    set reason(reason: DismissReason) {
+        this.setReason(reason)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, DismissContentCoverActionInternal.getFinalizer())
-        this.reason = this.getReason()
+        // instructive change begin
+        // this.reason = this.getReason()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, DismissContentCoverActionInternal.construct())
-        this.reason = this.getReason()
+        // instructive change begin
+        // this.reason = this.getReason()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._DismissContentCoverAction_construct()
@@ -603,14 +690,25 @@ export class DismissPopupActionInternal implements MaterializedBase,DismissPopup
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    public reason: DismissReason
+    // instructive change begin
+    get reason(): DismissReason {
+        return this.getReason()
+    }
+    set reason(reason: DismissReason) {
+        this.setReason(reason)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, DismissPopupActionInternal.getFinalizer())
-        this.reason = this.getReason()
+        // instructive change begin
+        // this.reason = this.getReason()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, DismissPopupActionInternal.construct())
-        this.reason = this.getReason()
+        // instructive change begin
+        // this.reason = this.getReason()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._DismissPopupAction_construct()
@@ -654,14 +752,25 @@ export class DismissSheetActionInternal implements MaterializedBase,DismissSheet
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    public reason: DismissReason
+    // instructive change begin
+    get reason(): DismissReason {
+        return this.getReason()
+    }
+    set reason(reason: DismissReason) {
+        this.setReason(reason)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, DismissSheetActionInternal.getFinalizer())
-        this.reason = this.getReason()
+        // instructive change begin
+        // this.reason = this.getReason()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, DismissSheetActionInternal.construct())
-        this.reason = this.getReason()
+        // instructive change begin
+        // this.reason = this.getReason()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._DismissSheetAction_construct()
@@ -729,22 +838,48 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    public dragBehavior: DragBehavior
-    public useCustomDropAnimation: boolean
-    public autoHideComponentUniqueIds?: int32 | Array<int32> | undefined
-    public getModifierKeyState?: ModifierKeyStateGetter | undefined
+    // instructive change begin
+    get dragBehavior(): DragBehavior {
+        return this.getDragBehavior()
+    }
+    set dragBehavior(dragBehavior: DragBehavior) {
+        this.setDragBehavior(dragBehavior)
+    }
+    get useCustomDropAnimation(): boolean {
+        return this.getUseCustomDropAnimation()
+    }
+    set useCustomDropAnimation(useCustomDropAnimation: boolean) {
+        this.setUseCustomDropAnimation(useCustomDropAnimation)
+    }
+    get autoHideComponentUniqueIds(): int32 | Array<int32> | undefined {
+        return this.getAutoHideComponentUniqueIds()
+    }
+    set autoHideComponentUniqueIds(autoHideComponentUniqueIds: int32 | Array<int32> | undefined) {
+        this.setAutoHideComponentUniqueIds(autoHideComponentUniqueIds)
+    }
+    get getModifierKeyState(): ModifierKeyStateGetter | undefined {
+        return this.getGetModifierKeyState()
+    }
+    set getModifierKeyState(getModifierKeyState: ModifierKeyStateGetter | undefined) {
+        this.setGetModifierKeyState(getModifierKeyState)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, DragEventInternal.getFinalizer())
-        this.dragBehavior = this.getDragBehavior()
-        this.useCustomDropAnimation = this.getUseCustomDropAnimation()
-        this.autoHideComponentUniqueIds = this.getAutoHideComponentUniqueIds()
-        this.getModifierKeyState = this.getGetModifierKeyState()
+        // instructive change begin
+        // this.dragBehavior = this.getDragBehavior()
+        // this.useCustomDropAnimation = this.getUseCustomDropAnimation()
+        // this.autoHideComponentUniqueIds = this.getAutoHideComponentUniqueIds()
+        // this.getModifierKeyState = this.getGetModifierKeyState()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, DragEventInternal.construct())
-        this.dragBehavior = this.getDragBehavior()
-        this.useCustomDropAnimation = this.getUseCustomDropAnimation()
-        this.getModifierKeyState = this.getGetModifierKeyState()
+        // instructive change begin
+        // this.dragBehavior = this.getDragBehavior()
+        // this.useCustomDropAnimation = this.getUseCustomDropAnimation()
+        // this.getModifierKeyState = this.getGetModifierKeyState()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._DragEvent_construct()
@@ -1051,50 +1186,121 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    public type: KeyType
-    public keyCode: int32
-    public keyText: string
-    public keySource: KeySource
-    public deviceId: int32
-    public metaKey: int32
-    public timestamp: int64
-    public intentionCode: IntentionCode
-    public getModifierKeyState?: ModifierKeyStateGetter | undefined
-    public unicode?: int64 | undefined
-    public isNumLockOn?: boolean | undefined
-    public isCapsLockOn?: boolean | undefined
-    public isScrollLockOn?: boolean | undefined
+    // instructive change begin
+    get type(): KeyType {
+        return this.getType()
+    }
+    set type(type: KeyType) {
+        this.setType(type)
+    }
+    get keyCode(): int32 {
+        return this.getKeyCode()
+    }
+    set keyCode(keyCode: int32) {
+        this.setKeyCode(keyCode)
+    }
+    get keyText(): string {
+        return this.getKeyText()
+    }
+    set keyText(keyText: string) {
+        this.setKeyText(keyText)
+    }
+    get keySource(): KeySource {
+        return this.getKeySource()
+    }
+    set keySource(keySource: KeySource) {
+        this.setKeySource(keySource)
+    }
+    get deviceId(): int32 {
+        return this.getDeviceId()
+    }
+    set deviceId(deviceId: int32) {
+        this.setDeviceId(deviceId)
+    }
+    get metaKey(): int32 {
+        return this.getMetaKey()
+    }
+    set metaKey(metaKey: int32) {
+        this.setMetaKey(metaKey)
+    }
+    get timestamp(): int64 {
+        return this.getTimestamp()
+    }
+    set timestamp(timestamp: int64) {
+        this.setTimestamp(timestamp)
+    }
+    get intentionCode(): IntentionCode {
+        return this.getIntentionCode()
+    }
+    set intentionCode(intentionCode: IntentionCode) {
+        this.setIntentionCode(intentionCode)
+    }
+    get getModifierKeyState(): ModifierKeyStateGetter | undefined {
+        return this.getGetModifierKeyState()
+    }
+    set getModifierKeyState(getModifierKeyState: ModifierKeyStateGetter | undefined) {
+        this.setGetModifierKeyState(getModifierKeyState)
+    }
+    get unicode(): int64 | undefined {
+        return this.getUnicode()
+    }
+    set unicode(unicode: int64 | undefined) {
+        this.setUnicode(unicode)
+    }
+    get isNumLockOn(): boolean | undefined {
+        return this.getIsNumLockOn()
+    }
+    set isNumLockOn(isNumLockOn: boolean | undefined) {
+        this.setIsNumLockOn(isNumLockOn)
+    }
+    get isCapsLockOn(): boolean | undefined {
+        return this.getIsCapsLockOn()
+    }
+    set isCapsLockOn(isCapsLockOn: boolean | undefined) {
+        this.setIsCapsLockOn(isCapsLockOn)
+    }
+    get isScrollLockOn(): boolean | undefined {
+        return this.getIsScrollLockOn()
+    }
+    set isScrollLockOn(isScrollLockOn: boolean | undefined) {
+        this.setIsScrollLockOn(isScrollLockOn)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, KeyEventInternal.getFinalizer())
-        this.type = this.getType()
-        this.keyCode = this.getKeyCode()
-        this.keyText = this.getKeyText()
-        this.keySource = this.getKeySource()
-        this.deviceId = this.getDeviceId()
-        this.metaKey = this.getMetaKey()
-        this.timestamp = this.getTimestamp()
-        this.intentionCode = this.getIntentionCode()
-        this.getModifierKeyState = this.getGetModifierKeyState()
-        this.unicode = this.getUnicode()
-        this.isNumLockOn = this.getIsNumLockOn()
-        this.isCapsLockOn = this.getIsCapsLockOn()
-        this.isScrollLockOn = this.getIsScrollLockOn()
+        // instructive change begin
+        // this.type = this.getType()
+        // this.keyCode = this.getKeyCode()
+        // this.keyText = this.getKeyText()
+        // this.keySource = this.getKeySource()
+        // this.deviceId = this.getDeviceId()
+        // this.metaKey = this.getMetaKey()
+        // this.timestamp = this.getTimestamp()
+        // this.intentionCode = this.getIntentionCode()
+        // this.getModifierKeyState = this.getGetModifierKeyState()
+        // this.unicode = this.getUnicode()
+        // this.isNumLockOn = this.getIsNumLockOn()
+        // this.isCapsLockOn = this.getIsCapsLockOn()
+        // this.isScrollLockOn = this.getIsScrollLockOn()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, KeyEventInternal.construct())
-        this.type = this.getType()
-        this.keyCode = this.getKeyCode()
-        this.keyText = this.getKeyText()
-        this.keySource = this.getKeySource()
-        this.deviceId = this.getDeviceId()
-        this.metaKey = this.getMetaKey()
-        this.timestamp = this.getTimestamp()
-        this.intentionCode = this.getIntentionCode()
-        this.getModifierKeyState = this.getGetModifierKeyState()
-        this.unicode = this.getUnicode()
-        this.isNumLockOn = this.getIsNumLockOn()
-        this.isCapsLockOn = this.getIsCapsLockOn()
-        this.isScrollLockOn = this.getIsScrollLockOn()
+        // instructive change begin
+        // this.type = this.getType()
+        // this.keyCode = this.getKeyCode()
+        // this.keyText = this.getKeyText()
+        // this.keySource = this.getKeySource()
+        // this.deviceId = this.getDeviceId()
+        // this.metaKey = this.getMetaKey()
+        // this.timestamp = this.getTimestamp()
+        // this.intentionCode = this.getIntentionCode()
+        // this.getModifierKeyState = this.getGetModifierKeyState()
+        // this.unicode = this.getUnicode()
+        // this.isNumLockOn = this.getIsNumLockOn()
+        // this.isCapsLockOn = this.getIsCapsLockOn()
+        // this.isScrollLockOn = this.getIsScrollLockOn()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._KeyEvent_construct()
@@ -1398,17 +1604,33 @@ export class LayoutableInternal implements MaterializedBase,Layoutable {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    public measureResult: MeasureResult
-    public uniqueId?: int32 | undefined
+    // instructive change begin
+    get measureResult(): MeasureResult {
+        return this.getMeasureResult()
+    }
+    set measureResult(measureResult: MeasureResult) {
+        this.setMeasureResult(measureResult)
+    }
+    get uniqueId(): int32 | undefined {
+        return this.getUniqueId()
+    }
+    set uniqueId(uniqueId: int32 | undefined) {
+        this.setUniqueId(uniqueId)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, LayoutableInternal.getFinalizer())
-        this.measureResult = this.getMeasureResult()
-        this.uniqueId = this.getUniqueId()
+        // instructive change begin
+        // this.measureResult = this.getMeasureResult()
+        // this.uniqueId = this.getUniqueId()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, LayoutableInternal.construct())
-        this.measureResult = this.getMeasureResult()
-        this.uniqueId = this.getUniqueId()
+        // instructive change begin
+        // this.measureResult = this.getMeasureResult()
+        // this.uniqueId = this.getUniqueId()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._Layoutable_construct()
@@ -1599,14 +1821,25 @@ export class MeasurableInternal implements MaterializedBase,Measurable {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    public uniqueId?: int32 | undefined
+    // instructive change begin
+    get uniqueId(): int32 | undefined {
+        return this.getUniqueId()
+    }
+    set uniqueId(uniqueId: int32 | undefined) {
+        this.setUniqueId(uniqueId)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, MeasurableInternal.getFinalizer())
-        this.uniqueId = this.getUniqueId()
+        // instructive change begin
+        // this.uniqueId = this.getUniqueId()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, MeasurableInternal.construct())
-        this.uniqueId = this.getUniqueId()
+        // instructive change begin
+        // this.uniqueId = this.getUniqueId()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._Measurable_construct()
@@ -25772,38 +26005,89 @@ export interface AccessibilityHoverEvent extends BaseEvent {
     globalDisplayY?: double | undefined
 }
 export class AccessibilityHoverEventInternal extends BaseEventInternal implements MaterializedBase,AccessibilityHoverEvent {
-    public type: AccessibilityHoverType
-    public x: double
-    public y: double
-    public displayX: double
-    public displayY: double
-    public windowX: double
-    public windowY: double
-    public globalDisplayX?: double | undefined
-    public globalDisplayY?: double | undefined
+    // instructive change begin
+    get type(): AccessibilityHoverType {
+        return this.getType()
+    }
+    set type(type: AccessibilityHoverType) {
+        this.setType(type)
+    }
+    get x(): double {
+        return this.getX()
+    }
+    set x(x: double) {
+        this.setX(x)
+    }
+    get y(): double {
+        return this.getY()
+    }
+    set y(y: double) {
+        this.setY(y)
+    }
+    get displayX(): double {
+        return this.getDisplayX()
+    }
+    set displayX(displayX: double) {
+        this.setDisplayX(displayX)
+    }
+    get displayY(): double {
+        return this.getDisplayY()
+    }
+    set displayY(displayY: double) {
+        this.setDisplayY(displayY)
+    }
+    get windowX(): double {
+        return this.getWindowX()
+    }
+    set windowX(windowX: double) {
+        this.setWindowX(windowX)
+    }
+    get windowY(): double {
+        return this.getWindowY()
+    }
+    set windowY(windowY: double) {
+        this.setWindowY(windowY)
+    }
+    get globalDisplayX(): double | undefined {
+        return this.getGlobalDisplayX()
+    }
+    set globalDisplayX(globalDisplayX: double | undefined) {
+        this.setGlobalDisplayX(globalDisplayX)
+    }
+    get globalDisplayY(): double | undefined {
+        return this.getGlobalDisplayY()
+    }
+    set globalDisplayY(globalDisplayY: double | undefined) {
+        this.setGlobalDisplayY(globalDisplayY)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         super(tag, peerPtr)
-        this.type = this.getType()
-        this.x = this.getX()
-        this.y = this.getY()
-        this.displayX = this.getDisplayX()
-        this.displayY = this.getDisplayY()
-        this.windowX = this.getWindowX()
-        this.windowY = this.getWindowY()
-        this.globalDisplayX = this.getGlobalDisplayX()
-        this.globalDisplayY = this.getGlobalDisplayY()
+        // instructive change begin
+        // this.type = this.getType()
+        // this.x = this.getX()
+        // this.y = this.getY()
+        // this.displayX = this.getDisplayX()
+        // this.displayY = this.getDisplayY()
+        // this.windowX = this.getWindowX()
+        // this.windowY = this.getWindowY()
+        // this.globalDisplayX = this.getGlobalDisplayX()
+        // this.globalDisplayY = this.getGlobalDisplayY()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, AccessibilityHoverEventInternal.construct())
-        this.type = this.getType()
-        this.x = this.getX()
-        this.y = this.getY()
-        this.displayX = this.getDisplayX()
-        this.displayY = this.getDisplayY()
-        this.windowX = this.getWindowX()
-        this.windowY = this.getWindowY()
-        this.globalDisplayX = this.getGlobalDisplayX()
-        this.globalDisplayY = this.getGlobalDisplayY()
+        // instructive change begin
+        // this.type = this.getType()
+        // this.x = this.getX()
+        // this.y = this.getY()
+        // this.displayX = this.getDisplayX()
+        // this.displayY = this.getDisplayY()
+        // this.windowX = this.getWindowX()
+        // this.windowY = this.getWindowY()
+        // this.globalDisplayX = this.getGlobalDisplayX()
+        // this.globalDisplayY = this.getGlobalDisplayY()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._AccessibilityHoverEvent_construct()
@@ -26003,41 +26287,97 @@ export interface AxisEvent extends BaseEvent {
     hasAxis(axisType: AxisType): boolean
 }
 export class AxisEventInternal extends BaseEventInternal implements MaterializedBase,AxisEvent {
-    public action: AxisAction
-    public displayX: double
-    public displayY: double
-    public windowX: double
-    public windowY: double
-    public x: double
-    public y: double
-    public scrollStep?: int32 | undefined
-    public globalDisplayX?: double | undefined
-    public globalDisplayY?: double | undefined
+    // instructive change begin
+    get action(): AxisAction {
+        return this.getAction()
+    }
+    set action(action: AxisAction) {
+        this.setAction(action)
+    }
+    get displayX(): double {
+        return this.getDisplayX()
+    }
+    set displayX(displayX: double) {
+        this.setDisplayX(displayX)
+    }
+    get displayY(): double {
+        return this.getDisplayY()
+    }
+    set displayY(displayY: double) {
+        this.setDisplayY(displayY)
+    }
+    get windowX(): double {
+        return this.getWindowX()
+    }
+    set windowX(windowX: double) {
+        this.setWindowX(windowX)
+    }
+    get windowY(): double {
+        return this.getWindowY()
+    }
+    set windowY(windowY: double) {
+        this.setWindowY(windowY)
+    }
+    get x(): double {
+        return this.getX()
+    }
+    set x(x: double) {
+        this.setX(x)
+    }
+    get y(): double {
+        return this.getY()
+    }
+    set y(y: double) {
+        this.setY(y)
+    }
+    get scrollStep(): int32 | undefined {
+        return this.getScrollStep()
+    }
+    set scrollStep(scrollStep: int32 | undefined) {
+        this.setScrollStep(scrollStep)
+    }
+    get globalDisplayX(): double | undefined {
+        return this.getGlobalDisplayX()
+    }
+    set globalDisplayX(globalDisplayX: double | undefined) {
+        this.setGlobalDisplayX(globalDisplayX)
+    }
+    get globalDisplayY(): double | undefined {
+        return this.getGlobalDisplayY()
+    }
+    set globalDisplayY(globalDisplayY: double | undefined) {
+        this.setGlobalDisplayY(globalDisplayY)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         super(tag, peerPtr)
-        this.action = this.getAction()
-        this.displayX = this.getDisplayX()
-        this.displayY = this.getDisplayY()
-        this.windowX = this.getWindowX()
-        this.windowY = this.getWindowY()
-        this.x = this.getX()
-        this.y = this.getY()
-        this.scrollStep = this.getScrollStep()
-        this.globalDisplayX = this.getGlobalDisplayX()
-        this.globalDisplayY = this.getGlobalDisplayY()
+        // instructive change begin
+        // this.action = this.getAction()
+        // this.displayX = this.getDisplayX()
+        // this.displayY = this.getDisplayY()
+        // this.windowX = this.getWindowX()
+        // this.windowY = this.getWindowY()
+        // this.x = this.getX()
+        // this.y = this.getY()
+        // this.scrollStep = this.getScrollStep()
+        // this.globalDisplayX = this.getGlobalDisplayX()
+        // this.globalDisplayY = this.getGlobalDisplayY()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, AxisEventInternal.construct())
-        this.action = this.getAction()
-        this.displayX = this.getDisplayX()
-        this.displayY = this.getDisplayY()
-        this.windowX = this.getWindowX()
-        this.windowY = this.getWindowY()
-        this.x = this.getX()
-        this.y = this.getY()
-        this.scrollStep = this.getScrollStep()
-        this.globalDisplayX = this.getGlobalDisplayX()
-        this.globalDisplayY = this.getGlobalDisplayY()
+        // instructive change begin
+        // this.action = this.getAction()
+        // this.displayX = this.getDisplayX()
+        // this.displayY = this.getDisplayY()
+        // this.windowX = this.getWindowX()
+        // this.windowY = this.getWindowY()
+        // this.x = this.getX()
+        // this.y = this.getY()
+        // this.scrollStep = this.getScrollStep()
+        // this.globalDisplayX = this.getGlobalDisplayX()
+        // this.globalDisplayY = this.getGlobalDisplayY()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._AxisEvent_construct()
@@ -26300,38 +26640,89 @@ export interface ClickEvent extends BaseEvent {
     preventDefault(): void
 }
 export class ClickEventInternal extends BaseEventInternal implements MaterializedBase,ClickEvent {
-    public displayX: double
-    public displayY: double
-    public windowX: double
-    public windowY: double
-    public x: double
-    public y: double
-    public hand?: InteractionHand | undefined
-    public globalDisplayX?: double | undefined
-    public globalDisplayY?: double | undefined
+    // instructive change begin
+    get displayX(): double {
+        return this.getDisplayX()
+    }
+    set displayX(displayX: double) {
+        this.setDisplayX(displayX)
+    }
+    get displayY(): double {
+        return this.getDisplayY()
+    }
+    set displayY(displayY: double) {
+        this.setDisplayY(displayY)
+    }
+    get windowX(): double {
+        return this.getWindowX()
+    }
+    set windowX(windowX: double) {
+        this.setWindowX(windowX)
+    }
+    get windowY(): double {
+        return this.getWindowY()
+    }
+    set windowY(windowY: double) {
+        this.setWindowY(windowY)
+    }
+    get x(): double {
+        return this.getX()
+    }
+    set x(x: double) {
+        this.setX(x)
+    }
+    get y(): double {
+        return this.getY()
+    }
+    set y(y: double) {
+        this.setY(y)
+    }
+    get hand(): InteractionHand | undefined {
+        return this.getHand()
+    }
+    set hand(hand: InteractionHand | undefined) {
+        this.setHand(hand)
+    }
+    get globalDisplayX(): double | undefined {
+        return this.getGlobalDisplayX()
+    }
+    set globalDisplayX(globalDisplayX: double | undefined) {
+        this.setGlobalDisplayX(globalDisplayX)
+    }
+    get globalDisplayY(): double | undefined {
+        return this.getGlobalDisplayY()
+    }
+    set globalDisplayY(globalDisplayY: double | undefined) {
+        this.setGlobalDisplayY(globalDisplayY)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         super(tag, peerPtr)
-        this.displayX = this.getDisplayX()
-        this.displayY = this.getDisplayY()
-        this.windowX = this.getWindowX()
-        this.windowY = this.getWindowY()
-        this.x = this.getX()
-        this.y = this.getY()
-        this.hand = this.getHand()
-        this.globalDisplayX = this.getGlobalDisplayX()
-        this.globalDisplayY = this.getGlobalDisplayY()
+        // instructive change begin
+        // this.displayX = this.getDisplayX()
+        // this.displayY = this.getDisplayY()
+        // this.windowX = this.getWindowX()
+        // this.windowY = this.getWindowY()
+        // this.x = this.getX()
+        // this.y = this.getY()
+        // this.hand = this.getHand()
+        // this.globalDisplayX = this.getGlobalDisplayX()
+        // this.globalDisplayY = this.getGlobalDisplayY()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, ClickEventInternal.construct())
-        this.displayX = this.getDisplayX()
-        this.displayY = this.getDisplayY()
-        this.windowX = this.getWindowX()
-        this.windowY = this.getWindowY()
-        this.x = this.getX()
-        this.y = this.getY()
-        this.hand = this.getHand()
-        this.globalDisplayX = this.getGlobalDisplayX()
-        this.globalDisplayY = this.getGlobalDisplayY()
+        // instructive change begin
+        // this.displayX = this.getDisplayX()
+        // this.displayY = this.getDisplayY()
+        // this.windowX = this.getWindowX()
+        // this.windowY = this.getWindowY()
+        // this.x = this.getX()
+        // this.y = this.getY()
+        // this.hand = this.getHand()
+        // this.globalDisplayX = this.getGlobalDisplayX()
+        // this.globalDisplayY = this.getGlobalDisplayY()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._ClickEvent_construct()
@@ -26544,14 +26935,25 @@ export interface FocusAxisEvent extends BaseEvent {
     stopPropagation(): void
 }
 export class FocusAxisEventInternal extends BaseEventInternal implements MaterializedBase,FocusAxisEvent {
-    public axisMap: Map<AxisModel, double>
+    // instructive change begin
+    get axisMap(): Map<AxisModel, double> {
+        return this.getAxisMap()
+    }
+    set axisMap(axisMap: Map<AxisModel, double>) {
+        this.setAxisMap(axisMap)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         super(tag, peerPtr)
-        this.axisMap = this.getAxisMap()
+        // instructive change begin
+        // this.axisMap = this.getAxisMap()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, FocusAxisEventInternal.construct())
-        this.axisMap = this.getAxisMap()
+        // instructive change begin
+        // this.axisMap = this.getAxisMap()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._FocusAxisEvent_construct()
@@ -26618,35 +27020,81 @@ export interface HoverEvent extends BaseEvent {
     stopPropagation(): void
 }
 export class HoverEventInternal extends BaseEventInternal implements MaterializedBase,HoverEvent {
-    public x?: double | undefined
-    public y?: double | undefined
-    public windowX?: double | undefined
-    public windowY?: double | undefined
-    public displayX?: double | undefined
-    public displayY?: double | undefined
-    public globalDisplayX?: double | undefined
-    public globalDisplayY?: double | undefined
+    // instructive change begin
+    get x(): double | undefined {
+        return this.getX()
+    }
+    set x(x: double | undefined) {
+        this.setX(x)
+    }
+    get y(): double | undefined {
+        return this.getY()
+    }
+    set y(y: double | undefined) {
+        this.setY(y)
+    }
+    get windowX(): double | undefined {
+        return this.getWindowX()
+    }
+    set windowX(windowX: double | undefined) {
+        this.setWindowX(windowX)
+    }
+    get windowY(): double | undefined {
+        return this.getWindowY()
+    }
+    set windowY(windowY: double | undefined) {
+        this.setWindowY(windowY)
+    }
+    get displayX(): double | undefined {
+        return this.getDisplayX()
+    }
+    set displayX(displayX: double | undefined) {
+        this.setDisplayX(displayX)
+    }
+    get displayY(): double | undefined {
+        return this.getDisplayY()
+    }
+    set displayY(displayY: double | undefined) {
+        this.setDisplayY(displayY)
+    }
+    get globalDisplayX(): double | undefined {
+        return this.getGlobalDisplayX()
+    }
+    set globalDisplayX(globalDisplayX: double | undefined) {
+        this.setGlobalDisplayX(globalDisplayX)
+    }
+    get globalDisplayY(): double | undefined {
+        return this.getGlobalDisplayY()
+    }
+    set globalDisplayY(globalDisplayY: double | undefined) {
+        this.setGlobalDisplayY(globalDisplayY)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         super(tag, peerPtr)
-        this.x = this.getX()
-        this.y = this.getY()
-        this.windowX = this.getWindowX()
-        this.windowY = this.getWindowY()
-        this.displayX = this.getDisplayX()
-        this.displayY = this.getDisplayY()
-        this.globalDisplayX = this.getGlobalDisplayX()
-        this.globalDisplayY = this.getGlobalDisplayY()
+        // instructive change begin
+        // this.x = this.getX()
+        // this.y = this.getY()
+        // this.windowX = this.getWindowX()
+        // this.windowY = this.getWindowY()
+        // this.displayX = this.getDisplayX()
+        // this.displayY = this.getDisplayY()
+        // this.globalDisplayX = this.getGlobalDisplayX()
+        // this.globalDisplayY = this.getGlobalDisplayY()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, HoverEventInternal.construct())
-        this.x = this.getX()
-        this.y = this.getY()
-        this.windowX = this.getWindowX()
-        this.windowY = this.getWindowY()
-        this.displayX = this.getDisplayX()
-        this.displayY = this.getDisplayY()
-        this.globalDisplayX = this.getGlobalDisplayX()
-        this.globalDisplayY = this.getGlobalDisplayY()
+        // instructive change begin
+        // this.x = this.getX()
+        // this.y = this.getY()
+        // this.windowX = this.getWindowX()
+        // this.windowY = this.getWindowY()
+        // this.displayX = this.getDisplayX()
+        // this.displayY = this.getDisplayY()
+        // this.globalDisplayX = this.getGlobalDisplayX()
+        // this.globalDisplayY = this.getGlobalDisplayY()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._HoverEvent_construct()
@@ -26940,50 +27388,121 @@ export interface MouseEvent extends BaseEvent {
     getHistoricalPoints(): Array<MouseHistoricalPoint> | undefined
 }
 export class MouseEventInternal extends BaseEventInternal implements MaterializedBase,MouseEvent {
-    public button: MouseButton
-    public action: MouseAction
-    public displayX: double
-    public displayY: double
-    public windowX: double
-    public windowY: double
-    public x: double
-    public y: double
-    public rawDeltaX?: double | undefined
-    public rawDeltaY?: double | undefined
-    public pressedButtons?: Array<MouseButton> | undefined
-    public globalDisplayX?: double | undefined
-    public globalDisplayY?: double | undefined
+    // instructive change begin
+    get button(): MouseButton {
+        return this.getButton()
+    }
+    set button(button: MouseButton) {
+        this.setButton(button)
+    }
+    get action(): MouseAction {
+        return this.getAction()
+    }
+    set action(action: MouseAction) {
+        this.setAction(action)
+    }
+    get displayX(): double {
+        return this.getDisplayX()
+    }
+    set displayX(displayX: double) {
+        this.setDisplayX(displayX)
+    }
+    get displayY(): double {
+        return this.getDisplayY()
+    }
+    set displayY(displayY: double) {
+        this.setDisplayY(displayY)
+    }
+    get windowX(): double {
+        return this.getWindowX()
+    }
+    set windowX(windowX: double) {
+        this.setWindowX(windowX)
+    }
+    get windowY(): double {
+        return this.getWindowY()
+    }
+    set windowY(windowY: double) {
+        this.setWindowY(windowY)
+    }
+    get x(): double {
+        return this.getX()
+    }
+    set x(x: double) {
+        this.setX(x)
+    }
+    get y(): double {
+        return this.getY()
+    }
+    set y(y: double) {
+        this.setY(y)
+    }
+    get rawDeltaX(): double | undefined {
+        return this.getRawDeltaX()
+    }
+    set rawDeltaX(rawDeltaX: double | undefined) {
+        this.setRawDeltaX(rawDeltaX)
+    }
+    get rawDeltaY(): double | undefined {
+        return this.getRawDeltaY()
+    }
+    set rawDeltaY(rawDeltaY: double | undefined) {
+        this.setRawDeltaY(rawDeltaY)
+    }
+    get pressedButtons(): Array<MouseButton> | undefined {
+        return this.getPressedButtons()
+    }
+    set pressedButtons(pressedButtons: Array<MouseButton> | undefined) {
+        this.setPressedButtons(pressedButtons)
+    }
+    get globalDisplayX(): double | undefined {
+        return this.getGlobalDisplayX()
+    }
+    set globalDisplayX(globalDisplayX: double | undefined) {
+        this.setGlobalDisplayX(globalDisplayX)
+    }
+    get globalDisplayY(): double | undefined {
+        return this.getGlobalDisplayY()
+    }
+    set globalDisplayY(globalDisplayY: double | undefined) {
+        this.setGlobalDisplayY(globalDisplayY)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         super(tag, peerPtr)
-        this.button = this.getButton()
-        this.action = this.getAction()
-        this.displayX = this.getDisplayX()
-        this.displayY = this.getDisplayY()
-        this.windowX = this.getWindowX()
-        this.windowY = this.getWindowY()
-        this.x = this.getX()
-        this.y = this.getY()
-        this.rawDeltaX = this.getRawDeltaX()
-        this.rawDeltaY = this.getRawDeltaY()
-        this.pressedButtons = this.getPressedButtons()
-        this.globalDisplayX = this.getGlobalDisplayX()
-        this.globalDisplayY = this.getGlobalDisplayY()
+        // instructive change begin
+        // this.button = this.getButton()
+        // this.action = this.getAction()
+        // this.displayX = this.getDisplayX()
+        // this.displayY = this.getDisplayY()
+        // this.windowX = this.getWindowX()
+        // this.windowY = this.getWindowY()
+        // this.x = this.getX()
+        // this.y = this.getY()
+        // this.rawDeltaX = this.getRawDeltaX()
+        // this.rawDeltaY = this.getRawDeltaY()
+        // this.pressedButtons = this.getPressedButtons()
+        // this.globalDisplayX = this.getGlobalDisplayX()
+        // this.globalDisplayY = this.getGlobalDisplayY()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, MouseEventInternal.construct())
-        this.button = this.getButton()
-        this.action = this.getAction()
-        this.displayX = this.getDisplayX()
-        this.displayY = this.getDisplayY()
-        this.windowX = this.getWindowX()
-        this.windowY = this.getWindowY()
-        this.x = this.getX()
-        this.y = this.getY()
-        this.rawDeltaX = this.getRawDeltaX()
-        this.rawDeltaY = this.getRawDeltaY()
-        this.pressedButtons = this.getPressedButtons()
-        this.globalDisplayX = this.getGlobalDisplayX()
-        this.globalDisplayY = this.getGlobalDisplayY()
+        // instructive change begin
+        // this.button = this.getButton()
+        // this.action = this.getAction()
+        // this.displayX = this.getDisplayX()
+        // this.displayY = this.getDisplayY()
+        // this.windowX = this.getWindowX()
+        // this.windowY = this.getWindowY()
+        // this.x = this.getX()
+        // this.y = this.getY()
+        // this.rawDeltaX = this.getRawDeltaX()
+        // this.rawDeltaY = this.getRawDeltaY()
+        // this.pressedButtons = this.getPressedButtons()
+        // this.globalDisplayX = this.getGlobalDisplayX()
+        // this.globalDisplayY = this.getGlobalDisplayY()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._MouseEvent_construct()

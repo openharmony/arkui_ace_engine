@@ -63,23 +63,49 @@ export class NavDestinationContextInternal implements MaterializedBase,NavDestin
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    public pathInfo: NavPathInfo
-    public pathStack: NavPathStack
-    public navDestinationId?: string | undefined
-    public mode?: NavDestinationMode | undefined
+    // instructive change begin
+    get pathInfo(): NavPathInfo {
+        return this.getPathInfo()
+    }
+    set pathInfo(pathInfo: NavPathInfo) {
+        this.setPathInfo(pathInfo)
+    }
+    get pathStack(): NavPathStack {
+        return this.getPathStack()
+    }
+    set pathStack(pathStack: NavPathStack) {
+        this.setPathStack(pathStack)
+    }
+    get navDestinationId(): string | undefined {
+        return this.getNavDestinationId()
+    }
+    set navDestinationId(navDestinationId: string | undefined) {
+        this.setNavDestinationId(navDestinationId)
+    }
+    get mode(): NavDestinationMode | undefined {
+        return this.getMode()
+    }
+    set mode(mode: NavDestinationMode | undefined) {
+        this.setMode(mode)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, NavDestinationContextInternal.getFinalizer())
-        this.pathInfo = this.getPathInfo()
-        this.pathStack = this.getPathStack()
-        this.navDestinationId = this.getNavDestinationId()
-        this.mode = this.getMode()
+        // instructive change begin
+        // this.pathInfo = this.getPathInfo()
+        // this.pathStack = this.getPathStack()
+        // this.navDestinationId = this.getNavDestinationId()
+        // this.mode = this.getMode()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, NavDestinationContextInternal.construct())
-        this.pathInfo = this.getPathInfo()
-        this.pathStack = this.getPathStack()
-        this.navDestinationId = this.getNavDestinationId()
-        this.mode = this.getMode()
+        // instructive change begin
+        // this.pathInfo = this.getPathInfo()
+        // this.pathStack = this.getPathStack()
+        // this.navDestinationId = this.getNavDestinationId()
+        // this.mode = this.getMode()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._NavDestinationContext_construct()

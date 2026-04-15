@@ -961,17 +961,33 @@ export interface BaseGestureEvent extends BaseEvent {
     fingerInfos?: Array<FingerInfo> | undefined
 }
 export class BaseGestureEventInternal extends BaseEventInternal implements MaterializedBase,BaseGestureEvent {
-    public fingerList: Array<FingerInfo>
-    public fingerInfos?: Array<FingerInfo> | undefined
+    // instructive change begin
+    get fingerList(): Array<FingerInfo> {
+        return this.getFingerList()
+    }
+    set fingerList(fingerList: Array<FingerInfo>) {
+        this.setFingerList(fingerList)
+    }
+    get fingerInfos(): Array<FingerInfo> | undefined {
+        return this.getFingerInfos()
+    }
+    set fingerInfos(fingerInfos: Array<FingerInfo> | undefined) {
+        this.setFingerInfos(fingerInfos)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         super(tag, peerPtr)
-        this.fingerList = this.getFingerList()
-        this.fingerInfos = this.getFingerInfos()
+        // instructive change begin
+        // this.fingerList = this.getFingerList()
+        // this.fingerInfos = this.getFingerInfos()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, BaseGestureEventInternal.construct())
-        this.fingerList = this.getFingerList()
-        this.fingerInfos = this.getFingerInfos()
+        // instructive change begin
+        // this.fingerList = this.getFingerList()
+        // this.fingerInfos = this.getFingerInfos()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._BaseGestureEvent_construct()
@@ -1070,53 +1086,129 @@ export interface GestureEvent extends BaseEvent {
     tapLocation?: EventLocationInfo | undefined
 }
 export class GestureEventInternal extends BaseEventInternal implements MaterializedBase,GestureEvent {
-    public repeat: boolean
-    public fingerList: Array<FingerInfo>
-    public fingerInfos?: Array<FingerInfo> | undefined
-    public offsetX: double
-    public offsetY: double
-    public angle: double
-    public speed: double
-    public scale: double
-    public pinchCenterX: double
-    public pinchCenterY: double
-    public velocityX: double
-    public velocityY: double
-    public velocity: double
-    public tapLocation?: EventLocationInfo | undefined
+    // instructive change begin
+    get repeat(): boolean {
+        return this.getRepeat()
+    }
+    set repeat(repeat: boolean) {
+        this.setRepeat(repeat)
+    }
+    get fingerList(): Array<FingerInfo> {
+        return this.getFingerList()
+    }
+    set fingerList(fingerList: Array<FingerInfo>) {
+        this.setFingerList(fingerList)
+    }
+    get fingerInfos(): Array<FingerInfo> | undefined {
+        return this.getFingerInfos()
+    }
+    set fingerInfos(fingerInfos: Array<FingerInfo> | undefined) {
+        this.setFingerInfos(fingerInfos)
+    }
+    get offsetX(): double {
+        return this.getOffsetX()
+    }
+    set offsetX(offsetX: double) {
+        this.setOffsetX(offsetX)
+    }
+    get offsetY(): double {
+        return this.getOffsetY()
+    }
+    set offsetY(offsetY: double) {
+        this.setOffsetY(offsetY)
+    }
+    get angle(): double {
+        return this.getAngle()
+    }
+    set angle(angle: double) {
+        this.setAngle(angle)
+    }
+    get speed(): double {
+        return this.getSpeed()
+    }
+    set speed(speed: double) {
+        this.setSpeed(speed)
+    }
+    get scale(): double {
+        return this.getScale()
+    }
+    set scale(scale: double) {
+        this.setScale(scale)
+    }
+    get pinchCenterX(): double {
+        return this.getPinchCenterX()
+    }
+    set pinchCenterX(pinchCenterX: double) {
+        this.setPinchCenterX(pinchCenterX)
+    }
+    get pinchCenterY(): double {
+        return this.getPinchCenterY()
+    }
+    set pinchCenterY(pinchCenterY: double) {
+        this.setPinchCenterY(pinchCenterY)
+    }
+    get velocityX(): double {
+        return this.getVelocityX()
+    }
+    set velocityX(velocityX: double) {
+        this.setVelocityX(velocityX)
+    }
+    get velocityY(): double {
+        return this.getVelocityY()
+    }
+    set velocityY(velocityY: double) {
+        this.setVelocityY(velocityY)
+    }
+    get velocity(): double {
+        return this.getVelocity()
+    }
+    set velocity(velocity: double) {
+        this.setVelocity(velocity)
+    }
+    get tapLocation(): EventLocationInfo | undefined {
+        return this.getTapLocation()
+    }
+    set tapLocation(tapLocation: EventLocationInfo | undefined) {
+        this.setTapLocation(tapLocation)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         super(tag, peerPtr)
-        this.repeat = this.getRepeat()
-        this.fingerList = this.getFingerList()
-        this.fingerInfos = this.getFingerInfos()
-        this.offsetX = this.getOffsetX()
-        this.offsetY = this.getOffsetY()
-        this.angle = this.getAngle()
-        this.speed = this.getSpeed()
-        this.scale = this.getScale()
-        this.pinchCenterX = this.getPinchCenterX()
-        this.pinchCenterY = this.getPinchCenterY()
-        this.velocityX = this.getVelocityX()
-        this.velocityY = this.getVelocityY()
-        this.velocity = this.getVelocity()
-        this.tapLocation = this.getTapLocation()
+        // instructive change begin
+        // this.repeat = this.getRepeat()
+        // this.fingerList = this.getFingerList()
+        // this.fingerInfos = this.getFingerInfos()
+        // this.offsetX = this.getOffsetX()
+        // this.offsetY = this.getOffsetY()
+        // this.angle = this.getAngle()
+        // this.speed = this.getSpeed()
+        // this.scale = this.getScale()
+        // this.pinchCenterX = this.getPinchCenterX()
+        // this.pinchCenterY = this.getPinchCenterY()
+        // this.velocityX = this.getVelocityX()
+        // this.velocityY = this.getVelocityY()
+        // this.velocity = this.getVelocity()
+        // this.tapLocation = this.getTapLocation()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, GestureEventInternal.construct())
-        this.repeat = this.getRepeat()
-        this.fingerList = this.getFingerList()
-        this.fingerInfos = this.getFingerInfos()
-        this.offsetX = this.getOffsetX()
-        this.offsetY = this.getOffsetY()
-        this.angle = this.getAngle()
-        this.speed = this.getSpeed()
-        this.scale = this.getScale()
-        this.pinchCenterX = this.getPinchCenterX()
-        this.pinchCenterY = this.getPinchCenterY()
-        this.velocityX = this.getVelocityX()
-        this.velocityY = this.getVelocityY()
-        this.velocity = this.getVelocity()
-        this.tapLocation = this.getTapLocation()
+        // instructive change begin
+        // this.repeat = this.getRepeat()
+        // this.fingerList = this.getFingerList()
+        // this.fingerInfos = this.getFingerInfos()
+        // this.offsetX = this.getOffsetX()
+        // this.offsetY = this.getOffsetY()
+        // this.angle = this.getAngle()
+        // this.speed = this.getSpeed()
+        // this.scale = this.getScale()
+        // this.pinchCenterX = this.getPinchCenterX()
+        // this.pinchCenterY = this.getPinchCenterY()
+        // this.velocityX = this.getVelocityX()
+        // this.velocityY = this.getVelocityY()
+        // this.velocity = this.getVelocity()
+        // this.tapLocation = this.getTapLocation()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._GestureEvent_construct()
@@ -1649,14 +1741,25 @@ export interface LongPressGestureEvent extends BaseGestureEvent {
     repeat: boolean
 }
 export class LongPressGestureEventInternal extends BaseGestureEventInternal implements MaterializedBase,LongPressGestureEvent {
-    public repeat: boolean
+    // instructive change begin
+    get repeat(): boolean {
+        return this.getRepeat()
+    }
+    set repeat(repeat: boolean) {
+        this.setRepeat(repeat)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         super(tag, peerPtr)
-        this.repeat = this.getRepeat()
+        // instructive change begin
+        // this.repeat = this.getRepeat()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, LongPressGestureEventInternal.construct())
-        this.repeat = this.getRepeat()
+        // instructive change begin
+        // this.repeat = this.getRepeat()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._LongPressGestureEvent_construct()
@@ -1692,26 +1795,57 @@ export interface PanGestureEvent extends BaseGestureEvent {
     velocity: double
 }
 export class PanGestureEventInternal extends BaseGestureEventInternal implements MaterializedBase,PanGestureEvent {
-    public offsetX: double
-    public offsetY: double
-    public velocityX: double
-    public velocityY: double
-    public velocity: double
+    // instructive change begin
+    get offsetX(): double {
+        return this.getOffsetX()
+    }
+    set offsetX(offsetX: double) {
+        this.setOffsetX(offsetX)
+    }
+    get offsetY(): double {
+        return this.getOffsetY()
+    }
+    set offsetY(offsetY: double) {
+        this.setOffsetY(offsetY)
+    }
+    get velocityX(): double {
+        return this.getVelocityX()
+    }
+    set velocityX(velocityX: double) {
+        this.setVelocityX(velocityX)
+    }
+    get velocityY(): double {
+        return this.getVelocityY()
+    }
+    set velocityY(velocityY: double) {
+        this.setVelocityY(velocityY)
+    }
+    get velocity(): double {
+        return this.getVelocity()
+    }
+    set velocity(velocity: double) {
+        this.setVelocity(velocity)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         super(tag, peerPtr)
-        this.offsetX = this.getOffsetX()
-        this.offsetY = this.getOffsetY()
-        this.velocityX = this.getVelocityX()
-        this.velocityY = this.getVelocityY()
-        this.velocity = this.getVelocity()
+        // instructive change begin
+        // this.offsetX = this.getOffsetX()
+        // this.offsetY = this.getOffsetY()
+        // this.velocityX = this.getVelocityX()
+        // this.velocityY = this.getVelocityY()
+        // this.velocity = this.getVelocity()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, PanGestureEventInternal.construct())
-        this.offsetX = this.getOffsetX()
-        this.offsetY = this.getOffsetY()
-        this.velocityX = this.getVelocityX()
-        this.velocityY = this.getVelocityY()
-        this.velocity = this.getVelocity()
+        // instructive change begin
+        // this.offsetX = this.getOffsetX()
+        // this.offsetY = this.getOffsetY()
+        // this.velocityX = this.getVelocityX()
+        // this.velocityY = this.getVelocityY()
+        // this.velocity = this.getVelocity()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._PanGestureEvent_construct()
@@ -1805,20 +1939,41 @@ export interface PinchGestureEvent extends BaseGestureEvent {
     pinchCenterY: double
 }
 export class PinchGestureEventInternal extends BaseGestureEventInternal implements MaterializedBase,PinchGestureEvent {
-    public scale: double
-    public pinchCenterX: double
-    public pinchCenterY: double
+    // instructive change begin
+    get scale(): double {
+        return this.getScale()
+    }
+    set scale(scale: double) {
+        this.setScale(scale)
+    }
+    get pinchCenterX(): double {
+        return this.getPinchCenterX()
+    }
+    set pinchCenterX(pinchCenterX: double) {
+        this.setPinchCenterX(pinchCenterX)
+    }
+    get pinchCenterY(): double {
+        return this.getPinchCenterY()
+    }
+    set pinchCenterY(pinchCenterY: double) {
+        this.setPinchCenterY(pinchCenterY)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         super(tag, peerPtr)
-        this.scale = this.getScale()
-        this.pinchCenterX = this.getPinchCenterX()
-        this.pinchCenterY = this.getPinchCenterY()
+        // instructive change begin
+        // this.scale = this.getScale()
+        // this.pinchCenterX = this.getPinchCenterX()
+        // this.pinchCenterY = this.getPinchCenterY()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, PinchGestureEventInternal.construct())
-        this.scale = this.getScale()
-        this.pinchCenterX = this.getPinchCenterX()
-        this.pinchCenterY = this.getPinchCenterY()
+        // instructive change begin
+        // this.scale = this.getScale()
+        // this.pinchCenterX = this.getPinchCenterX()
+        // this.pinchCenterY = this.getPinchCenterY()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._PinchGestureEvent_construct()
@@ -1880,14 +2035,25 @@ export interface RotationGestureEvent extends BaseGestureEvent {
     angle: double
 }
 export class RotationGestureEventInternal extends BaseGestureEventInternal implements MaterializedBase,RotationGestureEvent {
-    public angle: double
+    // instructive change begin
+    get angle(): double {
+        return this.getAngle()
+    }
+    set angle(angle: double) {
+        this.setAngle(angle)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         super(tag, peerPtr)
-        this.angle = this.getAngle()
+        // instructive change begin
+        // this.angle = this.getAngle()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, RotationGestureEventInternal.construct())
-        this.angle = this.getAngle()
+        // instructive change begin
+        // this.angle = this.getAngle()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._RotationGestureEvent_construct()
@@ -1920,17 +2086,33 @@ export interface SwipeGestureEvent extends BaseGestureEvent {
     speed: double
 }
 export class SwipeGestureEventInternal extends BaseGestureEventInternal implements MaterializedBase,SwipeGestureEvent {
-    public angle: double
-    public speed: double
+    // instructive change begin
+    get angle(): double {
+        return this.getAngle()
+    }
+    set angle(angle: double) {
+        this.setAngle(angle)
+    }
+    get speed(): double {
+        return this.getSpeed()
+    }
+    set speed(speed: double) {
+        this.setSpeed(speed)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         super(tag, peerPtr)
-        this.angle = this.getAngle()
-        this.speed = this.getSpeed()
+        // instructive change begin
+        // this.angle = this.getAngle()
+        // this.speed = this.getSpeed()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, SwipeGestureEventInternal.construct())
-        this.angle = this.getAngle()
-        this.speed = this.getSpeed()
+        // instructive change begin
+        // this.angle = this.getAngle()
+        // this.speed = this.getSpeed()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._SwipeGestureEvent_construct()
@@ -1977,14 +2159,25 @@ export interface TapGestureEvent extends BaseGestureEvent {
     tapLocation?: EventLocationInfo | undefined
 }
 export class TapGestureEventInternal extends BaseGestureEventInternal implements MaterializedBase,TapGestureEvent {
-    public tapLocation?: EventLocationInfo | undefined
+    // instructive change begin
+    get tapLocation(): EventLocationInfo | undefined {
+        return this.getTapLocation()
+    }
+    set tapLocation(tapLocation: EventLocationInfo | undefined) {
+        this.setTapLocation(tapLocation)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         super(tag, peerPtr)
-        this.tapLocation = this.getTapLocation()
+        // instructive change begin
+        // this.tapLocation = this.getTapLocation()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, TapGestureEventInternal.construct())
-        this.tapLocation = this.getTapLocation()
+        // instructive change begin
+        // this.tapLocation = this.getTapLocation()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._TapGestureEvent_construct()
