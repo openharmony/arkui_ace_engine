@@ -107,6 +107,7 @@ public:
 
     void UpdateGridItemStyle(GridItemStyle gridItemStyle);
     void UpdateGridItemStyleMultiThread(GridItemStyle gridItemStyle);
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
     bool IsEnableChildrenMatchParent() override
     {
@@ -156,6 +157,7 @@ private:
     RefPtr<TouchEventImpl> touchListener_;
     bool isHover_ = false;
     bool isPressed_ = false;
+    bool isFocusBorderColorInitialized_ = false;
     GridItemStyle gridItemStyle_ = GridItemStyle::NONE;
     std::optional<GridItemIndexInfo> irregularItemInfo_;
 

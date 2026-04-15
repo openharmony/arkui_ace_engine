@@ -121,13 +121,34 @@ void GridItemPattern::OnModifyDone()
         InitHoverEvent();
         InitPressEvent();
     }
-    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+    if (!isFocusBorderColorInitialized_) {
         auto gridItemTheme = host->GetTheme<GridItemTheme>(true);
         CHECK_NULL_VOID(gridItemTheme);
         std::unique_ptr<FocusPaintParam> paintParams = std::make_unique<FocusPaintParam>();
         paintParams->SetPaintColor(gridItemTheme->GetGridItemFocusColor());
         focusHub->SetFocusPaintParamsPtr(paintParams);
+        isFocusBorderColorInitialized_ = true;
     }
+}
+
+bool GridItemPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return false;
+    }
+    auto gridItemTheme = host->GetTheme<GridItemTheme>(true);
+    CHECK_NULL_RETURN(gridItemTheme, false);
+
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    std::unique_ptr<FocusPaintParam> paintParams = std::make_unique<FocusPaintParam>();
+    paintParams->SetPaintColor(gridItemTheme->GetGridItemFocusColor());
+    focusHub->SetFocusPaintParamsPtr(paintParams);
+
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    return false;
 }
 
 void GridItemPattern::MarkIsSelected(bool isSelected)
