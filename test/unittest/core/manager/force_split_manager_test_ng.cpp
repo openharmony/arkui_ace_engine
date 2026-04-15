@@ -40,6 +40,17 @@ RefPtr<ForceSplitManager> GetForceSplitManager()
     auto pipeline = MockPipelineContext::GetCurrent();
     return pipeline ? pipeline->GetForceSplitManager() : nullptr;
 }
+
+void ResetForceSplitBehaviorConfig(const RefPtr<ForceSplitManager>& manager)
+{
+    if (!manager) {
+        return;
+    }
+    manager->behaviorMode_ = ForceSplitBehaviorMode::NAVIGATION;
+    manager->pagePairs_.clear();
+    manager->transPages_.clear();
+    manager->fullScreenPages_.clear();
+}
 } // namespace
 
 class ForceSplitManagerTestNg : public testing::Test {
@@ -712,4 +723,130 @@ HWTEST_F(ForceSplitManagerTestNg, CalcCurrentSplitRatio005, TestSize.Level1)
     float ratio = manager->CalcCurrentSplitRatio();
     EXPECT_FLOAT_EQ(ratio, 0.5f);
 }
+
+/**
+ * @tc.name: IsPagePair001
+ * @tc.desc: Test IsPagePair with missing from page, specific target page, and wildcard target page
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, IsPagePair001, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+    ResetForceSplitBehaviorConfig(manager);
+
+    EXPECT_FALSE(manager->IsPagePair("home", "detail"));
+
+    std::unordered_map<std::string, std::unordered_set<std::string>> pagePairs = {
+        { "home", { "detail", "goods" } },
+        { "list", {} },
+    };
+    manager->SetPagePairs(std::move(pagePairs));
+
+    EXPECT_TRUE(manager->IsPagePair("home", "detail"));
+    EXPECT_TRUE(manager->IsPagePair("home", "goods"));
+    EXPECT_FALSE(manager->IsPagePair("home", "dialog"));
+    EXPECT_TRUE(manager->IsPagePair("list", "anyTarget"));
+    EXPECT_FALSE(manager->IsPagePair("unknown", "detail"));
+}
+
+/**
+ * @tc.name: IsTransPage001
+ * @tc.desc: Test IsTransPage returns whether the page is configured as transPage
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, IsTransPage001, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+    ResetForceSplitBehaviorConfig(manager);
+
+    EXPECT_FALSE(manager->IsTransPage("dialog"));
+
+    std::unordered_set<std::string> transPages = { "dialog", "transparent" };
+    manager->SetTransPages(std::move(transPages));
+    EXPECT_TRUE(manager->IsTransPage("dialog"));
+    EXPECT_TRUE(manager->IsTransPage("transparent"));
+    EXPECT_FALSE(manager->IsTransPage("detail"));
+}
+
+/**
+ * @tc.name: CanPushPageToPrimary001
+ * @tc.desc: Test CanPushPageToPrimary for navigation mode and displace mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, CanPushPageToPrimary001, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+    ResetForceSplitBehaviorConfig(manager);
+
+    manager->SetBehaviorMode(ForceSplitBehaviorMode::NAVIGATION);
+    EXPECT_FALSE(manager->CanPushPageToPrimary());
+
+    std::unordered_map<std::string, std::unordered_set<std::string>> pagePairs = {
+        { "home", { "detail" } },
+    };
+    manager->SetPagePairs(std::move(pagePairs));
+    EXPECT_TRUE(manager->CanPushPageToPrimary());
+
+    manager->pagePairs_.clear();
+    manager->SetBehaviorMode(ForceSplitBehaviorMode::DISPLACE);
+    EXPECT_TRUE(manager->CanPushPageToPrimary());
+}
+
+/**
+ * @tc.name: IsTransitionShouldMovePageToPrimary001
+ * @tc.desc: Test navigation mode transition check uses pagePairs and fullScreenPages
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, IsTransitionShouldMovePageToPrimary001, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+    ResetForceSplitBehaviorConfig(manager);
+
+    manager->SetBehaviorMode(ForceSplitBehaviorMode::NAVIGATION);
+    std::unordered_map<std::string, std::unordered_set<std::string>> pagePairs = {
+        { "home", { "detail" } },
+        { "list", {} },
+    };
+    manager->SetPagePairs(std::move(pagePairs));
+
+    EXPECT_TRUE(manager->IsTransitionShouldMovePageToPrimary("home", "detail"));
+    EXPECT_FALSE(manager->IsTransitionShouldMovePageToPrimary("home", "dialog"));
+    EXPECT_TRUE(manager->IsTransitionShouldMovePageToPrimary("list", "anyTarget"));
+    EXPECT_FALSE(manager->IsTransitionShouldMovePageToPrimary("unknown", "detail"));
+
+    std::unordered_set<std::string> fullScreenPages = { "fullScreen" };
+    manager->SetFullScreenPages(std::move(fullScreenPages));
+    EXPECT_FALSE(manager->IsTransitionShouldMovePageToPrimary("fullScreen", "detail"));
+    EXPECT_FALSE(manager->IsTransitionShouldMovePageToPrimary("home", "fullScreen"));
+}
+
+/**
+ * @tc.name: IsTransitionShouldMovePageToPrimary002
+ * @tc.desc: Test displace mode transition check excludes fullScreenPages and transPages
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitManagerTestNg, IsTransitionShouldMovePageToPrimary002, TestSize.Level1)
+{
+    auto manager = GetForceSplitManager();
+    ASSERT_NE(manager, nullptr);
+    ResetForceSplitBehaviorConfig(manager);
+
+    manager->SetBehaviorMode(ForceSplitBehaviorMode::DISPLACE);
+    EXPECT_TRUE(manager->IsTransitionShouldMovePageToPrimary("home", "detail"));
+
+    std::unordered_set<std::string> transPages = { "dialog", "transparent" };
+    manager->SetTransPages(std::move(transPages));
+    EXPECT_FALSE(manager->IsTransitionShouldMovePageToPrimary("dialog", "detail"));
+    EXPECT_FALSE(manager->IsTransitionShouldMovePageToPrimary("home", "transparent"));
+
+    std::unordered_set<std::string> fullScreenPages = { "fullScreen" };
+    manager->SetFullScreenPages(std::move(fullScreenPages));
+    EXPECT_FALSE(manager->IsTransitionShouldMovePageToPrimary("fullScreen", "detail"));
+    EXPECT_FALSE(manager->IsTransitionShouldMovePageToPrimary("home", "fullScreen"));
+}
+
 } // namespace OHOS::Ace::NG
