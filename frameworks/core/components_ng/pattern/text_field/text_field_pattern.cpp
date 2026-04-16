@@ -10030,6 +10030,11 @@ void TextFieldPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(context);
     auto colorMode = context->GetColorMode();
     SetOriginCursorColor(colorMode == ColorMode::DARK ? Color(0x4DFFFFFF) : Color(0x4D000000));
+    auto textFieldTheme = host->GetTheme<TextFieldTheme>(true);
+    CHECK_NULL_VOID(textFieldTheme);
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        OnThemeScopeUpdateColor(layoutProperty, paintProperty, textFieldTheme);
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -13395,6 +13400,10 @@ void TextFieldPattern::UpdatePropertyImpl(const std::string& key, RefPtr<Propert
                     }
                     auto frameNode = wp.Upgrade();
                     CHECK_NULL_VOID(frameNode);
+                    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+                        ACE_UPDATE_NODE_PAINT_PROPERTY(
+                            TextFieldPaintProperty, SelectedBackgroundColorFlagByUser, true, frameNode);
+                    }
                     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, SelectedBackgroundColor, *realValue, frameNode);
                 }
             }

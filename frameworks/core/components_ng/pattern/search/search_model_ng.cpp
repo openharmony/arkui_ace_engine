@@ -2097,6 +2097,9 @@ void SearchModelNG::SetSelectedBackgroundColor(FrameNode* frameNode, const Color
     auto textFieldPaintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textFieldPaintProperty);
     textFieldPaintProperty->UpdateSelectedBackgroundColor(value);
+    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        textFieldPaintProperty->UpdateSelectedBackgroundColorFlagByUser(true);
+    }
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -2108,6 +2111,9 @@ void SearchModelNG::ResetSelectedBackgroundColor(FrameNode* frameNode)
     auto textFieldPaintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textFieldPaintProperty);
     textFieldPaintProperty->ResetSelectedBackgroundColor();
+    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        textFieldPaintProperty->ResetSelectedBackgroundColorFlagByUser();
+    }
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 

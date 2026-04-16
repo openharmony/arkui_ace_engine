@@ -309,6 +309,8 @@ private:
     void ImageIconColorConfigurationUpdate(int32_t index);
     void UpdateSymbolIconNode(int32_t index);
     void UpdateSymbolIconProperties(RefPtr<FrameNode>& frameNode, int32_t index);
+    void UpdateSymbolLayoutProperty(RefPtr<FrameNode>& iconFrameNode, int32_t index,
+        RefPtr<SearchLayoutProperty> layoutProperty, RefPtr<TextLayoutProperty> symbolLayoutProperty);
 
     void CreateOrUpdateSymbol(int32_t index, bool isCreateNode);
     void CreateOrUpdateImage(int32_t index, const std::string& src, bool isCreateNode, const std::string& bundleName,
