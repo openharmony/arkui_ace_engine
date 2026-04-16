@@ -18,6 +18,7 @@
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "base/utils/system_properties.h"
+#include "core/animation/curves.h"
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
@@ -34,6 +35,7 @@
 #include "core/components_ng/pattern/waterflow/water_flow_paint_method.h"
 #include "core/components_ng/pattern/waterflow/water_flow_sections.h"
 #include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
+#include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "core/components_ng/pattern/waterflow/water_flow_constants.h"
 
@@ -516,11 +518,23 @@ void WaterFlowPattern::ScrollPage(bool reverse, bool smooth, AccessibilityScroll
     }
     if (smooth) {
         float position = layoutInfo_->Offset() + distance;
-        ScrollablePattern::AnimateTo(-position, -1, nullptr, true, false, false);
+        if (scrollType == AccessibilityScrollType::SCROLL_HALF) {
+            ScrollablePattern::AnimateTo(
+                -position, HALF_PAGE_SCROLL_DURATION, Curves::LINEAR, false, false, false);
+        } else {
+            ScrollablePattern::AnimateTo(-position, -1, nullptr, true, false, false);
+        }
     } else {
         UpdateCurrentOffset(distance, SCROLL_FROM_JUMP);
     }
     // AccessibilityEventType::SCROLL_END
+}
+
+void WaterFlowPattern::ScrollBy(float offset)
+{
+    StopAnimate();
+    SetIsOverScroll(false);
+    UpdateCurrentOffset(-offset, SCROLL_FROM_JUMP);
 }
 
 std::string WaterFlowPattern::ProvideRestoreInfo()
@@ -887,6 +901,20 @@ std::function<bool(int32_t)> WaterFlowPattern::GetScrollIndexAbility()
         }
         return true;
     };
+}
+
+ScrollOffsetAbility WaterFlowPattern::GetScrollOffsetAbility(bool isAccessibility)
+{
+    if (!isAccessibility) {
+        return { nullptr, Axis::NONE };
+    }
+    return { [wp = WeakClaim(this)](float moveOffset) -> bool {
+                auto pattern = wp.Upgrade();
+                CHECK_NULL_RETURN(pattern, false);
+                pattern->ScrollBy(-moveOffset);
+                return true;
+            },
+        GetAxis(), layoutInfo_->contentStartOffset_, layoutInfo_->contentEndOffset_ };
 }
 
 void WaterFlowPattern::DumpInfo()

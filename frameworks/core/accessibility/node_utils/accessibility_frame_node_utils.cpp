@@ -222,7 +222,7 @@ bool ScrollByOffsetToParent(const RefPtr<NG::FrameNode>& curFrameNode, const Ref
     auto parentPattern = parentFrameNode->GetPattern<NG::ScrollablePattern>();
     CHECK_NULL_RETURN(parentPattern, false);
 
-    auto scrollAbility = parentPattern->GetScrollOffsetAbility();
+    auto scrollAbility = parentPattern->GetScrollOffsetAbility(true);
     auto scrollFunc = scrollAbility.scrollFunc;
     auto scrollAxis = scrollAbility.axis;
     if (!scrollFunc || scrollAxis == Axis::NONE) {
@@ -230,10 +230,11 @@ bool ScrollByOffsetToParent(const RefPtr<NG::FrameNode>& curFrameNode, const Ref
     }
 
     NG::MoveOffsetParam param {
-        scrollAxis == Axis::VERTICAL,
-        scrollAbility.contentStartOffset,
-        scrollAbility.contentEndOffset,
-        true
+        .isVertical = scrollAxis == Axis::VERTICAL,
+        .contentStartOffset = scrollAbility.contentStartOffset,
+        .contentEndOffset = scrollAbility.contentEndOffset,
+        .noNeedMargin = true,
+        .isFromAccessibility = true
     };
     auto moveOffset = NG::ScrollableUtils::GetMoveOffset(parentFrameNode, curFrameNode, param);
     if (!NearZero(moveOffset)) {

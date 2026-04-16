@@ -350,7 +350,7 @@ public:
         AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL) override
     {}
 
-    ScrollOffsetAbility GetScrollOffsetAbility() override
+    ScrollOffsetAbility GetScrollOffsetAbility(bool isAccessibility = false) override
     {
         return { nullptr, Axis::NONE };
     }

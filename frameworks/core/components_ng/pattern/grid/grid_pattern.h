@@ -88,7 +88,7 @@ public:
 
     void ScrollToFocusNodeIndex(int32_t index) override;
 
-    ScrollOffsetAbility GetScrollOffsetAbility() override;
+    ScrollOffsetAbility GetScrollOffsetAbility(bool isAccessibility = false) override;
 
     std::function<bool(int32_t)> GetScrollIndexAbility() override;
 

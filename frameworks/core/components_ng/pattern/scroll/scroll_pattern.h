@@ -151,7 +151,7 @@ public:
     }
 
     bool ScrollToNode(const RefPtr<FrameNode>& focusFrameNode) override;
-    ScrollOffsetAbility GetScrollOffsetAbility() override;
+    ScrollOffsetAbility GetScrollOffsetAbility(bool isAccessibility = false) override;
 
     bool IsAtTop() const override;
     bool IsAtBottom(bool considerRepeat = false) const override;

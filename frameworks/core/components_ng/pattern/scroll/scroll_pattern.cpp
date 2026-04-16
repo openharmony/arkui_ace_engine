@@ -19,6 +19,7 @@
 
 #include "base/log/dump_log.h"
 #include "core/common/vibrator/vibrator_utils.h"
+#include "core/components_ng/pattern/scrollable/scrollable_accessibility_utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
 #include "core/components_ng/pattern/scrollable/scrollable_controller.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
@@ -43,6 +44,21 @@ constexpr int64_t CROWN_VIBRATOR_INTERVAL_TIME = 30 * 1000 * 1000;
 constexpr char CROWN_VIBRATOR_WEAK[] = "watchhaptic.feedback.crown.strength2";
 #endif
 } // namespace
+
+std::optional<float> GetScrollAccessibilityCenterLimitMoveOffset(
+    const RefPtr<FrameNode>& parentFrameNode, float rawMoveOffset)
+{
+    CHECK_NULL_RETURN(parentFrameNode, std::nullopt);
+    auto scrollPattern = parentFrameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_RETURN(scrollPattern, std::nullopt);
+    if (scrollPattern->GetScrollSnapAlign() != ScrollSnapAlign::CENTER) {
+        return std::nullopt;
+    }
+    if (scrollPattern->GetSnapOffsets().empty()) {
+        scrollPattern->CaleSnapOffsets(parentFrameNode);
+    }
+    return scrollPattern->CalcPredictSnapOffset(rawMoveOffset);
+}
 
 void ScrollPattern::OnModifyDone()
 {
@@ -852,6 +868,12 @@ void ScrollPattern::ScrollPage(bool reverse, bool smooth, AccessibilityScrollTyp
     }
     ACE_SCOPED_TRACE(
         "Scroll ScrollPage distance:%f, id:%d", distance, static_cast<int32_t>(host->GetAccessibilityId()));
+    if (smooth && scrollType == AccessibilityScrollType::SCROLL_HALF) {
+        float position = currentOffset_ + distance;
+        SetIsOverScroll(false);
+        AnimateTo(-position, HALF_PAGE_SCROLL_DURATION, Curves::LINEAR, false, false, false);
+        return;
+    }
     ScrollBy(distance, distance, smooth);
 }
 
@@ -1067,8 +1089,9 @@ bool ScrollPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
     return false;
 }
 
-ScrollOffsetAbility ScrollPattern::GetScrollOffsetAbility()
+ScrollOffsetAbility ScrollPattern::GetScrollOffsetAbility(bool isAccessibility)
 {
+    (void)isAccessibility;
     return { [wp = WeakClaim(this)](float moveOffset) -> bool {
                 auto pattern = wp.Upgrade();
                 CHECK_NULL_RETURN(pattern, false);

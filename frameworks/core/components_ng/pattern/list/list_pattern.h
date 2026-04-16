@@ -175,7 +175,7 @@ public:
     bool LayoutItemInGroupForFocus(int32_t indexInList, int32_t nextIndexInGroup, int32_t curIndexInGroup,
         const ListItemGroupPara& listItemGroupPara, int32_t maxListItemIndex);
 
-    ScrollOffsetAbility GetScrollOffsetAbility() override;
+    ScrollOffsetAbility GetScrollOffsetAbility(bool isAccessibility = false) override;
 
     std::function<bool(int32_t)> GetScrollIndexAbility() override;
 
