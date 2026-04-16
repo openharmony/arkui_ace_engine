@@ -1557,4 +1557,102 @@ HWTEST_F(MenuItemPatternTestOneNg, ReportEvent002, TestSize.Level1)
     itemPattern->isOptionPattern_ = true;
     itemPattern->ReportEvent();
 }
+
+/**
+ * @tc.name: ApplyOptionThemeStyles001
+ * @tc.desc: Verify ApplyOptionThemeStyles().
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, ApplyOptionThemeStyles001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    MenuItemModelNG MenuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.labelInfo = "label";
+    MenuItemModelInstance.Create(itemOption);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+
+    auto textId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, textId, AceType::MakeRefPtr<TextPattern>());
+    itemPattern->SetTextNode(textNode);
+
+    auto selectId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto selectNode = FrameNode::GetOrCreateFrameNode(
+        V2::SELECT_ETS_TAG, selectId, []() { return AceType::MakeRefPtr<SelectPattern>(); });
+    auto menuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        [selectId]() { return AceType::MakeRefPtr<MenuPattern>(selectId, V2::SELECT_ETS_TAG, MenuType::MENU); });
+    ASSERT_NE(selectNode, nullptr);
+    ASSERT_NE(menuNode, nullptr);
+    itemPattern->SetMenu(menuNode);
+
+    itemPattern->isSelected_ = false;
+    auto selectPaintProperty = selectNode->GetPaintProperty<SelectPaintProperty>();
+    ASSERT_NE(selectPaintProperty, nullptr);
+    auto selectTheme = itemPattern->GetCurrentSelectTheme();
+    ASSERT_NE(selectTheme, nullptr);
+    auto itemLayoutProperty = itemPattern->GetPaintProperty<MenuItemPaintProperty>();
+    ASSERT_NE(itemLayoutProperty, nullptr);
+    itemLayoutProperty->UpdateOptionBgColor(Color::RED);
+    itemLayoutProperty->UpdateOptionFontColor(Color::RED);
+
+    ASSERT_EQ(itemPattern->bgColor_.has_value(), false);
+    itemPattern->ApplyOptionThemeStyles(selectPaintProperty);
+    EXPECT_EQ(itemPattern->bgColor_.value(), selectTheme->GetBackgroundColor());
+}
+
+/**
+ * @tc.name: ApplySelectedThemeStyles001
+ * @tc.desc: Verify ApplySelectedThemeStyles().
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, ApplySelectedThemeStyles001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    MenuItemModelNG MenuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.labelInfo = "label";
+    MenuItemModelInstance.Create(itemOption);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+
+    auto textId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, textId, AceType::MakeRefPtr<TextPattern>());
+    itemPattern->SetTextNode(textNode);
+
+    auto selectId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto selectNode = FrameNode::GetOrCreateFrameNode(
+        V2::SELECT_ETS_TAG, selectId, []() { return AceType::MakeRefPtr<SelectPattern>(); });
+    auto menuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        [selectId]() { return AceType::MakeRefPtr<MenuPattern>(selectId, V2::SELECT_ETS_TAG, MenuType::MENU); });
+    ASSERT_NE(selectNode, nullptr);
+    ASSERT_NE(menuNode, nullptr);
+    itemPattern->SetMenu(menuNode);
+
+    itemPattern->isSelected_ = true;
+    auto selectPaintProperty = selectNode->GetPaintProperty<SelectPaintProperty>();
+    ASSERT_NE(selectPaintProperty, nullptr);
+    auto selectTheme = itemPattern->GetCurrentSelectTheme();
+    ASSERT_NE(selectTheme, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->SetIsSelectMenuBackgroundColorJsview(false);
+    auto renderContext = menuNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateBackgroundColor(Color::RED);
+    auto itemLayoutProperty = itemPattern->GetPaintProperty<MenuItemPaintProperty>();
+    ASSERT_NE(itemLayoutProperty, nullptr);
+    itemLayoutProperty->UpdateSelectedOptionBgColor(Color::RED);
+    itemLayoutProperty->UpdateSelectedOptionFontColor(Color::RED);
+
+    ASSERT_EQ(itemPattern->bgColor_.has_value(), false);
+    ASSERT_NE(renderContext->GetBackgroundColorValue(), selectTheme->GetBackgroundColor());
+    itemPattern->ApplySelectedThemeStyles(selectPaintProperty, menuNode);
+    EXPECT_EQ(itemPattern->bgColor_.value(), selectTheme->GetSelectedColor());
+    EXPECT_EQ(renderContext->GetBackgroundColorValue(), selectTheme->GetBackgroundColor());
+}
 } // namespace OHOS::Ace::NG

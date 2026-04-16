@@ -749,6 +749,19 @@ void ResetMenuBgColor(ArkUINodeHandle node)
     }
 }
 
+void ResetMenuBgColorIsJsView(ArkUINodeHandle node, ArkUI_Bool isJsView)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto selectTheme = frameNode->GetTheme<SelectTheme>(true);
+    CHECK_NULL_VOID(selectTheme);
+    SelectModelNG::SetMenuBackgroundColor(frameNode, selectTheme->GetBackgroundColor(), isJsView);
+    if (SystemProperties::ConfigChangePerform()) {
+        SelectModelNG::SetMenuBackgroundColorByUser(frameNode, false);
+        SelectModelNG::CreateWithColorResourceObj(frameNode, nullptr, SelectColorType::MENU_BACKGROUND_COLOR);
+    }
+}
+
 void SetMenuBgBlurStyle(ArkUINodeHandle node, ArkUI_Int32 style)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1193,7 +1206,7 @@ const ArkUISelectModifier* GetSelectModifier()
         .setSelectValue = SetSelectValue,
         .resetSelectValue = ResetSelectValue,
         .setMenuBgColor = SetMenuBgColor,
-        .resetMenuBgColor = ResetMenuBgColor,
+        .resetMenuBgColor = ResetMenuBgColorIsJsView,
         .setMenuBgBlurStyle = SetMenuBgBlurStyle,
         .resetMenuBgBlurStyle = ResetMenuBgBlurStyle,
         .setSelectDivider = SetSelectDivider,

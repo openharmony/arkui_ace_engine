@@ -916,7 +916,7 @@ ArkUINativeModuleValue SelectBridge::ResetMenuBackgroundColor(ArkUIRuntimeCallIn
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getSelectModifier()->resetMenuBgColor(nativeNode);
+    GetArkUINodeModifiers()->getSelectModifier()->resetMenuBgColor(nativeNode, false);
     return panda::JSValueRef::Undefined(vm);
 }
 

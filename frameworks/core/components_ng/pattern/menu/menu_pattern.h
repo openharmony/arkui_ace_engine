@@ -277,6 +277,16 @@ public:
         return isSelectMenu_;
     }
 
+    void SetIsSelectMenuBackgroundColorJsview(bool isSelectMenuBackgroundColorJsview)
+    {
+        isSelectMenuBackgroundColorJsview_ = isSelectMenuBackgroundColorJsview;
+    }
+
+    bool IsSelectMenuBackgroundColorJsview() const
+    {
+        return isSelectMenuBackgroundColorJsview_;
+    }
+
     void SetHasOptionWidth(bool hasOptionWidth)
     {
         hasOptionWidth_ = hasOptionWidth;
@@ -865,6 +875,7 @@ private:
     std::optional<int32_t> halfFoldHoverCallbackId_;
 
     bool isSelectMenu_ = false;
+    bool isSelectMenuBackgroundColorJsview_ = true;
     MenuPreviewMode previewMode_ = MenuPreviewMode::NONE;
     MenuPreviewAnimationOptions previewAnimationOptions_;
     bool isShowHoverImage_ = false;

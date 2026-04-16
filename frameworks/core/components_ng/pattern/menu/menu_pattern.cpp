@@ -2495,8 +2495,10 @@ void MenuPattern::OnColorConfigurationUpdate()
             child->MarkModifyDone();
             child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
+        host->SetNeedCallChildrenUpdate(false);
+    } else {
+        host->SetNeedCallChildrenUpdate(SystemProperties::ConfigChangePerform());
     }
-    host->SetNeedCallChildrenUpdate(false);
 
     auto menuLayoutProperty = GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(menuLayoutProperty);
