@@ -144,6 +144,7 @@
       OHOS::Ace::NG::AddControlButtonsForCj*;
       OHOS::Ace::DynamicModuleHelper::*;
       OHOS::Ace::NG::DialogView::CreateDialogNode*;
+      OHOS::Ace::NG::DialogView::IsSupportBlurStyle*;
       OHOS::Ace::PixelMap::*;
       OHOS::Ace::MeasureUtil::*;
       OHOS::Ace::ViewPartialUpdateModel::*;
