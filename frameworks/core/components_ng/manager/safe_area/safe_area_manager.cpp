@@ -98,6 +98,21 @@ bool SafeAreaManager::UpdateNavSafeArea(const SafeAreaInsets& safeArea)
     return true;
 }
 
+bool SafeAreaManager::CheckFloatNavSafeArea(const SafeAreaInsets& safeArea)
+{
+    return floatNavSafeArea_ != safeArea;
+}
+
+bool SafeAreaManager::UpdateFloatNavSafeArea(const SafeAreaInsets& safeArea)
+{
+    if (floatNavSafeArea_ == safeArea) {
+        return false;
+    }
+    ACE_SCOPED_TRACE("SafeAreaManager::UpdateFloatNavSafeArea %s", safeArea.ToString().c_str());
+    floatNavSafeArea_ = safeArea;
+    return true;
+}
+
 bool SafeAreaManager::UpdateKeyboardSafeArea(float keyboardHeight, std::optional<uint32_t> rootHeight)
 {
     uint32_t bottom;
@@ -146,7 +161,7 @@ SafeAreaInsets SafeAreaManager::GetCombinedSafeArea(const SafeAreaExpandOpts& op
         res = res.Combine(cutoutSafeArea_);
     }
     if (opts.type & SAFE_AREA_TYPE_SYSTEM) {
-        res = res.Combine(systemSafeArea_).Combine(navSafeArea_);
+        res = res.Combine(systemSafeArea_).Combine(navSafeArea_).Combine(floatNavSafeArea_);
     }
     if (keyboardAvoidMode_ == KeyBoardAvoidMode::NONE) {
         return res;
@@ -291,13 +306,21 @@ SafeAreaInsets SafeAreaManager::GetCutoutSafeAreaWithoutProcess() const
     return cutoutSafeArea_;
 }
 
+SafeAreaInsets SafeAreaManager::GetFloatNavSafeArea() const
+{
+    if (IsSafeAreaValid()) {
+        return floatNavSafeArea_;
+    }
+    return {};
+}
+
 SafeAreaInsets SafeAreaManager::GetSafeArea() const
 {
     if (!IsSafeAreaValid()) {
         return {};
     }
     auto cutoutSafeArea = useCutout_ ? cutoutSafeArea_ : SafeAreaInsets();
-    return systemSafeArea_.Combine(cutoutSafeArea).Combine(navSafeArea_);
+    return systemSafeArea_.Combine(cutoutSafeArea).Combine(navSafeArea_).Combine(floatNavSafeArea_);
 }
 
 SafeAreaInsets SafeAreaManager::GetSafeAreaWithoutCutout() const
@@ -305,14 +328,14 @@ SafeAreaInsets SafeAreaManager::GetSafeAreaWithoutCutout() const
     if (!IsSafeAreaValid()) {
         return {};
     }
-    return systemSafeArea_.Combine(navSafeArea_);
+    return systemSafeArea_.Combine(navSafeArea_).Combine(floatNavSafeArea_);
 }
 
 SafeAreaInsets SafeAreaManager::GetSafeAreaWithoutProcess() const
 {
     auto cutoutSafeArea = useCutout_ ? cutoutSafeArea_ : SafeAreaInsets();
     if (!windowTypeConfig_.isSceneBoardWindow) {
-        return systemSafeArea_.Combine(cutoutSafeArea).Combine(navSafeArea_);
+        return systemSafeArea_.Combine(cutoutSafeArea).Combine(navSafeArea_).Combine(floatNavSafeArea_);
     }
     SafeAreaInsets scbSafeArea;
     if (scbSystemSafeArea_.has_value()) {
@@ -346,7 +369,7 @@ PaddingPropertyF SafeAreaManager::SafeAreaToPadding(bool withoutProcess, LayoutS
     bool includeSystem = ignoreType & LAYOUT_SAFE_AREA_TYPE_SYSTEM;
     bool includeKeyboard = ignoreType & LAYOUT_SAFE_AREA_TYPE_KEYBOARD;
     if (includeSystem) {
-        combinedSafeArea = systemSafeArea_.Combine(cutoutSafeArea).Combine(navSafeArea_);
+        combinedSafeArea = systemSafeArea_.Combine(cutoutSafeArea).Combine(navSafeArea_).Combine(floatNavSafeArea_);
     }
     if (includeKeyboard) {
         if (IsModeResize()) {

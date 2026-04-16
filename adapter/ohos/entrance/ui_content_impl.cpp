@@ -520,6 +520,8 @@ bool ParseAvoidAreasUpdate(const RefPtr<NG::PipelineContext>& context,
             safeAreaUpdated |= safeAreaManager->UpdateSystemSafeArea(ConvertAvoidArea(avoidArea.second));
         } else if (avoidArea.first == OHOS::Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
             safeAreaUpdated |= safeAreaManager->UpdateNavSafeArea(ConvertAvoidArea(avoidArea.second));
+        } else if (avoidArea.first == OHOS::Rosen::AvoidAreaType::TYPE_FLOAT_NAVIGATION) {
+            safeAreaUpdated |= safeAreaManager->UpdateFloatNavSafeArea(ConvertAvoidArea(avoidArea.second));
         } else if (avoidArea.first == OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT) {
             safeAreaUpdated |= safeAreaManager->UpdateCutoutSafeArea(ConvertAvoidArea(avoidArea.second),
                 NG::OptionalSize<uint32_t>(config.Width(), config.Height()));
@@ -541,6 +543,8 @@ std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets> ParseAvoidAreasToMap(
             safeAvoidAreas[NG::SafeAreaAvoidType::TYPE_SYSTEM] = ConvertAvoidArea(avoidArea.second);
         } else if (avoidArea.first == OHOS::Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
             safeAvoidAreas[NG::SafeAreaAvoidType::TYPE_NAVIGATION_INDICATOR] = ConvertAvoidArea(avoidArea.second);
+        } else if (avoidArea.first == OHOS::Rosen::AvoidAreaType::TYPE_FLOAT_NAVIGATION) {
+            safeAvoidAreas[NG::SafeAreaAvoidType::TYPE_FLOAT_NAVIGATION] = ConvertAvoidArea(avoidArea.second);
         } else if (avoidArea.first == OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT) {
             safeAvoidAreas[NG::SafeAreaAvoidType::TYPE_CUTOUT] = ConvertAvoidArea(avoidArea.second);
         }
@@ -2801,12 +2805,16 @@ void UIContentImpl::InitializeSafeArea(const RefPtr<Platform::AceContainer>& con
             auto systemInsets = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM);
             auto cutoutInsets = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT);
             auto navInsets = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
+            auto floatNavInsets = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_FLOAT_NAVIGATION);
             pipeline->UpdateSystemSafeAreaWithoutAnimation(systemInsets);
             pipeline->UpdateCutoutSafeAreaWithoutAnimation(cutoutInsets);
             pipeline->UpdateNavSafeAreaWithoutAnimation(navInsets);
+            pipeline->UpdateFloatNavSafeAreaWithoutAnimation(floatNavInsets);
             TAG_LOGI(ACE_SAFE_AREA,
-                "InitializeSafeArea systemInsets:%{public}s, cutoutInsets:%{public}s, navInsets:%{public}s",
-                systemInsets.ToString().c_str(), cutoutInsets.ToString().c_str(), navInsets.ToString().c_str());
+                "InitializeSafeArea systemInsets:%{public}s, cutoutInsets:%{public}s, navInsets:%{public}s, "
+                "floatNavInsets:%{public}s",
+                systemInsets.ToString().c_str(), cutoutInsets.ToString().c_str(), navInsets.ToString().c_str(),
+                floatNavInsets.ToString().c_str());
         }
     }
     InitWindowMode(container);
