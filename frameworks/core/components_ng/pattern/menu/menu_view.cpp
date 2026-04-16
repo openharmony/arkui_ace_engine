@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/menu/menu_view.h"
 
+#include "base/subwindow/subwindow_manager.h"
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "core/common/container.h"

@@ -41,6 +41,7 @@
 #include "adapter/ohos/capability/html/span_to_html.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/rect.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/image/file_uri_helper.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
