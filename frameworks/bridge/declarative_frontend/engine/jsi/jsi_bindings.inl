@@ -39,13 +39,7 @@ template<typename C>
 thread_local FunctionCallback JsiClass<C>::constructor_ = nullptr;
 
 template<typename C>
-thread_local JSFunctionCallback JsiClass<C>::jsConstructor_ = nullptr;
-
-template<typename C>
-thread_local JSDestructorCallback<C> JsiClass<C>::jsDestructor_ = nullptr;
-
-template<typename C>
-thread_local JSGCMarkCallback<C> JsiClass<C>::jsGcMark_ = nullptr;
+thread_local JsiClassConstructorBinding JsiClass<C>::jsConstructorBinding_;
 
 template<typename C>
 thread_local std::string JsiClass<C>::className_;
@@ -240,14 +234,17 @@ template<typename C>
 void JsiClass<C>::Bind(
     BindingTarget t, JSFunctionCallback ctor, JSDestructorCallback<C> dtor, JSGCMarkCallback<C> gcMark)
 {
-    jsConstructor_ = ctor;
-    jsDestructor_ = dtor;
-    jsGcMark_ = gcMark;
+    jsConstructorBinding_.jsConstructor = ctor;
+    jsConstructorBinding_.jsDestructorErased =
+        dtor == nullptr ? nullptr : reinterpret_cast<JSDestructorCallbackErased>(dtor);
+    jsConstructorBinding_.jsGcMarkErased =
+        gcMark == nullptr ? nullptr : reinterpret_cast<JSGCMarkCallbackErased>(gcMark);
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
     LocalScope scope(vm);
     classFunction_ = panda::Global<panda::FunctionRef>(
-        vm, panda::FunctionRef::NewClassFunction(vm, JSConstructorInterceptor, nullptr, nullptr));
+        vm, panda::FunctionRef::NewClassFunction(vm, JsiJSConstructorInterceptor, nullptr,
+            reinterpret_cast<void*>(&JsiClass<C>::jsConstructorBinding_)));
     classFunction_->SetName(vm, StringRef::NewFromUtf8(vm, className_.c_str()));
     auto prototype = panda::Local<panda::ObjectRef>(classFunction_->GetFunctionPrototype(vm));
     prototype->Set(vm, panda::StringRef::NewFromUtf8(vm, "constructor"),
@@ -276,8 +273,10 @@ template<typename C>
 template<typename... Args>
 void JsiClass<C>::Bind(BindingTarget t, JSDestructorCallback<C> dtor, JSGCMarkCallback<C> gcMark)
 {
-    jsDestructor_ = dtor;
-    jsGcMark_ = gcMark;
+    jsConstructorBinding_.jsDestructorErased =
+        dtor == nullptr ? nullptr : reinterpret_cast<JSDestructorCallbackErased>(dtor);
+    jsConstructorBinding_.jsGcMarkErased =
+        gcMark == nullptr ? nullptr : reinterpret_cast<JSGCMarkCallbackErased>(gcMark);
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     auto vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
     LocalScope scope(vm);
@@ -341,11 +340,14 @@ void JsiClass<C>::InheritAndBind(
         return;
     }
 
-    jsConstructor_ = ctor;
-    jsDestructor_ = dtor;
-    jsGcMark_ = gcMark;
+    jsConstructorBinding_.jsConstructor = ctor;
+    jsConstructorBinding_.jsDestructorErased =
+        dtor == nullptr ? nullptr : reinterpret_cast<JSDestructorCallbackErased>(dtor);
+    jsConstructorBinding_.jsGcMarkErased =
+        gcMark == nullptr ? nullptr : reinterpret_cast<JSGCMarkCallbackErased>(gcMark);
     classFunction_ = panda::Global<panda::FunctionRef>(
-        vm, panda::FunctionRef::NewClassFunction(vm, JSConstructorInterceptor, nullptr, nullptr));
+        vm, panda::FunctionRef::NewClassFunction(vm, JsiJSConstructorInterceptor, nullptr,
+            reinterpret_cast<void*>(&JsiClass<C>::jsConstructorBinding_)));
     classFunction_->SetName(vm, StringRef::NewFromUtf8(vm, className_.c_str()));
 
     panda::Local<panda::JSValueRef> getResult = t->Get(
@@ -598,36 +600,42 @@ panda::Local<panda::JSValueRef> JsiClass<C>::ConstructorInterceptor(panda::JsiRu
     return constructor_(runtimeCallInfo);
 }
 
-template<typename C>
-panda::Local<panda::JSValueRef> JsiClass<C>::JSConstructorInterceptor(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+panda::Local<panda::JSValueRef> JsiJSConstructorInterceptor(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     panda::Local<panda::JSValueRef> newTarget = runtimeCallInfo->GetNewTargetRef();
-    if (newTarget->IsFunction(vm) && jsConstructor_) {
+    auto* binding = reinterpret_cast<JsiClassConstructorBinding*>(runtimeCallInfo->GetData());
+    if (binding == nullptr) {
+        panda::JSNApi::ThrowException(
+            vm, panda::Exception::TypeError(vm, panda::StringRef::NewFromUtf8(vm, "Constructor binding is null")));
+        return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
+    }
+    if (newTarget->IsFunction(vm) && binding->jsConstructor != nullptr) {
         JsiCallbackInfo info(runtimeCallInfo);
-        jsConstructor_(info);
+        binding->jsConstructor(info);
         auto retVal = info.GetReturnValue();
         if (retVal.valueless_by_exception()) {
             return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
         }
         auto instance = std::get_if<void*>(&retVal);
-        if (instance) {
+        if (instance != nullptr) {
             panda::Local<panda::JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
             Local<ObjectRef>(thisObj)->SetNativePointerFieldCount(vm, 1);
             size_t nativeSize = info.GetSize();
-            Local<ObjectRef>(thisObj)->SetNativePointerField(
-                vm, 0, *instance, &JsiClass<C>::DestructorInterceptor, nullptr, nativeSize);
+            Local<ObjectRef>(thisObj)->SetNativePointerField(vm, 0, *instance,
+                JsiJSNativePointerDestructorInterceptor,
+                binding, nativeSize);
             return thisObj;
         }
     }
     return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
 }
 
-template<typename C>
-void JsiClass<C>::DestructorInterceptor(void* env, void* nativePtr, void* data)
+inline void JsiJSNativePointerDestructorInterceptor(void* env, void* nativePtr, void* data)
 {
-    if (jsDestructor_) {
-        jsDestructor_(reinterpret_cast<C*>(nativePtr));
+    auto* binding = static_cast<JsiClassConstructorBinding*>(data);
+    if (binding != nullptr && binding->jsDestructorErased != nullptr) {
+        binding->jsDestructorErased(nativePtr);
     }
 }
 

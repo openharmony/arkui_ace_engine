@@ -34,6 +34,15 @@ std::tuple<Types...> ToTuple(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 
 namespace OHOS::Ace::Framework {
 
+struct JsiClassConstructorBinding {
+    JSFunctionCallback jsConstructor = nullptr;
+    JSDestructorCallbackErased jsDestructorErased = nullptr;
+    JSGCMarkCallbackErased jsGcMarkErased = nullptr;
+};
+
+inline panda::Local<panda::JSValueRef> JsiJSConstructorInterceptor(panda::JsiRuntimeCallInfo* runtimeCallInfo);
+inline void JsiJSNativePointerDestructorInterceptor(void* env, void* nativePtr, void* data);
+
 template<typename C>
 class JsiClass {
 public:
@@ -118,10 +127,6 @@ private:
 
     static panda::Local<panda::JSValueRef> ConstructorInterceptor(panda::JsiRuntimeCallInfo* runtimeCallInfo);
 
-    static void DestructorInterceptor(void* env, void* nativePtr, void* data);
-
-    static panda::Local<panda::JSValueRef> JSConstructorInterceptor(panda::JsiRuntimeCallInfo* runtimeCallInfo);
-
     static bool CheckIfConstructCall(panda::JsiRuntimeCallInfo* runtimeCallInfo);
 
     static thread_local std::unordered_map<std::string, panda::Global<panda::FunctionRef>> staticFunctions_;
@@ -129,9 +134,7 @@ private:
     static thread_local std::unordered_map<std::string, panda::Global<panda::FunctionRef>> customGetFunctions_;
     static thread_local std::unordered_map<std::string, panda::Global<panda::FunctionRef>> customSetFunctions_;
     static thread_local FunctionCallback constructor_;
-    static thread_local JSFunctionCallback jsConstructor_;
-    static thread_local JSDestructorCallback<C> jsDestructor_;
-    static thread_local JSGCMarkCallback<C> jsGcMark_;
+    static thread_local JsiClassConstructorBinding jsConstructorBinding_;
     static thread_local std::string className_;
     static thread_local panda::Global<panda::FunctionRef> classFunction_;
 };
