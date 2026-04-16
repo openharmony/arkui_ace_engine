@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_SVG_ROSEN_RENDER_SVG_ELLIPSE_H
 #define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_SVG_ROSEN_RENDER_SVG_ELLIPSE_H
 
-#include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/drawing_forward.h"
 
 #include "frameworks/compatible/components/svg/render_svg_ellipse.h"
 

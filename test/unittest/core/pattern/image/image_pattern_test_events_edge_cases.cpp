@@ -60,4 +60,36 @@ HWTEST_F(ImagePatternEventsEdgeCasesTestNg, hasSceneChanged001, TestSize.Level1)
     EXPECT_TRUE(result);
 }
 
+/**
+ * @tc.name: LoadImageDataIfNeedLoadFailedAltErrorTest001
+ * @tc.desc: Test LoadImageDataIfNeed when loadFailed_=true and GetAltError() is set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternEventsEdgeCasesTestNg, LoadImageDataIfNeedLoadFailedAltErrorTest001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->loadFailed_ = true;
+
+    ImageModelNG::SetAltError(AceType::RawPtr(frameNode), ImageSourceInfo { RESOURCE_URL });
+
+    auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    EXPECT_TRUE(imageLayoutProperty->GetAltError());
+
+    pattern->loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL), LoadNotifier(nullptr, nullptr, nullptr));
+    imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(IMAGE_SRC_URL));
+
+    pattern->LoadImageDataIfNeed();
+
+    EXPECT_NE(pattern->altErrorCtx_, nullptr);
+}
+
 } // namespace OHOS::Ace::NG
