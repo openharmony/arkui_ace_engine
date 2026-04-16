@@ -17,6 +17,9 @@ class ArkSystemColors implements Colors {
     warning: ResourceColor;
     alert: ResourceColor;
     confirm: ResourceColor;
+    primary: ResourceColor;
+    onPrimary: ResourceColor;
+    container: ResourceColor;
 
     fontPrimary: ResourceColor;
     fontSecondary: ResourceColor;
@@ -77,7 +80,6 @@ class ArkSystemColors implements Colors {
         this.warning = ArkResourcesHelper.$r('sys.color.warning', 125830979);
         this.alert = ArkResourcesHelper.$r('sys.color.alert', 125830980);
         this.confirm = ArkResourcesHelper.$r('sys.color.confirm', 125830981);
-
         this.fontPrimary = ArkResourcesHelper.$r('sys.color.font_primary', 125830982);
         this.fontSecondary = ArkResourcesHelper.$r('sys.color.font_secondary', 125830983);
         this.fontTertiary = ArkResourcesHelper.$r('sys.color.font_tertiary', 125830984);
@@ -131,5 +133,8 @@ class ArkSystemColors implements Colors {
         this.interactiveActive = ArkResourcesHelper.$r('sys.color.interactive_active', 125831022);
         this.interactiveSelect = ArkResourcesHelper.$r('sys.color.interactive_select', 125831023);
         this.interactiveClick = ArkResourcesHelper.$r('sys.color.interactive_click', 125831024);
+        this.primary = ArkResourcesHelper.$r('sys.color.primary', 125836896);
+        this.onPrimary = ArkResourcesHelper.$r('sys.color.on_primary', 125836897);
+        this.container = ArkResourcesHelper.$r('sys.color.container', 125836898);
     }
 }

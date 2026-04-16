@@ -126,6 +126,9 @@ class ArkThemeNativeHelper {
             theme.colors.interactiveActive,
             theme.colors.interactiveSelect,
             theme.colors.interactiveClick,
+            theme.colors.primary,
+            theme.colors.onPrimary,
+            theme.colors.container,
         ];
     }
     static convertColorsToArray(colors) {
@@ -383,6 +386,9 @@ class ArkSystemColors {
         this.interactiveActive = ArkResourcesHelper.$r('sys.color.interactive_active', 125831022);
         this.interactiveSelect = ArkResourcesHelper.$r('sys.color.interactive_select', 125831023);
         this.interactiveClick = ArkResourcesHelper.$r('sys.color.interactive_click', 125831024);
+        this.primary = ArkResourcesHelper.$r('sys.color.primary', 125836896);
+        this.onPrimary = ArkResourcesHelper.$r('sys.color.on_primary', 125836897);
+        this.container = ArkResourcesHelper.$r('sys.color.container', 125836898);
     }
 }
 class ArkSystemCornerRadius {

@@ -105,6 +105,9 @@ struct TestProperty {
         125831022, /* INTERACTIVE_ACTIVE = 48 */
         125831023, /* INTERACTIVE_SELECT = 49 */
         125831024, /* INTERACTIVE_CLICK = 50 */
+        -1,        /* PRIMARY = 51 */
+        -1,        /* ON_PRIMARY = 52 */
+        -1,        /* CONTAINER = 53 */
     };
     RefPtr<TokenColors> tokenColors_;
 };
