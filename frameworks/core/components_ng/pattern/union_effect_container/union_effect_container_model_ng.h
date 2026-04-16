@@ -24,6 +24,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT UnionEffectContainerModelNG : public OHOS::Ace::UnionEffectContainerModel {
 public:
     void Create(const UnionEffectContainerOptions& options) override;
+    void SetUnionMode(UnionMode unionMode) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_UNION_EFFECT_CONTAINER_MODEL_NG_H

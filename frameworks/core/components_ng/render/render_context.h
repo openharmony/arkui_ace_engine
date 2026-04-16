@@ -43,6 +43,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/render/animation_utils.h"
+#include "core/components_ng/property/union_effect_container_options.h"
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/render_property.h"
 
@@ -766,6 +767,8 @@ public:
 
     // useUnionEffect
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseUnionEffect, bool);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UnionMode, UnionMode);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(CenterGravityOptions, CenterGravityOptions);
 
     // useShadowBatching
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseShadowBatching, bool);
@@ -1004,6 +1007,8 @@ protected:
     virtual void OnUseEffectUpdate(bool useEffect) {}
     virtual void OnUseEffectTypeUpdate(EffectType effectType) {}
     virtual void OnUseUnionEffectUpdate(bool useUnion) {}
+    virtual void OnUnionModeUpdate(UnionMode unionMode) {}
+    virtual void OnCenterGravityOptionsUpdate(const CenterGravityOptions& centerGravityOptions) {}
     virtual bool GetStatusByEffectTypeAndWindow() { return false; }
     virtual void OnUseShadowBatchingUpdate(bool useShadowBatching) {}
     virtual void OnFreezeUpdate(bool isFreezed) {}

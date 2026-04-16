@@ -642,6 +642,7 @@ public:
     static void SetUseEffect(bool useEffect, EffectType effectType);
     // useUnion
     static void SetUseUnion(bool useUnion);
+    static void SetCenterGravityOptions(const CenterGravityOptions& centerGravityOptions);
 
     static void SetFreeze(bool freeze);
     static void SetAttractionEffect(const AttractionEffect& effect);

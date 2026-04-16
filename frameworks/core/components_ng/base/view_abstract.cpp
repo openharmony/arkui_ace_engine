@@ -62,6 +62,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 #include "core/components_ng/render/ui_material_filter_creator.h"
+#include "core/components_ng/property/union_effect_container_options.h"
 #include "core/interfaces/native/node/menu_modifier.h"
 #include "core/interfaces/native/node/menu_item_modifier.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -6305,6 +6306,14 @@ void ViewAbstract::SetUseUnion(bool useUnion)
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     SetUseUnion(frameNode, useUnion);
+}
+
+void ViewAbstract::SetCenterGravityOptions(const CenterGravityOptions& centerGravityOptions)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(CenterGravityOptions, centerGravityOptions);
 }
 
 void ViewAbstract::SetFreeze(bool freeze)

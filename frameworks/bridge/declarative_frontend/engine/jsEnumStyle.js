@@ -1921,6 +1921,12 @@ let ShadowStyle;
   ShadowStyle[ShadowStyle.OUTER_FLOATING_MD = 5] = 'OUTER_FLOATING_MD';
 })(ShadowStyle || (ShadowStyle = {}));
 
+let UnionMode;
+(function (UnionMode) {
+  UnionMode[UnionMode.SMOOTH_UNION = 0] = 'SMOOTH_UNION';
+  UnionMode[UnionMode.GRAVITY_UNION = 1] = 'GRAVITY_UNION';
+})(UnionMode || (UnionMode = {}));
+
 let ShadowType;
 (function (ShadowType) {
   ShadowType[ShadowType.COLOR = 0] = 'COLOR';

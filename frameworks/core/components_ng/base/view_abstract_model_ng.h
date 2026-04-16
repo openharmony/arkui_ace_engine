@@ -1155,6 +1155,11 @@ public:
         ViewAbstract::SetUseUnion(useUnion);
     }
 
+    void SetCenterGravityOptions(const CenterGravityOptions& centerGravityOptions) override
+    {
+        ViewAbstract::SetCenterGravityOptions(centerGravityOptions);
+    }
+
     void SetUseShadowBatching(bool useShadowBatching) override
     {
         ViewAbstract::SetUseShadowBatching(useShadowBatching);

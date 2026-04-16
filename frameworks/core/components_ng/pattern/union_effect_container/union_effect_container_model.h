@@ -22,6 +22,7 @@
 namespace OHOS::Ace {
 namespace NG {
 struct UnionEffectContainerOptions;
+enum class UnionMode;
 } // namespace OHOS::Ace::NG
 class UnionEffectContainerModel {
 public:
@@ -29,6 +30,7 @@ public:
     virtual ~UnionEffectContainerModel() = default;
 
     virtual void Create(const NG::UnionEffectContainerOptions& options) {}
+    virtual void SetUnionMode(NG::UnionMode unionMode) {}
 
 private:
     static std::unique_ptr<UnionEffectContainerModel> instance_;
