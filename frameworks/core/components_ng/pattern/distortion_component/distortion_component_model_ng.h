@@ -21,7 +21,7 @@
 namespace OHOS::Ace::NG {
 class ACE_EXPORT DistortionComponentModelNG : public OHOS::Ace::DistortionComponentModel {
 public:
-    void Create(const RefPtr<FrameNode>& builderNode) override;
+    void Create() override;
     void SetDistortion(const DistortionParam& distortion) override;
 };
 } // namespace OHOS::Ace::NG
