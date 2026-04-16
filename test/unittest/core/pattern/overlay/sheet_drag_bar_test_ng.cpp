@@ -393,4 +393,161 @@ HWTEST_F(SheetDragBarTestNg, CreatePropertyCallback004, TestSize.Level1)
     normalProperty->updateCallback_(1.0f);
     EXPECT_EQ(paintProperty->GetBarWidth(), 4.0_vp);
 }
+
+/**
+ * @tc.name: ScaleAnimation001
+ * @tc.desc: Test SheetDragBarPattern::ScaleAnimation with isDown=true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetDragBarTestNg, ScaleAnimation001, TestSize.Level1)
+{
+    auto dragBarNode = FrameNode::CreateFrameNode(V2::DRAG_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetDragBarPattern>());
+    auto dragBarPattern = dragBarNode->GetPattern<SheetDragBarPattern>();
+    ASSERT_NE(dragBarPattern, nullptr);
+
+    dragBarPattern->ScaleAnimation(true);
+    EXPECT_TRUE(dragBarPattern->isDown_);
+}
+
+/**
+ * @tc.name: ScaleAnimation002
+ * @tc.desc: Test SheetDragBarPattern::ScaleAnimation with isDown=false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetDragBarTestNg, ScaleAnimation002, TestSize.Level1)
+{
+    auto dragBarNode = FrameNode::CreateFrameNode(V2::DRAG_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetDragBarPattern>());
+    auto dragBarPattern = dragBarNode->GetPattern<SheetDragBarPattern>();
+    ASSERT_NE(dragBarPattern, nullptr);
+
+    dragBarPattern->ScaleAnimation(false);
+    EXPECT_FALSE(dragBarPattern->isDown_);
+}
+
+/**
+ * @tc.name: HandleTouchDown001
+ * @tc.desc: Test SheetDragBarPattern::HandleTouchDown method
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetDragBarTestNg, HandleTouchDown001, TestSize.Level1)
+{
+    auto dragBarNode = FrameNode::CreateFrameNode(V2::DRAG_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetDragBarPattern>());
+    auto dragBarPattern = dragBarNode->GetPattern<SheetDragBarPattern>();
+    ASSERT_NE(dragBarPattern, nullptr);
+
+    TouchLocationInfo locationInfo(1);
+    locationInfo.SetGlobalLocation(Offset(10, 20));
+
+    dragBarPattern->HandleTouchDown(locationInfo);
+    EXPECT_TRUE(dragBarPattern->isDown_);
+    EXPECT_EQ(dragBarPattern->downPoint_, OffsetF(10.0f, 20.0f));
+}
+
+/**
+ * @tc.name: HandleTouchUp001
+ * @tc.desc: Test SheetDragBarPattern::HandleTouchUp method
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetDragBarTestNg, HandleTouchUp001, TestSize.Level1)
+{
+    auto dragBarNode = FrameNode::CreateFrameNode(V2::DRAG_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetDragBarPattern>());
+    auto dragBarPattern = dragBarNode->GetPattern<SheetDragBarPattern>();
+    ASSERT_NE(dragBarPattern, nullptr);
+
+    dragBarPattern->isDown_ = true;
+    dragBarPattern->downPoint_ = OffsetF(10.0f, 20.0f);
+
+    dragBarPattern->HandleTouchUp();
+    EXPECT_FALSE(dragBarPattern->isDown_);
+}
+
+/**
+ * @tc.name: OnModifyDone001
+ * @tc.desc: Test SheetDragBarPattern::OnModifyDone method
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetDragBarTestNg, OnModifyDone001, TestSize.Level1)
+{
+    auto dragBarNode = FrameNode::CreateFrameNode(V2::DRAG_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetDragBarPattern>());
+    auto dragBarPattern = dragBarNode->GetPattern<SheetDragBarPattern>();
+    ASSERT_NE(dragBarPattern, nullptr);
+
+    dragBarPattern->touchEvent_ = nullptr;
+    dragBarPattern->clickListener_ = nullptr;
+    dragBarPattern->OnModifyDone();
+    EXPECT_NE(dragBarPattern->touchEvent_, nullptr);
+    EXPECT_NE(dragBarPattern->clickListener_, nullptr);
+}
+
+/**
+ * @tc.name: OnAttachToFrameNode001
+ * @tc.desc: Test SheetDragBarPattern::OnAttachToFrameNode method
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetDragBarTestNg, OnAttachToFrameNode001, TestSize.Level1)
+{
+    auto dragBarNode = FrameNode::CreateFrameNode(V2::DRAG_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetDragBarPattern>());
+    auto dragBarPattern = dragBarNode->GetPattern<SheetDragBarPattern>();
+    ASSERT_NE(dragBarPattern, nullptr);
+    dragBarPattern->OnAttachToFrameNode();
+    auto layoutProperty = dragBarNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetMeasureType(), MeasureType::MATCH_CONTENT);
+}
+
+/**
+ * @tc.name: StopAnimation001
+ * @tc.desc: Test SheetDragBarPattern::StopAnimation method
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetDragBarTestNg, StopAnimation001, TestSize.Level1)
+{
+    auto dragBarNode = FrameNode::CreateFrameNode(V2::DRAG_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetDragBarPattern>());
+    auto dragBarPattern = dragBarNode->GetPattern<SheetDragBarPattern>();
+    ASSERT_NE(dragBarPattern, nullptr);
+    dragBarPattern->CreatePropertyCallback();
+    ASSERT_NE(dragBarPattern->property_, nullptr);
+    dragBarPattern->StopAnimation();
+}
+
+/**
+ * @tc.name: UpdateDrawPoint001
+ * @tc.desc: Test SheetDragBarPattern::UpdateDrawPoint method
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetDragBarTestNg, UpdateDrawPoint001, TestSize.Level1)
+{
+    auto dragBarNode = FrameNode::CreateFrameNode(V2::DRAG_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetDragBarPattern>());
+    auto dragBarPattern = dragBarNode->GetPattern<SheetDragBarPattern>();
+    ASSERT_NE(dragBarPattern, nullptr);
+
+    dragBarPattern->isDown_ = true;
+    dragBarPattern->UpdateDrawPoint();
+    EXPECT_TRUE(dragBarPattern->isDown_);
+}
+
+/**
+ * @tc.name: UpdateDrawPoint002
+ * @tc.desc: Test SheetDragBarPattern::UpdateDrawPoint with isDown=false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetDragBarTestNg, UpdateDrawPoint002, TestSize.Level1)
+{
+    auto dragBarNode = FrameNode::CreateFrameNode(V2::DRAG_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetDragBarPattern>());
+    auto dragBarPattern = dragBarNode->GetPattern<SheetDragBarPattern>();
+    ASSERT_NE(dragBarPattern, nullptr);
+
+    dragBarPattern->isDown_ = false;
+    dragBarPattern->UpdateDrawPoint();
+    EXPECT_FALSE(dragBarPattern->isDown_);
+}
 } // namespace OHOS::Ace::NG
