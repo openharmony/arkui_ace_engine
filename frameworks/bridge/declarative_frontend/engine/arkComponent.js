@@ -29278,20 +29278,21 @@ class ListSupportEmptyBranchInLazyLoading extends ModifierWithKey {
 }
 ListSupportEmptyBranchInLazyLoading.identity = Symbol('listSupportEmptyBranchInLazyLoading');
 
-class ListBackPressCloseSwipeActionModifier extends ModifierWithKey {
+class ListBackPressBehaviorModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
+    const closeSwipeAction = (this.value === null || this.value === void 0 ? void 0 : this.value.closeSwipeAction) ?? true;
     if (reset) {
-      getUINativeModule().list.setBackPressCloseSwipeAction(node, true);
+      getUINativeModule().list.setBackPressBehavior(node, true);
     }
     else {
-      getUINativeModule().list.setBackPressCloseSwipeAction(node, this.value);
+      getUINativeModule().list.setBackPressBehavior(node, closeSwipeAction);
     }
   }
 }
-ListBackPressCloseSwipeActionModifier.identity = Symbol('listBackPressCloseSwipeAction');
+ListBackPressBehaviorModifier.identity = Symbol('listBackPressBehavior');
 
 class ArkListComponent extends ArkScrollable {
   constructor(nativePtr, classType) {
@@ -29510,9 +29511,9 @@ class ArkListComponent extends ArkScrollable {
     modifierWithKey(this._modifiersWithKeys, ListSupportEmptyBranchInLazyLoading.identity, ListSupportEmptyBranchInLazyLoading, value);
     return this;
   }
-  backPressCloseSwipeAction(value) {
-    modifierWithKey(this._modifiersWithKeys, ListBackPressCloseSwipeActionModifier.identity,
-      ListBackPressCloseSwipeActionModifier, value);
+  backPressBehavior(value) {
+    modifierWithKey(this._modifiersWithKeys, ListBackPressBehaviorModifier.identity,
+      ListBackPressBehaviorModifier, value);
     return this;
   }
 }
