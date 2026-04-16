@@ -34,6 +34,7 @@ public:
     static void SetSearchIcon(const JSCallbackInfo& info);
     static void SetCancelButton(const JSCallbackInfo& info);
     static void SetTextColor(const JSCallbackInfo& info);
+    static void SetBackgroundColor(const JSCallbackInfo& info);
     static void SetCaret(const JSCallbackInfo& info);
     static void SetPlaceholderColor(const JSCallbackInfo& info);
     static void SetPlaceholderFont(const JSCallbackInfo& info);
