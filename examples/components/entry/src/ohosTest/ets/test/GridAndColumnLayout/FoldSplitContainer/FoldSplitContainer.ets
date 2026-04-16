@@ -19,7 +19,7 @@ import { ON, Point } from '@ohos.UiTest';
 const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorRegistry.getAbilityDelegator()
 const driver = Driver.create();
 
-export async function FoldSplitContainerStart(done: () => void) {
+export async function FoldSplitContainerStart(): Promise<void>  {
   await delegator.startAbility({
     bundleName: 'cn.ohos.components',
     abilityName: 'EntryAbility'
@@ -43,5 +43,4 @@ export async function FoldSplitContainerStart(done: () => void) {
   let Buttons: Array<Component> = await driver.findComponents(ON.type('Button'));
   await Buttons[1].click()
   await driver.delayMs(3500);
-  done();
 }

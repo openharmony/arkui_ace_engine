@@ -29,7 +29,8 @@ import { FoldSplitContainerStart } from './FoldSplitContainer';
 export default function FoldSplitContainer1() {
   describe('FoldSplitContainer1', () => {
     beforeAll(async (done: () => void) => {
-      await FoldSplitContainerStart(done)
+      await FoldSplitContainerStart()
+      done()
     })
     /**
      * 测试组件'expandedLayoutOptions.isExtraRegionPerpendicular'支持设置包含单个子组件为'true'且获取属性正确
@@ -406,7 +407,7 @@ export default function FoldSplitContainer1() {
     })
 
     /**
-     * 测试组件'animationOptions.EaseIn'支持设置包含单个子组件为'Ease'且获取属性正确
+     * 测试组件'animationOptions.curve'支持设置包含单个子组件为'EaseIn'且获取属性正确
      */
     it('ArkUI_FoldSplitContainer_025', 0, async (done: () => void) => {
       //获取不到断言参数
@@ -421,7 +422,7 @@ export default function FoldSplitContainer1() {
     })
 
     /**
-     * 测试组件'animationOptions.EaseIn'支持设置包含单个子组件为'EaseOut'且获取属性正确
+     * 测试组件'animationOptions.curve'支持设置包含单个子组件为'EaseOut'且获取属性正确
      */
     it('ArkUI_FoldSplitContainer_026', 0, async (done: () => void) => {
       //获取不到断言参数
@@ -436,7 +437,7 @@ export default function FoldSplitContainer1() {
     })
 
     /**
-     * 测试组件'animationOptions.EaseIn'支持设置包含单个子组件为'EaseInOut'且获取属性正确
+     * 测试组件'animationOptions.curve'支持设置包含单个子组件为'EaseInOut'且获取属性正确
      */
     it('ArkUI_FoldSplitContainer_027', 0, async (done: () => void) => {
       //获取不到断言参数
@@ -451,7 +452,7 @@ export default function FoldSplitContainer1() {
     })
 
     /**
-     * 测试组件'animationOptions.EaseIn'支持设置包含单个子组件为'FastOutSlowIn'且获取属性正确
+     * 测试组件'animationOptions.curve'支持设置包含单个子组件为'FastOutSlowIn'且获取属性正确
      */
     it('ArkUI_FoldSplitContainer_028', 0, async (done: () => void) => {
       //获取不到断言参数
@@ -466,13 +467,13 @@ export default function FoldSplitContainer1() {
     })
 
     /**
-     * 测试组件'animationOptions.EaseIn'支持设置包含单个子组件为'LinearOutSlowIn'且获取属性正确
+     * 测试组件'animationOptions.curve'支持设置包含单个子组件为'LinearOutSlowIn'且获取属性正确
      */
     it('ArkUI_FoldSplitContainer_029', 0, async (done: () => void) => {
       //获取不到断言参数
       await titleSearch('参数列表', 'animationOptions.curve')
       await radioClick({
-        radioClickObj: 5,
+        radioClickObj: 6,
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
@@ -481,13 +482,13 @@ export default function FoldSplitContainer1() {
     })
 
     /**
-     * 测试组件'animationOptions.EaseIn'支持设置包含单个子组件为'FastOutLinearIn'且获取属性正确
+     * 测试组件'animationOptions.curve'支持设置包含单个子组件为'FastOutLinearIn'且获取属性正确
      */
     it('ArkUI_FoldSplitContainer_030', 0, async (done: () => void) => {
       //获取不到断言参数
       await titleSearch('参数列表', 'animationOptions.curve')
       await radioClick({
-        radioClickObj: 6,
+        radioClickObj: 7,
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
@@ -502,21 +503,6 @@ export default function FoldSplitContainer1() {
       //获取不到断言参数
       await titleSearch('参数列表', 'animationOptions.curve')
       await radioClick({
-        radioClickObj: 7,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        },
-      })
-      done();
-    })
-
-    /**
-     * 测试组件'animationOptions.EaseIn'支持设置包含单个子组件为'Sharp'且获取属性正确
-     */
-    it('ArkUI_FoldSplitContainer_032', 0, async (done: () => void) => {
-      //获取不到断言参数
-      await titleSearch('参数列表', 'animationOptions.curve')
-      await radioClick({
         radioClickObj: 8,
         toggleClick: {
           toggleClickType: ToggleClick.Open,
@@ -526,9 +512,9 @@ export default function FoldSplitContainer1() {
     })
 
     /**
-     * 测试组件'animationOptions.EaseIn'支持设置包含单个子组件为'Rhythm'且获取属性正确
+     * 测试组件'animationOptions.curve'支持设置包含单个子组件为'Sharp'且获取属性正确
      */
-    it('ArkUI_FoldSplitContainer_033', 0, async (done: () => void) => {
+    it('ArkUI_FoldSplitContainer_032', 0, async (done: () => void) => {
       //获取不到断言参数
       await titleSearch('参数列表', 'animationOptions.curve')
       await radioClick({
@@ -541,9 +527,9 @@ export default function FoldSplitContainer1() {
     })
 
     /**
-     * 测试组件'animationOptions.EaseIn'支持设置包含单个子组件为'Smooth'且获取属性正确
+     * 测试组件'animationOptions.curve'支持设置包含单个子组件为'Rhythm'且获取属性正确
      */
-    it('ArkUI_FoldSplitContainer_034', 0, async (done: () => void) => {
+    it('ArkUI_FoldSplitContainer_033', 0, async (done: () => void) => {
       //获取不到断言参数
       await titleSearch('参数列表', 'animationOptions.curve')
       await radioClick({
@@ -556,13 +542,28 @@ export default function FoldSplitContainer1() {
     })
 
     /**
-     * 测试组件'animationOptions.EaseIn'支持设置包含单个子组件为'Friction'且获取属性正确
+     * 测试组件'animationOptions.curve'支持设置包含单个子组件为'Smooth'且获取属性正确
+     */
+    it('ArkUI_FoldSplitContainer_034', 0, async (done: () => void) => {
+      //获取不到断言参数
+      await titleSearch('参数列表', 'animationOptions.curve')
+      await radioClick({
+        radioClickObj: 11,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open,
+        },
+      })
+      done();
+    })
+
+    /**
+     * 测试组件'animationOptions.curve'支持设置包含单个子组件为'Friction'且获取属性正确
      */
     it('ArkUI_FoldSplitContainer_035', 0, async (done: () => void) => {
       //获取不到断言参数
       await titleSearch('参数列表', 'animationOptions.curve')
       await radioClick({
-        radioClickObj: 11,
+        radioClickObj: 12,
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
