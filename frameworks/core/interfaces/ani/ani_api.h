@@ -24,7 +24,7 @@
 #include <vector>
 
 #include "base/memory/referenced.h"
-#include "core/components_ng/base/frame_node.h"
+#include "ui/base/utils/utils.h"
 #include "frameworks/core/components/common/layout/constants.h"
 
 #ifdef __cplusplus
@@ -134,6 +134,10 @@ private:
 
 namespace OHOS::AbilityRuntime {
 class Context;
+}
+
+namespace OHOS::Ace::NG {
+class FrameNode;
 }
 
 namespace OHOS::Ace::Ani {

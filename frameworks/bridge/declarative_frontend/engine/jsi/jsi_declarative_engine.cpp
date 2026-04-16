@@ -84,6 +84,7 @@
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_base_utils.h"
+#include "frameworks/bridge/js_frontend/frontend_delegate.h"
 #include "frameworks/core/components/xcomponent/xcomponent_component_client.h"
 #include "frameworks/core/components_ng/base/view_stack_processor.h"
 #include "frameworks/core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
