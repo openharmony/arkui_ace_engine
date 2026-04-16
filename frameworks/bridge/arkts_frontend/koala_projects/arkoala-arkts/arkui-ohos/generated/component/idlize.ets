@@ -29,7 +29,7 @@ import { arkui_Graphics_LengthMetrics_serializer, Vector2_serializer, Size_seria
 import { ColorMetrics as arkui_Graphics_ColorMetrics, LengthMetrics as arkui_Graphics_LengthMetrics, Vector2, Size, NodePosition, Vector3, Matrix4, Rect, Circle, RoundRect, CommandPath, Frame, DrawContext as arkui_Graphics_DrawContext } from 'arkui.Graphics'
 import { ArkListOptions_serializer } from './../framework/ohos.arkui.ArcList'
 import { ArkListOptions, ArcScrollIndexHandler } from '@ohos.arkui.ArcList'
-import { CrownSensitivity, BarState, ScrollSource, EdgeEffect, Color as arkui_component_enums_Color, AnimationPropertyType, EventQueryType, RawInputEventType, Curve, BorderStyle, TouchType, ColorSpace } from './enums'
+import { CrownSensitivity, BarState, ScrollSource, EdgeEffect, CompetitionStrategy, Color as arkui_component_enums_Color, AnimationPropertyType, EventQueryType, RawInputEventType, Curve, BorderStyle, TouchType, ColorSpace } from './enums'
 import { ScrollState, UIListEvent, UIListEventInternal } from './list'
 import { SwipeActionOptions_serializer, SwipeActionOptions } from './listItem'
 import { ArcScrollBarOptions_serializer } from './../framework/ohos.arkui.ArcScrollBar'
@@ -1576,6 +1576,11 @@ export class BuilderNodeOps implements MaterializedBase {
         const event_casted = event as (InputEventType | undefined)
         return this.postInputEvent_serialize(event_casted)
     }
+    public postInputEventWithStrategy(event?: InputEventType, competitionStrategy?: CompetitionStrategy): boolean {
+        const event_casted = event as (InputEventType | undefined)
+        const competitionStrategy_casted = competitionStrategy as (CompetitionStrategy | undefined)
+        return this.postInputEventWithStrategy_serialize(event_casted, competitionStrategy_casted)
+    }
     public setRootFrameNodeInBuilderNode(node: KPointer): KPointer {
         const node_casted = node as (KPointer)
         return this.setRootFrameNodeInBuilderNode_serialize(node_casted)
@@ -1632,6 +1637,39 @@ export class BuilderNodeOps implements MaterializedBase {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval = ArkUIGeneratedNativeModule._BuilderNodeOps_postInputEvent(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    private postInputEventWithStrategy_serialize(event?: InputEventType, competitionStrategy?: CompetitionStrategy): boolean {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (event !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const eventTmpValue = event!
+            if (eventTmpValue instanceof TouchEvent) {
+                thisSerializer.writeInt8((0).toByte())
+                const eventTmpValueForIdx0 = eventTmpValue as TouchEvent
+                const eventTmpValueForIdx0Transformed: TouchEventProxy = extractors.transform_Ark_TouchEvent_to_Ark_TouchEventProxy(eventTmpValueForIdx0)
+                TouchEventProxy_serializer.write(thisSerializer, eventTmpValueForIdx0Transformed)
+            } else if (eventTmpValue instanceof MouseEvent) {
+                thisSerializer.writeInt8((1).toByte())
+                const eventTmpValueForIdx1 = eventTmpValue as MouseEvent
+                MouseEvent_serializer.write(thisSerializer, eventTmpValueForIdx1)
+            } else if (eventTmpValue instanceof AxisEvent) {
+                thisSerializer.writeInt8((2).toByte())
+                const eventTmpValueForIdx2 = eventTmpValue as AxisEvent
+                AxisEvent_serializer.write(thisSerializer, eventTmpValueForIdx2)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (competitionStrategy !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const competitionStrategyTmpValue = (competitionStrategy as CompetitionStrategy)
+            thisSerializer.writeInt32(competitionStrategyTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval = ArkUIGeneratedNativeModule._BuilderNodeOps_postInputEventWithStrategy(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }

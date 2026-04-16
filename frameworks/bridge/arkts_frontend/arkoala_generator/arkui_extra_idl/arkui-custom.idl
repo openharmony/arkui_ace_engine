@@ -21,6 +21,7 @@ import global.resource.Resource as Resource;
 import ohos.arkui.observer.default as observer;
 import arkui.component.gesture.GestureEvent as GestureEvent;
 import arkui.component.lazyForEach.LazyForEachOptions as LazyForEachOptions;
+import arkui.component.enums.CompetitionStrategy as CompetitionStrategy;
 
 callback Callback_RangeUpdate = void (i32 start, i32 end, i32 cacheStart, i32 cacheEnd, boolean isLoop);
 callback Callback_CreateItem = pointer (i32 index);
@@ -268,6 +269,7 @@ interface BuilderNodeOps {
     void setOptions(BuilderNodeOptions options);
     boolean postTouchEvent(TouchEvent event);
     boolean postInputEvent(optional InputEventType event);
+    boolean postInputEventWithStrategy(optional InputEventType event, optional CompetitionStrategy competitionStrategy);
     pointer setRootFrameNodeInBuilderNode(pointer node);
 };
 typedef InputEventType = (TouchEvent or MouseEvent or AxisEvent);

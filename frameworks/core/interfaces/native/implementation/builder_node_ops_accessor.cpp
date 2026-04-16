@@ -310,6 +310,80 @@ Ark_Boolean PostInputEventImpl(Ark_BuilderNodeOps peer, const Opt_InputEventType
     }
     return Converter::ArkValue<Ark_Boolean>(result);
 }
+
+Ark_Boolean CheckPostInputEventWithStrategyImpl(Ark_BuilderNodeOps peer, const Opt_InputEventType* event,
+    const Opt_CompetitionStrategy* competitionStrategy)
+{
+    const auto errValue = Converter::ArkValue<Ark_Boolean>(false);
+    CHECK_NULL_RETURN(peer, errValue);
+    CHECK_NULL_RETURN(event, errValue);
+    CHECK_NULL_RETURN(competitionStrategy, errValue);
+    if (InteropTag::INTEROP_TAG_UNDEFINED == event->tag) {
+        TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "PostInputEventWithStrategyImpl event is undefined");
+        return errValue;
+    }
+    return Converter::ArkValue<Ark_Boolean>(true);
+}
+
+bool GetIsNewReferee(const Opt_CompetitionStrategy* competitionStrategy)
+{
+    bool isNewReferee = true;
+    if (competitionStrategy->tag != InteropTag::INTEROP_TAG_UNDEFINED &&
+        competitionStrategy->value == Ark_CompetitionStrategy::ARK_COMPETITION_STRATEGY_COMPETITION) {
+        isNewReferee = false;
+    }
+    return isNewReferee;
+}
+
+Ark_Boolean PostInputEventWithStrategyImpl(Ark_BuilderNodeOps peer, const Opt_InputEventType* event,
+    const Opt_CompetitionStrategy* competitionStrategy)
+{
+    const auto errValue = Converter::ArkValue<Ark_Boolean>(false);
+    if (!CheckPostInputEventWithStrategyImpl(peer, event, competitionStrategy)) {
+        return errValue;
+    }
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, errValue);
+    auto postEventManager = pipelineContext->GetPostEventManager();
+    CHECK_NULL_RETURN(postEventManager, errValue);
+    bool result = false;
+    auto arkEvent = event->value;
+    bool isNewReferee = GetIsNewReferee(competitionStrategy);
+    switch (arkEvent.selector) {
+        case SELECTOR_ID_0: {
+            auto proxy = arkEvent.value0;
+            TouchEvent touchEvent;
+            GetTouchEventFromProxy(proxy, touchEvent);
+            touchEvent.isNewReferee = isNewReferee;
+            result = postEventManager->PostTouchEventWithStrategy(peer->realNode_, std::move(touchEvent));
+            break;
+        }
+        case SELECTOR_ID_1: {
+            auto mouseEventInfo = arkEvent.value1->GetEventInfo();
+            CHECK_NULL_RETURN(mouseEventInfo, errValue);
+            auto mouseEvent = mouseEventInfo->ConvertToMouseEvent();
+            mouseEvent.time = mouseEventInfo->GetTimeStamp();
+            mouseEvent.isNewReferee = isNewReferee;
+            result = postEventManager->PostMouseEventWithStrategy(peer->realNode_, std::move(mouseEvent));
+            break;
+        }
+        case SELECTOR_ID_2: {
+            auto axisEventInfo = arkEvent.value2->GetEventInfo();
+            CHECK_NULL_RETURN(axisEventInfo, errValue);
+            auto axisEvent = axisEventInfo->ConvertToAxisEvent();
+            axisEvent.pressedCodes = axisEventInfo->GetPressedKeyCodes();
+            axisEvent.isNewReferee = isNewReferee;
+            result = postEventManager->PostAxisEventWithStrategy(peer->realNode_, std::move(axisEvent));
+            break;
+        }
+        default: {
+            result = false;
+            break;
+        }
+    }
+    return Converter::ArkValue<Ark_Boolean>(result);
+}
+
 Ark_NativePointer SetRootFrameNodeInBuilderNodeImpl(Ark_BuilderNodeOps peer, Ark_NativePointer node)
 {
     auto uiNode = reinterpret_cast<UINode*>(node);
@@ -334,6 +408,7 @@ const GENERATED_ArkUIBuilderNodeOpsAccessor* GetBuilderNodeOpsAccessor()
         BuilderNodeOpsAccessor::SetOptionsImpl,
         BuilderNodeOpsAccessor::PostTouchEventImpl,
         BuilderNodeOpsAccessor::PostInputEventImpl,
+        BuilderNodeOpsAccessor::PostInputEventWithStrategyImpl,
         BuilderNodeOpsAccessor::SetRootFrameNodeInBuilderNodeImpl,
     };
     return &BuilderNodeOpsAccessorImpl;
