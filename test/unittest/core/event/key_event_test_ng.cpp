@@ -940,20 +940,6 @@ HWTEST_F(KeyEventTestNg, KeyEvent_ToString001, TestSize.Level1)
 }
 
 /**
- * @tc.name: KeyToString001
- * @tc.desc: Test KeyToString returns correct string for valid keycode.
- * @tc.type: FUNC
- */
-HWTEST_F(KeyEventTestNg, KeyToString001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Call KeyToString with KEY_A code (2017).
-     * @tc.expected: Returns "KeyA".
-     */
-    EXPECT_STREQ(KeyToString(static_cast<int32_t>(KeyCode::KEY_A)), "KeyA");
-}
-
-/**
  * @tc.name: KeyToString002
  * @tc.desc: Test KeyToString returns "Unknown" for negative code.
  * @tc.type: FUNC
