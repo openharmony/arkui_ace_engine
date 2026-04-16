@@ -676,7 +676,7 @@ void LayoutWrapper::AdjustFixedSizeNode(RectF& frame)
     }
 }
 
-void LayoutWrapper::AdjustChildren(RefPtr<FrameNode>& host, const OffsetF& offset, bool parentScrollable)
+void LayoutWrapper::AdjustChildren(const RefPtr<FrameNode>& host, const OffsetF& offset, bool parentScrollable)
 {
     auto& pattern = host->GetPattern();
     if (pattern && pattern->ConsumeChildrenAdjustment(offset)) {
@@ -687,8 +687,7 @@ void LayoutWrapper::AdjustChildren(RefPtr<FrameNode>& host, const OffsetF& offse
     }
 }
 
-void LayoutWrapper::AdjustChild(const RefPtr<UINode>& childUI, const OffsetF& offset,
-    bool parentScrollable)
+void LayoutWrapper::AdjustChild(RefPtr<UINode> childUI, const OffsetF& offset, bool parentScrollable)
 {
     auto child = DynamicCast<FrameNode>(RawPtr(childUI));
     if (!child) {

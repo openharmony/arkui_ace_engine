@@ -63,11 +63,6 @@ public:
         return RefPtr<T>(rawPtr);
     }
     template<class T>
-    static RefPtr<T> Transfer(T* rawPtr)
-    {
-        return RefPtr<T>(rawPtr, false);
-    }
-    template<class T>
     static WeakPtr<T> WeakClaim(T* rawPtr)
     {
         return WeakPtr<T>(rawPtr);
@@ -135,6 +130,25 @@ protected:
     virtual bool MaybeRelease()
     {
         return true;
+    }
+
+    template<class T, class O>
+    static RefPtr<T> Transfer(RefPtr<O>& ptr)
+    {
+        auto p = O::template DynamicCast<T>(ptr.rawPtr_);
+        if (p) {
+            ptr.rawPtr_ = nullptr;
+        }
+        return RefPtr<T>(p, false);
+    }
+
+    // ATTENTION: Use this only in performance-sensitive contexts
+    template<class T, class O>
+    static RefPtr<T> ForceTransfer(RefPtr<O>& ptr)
+    {
+        auto p = reinterpret_cast<T*>(ptr.rawPtr_);
+        ptr.rawPtr_ = nullptr;
+        return RefPtr<T>(p, false);
     }
 
 private:
@@ -205,10 +219,6 @@ public:
     void Reset()
     {
         Swap(RefPtr());
-    }
-    void Release()
-    {
-        rawPtr_ = nullptr;
     }
 
     typename LifeCycleCheckable::PtrHolder<T> operator->() const

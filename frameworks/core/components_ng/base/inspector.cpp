@@ -854,25 +854,32 @@ RefPtr<UINode> Inspector::GetInspectorByKey(const RefPtr<FrameNode>& root, const
     if (id ? key == *id : keyIsNull) {
         return root;
     }
-    std::vector<const std::list<RefPtr<UINode>>*> groups;
-    std::vector<const std::list<RefPtr<UINode>>*> groupsNext;
-    // reserve 32-elements space to avoid memory allocation in future
-    groups.reserve(32);
-    groupsNext.reserve(32);
-    groups.emplace_back(&root->GetChildren(notDetach));
-    do {
-        for (auto& g : groups) {
-            for (auto& n : *g) {
-                const auto& id = n->GetInspectorId();
-                if (id ? key == *id : keyIsNull) {
-                    return n;
-                }
-                groupsNext.emplace_back(&n->GetChildren(notDetach));
+
+    std::vector<RefPtr<UINode>> elements;
+    std::vector<RefPtr<UINode>> elementsNext;
+    const auto& children = root->GetChildren(notDetach);
+    elements.reserve(children.size());
+    for (const auto& child : children) {
+        elements.emplace_back(child);
+    }
+    while (!elements.empty()) {
+        for (auto& current: elements) {
+            const auto& id = current->GetInspectorId();
+            if (id ? key == *id : keyIsNull) {
+                return current;
             }
         }
-        groups.swap(groupsNext);
-        groupsNext.clear();
-    } while (groups.size());
+
+        elementsNext.reserve(elements.size() * 2); // double size
+        for (auto& current: elements) {
+            const auto& children = current->GetChildren(notDetach);
+            for (const auto& child : children) {
+                elementsNext.emplace_back(child);
+            }
+        }
+        elements.swap(elementsNext);
+        elementsNext.clear();
+    }
     return nullptr;
 }
 

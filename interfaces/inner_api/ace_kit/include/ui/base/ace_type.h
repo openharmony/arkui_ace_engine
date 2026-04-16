@@ -69,22 +69,9 @@ public:
         return Claim(DynamicCast<T>(RawPtr(ptr)));
     }
     template<class T, class O>
-    static RefPtr<T> DynamicTransfer(RefPtr<O>& ptr)
+    static RefPtr<T> DynamicCast(RefPtr<O>&& ptr)
     {
-        auto p = Transfer(DynamicCast<T>(RawPtr(ptr)));
-        if (p) {
-            ptr.Release();
-        }
-        return p;
-    }
-    template<class T, class O>
-    static RefPtr<T> DynamicTransfer(RefPtr<O>&& ptr)
-    {
-        auto p = Transfer(DynamicCast<T>(RawPtr(ptr)));
-        if (p) {
-            ptr.Release();
-        }
-        return p;
+        return Transfer<T>(ptr);
     }
     template<class T, class O>
     static WeakPtr<T> DynamicCast(const WeakPtr<O>& weak)

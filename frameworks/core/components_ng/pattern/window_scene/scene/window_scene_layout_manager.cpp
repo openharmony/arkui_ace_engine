@@ -122,7 +122,7 @@ uint64_t WindowSceneLayoutManager::GetScreenId(const RefPtr<FrameNode>& screenNo
 
 void WindowSceneLayoutManager::UpdateRootGeometry(TraverseInfo& info)
 {
-    // precondition: info.node != nullptr && info.context != nullptr
+    // precondition: info.node != nullptr
     // no need to check again
     auto node = info.node;
     auto rsNode = info.rsNode;

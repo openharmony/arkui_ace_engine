@@ -1029,12 +1029,22 @@ void UINode::DetachFromMainTree(bool recursive, bool needCheckThreadSafeNodeTree
     // if recursive = false, recursively call DetachFromMainTree(false), until we reach the first FrameNode.
     bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
     isTraversing_ = true;
-    auto&& children = GetChildren();
-    auto&& adoptedChildren = GetAdoptedChildren();
+    std::vector<RefPtr<UINode>> childrenVec;
+    auto& children = GetChildren();
+    childrenVec.reserve(children.size());
     for (const auto& child : children) {
+        childrenVec.emplace_back(child);
+    }
+    std::vector<RefPtr<UINode>> adoptedChildrenVec;
+    auto& adoptedChildren = GetAdoptedChildren();
+    adoptedChildrenVec.reserve(adoptedChildren.size());
+    for (const auto& child : adoptedChildren) {
+        adoptedChildrenVec.emplace_back(child);
+    }
+    for (const auto& child : childrenVec) {
         child->DetachFromMainTree(isRecursive);
     }
-    for (const auto& adoptChild : adoptedChildren) {
+    for (const auto& adoptChild : adoptedChildrenVec) {
         adoptChild->DetachFromMainTree(isRecursive);
     }
     isTraversing_ = false;
