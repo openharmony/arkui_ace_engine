@@ -24,6 +24,14 @@
 
 namespace OHOS::Ace::NG {
 
+namespace {
+const RefPtr<TokenTheme>& GetEmptyTokenTheme()
+{
+    static const RefPtr<TokenTheme> emptyTheme = nullptr;
+    return emptyTheme;
+}
+} // namespace
+
 TokenThemeStorage* TokenThemeStorage::GetInstance()
 {
     static TokenThemeStorage instance;
@@ -40,7 +48,10 @@ void TokenThemeStorage::StoreThemeScope(TokenThemeScopeId themeScopeId, int32_t 
 void TokenThemeStorage::RemoveThemeScope(TokenThemeScopeId themeScopeId, bool removeToken /* = false */)
 {
     if (removeToken) {
-        CacheRemove(themeScopeMap_[themeScopeId]);
+        auto iter = themeScopeMap_.find(themeScopeId);
+        if (iter != themeScopeMap_.end()) {
+            CacheRemove(iter->second);
+        }
     }
     themeScopeMap_.erase(themeScopeId);
 }
@@ -50,8 +61,11 @@ const RefPtr<TokenTheme>& TokenThemeStorage::GetTheme(TokenThemeScopeId themeSco
     if (themeScopeId == 0) {
         return GetDefaultTheme();
     }
-    auto themeId = themeScopeMap_[themeScopeId];
-    return CacheGet(themeId);
+    auto iter = themeScopeMap_.find(themeScopeId);
+    if (iter == themeScopeMap_.end()) {
+        return GetEmptyTokenTheme();
+    }
+    return CacheGet(iter->second);
 }
 
 void TokenThemeStorage::SetDefaultTheme(const RefPtr<TokenTheme>& theme, ColorMode colorMode)
@@ -168,7 +182,11 @@ void TokenThemeStorage::CacheSet(const RefPtr<TokenTheme>& theme)
 const RefPtr<TokenTheme>& TokenThemeStorage::CacheGet(int32_t themeId)
 {
     std::lock_guard<std::mutex> lock(themeCacheMutex_);
-    return themeCache_[themeId];
+    auto iter = themeCache_.find(themeId);
+    if (iter == themeCache_.end()) {
+        return GetEmptyTokenTheme();
+    }
+    return iter->second;
 }
 
 void TokenThemeStorage::CacheRemove(int32_t themeId)
