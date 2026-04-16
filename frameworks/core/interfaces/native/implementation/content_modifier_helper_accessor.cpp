@@ -53,6 +53,7 @@
 #include "core/components_ng/pattern/select/select_model_ng.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+const GENERATED_ArkUICheckboxContentModifier* GetCheckboxStaticContentModifier();
 namespace {
 const GENERATED_ArkUICheckboxContentModifier* GetCheckboxContentModifier()
 {
