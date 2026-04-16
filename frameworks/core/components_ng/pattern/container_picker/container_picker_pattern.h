@@ -319,7 +319,7 @@ private:
 
     void InitDisabled();
     void InitAreaChangeEvent();
-    void SyncSelectionIndicatorWithTheme(int32_t themeScopeId);
+    void SyncSelectionIndicatorWithTheme();
 
     RefPtr<PanEvent> panEvent_;
     PanDirection panDirection_;

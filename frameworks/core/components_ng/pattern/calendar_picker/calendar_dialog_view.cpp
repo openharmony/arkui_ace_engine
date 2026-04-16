@@ -60,7 +60,7 @@ void ApplyBlurStyleColorModeForApi26(const RefPtr<FrameNode>& dialogNode, BlurSt
     CHECK_NULL_VOID(dialogNode);
     // Target API 26+: blur style follows the dialog node's local color mode (WithTheme / explicit scope).
     // Below target API 26: keep colorMode from blurStyleOption default or dialogProperties.
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+    if (dialogNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         if (dialogNode->GetLocalColorMode() == ColorMode::DARK) {
             styleOption.colorMode = ThemeColorMode::DARK;
         } else if (dialogNode->GetLocalColorMode() == ColorMode::LIGHT) {
@@ -517,6 +517,7 @@ bool CalendarDialogView::MountCalendarMonthFramesToSwiper(int32_t calendarNodeId
 
 void CalendarDialogView::InitCalendarProperty(const RefPtr<FrameNode>& calendarNode)
 {
+    CHECK_NULL_VOID(calendarNode);
     auto calendarLayoutProperty = calendarNode->GetLayoutProperty();
     CHECK_NULL_VOID(calendarLayoutProperty);
     RefPtr<CalendarTheme> theme = calendarNode->GetTheme<CalendarTheme>(true);
@@ -1090,9 +1091,9 @@ void CalendarDialogView::UpdateBackgroundStyle(const RefPtr<RenderContext>& rend
         dialogProperties.backgroundBlurStyle.value_or(calendarTheme->GetCalendarPickerDialogBlurStyle()));
     if (dialogProperties.blurStyleOption.has_value() && contentRenderContext->GetBackgroundEffect().has_value()) {
         contentRenderContext->UpdateBackgroundEffect(std::nullopt);
+    } else {
+        ApplyBlurStyleColorModeForApi26(dialogNode, styleOption);
     }
-
-    ApplyBlurStyleColorModeForApi26(dialogNode, styleOption);
 
     renderContext->UpdateBackBlurStyle(styleOption);
     if (dialogProperties.effectOption.has_value()) {

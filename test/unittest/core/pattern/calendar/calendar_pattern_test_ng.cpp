@@ -118,6 +118,7 @@ HWTEST_F(CalendarPatternTestNg, CalendarTest007, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
 
     // Today style.
     TodayStyle todayStyle;
@@ -710,6 +711,11 @@ HWTEST_F(CalendarPatternTestNg, CalendarMonthPatternTest005, TestSize.Level1)
         obtainedMonth.days.emplace_back(calendarDay);
     }
     calendarMonthPattern->obtainedMonth_ = obtainedMonth;
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    if (!pipeline->GetSafeAreaManager()) {
+        pipeline->safeAreaManager_ = AceType::MakeRefPtr<SafeAreaManager>();
+    }
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
     calendarMonthPattern->CreateNodePaintMethod();
     EXPECT_TRUE(calendarMonthPattern->accessibilityPropertyVec_.size() > 0);
