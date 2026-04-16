@@ -2187,13 +2187,17 @@ HWTEST_F(TextFieldPatternTest, TextPattern086, TestSize.Level0)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-
+    /**
+     * @tc.steps: step2. AddTouchLocationInfo
+     */
     TouchEventInfo touchEventInfo("onTouch");
     TouchLocationInfo touchLocationInfo(0);
     touchLocationInfo.touchType_ = TouchType::MOVE;
     touchLocationInfo.localLocation_ = Offset(0.0f, 0.0f);
     touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
-
+    /**
+     * @tc.steps: step3. UpdateCaretByTouchMove
+     */
     pattern->hasPreviewText_ = true;
     pattern->UpdateCaretByTouchMove(touchLocationInfo);
 }

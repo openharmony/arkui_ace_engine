@@ -30,6 +30,9 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/position_property.h"
+#ifdef ENABLE_ROSEN_BACKEND
+#include "core/components_ng/render/adapter/rosen_render_context.h"
+#endif
 #include "core/components_ng/render/font_collection.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/utils.h"
@@ -61,6 +64,34 @@ float GetContentOffsetY(LayoutWrapper* layoutWrapper)
         offsetY += Alignment::GetAlignPosition(size, content->GetRect().GetSize(), align).GetY();
     }
     return offsetY;
+}
+
+void UpdateSymbolHdrHeadRoomToRenderContext(const RefPtr<FrameNode>& frameNode, TextPattern& pattern,
+    TextStyle& textStyle)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() != V2::SYMBOL_ETS_TAG) {
+        return;
+    }
+    const auto& symbolColorInfo = textStyle.GetAndUpdateSymbolColorInfo();
+    auto lastTextStyle = pattern.GetTextStyle();
+    const auto& lastSymbolColorInfo = lastTextStyle.GetAndUpdateSymbolColorInfo();
+    bool needUpdateHdrHeadRoom = symbolColorInfo.hasHdr != lastSymbolColorInfo.hasHdr;
+    if (!needUpdateHdrHeadRoom && symbolColorInfo.hasHdr) {
+        needUpdateHdrHeadRoom = !NearEqual(symbolColorInfo.maxHeadRoom, lastSymbolColorInfo.maxHeadRoom);
+    }
+    if (needUpdateHdrHeadRoom) {
+        const auto headRoom = symbolColorInfo.hasHdr ? symbolColorInfo.maxHeadRoom : 1.0f;
+#ifdef ENABLE_ROSEN_BACKEND
+        auto renderContext = AceType::DynamicCast<RosenRenderContext>(frameNode->GetRenderContext());
+        if (renderContext) {
+            renderContext->SetHDRColorHeadRoom(headRoom);
+        }
+#endif
+        if (SystemProperties::GetTextTraceEnabled()) {
+            ACE_TEXT_SCOPED_TRACE("UpdateSymbolHdrHeadRoomToRenderContext[headRoom:%f]", headRoom);
+        }
+    }
 }
 } // namespace
 
@@ -121,6 +152,7 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
         }
         contentModifier->SetFontReady(false);
     }
+    UpdateSymbolHdrHeadRoomToRenderContext(frameNode, *pattern, textStyle);
     UpdateShaderStyle(textLayoutProperty, textStyle);
     textStyle.SetHalfLeading(textLayoutProperty->GetHalfLeadingValue(pipeline->GetHalfLeading()));
     textStyle.SetEnableAutoSpacing(textLayoutProperty->GetEnableAutoSpacingValue(false));

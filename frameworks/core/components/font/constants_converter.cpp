@@ -288,18 +288,6 @@ RSColor ConvertToRSColor(Color color)
     return color.GetValue();
 }
 
-bool ShouldUseUIColorForSymbolColor(const Color& color)
-{
-    return color.GetHeadRoomColor().has_value() || color.GetColorSpace() != ColorSpace::SRGB;
-}
-
-bool HasUIColorSymbolColors(const std::vector<Color>& colors)
-{
-    return std::any_of(colors.begin(), colors.end(), [](const auto& color) {
-        return ShouldUseUIColorForSymbolColor(color);
-    });
-}
-
 Rosen::Drawing::UIColor ConvertToRSUIColor(const Color& color)
 {
     if (auto headRoomColor = color.GetHeadRoomColor(); headRoomColor.has_value()) {
@@ -803,9 +791,10 @@ Rosen::SymbolColor ConvertToNativeSymbolColor(const std::vector<SymbolGradient>&
     return symbolColor;
 }
 
-void SetSymbolRenderColor(const std::vector<Color>& symbolColor, Rosen::TextStyle& txtStyle)
+void SetSymbolRenderColor(const TextStyle& textStyle, Rosen::TextStyle& txtStyle)
 {
-    if (HasUIColorSymbolColors(symbolColor)) {
+    const auto& symbolColor = textStyle.GetSymbolColorList();
+    if (textStyle.GetAndUpdateSymbolColorInfo().shouldUseUIColor) {
         std::vector<Rosen::Drawing::UIColor> uiColors;
         std::vector<Rosen::SymbolColorSpace> colorSpaces;
         uiColors.reserve(symbolColor.size());
@@ -833,8 +822,7 @@ void ConvertSymbolTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyl
 
     txtStyle.isSymbolGlyph = true;
     txtStyle.symbol.SetRenderMode(textStyle.GetRenderStrategy());
-    const std::vector<Color>& symbolColor = textStyle.GetSymbolColorList();
-    SetSymbolRenderColor(symbolColor, txtStyle);
+    SetSymbolRenderColor(textStyle, txtStyle);
 
     if (auto intermediateStyle = textStyle.GetShaderStyle(); !intermediateStyle.empty()) {
         txtStyle.symbol.SetSymbolColor(ConvertToNativeSymbolColor(intermediateStyle));
