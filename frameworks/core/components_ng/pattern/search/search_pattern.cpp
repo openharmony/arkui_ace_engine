@@ -1890,6 +1890,7 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
         textFieldLayoutProperty->GetIncludeFontPadding().value_or(false)).c_str(), filter);
     json->PutExtAttr("fallbackLineSpacing", std::to_string(
         textFieldLayoutProperty->GetFallbackLineSpacing().value_or(false)).c_str(), filter);
+    json->PutExtAttr("enableKeyboardOnFocus", NeedToRequestKeyboardOnFocus() ? "true" : "false", filter);
     json->PutExtAttr("enterKeyType", searchTextFieldPattern->TextInputActionToString().c_str(), filter);
     json->PutExtAttr("selectionMenuHidden",
         textFieldLayoutProperty->GetSelectionMenuHidden().value_or(false) ? "true" : "false", filter);
