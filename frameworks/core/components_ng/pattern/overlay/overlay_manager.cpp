@@ -5041,6 +5041,15 @@ void OverlayManager::OnBindSheetInner(std::function<void(const std::string&)>&& 
     InitSheetWrapperAction(sheetNode, targetNode, sheetStyle);
     auto sheetNodePattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetNodePattern);
+    auto sheetWrapper = sheetNode->GetParent();
+    if (sheetWrapper && !sheetWrapper->IsOnMainTree() &&
+        (sheetNodePattern->GetSheetOnWillAppear() || sheetNodePattern->GetSheetOnAppear())) {
+        auto context = sheetNode->GetContext();
+        CHECK_NULL_VOID(context);
+        auto reporter = context->GetStatisticEventReporter();
+        CHECK_NULL_VOID(reporter);
+        reporter->SendEvent(StatisticEventType::SHEETPAGE_ATTACH_ERR);
+    }
     if (SystemProperties::ConfigChangePerform()) {
         // Register the resource update function as required during sheet node creation.
         sheetNodePattern->UpdateSheetParamResource(sheetNode, sheetStyle);

@@ -88,6 +88,8 @@ enum class StatisticEventType {
     VIDEO_EXCEED_PROGRESS_RATE = 10902,
     // Navigation events (11100-11199)
     NAVIGATION_HOME_DESTINATION = 11100,
+    // Sheet events (11300-11399)
+    SHEETPAGE_ATTACH_ERR = 11300,
 };
 
 struct StatisticAppInfo {

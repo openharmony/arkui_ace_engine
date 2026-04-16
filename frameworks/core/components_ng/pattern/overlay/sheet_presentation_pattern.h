@@ -163,11 +163,21 @@ public:
         onAppear_ = std::move(onAppear);
     }
 
+    std::function<void()> GetSheetOnAppear() const
+    {
+        return onAppear_;
+    }
+
     void OnAppear();
 
     void UpdateOnWillAppear(std::function<void()>&& onWillAppear)
     {
         onWillAppear_ = std::move(onWillAppear);
+    }
+
+    std::function<void()> GetSheetOnWillAppear() const
+    {
+        return onWillAppear_;
     }
 
     void OnWillAppear();
