@@ -466,4 +466,63 @@ HWTEST_F(WebPatternCursorTest, ProcessCustomCursor_002, TestSize.Level1)
     EXPECT_NE(info->GetBuff(), nullptr);
 #endif
 }
+
+/**
+ * @tc.name: OnCursorChangeWebWindowID_001
+ * @tc.desc: OnCursorChange with useWebWindowID=true and CT_TEMP_POINTER
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternCursorTest, OnCursorChangeWebWindowID_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    OHOS::NWeb::CursorType type = OHOS::NWeb::CursorType::CT_TEMP_POINTER;
+    auto info = std::make_shared<NWebCursorInfoTestImpl>();
+    ASSERT_NE(info, nullptr);
+    web_pattern_->isHoverExit_ = false;
+    web_pattern_->windowId_ = 100;
+
+    OHOS::NWeb::CursorType originalCursorType = web_pattern_->cursorType_;
+
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    auto mockMouseStyle = AceType::DynamicCast<MockMouseStyle>(mouseStyle);
+    MockContainer::Current()->SetIsUIExtensionWindow(false);
+    EXPECT_CALL(*mockMouseStyle, GetPointerStyle(::testing::_, ::testing::_)).WillRepeatedly(Return(0));
+
+    bool result = web_pattern_->OnCursorChange(type, info, true);
+
+    EXPECT_TRUE(result);
+    EXPECT_EQ(web_pattern_->cursorType_, originalCursorType);
+#endif
+}
+
+/**
+ * @tc.name: OnCursorChangeWebWindowID_002
+ * @tc.desc: OnCursorChange with useWebWindowID=true and CT_DRAG
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternCursorTest, OnCursorChangeWebWindowID_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    OHOS::NWeb::CursorType type = OHOS::NWeb::CursorType::CT_DRAG;
+    auto info = std::make_shared<NWebCursorInfoTestImpl>();
+    ASSERT_NE(info, nullptr);
+    web_pattern_->isHoverExit_ = false;
+    web_pattern_->windowId_ = 100;
+
+    // First set cursorType_ to a specific value
+    web_pattern_->cursorType_ = OHOS::NWeb::CursorType::CT_POINTER;
+    OHOS::NWeb::CursorType originalCursorType = web_pattern_->cursorType_;
+
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    auto mockMouseStyle = AceType::DynamicCast<MockMouseStyle>(mouseStyle);
+    MockContainer::Current()->SetIsUIExtensionWindow(false);
+    EXPECT_CALL(*mockMouseStyle, GetPointerStyle(::testing::_, ::testing::_)).WillRepeatedly(Return(0));
+
+    bool result = web_pattern_->OnCursorChange(type, info, true);
+
+    EXPECT_TRUE(result);
+    // CT_DRAG should not change cursorType_
+    EXPECT_EQ(web_pattern_->cursorType_, originalCursorType);
+#endif
+}
 } // namespace OHOS::Ace::NG
