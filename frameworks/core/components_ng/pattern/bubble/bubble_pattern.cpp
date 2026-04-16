@@ -127,7 +127,7 @@ void BubblePattern::OnAttachToFrameNode()
         ACE_UINODE_TRACE(popupNode);
         popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         auto pattern = weak.Upgrade();
-        if (pattern) {
+        if (pattern && !pattern->isTips_) {
             pattern->PopBubble(true);
         }
     };

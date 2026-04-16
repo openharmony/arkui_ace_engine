@@ -319,6 +319,7 @@ private:
     void HandleKeyboard(LayoutWrapper* layoutWrapper, bool showInSubWindow);
     void FitAvailableRect(LayoutWrapper* layoutWrapper, bool showInSubWindow);
     void FitMouseOffset(LayoutWrapper* layoutWrapper);
+    void UpdateWindowBoundsRect(bool showInSubWindow);
 
     void UpdateTextNodeMaxLines(const RefPtr<LayoutWrapper>& childWrapper, const LayoutConstraintF& layoutConstraint);
     void MeasureTipsRegion(const RefPtr<LayoutWrapper>& childWrapper, const LayoutConstraintF& childContraint);
@@ -453,7 +454,9 @@ private:
     bool doubleBorderEnable_ = false;
     bool expandDisplay_ = false;
     bool isUserSetMaterial_ = false;
+
     float floatButtonsHeight_ = 0.0f;
+    Rect windowBoundsRect_;
     // param to generate arrow shape.
     double angleSideX_ = 0.0;
     double angleSideY_ = 0.0;
