@@ -800,9 +800,6 @@ public:
     {
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
         imeShown_ = keyboardShown;
-        if (keyboardShown && !voiceKbShown_) {
-            voiceButtonKeyboardOpened_ = false;
-        }
 #endif
     }
     void NotifyKeyboardClosedByUser() override;
@@ -2360,7 +2357,6 @@ private:
     InlineMeasureItem inlineMeasureItem_;
     bool voiceKbShown_ = false;
     bool voiceKbOpenedByButton_ = false;
-    bool voiceButtonKeyboardOpened_ = false;
 
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;
