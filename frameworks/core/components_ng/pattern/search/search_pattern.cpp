@@ -1114,8 +1114,11 @@ void SearchPattern::PaintFocusState(bool recoverFlag)
     auto searchTheme = GetTheme();
     CHECK_NULL_VOID(searchTheme);
     if (renderContext->GetBackgroundColor().value_or(searchNormalColor_) == searchNormalColor_) {
-        renderContext->UpdateBackgroundColor(
-            searchTheme->GetSearchNormalColor().BlendColor(searchTheme->GetFocusBgColor()));
+        auto textFieldTheme = host->GetTheme<TextFieldTheme>(true);
+        CHECK_NULL_VOID(textFieldTheme);
+        renderContext->UpdateBackgroundColor(searchTheme->GetSearchNormalColor().BlendColor(
+            host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) ? textFieldTheme->GetFocusBgColor()
+                                                                                    : searchTheme->GetFocusBgColor()));
         isFocusBgColorSet_ = true;
     }
     if (focusChoice_ == FocusChoice::CANCEL_BUTTON) {
