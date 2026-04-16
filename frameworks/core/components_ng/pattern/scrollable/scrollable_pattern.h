@@ -20,10 +20,6 @@
 #include <vector>
 
 #include "base/geometry/axis.h"
-#include "core/animation/bezier_variable_velocity_motion.h"
-#include "core/animation/select_motion.h"
-#include "core/animation/spring_curve.h"
-#include "core/animation/velocity_motion.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/event/scrollable_event.h"
@@ -42,7 +38,10 @@
 #include "core/components/scroll/scroll_controller_base.h"
 
 namespace OHOS::Ace {
+class BezierVariableVelocityMotion;
 class ScrollControllerBase;
+class SelectMotion;
+class VelocityMotion;
 enum class ScrollAlign : int;
 enum class ScrollEdgeType : size_t;
 }

@@ -281,7 +281,7 @@ void MockPipelineContext::SetContainerModalTitleHeight(int32_t height)
 // mock_pipeline_context =======================================================
 
 // pipeline_context ============================================================
-PipelineContext::PipelineContext()
+PipelineContext::PipelineContext(): safeAreaManager_(MakeRefPtr<SafeAreaManager>())
 {
     InitManagers();
     if (navigationMgr_) {

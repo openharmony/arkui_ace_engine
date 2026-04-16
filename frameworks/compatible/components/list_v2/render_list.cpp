@@ -23,6 +23,7 @@
 #include "core/components/box/drag_drop_event.h"
 #include "core/components/scroll/render_scroll.h"
 #include "core/components/scroll/render_single_child_scroll.h"
+#include "core/components/scroll/scroll_fade_effect.h"
 #include "core/components/scroll/scroll_spring_effect.h"
 #include "core/components/scroll/scrollable.h"
 #include "core/components/stack/stack_element.h"

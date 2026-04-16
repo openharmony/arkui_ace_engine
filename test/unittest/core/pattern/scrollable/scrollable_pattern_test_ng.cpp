@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/scrollable/refresh_coordination.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/animation/bezier_variable_velocity_motion.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_method.h"
 
 namespace OHOS::Ace::NG {

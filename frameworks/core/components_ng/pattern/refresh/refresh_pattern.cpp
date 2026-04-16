@@ -36,10 +36,6 @@
 #include "core/components_ng/render/animation_utils.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "frameworks/base/i18n/localization.h"
-#include "frameworks/base/utils/time_util.h"
-#include "frameworks/base/utils/utils.h"
-#include "frameworks/core/components/common/layout/constants.h"
 #include "frameworks/core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
 #include "frameworks/core/components_ng/pattern/text/text_pattern.h"
 

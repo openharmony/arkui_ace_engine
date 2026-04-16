@@ -16,14 +16,7 @@
 
 #include "core/components_ng/pattern/list/list_model_ng.h"
 
-#include "base/memory/referenced.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
-#include "core/components_ng/pattern/arc_list/arc_list_pattern.h"
-#include "core/components_ng/pattern/list/list_position_controller.h"
-#include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
-#include "ui/base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
 

@@ -14,12 +14,14 @@
  */
 
 #include "core/components/common/layout/grid_column_info.h"
+#include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 
+#include "base/log/dump_log.h"
+#include "core/common/vibrator/vibrator_utils.h"
+#include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
 #include "core/components_ng/pattern/scrollable/scrollable_controller.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
-#include "base/log/dump_log.h"
-#include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 

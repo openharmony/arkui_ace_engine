@@ -15,6 +15,8 @@
 
 #include "core/components/common/properties/scroll_bar.h"
 
+#include "core/components/scroll/scroll_bar_controller.h"
+
 namespace OHOS::Ace {
 
 bool ScrollBar::InBarRegion(const Point& point) const
@@ -251,6 +253,18 @@ void ScrollBar::Reset(const RefPtr<ScrollBar>& scrollBar)
         return;
     }
     barController_->Reset();
+}
+
+bool ScrollBar::IsPressed() const
+{
+    return barController_ ? barController_->IsPressed() : false;
+}
+
+void ScrollBar::SetIsHover(bool isInBarRegion) const
+{
+    if (barController_) {
+        barController_->SetIsHover(isInBarRegion);
+    }
 }
 
 } // namespace OHOS::Ace

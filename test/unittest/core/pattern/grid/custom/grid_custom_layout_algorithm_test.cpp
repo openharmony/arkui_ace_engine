@@ -14,9 +14,10 @@
  */
 
 #include "custom_layout_options.h"
+#include "gtest/gtest.h"
+#include "gmock/gmock.h"
 #define protected public
 #define private public
-#include "test/mock/frameworks/core/animation/mock_animation_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/grid/grid_test_ng.h"
 

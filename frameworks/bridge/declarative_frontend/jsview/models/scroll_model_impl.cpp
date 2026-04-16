@@ -18,6 +18,8 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "core/components/scroll/scroll_fade_effect.h"
+#include "core/components/scroll/scroll_spring_effect.h"
 
 namespace OHOS::Ace::Framework {
 namespace {

@@ -16,8 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_SCROLL_BAR_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_SCROLL_BAR_H
 
-#include <cmath>
-
 #include "base/geometry/dimension.h"
 #include "base/geometry/offset.h"
 #include "base/geometry/rect.h"
@@ -25,7 +23,6 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/scroll/scroll_bar_controller.h"
-#include "core/components/scroll/scroll_position_controller.h"
 
 namespace OHOS::Ace {
 
@@ -258,17 +255,8 @@ public:
         barController_ = std::move(controller);
     }
 
-    bool IsPressed() const
-    {
-        return barController_ ?  barController_->IsPressed() : false;
-    }
-
-    void SetIsHover(bool isInBarRegion) const
-    {
-        if (barController_) {
-            barController_->SetIsHover(isInBarRegion);
-        }
-    }
+    bool IsPressed() const;
+    void SetIsHover(bool isInBarRegion) const;
 
 private:
     void SetBarRegion(const Offset& offset, const Size& size);
