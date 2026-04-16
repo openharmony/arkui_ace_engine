@@ -548,6 +548,10 @@ export class CursorController {
     public setCursor(value: PointerStyle): void {
         throw Error("setCursor not implemented in CursorController!")
     }
+
+    public setCustomCursor(value: PixelMap, focusX?: int32, focusY?: int32): void {
+        throw Error("setCustomCursor not implemented in CursorController!")
+    }
 }
 
 export const enum KeyboardAvoidMode {

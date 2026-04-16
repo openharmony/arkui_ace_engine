@@ -1324,6 +1324,12 @@ export class CursorControllerImpl extends CursorController {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
+
+    public setCustomCursor(value: PixelMap, focusX?: int32, focusY?: int32): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        IUIContext.setCustomCursor(value, focusX, focusY);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
 }
 
 export interface DetachedRootEntry {
