@@ -324,6 +324,9 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
         // case: new ObservedObject
         ObservedObject.addOwningProperty(this.localCopyObservedObject_, this);
         this.shouldInstallTrackedObjectReadCb = TrackedObject.needsPropertyReadCb(this.localCopyObservedObject_);
+      } else if (InteropConfigureStateMgmt.needsInterop() && isStaticProxy(this.localCopyObservedObject_)) {
+        this.localCopyObservedObject_ = InteropExtractorModule.getInteropObservedObject(this.localCopyObservedObject_, this);
+        this.shouldInstallTrackedObjectReadCb = TrackedObject.needsPropertyReadCb(this.localCopyObservedObject_);
       } else {
         // wrap newObservedObjectValue raw object as ObservedObject and subscribe to it
         stateMgmtConsole.propertyAccess(`${this.debugInfo()}: Provided source object's is not proxied (is not a ObservedObject). Wrapping it inside ObservedObject.`);
