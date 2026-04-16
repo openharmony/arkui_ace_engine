@@ -31,6 +31,8 @@
 #include "securec.h"
 
 #include "base/utils/utils.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/modifier.h"
 #include "core/interfaces/ani/ani_api.h"
 #include "arkoala-arkts/framework/native/src/resource_color_helper.h"
 #ifndef __linux__
