@@ -1137,7 +1137,7 @@ export class FrameNodeUtils {
     }
 }
 
-abstract class TypedFrameNode<T extends Object> extends FrameNode {
+abstract class TypedFrameNode<T> extends FrameNode {
     attribute_: T | undefined = undefined;
     attrCreator_: (node: FrameNode, type: ModifierType) => T
     type_: string = "";
