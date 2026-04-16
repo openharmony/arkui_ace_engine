@@ -49,12 +49,13 @@ void SubContainer::Initialize()
         return;
     }
 
-    if (!outSidePipelineContext_.Upgrade()) {
+    auto outSidePipelineContext = outSidePipelineContext_.Upgrade();
+    if (!outSidePipelineContext) {
         LOGE("no pipeline context for create form component container.");
         return;
     }
 
-    auto executor = outSidePipelineContext_.Upgrade()->GetTaskExecutor();
+    auto executor = outSidePipelineContext->GetTaskExecutor();
     if (!executor) {
         LOGE("could not got main pipeline executor");
         return;
@@ -116,8 +117,13 @@ void SubContainer::UpdateRootElementSize()
         return;
     }
 
-    surfaceWidth_ = outSidePipelineContext_.Upgrade()->NormalizeToPx(rootWidth);
-    surfaceHeight_ = outSidePipelineContext_.Upgrade()->NormalizeToPx(rootHeight);
+    auto outSidePipelineContext = outSidePipelineContext_.Upgrade();
+    if (outSidePipelineContext) {
+        surfaceWidth_ = outSidePipelineContext->NormalizeToPx(rootWidth);
+        surfaceHeight_ = outSidePipelineContext->NormalizeToPx(rootHeight);
+    } else {
+        LOGW("no pipeline context for create form component container.");
+    }
     if (pipelineContext_) {
         pipelineContext_->SetRootSize(density_, rootWidth.Value(), rootHeight.Value());
     }
@@ -505,9 +511,15 @@ void SubContainer::InitCardThemeManager(const std::string &path, int32_t instanc
     const std::map<std::string, sptr<AppExecFwk::FormAshmem>> &imageDataMap, RefPtr<AssetManager> assetManager)
 {
     ContainerScope scope(instanceId_);
-    density_ = outSidePipelineContext_.Upgrade()->GetDensity();
-    auto eventManager = outSidePipelineContext_.Upgrade()->GetEventManager();
-    pipelineContext_->SetEventManager(eventManager);
+    auto outSidePipelineContext = outSidePipelineContext_.Upgrade();
+    if (outSidePipelineContext) {
+        density_ = outSidePipelineContext->GetDensity();
+        auto eventManager = outSidePipelineContext->GetEventManager();
+        pipelineContext_->SetEventManager(eventManager);
+    } else {
+        LOGW("no pipeline context for create form component container.");
+    }
+    
     ProcessSharedImage(imageDataMap);
     UpdateRootElementSize();
     pipelineContext_->SetIsJsCard(true);  // JSCard & eTSCard both use this flag
