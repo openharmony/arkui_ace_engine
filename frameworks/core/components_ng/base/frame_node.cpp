@@ -3302,9 +3302,7 @@ RefPtr<FrameNode> FrameNode::GetAncestorNodeOfFrame(bool checkBoundary) const
     auto parent = GetParent();
     while (parent) {
         if (parent->GetNodeType() == UINodeType::FRAME_NODE) {
-            auto parentFrame = Transfer(reinterpret_cast<FrameNode*>(parent.GetRawPtr()));
-            parent.Release();
-            return parentFrame;
+            return ForceTransfer<FrameNode>(parent);
         }
         parent = parent->GetParent();
     }

@@ -378,8 +378,8 @@ protected:
     bool escapeDelayForIgnore_ = false;
     bool isScrollableAxis_ = false;
 private:
-    void AdjustChildren(RefPtr<FrameNode>& host, const OffsetF& offset, bool parentScrollable);
-    void AdjustChild(const RefPtr<UINode>& node, const OffsetF& offset, bool parentScrollable);
+    void AdjustChildren(const RefPtr<FrameNode>& host, const OffsetF& offset, bool parentScrollable);
+    void AdjustChild(RefPtr<UINode> node, const OffsetF& offset, bool parentScrollable);
     void AdjustNotExpandNodeInner(RefPtr<FrameNode>& host);
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutWrapper);
