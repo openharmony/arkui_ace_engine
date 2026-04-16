@@ -227,9 +227,9 @@ bool EvaluateAbcFile(const shared_ptr<JsRuntime>& runtime, const std::string& fi
     auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     CHECK_NULL_RETURN(arkRuntime, false);
     FILE* file = fopen(filePath.c_str(), "rb");
-    CHECK_NULL_RETURN(file, false);
     if (!file) {
         LOGF("Failed to open the file!");
+        return false;
     }
     if (fseek(file, 0, SEEK_END) != 0) {
         fclose(file);
