@@ -33,6 +33,7 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/manager/smart_gesture/smart_gesture_types.h"
 #include "core/components_ng/layout/vertical_overflow_handler.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/node_paint_method.h"
@@ -214,6 +215,22 @@ public:
     virtual RefPtr<NodePaintMethod> CreateDefaultNodePaintMethod()
     {
         return MakeRefPtr<NodePaintMethod>();
+    }
+
+    virtual bool IsScrollAble(SmartGestureDirection direction = SmartGestureDirection::FORWARD) const
+    {
+        return false;
+    }
+
+    virtual std::optional<ScrollingConfig> GetDefaultScrollingConfig(
+        SmartGestureDirection direction = SmartGestureDirection::FORWARD) const
+    {
+        return std::nullopt;
+    }
+
+    virtual void PerformScroll(const ScrollingConfig& /* config */)
+    {
+        return;
     }
 
     virtual std::optional<RectF> GetOverridePaintRect() const

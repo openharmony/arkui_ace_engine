@@ -19,6 +19,7 @@
 #include <cmath>
 #include <cstdint>
 #include <optional>
+#include <string>
 
 #include "base/error/error_code.h"
 #include "base/geometry/axis.h"
@@ -103,6 +104,10 @@ constexpr int32_t MIN_DUMP_VELOCITY_THRESHOLD = 500;
 constexpr float MAX_INDICATOR_VELOCITY = 1200.0f;
 constexpr Dimension DEFAULT_INDICATOR_HEAD_DISTANCE = 14.0_vp;
 
+constexpr char SWIPER_SCROLL_DIRECTION_FORWARD[] = "forward";
+constexpr char SWIPER_SCROLL_DIRECTION_BACKWARD[] = "backward";
+constexpr char SWIPER_SCROLL_DIRECTION_BIDIRECTIONAL[] = "bidirectional";
+
 MoveStep GetKeyMoveStep(const KeyEvent& event, Axis axis, bool isRtl)
 {
     if ((axis == Axis::HORIZONTAL && event.code == (isRtl ? KeyCode::KEY_DPAD_RIGHT : KeyCode::KEY_DPAD_LEFT)) ||
@@ -116,6 +121,60 @@ MoveStep GetKeyMoveStep(const KeyEvent& event, Axis axis, bool isRtl)
     return MoveStep::NONE;
 }
 } // namespace
+
+bool SwiperPattern::IsScrollAble(SmartGestureDirection direction) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pattern = host->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    SwiperUISessionAdapter adapter(pattern);
+    auto scrollAbility = adapter.GetScrollAbility();
+    if (strcmp(scrollAbility, SWIPER_SCROLL_DIRECTION_FORWARD) == 0) {
+        if (direction == SmartGestureDirection::FORWARD) {
+            return true;
+        }
+    }
+    if (strcmp(scrollAbility, SWIPER_SCROLL_DIRECTION_BACKWARD) == 0) {
+        if (direction == SmartGestureDirection::BACKWARD) {
+            return true;
+        }
+    }
+    if (strcmp(scrollAbility, SWIPER_SCROLL_DIRECTION_BIDIRECTIONAL) == 0) {
+        if (direction == SmartGestureDirection::FORWARD || direction == SmartGestureDirection::BACKWARD) {
+            return true;
+        }
+    }
+    return false;
+}
+
+std::optional<ScrollingConfig> SwiperPattern::GetDefaultScrollingConfig(SmartGestureDirection direction) const
+{
+    ScrollingConfig config;
+    config.count = 1;
+    config.direction = SmartGestureDirection::FORWARD;
+    return config;
+}
+
+void SwiperPattern::PerformScroll(const ScrollingConfig& config)
+{
+    if (!IsScrollAble(config.direction) || !config.HasValue()) {
+        return;
+    }
+    int32_t count = config.count.value();
+    int32_t totalCount = TotalCount();
+    if (totalCount < 1) {
+        return;
+    }
+    if (IsLoop() && count > totalCount) {
+        count = count % totalCount;
+    }
+    if (config.direction == SmartGestureDirection::FORWARD) {
+        ShowNextWithStep(false, count);
+    } else if (config.direction == SmartGestureDirection::BACKWARD) {
+        ShowPreviousWithStep(false, count);
+    }
+}
 
 SwiperPattern::SwiperPattern()
 {
@@ -2137,6 +2196,11 @@ int32_t SwiperPattern::CheckTargetIndex(int32_t targetIndex, bool isForceBackwar
 
 void SwiperPattern::ShowNext(bool needCheckWillScroll)
 {
+    ShowNextWithStep(needCheckWillScroll, std::nullopt);
+}
+
+void SwiperPattern::ShowNextWithStep(bool needCheckWillScroll, std::optional<int32_t> step)
+{
     if (IsVisibleChildrenSizeLessThanSwiper()) {
         return;
     }
@@ -2148,6 +2212,12 @@ void SwiperPattern::ShowNext(bool needCheckWillScroll)
     }
 
     auto stepItems = IsSwipeByGroup() ? displayCount : 1;
+    if (step.has_value()) {
+        if (step.value() <= 0) {
+            return;
+        }
+        stepItems = step.value();
+    }
     auto fromIndex = targetIndex_.value_or(currentIndex_);
     auto nextIndex = fromIndex + stepItems;
     if (fromIndex >= childrenSize - displayCount && !IsLoop()) {
@@ -2191,6 +2261,11 @@ void SwiperPattern::ShowNext(bool needCheckWillScroll)
 
 void SwiperPattern::ShowPrevious(bool needCheckWillScroll)
 {
+    ShowPreviousWithStep(needCheckWillScroll, std::nullopt);
+}
+
+void SwiperPattern::ShowPreviousWithStep(bool needCheckWillScroll, std::optional<int32_t> step)
+{
     if (IsVisibleChildrenSizeLessThanSwiper()) {
         return;
     }
@@ -2207,6 +2282,12 @@ void SwiperPattern::ShowPrevious(bool needCheckWillScroll)
     }
 
     auto stepItems = IsSwipeByGroup() ? displayCount : 1;
+    if (step.has_value()) {
+        if (step.value() <= 0) {
+            return;
+        }
+        stepItems = step.value();
+    }
     auto fromIndex = targetIndex_.value_or(currentIndex_);
     auto prevIndex = fromIndex - stepItems;
     if (fromIndex <= 0 && !IsLoop()) {

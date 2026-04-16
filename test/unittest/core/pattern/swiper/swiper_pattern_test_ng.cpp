@@ -2467,4 +2467,109 @@ HWTEST_F(SwiperPatternTestNg, CachedCountIndependent001, TestSize.Level1)
     pattern_->independent_ = true;
     EXPECT_EQ(pattern_->GetCachedCount(), 1);
 }
+
+/**
+ * @tc.name: SwiperIsScrollAble001
+ * @tc.desc: test IsScrollAble function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, SwiperIsScrollAble, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node.
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(1);
+    model.SetSwipeByGroup(false);
+    model.SetIndex(5);
+    CreateSwiperItems(10);
+    CreateSwiperDone();
+    /**
+     * @tc.steps: step2. Execute IsScrollAble function, return is the swiper scrollable.
+     * @tc.expected: If item count is less than display count, swiper can not scroll.
+     */
+    EXPECT_EQ(pattern_->IsScrollAble(SmartGestureDirection::FORWARD), true);
+    EXPECT_EQ(pattern_->IsScrollAble(SmartGestureDirection::BACKWARD), true);
+}
+
+/**
+ * @tc.name: GetDefaultScrollingConfig001
+ * @tc.desc: test GetDefaultScrollingConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, GetDefaultScrollingConfig001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node.
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    model.SetSwipeByGroup(false);
+    CreateSwiperItems(6);
+    CreateSwiperDone();
+    /**
+     * @tc.steps: step2. Get default scrolling config.
+     * @tc.expected: Default scrolling count is 1, default scroll directon is forward.
+     */
+    auto config = pattern_->GetDefaultScrollingConfig();
+    ASSERT_EQ(config->count.has_value(), true);
+    EXPECT_EQ(config->count.value(), 1);
+    EXPECT_EQ(config->direction, SmartGestureDirection::FORWARD);
+}
+
+/**
+ * @tc.name: SwiperPerformScroll001
+ * @tc.desc: test PerformScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, SwiperPerformScroll001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node.
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(1);
+    model.SetSwipeByGroup(false);
+    model.SetIndex(1);
+    CreateSwiperItems(6);
+    CreateSwiperDone();
+    /**
+     * @tc.steps: step2. Execute scroll with scrolling config.
+     * @tc.expected: Swiper scroll to 4.
+     */
+    auto config = pattern_->GetDefaultScrollingConfig();
+    config->count = 3;
+    config->direction = SmartGestureDirection::FORWARD;
+
+    pattern_->PerformScroll(config.value());
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 4);
+}
+
+/**
+ * @tc.name: SwiperPerformScroll002
+ * @tc.desc: test PerformScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, SwiperPerformScroll002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node.
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(1);
+    model.SetSwipeByGroup(true);
+    CreateSwiperItems(6);
+    model.SetIndex(4);
+    CreateSwiperDone();
+    /**
+     * @tc.steps: step2. Execute scroll with scrolling config.
+     * @tc.expected: Swiper scroll to 1.
+     */
+    auto config = pattern_->GetDefaultScrollingConfig();
+    config->count = 3;
+    config->direction = SmartGestureDirection::BACKWARD;
+
+    pattern_->PerformScroll(config.value());
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 1);
+}
 } // namespace OHOS::Ace::NG
