@@ -44,7 +44,6 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/page/page_component.h"
-#include "core/components/text_overlay/text_overlay_manager.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/event/visible_ratio_callback.h"
 #include "core/event/event_trigger.h"
@@ -78,6 +77,7 @@ class StageElement;
 class StackElement;
 class Window;
 class Animator;
+class TextOverlayManager;
 class ManagerInterface;
 class AccessibilityManager;
 class RenderContext;
@@ -744,15 +744,9 @@ public:
 
     void SetShortcutKey(const KeyEvent& event);
 
-    void SetTextOverlayManager(const RefPtr<TextOverlayManager>& textOverlayManager)
-    {
-        textOverlayManager_ = textOverlayManager;
-    }
+    void SetTextOverlayManager(const RefPtr<TextOverlayManager>& textOverlayManager);
 
-    RefPtr<TextOverlayManager> GetTextOverlayManager() const
-    {
-        return textOverlayManager_;
-    }
+    RefPtr<TextOverlayManager> GetTextOverlayManager() const;
 
     void SubscribeCtrlA(SubscribeCtrlACallback callback)
     {

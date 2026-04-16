@@ -23,7 +23,6 @@
 #include "core/components/common/layout/align_declaration.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
-#include "core/components/text_overlay/text_overlay_manager.h"
 
 namespace OHOS::Ace::V2 {
 
