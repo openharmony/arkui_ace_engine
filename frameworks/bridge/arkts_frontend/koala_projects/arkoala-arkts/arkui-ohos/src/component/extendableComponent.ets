@@ -60,6 +60,7 @@ export interface IExtendableComponent {
     getDialogController(): promptAction.DialogController | undefined;
     __removeChildWhenDispose__IExtendableComponent_Internal(): void;
     __addMeToParent__IExtendableComponent_Internal(): void;
+    __clearDelegate__Internal(): void;
     isViewActive(): boolean;
     setActiveInternal(active: boolean, isReuse: boolean): void;
     fireAboutToReuse(param?: RecordData): void;
@@ -121,8 +122,11 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
         this.ownedStateVariables_!.push(stateVariable);
     }
 
-    __clearStateVariables__Internal(): void {
+    __clearDelegate__Internal(): void {
         this.delegate_ = undefined;
+    }
+
+    __clearStateVariables__Internal(): void {
         if (!this.ownedStateVariables_?.length) {
             return;
         }
