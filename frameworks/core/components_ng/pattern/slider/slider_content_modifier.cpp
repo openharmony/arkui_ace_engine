@@ -15,7 +15,10 @@
 
 #include "core/components_ng/pattern/slider/slider_content_modifier.h"
 
+#include "core/components/common/properties/animation_option.h"
+#include "core/components_ng/pattern/slider/slider_paint_property.h"
 #include "core/components_ng/pattern/slider/slider_pattern.h"
+#include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/path_painter.h"
 

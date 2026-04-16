@@ -16,6 +16,7 @@
 
 #include "core/components/common/properties/ui_material.h"
 #include "core/components/theme/shadow_theme.h"
+#include "core/components/toast/toast_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
