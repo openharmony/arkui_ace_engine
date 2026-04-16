@@ -645,7 +645,7 @@ const std::string& WindowSceneLayoutManager::GetWindowName(TraverseInfo& info)
 
 std::string WindowSceneLayoutManager::GetWindowName(const RefPtr<FrameNode>& node)
 {
-    CHECK_NULL_RETURN(node, 0);
+    CHECK_NULL_RETURN(node, "");
     return GetWindowNameImpl(*node, node->GetWindowPatternType());
 }
 
