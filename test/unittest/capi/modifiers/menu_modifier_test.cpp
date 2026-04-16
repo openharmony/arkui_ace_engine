@@ -157,37 +157,17 @@ class MenuModifierTest : public ModifierTestBase<GENERATED_ArkUIMenuModifier,
 public:
     static void SetUpTestCase()
     {
-        MockPipelineContext::SetUp();
-        // assume using of test/mock/frameworks/core/common/mock_theme_constants.cpp in build
+        ModifierTestBase::SetUpTestCase();
+
         auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(nullptr);
         // set test values to Theme Pattern as data for the Theme building
-        auto themeStyle = AceType::MakeRefPtr<ThemeStyle>();
+        auto themeStyle = SetupThemeStyle("select_pattern");
         MockThemeStyle::GetInstance()->SetAttr("select_pattern", { .value = themeStyle });
-        themeConstants->LoadTheme(0);
-        auto selectTheme = SelectTheme::Builder().Build(themeConstants);
-        auto menuTheme = MenuTheme::Builder().Build(nullptr);
-        auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-        EXPECT_CALL(*themeManager, GetThemeConstants(testing::_, testing::_)).WillRepeatedly(Return(themeConstants));
-        auto getThemeMockFunc = [selectTheme, menuTheme](ThemeType type) -> RefPtr<Theme> {
-            if (type == SelectTheme::TypeId()) {
-                return selectTheme;
-            } else if (type == MenuTheme::TypeId()) {
-                return menuTheme;
-            }
-            return nullptr;
-        };
-        EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(getThemeMockFunc);
 
-        MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-        MockContainer::SetUp(MockPipelineContext::GetCurrent());
-        MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+        SetupTheme<SelectTheme>();
+        SetupTheme<MenuTheme>();
+
         AddResource(FAMILY_RES_ID, "aa.bb.cc");
-    }
-
-    static void TearDownTestCase()
-    {
-        MockPipelineContext::TearDown();
-        MockContainer::TearDown();
     }
 };
 

@@ -50,9 +50,132 @@ public:
     MOCK_METHOD0(UpdateCustomBackground, void());
     MOCK_METHOD1(SetSurfaceBufferOpaque, void(bool));
 
+    const RefPtr<NG::ChainedTransitionEffect> GetChainedTransitionEffect()
+    {
+        return chainedTransitionEffect_;
+    }
+
+    void SetVisible(bool visible) override
+    {
+        isVisible_ = visible;
+    }
+
+    void ResetBlendBgColor() override
+    {
+        blendColor_ = Color::TRANSPARENT;
+    }
+
+    void BlendBgColor(const Color& color) override
+    {
+        blendColor_ = color;
+    }
+
+    void UpdatePaintRect(const RectF& rect) override
+    {
+        paintRect_ = rect;
+    }
+
+    void SavePaintRect(bool isRound = true, uint16_t flag = 0) override
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto geometryNode = host->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        OnePixelRounding(flag);
+        UpdatePaintRect(RectF(geometryNode->GetPixelGridRoundOffset(), geometryNode->GetPixelGridRoundSize()));
+    }
+
+    void OnePixelRounding(uint16_t flag)
+    {
+        auto frameNode = GetHost();
+        CHECK_NULL_VOID(frameNode);
+        auto geometryNode = frameNode->GetGeometryNode();
+        float relativeLeft = geometryNode->GetFrameOffset().GetX();
+        float relativeTop = geometryNode->GetFrameOffset().GetY();
+        float nodeWidth = geometryNode->GetFrameSize().Width();
+        float nodeHeight = geometryNode->GetFrameSize().Height();
+        float roundToPixelErrorX = 0.0f;
+        float roundToPixelErrorY = 0.0f;
+        float absoluteRight = relativeLeft + nodeWidth;
+        float absoluteBottom = relativeTop + nodeHeight;
+        bool ceilLeft = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_START);
+        bool floorLeft = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_START);
+        bool noRoundLeft = flag & static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_START);
+        bool ceilTop = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_TOP);
+        bool floorTop = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_TOP);
+        bool noRoundTop = flag & static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_TOP);
+        bool ceilRight = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_END);
+        bool floorRight = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_END);
+        bool noRoundRight = flag & static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_END);
+        bool ceilBottom = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
+        bool floorBottom = flag & static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_BOTTOM);
+        bool noRoundBottom = flag & static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_BOTTOM);
+
+        float nodeLeftI = OnePixelValueRounding(relativeLeft, !noRoundLeft, ceilLeft, floorLeft);
+        float nodeTopI = OnePixelValueRounding(relativeTop, !noRoundTop, ceilTop, floorTop);
+        roundToPixelErrorX += nodeLeftI - relativeLeft;
+        roundToPixelErrorY += nodeTopI - relativeTop;
+        geometryNode->SetPixelGridRoundOffset(OffsetF(nodeLeftI, nodeTopI));
+
+        float nodeWidthI = OnePixelValueRounding(absoluteRight, !noRoundRight, ceilRight, floorRight) - nodeLeftI;
+        float nodeWidthTemp = OnePixelValueRounding(nodeWidth, !noRoundRight, ceilRight, floorRight);
+        roundToPixelErrorX += nodeWidthI - nodeWidth;
+        if (roundToPixelErrorX > 0.5f) {
+            nodeWidthI -= 1.0f;
+            roundToPixelErrorX -= 1.0f;
+        }
+        bool enableForceFloorX =
+            SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE && (floorLeft || floorRight);
+        if (roundToPixelErrorX < -0.5f && !enableForceFloorX) {
+            nodeWidthI += 1.0f;
+            roundToPixelErrorX += 1.0f;
+        }
+        if (nodeWidthI < nodeWidthTemp) {
+            roundToPixelErrorX += nodeWidthTemp - nodeWidthI;
+            nodeWidthI = nodeWidthTemp;
+        }
+
+        float nodeHeightI = OnePixelValueRounding(absoluteBottom, !noRoundBottom, ceilBottom, floorBottom) - nodeTopI;
+        float nodeHeightTemp = OnePixelValueRounding(nodeHeight, !noRoundBottom, ceilBottom, floorBottom);
+        roundToPixelErrorY += nodeHeightI - nodeHeight;
+        if (roundToPixelErrorY > 0.5f) {
+            nodeHeightI -= 1.0f;
+            roundToPixelErrorY -= 1.0f;
+        }
+        bool enableForceFloorY =
+            SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE && (floorTop || floorBottom);
+        if (roundToPixelErrorY < -0.5f && !enableForceFloorY) {
+            nodeHeightI += 1.0f;
+            roundToPixelErrorY += 1.0f;
+        }
+        if (nodeHeightI < nodeHeightTemp) {
+            roundToPixelErrorY += nodeHeightTemp - nodeHeightI;
+            nodeHeightI = nodeHeightTemp;
+        }
+        geometryNode->SetPixelGridRoundSize(SizeF(nodeWidthI, nodeHeightI));
+    }
+
     float OnePixelValueRounding(float value, bool isRound, bool forceCeil, bool forceFloor)
     {
-        return 0.0f;
+        float fractials = fmod(value, 1.0f);
+        if (fractials == 0.0f) {
+            return value;
+        }
+        if (fractials < 0.0f) {
+            ++fractials;
+        }
+        if (forceCeil) {
+            return (value - fractials + 1.0f);
+        } else if (forceFloor) {
+            return (value - fractials);
+        } else if (isRound) {
+            if (NearEqual(fractials, 1.0f) || GreatOrEqual(fractials, 0.5f)) {
+                return (value - fractials + 1.0f);
+            } else {
+                return (value - fractials);
+            }
+        }
+        return value;
     }
 
     RectF GetPaintRectWithTransform() override
@@ -83,13 +206,17 @@ public:
     void UpdateBackBlurStyle(
         const std::optional<BlurStyleOption>& bgBlurStyle, const SysOptions& sysOptions = SysOptions())
     {
-        (void)bgBlurStyle;
+        const auto& groupProperty = GetOrCreateBackground();
+        groupProperty->propBlurStyleOption = bgBlurStyle;
         sysOptions_ = sysOptions;
     }
 
     void UpdateBackBlur(const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions) override
     {
-        (void)radius;
+        const auto& groupProperty = GetOrCreateBackground();
+        groupProperty->propBlurRadius = radius;
+        // see ./components_ng/render/adapter/rosen_render_context.cpp
+        // RosenRenderContext::UpdateBackBlur
         backdropBlurOption = blurOption;
         sysOptions_ = sysOptions;
     }
@@ -97,20 +224,30 @@ public:
     void UpdateBackgroundEffect(
         const std::optional<EffectOption>& effectOption, const SysOptions& sysOptions = SysOptions())
     {
-        (void)effectOption;
+        const auto& groupProperty = GetOrCreateBackground();
+        groupProperty->propEffectOption = effectOption;
         sysOptions_ = sysOptions;
+    }
+
+    void OnUseEffectUpdate(bool useEffect) override
+    {
+        propUseEffect_ = useEffect;
     }
 
     void OnUseEffectTypeUpdate(EffectType effectType) override
     {
+        propUseEffectType_ = effectType;
     }
     void UpdateMotionBlur(const MotionBlurOption& motionBlurOption) override
     {
+        const auto& groupProperty = GetOrCreateForeground();
+        groupProperty->propMotionBlur = motionBlurOption;
     }
 
     void UpdateFrontBlur(const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions) override
     {
-        (void)radius;
+        const auto& groupProperty = GetOrCreateForeground();
+        groupProperty->propBlurRadius = radius;
         foregroundBlurOption = blurOption;
         sysOptions_ = sysOptions;
     }
@@ -130,9 +267,24 @@ public:
         return 0;
     }
 
+    void SetOpacityMultiplier(float opacity)
+    {
+        opacityMultiplier_ = opacity;
+    }
+
     bool HasDisappearTransition() const
     {
         return hasDisappearTransition_;
+    }
+
+    void SetTransitionOutCallback(std::function<void()>&& callback)
+    {
+        transitionOutCallback_ = std::move(callback);
+    }
+
+    void SetActualForegroundColor(const Color& value) override
+    {
+        actualForegroundColor_ = value;
     }
 
     size_t GetAnimationsCount() const override
@@ -150,14 +302,22 @@ public:
         return sysOptions_;
     }
 
+    bool isVisible_ = true;
     bool hasDisappearTransition_ = false;
     RectF rect_;
     RectF paintRect_;
-    BlurOption foregroundBlurOption;
+    Color blendColor_ = Color::TRANSPARENT;
+    RefPtr<AnimatablePropertyOffsetF> translateXY_;
+    float opacityMultiplier_ = 1.0f;
+    std::function<void()> transitionOutCallback_;
+    Color actualForegroundColor_;
+
     BlurOption backdropBlurOption;
+    BlurOption foregroundBlurOption;
     RefPtr<NG::ChainedTransitionEffect> chainedTransitionEffect_ = nullptr;
     TransitionFinishCallback transitionUserCallback_ = nullptr;
     std::optional<SysOptions> sysOptions_;
+private:
     size_t animationsCount_ = 0;
 };
 } // namespace OHOS::Ace::NG
