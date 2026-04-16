@@ -41,6 +41,10 @@ class ArkStackComponent extends ArkComponent implements StackAttribute {
     modifierWithKey(this._modifiersWithKeys, StackPointLightModifier.identity, StackPointLightModifier, value);
     return this;
   }
+  syncLoad(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, StackSyncLoadModifier.identity, StackSyncLoadModifier, value);
+    return this;
+  }
 }
 
 class StackPointLightModifier extends ModifierWithKey<PointLightStyle> {
@@ -99,6 +103,21 @@ class StackAlignContentModifier extends ModifierWithKey<number> {
     return this.stageValue !== this.value;
   }
 }
+
+class StackSyncLoadModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('stackSyncLoad');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().stack.resetStackSyncLoad(node);
+    } else {
+      getUINativeModule().stack.setStackSyncLoad(node, this.value);
+    }
+  }
+}
+
 // @ts-ignore
 globalThis.Stack.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {

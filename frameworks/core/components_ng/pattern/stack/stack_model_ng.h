@@ -32,8 +32,11 @@ public:
     void SetAlignment(Alignment align) override;
     void SetHasHeight() override {}
     void SetHasWidth() override {}
+    void SetSyncLoad(bool enable) override;
     static void SetAlignment(FrameNode* frameNode, Alignment align);
     static Alignment GetAlignment(FrameNode* frameNode);
+    static void SetSyncLoad(FrameNode* frameNode, bool enable);
+    static bool GetSyncLoad(FrameNode* frameNode);
 private:
     void Create() override;
 };

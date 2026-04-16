@@ -1815,6 +1815,8 @@
       "OHOS::Ace::NG::SpanNode::GetOrCreateSpanNode(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, int)";
       "OHOS::Ace::NG::SpanNode::RequestTextFlushDirty(bool)";
       "OHOS::Ace::NG::StackLayoutAlgorithm::Layout(OHOS::Ace::NG::LayoutWrapper*)";
+      "OHOS::Ace::NG::StackLayoutAlgorithm::IsAsyncLoadAvailable(OHOS::Ace::NG::LayoutWrapper*)";
+      "OHOS::Ace::NG::StackLayoutAlgorithm::MeasureInNextFrame() const";
       "OHOS::Ace::NG::StackLayoutAlgorithm::StackLayoutAlgorithm()";
       "OHOS::Ace::NG::StackPattern::CreateEventHub()";
       "OHOS::Ace::NG::StackPattern::DumpInfo()";

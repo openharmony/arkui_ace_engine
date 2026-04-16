@@ -82,6 +82,9 @@ export class ArkStackPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._StackAttribute_setPointLight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setSyncLoadAttribute(value: boolean): void {
+        ArkUIGeneratedNativeModule._StackAttribute_setSyncLoad(this.peer.ptr, value ? true : false)
+    }
 }
 export interface StackOptions {
     alignContent?: Alignment;
@@ -95,6 +98,9 @@ export interface StackAttribute extends CommonMethod {
     }
     pointLight(value: PointLightStyle | undefined): this {
         throw new Error('Unimplemented method pointLight')
+    }
+    syncLoad(value: boolean): this {
+        throw new Error('Unimplemented method syncLoad')
     }
     attributeModifier(value: AttributeModifier<StackAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error('Unimplemented method attributeModifier')
@@ -119,6 +125,11 @@ export class ArkStackComponent extends ArkCommonMethodComponent implements Stack
     public pointLight(value: PointLightStyle | undefined): this {
         const value_casted = value as (PointLightStyle | undefined)
         this.getPeer()?.setPointLightAttribute(value_casted)
+        return this
+    }
+    public syncLoad(value: boolean): this {
+        const value_casted = value as (boolean)
+        this.getPeer()?.setSyncLoadAttribute(value_casted)
         return this
     }
     public attributeModifier(value: AttributeModifier<StackAttribute> | AttributeModifier<CommonMethod> | undefined): this {

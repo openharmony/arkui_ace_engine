@@ -72,4 +72,10 @@ void BoxLayoutAlgorithm::CalcSingleSideMarginFrame(
     (void)maxWidth;
     (void)maxHeight;
 }
+
+bool BoxLayoutAlgorithm::IsAsyncLoadAvailable(LayoutWrapper* layoutWrapper)
+{
+    (void)layoutWrapper;
+    return false;
+}
 } // namespace OHOS::Ace::NG

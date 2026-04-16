@@ -34,7 +34,12 @@ void BoxLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto pattern = host->GetPattern();
     CHECK_NULL_VOID(pattern);
     bool isEnableChildrenMatchParent = pattern->IsEnableChildrenMatchParent();
+    bool isAsyncLoadAvailable = IsAsyncLoadAvailable(layoutWrapper);
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        if (isAsyncLoadAvailable && layoutWrapper->ReachResponseDeadline()) {
+            measureInNextFrame_ = true;
+            break;
+        }
         auto childLayoutProperty = child->GetLayoutProperty();
         CHECK_NULL_CONTINUE(childLayoutProperty);
         auto layoutPolicy = childLayoutProperty->GetLayoutPolicyProperty();
@@ -47,6 +52,9 @@ void BoxLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         child->Measure(layoutConstraint);
     }
     PerformMeasureSelf(layoutWrapper, isEnableChildrenMatchParent);
+    if (MeasureInNextFrame()) {
+        return;
+    }
     if (isEnableChildrenMatchParent) {
         auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
         MeasureAdaptiveLayoutChildren(layoutWrapper, frameSize);
@@ -331,5 +339,10 @@ Alignment BoxLayoutAlgorithm::MapLocalizedToAlignment(std::string localizedAlign
         return it->second;
     }
     return Alignment::CENTER;
+}
+
+bool BoxLayoutAlgorithm::IsAsyncLoadAvailable(LayoutWrapper* layoutWrapper)
+{
+    return false;
 }
 } // namespace OHOS::Ace::NG

@@ -30,6 +30,7 @@ public:
     void SetAlignment(Alignment align) override;
     void SetHasHeight() override;
     void SetHasWidth() override;
+    void SetSyncLoad(bool enable) override {}
 };
 
 } // namespace OHOS::Ace::Framework

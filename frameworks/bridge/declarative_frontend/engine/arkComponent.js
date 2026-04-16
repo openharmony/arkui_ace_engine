@@ -11218,6 +11218,10 @@ class ArkStackComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, StackPointLightModifier.identity, StackPointLightModifier, value);
     return this;
   }
+  syncLoad(value) {
+    modifierWithKey(this._modifiersWithKeys, StackSyncLoadModifier.identity, StackSyncLoadModifier, value);
+    return this;
+  }
 }
 class StackPointLightModifier extends ModifierWithKey {
   constructor(value) {
@@ -11275,6 +11279,19 @@ class StackAlignContentModifier extends ModifierWithKey {
   }
 }
 StackAlignContentModifier.identity = Symbol('stackAlignContent');
+class StackSyncLoadModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().stack.resetSyncLoad(node);
+    } else {
+      getUINativeModule().stack.setSyncLoad(node, this.value);
+    }
+  }
+}
+StackSyncLoadModifier.identity = Symbol('stackSyncLoad');
 // @ts-ignore
 if (globalThis.Stack !== undefined) {
   globalThis.Stack.attributeModifier = function (modifier) {

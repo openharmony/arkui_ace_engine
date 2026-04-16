@@ -101,4 +101,23 @@ NG::OffsetF StackLayoutAlgorithm::CalculateStackAlignment(
     offset.SetY((1.0 + alignment.GetVertical()) * (parentSize.Height() - childSize.Height()) / 2.0);
     return offset;
 }
+
+bool StackLayoutAlgorithm::IsAsyncLoadAvailable(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_RETURN(layoutWrapper, false);
+    const auto& layoutProperty = AceType::DynamicCast<StackLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto syncLoad = layoutProperty->GetSyncLoad().value_or(true);
+    const auto& layoutConstraint = layoutProperty->GetLayoutConstraint();
+    if (syncLoad || !layoutConstraint.has_value()) {
+        return false;
+    }
+    auto idealSize = layoutConstraint.value().selfIdealSize;
+    return idealSize.IsValid();
+}
+
+bool StackLayoutAlgorithm::MeasureInNextFrame() const
+{
+    return measureInNextFrame_;
+}
 } // namespace OHOS::Ace::NG
