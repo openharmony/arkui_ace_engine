@@ -33,6 +33,7 @@
 
 namespace OHOS::Ace::NG {
 constexpr uint8_t TOTAL_COUNT = 3;
+constexpr float CALENDAR_PICKER_TEXT_MAX_SCALE = 1.45f;
 void CalendarPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -481,8 +482,11 @@ void CalendarPattern::UpdateTitleNode()
         textLayoutProperty->UpdateFontSize(fontSize);
     } else {
         textLayoutProperty->UpdateMaxLines(2);
-        fontSizeScale = fontSizeScale > theme->GetCalendarPickerLargerScale() ? theme->GetCalendarPickerLargerScale()
-                                                                              : fontSizeScale;
+        const bool skipDialogDayGridAging = host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
+            CalendarUtils::SkipCalendarPickerDayGridAgingAdapt(pipelineContext);
+        auto maxTextScale = skipDialogDayGridAging ?
+            CALENDAR_PICKER_TEXT_MAX_SCALE : theme->GetCalendarPickerLargerScale();
+        fontSizeScale = fontSizeScale > maxTextScale ? maxTextScale : fontSizeScale;
         textLayoutProperty->UpdateFontSize(fontSize * fontSizeScale);
     }
 

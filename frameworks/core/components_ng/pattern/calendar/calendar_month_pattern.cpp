@@ -24,10 +24,9 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/calendar/calendar_paint_method.h"
-#include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
+#include "core/components_ng/pattern/calendar/calendar_utils.h"
 #include "core/components/slider/slider_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/components_ng/pattern/calendar/calendar_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -133,8 +132,14 @@ CalendarMonthPattern::~CalendarMonthPattern()
 
 Dimension CalendarMonthPattern::GetDaySize(const RefPtr<CalendarTheme>& theme)
 {
-    auto pipeline = GetHost()->GetContext();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, theme->GetCalendarPickerDayWidthOrHeight());
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, theme->GetCalendarPickerDayWidthOrHeight());
+    if (IsCalendarDialog() && host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
+        CalendarUtils::SkipCalendarPickerDayGridAgingAdapt(pipeline)) {
+        return theme->GetCalendarPickerDayWidthOrHeight();
+    }
     auto fontSizeScale = pipeline->GetFontScale();
 #ifndef ARKUI_WEARABLE
     if (fontSizeScale < theme->GetCalendarPickerLargeScale() || CalendarUtils::CheckOrientationChange()) {
@@ -149,8 +154,14 @@ Dimension CalendarMonthPattern::GetDaySize(const RefPtr<CalendarTheme>& theme)
 
 bool CalendarMonthPattern::IsLargeSize(const RefPtr<CalendarTheme>& theme)
 {
-    auto pipeline = GetHost()->GetContext();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
+    if (IsCalendarDialog() && host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
+        CalendarUtils::SkipCalendarPickerDayGridAgingAdapt(pipeline)) {
+        return false;
+    }
     auto fontSizeScale = pipeline->GetFontScale();
 #ifndef ARKUI_WEARABLE
     if ((fontSizeScale < theme->GetCalendarPickerLargeScale() || CalendarUtils::CheckOrientationChange())

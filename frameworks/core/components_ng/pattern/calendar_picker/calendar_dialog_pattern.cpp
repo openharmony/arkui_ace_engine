@@ -1399,7 +1399,11 @@ void CalendarDialogPattern::OnLanguageConfigurationUpdate()
             ACE_UPDATE_NODE_PAINT_PROPERTY(
                 CalendarPaintProperty, WeekFontSize, theme->GetCalendarSmallDayFontSize(), monthFrameNode);
         } else {
-            if (fontSizeScale < theme->GetCalendarPickerLargeScale() || CalendarDialogView::CheckOrientationChange()) {
+            const bool skipDialogDayGridAging =
+                monthFrameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
+                CalendarDialogView::SkipCalendarPickerDayGridAgingAdapt(pipelineContext);
+            if (fontSizeScale < theme->GetCalendarPickerLargeScale() || CalendarDialogView::CheckOrientationChange() ||
+                skipDialogDayGridAging) {
                 ACE_UPDATE_NODE_PAINT_PROPERTY(CalendarPaintProperty, WeekFontSize, fontSize, monthFrameNode);
             } else {
                 fontSizeScale = fontSizeScale > theme->GetCalendarPickerLargerScale()

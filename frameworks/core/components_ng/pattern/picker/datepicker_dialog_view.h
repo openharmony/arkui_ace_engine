@@ -66,8 +66,8 @@ public:
     static RefPtr<FrameNode> CreateTimeNode(std::map<std::string, PickerTime> timePickerProperty,
         const PickerTextProperties& properties, bool useMilitaryTime);
     static RefPtr<FrameNode> CreateLunarSwitchTextNode();
-    static const Dimension ConvertFontScaleValue(
-        const Dimension& fontSizeValue, const Dimension& fontSizeLimit = 0.0_vp, bool isUserSetFont = false);
+    static const Dimension ConvertFontScaleValue(const Dimension& fontSizeValue,
+        const Dimension& fontSizeLimit = 0.0_vp, bool isUserSetFont = false, bool skipOptimizeFlag = false);
 
     static bool switchFlag_;
 
@@ -143,7 +143,7 @@ private:
         const RefPtr<FrameNode> &dateNode, const RefPtr<FrameNode> &dialogNode,
         const RefPtr<FrameNode> &contentColumn, std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
-    static bool NeedAdaptForAging();
+    static bool NeedAdaptForAging(bool skipOptimizeFlag = false);
     static RefPtr<FrameNode> CreateButtonNodeForAging(const DatePickerSettingData& settingData,
         const RefPtr<FrameNode>& timePickerNode, const RefPtr<FrameNode>& monthAndDayNode,
         const RefPtr<FrameNode>& datePickerNode, const std::vector<ButtonInfo>& buttonInfos,
