@@ -924,7 +924,12 @@ bool AceContainer::OnBackPressed(int32_t instanceId)
                 TAG_LOGI(AceLogTag::ACE_UIEVENT, "subwindow consumed backpressed event");
                 return true;
             }
-            instanceId = SubwindowManager::GetInstance()->GetParentContainerId(instanceId);
+            auto parentInstanceId = SubwindowManager::GetInstance()->GetParentContainerId(instanceId);
+            if (RemoveOverlayBySubwindowManager(parentInstanceId)) {
+                TAG_LOGI(AceLogTag::ACE_UIEVENT, "subwindow consumed backpressed event");
+                return true;
+            }
+            return false;
         } else {
             SubwindowManager::GetInstance()->CloseMenu();
             TAG_LOGI(AceLogTag::ACE_UIEVENT, "Menu consumed backpressed event");
