@@ -1685,6 +1685,16 @@ void ViewAbstractModelStatic::SetPixelStretchEffect(FrameNode* frameNode,
     }
 }
 
+void ViewAbstractModelStatic::SetSpatialEffect(FrameNode* frameNode, const std::optional<SpatialEffectParams>& params)
+{
+    if (params.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(SpatialEffect, params.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, SpatialEffect, frameNode);
+    }
+}
+
 void ViewAbstractModelStatic::SetBlendApplyType(
     FrameNode* frameNode, const std::optional<BlendApplyType>& blendApplyType)
 {

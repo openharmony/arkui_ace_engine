@@ -134,7 +134,10 @@ ace_unittest("view_abstract_model_test_ng") {
 ace_unittest("view_abstract_model_static_test_ng") {
   module_name = "DialogSet-Menu"
   type = "new"
-  sources = [ "view_abstract_model_static_test_two_ng.cpp" ]
+  sources = [
+    "view_abstract_model_static_test_two_ng.cpp",
+    "view_abstract_spatial_effect_test_ng.cpp",
+  ]
 }
 
 ace_unittest("short_cuts_little_test_ng") {

@@ -2667,6 +2667,8 @@ typedef struct Ark_SliderShowStepOptions Ark_SliderShowStepOptions;
 typedef struct Opt_SliderShowStepOptions Opt_SliderShowStepOptions;
 typedef struct Ark_SnapshotOptions Ark_SnapshotOptions;
 typedef struct Opt_SnapshotOptions Opt_SnapshotOptions;
+typedef struct Ark_SpatialPosition Ark_SpatialPosition;
+typedef struct Opt_SpatialPosition Opt_SpatialPosition;
 typedef struct Ark_SslErrorEvent Ark_SslErrorEvent;
 typedef struct Opt_SslErrorEvent Opt_SslErrorEvent;
 typedef struct Ark_StackOptions Ark_StackOptions;
@@ -3165,6 +3167,8 @@ typedef struct Ark_SliderSuffixOptions Ark_SliderSuffixOptions;
 typedef struct Opt_SliderSuffixOptions Opt_SliderSuffixOptions;
 typedef struct Ark_SpanStyle Ark_SpanStyle;
 typedef struct Opt_SpanStyle Opt_SpanStyle;
+typedef struct Ark_SpatialEffectParams Ark_SpatialEffectParams;
+typedef struct Opt_SpatialEffectParams Opt_SpatialEffectParams;
 typedef struct Ark_StarStyleOptions Ark_StarStyleOptions;
 typedef struct Opt_StarStyleOptions Opt_StarStyleOptions;
 typedef struct Ark_StyledStringChangeValue Ark_StyledStringChangeValue;
@@ -17643,6 +17647,17 @@ typedef struct Opt_SnapshotOptions {
     Ark_Tag tag;
     Ark_SnapshotOptions value;
 } Opt_SnapshotOptions;
+typedef struct Ark_SpatialPosition {
+    /* kind: Interface */
+    Ark_DepthVector3 leftTop;
+    Ark_DepthVector3 rightTop;
+    Ark_DepthVector3 leftBottom;
+    Ark_DepthVector3 rightBottom;
+} Ark_SpatialPosition;
+typedef struct Opt_SpatialPosition {
+    Ark_Tag tag;
+    Ark_SpatialPosition value;
+} Opt_SpatialPosition;
 typedef struct Ark_SslErrorEvent {
     /* kind: Interface */
     Ark_SslErrorHandler handler;
@@ -20461,6 +20476,15 @@ typedef struct Opt_SpanStyle {
     Ark_Tag tag;
     Ark_SpanStyle value;
 } Opt_SpanStyle;
+typedef struct Ark_SpatialEffectParams {
+    /* kind: Interface */
+    Ark_SpatialPosition position;
+    Opt_Float64 occlusionWeight;
+} Ark_SpatialEffectParams;
+typedef struct Opt_SpatialEffectParams {
+    Ark_Tag tag;
+    Ark_SpatialEffectParams value;
+} Opt_SpatialEffectParams;
 typedef struct Ark_StarStyleOptions {
     /* kind: Interface */
     Opt_ResourceStr backgroundUri;
@@ -24610,6 +24634,8 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                                const Opt_Float64* value);
     void (*setLightUpEffect)(Ark_NativePointer node,
                              const Opt_Float64* value);
+    void (*setSpatialEffect)(Ark_NativePointer node,
+                             const Opt_SpatialEffectParams* value);
     void (*setPixelStretchEffect)(Ark_NativePointer node,
                                   const Opt_PixelStretchEffectOptions* value);
     void (*setAccessibilityNextFocusId)(Ark_NativePointer node,

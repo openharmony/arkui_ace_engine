@@ -355,6 +355,7 @@ public:
     static void SetLightUpEffect(FrameNode* frameNode, const std::optional<double> radio);
     static void SetPixelStretchEffect(FrameNode* frameNode,
         const std::optional<PixStretchEffectOption>& option);
+    static void SetSpatialEffect(FrameNode* frameNode, const std::optional<SpatialEffectParams>& params);
     static void SetBlendApplyType(FrameNode* frameNode, const std::optional<BlendApplyType>& blendApplyType);
     static void SetPrivacySensitive(FrameNode* frameNode, const std::optional<bool>& flag);
     static void SetOnTouchTestFunc(FrameNode* frameNode, NG::OnChildTouchTestFunc&& onChildTouchTest);

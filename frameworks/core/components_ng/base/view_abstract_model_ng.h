@@ -283,6 +283,10 @@ public:
     {
         ViewAbstract::SetPixelStretchEffect(option);
     }
+    void SetSpatialEffect(const std::optional<SpatialEffectParams>& params) override
+    {
+        ViewAbstract::SetSpatialEffect(params);
+    }
     void SetLightUpEffect(double radio) override
     {
         ViewAbstract::SetLightUpEffect(radio);

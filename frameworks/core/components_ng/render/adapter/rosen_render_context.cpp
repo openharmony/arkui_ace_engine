@@ -1641,6 +1641,26 @@ void RosenRenderContext::OnPixelStretchEffectUpdate(const PixStretchEffectOption
     RequestNextFrame();
 }
 
+void RosenRenderContext::OnSpatialEffectUpdate(const SpatialEffectParams& params)
+{
+    FREE_RS_CONTEXT_CHECK(OnSpatialEffectUpdate, params);
+    CHECK_NULL_VOID(rsNode_);
+    std::shared_ptr<Rosen::SpatialEffectPara> spatialEffect;
+    if (params.position.has_value()) {
+        spatialEffect = std::make_shared<Rosen::SpatialEffectPara>();
+        const auto& position = params.position.value();
+        spatialEffect->leftTop = Rosen::Vector3f { position.leftTop.x, position.leftTop.y, position.leftTop.z };
+        spatialEffect->rightTop = Rosen::Vector3f { position.rightTop.x, position.rightTop.y, position.rightTop.z };
+        spatialEffect->leftBottom =
+            Rosen::Vector3f { position.leftBottom.x, position.leftBottom.y, position.leftBottom.z };
+        spatialEffect->rightBottom =
+            Rosen::Vector3f { position.rightBottom.x, position.rightBottom.y, position.rightBottom.z };
+        spatialEffect->occlusionWeight = params.occlusionWeight;
+    }
+    rsNode_->SetSpatialEffectPara(spatialEffect);
+    RequestNextFrame();
+}
+
 void RosenRenderContext::OnLightUpEffectUpdate(double radio)
 {
     FREE_RS_CONTEXT_CHECK(OnLightUpEffectUpdate, radio);

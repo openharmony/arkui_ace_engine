@@ -29,6 +29,7 @@
 #include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/blend_mode.h"
+#include "core/components/common/properties/depth_option.h"
 #include "core/components/common/properties/popup_param.h"
 #include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/base/modifier.h"
@@ -582,6 +583,9 @@ public:
     virtual void CreateWithResourceObj(const RefPtr<NG::FrameNode>& frameNode,
         const RefPtr<ResourceObject>& resourceObj, const PopupOptionsType& type) = 0;
     virtual void AllowForceDark(bool forceDarkAllowed) {};
+
+    // depth space
+    virtual void SetSpatialEffect(const std::optional<SpatialEffectParams>& params) {};
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_ABSTRACT_MODEL_H

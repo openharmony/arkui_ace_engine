@@ -1075,6 +1075,19 @@ void ViewAbstract::SetPixelStretchEffect(PixStretchEffectOption& option)
     ACE_UPDATE_RENDER_CONTEXT(PixelStretchEffect, option);
 }
 
+void ViewAbstract::SetSpatialEffect(const std::optional<SpatialEffectParams>& params)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+
+    if (params.has_value()) {
+        ACE_UPDATE_RENDER_CONTEXT(SpatialEffect, params.value());
+        return;
+    }
+    ACE_RESET_RENDER_CONTEXT(RenderContext, SpatialEffect);
+}
+
 void ViewAbstract::SetLightUpEffect(double radio)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -7396,6 +7409,16 @@ void ViewAbstract::SetPixelStretchEffect(FrameNode* frameNode, PixStretchEffectO
     ACE_UPDATE_NODE_RENDER_CONTEXT(PixelStretchEffect, option, frameNode);
 }
 
+void ViewAbstract::SetSpatialEffect(FrameNode* frameNode, const std::optional<SpatialEffectParams>& params)
+{
+    if (params.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(SpatialEffect, params.value(), frameNode);
+        return;
+    }
+    auto target = frameNode->GetRenderContext();
+    ACE_RESET_NODE_RENDER_CONTEXT(target, SpatialEffect, frameNode);
+}
+ 
 void ViewAbstract::SetLightUpEffect(FrameNode* frameNode, double radio)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(LightUpEffect, radio, frameNode);
