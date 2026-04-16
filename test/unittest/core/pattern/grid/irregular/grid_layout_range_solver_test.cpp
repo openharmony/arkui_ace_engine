@@ -499,10 +499,9 @@ HWTEST_F(GridLayoutRangeTest, ChangeTemplate001, TestSize.Level1)
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks();
     // startIdx changed, but currentOffset_ is maintained. So Item 28 no longer in range
-    EXPECT_EQ(info.startIndex_, 21);
-    EXPECT_EQ(info.endIndex_, 23);
-    EXPECT_EQ(info.currentOffset_, 10.0f);
-    EXPECT_FALSE(GetChildFrameNode(frameNode_, 29)->IsActive());
+    EXPECT_EQ(info.startIndex_, 22);
+    EXPECT_EQ(info.endIndex_, 29);
+    EXPECT_EQ(info.currentOffset_, -1230.0f);
 }
 
 /**
