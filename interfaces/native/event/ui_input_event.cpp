@@ -14,6 +14,7 @@
  */
 
 #include "interfaces/native/event/ui_input_event_impl.h"
+#include "interfaces/native/error_message_macros.h"
 
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
@@ -6152,13 +6153,10 @@ float OH_ArkUI_TouchTestInfoItem_GetYRelativeToParent(const ArkUI_TouchTestInfoI
 
 ArkUI_ErrorCode OH_ArkUI_TouchTestInfoItem_GetChildRect(const ArkUI_TouchTestInfoItem* info, ArkUI_Rect* childRect)
 {
-    if (!info || !childRect) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(info && childRect, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "null params");
     auto* touchTestInfoItem = reinterpret_cast<const ArkUITouchTestInfoItem*>(info);
-    if (!touchTestInfoItem) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(touchTestInfoItem,
+        ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "touchTestInfoItem is null");
     auto rect = touchTestInfoItem->rect;
     childRect->height = rect.height;
     childRect->width = rect.width;
@@ -6170,18 +6168,15 @@ ArkUI_ErrorCode OH_ArkUI_TouchTestInfoItem_GetChildRect(const ArkUI_TouchTestInf
 ArkUI_ErrorCode OH_ArkUI_TouchTestInfoItem_GetChildId(
     const ArkUI_TouchTestInfoItem* info, char* buffer, int32_t bufferSize)
 {
-    if (!info || !buffer || bufferSize <= 0) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(info && buffer && bufferSize > 0,
+        ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "null params or invalid buffer");
     auto* touchTestInfoItem = reinterpret_cast<const ArkUITouchTestInfoItem*>(info);
-    if (!touchTestInfoItem) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(touchTestInfoItem,
+        ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "touchTestInfoItem is null");
     const std::string childId(touchTestInfoItem->id);
     int32_t srcLength = static_cast<int32_t>(childId.length());
-    if (srcLength >= bufferSize) {
-        return ARKUI_ERROR_CODE_BUFFER_SIZE_NOT_ENOUGH;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(srcLength < bufferSize,
+        ARKUI_ERROR_CODE_BUFFER_SIZE_NOT_ENOUGH, __FUNCTION__, "buffer size insufficient");
     childId.copy(buffer, srcLength);
     buffer[srcLength] = '\0';
     return ARKUI_ERROR_CODE_NO_ERROR;
@@ -6190,30 +6185,24 @@ ArkUI_ErrorCode OH_ArkUI_TouchTestInfoItem_GetChildId(
 ArkUI_ErrorCode OH_ArkUI_TouchTestInfo_SetTouchResultStrategy(
     ArkUI_TouchTestInfo* info, ArkUI_TouchTestStrategy strategy)
 {
-    if (!info) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(info, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "info is null");
     auto* touchTestInfo = reinterpret_cast<ArkUITouchTestInfo*>(info);
-    if (!touchTestInfo) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
-    if (static_cast<ArkUITouchTestStrategy>(strategy) < ArkUITouchTestStrategy::TOUCH_TEST_STRATEGY_DEFAULT ||
-        static_cast<ArkUITouchTestStrategy>(strategy) > ArkUITouchTestStrategy::TOUCH_TEST_STRATEGY_FORWARD) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(touchTestInfo,
+        ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "touchTestInfo is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        static_cast<ArkUITouchTestStrategy>(strategy) >= ArkUITouchTestStrategy::TOUCH_TEST_STRATEGY_DEFAULT &&
+        static_cast<ArkUITouchTestStrategy>(strategy) <= ArkUITouchTestStrategy::TOUCH_TEST_STRATEGY_FORWARD,
+        ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "strategy out of range");
     touchTestInfo->strategy = static_cast<ArkUITouchTestStrategy>(strategy);
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
 ArkUI_ErrorCode OH_ArkUI_TouchTestInfo_SetTouchResultId(ArkUI_TouchTestInfo* info, const char* id)
 {
-    if (!info || !id) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(info && id, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "null params");
     auto* touchTestInfo = reinterpret_cast<ArkUITouchTestInfo*>(info);
-    if (!touchTestInfo) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(touchTestInfo,
+        ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "touchTestInfo is null");
     std::string srcId(id);
     const size_t srcLen = srcId.length();
     const size_t requiredSize = srcLen + 1;
@@ -6222,9 +6211,8 @@ ArkUI_ErrorCode OH_ArkUI_TouchTestInfo_SetTouchResultId(ArkUI_TouchTestInfo* inf
         touchTestInfo->resultId = nullptr;
     }
     touchTestInfo->resultId = new (std::nothrow) char[requiredSize];
-    if (!touchTestInfo->resultId) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(touchTestInfo->resultId,
+        ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "alloc failed");
     srcId.copy(touchTestInfo->resultId, srcLen);
     touchTestInfo->resultId[srcLen] = '\0';
     return ARKUI_ERROR_CODE_NO_ERROR;
@@ -6301,6 +6289,7 @@ ArkUI_CrownEvent_Action OH_ArkUI_DigitalCrownEvent_GetAction(const ArkUI_UIInput
     CheckSupportedScenarioAndResetEventStatus(S_NODE_ON_DIGITAL_CROWN, event);
     ArkUI_CrownEvent_Action crownEventAction = ArkUI_CrownEvent_Action::ARKUI_CROWNEVENT_ACTION_UNKNOWN;
     if (!event) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "event is null");
         RETURN_RET_WITH_STATUS_CHECK(crownEventAction, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
     switch (event->eventTypeId) {
@@ -6313,8 +6302,10 @@ ArkUI_CrownEvent_Action OH_ArkUI_DigitalCrownEvent_GetAction(const ArkUI_UIInput
             break;
         }
         default:
+            SET_ERROR_MESSAGE(ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT, __FUNCTION__, "event type not supported");
             RETURN_RET_WITH_STATUS_CHECK(crownEventAction, ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
     }
+    SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "event is invalid");
     RETURN_RET_WITH_STATUS_CHECK(crownEventAction, ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
@@ -6322,6 +6313,7 @@ ArkUI_ErrorCode OH_ArkUI_DigitalCrownEvent_SetStopPropagation(const ArkUI_UIInpu
 {
     CheckSupportedScenarioAndResetEventStatus(S_NODE_ON_DIGITAL_CROWN, event);
     if (!event) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "event is null");
         RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
     switch (event->eventTypeId) {
@@ -6334,9 +6326,11 @@ ArkUI_ErrorCode OH_ArkUI_DigitalCrownEvent_SetStopPropagation(const ArkUI_UIInpu
             break;
         }
         default:
+            SET_ERROR_MESSAGE(ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT, __FUNCTION__, "event type not supported");
             RETURN_RET_WITH_STATUS_CHECK(
                 ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT, ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
     }
+    SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "event is invalid");
     RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 #ifdef __cplusplus
