@@ -9487,7 +9487,7 @@ bool WebPattern::OnAccessibilityChildTreeDeregister()
     CHECK_NULL_RETURN(accessibilityManager, false);
     if (treeId_ == 0) {
         TAG_LOGD(AceLogTag::ACE_WEB, "OnAccessibilityChildTreeDeregister: treeId is 0.");
-        return false;
+        return true;
     }
     return accessibilityManager->DeregisterWebInteractionOperationAsChildTree(treeId_, WeakClaim(this));
 }
