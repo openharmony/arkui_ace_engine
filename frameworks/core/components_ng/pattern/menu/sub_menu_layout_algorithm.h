@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_MENU_SUB_MENU_LAYOUT_ALGORITHM_H
 
 #include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
+#include "core/components_ng/pattern/menu/menu_layout_property.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT SubMenuLayoutAlgorithm : public MenuLayoutAlgorithm {

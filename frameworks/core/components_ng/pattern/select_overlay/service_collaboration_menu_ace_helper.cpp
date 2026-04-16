@@ -29,6 +29,7 @@
 #include "base/utils/system_properties.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/select/select_theme.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components/divider/divider_theme.h"
 #include "core/components/theme/shadow_theme.h"

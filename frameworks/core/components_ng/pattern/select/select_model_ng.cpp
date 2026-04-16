@@ -22,6 +22,8 @@
 #include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_view_inner_modifier.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/select/select_layout_property.h"
+#include "core/components_ng/pattern/select/select_paint_property.h"
+#include "core/components_ng/pattern/select/select_pattern.h"
 #include "core/interfaces/native/node/menu_modifier.h"
 
 namespace OHOS::Ace::NG {
