@@ -14,6 +14,7 @@
  */
 
 import { TouchEvent } from './component/common'
+import { CompetitionStrategy } from './component/enums'
 import { Size } from "./Graphics"
 import { UIContext } from "@ohos/arkui/UIContext"
 import { Finalizable, InteropNativeModule, KPointer, loadNativeModuleLibrary, nullptr, pointer, InteropNativeModule } from "@koalaui/interop"
@@ -218,6 +219,10 @@ export class ReactiveBuilderNode {
 
     public postInputEvent(event: InputEventType): boolean {
         let ret = this._JSBuilderNode.postInputEvent(event);
+        return ret;
+    }
+    public postInputEventWithStrategy(event: InputEventType, competitionStrategy?: CompetitionStrategy): boolean {
+        let ret = this._JSBuilderNode.postInputEventWithStrategy(event, competitionStrategy);
         return ret;
     }
     public getNodeWithoutProxy(): pointer | undefined {

@@ -28469,6 +28469,9 @@ typedef struct GENERATED_ArkUIBuilderNodeOpsAccessor {
                                   const Ark_TouchEventProxy* event);
     Ark_Boolean (*postInputEvent)(Ark_BuilderNodeOps peer,
                                   const Opt_InputEventType* event);
+    Ark_Boolean (*postInputEventWithStrategy)(Ark_BuilderNodeOps peer,
+                                              const Opt_InputEventType* event,
+                                              const Opt_CompetitionStrategy* competitionStrategy);
     Ark_NativePointer (*setRootFrameNodeInBuilderNode)(Ark_BuilderNodeOps peer,
                                                        Ark_NativePointer node);
 } GENERATED_ArkUIBuilderNodeOpsAccessor;

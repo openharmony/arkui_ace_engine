@@ -62,6 +62,10 @@ export enum ImageFit {
     BOTTOM_END = 15,
     MATRIX = 16
 }
+export enum CompetitionStrategy {
+    DEFAULT = 0,
+    COMPETITION = 1
+}
 export enum BorderStyle {
     Dotted = 2,
     Dashed = 1,

@@ -3872,6 +3872,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _BuilderNodeOps_postInputEvent(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): boolean
     @ani.unsafe.Direct
+    native static _BuilderNodeOps_postInputEventWithStrategy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): boolean
+    @ani.unsafe.Direct
     native static _BuilderNodeOps_setRootFrameNodeInBuilderNode(ptr: KPointer, node: KPointer): KPointer
     @ani.unsafe.Direct
     native static _CalendarPickerDialog_construct(): KPointer
