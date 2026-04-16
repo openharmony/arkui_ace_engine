@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-  <path d="M100 10 C155 10 190 50 190 100 C190 150 155 190 100 190 C45 190 10 150 10 100 C10 50 45 10 100 10Z M100 50 C70 50 50 70 50 100 C50 130 70 150 100 150 C130 150 150 130 150 100 C150 70 130 50 100 50Z" fill="#3F51B5">
-    <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="6s" repeatCount="indefinite"/>
-  </path>
-</svg>
