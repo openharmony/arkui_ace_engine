@@ -1598,6 +1598,22 @@ HWTEST_F(MenuPattern2TwoTestNg, UpdateNodeThemeScopeId001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: UpdateNodeThemeScopeId002
+ * @tc.desc: verify NodeThemeScopeId when version greater than 26.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TwoTestNg, UpdateNodeThemeScopeId002, TestSize.Level0)
+{
+    int32_t errApiVersion = 99;
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(errApiVersion);
+    auto menuNode = CreateTargetNode();
+    int32_t result = MenuView::UpdateNodeThemeScopeId(menuNode, 1, "");
+    EXPECT_EQ(result, 0);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
  * @tc.name: ModifyDivider001
  * @tc.desc: test ModifyDivider and SetItemGroupDivider.
  * @tc.type: FUNC
@@ -1632,6 +1648,29 @@ HWTEST_F(MenuPattern2TwoTestNg, ModifyDivider001, TestSize.Level1)
     groupPattern->ModifyDividerColor(groupNode, Color::FOREGROUND);
     groupPattern->ModifyDividerColor(groupNode, Color::RED);
  
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: CreateMenuOption001
+ * @tc.desc: verify CreateMenuOption when version greater than 26.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TwoTestNg, CreateMenuOption001, TestSize.Level1)
+{
+    std::vector<OptionParam> params;
+    params.emplace_back("MenuItem1", "testIcon", nullptr);
+    int32_t errApiVersion = 99;
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(errApiVersion);
+    auto menuNode = CreateTargetNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuViewOption = MenuView::CreateMenuOption(true, params, 0, 0);
+    ASSERT_NE(menuViewOption, nullptr);
+    MenuParam menuParam;
+    menuParam.type = MenuType::CONTEXT_MENU;
+    menuParam.previewMode = MenuPreviewMode::CUSTOM;
+    MenuView::MountOptionToColumn(params, menuNode, menuParam, menuNode, 0);
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 } // namespace OHOS::Ace::NG
