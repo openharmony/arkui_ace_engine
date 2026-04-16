@@ -363,6 +363,11 @@ HWTEST_F(StatisticEventReporterTest, ConvertToEvent002, TestSize.Level1)
     auto event10 = reporter->ConvertToEvent(StatisticEventType::CLICK_AI_MENU_ASK_CELIA);
     EXPECT_EQ(event10.eventName, "CLICK_AI_MENU");
     EXPECT_EQ(event10.subEventName, "ASK_CELIA");
+
+    // Test SCROLL_VISIBLE_CONTENT_CHANGE
+    auto event11 = reporter->ConvertToEvent(StatisticEventType::SCROLL_VISIBLE_CONTENT_CHANGE);
+    EXPECT_EQ(event11.eventName, "LIST");
+    EXPECT_EQ(event11.subEventName, "SCROLL_VISIBLE_CONTENT_CHANGE");
 }
 
 /**

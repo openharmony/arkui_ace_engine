@@ -3587,6 +3587,15 @@ void ListPattern::ResetChildrenSize()
     }
 }
 
+void ListPattern::ReportStatisticEventScrollVisibleContentChange()
+{
+    if (maxListItemIndex_ < 0) {
+        auto context = GetContext();
+        CHECK_NULL_VOID(context);
+        context->GetStatisticEventReporter()->SendEvent(StatisticEventType::SCROLL_VISIBLE_CONTENT_CHANGE);
+    }
+}
+
 void ListPattern::OnScrollVisibleContentChange(const RefPtr<ListEventHub>& listEventHub, bool indexChanged)
 {
     CHECK_NULL_VOID(listEventHub);
@@ -3596,6 +3605,7 @@ void ListPattern::OnScrollVisibleContentChange(const RefPtr<ListEventHub>& listE
     auto OnJSFrameNodeScrollVisibleContentChange = listEventHub->GetJSFrameNodeOnScrollVisibleContentChange();
     if (onScrollVisibleContentChange) {
         if (indexChanged || startChanged || endChanged) {
+            ReportStatisticEventScrollVisibleContentChange();
             onScrollVisibleContentChange(startInfo_, endInfo_);
             ReportOnItemListScrollEvent("onScrollVisibleContentChange", startInfo_.index, endInfo_.index);
             groupIndexChanged_ = true;
@@ -3603,6 +3613,7 @@ void ListPattern::OnScrollVisibleContentChange(const RefPtr<ListEventHub>& listE
     }
     if (OnJSFrameNodeScrollVisibleContentChange) {
         if (indexChanged || startChanged || endChanged) {
+            ReportStatisticEventScrollVisibleContentChange();
             OnJSFrameNodeScrollVisibleContentChange(startInfo_, endInfo_);
         }
     }
