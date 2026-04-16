@@ -52,17 +52,33 @@ export class TabContentTransitionProxyInternal implements MaterializedBase,TabCo
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    public from: int32
-    public to: int32
+    // instructive change begin
+    get from(): int32 {
+        return this.getFrom()
+    }
+    set from(from: int32) {
+        this.setFrom(from)
+    }
+    get to(): int32 {
+        return this.getTo()
+    }
+    set to(to: int32) {
+        this.setTo(to)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, TabContentTransitionProxyInternal.getFinalizer())
-        this.from = this.getFrom()
-        this.to = this.getTo()
+        // instructive change begin
+        // this.from = this.getFrom()
+        // this.to = this.getTo()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, TabContentTransitionProxyInternal.construct())
-        this.from = this.getFrom()
-        this.to = this.getTo()
+        // instructive change begin
+        // this.from = this.getFrom()
+        // this.to = this.getTo()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._TabContentTransitionProxy_construct()

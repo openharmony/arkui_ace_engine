@@ -67,14 +67,25 @@ export class IMEClientInternal implements MaterializedBase,IMEClient {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    public nodeId: int64
+    // instructive change begin
+    get nodeId(): int64 {
+        return this.getNodeId()
+    }
+    set nodeId(nodeId: int64) {
+        this.setNodeId(nodeId)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, IMEClientInternal.getFinalizer())
-        this.nodeId = this.getNodeId()
+        // instructive change begin
+        // this.nodeId = this.getNodeId()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, IMEClientInternal.construct())
-        this.nodeId = this.getNodeId()
+        // instructive change begin
+        // this.nodeId = this.getNodeId()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._IMEClient_construct()
