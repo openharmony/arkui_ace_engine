@@ -22,7 +22,11 @@
 #include "base/memory/referenced.h"
 #include "base/thread/task_executor.h"
 #include "core/components_ng/base/frame_node.h"
-#include "session/host/include/extension_session.h"
+#include "refbase.h"
+
+namespace OHOS::Rosen {
+    class ExtensionSession;
+}
 
 namespace OHOS::Ace {
 class ACE_EXPORT WindowExtensionConnectionAdapterNG : public AceType {
@@ -35,10 +39,8 @@ public:
     virtual void ConnectExtension(const RefPtr<NG::FrameNode>& node, int32_t windowId) = 0;
     virtual void UpdateRect(const Rect& rect) = 0;
     virtual void RemoveExtension() = 0;
-    void SetExtensionSession(sptr<Rosen::ExtensionSession>& extensionSession)
-    {
-        extensionSession_ = extensionSession;
-    }
+    void SetExtensionSession(sptr<Rosen::ExtensionSession>& extensionSession);
+    ~WindowExtensionConnectionAdapterNG() override;
 
 protected:
     sptr<Rosen::ExtensionSession> extensionSession_;

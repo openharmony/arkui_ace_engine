@@ -16,20 +16,25 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SYSTEM_WINDOW_SCENE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SYSTEM_WINDOW_SCENE_H
 
-#include "common/rs_vector4.h"
-#include "session/host/include/session.h"
+#include "refbase.h"
 
 #include "core/common/container.h"
 #include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 
+namespace OHOS::Rosen {
+    template<typename T>
+    class Vector4;
+    typedef Vector4<float> Vector4f;
+    class Session;
+}
 namespace OHOS::Ace::NG {
 class SystemWindowScene : public StackPattern, public FocusView {
     DECLARE_ACE_TYPE(SystemWindowScene, StackPattern, FocusView);
 
 public:
     explicit SystemWindowScene(const sptr<Rosen::Session>& session);
-    ~SystemWindowScene() override = default;
+    ~SystemWindowScene() override;
 
     std::optional<RenderContext::ContextParam> GetContextParam() const override
     {

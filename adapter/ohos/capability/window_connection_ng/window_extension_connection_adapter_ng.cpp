@@ -12,14 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/common/window_ng/window_extension_connection_proxy_ng.h"
 
-#include "window_extension_connection_ohos_ng.h"
+#include "core/common/window_ng/window_extension_connection_adapter_ng.h"
 #include "session/host/include/extension_session.h"
 
 namespace OHOS::Ace {
-RefPtr<WindowExtensionConnectionAdapterNG> WindowExtensionConnectionProxyNG::CreateAdapter()
+
+WindowExtensionConnectionAdapterNG::~WindowExtensionConnectionAdapterNG() = default;
+
+void WindowExtensionConnectionAdapterNG::SetExtensionSession(sptr<Rosen::ExtensionSession>& extensionSession)
 {
-    return AceType::MakeRefPtr<WindowExtensionConnectionAdapterOhosNG>();
+    extensionSession_ = extensionSession;
 }
+
 } // namespace OHOS::Ace
