@@ -529,6 +529,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSProfiler::JSBind(globalObj);
     JSSaveButton::JSBind(globalObj);
     JSShareData::JSBind(globalObj);
+    JSDistortionComponent::JSBind(globalObj);
 #ifdef WEB_SUPPORTED
     JSWeb::JSBind(globalObj);
     JSWebController::JSBind(globalObj);
@@ -550,7 +551,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSRotationRecognizer::JSBind(globalObj);
     JSTouchRecognizer::JSBind(globalObj);
     JSUnionEffectContainer::JSBind(globalObj);
-    JSDistortionComponent::JSBind(globalObj);
 }
 
 void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine)
