@@ -26,6 +26,10 @@
 #define protected public
 
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
+#include "test/unittest/core/pattern/test_ng.h"
 
 #include "base/memory/ace_type.h"
 #include "core/components/progress/progress_theme.h"
@@ -41,10 +45,6 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/progress_mask_property.h"
 #include "core/components_ng/render/render_context.h"
-#include "test/mock/frameworks/core/rosen/mock_canvas.h"
-#include "test/mock/frameworks/core/common/mock_theme_manager.h"
-#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
-#include "test/unittest/core/pattern/test_ng.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -137,7 +137,7 @@ void ProgressConModTestNg::TearDown()
     layoutProperty_ = nullptr;
     paintProperty_ = nullptr;
     accessibilityProperty_ = nullptr;
-    ClearOldNodes();  // Each testcase will create new node at begin
+    ClearOldNodes(); // Each testcase will create new node at begin
 }
 
 void ProgressConModTestNg::GetProgress()
@@ -211,7 +211,7 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest002, TestSize.Level1)
     auto eventHub = frameNode_->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
-   
+
     auto progressPaintProperty = frameNode_->GetPaintProperty<ProgressPaintProperty>();
     ASSERT_NE(progressPaintProperty, nullptr);
     progressPaintProperty->UpdateMaxValue(MAX_VALUE);
