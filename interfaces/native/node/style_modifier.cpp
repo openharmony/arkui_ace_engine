@@ -14531,16 +14531,14 @@ void ProcessFontWeightConfigs(ArkUI_NodeHandle node, OH_ArkUI_FontWeightConfigs*
     if (configs->isEnableVariableFontWeightSet) {
         modifier->setSpanEnableVariableFontWeight(
             node->uiNodeHandle, configs->enableVariableFontWeight, nullptr);
-        modifier->setSpanVariableFontWeight(node->uiNodeHandle, fontWeight, nullptr);
     } else {
-        modifier->resetSpanEnableVariableFontWeight(node->uiNodeHandle);
-        modifier->resetSpanVariableFontWeight(node->uiNodeHandle);
+        modifier->setSpanEnableVariableFontWeight(node->uiNodeHandle, false, nullptr);
     }
     if (configs->isEnableDeviceFontWeightCategorySet) {
         modifier->setSpanEnableDeviceFontWeightCategory(
             node->uiNodeHandle, configs->enableDeviceFontWeightCategory, nullptr);
     } else {
-        modifier->resetSpanEnableDeviceFontWeightCategory(node->uiNodeHandle);
+        modifier->setSpanEnableDeviceFontWeightCategory(node->uiNodeHandle, true, nullptr);
     }
 }
 
@@ -14574,8 +14572,8 @@ void FillSpanFontWeightConfigs(ArkUI_NodeHandle node)
         modifier->getSpanEnableVariableFontWeight(node->uiNodeHandle);
     g_spanFontWeightConfigs.enableDeviceFontWeightCategory =
         modifier->getSpanEnableDeviceFontWeightCategory(node->uiNodeHandle);
-    g_spanFontWeightConfigs.isEnableVariableFontWeightSet = true;
-    g_spanFontWeightConfigs.isEnableDeviceFontWeightCategorySet = true;
+    g_spanFontWeightConfigs.isEnableVariableFontWeightSet = false;
+    g_spanFontWeightConfigs.isEnableDeviceFontWeightCategorySet = false;
 }
 
 int32_t SetSpanFontWeight(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -14651,6 +14649,11 @@ int32_t SetSpanFont(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         if (fontConfigs->fontWeightConfigs) {
             ProcessFontWeightConfigs(node, fontConfigs->fontWeightConfigs,
                 fontWeightValue);
+        } else {
+            auto* modifier = fullImpl->getNodeModifiers()->getSpanModifier();
+            modifier->resetSpanVariableFontWeight(node->uiNodeHandle);
+            modifier->resetSpanEnableVariableFontWeight(node->uiNodeHandle);
+            modifier->resetSpanEnableDeviceFontWeightCategory(node->uiNodeHandle);
         }
     }
     return ERROR_CODE_NO_ERROR;
