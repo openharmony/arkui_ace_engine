@@ -20,26 +20,26 @@ class ArkThemeWhiteList {
     // add to list only names of built-in components which support ArkTheme
     // strongly recommended to use alphabetical order
     private static whiteList: Array<string> = [
-        'AlphabetIndexer',
         'Badge',
         'Button',
-        'Counter',
-        'DataPanel',
         'DatePicker',
+        'JSAlphabetIndexer',
+        'JSCounter',
+        'JSDataPanel',
+        'JSMenu',
+        'JSMenuItem',
+        'JSPatternLock',
+        'JSQRCode',
+        'JSRadio',
+        'JSTextClock',
+        'JSTimePicker',
         'LoadingProgress',
-        'Menu',
-        'MenuItem',
-        'PatternLock',
         'Progress',
-        'QRCode',
-        'Radio',
         'Scroll',
-        'Search',
+        'JSSearch',
         'Swiper',
         'Text',
-        'TextClock',
         'TextPicker',
-        'TimePicker',
     ];
 
     /**
