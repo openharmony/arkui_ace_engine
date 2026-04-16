@@ -17,7 +17,6 @@
 #include "base/geometry/dimension.h"
 #include "base/log/log.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/edge.h"
 #include "core/components_v2/pattern_lock/pattern_lock_controller.h"
 #include "core/pipeline/base/render_component.h"
 #include "frameworks/core/components/common/properties/svg_paint_state.h"

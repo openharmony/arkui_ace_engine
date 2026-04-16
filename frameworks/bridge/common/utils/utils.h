@@ -49,7 +49,6 @@
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/text_style.h"
 #include "frameworks/bridge/common/dom/dom_type.h"
-#include "frameworks/core/components_ng/property/border_property.h"
 
 namespace OHOS::Ace::Framework {
 

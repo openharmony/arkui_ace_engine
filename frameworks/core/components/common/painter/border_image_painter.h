@@ -27,7 +27,6 @@
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/decoration.h"
-#include "core/components/common/properties/edge.h"
 #ifdef USE_ROSEN_DRAWING
 #include "core/components_ng/render/drawing.h"
 #endif

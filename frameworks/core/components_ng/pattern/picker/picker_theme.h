@@ -19,7 +19,6 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/system_properties.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/border.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/edge.h"

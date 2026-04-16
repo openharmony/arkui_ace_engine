@@ -15,6 +15,7 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_PATTERN_LOCK_PATTERN_LOCK_CONTROLLER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_PATTERN_LOCK_PATTERN_LOCK_CONTROLLER_H
+#include <functional>
 #include "base/memory/ace_type.h"
 namespace OHOS::Ace::V2 {
 enum class PatternLockChallengeResult {

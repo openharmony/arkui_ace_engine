@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_PIECE_RENDER_PIECE_H
 #define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_PIECE_RENDER_PIECE_H
 
-#include "core/components/common/properties/border.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/edge.h"
 #include "compatible/components/piece/piece_component.h"

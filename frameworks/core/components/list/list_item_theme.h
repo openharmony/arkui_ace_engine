@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_LIST_LIST_ITEM_THEME_H
 
 #include "core/components/theme/theme.h"
+#include "core/components/common/properties/edge.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/measure_property.h"
