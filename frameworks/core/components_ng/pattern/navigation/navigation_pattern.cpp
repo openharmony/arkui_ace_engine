@@ -7523,15 +7523,11 @@ void NavigationPattern::UpdateCanForceSplitLayout()
     CHECK_NULL_VOID(container);
     bool isMainWindow = container->IsMainWindow();
     bool isInAppMainPage = pageNode_.Upgrade() != nullptr;
-    auto windowManager = context->GetWindowManager();
-    CHECK_NULL_VOID(windowManager);
-    auto windowMode = windowManager->GetWindowMode();
-    bool isInSplitScreenMode = windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-        windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
-    canForceSplitLayout_ = isMainWindow && isInAppMainPage && !isInSplitScreenMode;
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Update canForceSplitLayout_, isMainWindow:%{public}d, "
-        "isInAppMainPage:%{public}d, isInSplitScreenMode:%{public}d, canForceSplitLayout_:%{public}d",
-        isMainWindow, isInAppMainPage, isInSplitScreenMode, canForceSplitLayout_);
+    canForceSplitLayout_ = isMainWindow && isInAppMainPage;
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+        "Update canForceSplitLayout_, isMainWindow:%{public}d, isInAppMainPage:%{public}d, "
+        "canForceSplitLayout_:%{public}d",
+        isMainWindow, isInAppMainPage, canForceSplitLayout_);
 }
 
 void NavigationPattern::ContentChangeReport(const RefPtr<FrameNode>& keyNode)

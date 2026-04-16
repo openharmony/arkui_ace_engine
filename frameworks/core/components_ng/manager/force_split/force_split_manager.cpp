@@ -170,20 +170,13 @@ bool ForceSplitManager::IsWindowConditionMatched()
     CHECK_NULL_RETURN(context, false);
     auto container = Container::GetContainer(context->GetInstanceId());
     CHECK_NULL_RETURN(container, false);
-    auto windowManager = context->GetWindowManager();
-    CHECK_NULL_RETURN(windowManager, false);
     bool isMainWindow = container->IsMainWindow();
-    auto windowMode = windowManager->GetWindowMode();
     /**
-     * The foce split mode must meet the following conditions to take effect:
-     *  1. Belonging to the main window of the application
-     *  2. The application is not in split screen mode
-     */
-    bool isInSplitScreenMode = windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-        windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "IsWindowConditionMatched, isMainWindow:%{public}d, "
-        "isInSplitScreenMode:%{public}d", isMainWindow, isInSplitScreenMode);
-    return isMainWindow && !isInSplitScreenMode;
+        * The foce split mode must meet the following conditions to take effect:
+        *  1. Belonging to the main window of the application
+        */
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "IsWindowConditionMatched, isMainWindow:%{public}d", isMainWindow);
+    return isMainWindow;
 }
 
 bool ForceSplitManager::HasForceSplitTargetNavigation()
