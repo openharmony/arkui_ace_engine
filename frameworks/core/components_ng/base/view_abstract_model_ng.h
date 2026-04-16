@@ -16,32 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_ABSTRACT_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_ABSTRACT_MODEL_NG_H
 
-#include <optional>
-#include <utility>
-
-#include "base/geometry/dimension_offset.h"
-#include "base/geometry/ng/vector.h"
-#include "base/geometry/offset.h"
-#include "base/geometry/rect.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
-#include "base/utils/utils.h"
-#include "core/components/common/layout/position_param.h"
-#include "core/components/common/properties/alignment.h"
-#include "core/components_ng/base/modifier.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/event/gesture_event_hub.h"
-#include "core/components_ng/property/border_property.h"
-#include "core/components_ng/property/calc_length.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/property/property.h"
-#include "core/image/image_source_info.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace {
 class SpanString;
@@ -114,15 +92,7 @@ public:
         }
     }
 
-    void UpdateLayoutPolicyProperty(const LayoutCalPolicy layoutPolicy, bool isWidth) override
-    {
-        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-        CHECK_NULL_VOID(frameNode);
-        auto layoutProperty = frameNode->GetLayoutProperty();
-        if (layoutProperty) {
-            layoutProperty->UpdateLayoutPolicyProperty(layoutPolicy, isWidth);
-        }
-    }
+    void UpdateLayoutPolicyProperty(const LayoutCalPolicy layoutPolicy, bool isWidth) override;
 
     void SetHeight(const RefPtr<ResourceObject>& resObj) override
     {
@@ -341,11 +311,7 @@ public:
     }
 
     void SetPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
-        const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) override
-    {
-        NG::PaddingProperty paddings = NG::ConvertToCalcPaddingProperty(top, bottom, left, right);
-        ViewAbstract::SetPadding(paddings);
-    }
+        const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) override;
 
     void SetPaddings(const NG::PaddingProperty& paddings) override
     {
@@ -378,11 +344,7 @@ public:
     }
 
     void SetSafeAreaPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
-        const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) override
-    {
-        NG::PaddingProperty paddings = NG::ConvertToCalcPaddingProperty(top, bottom, left, right);
-        ViewAbstract::SetSafeAreaPadding(paddings);
-    }
+        const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) override;
 
     void SetMargin(const CalcDimension& value) override
     {
@@ -1219,24 +1181,15 @@ public:
         ViewAbstract::SetOnCrownEvent(std::move(onCrownCallback));
     }
 #endif
-    void SetOnKeyPreIme(OnKeyConsumeFunc&& onKeyCallback) override
-    {
-        auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
-        CHECK_NULL_VOID(focusHub);
-        focusHub->SetOnKeyPreIme(std::move(onKeyCallback));
-    }
+
+    void SetOnKeyPreIme(OnKeyConsumeFunc&& onKeyCallback) override;
 
     void SetOnKeyEventDispatch(OnKeyEventDispatchFunc&& onKeyCallback) override
     {
         ViewAbstract::SetOnKeyEventDispatch(std::move(onKeyCallback));
     }
 
-    static void SetOnKeyPreIme(FrameNode* frameNode, OnKeyConsumeFunc&& onKeyCallback)
-    {
-        auto focusHub = frameNode->GetOrCreateFocusHub();
-        CHECK_NULL_VOID(focusHub);
-        focusHub->SetOnKeyPreIme(std::move(onKeyCallback));
-    }
+    static void SetOnKeyPreIme(FrameNode* frameNode, OnKeyConsumeFunc&& onKeyCallback);
 
     void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) override
     {
@@ -1426,20 +1379,7 @@ public:
     void SetOnAreaChanged(
         std::function<void(const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin)>&&
             onAreaChanged,
-        int32_t minInterval) override
-    {
-        auto areaChangeCallback = [areaChangeFunc = std::move(onAreaChanged)](const RectF& oldRect,
-                                      const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin) {
-            areaChangeFunc(Rect(oldRect.GetX(), oldRect.GetY(), oldRect.Width(), oldRect.Height()),
-                Offset(oldOrigin.GetX(), oldOrigin.GetY()), Rect(rect.GetX(), rect.GetY(), rect.Width(), rect.Height()),
-                Offset(origin.GetX(), origin.GetY()));
-        };
-        if (minInterval > 0) {
-            ViewAbstract::SetOnAreaChangedWithInterval(std::move(areaChangeCallback), minInterval);
-        } else {
-            ViewAbstract::SetOnAreaChanged(std::move(areaChangeCallback));
-        }
-    }
+        int32_t minInterval) override;
 
     void SetOnSizeChanged(
         std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged) override
@@ -1604,17 +1544,8 @@ public:
         ViewAbstract::SetPrivacySensitive(flag);
     }
 
-    void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override
-    {
-        auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-        ViewAbstract::BindPopup(param, AceType::Claim(targetNode), AceType::DynamicCast<UINode>(customNode));
-    }
-
-    void BindTips(const RefPtr<PopupParam>& param, const RefPtr<OHOS::Ace::SpanString>& spanString) override
-    {
-        auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-        ViewAbstract::BindTips(param, AceType::Claim(targetNode), spanString);
-    }
+    void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override;
+    void BindTips(const RefPtr<PopupParam>& param, const RefPtr<SpanString>& spanString) override;
 
     int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) override
     {
@@ -1809,24 +1740,14 @@ public:
     }
 #endif
 
-    void DisableOnKeyPreIme() override
-    {
-        auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
-        CHECK_NULL_VOID(focusHub);
-        focusHub->ClearOnKeyPreIme();
-    }
+    void DisableOnKeyPreIme() override;
 
     void DisableOnKeyEventDispatch() override
     {
         ViewAbstract::DisableOnKeyEventDispatch();
     }
 
-    static void DisableOnKeyPreIme(FrameNode* frameNode)
-    {
-        auto focusHub = frameNode->GetOrCreateFocusHub();
-        CHECK_NULL_VOID(focusHub);
-        focusHub->ClearOnKeyPreIme();
-    }
+    static void DisableOnKeyPreIme(FrameNode* frameNode);
 
     void DisableOnHover() override
     {

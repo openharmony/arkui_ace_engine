@@ -23,6 +23,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
+#include "core/components_ng/property/measure_utils.h"
 #include "pixel_map_peer.h"
 #include "rich_editor_controller_peer_impl.h"
 #include "styled_string_peer.h"

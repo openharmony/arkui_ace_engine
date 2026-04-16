@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_algorithm.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {

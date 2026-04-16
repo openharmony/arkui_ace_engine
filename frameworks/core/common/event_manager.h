@@ -59,6 +59,8 @@ public:
     virtual void DelegateTouchEvent(const TouchEvent& point) {};
 };
 } // namespace NG
+enum class MouseFormat;
+class MouseStyleManager;
 class RenderNode;
 class Element;
 class TextOverlayManager;
@@ -229,11 +231,7 @@ public:
         return inputMonitorManager_;
     }
 
-    void FlushCursorStyleRequests()
-    {
-        CHECK_NULL_VOID(mouseStyleManager_);
-        mouseStyleManager_->VsyncMouseFormat();
-    }
+    void FlushCursorStyleRequests();
 
     bool TryResampleTouchEvent(std::vector<TouchEvent>& history,
         const std::vector<TouchEvent>& current, uint64_t nanoTimeStamp, TouchEvent& resample);
@@ -425,11 +423,7 @@ public:
 
     void DelegateTouchEvent(const TouchEvent& point);
 
-    MouseFormat GetCurrentMouseStyle()
-    {
-        CHECK_NULL_RETURN(mouseStyleManager_, MouseFormat::DEFAULT);
-        return mouseStyleManager_->GetCurrentMouseStyle();
-    }
+    MouseFormat GetCurrentMouseStyle();
 
     void AddTouchDoneFrameNode(const WeakPtr<NG::FrameNode>& frameNode);
 

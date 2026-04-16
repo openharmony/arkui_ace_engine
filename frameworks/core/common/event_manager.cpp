@@ -15,6 +15,7 @@
 
 #include "core/common/event_manager.h"
 
+#include "base/mousestyle/mouse_style.h"
 #include "base/input_manager/input_manager.h"
 #include "base/log/dump_log.h"
 #include "base/thread/frame_trace_adapter.h"
@@ -3418,4 +3419,16 @@ RefPtr<NG::RelaxedInteractionManager> EventManager::GetOrCreateRelaxedInteractio
     return relaxedInteractionManager_;
 }
 #endif
+
+void EventManager::FlushCursorStyleRequests()
+{
+    CHECK_NULL_VOID(mouseStyleManager_);
+    mouseStyleManager_->VsyncMouseFormat();
+}
+
+MouseFormat EventManager::GetCurrentMouseStyle()
+{
+    CHECK_NULL_RETURN(mouseStyleManager_, MouseFormat::DEFAULT);
+    return mouseStyleManager_->GetCurrentMouseStyle();
+}
 } // namespace OHOS::Ace

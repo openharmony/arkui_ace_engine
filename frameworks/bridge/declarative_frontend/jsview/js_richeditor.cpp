@@ -48,6 +48,7 @@
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/pattern/rich_editor/color_mode_processor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_base_controller.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"

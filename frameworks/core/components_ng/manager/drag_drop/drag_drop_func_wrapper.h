@@ -23,6 +23,7 @@
 #include "core/common/udmf/udmf_client.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/gestures/gesture_info.h"
+#include "core/components_ng/manager/drag_drop/utils/internal_drag_action.h"
 
 namespace OHOS::Ace::NG {
 using PixelMapFinishCallback = std::function<void(RefPtr<PixelMap>, bool)>;

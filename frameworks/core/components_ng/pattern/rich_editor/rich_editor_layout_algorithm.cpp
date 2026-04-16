@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/rich_editor/style_manager.h"
 #include "core/components_ng/pattern/text/multiple_paragraph_layout_algorithm.h"
 #include "core/components_ng/pattern/text/paragraph_util.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace {
 constexpr int32_t CHILDREN_SIZE = 1;

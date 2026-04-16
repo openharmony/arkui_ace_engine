@@ -29,6 +29,7 @@
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_ui_director.h"
 #endif
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
