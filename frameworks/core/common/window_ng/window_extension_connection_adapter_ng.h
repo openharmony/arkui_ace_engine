@@ -39,7 +39,7 @@ public:
     virtual void ConnectExtension(const RefPtr<NG::FrameNode>& node, int32_t windowId) = 0;
     virtual void UpdateRect(const Rect& rect) = 0;
     virtual void RemoveExtension() = 0;
-    void SetExtensionSession(sptr<Rosen::ExtensionSession>& extensionSession);
+    void SetExtensionSession(const sptr<Rosen::ExtensionSession>& extensionSession);
     ~WindowExtensionConnectionAdapterNG() override;
 
 protected:

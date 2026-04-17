@@ -20,7 +20,7 @@ namespace OHOS::Ace {
 
 WindowExtensionConnectionAdapterNG::~WindowExtensionConnectionAdapterNG() = default;
 
-void WindowExtensionConnectionAdapterNG::SetExtensionSession(sptr<Rosen::ExtensionSession>& extensionSession)
+void WindowExtensionConnectionAdapterNG::SetExtensionSession(const sptr<Rosen::ExtensionSession>& extensionSession)
 {
     extensionSession_ = extensionSession;
 }
