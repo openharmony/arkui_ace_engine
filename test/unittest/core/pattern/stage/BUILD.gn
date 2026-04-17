@@ -13,6 +13,8 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
+ace_root = "//foundation/arkui/ace_engine"
+
 ace_unittest("stage_test_ng") {
   module_name = "Animation-PageTransition"
   type = "new"
@@ -37,5 +39,18 @@ ace_unittest("stage_test_ng") {
 ace_unittest("force_split_stage_test_ng") {
   module_name = "Animation-Frame"
   type = "new"
-  sources = [ "force_split_stage_test_ng.cpp" ]
+  sources = [
+    "force_split_stage_test_ng.cpp",
+    "force_split_stage_test_two_ng.cpp",
+    "force_split_stage_test_three_ng.cpp",
+  ]
+  if (!ace_engine_feature_enable_split_mode) {
+    defines = [ "ENABLE_SPLIT_MODE" ]
+    sources += [
+      "$ace_root/frameworks/core/components_ng/pattern/stage/force_split/parallel_page_pattern.cpp",
+      "$ace_root/frameworks/core/components_ng/pattern/stage/force_split/parallel_stage_layout_algorithm.cpp",
+      "$ace_root/frameworks/core/components_ng/pattern/stage/force_split/parallel_stage_manager.cpp",
+      "$ace_root/frameworks/core/components_ng/pattern/stage/force_split/parallel_stage_pattern.cpp",
+    ]
+  }
 }
