@@ -14,7 +14,7 @@
  */
 
 declare interface SystemDensity {
-    systemDensity: number;
+  systemDensity: number;
 }
 
 // SystemDensityEnv decorated by @ObservedV2 used in Env.

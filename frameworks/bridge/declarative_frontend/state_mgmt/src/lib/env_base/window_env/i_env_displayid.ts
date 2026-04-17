@@ -14,7 +14,7 @@
  */
 
 declare interface DisplayId {
-    displayId: number;
+  displayId: number;
 }
 
 // DisplayIdEnv decorated by @ObservedV2 used in Env.

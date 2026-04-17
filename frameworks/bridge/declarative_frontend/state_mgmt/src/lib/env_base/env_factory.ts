@@ -29,7 +29,7 @@ interface EnvTypeMap {
   'system.window.avoidarea': WindowAvoidAreaVpEnv;
   'system.window.avoidarea.px': WindowAvoidAreaPxEnv;
   'system.window.focused': WindowFocusedEnv;
- 	'system.window.highlighted': WindowHighlightedEnv;
+  'system.window.highlighted': WindowHighlightedEnv;
   'system.window.systemdensity': SystemDensityEnv;
   'system.window.displayid': DisplayIdEnv;
 }
