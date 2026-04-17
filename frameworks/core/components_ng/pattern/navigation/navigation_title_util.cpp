@@ -301,6 +301,7 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItemButton(const RefPtr<Navigat
         padding.SetEdges(CalcLength(BUTTON_PADDING));
         menuItemLayoutProperty->UpdatePadding(padding);
     }
+    menuItemLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     return menuItemNode;
 }
 

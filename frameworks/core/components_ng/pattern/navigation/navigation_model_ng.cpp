@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -933,6 +933,7 @@ bool NavigationModelNG::UpdateBackButtonProperty(const RefPtr<FrameNode>& backBu
         CalcSize(CalcLength(backButtonWidth), CalcLength(backButtonHeight)));
     backButtonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(backButtonRadiusSize));
     renderContext->UpdateBackgroundColor(backButtonColor);
+    backButtonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     PaddingProperty padding;
     padding.SetEdges(CalcLength(backButtonPadding));
     backButtonLayoutProperty->UpdatePadding(padding);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -499,6 +499,7 @@ RefPtr<FrameNode> BuildButton(const std::shared_ptr<SelectOverlayInfo>& info, st
     CHECK_NE_RETURN(retPrepare, true, button);
 
     button->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
+    buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
 
     if (hasCallback) {
         button->GetOrCreateGestureEventHub()->SetUserOnClick(
@@ -607,6 +608,7 @@ RefPtr<FrameNode> BuildButton(const MenuOptionsParam& menuOption, int32_t overla
     }
     buttonLayoutProperty->UpdateFlexShrink(0);
     button->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
+    buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     BindButtonClickEvent(button, menuOption, overlayId);
     SetResponseRegion(button);
     if (auto buttonPattern = button->GetPatternPtr<ButtonPattern>(); buttonPattern) {
@@ -725,6 +727,7 @@ RefPtr<FrameNode> BuildCreateMenuItemButton(const MenuOptionsParam& menuOptionsP
 
     buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(textOverlayTheme->GetMenuButtonRadius()));
     button->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
+    buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     BindCreateMenuItemClickEvent(button, menuOptionsParam, overlayId, systemCallback, menuItemCallback);
     SetResponseRegion(button);
     button->MarkModifyDone();
@@ -781,6 +784,10 @@ void PrepareMoreOrBackButtonNode(RefPtr<OHOS::Ace::NG::FrameNode>& button,
     });
 
     button->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
+    auto buttonLayoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
+    if (buttonLayoutProperty) {
+        buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+    }
     if (button->GetPatternPtr<ButtonPattern>()) {
         button->GetPatternPtr<ButtonPattern>()->SetClickedColor(textOverlayTheme->GetButtonClickedColor());
         button->GetPatternPtr<ButtonPattern>()->SetBlendColor(textOverlayTheme->GetButtonClickedColor(),

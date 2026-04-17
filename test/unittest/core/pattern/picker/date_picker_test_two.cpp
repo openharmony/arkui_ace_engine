@@ -34,6 +34,7 @@
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1328,9 +1329,14 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerUpdateConfirmButtonTextLayoutProperty001
     auto textConfirmNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textConfirmNode, nullptr);
+    auto buttonNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(buttonNode, nullptr);
     auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
-    DatePickerDialogView::UpdateConfirmButtonTextLayoutProperty(textLayoutProperty, theme);
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    DatePickerDialogView::UpdateConfirmButtonTextLayoutProperty(textLayoutProperty, theme, buttonLayoutProperty);
     EXPECT_EQ(textLayoutProperty->GetTextColor(), theme->GetTitleStyle().GetTextColor());
 }
 
@@ -1346,9 +1352,14 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerUpdateCancelButtonTextLayoutProperty001,
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textCancelNode, nullptr);
+    auto buttonNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(buttonNode, nullptr);
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textCancelLayoutProperty, nullptr);
-    DatePickerDialogView::UpdateCancelButtonTextLayoutProperty(textCancelLayoutProperty, theme);
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    DatePickerDialogView::UpdateCancelButtonTextLayoutProperty(textCancelLayoutProperty, theme, buttonLayoutProperty);
     EXPECT_EQ(textCancelLayoutProperty->GetTextColor(), theme->GetTitleStyle().GetTextColor());
 }
 

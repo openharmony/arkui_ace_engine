@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -230,6 +230,7 @@ void ButtonFunctionTestTwoNg::SetUpTestCase()
 
     buttonTheme->heightMap_.emplace(std::pair<ControlSize, Dimension>(ControlSize::SMALL, DEFAULT_HEIGTH));
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(buttonTheme));
 }
 
 void ButtonFunctionTestTwoNg::TearDownTestCase()
@@ -613,21 +614,21 @@ HWTEST_F(ButtonFunctionTestTwoNg, ParseButtonResColor, TestSize.Level1)
      * @tc.steps: step3. Parse resource with invalid color type.
      * @tc.expected: step3. Color remains unchanged.
      */
-    buttonModelNG.ParseButtonResColor(resObj, result, static_cast<ButtonColorType>(2));
+    buttonModelNG.ParseButtonResColor(AceType::Claim(buttonNode), resObj, result, static_cast<ButtonColorType>(2));
     EXPECT_EQ(result, Color::RED);
 
     /**
      * @tc.steps: step4. Parse resource with background color type.
      * @tc.expected: step4. Color is set to button theme's background color.
      */
-    buttonModelNG.ParseButtonResColor(resObj, result, ButtonColorType::BACKGROUND_COLOR);
+    buttonModelNG.ParseButtonResColor(AceType::Claim(buttonNode), resObj, result, ButtonColorType::BACKGROUND_COLOR);
     EXPECT_EQ(result, buttonTheme->GetBgColor());
 
     /**
      * @tc.steps: step5. Parse resource with font color type.
      * @tc.expected: step5. Color is set to button theme's font color.
      */
-    buttonModelNG.ParseButtonResColor(resObj, result, ButtonColorType::FONT_COLOR);
+    buttonModelNG.ParseButtonResColor(AceType::Claim(buttonNode), resObj, result, ButtonColorType::FONT_COLOR);
     EXPECT_EQ(result, buttonTheme->GetTextStyle().GetTextColor());
 }
 

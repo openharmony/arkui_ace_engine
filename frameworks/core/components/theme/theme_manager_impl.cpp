@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,6 +43,7 @@
 #include "frameworks/compatible/components/piece/piece_theme.h"
 #include "core/components/popup/popup_theme.h"
 #include "core/components/progress/progress_theme.h"
+#include "core/components_ng/pattern/button/button_theme_wrapper.h"
 #include "core/components/qrcode/qrcode_theme.h"
 #include "core/components/rating/rating_theme.h"
 #include "core/components/refresh/refresh_theme.h"
@@ -209,6 +210,7 @@ RefPtr<TokenThemeWrapper> ThemeWrapperBuildFunc(const RefPtr<ThemeConstants>& th
 
 const std::unordered_map<ThemeType, RefPtr<TokenThemeWrapper>(*)(const RefPtr<ThemeConstants>&)>
     TOKEN_THEME_WRAPPER_BUILDERS = {
+        { ButtonTheme::TypeId(), &ThemeWrapperBuildFunc<NG::ButtonThemeWrapper::WrapperBuilder> },
         { CheckboxTheme::TypeId(), &ThemeWrapperBuildFunc<NG::CheckboxThemeWrapper::WrapperBuilder> },
         { SwitchTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SwitchThemeWrapper::WrapperBuilder> },
         { ToggleTheme::TypeId(), &ThemeWrapperBuildFunc<NG::ToggleThemeWrapper::WrapperBuilder> },

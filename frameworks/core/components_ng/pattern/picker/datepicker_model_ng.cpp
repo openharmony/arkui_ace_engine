@@ -283,6 +283,7 @@ RefPtr<FrameNode> DatePickerModelNG::CreateFrameNode(int32_t nodeId)
         auto blendMonthNode = CreateColumnNode();
         auto buttonMonthNode = CreateButtonNode();
         buttonMonthNode->GetRenderContext()->UpdateBackgroundColor(Color::BLUE);
+        buttonMonthNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateBackgroundColorFlagByUser(true);
         buttonMonthNode->MountToParent(stackMonthNode);
         monthColumnNode->MountToParent(blendMonthNode);
         blendMonthNode->MountToParent(stackMonthNode);
@@ -296,6 +297,7 @@ RefPtr<FrameNode> DatePickerModelNG::CreateFrameNode(int32_t nodeId)
         auto blendDayNode = CreateColumnNode();
         auto buttonDayNode = CreateButtonNode();
         buttonDayNode->GetRenderContext()->UpdateBackgroundColor(Color::GRAY);
+        buttonDayNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateBackgroundColorFlagByUser(true);
         buttonDayNode->MountToParent(stackDayNode);
         dayColumnNode->MountToParent(blendDayNode);
         blendDayNode->MountToParent(stackDayNode);

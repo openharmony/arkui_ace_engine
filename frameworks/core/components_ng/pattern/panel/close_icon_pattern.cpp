@@ -40,6 +40,7 @@ void CloseIconPattern::InitCloseIcon()
     auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
     buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     CHECK_NULL_VOID(buttonLayoutProperty);
+    buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     buttonLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(closeIconLayoutProperty->GetCloseIconWidthValue()),
             CalcLength(closeIconLayoutProperty->GetCloseIconHeightValue())));

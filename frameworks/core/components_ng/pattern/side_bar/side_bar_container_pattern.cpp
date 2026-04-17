@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -678,6 +678,7 @@ RefPtr<FrameNode> SideBarContainerPattern::CreateControlButton(const RefPtr<Side
     auto buttonRenderContext = buttonNode->GetRenderContext();
     CHECK_NULL_RETURN(buttonRenderContext, nullptr);
     buttonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     buttonRenderContext->UpdateZIndex(DEFAULT_CONTROL_BUTTON_ZINDEX);
     auto focusHub = buttonNode->GetOrCreateFocusHub();
     CHECK_NULL_RETURN(focusHub, nullptr);

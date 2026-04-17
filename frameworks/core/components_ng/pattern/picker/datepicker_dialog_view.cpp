@@ -327,6 +327,9 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTitleButtonNode(const RefPtr<Frame
     auto buttonTitleRenderContext = buttonTitleNode->GetRenderContext();
     CHECK_NULL_RETURN(buttonTitleRenderContext, nullptr);
     buttonTitleRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    auto buttonLayoutProperty = buttonTitleNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_RETURN(buttonLayoutProperty, nullptr);
+    buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         bool needAdaptForAging = false;
         if (GreatOrEqual(pipeline->GetFontScale(), pickerTheme->GetMaxOneFontScale()) &&
@@ -848,18 +851,19 @@ RefPtr<FrameNode> DatePickerDialogView::CreateConfirmNode(const RefPtr<FrameNode
     CHECK_NULL_RETURN(textConfirmNode, nullptr);
     auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-    UpdateConfirmButtonTextLayoutProperty(textLayoutProperty, pickerTheme);
+    auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_RETURN(buttonConfirmLayoutProperty, nullptr);
+    UpdateConfirmButtonTextLayoutProperty(textLayoutProperty, pickerTheme, buttonConfirmLayoutProperty);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     auto buttonConfirmEventHub = buttonConfirmNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(buttonConfirmEventHub, nullptr);
     buttonConfirmEventHub->SetStateEffect(true);
 
-    auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_RETURN(buttonConfirmLayoutProperty, nullptr);
     UpdateButtonLayoutProperty(buttonConfirmLayoutProperty, pickerTheme);
     auto buttonConfirmRenderContext = buttonConfirmNode->GetRenderContext();
     buttonConfirmRenderContext->UpdateBackgroundColor(buttonColor_);
+    buttonConfirmLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     UpdateButtonStyles(buttonInfos, ACCEPT_BUTTON_INDEX, buttonConfirmLayoutProperty, buttonConfirmRenderContext);
     UpdateButtonDefaultFocus(buttonInfos, buttonConfirmNode, true);
     textConfirmNode->MountToParent(buttonConfirmNode);
@@ -882,23 +886,28 @@ RefPtr<FrameNode> DatePickerDialogView::CreateConfirmNode(const RefPtr<FrameNode
 }
 
 void UpdateButtonTextColor(const RefPtr<TextLayoutProperty>& textLayoutProperty, const RefPtr<PickerTheme>& pickerTheme,
-    bool useButtonFocusArea)
+    bool useButtonFocusArea, const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty)
 {
     CHECK_NULL_VOID(textLayoutProperty);
     CHECK_NULL_VOID(pickerTheme);
+    CHECK_NULL_VOID(buttonLayoutProperty);
     if (useButtonFocusArea) {
         textLayoutProperty->UpdateTextColor(pickerTheme->GetTitleStyle().GetTextColor());
+        buttonLayoutProperty->UpdateFontColor(pickerTheme->GetTitleStyle().GetTextColor());
     } else {
         textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+        buttonLayoutProperty->UpdateFontColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
     }
+    buttonLayoutProperty->UpdateFontColorFlagByUser(true);
 }
 
-void DatePickerDialogView::UpdateConfirmButtonTextLayoutProperty(
-    const RefPtr<TextLayoutProperty>& textLayoutProperty, const RefPtr<PickerTheme>& pickerTheme)
+void DatePickerDialogView::UpdateConfirmButtonTextLayoutProperty(const RefPtr<TextLayoutProperty>& textLayoutProperty,
+    const RefPtr<PickerTheme>& pickerTheme, const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty)
 {
     CHECK_NULL_VOID(textLayoutProperty);
+    CHECK_NULL_VOID(buttonLayoutProperty);
     textLayoutProperty->UpdateContent(GetDialogNormalButtonText(true));
-    UpdateButtonTextColor(textLayoutProperty, pickerTheme, useButtonFocusArea_);
+    UpdateButtonTextColor(textLayoutProperty, pickerTheme, useButtonFocusArea_, buttonLayoutProperty);
     if (!NeedAdaptForAging()) {
         textLayoutProperty->UpdateMaxFontScale(pickerTheme->GetNormalFontScale());
     }
@@ -918,11 +927,13 @@ void DatePickerDialogView::UpdateConfirmButtonTextLayoutProperty(
 }
 
 void DatePickerDialogView::UpdateCancelButtonTextLayoutProperty(
-    const RefPtr<TextLayoutProperty>& textCancelLayoutProperty, const RefPtr<PickerTheme>& pickerTheme)
+    const RefPtr<TextLayoutProperty>& textCancelLayoutProperty, const RefPtr<PickerTheme>& pickerTheme,
+    const RefPtr<ButtonLayoutProperty>& buttonCancelLayoutProperty)
 {
     CHECK_NULL_VOID(textCancelLayoutProperty);
+    CHECK_NULL_VOID(buttonCancelLayoutProperty);
     textCancelLayoutProperty->UpdateContent(GetDialogNormalButtonText(false));
-    UpdateButtonTextColor(textCancelLayoutProperty, pickerTheme, useButtonFocusArea_);
+    UpdateButtonTextColor(textCancelLayoutProperty, pickerTheme, useButtonFocusArea_, buttonCancelLayoutProperty);
     if (!NeedAdaptForAging()) {
         textCancelLayoutProperty->UpdateMaxFontScale(pickerTheme->GetNormalFontScale());
     }
@@ -1046,6 +1057,7 @@ void DatePickerDialogView::UpdateButtonStyles(const std::vector<ButtonInfo>& but
     }
     if (buttonInfos[index].fontColor.has_value()) {
         buttonLayoutProperty->UpdateFontColor(buttonInfos[index].fontColor.value());
+        buttonLayoutProperty->UpdateFontColorFlagByUser(true);
     }
     if (buttonInfos[index].fontWeight.has_value()) {
         buttonLayoutProperty->UpdateFontWeight(buttonInfos[index].fontWeight.value());
@@ -1061,6 +1073,7 @@ void DatePickerDialogView::UpdateButtonStyles(const std::vector<ButtonInfo>& but
     }
     if (buttonInfos[index].backgroundColor.has_value()) {
         buttonRenderContext->UpdateBackgroundColor(buttonInfos[index].backgroundColor.value());
+        buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     }
 }
 
@@ -1313,12 +1326,14 @@ RefPtr<FrameNode> DatePickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     CHECK_NULL_RETURN(buttonCancelNode, nullptr);
+    auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_RETURN(buttonCancelLayoutProperty, nullptr);
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_RETURN(textCancelNode, nullptr);
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textCancelLayoutProperty, nullptr);
-    UpdateCancelButtonTextLayoutProperty(textCancelLayoutProperty, pickerTheme);
+    UpdateCancelButtonTextLayoutProperty(textCancelLayoutProperty, pickerTheme, buttonCancelLayoutProperty);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
     datePickerPattern->SetCancelNode(buttonCancelNode);
     textCancelNode->MountToParent(buttonCancelNode);
@@ -1330,7 +1345,6 @@ RefPtr<FrameNode> DatePickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     CHECK_NULL_RETURN(buttonCancelEventHub, nullptr);
     buttonCancelEventHub->SetStateEffect(true);
 
-    auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
     buttonCancelLayoutProperty->UpdateLabel(GetDialogNormalButtonText(false));
     buttonCancelLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
@@ -1356,6 +1370,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
 
     auto buttonCancelRenderContext = buttonCancelNode->GetRenderContext();
     buttonCancelRenderContext->UpdateBackgroundColor(buttonColor_);
+    buttonCancelLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     UpdateButtonStyles(buttonInfos, CANCEL_BUTTON_INDEX, buttonCancelLayoutProperty, buttonCancelRenderContext);
     UpdateButtonDefaultFocus(buttonInfos, buttonCancelNode, false);
     buttonCancelNode->MarkModifyDone();
@@ -2149,6 +2164,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateNextPrevButtonNode(std::function<v
     eventNextPrevmHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(onClickCallback));
     auto buttonNextPrevRenderContext = nextPrevButtonNode->GetRenderContext();
     buttonNextPrevRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    buttonNextPrevLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     UpdateButtonStyles(buttonInfos, CANCEL_BUTTON_INDEX, buttonNextPrevLayoutProperty, buttonNextPrevRenderContext);
     UpdateButtonDefaultFocus(buttonInfos, nextPrevButtonNode, false);
     nextPrevButtonNode->MarkModifyDone();

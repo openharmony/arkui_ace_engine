@@ -200,6 +200,7 @@ void SheetView::CreateCloseIconButtonNode(RefPtr<FrameNode> sheetNode, NG::Sheet
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
     buttonNode->GetRenderContext()->UpdateBackgroundColor(sheetTheme->GetCloseIconColor());
+    buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
     BorderRadiusProperty borderRaduis;
     borderRaduis.SetRadius(sheetTheme->GetCloseIconRadius());

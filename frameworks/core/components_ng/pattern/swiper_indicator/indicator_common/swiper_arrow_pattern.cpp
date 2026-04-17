@@ -488,6 +488,10 @@ void SwiperArrowPattern::UpdateArrowContentBySymbol(RefPtr<FrameNode>& buttonNod
     if (!swiperArrowLayoutProperty->GetEnabledValue(true)) {
         buttonNode->GetRenderContext()->UpdateBackgroundColor(
             backgroundColor_.BlendOpacity(swiperIndicatorTheme->GetArrowDisabledAlpha()));
+        auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+        if (buttonLayoutProperty) {
+            buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+        }
         symbolLayoutProperty->UpdateSymbolColorList({ swiperArrowLayoutProperty->GetArrowColorValue().BlendOpacity(
             swiperIndicatorTheme->GetArrowDisabledAlpha()) });
     }
@@ -529,6 +533,10 @@ void SwiperArrowPattern::UpdateArrowContentByImage(RefPtr<FrameNode>& buttonNode
         CHECK_NULL_VOID(swiperIndicatorTheme);
         buttonNode->GetRenderContext()->UpdateBackgroundColor(
             backgroundColor_.BlendOpacity(swiperIndicatorTheme->GetArrowDisabledAlpha()));
+        auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+        if (buttonLayoutProperty) {
+            buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+        }
         imageSourceInfo.SetFillColor(swiperArrowLayoutProperty->GetArrowColorValue().BlendOpacity(
             swiperIndicatorTheme->GetArrowDisabledAlpha()));
     }
@@ -552,6 +560,7 @@ void SwiperArrowPattern::UpdateArrowContent()
             : Color::TRANSPARENT);
     auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(buttonLayoutProperty);
+    buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     buttonLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(swiperArrowLayoutProperty->GetBackgroundSizeValue()),
             CalcLength(swiperArrowLayoutProperty->GetBackgroundSizeValue())));

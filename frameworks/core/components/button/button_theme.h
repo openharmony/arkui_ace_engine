@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,7 +46,7 @@ public:
             return theme;
         }
 
-    private:
+    protected:
         void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<ButtonTheme>& theme) const
         {
             if (!themeConstants) {
@@ -139,6 +139,7 @@ public:
             ParseSubStylePattern(buttonPattern, theme);
         }
 
+    private:
         void ParseSubStylePattern(const RefPtr<ThemeStyle>& buttonPattern, const RefPtr<ButtonTheme>& theme) const
         {
             std::unordered_map<ButtonStyleMode, Color> normalBgColorMap_ = { { ButtonStyleMode::EMPHASIZE,
@@ -197,7 +198,7 @@ public:
         return radius_;
     }
 
-    const Color& GetBgColor() const
+    virtual const Color& GetBgColor() const
     {
         return bgColor_;
     }
@@ -387,7 +388,7 @@ public:
         return innerPadding_;
     }
 
-    Color GetBgColor(ButtonStyleMode buttonStyle, ButtonRole buttonRole) const
+    virtual Color GetBgColor(ButtonStyleMode buttonStyle, ButtonRole buttonRole) const
     {
         auto bgColorMapByRole_ = bgColorMap_.find(buttonRole);
         if (bgColorMapByRole_ != bgColorMap_.end()) {
@@ -400,7 +401,7 @@ public:
         return bgColor_;
     }
 
-    const Color& GetTextColor(ButtonStyleMode buttonStyle, ButtonRole buttonRole) const
+    virtual const Color& GetTextColor(ButtonStyleMode buttonStyle, ButtonRole buttonRole) const
     {
         auto roleResult = textColorByRoleMap_.find(buttonRole);
         auto result = textColorMap_.find(buttonStyle);
@@ -547,6 +548,7 @@ public:
 
 protected:
     ButtonTheme() = default;
+    TextStyle textStyle_;
 
 private:
     Color bgColor_;
@@ -571,7 +573,6 @@ private:
     Color textBackgroundFocus_;
     Color normalBackgroundFocus_;
     Color emphasizeBackgroundFocus_;
-    TextStyle textStyle_;
     Edge padding_;
     Edge minCircleButtonPadding_;
     Edge maxCircleButtonPadding_;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -202,9 +202,7 @@ void ButtonPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     ACE_UINODE_TRACE(host);
     auto layoutProperty = host->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto buttonTheme = context->GetTheme<ButtonTheme>();
+    auto buttonTheme = host->GetTheme<ButtonTheme>(true);
     CHECK_NULL_VOID(buttonTheme);
     auto textStyle = buttonTheme->GetTextStyle();
     auto buttonType = layoutProperty->GetType().value_or(ButtonType::CAPSULE);
@@ -645,15 +643,19 @@ void ButtonPattern::UpdateTextStyle(
 {
     auto host = layoutProperty->GetHost();
     CHECK_NULL_VOID(host);
-    auto* pipeline = host->GetContextWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    auto buttonTheme = host->GetTheme<ButtonTheme>(true);
     CHECK_NULL_VOID(buttonTheme);
     if (!textLayoutProperty->HasTextColor()) {
         ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
         ButtonRole buttonRole = layoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL);
         Color fontColor = buttonTheme->GetTextColor(buttonStyle, buttonRole);
         textLayoutProperty->UpdateTextColor(fontColor);
+
+        auto textNode = textLayoutProperty->GetHost();
+        CHECK_NULL_VOID(textNode);
+        auto textRenderContext = textNode->GetRenderContext();
+        CHECK_NULL_VOID(textRenderContext);
+        textRenderContext->UpdateForegroundColor(fontColor);
     }
     if (!textLayoutProperty->HasFontSize()) {
         ControlSize controlSize = layoutProperty->GetControlSize().value_or(ControlSize::NORMAL);
@@ -1037,13 +1039,11 @@ void ButtonPattern::HandleBackgroundColor()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     ACE_UINODE_TRACE(host);
-    auto* pipeline = host->GetContextWithCheck();
-    CHECK_NULL_VOID(pipeline);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    auto buttonTheme = host->GetTheme<ButtonTheme>(true);
     CHECK_NULL_VOID(buttonTheme);
     ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
     ButtonRole buttonRole = layoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL);
@@ -1455,6 +1455,44 @@ void ButtonPattern::OnColorConfigurationUpdate()
         themeBgColor_ = backgroundColor;
         themeTextColor_ = textColor;
     }
+}
+
+bool ButtonPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    bool result = false;
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return false;
+    }
+    auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, result);
+    if ((!layoutProperty->GetFontColorFlagByUser().value_or(false)) ||
+        (!layoutProperty->GetBackgroundColorFlagByUser().value_or(false))) {
+        result = true;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, result);
+    auto buttonTheme = host->GetTheme<ButtonTheme>(true);
+    CHECK_NULL_RETURN(buttonTheme, result);
+    ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
+    ButtonRole buttonRole = layoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL);
+    if (layoutProperty->GetLabel().has_value() && !layoutProperty->GetFontColorFlagByUser().value_or(false)) {
+        auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
+        CHECK_NULL_RETURN(textNode, result);
+        auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_RETURN(textLayoutProperty, result);
+        Color fontColor = buttonTheme->GetTextColor(buttonStyle, buttonRole);
+        textLayoutProperty->UpdateTextColor(fontColor);
+
+        auto textRenderContext = textNode->GetRenderContext();
+        CHECK_NULL_RETURN(textRenderContext, result);
+        textRenderContext->UpdateForegroundColor(fontColor);
+    }
+    if (!layoutProperty->GetBackgroundColorFlagByUser().value_or(false)) {
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, result);
+        renderContext->UpdateBackgroundColor(buttonTheme->GetBgColor(buttonStyle, buttonRole));
+    }
+    return result;
 }
 
 void ButtonPattern::OnColorConfigurationUpdateTextColor(const RefPtr<FrameNode>& host,

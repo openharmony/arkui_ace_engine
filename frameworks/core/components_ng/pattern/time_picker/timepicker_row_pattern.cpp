@@ -139,6 +139,7 @@ void TimePickerRowPattern::SetButtonIdeaSize()
             buttonLayoutProperty->UpdateUserDefinedIdealSize(
                 CalcSize(CalcLength(width - PRESS_INTERVAL.ConvertToPx()), CalcLength(buttonHeight)));
             buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+            buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
         } else {
             auto isFocusButton = haveFocus_ && (currentFocusButtonNode == buttonNode);
             UpdateFocusStyles(buttonLayoutProperty, timePickerColumnNode, height, isFocusButton);
@@ -633,6 +634,7 @@ void TimePickerRowPattern::CreateAmPmNode()
             buttonLayoutProperty->UpdateUserDefinedIdealSize(
                 CalcSize(CalcLength(SetAmPmButtonIdeaSize()), CalcLength(height - PRESS_INTERVAL)));
             buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
+            buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
             buttonNode->MarkModifyDone();
             buttonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }

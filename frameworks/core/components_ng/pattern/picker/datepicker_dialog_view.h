@@ -116,8 +116,8 @@ private:
         const RefPtr<FrameNode>& dateNode, const RefPtr<FrameNode>& dialogNode, const RefPtr<FrameNode>& contentColumn,
         std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
-    static void UpdateConfirmButtonTextLayoutProperty(
-        const RefPtr<TextLayoutProperty>& textLayoutProperty, const RefPtr<PickerTheme>& pickerTheme);
+    static void UpdateConfirmButtonTextLayoutProperty(const RefPtr<TextLayoutProperty>& textLayoutProperty,
+        const RefPtr<PickerTheme>& pickerTheme, const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty);
     static void UpdateButtonLayoutProperty(
         const RefPtr<ButtonLayoutProperty>& buttonConfirmLayoutProperty, const RefPtr<PickerTheme>& pickerTheme);
     static void UpdateConfirmButtonMargin(
@@ -169,8 +169,8 @@ private:
     static const Dimension ConvertTitleFontScaleValue(const Dimension& fontSizeValue);
     static const Dimension AdjustFontSizeScale(const Dimension& fontSizeValue, double fontScale);
     static void GetUserSettingLimit();
-    static void UpdateCancelButtonTextLayoutProperty(
-        const RefPtr<TextLayoutProperty>& textCancelLayoutProperty, const RefPtr<PickerTheme>& pickerTheme);
+    static void UpdateCancelButtonTextLayoutProperty(const RefPtr<TextLayoutProperty>& textCancelLayoutProperty,
+        const RefPtr<PickerTheme>& pickerTheme, const RefPtr<ButtonLayoutProperty>& buttonCancelLayoutProperty);
     static void UpdateTimePickerChildrenStatus(const RefPtr<FrameNode>& timePickerNode);
     static void SwitchFocusStatus(
         const RefPtr<FrameNode>& timePickerNode, const RefPtr<FrameNode>& monthAndDayPickerNode);
