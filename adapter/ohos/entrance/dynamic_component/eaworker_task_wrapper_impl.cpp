@@ -44,22 +44,24 @@ void GetAniEnv(int32_t hostInstanceId, bool attachCurrentThread, ani_env **resul
     ani_vm *vm = nullptr;
     GetVM(hostInstanceId, &vm);
     CHECK_NULL_VOID(vm);
-    ani_status status = ANI_OK;
-    if (!attachCurrentThread) {
-        ani_option interopEnabled {"--interop=disable", nullptr};
-        ani_options aniArgs {1, &interopEnabled};
-        status = vm->AttachCurrentThread(&aniArgs, ANI_VERSION_1, result);
-        if (status == ANI_OK) {
-            return;
-        }
+    ani_status status = ANI_ERROR;
 
-        TAG_LOGW(AceLogTag::ACE_DYNAMIC_COMPONENT, "AttachCurrentThread failed, status: %{public}d", status);
+    if ((status = vm->GetEnv(ANI_VERSION_1, result)) == ANI_OK) {
+        return;
     }
 
-    if ((status = vm->GetEnv(ANI_VERSION_1, result)) != ANI_OK) {
+    if (attachCurrentThread) {
         TAG_LOGW(AceLogTag::ACE_DYNAMIC_COMPONENT, "GetAniEnv from vm failed, status: %{public}d", status);
         return;
     }
+
+    ani_option interopEnabled {"--interop=disable", nullptr};
+    ani_options aniArgs {1, &interopEnabled};
+    if ((status = vm->AttachCurrentThread(&aniArgs, ANI_VERSION_1, result)) == ANI_OK) {
+        return;
+    }
+
+    TAG_LOGW(AceLogTag::ACE_DYNAMIC_COMPONENT, "AttachCurrentThread failed, status: %{public}d", status);
 }
 
 bool CheckWorkerId(int32_t workerId)
