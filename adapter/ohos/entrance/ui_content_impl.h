@@ -607,7 +607,7 @@ protected:
     VMType vmType_ = VMType::NORMAL;
 
 private:
-    void ProcessWindowSizeLayoutBreakPointChange();
+    void ProcessWindowSizeLayoutBreakPointChange(double density);
 };
 
 } // namespace OHOS::Ace
