@@ -150,6 +150,7 @@ private:
     void ChangeSecondChildVisibility(bool stopAndStart);
     void UpdateTextTranslateXY(float offsetX, bool cancel = false, bool isFirstTextNode = true);
     void PropertyCancelAnimationFinish();
+    bool AnimationParamChange();
     bool OnlyPlayStatusChange();
     void ChangeAnimationPlayStatus();
     void StoreProperties();
@@ -208,6 +209,7 @@ private:
     double scrollAmount_ = DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx();
     int32_t loop_ = -1;
     MarqueeDirection direction_ = MarqueeDirection::LEFT;
+    int32_t delay_ = 0;
     TextDirection currentTextDirection_ = TextDirection::LTR;
     ACE_DISALLOW_COPY_AND_MOVE(MarqueePattern);
     int32_t lastWindowHeight_ = 0.0;
