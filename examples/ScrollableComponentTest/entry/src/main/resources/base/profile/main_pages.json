@@ -212,6 +212,15 @@
     "pages/scrollable/ScrollSpeak/Scroll/scrollNo",
     "pages/scrollable/ScrollSpeak/WaterFlow/waterFlowIndex",
     "pages/scrollable/ScrollSpeak/WaterFlow/waterFlowHori",
-    "pages/scrollable/ScrollSpeak/WaterFlow/waterFlowNo"
+    "pages/scrollable/ScrollSpeak/WaterFlow/waterFlowNo",
+    "pages/scrollable/EventReport/scroll",
+    "pages/scrollable/EventReport/scroll-nestedScroll",
+    "pages/scrollable/EventReport/list",
+    "pages/scrollable/EventReport/list-nestedScroll",
+    "pages/scrollable/EventReport/grid",
+    "pages/scrollable/EventReport/grid-nestedScroll",
+    "pages/scrollable/EventReport/waterflow",
+    "pages/scrollable/EventReport/waterflow-nestedScroll",
+    "pages/scrollable/EventReport/index"
   ]
 }
