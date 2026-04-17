@@ -28,6 +28,8 @@ interface EnvTypeMap {
   'system.window.size.px': WindowSizePxEnv;
   'system.window.avoidarea': WindowAvoidAreaVpEnv;
   'system.window.avoidarea.px': WindowAvoidAreaPxEnv;
+  'system.window.focused': WindowFocusedEnv;
+ 	'system.window.highlighted': WindowHighlightedEnv;
   'system.window.systemdensity': SystemDensityEnv;
   'system.window.displayid': DisplayIdEnv;
 }
@@ -93,6 +95,24 @@ const envFactoryMap: {
     }
     stateMgmtConsole.debug(`create WindowAvoidAreaPxEnv.`);
     return new WindowAvoidAreaPxEnv(context);
+  },
+  'system.window.focused': (context: UIContext) => {
+    const WindowFocusedEnv = requireNapi('window.windowfocusenv').WindowFocusedEnv;
+    if (typeof WindowFocusedEnv !== 'function') {
+      // internal error
+      throw new BusinessError(REQUIRE_INTERNAL_ERROR, 'WindowFocusedEnv not found (requireNapi failed).');
+    }
+    stateMgmtConsole.debug(`create WindowFocusedEnv.`);
+    return new WindowFocusedEnv(context);
+  },
+  'system.window.highlighted': (context: UIContext) => {
+    const WindowHighlightedEnv = requireNapi('window.windowfocusenv').WindowHighlightedEnv;
+    if (typeof WindowHighlightedEnv !== 'function') {
+      // internal error
+      throw new BusinessError(REQUIRE_INTERNAL_ERROR, 'WindowHighlightedEnv not found (requireNapi failed).');
+    }
+    stateMgmtConsole.debug(`create WindowHighlightedEnv.`);
+    return new WindowHighlightedEnv(context);
   },
   'system.window.systemdensity': (context: UIContext) => {
     const SystemDensityEnv = requireNapi('window.systemdensityenv').SystemDensityEnv;
