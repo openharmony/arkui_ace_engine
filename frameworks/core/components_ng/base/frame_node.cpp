@@ -1628,6 +1628,9 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFil
     json->Put("isMeasureBoundary", isMeasureBoundary_);
     json->Put("hasPendingRequest", hasPendingRequest_);
     json->Put("isFirstBuilding", isFirstBuilding_);
+    if (!GetInspectorLabel().empty()) {
+        json->Put("inspectorLabel", GetInspectorLabel().c_str());
+    }
     ExtraCustomPropertyToJsonValue(json, filter);
     if (IsCNode() || !IsJsCustomPropertyUpdated()) {
         auto jsonNode = JsonUtil::Create(true);

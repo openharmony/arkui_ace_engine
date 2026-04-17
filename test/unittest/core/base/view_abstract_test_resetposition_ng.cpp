@@ -20,12 +20,18 @@
 #include "core/components_ng/syntax/if_else_model_ng.h"
 #include "core/components_ng/syntax/if_else_node.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/interfaces/native/node/node_api.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 const std::string NODE_TAG("node");
+constexpr int32_t INSPECTOR_LABEL_NODE_ID = 1;
+const std::string INSPECTOR_LABEL_WITHOUT_MAIN_NODE = "label_without_main_node";
+const std::string INSPECTOR_LABEL_VALUE = "inspector_label_value";
+const std::string MODIFIER_INSPECTOR_LABEL_VALUE = "modifier_inspector_label";
+const std::string EMPTY_INSPECTOR_LABEL = "";
 void ViewAbstractTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
@@ -553,6 +559,41 @@ HWTEST_F(ViewAbstractTestNg, SetInspectorId001, TestSize.Level1)
     auto node = FrameNode::CreateFrameNode("TestNode", 1, AceType::MakeRefPtr<Pattern>());
     ViewStackProcessor::GetInstance()->Push(node);
     ViewAbstract::SetInspectorId("test1");
+}
+
+/**
+ * @tc.name: SetInspectorLabel001
+ * @tc.desc: Test SetInspectorLabel when main element node is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, SetInspectorLabel001, TestSize.Level1)
+{
+    ViewStackProcessor::GetInstance()->ClearStack();
+    auto node = FrameNode::CreateFrameNode(NODE_TAG, INSPECTOR_LABEL_NODE_ID, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(node, nullptr);
+    EXPECT_TRUE(node->GetInspectorLabel().empty());
+
+    ViewAbstract::SetInspectorLabel(INSPECTOR_LABEL_WITHOUT_MAIN_NODE);
+
+    EXPECT_TRUE(node->GetInspectorLabel().empty());
+}
+
+/**
+ * @tc.name: SetInspectorLabel002
+ * @tc.desc: Test SetInspectorLabel when main element node exists.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, SetInspectorLabel002, TestSize.Level1)
+{
+    auto node = FrameNode::CreateFrameNode(NODE_TAG, INSPECTOR_LABEL_NODE_ID, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(node, nullptr);
+    ViewStackProcessor::GetInstance()->Push(node);
+
+    ViewAbstract::SetInspectorLabel(INSPECTOR_LABEL_VALUE);
+    EXPECT_EQ(node->GetInspectorLabel(), INSPECTOR_LABEL_VALUE);
+
+    ViewAbstract::SetInspectorLabel(EMPTY_INSPECTOR_LABEL);
+    EXPECT_EQ(node->GetInspectorLabel(), EMPTY_INSPECTOR_LABEL);
 }
 
 /**

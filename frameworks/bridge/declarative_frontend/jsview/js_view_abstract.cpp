@@ -10221,6 +10221,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("clickEffect", &JSViewAbstract::JsClickEffect);
     JSClass<JSViewAbstract>::StaticMethod("enableClickSoundEffect", &JSViewAbstract::JsSetEnableClickSoundEffect);
     JSClass<JSViewAbstract>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
+    JSClass<JSViewAbstract>::StaticMethod("inspectorLabel", &JSViewAbstract::JsInspectorLabel);
     JSClass<JSViewAbstract>::StaticMethod("geometryTransition", &JSViewAbstract::JsGeometryTransition);
     JSClass<JSViewAbstract>::StaticMethod("onAreaChange", &JSViewAbstract::JsOnAreaChange);
     JSClass<JSViewAbstract>::StaticMethod("onSizeChange", &JSViewAbstract::JsOnSizeChange);
@@ -13192,6 +13193,23 @@ void JSViewAbstract::JsDebugLine(const JSCallbackInfo& info)
     }
 
     ViewAbstractModel::GetInstance()->SetDebugLine(debugLine);
+}
+
+void JSViewAbstract::JsInspectorLabel(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (info[0]->IsUndefined()) {
+        ViewAbstractModel::GetInstance()->SetInspectorLabel("");
+        return;
+    }
+    const JSRef<JSVal>& jsValue = info[0];
+    std::string inspectorLabel;
+    if (!ParseJsString(jsValue, inspectorLabel)) {
+        return;
+    }
+    ViewAbstractModel::GetInstance()->SetInspectorLabel(inspectorLabel);
 }
 
 void JSViewAbstract::JsOpacityPassThrough(const JSCallbackInfo& info)

@@ -3022,6 +3022,20 @@ class IdModifier extends ModifierWithKey<string> {
   }
 }
 
+class InspectorLabelModifier extends ModifierWithKey<string> {
+  constructor(value: string) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('inspectorLabel');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetInspectorLabel(node);
+    } else {
+      getUINativeModule().common.setInspectorLabel(node, this.value);
+    }
+  }
+}
+
 class KeyModifier extends ModifierWithKey<string> {
   constructor(value: string) {
     super(value);
@@ -5780,6 +5794,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     } else {
       modifierWithKey(this._modifiersWithKeys, IdModifier.identity, IdModifier, undefined);
     }
+    return this;
+  }
+
+  inspectorLabel(value: string): this {
+    modifierWithKey(this._modifiersWithKeys, InspectorLabelModifier.identity, InspectorLabelModifier, value);
     return this;
   }
 

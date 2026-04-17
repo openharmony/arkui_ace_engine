@@ -2885,6 +2885,22 @@ class IdModifier extends ModifierWithKey {
   }
 }
 IdModifier.identity = Symbol('id');
+
+class InspectorLabelModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetInspectorLabel(node);
+    }
+    else {
+      getUINativeModule().common.setInspectorLabel(node, this.value);
+    }
+  }
+}
+InspectorLabelModifier.identity = Symbol('inspectorLabel');
+
 class KeyModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -5334,6 +5350,10 @@ class ArkComponent {
     else {
       modifierWithKey(this._modifiersWithKeys, IdModifier.identity, IdModifier, undefined);
     }
+    return this;
+  }
+  inspectorLabel(value) {
+    modifierWithKey(this._modifiersWithKeys, InspectorLabelModifier.identity, InspectorLabelModifier, value);
     return this;
   }
   geometryTransition(id, options) {

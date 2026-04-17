@@ -5240,6 +5240,23 @@ void ResetId(ArkUINodeHandle node)
     ViewAbstract::SetInspectorId(frameNode, id);
 }
 
+void SetInspectorLabel(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    std::string valueStr = value;
+    frameNode->SetInspectorLabel(valueStr);
+}
+
+void ResetInspectorLabel(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string defaultStr = "";
+    frameNode->SetInspectorLabel(defaultStr);
+}
+
 void SetKey(ArkUINodeHandle node, ArkUI_CharPtr key)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -8291,6 +8308,14 @@ ArkUI_CharPtr GetKey(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, nullptr);
     g_strValue = ViewAbstract::GetKey(frameNode);
+    return g_strValue.c_str();
+}
+
+ArkUI_CharPtr GetInspectorLabel(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    g_strValue = frameNode->GetInspectorLabel();
     return g_strValue.c_str();
 }
 
@@ -11484,6 +11509,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetAccessibilityDescription = ResetAccessibilityDescription,
         .setId = SetId,
         .resetId = ResetId,
+        .setInspectorLabel = SetInspectorLabel,
+        .resetInspectorLabel = ResetInspectorLabel,
         .setKey = SetKey,
         .resetKey = ResetKey,
         .setRestoreId = SetRestoreId,
@@ -11660,6 +11687,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .getPaddingDimension = GetPaddingDimension,
         .getConfigSize = GetConfigSize,
         .getKey = GetKey,
+        .getInspectorLabel = GetInspectorLabel,
         .getEnabled = GetEnabled,
         .getMargin = GetMargin,
         .getMarginDimension = GetMarginDimension,
@@ -12027,6 +12055,8 @@ const CJUICommonModifier* GetCJUICommonModifier()
         .resetAccessibilityDescription = ResetAccessibilityDescription,
         .setId = SetId,
         .resetId = ResetId,
+        .setInspectorLabel = SetInspectorLabel,
+        .resetInspectorLabel = ResetInspectorLabel,
         .setKey = SetKey,
         .resetKey = ResetKey,
         .setRestoreId = SetRestoreId,

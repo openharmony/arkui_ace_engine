@@ -619,6 +619,7 @@ public:
     static void JsDefaultFocus(const JSCallbackInfo& info);
     static void JsGroupDefaultFocus(const JSCallbackInfo& info);
     static void JsDebugLine(const JSCallbackInfo& info);
+    static void JsInspectorLabel(const JSCallbackInfo& info);
     static void JsOpacityPassThrough(const JSCallbackInfo& info);
     static void JsTransitionPassThrough(const JSCallbackInfo& info);
     static void JsKeyboardShortcut(const JSCallbackInfo& info);

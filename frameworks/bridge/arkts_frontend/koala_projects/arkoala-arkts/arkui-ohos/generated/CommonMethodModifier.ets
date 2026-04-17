@@ -328,6 +328,7 @@ export class CommonMethodModifier implements CommonMethod {
     public _toolbar_0_0value?: CustomBuilder | undefined
     public _onGestureCollectIntercept_0_0value?: GestureCollectInterceptCallback
     public _shouldRecognizerParallelWith_0_0value?: ShouldRecognizerParallelWithCallback
+    public _inspectorLabel_0_0value?: string | undefined
     applyModifierPatch(node: object): void {
         this._state.addRef()
         const peer = node as ArkCommonMethodPeer;
@@ -4044,6 +4045,23 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (flagArray[217] != 0) {
+            switch (flagArray[217]) {
+                case 1: {
+                    peer.setInspectorLabelAttribute((this._inspectorLabel_0_0value as string | undefined));
+                    flagArray[217] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[217] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[217] = 0;
+                    peer.setInspectorLabelAttribute(undefined);
+                }
+            }
+        }
     }
     mergeModifier(modifier: CommonMethodModifier): void {
         this._state = modifier._state;
@@ -6683,6 +6701,18 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (flagArray[217] != 0) {
+            switch (flagArray[217]) {
+                case 1:
+                case 3: {
+                    this.inspectorLabel((modifier._inspectorLabel_0_0value as string | undefined));
+                    break;
+                }
+                default: {
+                    this.inspectorLabel(undefined);
+                }
+            }
+        }
     }
     width(value: Length | LayoutPolicy | undefined): this {
         if (((this._flagArray[0]) == (0)) || (true)) {
@@ -8915,6 +8945,16 @@ export class CommonMethodModifier implements CommonMethod {
             this._state.fireChange()
         } else {
             this._flagArray[216] = 3
+        }
+        return this
+    }
+    inspectorLabel(label: string | undefined): this {
+        if (((this._flagArray[217]) == (0)) || ((this._inspectorLabel_0_0value) !== (label))) {
+            this._flagArray[217] = 1
+            this._inspectorLabel_0_0value = label
+            this._state.fireChange()
+        } else {
+            this._flagArray[217] = 3
         }
         return this
     }
