@@ -82,7 +82,7 @@ private:
         const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& timePickerNode,
         const std::vector<ButtonInfo>& buttonInfos, std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
-    static bool NeedAdaptForAging();
+    static bool NeedAdaptForAging(bool skipOptimizeFlag = false);
     static std::function<void()> CreateAndSetTimePickerSwitchEvent(const RefPtr<FrameNode>& buttonTitleNode,
         const RefPtr<FrameNode>& timePicker, const RefPtr<FrameNode>& buttonCancelNode,
         const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<FrameNode>& cancelNextDividerNode,
@@ -99,7 +99,7 @@ private:
     static const Dimension ConvertFontSizeLimit(const Dimension& fontSizeValue,
         const Dimension& fontSizeLimit, bool isUserSetFont = false);
     static const Dimension ConvertFontScaleValue(const Dimension& fontSizeValue,
-        const Dimension& fontSizeLimit = 0.0_vp, bool isUserSetFont = false);
+        const Dimension& fontSizeLimit = 0.0_vp, bool isUserSetFont = false, bool skipOptimizeFlag = false);
     static const Dimension ConvertTitleFontScaleValue(const Dimension& fontSizeValue);
     static const Dimension AdjustFontSizeScale(const Dimension& fontSizeValue, double fontScale);
     static void GetUserSettingLimit();

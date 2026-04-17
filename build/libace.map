@@ -470,6 +470,7 @@
       "OHOS::Ace::FontManager::AddFontNodeNG(OHOS::Ace::WeakPtr<OHOS::Ace::NG::UINode> const&)";
       "OHOS::Ace::FontManager::AddVariationNode(OHOS::Ace::WeakPtr<OHOS::Ace::RenderNode> const&)";
       "OHOS::Ace::FontManager::GetAppCustomFont() const";
+      "OHOS::Ace::FontManager::GetFallbackLineSpacingStyleOptimizeFlag()";
       "OHOS::Ace::FontManager::IsUseAppCustomFont() const";
       "OHOS::Ace::FontManager::RegisterCallback(OHOS::Ace::WeakPtr<OHOS::Ace::RenderNode> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::function<void ()> const&)";
       "OHOS::Ace::FontManager::RemoveVariationNode(OHOS::Ace::WeakPtr<OHOS::Ace::RenderNode> const&)";
@@ -2086,6 +2087,7 @@
       "OHOS::Ace::NG::TextPattern::UpdateSelectOverlayOrCreate(OHOS::Ace::NG::SelectOverlayInfo&, bool)";
       "OHOS::Ace::NG::TextPattern::UpdateSpanItemDragStatus(std::__h::list<OHOS::Ace::ResultObject, std::__h::allocator<OHOS::Ace::ResultObject>> const&, bool)";
       "OHOS::Ace::NG::TextPattern::OnInjectionEvent(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::Ace::NG::TextPattern::GetFallbackLineSpacingStyleOptimizeFlag()";
       "OHOS::Ace::NG::TextSelectOverlay::AllowSearch()";
       "OHOS::Ace::NG::TextSelectOverlay::AllowShare()";
       "OHOS::Ace::NG::TextSelectOverlay::AllowTranslate()";

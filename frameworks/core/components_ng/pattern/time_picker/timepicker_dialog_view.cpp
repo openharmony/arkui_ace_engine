@@ -35,6 +35,9 @@ const int32_t MARGIN_HALF = 2;
 const int32_t BUFFER_NODE_NUMBER = 2;
 constexpr size_t ACCEPT_BUTTON_INDEX = 0;
 constexpr size_t CANCEL_BUTTON_INDEX = 1;
+constexpr Dimension TITLE_VERTICAL_SPACE = 7.0_vp;
+constexpr Dimension TITLE_BUTTON_VERTICAL_PADDING = 8.0_vp;
+constexpr Dimension TITLE_BUTTON_HORIZONTAL_MARGIN = 16.0_vp;
 } // namespace
 thread_local bool TimePickerDialogView::switchFlag_ = false;
 thread_local bool TimePickerDialogView::useButtonFocusArea_ = false;
@@ -305,9 +308,19 @@ RefPtr<FrameNode> TimePickerDialogView::CreateNextPrevButtonNode(std::function<v
     timePickerRowPattern->SetNextPrevButtonNode(nextPrevButtonNode);
     textNextPrevLayoutProperty->UpdateContent(GetDialogAgingButtonText(true));
     textNextPrevLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+    if (!NeedAdaptForAging()) {
+        textNextPrevLayoutProperty->UpdateMaxFontScale(pickerTheme->GetNormalFontScale());
+    }
     textNextPrevLayoutProperty->UpdateFontSize(
-        ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize()));
+        ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize(), 0.0_vp, false, true));
     textNextPrevLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
+
+    auto fontManager = pipeline->GetFontManager();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) && fontManager &&
+        fontManager->GetFallbackLineSpacingStyleOptimizeFlag()) {
+        textNextPrevLayoutProperty->UpdateIncludeFontPadding(true);
+        textNextPrevLayoutProperty->UpdateFallbackLineSpacing(true);
+    }
     textNextPrevNode->MountToParent(nextPrevButtonNode);
     auto eventNextPrevHub = nextPrevButtonNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(eventNextPrevHub, nullptr);
@@ -320,14 +333,20 @@ RefPtr<FrameNode> TimePickerDialogView::CreateNextPrevButtonNode(std::function<v
     auto buttonNextPrevLayoutProperty = nextPrevButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
     buttonNextPrevLayoutProperty->UpdateLabel(GetDialogAgingButtonText(true));
     buttonNextPrevLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    if (nextPrevButtonNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         buttonNextPrevLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         buttonNextPrevLayoutProperty->UpdateType(ButtonType::CAPSULE);
     }
     buttonNextPrevLayoutProperty->UpdateFlexShrink(1.0);
     UpdateConfirmButtonMargin(buttonNextPrevLayoutProperty, dialogTheme);
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        buttonNextPrevLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(pickerTheme->GetButtonWidth()), std::nullopt));
+        buttonNextPrevLayoutProperty->UpdateMaxLines(1);
+        buttonNextPrevLayoutProperty->UpdateFontSize(
+            ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize(), 0.0_vp, false, true));
+    } else if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
             buttonNextPrevLayoutProperty->UpdateUserDefinedIdealSize(
                 CalcSize(CalcLength(pickerTheme->GetButtonWidth()), CalcLength(pickerTheme->GetButtonHeight())));
     } else {
@@ -475,7 +494,13 @@ RefPtr<FrameNode> TimePickerDialogView::CreateTitleButtonNode(const RefPtr<Frame
     textLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     auto titleNodeRenderContext = textTitleNode->GetRenderContext();
     titleNodeRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    textLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+
+    auto textPattern = textTitleNode->GetPattern<TextPattern>();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) && textPattern &&
+        textPattern->GetFallbackLineSpacingStyleOptimizeFlag()) {
+        textLayoutProperty->UpdateIncludeFontPadding(true);
+        textLayoutProperty->UpdateFallbackLineSpacing(true);
+    }
 
     textLayoutProperty->UpdateTextColor(pickerTheme->GetTitleStyle().GetTextColor());
     textLayoutProperty->UpdateFontSize(
@@ -486,16 +511,42 @@ RefPtr<FrameNode> TimePickerDialogView::CreateTitleButtonNode(const RefPtr<Frame
     auto buttonTitleRenderContext = buttonTitleNode->GetRenderContext();
     CHECK_NULL_RETURN(buttonTitleRenderContext, nullptr);
     buttonTitleRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    MarginProperty margin;
-    margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
-    margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
-    margin.top = CalcLength(pickerTheme->GetTimePickerTitleMarginTop() / MARGIN_HALF);
-    margin.bottom = CalcLength(pickerTheme->GetTimePickerTitleMarginBottom() / MARGIN_HALF);
-    buttonTitleNode->GetLayoutProperty()->UpdateMargin(margin);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        buttonTitleNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-            CalcSize(std::nullopt, CalcLength(pickerTitleHeight_)));
+
+    auto layoutProps = buttonTitleNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProps, nullptr);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        bool needAdaptForAging = false;
+        if (GreatOrEqual(pipeline->GetFontScale(), pickerTheme->GetMaxOneFontScale()) &&
+            Dimension(pipeline->GetRootHeight()).ConvertToVp() > pickerTheme->GetDeviceHeightLimit() &&
+            (pipeline->IsFollowSystem() &&
+            (GreatOrEqual(pipeline->GetMaxAppFontScale(), pickerTheme->GetMaxOneFontScale())))) {
+            needAdaptForAging = true;
+        }
+        if (!needAdaptForAging) {
+            PaddingProperty adaptPadding;
+            adaptPadding.top = CalcLength(TITLE_BUTTON_VERTICAL_PADDING);
+            adaptPadding.bottom = CalcLength(TITLE_BUTTON_VERTICAL_PADDING);
+            layoutProps->UpdatePadding(adaptPadding);
+        }
+        MarginProperty adaptMargin;
+        adaptMargin.top = CalcLength(TITLE_VERTICAL_SPACE);
+        adaptMargin.bottom = CalcLength(TITLE_VERTICAL_SPACE);
+        adaptMargin.left = CalcLength(TITLE_BUTTON_HORIZONTAL_MARGIN);
+        adaptMargin.right = CalcLength(TITLE_BUTTON_HORIZONTAL_MARGIN);
+        layoutProps->UpdateMargin(adaptMargin);
+        layoutProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, std::nullopt));
+    } else {
+        MarginProperty margin;
+        margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
+        margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
+        margin.top = CalcLength(pickerTheme->GetTimePickerTitleMarginTop() / MARGIN_HALF);
+        margin.bottom = CalcLength(pickerTheme->GetTimePickerTitleMarginBottom() / MARGIN_HALF);
+        layoutProps->UpdateMargin(margin);
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            layoutProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(pickerTitleHeight_)));
+        }
     }
+
     textTitleNode->MountToParent(buttonTitleNode);
     return buttonTitleNode;
 }
@@ -721,7 +772,13 @@ void TimePickerDialogView::UpdateButtonLayoutProperty(
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
     UpdateConfirmButtonMargin(buttonConfirmLayoutProperty, dialogTheme);
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        buttonConfirmLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(pickerTheme->GetButtonWidth()), std::nullopt));
+        buttonConfirmLayoutProperty->UpdateMaxLines(1);
+        buttonConfirmLayoutProperty->UpdateFontSize(
+            ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize(), 0.0_vp, false, true));
+    } else if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         buttonConfirmLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(pickerTheme->GetButtonWidth()), CalcLength(pickerTheme->GetButtonHeight())));
     } else {
@@ -759,8 +816,18 @@ void TimePickerDialogView::UpdateConfirmButtonTextLayoutProperty(
         textLayoutProperty->UpdateMaxFontScale(pickerTheme->GetNormalFontScale());
     }
     textLayoutProperty->UpdateFontSize(
-        ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize()));
+        ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize(), 0.0_vp, false, true));
     textLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
+
+    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto fontManager = pipeline->GetFontManager();
+    CHECK_NULL_VOID(fontManager);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
+        fontManager->GetFallbackLineSpacingStyleOptimizeFlag()) {
+        textLayoutProperty->UpdateIncludeFontPadding(true);
+        textLayoutProperty->UpdateFallbackLineSpacing(true);
+    }
 }
 
 void TimePickerDialogView::UpdateCancelButtonMargin(
@@ -808,14 +875,20 @@ RefPtr<FrameNode> TimePickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
     buttonCancelLayoutProperty->UpdateLabel(GetDialogNormalButtonText(false));
     buttonCancelLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    if (buttonCancelNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         buttonCancelLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         buttonCancelLayoutProperty->UpdateType(ButtonType::CAPSULE);
     }
     buttonCancelLayoutProperty->UpdateFlexShrink(1.0);
     UpdateCancelButtonMargin(buttonCancelLayoutProperty, dialogTheme);
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        buttonCancelLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(pickerTheme->GetButtonWidth()), std::nullopt));
+        buttonCancelLayoutProperty->UpdateMaxLines(1);
+        buttonCancelLayoutProperty->UpdateFontSize(
+            ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize(), 0.0_vp, false, true));
+    } else if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
             buttonCancelLayoutProperty->UpdateUserDefinedIdealSize(
                 CalcSize(CalcLength(pickerTheme->GetButtonWidth()), CalcLength(pickerTheme->GetButtonHeight())));
     } else {
@@ -844,8 +917,19 @@ void TimePickerDialogView::UpdateCancelButtonTextLayoutProperty(
     if (!NeedAdaptForAging()) {
         textCancelLayoutProperty->UpdateMaxFontScale(pickerTheme->GetNormalFontScale());
     }
-    textCancelLayoutProperty->UpdateFontSize(pickerTheme->GetOptionStyle(false, false).GetFontSize());
+    textCancelLayoutProperty->UpdateFontSize(
+        ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize(), 0.0_vp, false, true));
     textCancelLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
+
+    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto fontManager = pipeline->GetFontManager();
+    CHECK_NULL_VOID(fontManager);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
+        fontManager->GetFallbackLineSpacingStyleOptimizeFlag()) {
+        textCancelLayoutProperty->UpdateIncludeFontPadding(true);
+        textCancelLayoutProperty->UpdateFallbackLineSpacing(true);
+    }
 }
 
 void TimePickerDialogView::UpdateButtonStyles(const std::vector<ButtonInfo>& buttonInfos, size_t index,
@@ -865,7 +949,8 @@ void TimePickerDialogView::UpdateButtonStyles(const std::vector<ButtonInfo>& but
     }
     UpdateButtonStyleAndRole(buttonInfos, index, buttonLayoutProperty, buttonRenderContext, buttonTheme);
     if (buttonInfos[index].fontSize.has_value()) {
-        buttonLayoutProperty->UpdateFontSize(ConvertFontScaleValue(buttonInfos[index].fontSize.value()));
+        buttonLayoutProperty->UpdateFontSize(
+            ConvertFontScaleValue(buttonInfos[index].fontSize.value(), 0.0_vp, false, true));
     }
     if (buttonInfos[index].fontColor.has_value()) {
         buttonLayoutProperty->UpdateFontColor(buttonInfos[index].fontColor.value());
@@ -1085,10 +1170,16 @@ bool TimePickerDialogView::GetIsUserSetTextProperties(const PickerTextProperties
     }
     return false;
 }
-bool TimePickerDialogView::NeedAdaptForAging()
+
+bool TimePickerDialogView::NeedAdaptForAging(bool skipOptimizeFlag)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
+    auto fontManager = pipeline->GetFontManager();
+    if (!skipOptimizeFlag && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)
+        && fontManager && fontManager->GetFallbackLineSpacingStyleOptimizeFlag()) {
+        return false;
+    }
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, false);
     auto maxAppFontScale = pipeline->GetMaxAppFontScale();
@@ -1114,7 +1205,7 @@ const Dimension TimePickerDialogView::AdjustFontSizeScale(const Dimension& fontS
 }
 
 const Dimension TimePickerDialogView::ConvertFontScaleValue(
-    const Dimension& fontSizeValue, const Dimension& fontSizeLimit, bool isUserSetFont)
+    const Dimension& fontSizeValue, const Dimension& fontSizeLimit, bool isUserSetFont, bool skipOptimizeFlag)
 {
     auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, fontSizeValue);
@@ -1131,7 +1222,23 @@ const Dimension TimePickerDialogView::ConvertFontScaleValue(
     if (pipeline->IsFollowSystem() && (!NearZero(maxAppFontScale))) {
         fontSizeScale = std::min(fontSizeScale, maxAppFontScale);
     }
-    if (NeedAdaptForAging()) {
+
+    auto fontManager = pipeline->GetFontManager();
+    if (!skipOptimizeFlag && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
+        fontManager && fontManager->GetFallbackLineSpacingStyleOptimizeFlag()) {
+        if (NearZero(fontSizeScale) || (fontSizeValue.Unit() == DimensionUnit::VP)) {
+            return fontSizeValue;
+        }
+        if (GreatOrEqualCustomPrecision(fontSizeScale, 1.0f) && pipeline->IsFollowSystem()) {
+            fontSizeScale = std::clamp(fontSizeScale, 0.0f, maxAppFontScale);
+            if (fontSizeScale != 0.0f) {
+                return Dimension(fontSizeValue / fontSizeScale);
+            }
+        }
+        return fontSizeValue;
+    }
+
+    if (NeedAdaptForAging(skipOptimizeFlag)) {
         if (isUserSetFont) {
             if (GreatOrEqualCustomPrecision(fontSizeValue.ConvertToPx() * fontSizeScale,
                 fontSizeLimit.ConvertToPx()) && (fontSizeScale != 0.0f)) {
@@ -1195,7 +1302,14 @@ const Dimension TimePickerDialogView::ConvertTitleFontScaleValue(const Dimension
     if (NearZero(fontScale)) {
         return fontSizeValue;
     }
-    if (NeedAdaptForAging()) {
+
+    bool needAdaptForAging = false;
+    if (GreatOrEqual(pipeline->GetFontScale(), pickerTheme->GetMaxOneFontScale()) &&
+        Dimension(pipeline->GetRootHeight()).ConvertToVp() > pickerTheme->GetDeviceHeightLimit() &&
+        (pipeline->IsFollowSystem() && (GreatOrEqual(maxAppFontScale, pickerTheme->GetMaxOneFontScale())))) {
+        needAdaptForAging = true;
+    }
+    if (needAdaptForAging) {
         if (fontSizeValue.Unit() == DimensionUnit::VP) {
             return (fontSizeValue * pickerTheme->GetTitleFontScaleLimit());
         } else {
