@@ -29,7 +29,7 @@ class LazyArkWaterFlowComponent extends ArkScrollable {
    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
   }
 
-  initialize(value) {
+  initialize(value: Object[]): this {
     this.lazyComponent.initialize(value);
     return this;
   }
@@ -204,27 +204,27 @@ class LazyArkWaterFlowComponent extends ArkScrollable {
    return this;
   }
 
-  onWillStopDragging(value: (event: DragEvent) => void): this {
+  onWillStopDragging(value: (velocity: number) => void): this {
    this.lazyComponent.onWillStopDragging(value);
    return this;
   }
 
-  onWillStartDragging(value: (event: DragEvent) => void): this {
+  onWillStartDragging(value: () => void): this {
    this.lazyComponent.onWillStartDragging(value);
    return this;
   }
 
-  onDidStopDragging(value: (event: DragEvent) => void): this {
+  onDidStopDragging(value: (isWillFling: boolean) => void): this {
    this.lazyComponent.onDidStopDragging(value);
    return this;
   }
 
-  onWillStartFling(value: (event: any) => void): this {
+  onWillStartFling(value: () => void): this {
    this.lazyComponent.onWillStartFling(value);
    return this;
   }
 
-  onDidStopFling(value: (event: any) => void): this {
+  onDidStopFling(value: () => void): this {
    this.lazyComponent.onDidStopFling(value);
    return this;
   }
