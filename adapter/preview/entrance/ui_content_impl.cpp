@@ -430,7 +430,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window,
                                  const OHOS::Ace::RefPtr<PipelineContext>& context) mutable {
         CHECK_NULL_VOID(context);
         CHECK_NULL_VOID(window);
-        auto director = OHOS::Rosen::RSUIDirector::Create();
+        auto director = window->GetRSUIDirector();
         CHECK_NULL_VOID(director);
         director->SetRSSurfaceNode(window->GetSurfaceNode());
         auto container = AceContainer::GetContainerInstance(id);
@@ -443,7 +443,6 @@ UIContentErrorCode UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window,
                 task, TaskExecutor::TaskType::UI, delay, "ArkUIRenderServiceTask", PriorityType::HIGH);
         };
         director->SetUITaskRunner(func, id);
-        director->Init();
         context->SetRSUIDirector(director);
     };
     AceContainer::SetView(view, rsWindow_, deviceConfig_.density, deviceWidth_, deviceHeight_, callback);

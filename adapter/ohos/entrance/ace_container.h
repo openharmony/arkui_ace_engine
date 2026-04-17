@@ -565,8 +565,8 @@ public:
     static void AddLibPath(int32_t instanceId, const std::vector<std::string>& libPath);
     static void SetView(const RefPtr<AceView>& view, double density, int32_t width, int32_t height,
         sptr<OHOS::Rosen::Window> rsWindow, UIEnvCallback callback = nullptr);
-    static UIContentErrorCode SetViewNew(
-        const RefPtr<AceView>& view, double density, float width, float height, sptr<OHOS::Rosen::Window> rsWindow);
+    static UIContentErrorCode SetViewNew(const RefPtr<AceView>& view, double density, float width, float height,
+        sptr<OHOS::Rosen::Window> rsWindow, sptr<IRemoteObject> connectToRender = nullptr);
     static void SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window> uiWindow);
     static sptr<OHOS::Rosen::Window> GetUIWindow(int32_t instanceId);
     static OHOS::AppExecFwk::Ability* GetAbility(int32_t instanceId);
@@ -955,7 +955,6 @@ public:
     }
     void RegisterTerminateUIExtension(AbilityRuntimeContextCallback&& callback) override;
     void TerminateUIExtensionInner(int32_t code) override;
-
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();

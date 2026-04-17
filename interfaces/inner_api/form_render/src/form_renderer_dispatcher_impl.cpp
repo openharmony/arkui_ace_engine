@@ -122,6 +122,7 @@ bool FormRendererDispatcherImpl::IsVisible()
 void FormRendererDispatcherImpl::DispatchSurfaceChangeEvent(const OHOS::AppExecFwk::FormSurfaceInfo& formSurfaceInfo,
     uint32_t reason, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
+    HILOG_DEBUG("enter");
     auto handler = eventHandler_.lock();
     if (!handler) {
         HILOG_ERROR("eventHandler is nullptr");
@@ -135,15 +136,16 @@ void FormRendererDispatcherImpl::DispatchSurfaceChangeEvent(const OHOS::AppExecF
 #else
     reason = static_cast<uint32_t>(Rosen::WindowSizeChangeReason::UNDEFINED);
 #endif
-    handler->PostTask([content = uiContent_, formSurfaceInfo, reason, rsTransaction, this]() {
-        auto uiContent = content.lock();
-        if (!uiContent) {
-            HILOG_ERROR("uiContent is nullptr");
-            return;
-        }
+    handler->PostTask(
+        [content = uiContent_, formSurfaceInfo, reason, rsTransaction, this]() {
+            auto uiContent = content.lock();
+            if (!uiContent) {
+                HILOG_ERROR("uiContent is nullptr");
+                return;
+            }
 
-        HandleSurfaceChangeEvent(uiContent, formSurfaceInfo, reason, rsTransaction);
-    });
+            HandleSurfaceChangeEvent(uiContent, formSurfaceInfo, reason, rsTransaction);
+        }, "HandleSurfaceChangeEvent");
 
     auto formRenderer = formRenderer_.lock();
     if (!formRenderer) {
@@ -157,6 +159,7 @@ void FormRendererDispatcherImpl::HandleSurfaceChangeEvent(const std::shared_ptr<
     const OHOS::AppExecFwk::FormSurfaceInfo& formSurfaceInfo, uint32_t reason,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
+    HILOG_DEBUG("enter");
     bool needSync = false;
     if (rsTransaction && rsTransaction->GetSyncId() > 0) {
         // extract high 32 bits of SyncId as pid
@@ -164,46 +167,31 @@ void FormRendererDispatcherImpl::HandleSurfaceChangeEvent(const std::shared_ptr<
         if (rsTransaction->IsOpenSyncTransaction() || SyncTransactionPid != rsTransaction->GetParentPid()) {
             needSync = true;
         }
+        HILOG_DEBUG("syncId: %{public}" PRIu64 ", needSync: %{public}d", rsTransaction->GetSyncId(), needSync);
     }
-    std::shared_ptr<Rosen::RSUIContext> rsUIContext = nullptr;
-    if (isMultiInstanceEnabled_) {
-        rsUIContext = GetRSUIContext(uiContent);
-        if (rsUIContext == nullptr || rsUIContext->GetRSTransaction() == nullptr) {
-            HILOG_ERROR("rsUIContext is nullptr");
-            return;
-        }
+    std::shared_ptr<Rosen::RSUIContext> rsUIContext = GetRSUIContext(uiContent);
+    if (rsUIContext == nullptr || rsUIContext->GetRSTransaction() == nullptr) {
+        HILOG_ERROR("rsUIContext is nullptr");
+        return;
     }
-    if (isMultiInstanceEnabled_ && needSync) {
+
+    if (needSync) {
         globalLock_.lock();
         rsUIContext->GetRSTransaction()->FlushImplicitTransaction();
-        rsTransaction->Begin();
-    } else if (needSync) {
-        globalLock_.lock();
-        Rosen::RSTransaction::FlushImplicitTransaction();
+        rsTransaction->SetTransactionHandler(rsUIContext->GetRSTransaction());
         rsTransaction->Begin();
     }
     Rosen::RSAnimationTimingProtocol protocol;
     protocol.SetDuration(DEFAULT_FORM_ROTATION_ANIM_DURATION);
     auto curve = Rosen::RSAnimationTimingCurve::LINEAR;
-    if (isMultiInstanceEnabled_) {
-        Rosen::RSNode::OpenImplicitAnimation(rsUIContext, protocol, curve, []() {});
-    } else {
-        Rosen::RSNode::OpenImplicitAnimation(protocol, curve, []() {});
-    }
+    Rosen::RSNode::OpenImplicitAnimation(rsUIContext, protocol, curve, []() {});
     UpdateFormSurface(uiContent, formSurfaceInfo, reason, rsTransaction);
-    if (isMultiInstanceEnabled_) {
-        Rosen::RSNode::CloseImplicitAnimation(rsUIContext);
-    } else {
-        Rosen::RSNode::CloseImplicitAnimation();
-    }
+    Rosen::RSNode::CloseImplicitAnimation(rsUIContext);
     if (needSync) {
         rsTransaction->Commit();
         globalLock_.unlock();
-    } else if (isMultiInstanceEnabled_) {
-        rsUIContext->GetRSTransaction()->FlushImplicitTransaction();
-    } else {
-        Rosen::RSTransaction::FlushImplicitTransaction();
     }
+    HILOG_DEBUG("exit");
 }
 
 void FormRendererDispatcherImpl::UpdateFormSurface(const std::shared_ptr<UIContent>& uiContent,

@@ -317,7 +317,7 @@ bool IsContainerDeleteFlag()
 
 bool IsMultiInstanceEnabled()
 {
-    return (system::GetParameter("persist.rosen.rsclientmultiinstance.enabled", "0") != "0");
+    return (system::GetParameter("persist.rosen.rsclientmultiinstance.enabled", "1") != "0");
 }
 
 bool IsLayoutDetectEnabled()

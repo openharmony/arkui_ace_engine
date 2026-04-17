@@ -81,9 +81,6 @@ std::shared_ptr<RSNode> RosenRenderXComponent::CreateRSNode() const
     std::string renderNodeName = "RosenRenderXComponent";
     std::string surfaceNodeName =  renderNodeName + id_;
     struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = {.SurfaceNodeName = surfaceNodeName};
-    if (!SystemProperties::GetMultiInstanceEnabled()) {
-        return OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
-    }
     return RsNodeAdapter::CreateSurfaceNode(surfaceNodeConfig);
 }
 

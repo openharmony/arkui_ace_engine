@@ -16,6 +16,8 @@
 #include "core/components_ng/pattern/model/model_pattern.h"
 
 #include "core/pipeline_ng/pipeline_context.h"
+#include "ui/rs_ui_context.h"
+#include "ui/rs_ui_director.h"
 
 namespace OHOS::Ace::NG {
 void ModelPattern::OnRebuildFrame()
@@ -113,12 +115,19 @@ bool ModelPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     float width = contentSize.Width();
     float height = contentSize.Height();
     float scale = PipelineContext::GetCurrentContext()->GetViewScale();
+    std::shared_ptr<Rosen::RSUIContext> rsUIContext;
+    auto pipelineContext = host->GetContext();
+    if (pipelineContext) {
+        auto rsUIDirector = pipelineContext->GetWindow()->GetRSUIDirector();
+        if (rsUIDirector) {
+            rsUIContext = rsUIDirector->GetRSUIContext();
+        }
+    }
     Render3D::WindowChangeInfo windowChangeInfo {
         contentOffset.GetX(), contentOffset.GetY(),
         width, height,
         scale, widthScale, heightScale,
-        config.contentSizeChange, modelAdapter_->GetSurfaceType(), rotation_, backgroundColor
-    };
+        config.contentSizeChange, modelAdapter_->GetSurfaceType(), rotation_, backgroundColor, 0x0, rsUIContext};
     modelAdapter_->OnDirtyLayoutWrapperSwap(windowChangeInfo);
     host->MarkNeedSyncRenderTree();
 

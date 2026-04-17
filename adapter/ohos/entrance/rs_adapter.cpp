@@ -31,54 +31,28 @@ void RsAdapter::RsUIDirectorInit(
     std::shared_ptr<OHOS::Rosen::RSUIDirector>& rsUiDirector,
     const OHOS::sptr<OHOS::Rosen::Window>& window, std::string cacheDir)
 {
-    if (!SystemProperties::GetMultiInstanceEnabled()) {
-        rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
-        auto surfaceNode = window->GetSurfaceNode();
-        rsUiDirector->SetRSSurfaceNode(surfaceNode);
-        rsUiDirector->SetCacheDir(cacheDir);
-        rsUiDirector->Init();
-    } else {
-        rsUiDirector = window->GetRSUIDirector();
-        if (!rsUiDirector) {
-            rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
-        }
-        rsUiDirector->SetRSSurfaceNode(window->GetSurfaceNode());
-        rsUiDirector->SetCacheDir(cacheDir);
-        rsUiDirector->Init(true, true);
-    }
+    rsUiDirector = window->GetRSUIDirector();
+    rsUiDirector->SetRSSurfaceNode(window->GetSurfaceNode());
+    rsUiDirector->SetCacheDir(cacheDir);
 }
 
-void RsAdapter::RsFlushImplicitTransaction(
-    std::shared_ptr<OHOS::Rosen::RSUIDirector>& rsUiDirector,
-    const OHOS::sptr<OHOS::Rosen::Window>& dragWindow,
-    std::shared_ptr<OHOS::Rosen::RSSurfaceNode>& surfaceNode)
+void RsAdapter::RsFlushImplicitTransaction(std::shared_ptr<OHOS::Rosen::RSUIDirector> &rsUiDirector,
+    const OHOS::sptr<OHOS::Rosen::Window> &dragWindow, std::shared_ptr<OHOS::Rosen::RSSurfaceNode> &surfaceNode)
 {
-    if (!SystemProperties::GetMultiInstanceEnabled()) {
-        rsUiDirector = Rosen::RSUIDirector::Create();
-        rsUiDirector->Init();
-        auto transactionProxy = Rosen::RSTransactionProxy::GetInstance();
-        if (transactionProxy != nullptr) {
-            transactionProxy->FlushImplicitTransaction();
-        }
-    } else {
-        rsUiDirector = dragWindow->GetRSUIDirector();
-        if (!rsUiDirector) {
-            rsUiDirector = Rosen::RSUIDirector::Create();
-        }
-        rsUiDirector->Init(true, true);
-        auto surfaceNode = dragWindow->GetSurfaceNode();
-        if (surfaceNode) {
-            auto rsUiContext = surfaceNode->GetRSUIContext();
-            if (rsUiContext) {
-                rsUiContext->GetRSTransaction()->FlushImplicitTransaction();
-            } else {
-                FlushImplicitTransaction();
-            }
+    rsUiDirector = dragWindow->GetRSUIDirector();
+
+    auto surfaceNodeFromWindow = dragWindow->GetSurfaceNode();
+    if (surfaceNodeFromWindow) {
+        auto rsUiContext = surfaceNodeFromWindow->GetRSUIContext();
+        if (rsUiContext) {
+            rsUiContext->GetRSTransaction()->FlushImplicitTransaction();
         } else {
             FlushImplicitTransaction();
         }
+    } else {
+        FlushImplicitTransaction();
     }
-    rsUiDirector->SetRSSurfaceNode(surfaceNode);
+    rsUiDirector->SetRSSurfaceNode(surfaceNodeFromWindow);
 }
 
 void RsAdapter::RsFlushImplicitTransactionWithRoot(
@@ -87,36 +61,21 @@ void RsAdapter::RsFlushImplicitTransactionWithRoot(
     std::shared_ptr<OHOS::Rosen::RSSurfaceNode>& surfaceNode,
     std::shared_ptr<Rosen::RSNode>& rootNode)
 {
-    if (!SystemProperties::GetMultiInstanceEnabled()) {
-        rsUiDirector = Rosen::RSUIDirector::Create();
-        rsUiDirector->Init();
-        auto transactionProxy = Rosen::RSTransactionProxy::GetInstance();
-        if (transactionProxy != nullptr) {
-            transactionProxy->FlushImplicitTransaction();
-        }
-        rsUiDirector->SetRSSurfaceNode(surfaceNode);
-        rootNode = Rosen::RSRootNode::Create();
-    } else {
-        rsUiDirector = dragWindow->GetRSUIDirector();
-        if (!rsUiDirector) {
-            rsUiDirector = Rosen::RSUIDirector::Create();
-        }
-        rsUiDirector->Init(true, true);
-        auto surfaceNode = dragWindow->GetSurfaceNode();
-        std::shared_ptr<Rosen::RSUIContext> rsUiContext;
-        if (surfaceNode) {
-            rsUiContext = surfaceNode->GetRSUIContext();
-            if (rsUiContext) {
-                rsUiContext->GetRSTransaction()->FlushImplicitTransaction();
-            } else {
-                FlushImplicitTransaction();
-            }
+    rsUiDirector = dragWindow->GetRSUIDirector();
+    auto surfaceNode1 = dragWindow->GetSurfaceNode();
+    std::shared_ptr<Rosen::RSUIContext> rsUiContext;
+    if (surfaceNode1) {
+        rsUiContext = surfaceNode->GetRSUIContext();
+        if (rsUiContext) {
+            rsUiContext->GetRSTransaction()->FlushImplicitTransaction();
         } else {
             FlushImplicitTransaction();
         }
-        rsUiDirector->SetRSSurfaceNode(surfaceNode);
-        rootNode = Rosen::RSRootNode::Create(false, false, rsUiContext);
+    } else {
+        FlushImplicitTransaction();
     }
+    rsUiDirector->SetRSSurfaceNode(surfaceNode1);
+    rootNode = Rosen::RSRootNode::Create(false, false, rsUiContext);
 }
 
 void RsAdapter::FlushImplicitTransaction()

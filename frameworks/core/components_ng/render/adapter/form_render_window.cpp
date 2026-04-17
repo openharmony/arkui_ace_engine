@@ -42,7 +42,7 @@ namespace OHOS::Ace {
 std::recursive_mutex FormRenderWindow::globalMutex_;
 #endif
 
-FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id)
+FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id, sptr<IRemoteObject> connectToRender)
     : taskExecutor_(taskExecutor), id_(id)
 {
 #ifdef ENABLE_ROSEN_BACKEND
@@ -68,37 +68,19 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
 
     receiver_->RequestNextVSync(frameCallback_);
 
-    rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create();
-    {
-        std::lock_guard<std::recursive_mutex> lock(globalMutex_);
-        if (SystemProperties::GetMultiInstanceEnabled()) {
-            rsUIDirector_->Init(true, true); // Func Init Thread unsafe.
-        } else {
-            rsUIDirector_->Init(); // Func Init Thread unsafe.
-        }
-    }
+    rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create(connectToRender);
 
     std::string surfaceNodeName = "ArkTSCardNode";
+    bool useMultiInstance = SystemProperties::GetMultiInstanceEnabled();
     struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = {.SurfaceNodeName = surfaceNodeName, .isSync = true};
-    if (SystemProperties::GetMultiInstanceEnabled()) {
-        rsSurfaceNode_ = OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true, rsUIDirector_->GetRSUIContext());
-        rsUIDirector_->SetRSSurfaceNode(rsSurfaceNode_);
-        rsUIDirector_->SetUITaskRunner([taskExecutor, id = id_](const std::function<void()>& task, uint32_t delay) {
+    rsSurfaceNode_ = OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true, rsUIDirector_->GetRSUIContext());
+    rsUIDirector_->SetRSSurfaceNode(rsSurfaceNode_);
+    rsUIDirector_->SetUITaskRunner([taskExecutor, id = id_](const std::function<void()> &task, uint32_t delay) {
             ContainerScope scope(id);
             CHECK_NULL_VOID(taskExecutor);
             taskExecutor->PostDelayedTask(
                 task, TaskExecutor::TaskType::UI, delay, "ArkUIFormRenderServiceTask", PriorityType::HIGH);
-            }, 0, true);
-    } else {
-        rsSurfaceNode_ = OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true);
-        rsUIDirector_->SetRSSurfaceNode(rsSurfaceNode_);
-        rsUIDirector_->SetUITaskRunner([taskExecutor, id = id_](const std::function<void()>& task, uint32_t delay) {
-            ContainerScope scope(id);
-            CHECK_NULL_VOID(taskExecutor);
-            taskExecutor->PostDelayedTask(
-                task, TaskExecutor::TaskType::UI, delay, "ArkUIFormRenderServiceTask", PriorityType::HIGH);
-            }, id);
-    }
+        }, 0, useMultiInstance);
 #else
     taskExecutor_ = nullptr;
     id_ = 0;

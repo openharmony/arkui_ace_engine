@@ -76,7 +76,8 @@ public:
     MOCK_METHOD1(NotifyMemoryLevel, void(int32_t level));
     MOCK_METHOD1(SetAppWindowTitle, void(const std::string& title));
     MOCK_METHOD1(SetAppWindowIcon, void(const std::shared_ptr<Media::PixelMap>& pixelMap));
-    MOCK_METHOD3(PreInitializeForm, void(OHOS::Rosen::Window* window, const std::string& url, napi_value storage));
+    MOCK_METHOD4(PreInitializeForm, void(OHOS::Rosen::Window* window, const std::string& url, napi_value storage,
+                                        sptr<IRemoteObject> connectToRender));
     MOCK_METHOD0(RunFormPage, void());
     MOCK_METHOD0(GetFormRootNode, std::shared_ptr<Rosen::RSSurfaceNode>());
     MOCK_METHOD1(UpdateFormData, void(const std::string& data));

@@ -1668,8 +1668,8 @@ void AceContainer::SetView(const RefPtr<AceView>& view, double density, int32_t 
     container->AttachView(window, view, density, width, height, rsWindow->GetWindowId(), callback);
 }
 
-UIContentErrorCode AceContainer::SetViewNew(
-    const RefPtr<AceView>& view, double density, float width, float height, sptr<OHOS::Rosen::Window> rsWindow)
+UIContentErrorCode AceContainer::SetViewNew(const RefPtr<AceView>& view, double density, float width, float height,
+    sptr<OHOS::Rosen::Window> rsWindow, sptr<IRemoteObject> connectToRender)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     CHECK_NULL_RETURN(view, UIContentErrorCode::NULL_POINTER);
@@ -1680,7 +1680,7 @@ UIContentErrorCode AceContainer::SetViewNew(
     AceContainer::SetUIWindow(view->GetInstanceId(), rsWindow);
 
     if (container->isFormRender_) {
-        auto window = std::make_shared<FormRenderWindow>(taskExecutor, view->GetInstanceId());
+        auto window = std::make_shared<FormRenderWindow>(taskExecutor, view->GetInstanceId(), connectToRender);
         if (!window->GetRSSurfaceNode()) {
             TAG_LOGW(AceLogTag::ACE_FORM,
                 "SurfaceNode is null, try to create form render window again, instanceId_:%{public}d.",

@@ -76,7 +76,7 @@ public:
         OHOS::Rosen::Window* window, const std::string& name, napi_value storage) override;
     void InitializeByName(OHOS::Rosen::Window *window,
         const std::string &name, napi_value storage, uint32_t focusWindowId) override;
-    void InitializeDynamic(const DynamicInitialConfig& config) override;
+    void InitializeDynamic(const DynamicInitialConfig& config, sptr<IRemoteObject> connectToRender = nullptr) override;
     void Initialize(
         OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowId) override;
     void Foreground() override;
@@ -168,7 +168,8 @@ public:
     void SetAppWindowIcon(const std::shared_ptr<Media::PixelMap>& pixelMap) override;
 
     // ArkTS Form
-    void PreInitializeForm(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) override;
+    void PreInitializeForm(OHOS::Rosen::Window* window, const std::string& url, napi_value storage,
+        sptr<IRemoteObject> connectToRender) override;
     void PreInitializeFormAni(OHOS::Rosen::Window* window, const std::string& url, ani_object storage) override;
     void RunFormPage() override;
     std::shared_ptr<Rosen::RSSurfaceNode> GetFormRootNode() override;
@@ -496,8 +497,8 @@ protected:
         OHOS::Rosen::Window* window, const std::string& contentInfo, StorageWrapper storage, bool isNamedRouter);
     UIContentErrorCode CommonInitialize(
         OHOS::Rosen::Window* window, const std::string& contentInfo, StorageWrapper storage, uint32_t focusWindowId = 0);
-    UIContentErrorCode CommonInitializeForm(
-        OHOS::Rosen::Window* window, const std::string& contentInfo, StorageWrapper StorageWrapper);
+    UIContentErrorCode CommonInitializeForm(OHOS::Rosen::Window* window, const std::string& contentInfo,
+        StorageWrapper StorageWrapper, sptr<IRemoteObject> connectToRender = nullptr);
     void InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog = false);
     void DestroyCallback() const;
     void ProcessDestructCallbacks();

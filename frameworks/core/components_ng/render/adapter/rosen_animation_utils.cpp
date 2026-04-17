@@ -309,7 +309,7 @@ std::shared_ptr<AnimationUtils::InteractiveAnimation> AnimationUtils::CreateInte
     Rosen::RSAnimationTimingProtocol timingProtocol;
     Rosen::RSAnimationTimingCurve curve;
     interactiveAnimation->interactiveAnimation_ =
-        Rosen::RSInteractiveImplictAnimator::Create(timingProtocol, curve);
+        Rosen::RSInteractiveImplictAnimator::Create(GetCurrentRSUIContext(nullptr), timingProtocol, curve);
     CHECK_NULL_RETURN(interactiveAnimation->interactiveAnimation_, nullptr);
     if (addCallback) {
         interactiveAnimation->interactiveAnimation_->AddAnimation(addCallback);

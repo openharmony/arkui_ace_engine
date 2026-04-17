@@ -36,6 +36,7 @@ std::shared_ptr<Rosen::RSNode> RsNodeAdapter::CreateCanvasNode()
         }
         return canvasNode;
     }
+    LOGW("CreateCanvasNode rsUIContext is null");
     return Rosen::RSCanvasNode::Create();
 }
 
@@ -49,6 +50,7 @@ std::shared_ptr<Rosen::RSNode> RsNodeAdapter::CreateRootNode()
         }
         return rootNode;
     }
+    LOGW("CreateCanvasNode rsUIContext is null");
     return Rosen::RSRootNode::Create();
 }
 
@@ -63,6 +65,7 @@ std::shared_ptr<Rosen::RSNode> RsNodeAdapter::CreateSurfaceNode(
         }
         return surfaceNode;
     }
+    LOGW("CreateCanvasNode rsUIContext is null");
     return Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
 }
 
@@ -84,6 +87,7 @@ std::shared_ptr<Rosen::RSUIContext> RsNodeAdapter::GetRSUIContext()
     if (rsUIDirector) {
         return rsUIDirector->GetRSUIContext();
     }
+    LOGW("rsUIDirector rsUIContext is null");
     return nullptr;
 }
 }

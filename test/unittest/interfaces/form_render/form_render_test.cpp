@@ -20,13 +20,16 @@
 #include "test/mock/interfaces/mock_uicontent.h"
 #include "test/unittest/interfaces/form_render/mock/mock_form_render_delegate_stub.h"
 #include "ui_content.h"
+#include "render_service_client/core/ui/rs_ui_director.h"
 
 #define private public
 #include "interfaces/inner_api/form_render/include/form_renderer.h"
 #include "interfaces/inner_api/form_render/include/form_renderer_delegate_impl.h"
 #include "interfaces/inner_api/form_render/include/form_renderer_group.h"
 #include "interfaces/inner_api/ace/serialized_gesture.h"
-#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#undef private
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "./mock/mock_i_remote_object_form.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -136,7 +139,7 @@ HWTEST_F(FormRenderTest, FormRenderTest001, TestSize.Level0)
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), UpdateFormData(_)).WillOnce(Return());
 
     EXPECT_CALL(*((MockUIContent *)(formRenderer->uiContent_.get())),
-        PreInitializeForm(An<OHOS::Rosen::Window *>(), "", _)).WillOnce(Return());
+        PreInitializeForm(An<OHOS::Rosen::Window *>(), "", _, _)).WillOnce(Return());
     EXPECT_CALL(*((MockUIContent *)(formRenderer->uiContent_.get())), RunFormPage()).Times(Exactly(1));
 
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetActionEventHandler(_)).WillOnce(Return());
@@ -271,16 +274,18 @@ HWTEST_F(FormRenderTest, FormRenderTest002, TestSize.Level0)
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), UpdateFormData(_)).WillOnce(Return());
 
     EXPECT_CALL(*((MockUIContent *)(formRenderer->uiContent_.get())),
-        PreInitializeForm(An<OHOS::Rosen::Window *>(), "", _)).WillOnce(Return());
+        PreInitializeForm(An<OHOS::Rosen::Window *>(), "", _, _)).WillOnce(Return());
     EXPECT_CALL(*((MockUIContent *)(formRenderer->uiContent_.get())), RunFormPage()).Times(Exactly(1));
 
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetActionEventHandler(_)).WillOnce(Return());
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetErrorEventHandler(_)).WillOnce(Return());
+    sptr<IRemoteObject> connectToRender = new (std::nothrow) AppExecFwk::MockFormIRemoteObject();
+    auto rsUIDirector = Rosen::RSUIDirector::Create(connectToRender);
     std::string surfaceNodeName = "ArkTSCardNode";
     struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = surfaceNodeName };
-    std::shared_ptr<Rosen::RSSurfaceNode> rsNode = OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true);
-    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), GetFormRootNode()).Times(Exactly(4))
-        .WillRepeatedly(Return(rsNode));
+    std::shared_ptr<Rosen::RSSurfaceNode> rsNode =
+        Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true, rsUIDirector->GetRSUIContext());
+    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), GetFormRootNode()).WillRepeatedly(Return(rsNode));
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), Foreground()).WillOnce(Return());
     formRenderer->AddForm(want, formJsInfo);
     EXPECT_EQ(onSurfaceCreateKey, CHECK_KEY);

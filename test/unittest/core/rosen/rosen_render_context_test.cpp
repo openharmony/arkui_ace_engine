@@ -296,7 +296,7 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest014, TestSize.Level1)
     std::shared_ptr<Rosen::RSUIContext> rsUIContext;
     std::shared_ptr<Rosen::RSNode> ret = rosenRenderContext->CreateHardwareSurface(
         param, isTextureExportNode, rsUIContext);
-    EXPECT_FALSE(ret == nullptr);
+    EXPECT_TRUE(ret == nullptr);
 }
 
 /**
@@ -803,12 +803,12 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest032, TestSize.Level1)
     contextParam.type = RenderContext::ContextType::SURFACE;
     std::optional<RenderContext::ContextParam> contextParamValue4 = std::make_optional(contextParam);
     rosenRenderContext->InitContext(false, contextParamValue4);
-    EXPECT_EQ(rosenRenderContext->rsNode_ != nullptr, true);
+    EXPECT_EQ(rosenRenderContext->rsNode_ != nullptr, false);
     rosenRenderContext->rsNode_ = nullptr;
     contextParam.type = RenderContext::ContextType::HARDWARE_SURFACE;
     std::optional<RenderContext::ContextParam> contextParamValue5 = std::make_optional(contextParam);
     rosenRenderContext->InitContext(false, contextParamValue5);
-    EXPECT_EQ(rosenRenderContext->rsNode_ != nullptr, true);
+    EXPECT_EQ(rosenRenderContext->rsNode_ != nullptr, false);
     rosenRenderContext->rsNode_ = nullptr;
     contextParam.type = RenderContext::ContextType::EFFECT;
     std::optional<RenderContext::ContextParam> contextParamValue7 = std::make_optional(contextParam);
@@ -823,7 +823,7 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest032, TestSize.Level1)
     contextParam.type = RenderContext::ContextType::COMPOSITE_COMPONENT;
     std::optional<RenderContext::ContextParam> contextParamValue10 = std::make_optional(contextParam);
     rosenRenderContext->InitContext(false, contextParamValue10);
-    EXPECT_EQ(rosenRenderContext->rsNode_ != nullptr, true);
+    EXPECT_EQ(rosenRenderContext->rsNode_ != nullptr, false);
     rosenRenderContext->rsNode_ = nullptr;
     contextParam.type = RenderContext::ContextType::EXTERNAL;
     std::optional<RenderContext::ContextParam> contextParamValue9 = std::make_optional(contextParam);

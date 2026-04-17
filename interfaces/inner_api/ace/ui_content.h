@@ -37,6 +37,7 @@
 #include "viewport_config.h"
 
 namespace OHOS {
+class IRemoteObject;
 
 namespace AbilityRuntime {
 class Context;
@@ -152,9 +153,10 @@ public:
     }
     virtual UIContentErrorCode InitializeByName(OHOS::Rosen::Window *window, const std::string &name,
                                                 napi_value storage) = 0;
-    virtual void InitializeByName(OHOS::Rosen::Window *window,
-        const std::string &name, napi_value storage, uint32_t focusWindowId) {};
-    virtual void InitializeDynamic(const DynamicInitialConfig& config) {};
+    virtual void InitializeByName(
+        OHOS::Rosen::Window* window, const std::string& name, napi_value storage, uint32_t focusWindowId) {};
+    virtual void InitializeDynamic(
+        const DynamicInitialConfig& config, sptr<IRemoteObject> connectToRender = nullptr) {};
 
     // UIExtensionAbility initialize for focusWindow ID
     virtual void Initialize(
@@ -211,6 +213,7 @@ public:
     virtual void UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode) {};
     virtual void ProcessFormVisibleChange(bool isVisible) {};
     virtual void NotifyRotationAnimationEnd() {};
+    virtual void SetConnectToRender(sptr<IRemoteObject> connectToRender) {};
 
     // only vaild in ContainerModalPatternEnhance
     virtual void UpdateTitleInTargetPos(bool isShow, int32_t height) = 0;
@@ -244,7 +247,8 @@ public:
     virtual void SetAppWindowIcon(const std::shared_ptr<Media::PixelMap>& pixelMap) = 0;
 
     // ArkTS Form
-    virtual void PreInitializeForm(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) = 0;
+    virtual void PreInitializeForm(OHOS::Rosen::Window* window, const std::string& url, napi_value storage,
+        sptr<IRemoteObject> connectToRender) = 0;
     virtual void PreInitializeFormAni(OHOS::Rosen::Window* window, const std::string& url, ani_object storage) {};
     virtual void RunFormPage() = 0;
     virtual std::shared_ptr<Rosen::RSSurfaceNode> GetFormRootNode() = 0;
