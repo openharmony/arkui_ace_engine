@@ -48,7 +48,9 @@
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_event_hub.h"
+#include "core/components_ng/pattern/dialog/dialog_layout_algorithm.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
@@ -1014,4 +1016,115 @@ HWTEST_F(OverlayDialogTransitionTestNg, DialogTransitionTest014, TestSize.Level1
     dialogNode->eventHub_ = eventHub;
     EXPECT_TRUE(overlayManager->DialogInMapHoldingFocus());
 }
+/**
+ * @tc.name: DialogAnalysisLayoutOfContent001
+ * @tc.desc: Test DialogLayoutAlgorithm::AnalysisLayoutOfContent when API version < VERSION_TWENTY_SIX,
+ *           wordBreak should be updated from dialog properties.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayDialogTransitionTestNg, DialogAnalysisLayoutOfContent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set API target version < VERSION_TWENTY_SIX.
+     */
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto oldVersion = container->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+
+    /**
+     * @tc.steps: step2. Create dialog node with DialogPattern.
+     */
+    auto dialogNode = FrameNode::CreateFrameNode(
+        V2::DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr));
+    ASSERT_NE(dialogNode, nullptr);
+
+    /**
+     * @tc.steps: step3. Create scroll node and text node with proper hierarchy.
+     */
+    auto scrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 3, AceType::MakeRefPtr<TextPattern>());
+    scrollNode->AddChild(textNode);
+
+    /**
+     * @tc.steps: step4. Create layout wrappers and build wrapper tree.
+     */
+    auto dialogWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        dialogNode, dialogNode->GetGeometryNode(), dialogNode->GetLayoutProperty());
+    auto scrollWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        scrollNode, scrollNode->GetGeometryNode(), scrollNode->GetLayoutProperty());
+    auto textWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        textNode, textNode->GetGeometryNode(), textNode->GetLayoutProperty());
+    scrollWrapper->AppendChild(textWrapper);
+
+    /**
+     * @tc.steps: step5. Call AnalysisLayoutOfContent and verify wordBreak is updated.
+     * @tc.expected: When API version < VERSION_TWENTY_SIX, wordBreak should be set to BREAK_ALL.
+     */
+    DialogLayoutAlgorithm dialogLayoutAlgorithm;
+    dialogLayoutAlgorithm.AnalysisLayoutOfContent(dialogWrapper.rawPtr_, scrollWrapper);
+
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(textNode->GetLayoutProperty());
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_TRUE(textLayoutProperty->GetWordBreak().has_value());
+    EXPECT_EQ(textLayoutProperty->GetWordBreak().value(), WordBreak::BREAK_ALL);
+
+    container->SetApiTargetVersion(oldVersion);
+}
+
+/**
+ * @tc.name: DialogAnalysisLayoutOfContent002
+ * @tc.desc: Test DialogLayoutAlgorithm::AnalysisLayoutOfContent when API version >= VERSION_TWENTY_SIX,
+ *           wordBreak should NOT be updated.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayDialogTransitionTestNg, DialogAnalysisLayoutOfContent002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set API target version >= VERSION_TWENTY_SIX.
+     */
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto oldVersion = container->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+
+    /**
+     * @tc.steps: step2. Create dialog node with DialogPattern.
+     */
+    auto dialogNode = FrameNode::CreateFrameNode(
+        V2::DIALOG_ETS_TAG, 4, AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr));
+    ASSERT_NE(dialogNode, nullptr);
+
+    /**
+     * @tc.steps: step3. Create scroll node and text node with proper hierarchy.
+     */
+    auto scrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 5, AceType::MakeRefPtr<Pattern>());
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 6, AceType::MakeRefPtr<TextPattern>());
+    scrollNode->AddChild(textNode);
+
+    /**
+     * @tc.steps: step4. Create layout wrappers and build wrapper tree.
+     */
+    auto dialogWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        dialogNode, dialogNode->GetGeometryNode(), dialogNode->GetLayoutProperty());
+    auto scrollWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        scrollNode, scrollNode->GetGeometryNode(), scrollNode->GetLayoutProperty());
+    auto textWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        textNode, textNode->GetGeometryNode(), textNode->GetLayoutProperty());
+    scrollWrapper->AppendChild(textWrapper);
+
+    /**
+     * @tc.steps: step5. Call AnalysisLayoutOfContent and verify wordBreak is NOT updated.
+     * @tc.expected: When API version >= VERSION_TWENTY_SIX, wordBreak should NOT be set.
+     */
+    DialogLayoutAlgorithm dialogLayoutAlgorithm;
+    dialogLayoutAlgorithm.AnalysisLayoutOfContent(dialogWrapper.rawPtr_, scrollWrapper);
+
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(textNode->GetLayoutProperty());
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_FALSE(textLayoutProperty->GetWordBreak().has_value());
+
+    container->SetApiTargetVersion(oldVersion);
+}
+
 } // namespace OHOS::Ace::NG
