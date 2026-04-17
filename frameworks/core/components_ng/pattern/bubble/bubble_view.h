@@ -26,6 +26,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/popup_param.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text/text_styles.h"
@@ -61,9 +62,23 @@ public:
     static PopupInfo GetPopupInfoWithCustomNode(const RefPtr<UINode>& customNode);
     static PopupInfo GetPopupInfoWithTargetId(const RefPtr<UINode>& customNode, const int32_t targetId);
     static RefPtr<OverlayManager> GetPopupOverlayManager(const RefPtr<UINode>& customNode, const int32_t targetId);
+    static bool SetBubbleSystemMaterial(const RefPtr<FrameNode>& bubbleNode, const RefPtr<PopupParam>& param);
 
 private:
-    static bool IsSupportBlurStyle(RefPtr<RenderContext>& renderContext, bool isShowInSubWindow, bool isTips = false);
+    static bool IsSupportBlurStyle(
+        const RefPtr<RenderContext>& renderContext, bool isShowInSubWindow, bool isTips = false);
+    static bool ShouldUpdateShadow(const RefPtr<PopupParam>& param);
+    static void UpdateBubbleBackgroundAndBlur(
+        const RefPtr<RenderContext>& renderContext,
+        const RefPtr<BubbleRenderProperty>& paintProp,
+        const RefPtr<PopupTheme>& theme,
+        const RefPtr<PopupParam>& param,
+        const RefPtr<BubblePattern>& pattern,
+        bool isUserSetMaterial);
+    static void UpdateBubbleShadow(
+        const RefPtr<RenderContext>& renderContext,
+        const RefPtr<PopupParam>& param,
+        const RefPtr<FrameNode>& popupNode);
 };
 } // namespace OHOS::Ace::NG
 

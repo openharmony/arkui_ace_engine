@@ -2873,11 +2873,15 @@ void BubbleLayoutAlgorithm::UpdateClipOffset(const RefPtr<FrameNode>& frameNode)
     clipPath_.clear();
     clipPath_ = ClipBubbleWithPath();
 #if defined(ENABLE_ROSEN_BACKEND)
+    auto renderContext = childNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     if (isUserSetMaterial_) {
         auto bubbleSDFShape = GetBubbleSDFShape();
-        auto renderContext = childNode->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
+        renderContext->ResetClipShape();
         renderContext->SetSDFShape(bubbleSDFShape);
+    } else {
+        renderContext->SetSDFShape(nullptr);
+        renderContext->ResetShadowPath();
     }
 #endif
 }
@@ -4060,74 +4064,11 @@ std::shared_ptr<OHOS::Rosen::RSNGShapeBase> BubbleLayoutAlgorithm::CreateSmoothU
     return unionShape0;
 }
 
-std::shared_ptr<OHOS::Rosen::RSNGShapeBase> BubbleLayoutAlgorithm::CreateSDFCornerRectShape(Placement placement)
-{
-    if (placement != Placement::TOP_LEFT && placement != Placement::TOP_RIGHT &&
-        placement != Placement::BOTTOM_LEFT && placement != Placement::BOTTOM_RIGHT &&
-        placement != Placement::LEFT_TOP && placement != Placement::LEFT_BOTTOM &&
-        placement != Placement::RIGHT_TOP && placement != Placement::RIGHT_BOTTOM) {
-        return nullptr;
-    }
-    auto rectShape0 = OHOS::Rosen::RSNGShapeBase::Create(
-        OHOS::Rosen::RSNGEffectType::SDF_RRECT_SHAPE);
-    auto rectShape = std::static_pointer_cast<OHOS::Rosen::RSNGSDFRRectShape>(rectShape0);
-    CHECK_NULL_RETURN(rectShape, nullptr);
-
-    float radiusPx = borderRadius_.ConvertToPx();
-    float cornerSize = radiusPx; // Rectangle size equals to border radius
-
-    OHOS::Rosen::RectF rect;
-    float rectRadius = 0.0f; // Rectangle has no rounded corners (sharp corners)
-    switch (placement) {
-        case Placement::TOP_LEFT:
-        case Placement::LEFT_TOP:
-            rect = OHOS::Rosen::RectF(
-                childOffset_.GetX() - RIGHT_ANGLE_SPACING,
-                childOffset_.GetY() - RIGHT_ANGLE_SPACING,
-                cornerSize,
-                cornerSize);
-            break;
-        case Placement::TOP_RIGHT:
-        case Placement::RIGHT_TOP:
-            rect = OHOS::Rosen::RectF(
-                childOffset_.GetX() + childSize_.Width() - cornerSize + RIGHT_ANGLE_SPACING,
-                childOffset_.GetY() - RIGHT_ANGLE_SPACING,
-                cornerSize,
-                cornerSize);
-            break;
-        case Placement::BOTTOM_LEFT:
-        case Placement::LEFT_BOTTOM:
-            rect = OHOS::Rosen::RectF(
-                childOffset_.GetX() - RIGHT_ANGLE_SPACING,
-                childOffset_.GetY() + childSize_.Height() - cornerSize + RIGHT_ANGLE_SPACING,
-                cornerSize,
-                cornerSize);
-            break;
-        case Placement::BOTTOM_RIGHT:
-        case Placement::RIGHT_BOTTOM:
-            rect = OHOS::Rosen::RectF(
-                childOffset_.GetX() + childSize_.Width() - cornerSize + RIGHT_ANGLE_SPACING,
-                childOffset_.GetY() + childSize_.Height() - cornerSize + RIGHT_ANGLE_SPACING,
-                cornerSize,
-                cornerSize);
-            break;
-        default:
-            return nullptr;
-    }
-
-    OHOS::Rosen::RRect rrect(rect, OHOS::Rosen::Vector4(rectRadius, rectRadius, rectRadius, rectRadius));
-    rectShape->Setter<OHOS::Rosen::SDFRRectShapeRRectTag>(rrect);
-    return rectShape0;
-}
-
 std::shared_ptr<OHOS::Rosen::RSNGShapeBase> BubbleLayoutAlgorithm::GetBubbleSDFShape()
 {
     if (!enableArrow_ || !showArrow_) {
         return CreateSDFRRectShape();
     }
-
-    auto rrectShape = CreateSDFRRectShape();
-    CHECK_NULL_RETURN(rrectShape, nullptr);
 
     float arrowOffset = GetArrowOffset(arrowPlacement_) +
         BUBBLE_ARROW_HEIGHT.ConvertToPx();
@@ -4142,19 +4083,76 @@ std::shared_ptr<OHOS::Rosen::RSNGShapeBase> BubbleLayoutAlgorithm::GetBubbleSDFS
         arrowBuildplacement, arrowOffset, vertex0, vertex1, vertex2);
 
     if (arrowBuildplacement == Placement::NONE) {
-        return rrectShape;
+        return CreateSDFRRectShape();
     }
 
-    auto rectShape = CreateSDFCornerRectShape(arrowBuildplacement);
-    auto combinedShape = rrectShape;
-    if (rectShape) {
-        combinedShape = CreateSmoothUnionShape(rrectShape, rectShape);
-    }
+    auto shape0 = CreateSDFRRectShapeWithCustomCorners(arrowBuildplacement);
+    CHECK_NULL_RETURN(shape0, nullptr);
 
     auto triangleShape = CreateSDFTriangleShape(vertex0, vertex1, vertex2);
     CHECK_NULL_RETURN(triangleShape, nullptr);
 
-    return CreateSmoothUnionShape(combinedShape, triangleShape);
+    return CreateSmoothUnionShape(shape0, triangleShape);
+}
+
+std::shared_ptr<OHOS::Rosen::RSNGShapeBase> BubbleLayoutAlgorithm::CreateSDFRRectShapeWithCustomCorners(
+    Placement arrowBuildplacement)
+{
+    // Create rounded rectangle with different corner radii based on arrow placement
+    auto shape0 = OHOS::Rosen::RSNGShapeBase::Create(
+        OHOS::Rosen::RSNGEffectType::SDF_RRECT_SHAPE);
+    auto rrectShape = std::static_pointer_cast<OHOS::Rosen::RSNGSDFRRectShape>(shape0);
+    CHECK_NULL_RETURN(rrectShape, nullptr);
+
+    float radiusPx = borderRadius_.ConvertToPx();
+    OHOS::Rosen::Vector4 cornerRadii(radiusPx, radiusPx, radiusPx, radiusPx);
+
+    // Set the corner where arrow is attached to 0 (sharp corner)
+    switch (arrowBuildplacement) {
+        case Placement::TOP:
+            // Top side corners should remain the same for centered arrows
+            break;
+        case Placement::BOTTOM:
+            // Bottom side corners should remain the same for centered arrows
+            break;
+        case Placement::LEFT:
+            // Left side corners should remain the same for centered arrows
+            break;
+        case Placement::RIGHT:
+            // Right side corners should remain the same for centered arrows
+            break;
+        case Placement::TOP_LEFT:
+        case Placement::LEFT_TOP:
+            cornerRadii.x_ = 0.0f; // Top-left corner
+            break;
+        case Placement::TOP_RIGHT:
+        case Placement::RIGHT_TOP:
+            cornerRadii.y_ = 0.0f; // Top-right corner
+            break;
+        case Placement::BOTTOM_LEFT:
+        case Placement::LEFT_BOTTOM:
+            cornerRadii.w_ = 0.0f; // Bottom-left corner
+            break;
+        case Placement::BOTTOM_RIGHT:
+        case Placement::RIGHT_BOTTOM:
+            cornerRadii.z_ = 0.0f; // Bottom-right corner
+            break;
+        default:
+            break;
+    }
+
+    OHOS::Rosen::RRect rrect(
+        OHOS::Rosen::RectF(
+            childOffset_.GetX(),
+            childOffset_.GetY(),
+            childSize_.Width(),
+            childSize_.Height()
+        ),
+        cornerRadii
+    );
+    rrectShape->Setter<OHOS::Rosen::SDFRRectShapeRRectTag>(rrect);
+
+    return shape0;
 }
 #endif
 

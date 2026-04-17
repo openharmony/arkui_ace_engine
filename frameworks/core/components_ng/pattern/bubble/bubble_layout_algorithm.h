@@ -193,7 +193,8 @@ public:
     std::shared_ptr<OHOS::Rosen::RSNGShapeBase> CreateSmoothUnionShape(
         const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shapeX,
         const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shapeY);
-    std::shared_ptr<OHOS::Rosen::RSNGShapeBase> CreateSDFCornerRectShape(Placement placement);
+    std::shared_ptr<OHOS::Rosen::RSNGShapeBase> CreateSDFRRectShapeWithCustomCorners(
+        Placement arrowBuildplacement);
 #endif
 
     const std::vector<std::vector<float>>& GetArrowOffsetsFromClip() const
