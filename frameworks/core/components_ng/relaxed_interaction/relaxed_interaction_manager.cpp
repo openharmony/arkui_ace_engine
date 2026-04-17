@@ -34,7 +34,6 @@ RelaxedInteractionManager::RelaxedInteractionManager(WeakPtr<PipelineContext> co
 
 ProcessResult RelaxedInteractionManager::ProcessCommand(const std::string& jsonStr)
 {
-    WorkflowDumper::GetInstance().AddLog(jsonStr);
     auto json = JsonUtil::ParseJsonString(jsonStr);
     if (!json || !json->IsValid() || !json->IsObject()) {
         TAG_LOGE(AceLogTag::ACE_UIEVENT, "Invalid command format");
@@ -59,9 +58,12 @@ ProcessResult RelaxedInteractionManager::ProcessCommand(const std::string& jsonS
 
 ExecutionState RelaxedInteractionManager::ExecuteNextStep()
 {
+    if (!choreographer_->HasCurrent() && !choreographer_->HasNext()) {
+        return ExecutionState::FAILED;
+    }
+
     ExecutionState state = DoExecuteNextStep();
-    WorkflowDumper::GetInstance().AddLog("Executor '" + choreographer_->GetCurrentExecutorDescription() +
-        "' workflow state changed to: " + ExecutionStateToString(state));
+    WorkflowDumper::GetInstance().AddLog("Current workflow state changed to: " + ExecutionStateToString(state));
     return state;
 }
 

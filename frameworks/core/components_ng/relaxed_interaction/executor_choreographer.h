@@ -50,16 +50,9 @@ public:
         return executorQueue_.size();
     }
 
-    std::string GetCurrentExecutorDescription() const
-    {
-        if (currentExecutor_) {
-            return currentExecutor_->GetDescription();
-        }
-        return "no executor";
-    }
-
 private:
     bool MoveToNext();
+
     std::string ExecutorResultToString(ExecutorResult result);
 
     std::deque<std::unique_ptr<BaseExecutor>> executorQueue_;
