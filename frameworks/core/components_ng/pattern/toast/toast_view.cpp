@@ -121,7 +121,11 @@ void ToastView::UpdateTextLayoutProperty(
 
 void ToastView::SetToastSystemMaterial(const RefPtr<FrameNode>& toastNode, const ToastInfo& toastInfo)
 {
-    if (SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::SMOOTH) {
+    if (SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::SMOOTH ||
+        MaterialUtils::IsMaterialDisabled()) {
+        return;
+    }
+    if (toastInfo.systemMaterial && !MaterialUtils::IsEnableMaterialParam(toastInfo.systemMaterial)) {
         return;
     }
     CHECK_NULL_VOID(toastNode);
@@ -129,9 +133,7 @@ void ToastView::SetToastSystemMaterial(const RefPtr<FrameNode>& toastNode, const
     CHECK_NULL_VOID(renderContext);
 
     // Check if user has explicitly set systemMaterial
-    if (toastInfo.systemMaterial &&
-        toastInfo.systemMaterial->GetType() >= static_cast<int32_t>(Ace::MaterialType::NONE) &&
-        toastInfo.systemMaterial->GetType() <= static_cast<int32_t>(Ace::MaterialType::MAX)) {
+    if (toastInfo.systemMaterial) {
         renderContext->UpdateBackBlurStyle(std::nullopt);
         ViewAbstract::SetSystemMaterial(AceType::RawPtr(toastNode), AceType::RawPtr(toastInfo.systemMaterial));
         return;
@@ -142,14 +144,9 @@ void ToastView::SetToastSystemMaterial(const RefPtr<FrameNode>& toastNode, const
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         bool hasCustomStyle = toastInfo.backgroundColor.has_value() ||
                               toastInfo.backgroundBlurStyle.has_value() ||
-                              toastInfo.shadow.has_value() ||
-                              toastInfo.systemMaterial;
+                              toastInfo.shadow.has_value();
         if (!hasCustomStyle) {
-            auto defaultMaterial = AceType::MakeRefPtr<UiMaterial>();
-            defaultMaterial->SetType(static_cast<int32_t>(Ace::MaterialType::IMMERSIVE));
-            ImmersiveOptions options {};
-            options.style = UiMaterialStyle::THICK;
-            defaultMaterial->SetImmersiveOptions(options);
+            auto defaultMaterial = MaterialUtils::GetInitMaterial(UiMaterialStyle::THICK);
             renderContext->UpdateBackBlurStyle(std::nullopt);
             ViewAbstract::SetSystemMaterial(AceType::RawPtr(toastNode), AceType::RawPtr(defaultMaterial));
         }

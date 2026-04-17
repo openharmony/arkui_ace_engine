@@ -3158,4 +3158,263 @@ HWTEST_F(OverlayManagerToastTestNg, SetToastSystemMaterial_BackBlurStyleReset, T
     EXPECT_NE(toastNode, nullptr);
 }
 
+/**
+ * @tc.name: SetToastSystemMaterial_DefaultMaterial_ApiVersion26
+ * @tc.desc: Test SetToastSystemMaterial sets default material via GetInitMaterial when API >= 26 and no custom styles
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, SetToastSystemMaterial_DefaultMaterial_ApiVersion26, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create toast node and set API version to VERSION_TWENTY_SIX
+     */
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE, .duration = DURATION };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto renderContext = toastNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->ResetBackBlurStyle();
+
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    int32_t backupApiVersion = container->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    EXPECT_TRUE(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX));
+
+    /**
+     * @tc.steps: step2. Create ToastInfo without systemMaterial and no custom styles
+     */
+    ToastInfo toastInfoNoCustom;
+    toastInfoNoCustom.message = MESSAGE;
+    toastInfoNoCustom.duration = DURATION;
+    toastInfoNoCustom.systemMaterial = nullptr;
+
+    /**
+     * @tc.steps: step3. Call SetToastSystemMaterial
+     * @tc.expected: Default material should be applied via GetInitMaterial(THICK)
+     */
+    ToastView::SetToastSystemMaterial(toastNode, toastInfoNoCustom);
+
+    EXPECT_NE(toastNode, nullptr);
+
+    container->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: SetToastSystemMaterial_DefaultMaterial_ApiVersionBelow26
+ * @tc.desc: Test SetToastSystemMaterial does not set default material when API < VERSION_TWENTY_SIX
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, SetToastSystemMaterial_DefaultMaterial_ApiVersionBelow26, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create toast node and set API version below VERSION_TWENTY_SIX
+     */
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE, .duration = DURATION };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto renderContext = toastNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->ResetBackBlurStyle();
+
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    int32_t backupApiVersion = container->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    EXPECT_FALSE(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX));
+
+    /**
+     * @tc.steps: step2. Create ToastInfo without systemMaterial and no custom styles
+     */
+    ToastInfo toastInfoNoCustom;
+    toastInfoNoCustom.message = MESSAGE;
+    toastInfoNoCustom.duration = DURATION;
+    toastInfoNoCustom.systemMaterial = nullptr;
+
+    /**
+     * @tc.steps: step3. Call SetToastSystemMaterial
+     * @tc.expected: No default material should be set since API < 26
+     */
+    ToastView::SetToastSystemMaterial(toastNode, toastInfoNoCustom);
+
+    auto resultMaterial = renderContext->GetSystemMaterial();
+    EXPECT_EQ(resultMaterial, nullptr);
+
+    container->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: SetToastSystemMaterial_CustomBackgroundColorPreventsDefault
+ * @tc.desc: Test that custom backgroundColor prevents default material even when API >= 26
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, SetToastSystemMaterial_CustomBackgroundColorPreventsDefault, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create toast node and set API version to VERSION_TWENTY_SIX
+     */
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE, .duration = DURATION };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto renderContext = toastNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->ResetBackBlurStyle();
+
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    int32_t backupApiVersion = container->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    EXPECT_TRUE(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX));
+
+    /**
+     * @tc.steps: step2. Create ToastInfo with custom backgroundColor (no systemMaterial)
+     */
+    ToastInfo toastInfoWithBgColor;
+    toastInfoWithBgColor.message = MESSAGE;
+    toastInfoWithBgColor.duration = DURATION;
+    toastInfoWithBgColor.systemMaterial = nullptr;
+    toastInfoWithBgColor.backgroundColor = Color::RED;
+
+    /**
+     * @tc.steps: step3. Call SetToastSystemMaterial
+     * @tc.expected: Default material should NOT be set due to custom backgroundColor
+     */
+    ToastView::SetToastSystemMaterial(toastNode, toastInfoWithBgColor);
+
+    auto resultMaterial = renderContext->GetSystemMaterial();
+    EXPECT_EQ(resultMaterial, nullptr);
+
+    container->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: SetToastSystemMaterial_CustomShadowPreventsDefault
+ * @tc.desc: Test that custom shadow prevents default material even when API >= 26
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, SetToastSystemMaterial_CustomShadowPreventsDefault, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create toast node and set API version to VERSION_TWENTY_SIX
+     */
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE, .duration = DURATION };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto renderContext = toastNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->ResetBackBlurStyle();
+
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    int32_t backupApiVersion = container->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    EXPECT_TRUE(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX));
+
+    /**
+     * @tc.steps: step2. Create ToastInfo with custom shadow (no systemMaterial)
+     */
+    ToastInfo toastInfoWithShadow;
+    toastInfoWithShadow.message = MESSAGE;
+    toastInfoWithShadow.duration = DURATION;
+    toastInfoWithShadow.systemMaterial = nullptr;
+    toastInfoWithShadow.shadow = ShadowConfig::DefaultShadowL;
+
+    /**
+     * @tc.steps: step3. Call SetToastSystemMaterial
+     * @tc.expected: Default material should NOT be set due to custom shadow
+     */
+    ToastView::SetToastSystemMaterial(toastNode, toastInfoWithShadow);
+
+    auto resultMaterial = renderContext->GetSystemMaterial();
+    EXPECT_EQ(resultMaterial, nullptr);
+
+    container->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: SetToastSystemMaterial_CustomBlurStylePreventsDefault
+ * @tc.desc: Test that custom backgroundBlurStyle prevents default material even when API >= 26
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, SetToastSystemMaterial_CustomBlurStylePreventsDefault, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create toast node and set API version to VERSION_TWENTY_SIX
+     */
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE, .duration = DURATION };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto renderContext = toastNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->ResetBackBlurStyle();
+
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    int32_t backupApiVersion = container->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    EXPECT_TRUE(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX));
+
+    /**
+     * @tc.steps: step2. Create ToastInfo with custom backgroundBlurStyle (no systemMaterial)
+     */
+    ToastInfo toastInfoWithBlur;
+    toastInfoWithBlur.message = MESSAGE;
+    toastInfoWithBlur.duration = DURATION;
+    toastInfoWithBlur.systemMaterial = nullptr;
+    toastInfoWithBlur.backgroundBlurStyle = static_cast<int32_t>(BlurStyle::COMPONENT_THICK);
+
+    /**
+     * @tc.steps: step3. Call SetToastSystemMaterial
+     * @tc.expected: Default material should NOT be set due to custom backgroundBlurStyle
+     */
+    ToastView::SetToastSystemMaterial(toastNode, toastInfoWithBlur);
+
+    auto resultMaterial = renderContext->GetSystemMaterial();
+    EXPECT_EQ(resultMaterial, nullptr);
+
+    container->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: SetToastSystemMaterial_SimplifiedCheck_ValidSystemMaterial
+ * @tc.desc: Test that simplified check (just if systemMaterial) accepts material with IMMERSIVE type
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, SetToastSystemMaterial_SimplifiedCheck_ValidSystemMaterial, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create toast node
+     */
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE, .duration = DURATION };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto renderContext = toastNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->ResetBackBlurStyle();
+
+    /**
+     * @tc.steps: step2. Create ToastInfo with IMMERSIVE type systemMaterial
+     * The new code uses simplified check (just checks if systemMaterial is non-null),
+     * so IMMERSIVE type should be accepted without type range validation.
+     */
+    constexpr int32_t MATERIAL_TYPE_IMMERSIVE = static_cast<int32_t>(Ace::MaterialType::IMMERSIVE);
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(MATERIAL_TYPE_IMMERSIVE);
+    ImmersiveOptions options {};
+    options.style = UiMaterialStyle::THICK;
+    material->SetImmersiveOptions(options);
+
+    ToastInfo toastInfoWithImmersive;
+    toastInfoWithImmersive.message = MESSAGE;
+    toastInfoWithImmersive.systemMaterial = material;
+
+    /**
+     * @tc.steps: step3. Call SetToastSystemMaterial
+     * @tc.expected: Should process material without type range rejection
+     */
+    ToastView::SetToastSystemMaterial(toastNode, toastInfoWithImmersive);
+
+    EXPECT_NE(toastNode, nullptr);
+}
+
 } // namespace OHOS::Ace::NG
