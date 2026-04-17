@@ -34,6 +34,7 @@
 #include "form_ashmem.h"
 #include "pointer_event.h"
 
+#include "base/resource/shared_image_manager.h"
 #include "base/utils/layout_break_point.h"
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "core/image/image_cache.h"
