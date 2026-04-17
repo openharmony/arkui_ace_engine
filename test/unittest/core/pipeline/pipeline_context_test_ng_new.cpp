@@ -4514,7 +4514,7 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTest043, TestSize.Level1)
      * @tc.expect: function executes without crash.
      */
     std::vector<RefPtr<FrameNode>> children = { frameNode_ };
-    IgnoreLayoutSafeAreaBundle bundle = std::make_pair(children, nullptr);
+    IgnoreLayoutSafeAreaBundle bundle = {children, nullptr, LayoutSafeAreaBundleType::IGNORE_LAYOUT_SAFE_AREA};
     context_->AddIgnoreLayoutSafeAreaBundle(std::move(bundle), false);
 }
 

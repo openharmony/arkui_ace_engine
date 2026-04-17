@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_LAYOUT_PROPERTY_H
 
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
@@ -58,6 +59,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_GET(SupportLazyLoadingEmptyBranch, bool);
 public:
     void UpdateSupportLazyLoadingEmptyBranch(const bool& value);
+    virtual void UpdateContentClip(std::optional<ContentClip> contentClip) {};
 
 protected:
     void Clone(RefPtr<LayoutProperty> property) const override

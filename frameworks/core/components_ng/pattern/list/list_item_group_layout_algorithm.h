@@ -140,6 +140,12 @@ public:
         prevContentMainSize_ = prevContentSize;
     }
 
+    void SetFixOffset(float startFixOffset, float endFixOffset)
+    {
+        startFixOffset_ = startFixOffset;
+        endFixOffset_ = endFixOffset;
+    }
+
     float GetListContentSize() const
     {
         return endPos_ - startPos_;
@@ -523,6 +529,8 @@ private:
     float prevContentMainSize_ = 0.0f;
     float contentStartOffset_ = 0.0f;
     float contentEndOffset_ = 0.0f;
+    float startFixOffset_ = 0.0f;
+    float endFixOffset_ = 0.0f;
     float groupItemAverageHeight_ = 0.0f;
     bool forwardLayout_ = true;
     bool needAllLayout_ = false;

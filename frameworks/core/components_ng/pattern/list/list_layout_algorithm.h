@@ -234,15 +234,9 @@ public:
         prevContentMainSize_ = mainSize;
     }
 
-    int32_t GetStartIndex() const
-    {
-        return itemPosition_.empty() ? -1 : itemPosition_.begin()->first;
-    }
+    int32_t GetStartIndex(bool ignoreFixOffset = false) const;
 
-    int32_t GetEndIndex() const
-    {
-        return itemPosition_.empty() ? -1 : itemPosition_.rbegin()->first;
-    }
+    int32_t GetEndIndex(bool ignoreFixOffset = false) const;
 
     int32_t GetMidIndex(LayoutWrapper* layoutWrapper, bool usePreContentMainSize = false);
 
@@ -489,6 +483,16 @@ public:
         return prevMeasureBreak_;
     }
 
+    float GetStartFixOffset() const
+    {
+        return startFixOffset_;
+    }
+
+    float GetEndFixOffset() const
+    {
+        return endFixOffset_;
+    }
+
     bool IsNeedSyncLoad(const RefPtr<ListLayoutProperty>& property) const;
 
     void CheckGroupMeasureBreak(const RefPtr<LayoutWrapper>& layoutWrapper);
@@ -496,6 +500,21 @@ public:
     void SetDraggingIndex(int32_t index)
     {
         draggingIndex_ = index;
+    }
+
+    void SetContentClipExpend(ExpandEdges expand)
+    {
+        expandEdges_ = expand;
+    }
+
+    void SetContentClipMode(ContentClipMode contentClipMode)
+    {
+        contentClipMode_ = contentClipMode;
+    }
+
+    void SetContentClipShape(const RefPtr<ShapeRect>& shape)
+    {
+        clipShapeRect_ = shape;
     }
 
     void ExpandWithSafeAreaPadding(const RefPtr<LayoutWrapper>& layoutWrapper);
@@ -626,6 +645,8 @@ protected:
         return 0.0f;
     }
 
+    void CalculateFixOffset(const ScaleProperty& scaleProperty);
+
     void LostChildFocusToSelf(LayoutWrapper* layoutWrapper, int32_t start, int32_t end);
 
     virtual void MeasureHeader(LayoutWrapper* layoutWrapper) {}
@@ -673,6 +694,8 @@ protected:
     bool isReverse_ = false;
     float contentMainSize_ = 0.0f;
     float prevContentMainSize_ = 0.0f;
+    float startFixOffset_ = 0.0f;
+    float endFixOffset_ = 0.0f;
     float paddingBeforeContent_ = 0.0f;
     float paddingAfterContent_ = 0.0f;
     float groupItemAverageHeight_ = 0.0f;
@@ -740,6 +763,9 @@ private:
 
     float chainInterval_ = 0.0f;
     int32_t draggingIndex_ = -1;
+    ContentClipMode contentClipMode_ = ContentClipMode::CONTENT_ONLY;
+    std::optional<ExpandEdges> expandEdges_;
+    RefPtr<ShapeRect> clipShapeRect_;
 };
 } // namespace OHOS::Ace::NG
 

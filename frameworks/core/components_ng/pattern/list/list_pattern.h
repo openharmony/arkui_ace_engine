@@ -82,6 +82,12 @@ public:
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
 
+    bool PostponedTaskForIgnoreCustomized() override
+    {
+        return true;
+    }
+    void PostponedTaskForIgnore(LayoutSafeAreaBundleType type) override;
+
     bool UpdateCurrentOffset(float offset, int32_t source) override;
 
     void PostAsyncLoadTask();
@@ -520,6 +526,8 @@ protected:
     float contentMainSize_ = 0.0f;
     float contentStartOffset_ = 0.0f;
     float contentEndOffset_ = 0.0f;
+    float startFixOffset_ = 0.0f;
+    float endFixOffset_ = 0.0f;
 
     float currentDelta_ = 0.0f;
     bool smooth_ = false;
@@ -630,6 +638,8 @@ private:
     void GetListItemGroupEdge(bool& groupAtStart, bool& groupAtEnd) const;
     void RefreshLanesItemRange();
     void UpdateListDirectionInCardStyle();
+    VisibleContentInfo GetStartListItemIndex(const RefPtr<ListItemGroupPattern>& groupPattern);
+    VisibleContentInfo GetEndListItemIndex(const RefPtr<ListItemGroupPattern>& groupPattern);
     bool UpdateStartListItemIndex();
     bool UpdateEndListItemIndex();
     bool CalculateJumpOffset();
@@ -650,6 +660,7 @@ private:
     void ReportOnItemListEvent(const std::string& event);
     void ReportOnItemListScrollEvent(const std::string& event, int32_t startindex, int32_t endindex);
     int32_t OnInjectionEvent(const std::string& command) override;
+    void PostAfterCurrentLayoutTask();
 
     std::optional<int32_t> focusIndex_;
     std::optional<int32_t> focusGroupIndex_;
@@ -712,6 +723,7 @@ private:
     int32_t draggingIndex_ = -1;
     bool heightEstimated_ = false;
     ScrollSnapAnimationSpeed listSnapSpeed_ = ScrollSnapAnimationSpeed::NORMAL;
+    std::optional<ExpandEdges> safeAreaPad_;
 };
 } // namespace OHOS::Ace::NG
 

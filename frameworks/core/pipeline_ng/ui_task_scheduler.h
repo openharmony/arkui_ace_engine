@@ -39,7 +39,16 @@ constexpr TaskThread MAIN_TASK = 1;
 constexpr TaskThread BACKGROUND_TASK = 1 << 1;
 constexpr TaskThread UNDEFINED_TASK = 1 << 2;
 
-using IgnoreLayoutSafeAreaBundle = std::pair<std::vector<RefPtr<FrameNode>>, RefPtr<FrameNode>>;
+enum class LayoutSafeAreaBundleType {
+    IGNORE_LAYOUT_SAFE_AREA = 0,
+    CONTENT_CLIP_SAFE_AREA = 1,
+};
+
+struct IgnoreLayoutSafeAreaBundle {
+    std::vector<RefPtr<FrameNode>> first;
+    RefPtr<FrameNode> second;
+    LayoutSafeAreaBundleType type = LayoutSafeAreaBundleType::IGNORE_LAYOUT_SAFE_AREA;
+};
 
 class UITask {
 public:
