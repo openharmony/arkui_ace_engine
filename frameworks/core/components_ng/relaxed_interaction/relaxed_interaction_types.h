@@ -16,6 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RELAXED_INTERACTION_RELAXED_INTERACTION_TYPES_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RELAXED_INTERACTION_RELAXED_INTERACTION_TYPES_H
 
+#include "ui/base/ace_type.h"
+#include "ui/gestures/gesture_event.h"
+
 #include <memory>
 #include <string>
 #include <vector>
@@ -82,6 +85,26 @@ struct Command {
     ExecuteMode mode;
     ScrollActionInfo actionInfo;
     bool isY2Set = false;
+};
+
+class NGGestureRecognizer;
+class PanRecognizer;
+class ClickRecognizer;
+
+using GestureRecognizerPred = std::function<bool (const RefPtr<NGGestureRecognizer>& gestureRecognizer)>;
+
+struct PanRecognizerPred {
+    bool operator()(const RefPtr<NGGestureRecognizer>& gestureRecognizer)
+    {
+        return AceType::InstanceOf<PanRecognizer>(gestureRecognizer);
+    }
+};
+
+struct ClickRecognizerPred {
+    bool operator()(const RefPtr<NGGestureRecognizer>& gestureRecognizer)
+    {
+        return AceType::InstanceOf<ClickRecognizer>(gestureRecognizer);
+    }
 };
 
 } // namespace OHOS::Ace::NG

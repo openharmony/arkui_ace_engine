@@ -23,8 +23,6 @@ namespace OHOS::Ace::NG {
 
 namespace {
 // Touch event constants to avoid magic numbers
-constexpr float FAKE_TOUCH_PRESSURE = 3.0f;
-constexpr float DEFAULT_TOUCH_SIZE = 1.0f;
 constexpr float HALF = 2.0f;
 
 TouchPoint CreateTouchPoint(const PointF& coordinates, TouchType touchType)
@@ -39,10 +37,10 @@ TouchPoint CreateTouchPoint(const PointF& coordinates, TouchType touchType)
     touchPoint.globalDisplayX = coordinates.GetX();
     touchPoint.globalDisplayY = coordinates.GetY();
     touchPoint.isPressed = (touchType == TouchType::DOWN) || (touchType == TouchType::MOVE);
-    touchPoint.force = FAKE_TOUCH_PRESSURE;
+    touchPoint.force = 0;
     touchPoint.sourceTool = SourceTool::FINGER;
     touchPoint.originalId = 0;
-    touchPoint.size = DEFAULT_TOUCH_SIZE;
+    touchPoint.size = 0;
     touchPoint.width = 0;
     touchPoint.height = 0;
     touchPoint.tiltX = 0.0f;

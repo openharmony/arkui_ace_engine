@@ -43,7 +43,8 @@ public:
     }
 
 protected:
-    RefPtr<FrameNode> FindFrameNode(double x, double y);
+    std::pair<RefPtr<FrameNode>, GestureEventFunc> FindFrameNode(
+        double x, double y, GestureRecognizerPred pred = PanRecognizerPred());
     WeakPtr<PipelineContext> context_;
 };
 

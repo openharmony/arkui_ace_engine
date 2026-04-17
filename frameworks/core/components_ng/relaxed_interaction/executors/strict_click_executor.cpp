@@ -35,35 +35,19 @@ ExecutorResult StrictClickExecutor::ExecuteStep()
     }
 
     // Use FrameNodeFinder to query FrameNode at coordinates
-    auto frameNode = FindFrameNode(coordinates_.GetX(), coordinates_.GetY());
-    if (!frameNode) {
+    auto result = FindFrameNode(coordinates_.GetX(), coordinates_.GetY(), ClickRecognizerPred());
+    if (!result.first) {
         TAG_LOGD(AceLogTag::ACE_UIEVENT, "No FrameNode found at coordinates (%{private}.2f, %{private}.2f)",
                  coordinates_.GetX(), coordinates_.GetY());
         return ExecutorResult::FAILED;
     }
 
-    // Trigger FrameNode's click event directly
-    return TriggerClick(frameNode);
-}
-
-ExecutorResult StrictClickExecutor::TriggerClick(const RefPtr<FrameNode>& frameNode)
-{
-    auto focusHub = frameNode->GetOrCreateFocusHub();
-    if (!focusHub) {
-        TAG_LOGW(AceLogTag::ACE_UIEVENT, "Failed to get FocusHub from FrameNode");
-        return ExecutorResult::FAILED;
+    if (result.second) {
+        auto info = RelaxedEventFactory::CreateClickGestureEvent(result.first);
+        result.second(info);
+        return ExecutorResult::SUCCESS;
     }
-
-    auto onClickCallback = focusHub->GetOnClickCallback();
-    if (!onClickCallback) {
-        TAG_LOGW(AceLogTag::ACE_UIEVENT, "No click event callback registered on FrameNode");
-        return ExecutorResult::FAILED;
-    }
-
-    // Build GestureEvent using utility function
-    auto info = RelaxedEventFactory::CreateClickGestureEvent(frameNode);
-    onClickCallback(info);
-    return ExecutorResult::SUCCESS;
+    return ExecutorResult::FAILED;
 }
 
 } // namespace OHOS::Ace::NG

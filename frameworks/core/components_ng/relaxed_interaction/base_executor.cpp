@@ -20,18 +20,19 @@
 
 namespace OHOS::Ace::NG {
 
-RefPtr<FrameNode> BaseExecutor::FindFrameNode(double x, double y)
+std::pair<RefPtr<FrameNode>, GestureEventFunc> BaseExecutor::FindFrameNode(
+    double x, double y, GestureRecognizerPred pred)
 {
-    FrameNodeFinder finder(context_);
-    auto frameNode = finder.FindAt(static_cast<float>(x), static_cast<float>(y));
-    if (frameNode) {
+    FrameNodeFinder finder(context_, pred);
+    auto result = finder.FindAt(static_cast<float>(x), static_cast<float>(y));
+    if (result.first) {
         WorkflowDumper::GetInstance().AddLog(
-            "Found frame node " + frameNode->ToString() + " for executor " + GetType());
+            "Found frame node " + result.first->ToString() + " for executor " + GetType());
     } else {
         WorkflowDumper::GetInstance().AddLog("No frame node found for executor " + GetType());
     }
 
-    return frameNode;
+    return result;
 }
 
 } // namespace OHOS::Ace::NG

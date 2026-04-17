@@ -49,8 +49,6 @@ public:
     }
 
 private:
-    ExecutorResult TriggerClick(const RefPtr<FrameNode>& frameNode);
-
     PointF coordinates_;
 };
 

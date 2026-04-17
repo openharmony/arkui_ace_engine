@@ -33,12 +33,12 @@ ExecutorResult StrictContentSwitchExecutor::ExecuteStep()
         return ExecutorResult::FAILED;
     }
 
-    auto frameNode = FindFrameNode(coordinates_.GetX(), coordinates_.GetY());
-    if (!frameNode) {
+    auto result = FindFrameNode(coordinates_.GetX(), coordinates_.GetY());
+    if (!result.first) {
         return ExecutorResult::FAILED;
     }
 
-    return TriggerContentSwitch(frameNode);
+    return TriggerContentSwitch(result.first);
 }
 
 ExecutorResult StrictContentSwitchExecutor::TriggerContentSwitch(const RefPtr<FrameNode> frameNode)

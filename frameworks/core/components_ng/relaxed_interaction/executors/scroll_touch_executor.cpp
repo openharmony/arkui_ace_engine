@@ -85,12 +85,12 @@ RefPtr<ScrollPattern> ScrollTouchExecutor::FindScrollPattern(float x, float y)
     if (!context) {
         return nullptr;
     }
-    auto frameNode = FindFrameNode(x, y);
-    if (!frameNode) {
+    auto result = FindFrameNode(x, y);
+    if (!result.first) {
         TAG_LOGD(AceLogTag::ACE_UIEVENT, "No FrameNode found at coordinates.");
         return nullptr;
     }
-    return AceType::DynamicCast<ScrollPattern>(frameNode->GetPattern());
+    return AceType::DynamicCast<ScrollPattern>(result.first->GetPattern());
 }
 
 } // namespace OHOS::Ace::NG

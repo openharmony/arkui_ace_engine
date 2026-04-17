@@ -18,13 +18,15 @@
 
 #include <string>
 #include <set>
+#include <utility>
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
+#include "core/components_ng/relaxed_interaction/relaxed_interaction_types.h"
 
 namespace OHOS::Ace::NG {
 
 class PipelineContext;
-class NGGestureRecognizer;
 
 /**
  * @brief FrameNode finder providing FrameNode query functionality
@@ -36,6 +38,7 @@ class NGGestureRecognizer;
 class FrameNodeFinder {
 public:
     explicit FrameNodeFinder(WeakPtr<PipelineContext> context);
+    explicit FrameNodeFinder(WeakPtr<PipelineContext> context, GestureRecognizerPred pred);
     ~FrameNodeFinder() = default;
 
     /**
@@ -48,14 +51,15 @@ public:
      * @param y Screen Y coordinate
      * @return RefPtr<FrameNode> Pointer to the found FrameNode, returns nullptr if not found
      */
-    RefPtr<FrameNode> FindAt(float x, float y);
+    std::pair<RefPtr<FrameNode>, GestureEventFunc> FindAt(float x, float y);
 
 private:
     WeakPtr<PipelineContext> context_;
+    GestureRecognizerPred pred_;
 
-    RefPtr<FrameNode> FindAt(const RefPtr<UINode>& rootNode, float x, float y);
-    RefPtr<FrameNode> Find(const TouchTestResult& touchTestResult);
-    RefPtr<FrameNode> FindLeaf(const RefPtr<NGGestureRecognizer>& gestureRecognizer);
+    std::pair<RefPtr<FrameNode>, GestureEventFunc> FindAt(const RefPtr<UINode>& rootNode, float x, float y);
+    std::pair<RefPtr<FrameNode>, GestureEventFunc> Find(const TouchTestResult& touchTestResult);
+    std::pair<RefPtr<FrameNode>, GestureEventFunc> FindLeaf(const RefPtr<NGGestureRecognizer>& gestureRecognizer);
     void CleanResult(const TouchTestResult& touchTestResult, int32_t touchId);
     void GetFrameNodes(std::set<WeakPtr<NG::FrameNode>>& frameNodes,
         const std::list<RefPtr<NG::NGGestureRecognizer>>& touchTestResults);
