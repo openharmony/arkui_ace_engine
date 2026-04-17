@@ -4099,7 +4099,9 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
                 reason == OHOS::Rosen::WindowSizeChangeReason::SCENE_WITH_ANIMATION) {
                 pipelineContext->FlushBuild();
                 pipelineContext->StartWindowAnimation();
-                if (container->GetUIContentType() != UIContentType::DYNAMIC_COMPONENT) {
+                // SCENE_WITH_ANIMATION does not require refreshing all nodes
+                if (container->GetUIContentType() != UIContentType::DYNAMIC_COMPONENT &&
+                    reason != OHOS::Rosen::WindowSizeChangeReason::SCENE_WITH_ANIMATION) {
                     container->NotifyDirectionUpdate();
                 }
             }
