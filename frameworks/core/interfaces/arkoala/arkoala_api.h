@@ -4474,6 +4474,10 @@ struct ArkUIListItemGroupModifier {
     void (*resetListItemGroupSpace)(ArkUINodeHandle node);
     void (*setListItemGroupStyle)(ArkUINodeHandle node, ArkUI_Uint32 style);
     void (*resetListItemGroupStyle)(ArkUINodeHandle node);
+    void (*setListItemGroupHeaderStyle)(ArkUINodeHandle node, ArkUI_Uint32 style);
+    void (*resetListItemGroupHeaderStyle)(ArkUINodeHandle node);
+    void (*setListItemGroupFooterStyle)(ArkUINodeHandle node, ArkUI_Uint32 style);
+    void (*resetListItemGroupFooterStyle)(ArkUINodeHandle node);
     ArkUI_Int32 (*setListItemGroupNodeAdapter)(ArkUINodeHandle node, ArkUINodeAdapterHandle handle);
     void (*resetListItemGroupNodeAdapter)(ArkUINodeHandle node);
     ArkUINodeAdapterHandle (*getListItemGroupNodeAdapter)(ArkUINodeHandle node);

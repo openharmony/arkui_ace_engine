@@ -29718,7 +29718,7 @@ class ListItemGroupInitializeModifier extends ModifierWithKey {
       getUINativeModule().listItemGroup.resetListItemGroupInitialize(node);
     } else {
       getUINativeModule().listItemGroup.setListItemGroupInitialize(node, this.value?.space, this.value?.style,
-        this.value?.headerComponent, this.value?.footerComponent);
+        this.value?.headerComponent, this.value?.footerComponent, this.value?.headerStyle, this.value?.footerStyle);
     }
   }
 }

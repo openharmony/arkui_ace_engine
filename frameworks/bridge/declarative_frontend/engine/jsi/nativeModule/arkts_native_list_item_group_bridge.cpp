@@ -156,8 +156,10 @@ ArkUINativeModuleValue ListItemGroupBridge::SetListItemGroupInitialize(ArkUIRunt
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> spaceArg = runtimeCallInfo->GetCallArgRef(1); //1 is index of space
-    Local<JSValueRef> styleArg = runtimeCallInfo->GetCallArgRef(2); //2 is index of style
+    Local<JSValueRef> spaceArg = runtimeCallInfo->GetCallArgRef(1); // 1 is index of space
+    Local<JSValueRef> styleArg = runtimeCallInfo->GetCallArgRef(2); // 2 is index of style
+    Local<JSValueRef> headerStyleArg = runtimeCallInfo->GetCallArgRef(5); // 5 is index of headerStyle
+    Local<JSValueRef> footerStyleArg = runtimeCallInfo->GetCallArgRef(6); // 6 is index of footerStyle
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
@@ -178,6 +180,30 @@ ArkUINativeModuleValue ListItemGroupBridge::SetListItemGroupInitialize(ArkUIRunt
         GetArkUINodeModifiers()->getListItemGroupModifier()->setListItemGroupStyle(nativeNode, style);
     }
 
+    // Parse headerStyle
+    if (headerStyleArg->IsUndefined() || headerStyleArg->IsNull() || !headerStyleArg->IsNumber()) {
+        GetArkUINodeModifiers()->getListItemGroupModifier()->resetListItemGroupHeaderStyle(nativeNode);
+    } else {
+        uint32_t headerStyle = headerStyleArg->Uint32Value(vm);
+        if (headerStyle < static_cast<uint32_t>(V2::ListItemGroupHeaderFooterStyle::NONE) ||
+            headerStyle > static_cast<uint32_t>(V2::ListItemGroupHeaderFooterStyle::FLOATING)) {
+            headerStyle = static_cast<uint32_t>(V2::ListItemGroupHeaderFooterStyle::NONE);
+        }
+        GetArkUINodeModifiers()->getListItemGroupModifier()->setListItemGroupHeaderStyle(nativeNode, headerStyle);
+    }
+
+    // Parse footerStyle
+    if (footerStyleArg->IsUndefined() || footerStyleArg->IsNull() || !footerStyleArg->IsNumber()) {
+        GetArkUINodeModifiers()->getListItemGroupModifier()->resetListItemGroupFooterStyle(nativeNode);
+    } else {
+        uint32_t footerStyle = footerStyleArg->Uint32Value(vm);
+        if (footerStyle < static_cast<uint32_t>(V2::ListItemGroupHeaderFooterStyle::NONE) ||
+            footerStyle > static_cast<uint32_t>(V2::ListItemGroupHeaderFooterStyle::FLOATING)) {
+            footerStyle = static_cast<uint32_t>(V2::ListItemGroupHeaderFooterStyle::NONE);
+        }
+        GetArkUINodeModifiers()->getListItemGroupModifier()->setListItemGroupFooterStyle(nativeNode, footerStyle);
+    }
+
     Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
     SetHeaderComponent(vm, nativeNode, info);
     SetFooterComponent(vm, nativeNode, info);
@@ -193,6 +219,8 @@ ArkUINativeModuleValue ListItemGroupBridge::ResetListItemGroupInitialize(ArkUIRu
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getListItemGroupModifier()->resetListItemGroupSpace(nativeNode);
     GetArkUINodeModifiers()->getListItemGroupModifier()->resetListItemGroupStyle(nativeNode);
+    GetArkUINodeModifiers()->getListItemGroupModifier()->resetListItemGroupHeaderStyle(nativeNode);
+    GetArkUINodeModifiers()->getListItemGroupModifier()->resetListItemGroupFooterStyle(nativeNode);
     GetArkUINodeModifiers()->getListItemGroupModifier()->listItemGroupResetHeader(nativeNode);
     GetArkUINodeModifiers()->getListItemGroupModifier()->listItemGroupResetFooter(nativeNode);
 

@@ -76,8 +76,9 @@ class ACE_EXPORT ListItemGroupPattern : public Pattern {
 
 public:
     explicit ListItemGroupPattern(
-        const RefPtr<ShallowBuilder>& shallowBuilder, V2::ListItemGroupStyle listItemGroupStyle)
-        : shallowBuilder_(shallowBuilder), listItemGroupStyle_(listItemGroupStyle)
+        const RefPtr<ShallowBuilder>& shallowBuilder, V2::ListItemGroupOptions options)
+        : shallowBuilder_(shallowBuilder), listItemGroupStyle_(options.style),
+          headerStyle_(options.headerStyle), footerStyle_(options.footerStyle)
     {}
     ~ListItemGroupPattern() override = default;
 
@@ -159,6 +160,10 @@ public:
         auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
         CHECK_NULL_VOID(accessibilityProperty);
         accessibilityProperty->SetIsHeaderOrFooter(true);
+        
+        if (headerStyle_ == V2::ListItemGroupHeaderFooterStyle::FLOATING) {
+            ApplyHeaderFooterStyle(frameNode);
+        }
     }
 
     void AddFooter(const RefPtr<NG::UINode>& footer)
@@ -194,6 +199,10 @@ public:
         auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
         CHECK_NULL_VOID(accessibilityProperty);
         accessibilityProperty->SetIsHeaderOrFooter(true);
+        
+        if (footerStyle_ == V2::ListItemGroupHeaderFooterStyle::FLOATING) {
+            ApplyHeaderFooterStyle(frameNode);
+        }
     }
 
     void RemoveHeader()
@@ -376,6 +385,17 @@ public:
     }
 
     void SetListItemGroupStyle(V2::ListItemGroupStyle style);
+    void SetHeaderStyle(V2::ListItemGroupHeaderFooterStyle style);
+    void SetFooterStyle(V2::ListItemGroupHeaderFooterStyle style);
+    V2::ListItemGroupHeaderFooterStyle GetHeaderStyle()
+    {
+        return headerStyle_;
+    }
+    V2::ListItemGroupHeaderFooterStyle GetFooterStyle()
+    {
+        return footerStyle_;
+    }
+    void ApplyHeaderFooterStyle(const RefPtr<FrameNode>& node);
     RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize();
     void UpdateChildrenMainSizeRoundingMode();
     void UpdateChildrenMainSizeRoundingModeMultiThread();
@@ -503,6 +523,8 @@ private:
     RefPtr<ListPositionMap> posMap_;
     RefPtr<ListChildrenMainSize> childrenSize_;
     V2::ListItemGroupStyle listItemGroupStyle_ = V2::ListItemGroupStyle::NONE;
+    V2::ListItemGroupHeaderFooterStyle headerStyle_ = V2::ListItemGroupHeaderFooterStyle::NONE;
+    V2::ListItemGroupHeaderFooterStyle footerStyle_ = V2::ListItemGroupHeaderFooterStyle::NONE;
 
     int32_t indexInList_ = 0;
 

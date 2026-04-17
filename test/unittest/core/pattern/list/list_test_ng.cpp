@@ -181,7 +181,9 @@ ListItemGroupModelNG ListTestNg::CreateListItemGroup(V2::ListItemGroupStyle list
     auto weakList = AceType::WeakClaim(AceType::RawPtr(listNode));
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
     ListItemGroupModelNG groupModel;
-    groupModel.Create(listItemGroupStyle);
+    V2::ListItemGroupOptions groupOptions;
+    groupOptions.style = listItemGroupStyle;
+    groupModel.Create(groupOptions);
     auto listItemGroup = ViewStackProcessor::GetInstance()->GetMainElementNode();
     listItemGroup->SetParent(weakList);
     auto listItemGroupFrameNode = AceType::DynamicCast<FrameNode>(listItemGroup);

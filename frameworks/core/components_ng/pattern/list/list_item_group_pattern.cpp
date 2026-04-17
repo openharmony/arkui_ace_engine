@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/base/view_abstract.h"
 
 namespace OHOS::Ace::NG {
 
@@ -735,6 +736,61 @@ void ListItemGroupPattern::SetListItemGroupStyle(V2::ListItemGroupStyle style)
         listItemGroupStyle_ = style;
         SetListItemGroupDefaultAttributes(host);
     }
+}
+
+void ListItemGroupPattern::SetHeaderStyle(V2::ListItemGroupHeaderFooterStyle style)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (headerStyle_ == V2::ListItemGroupHeaderFooterStyle::NONE &&
+        style == V2::ListItemGroupHeaderFooterStyle::FLOATING) {
+        headerStyle_ = style;
+        auto headerNode = GetHeader();
+        if (headerNode) {
+            auto headerFrameNode = AceType::DynamicCast<FrameNode>(headerNode);
+            if (headerFrameNode) {
+                ApplyHeaderFooterStyle(headerFrameNode);
+            }
+        }
+    }
+}
+
+void ListItemGroupPattern::SetFooterStyle(V2::ListItemGroupHeaderFooterStyle style)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (footerStyle_ == V2::ListItemGroupHeaderFooterStyle::NONE &&
+        style == V2::ListItemGroupHeaderFooterStyle::FLOATING) {
+        footerStyle_ = style;
+        auto footerNode = GetFooter();
+        if (footerNode) {
+            auto footerFrameNode = AceType::DynamicCast<FrameNode>(footerNode);
+            if (footerFrameNode) {
+                ApplyHeaderFooterStyle(footerFrameNode);
+            }
+        }
+    }
+}
+
+void ListItemGroupPattern::ApplyHeaderFooterStyle(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    auto renderContext = node->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pipeline = node->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto listItemGroupTheme = pipeline->GetTheme<ListItemTheme>();
+    CHECK_NULL_VOID(listItemGroupTheme);
+    
+    renderContext->UpdateBorderRadius(listItemGroupTheme->GetItemGroupDefaultBorderRadius());
+
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(static_cast<int32_t>(Ace::MaterialType::IMMERSIVE));
+    ImmersiveOptions options {
+        .style = UiMaterialStyle::THICK
+    };
+    material->SetImmersiveOptions(options);
+    ViewAbstract::SetSystemMaterial(AceType::RawPtr(node), AceType::RawPtr(material));
 }
 
 float ListItemGroupPattern::GetListPaddingOffset(const RefPtr<FrameNode>& listNode) const
