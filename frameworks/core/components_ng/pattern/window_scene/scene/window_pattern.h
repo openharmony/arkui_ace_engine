@@ -20,7 +20,6 @@
 #include "common/rs_vector4.h"
 #include "key_event.h"
 #include "pointer_event.h"
-#include "session/host/include/session.h"
 
 #include "base/geometry/ng/size_t.h"
 #include "core/common/container.h"
@@ -29,6 +28,10 @@
 
 #include "core/components_ng/pattern/window_scene/helper/starting_window_layout_helper.h"
 #include "core/components_ng/pattern/window_scene/scene/window_layout_algorithm.h"
+
+namespace OHOS::Rosen {
+    class Session;
+}
 
 namespace OHOS::Ace::NG {
 class WindowPattern : public StackPattern {

@@ -18,6 +18,7 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 
+#include "session/host/include/session.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "start_window_option.h"
 #include "ui/rs_surface_node.h"
