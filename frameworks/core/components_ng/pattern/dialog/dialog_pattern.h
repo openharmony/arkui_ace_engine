@@ -26,6 +26,7 @@
 #include "core/common/autofill/auto_fill_trigger_state_holder.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/dialog/dialog_theme.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/pattern/dialog/dialog_event_hub.h"
 #include "core/components_ng/manager/avoid_info/avoid_info_manager.h"

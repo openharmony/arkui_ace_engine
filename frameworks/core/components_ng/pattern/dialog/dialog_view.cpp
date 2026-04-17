@@ -14,6 +14,7 @@
  */
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 
+#include "core/components_ng/base/frame_node.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
