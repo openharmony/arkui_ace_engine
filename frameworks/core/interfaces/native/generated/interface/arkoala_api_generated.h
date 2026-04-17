@@ -24957,7 +24957,7 @@ typedef struct GENERATED_ArkUIDepthComponentModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
     void (*setDepthComponentOptions)(Ark_NativePointer node,
-                                     const Ark_ResourceStr* background,
+                                     const Ark_Union_ResourceStr_image_PixelMap* background,
                                      const Opt_DepthComponentOptions* options);
     void (*setDepthMap)(Ark_NativePointer node,
                         const Ark_Union_ResourceStr_image_PixelMap* value);
