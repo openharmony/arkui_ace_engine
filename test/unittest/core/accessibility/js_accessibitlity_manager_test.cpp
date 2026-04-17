@@ -30,6 +30,8 @@
 #include "adapter/ohos/osal/js_accessibility_manager.h"
 #include "frameworks/core/accessibility/accessibility_node.h"
 #include "frameworks/core/accessibility/utils/accessibility_manager_utils.h"
+#include "frameworks/core/components_ng/property/accessibility_property.h"
+#include "frameworks/core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "adapter/ohos/entrance/ace_container.h"
 #include "js_accessibility_manager_test.h"
 

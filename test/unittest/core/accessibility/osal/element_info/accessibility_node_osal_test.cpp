@@ -27,6 +27,7 @@
 #include "frameworks/core/accessibility/accessibility_manager.h"
 #include "frameworks/core/accessibility/accessibility_node.h"
 #include "frameworks/core/accessibility/accessibility_utils.h"
+#include "frameworks/core/components_ng/property/accessibility_property.h"
 
 using namespace testing;
 using namespace testing::ext;
