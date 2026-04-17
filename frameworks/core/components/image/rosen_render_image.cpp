@@ -32,6 +32,7 @@
 #include "core/components_ng/render/adapter/drawing_image.h"
 #endif
 #include "core/common/dynamic_module_helper.h"
+#include "core/image/image_cache.h"
 #include "core/image/image_object.h"
 #include "core/pipeline/base/rosen_render_context.h"
 

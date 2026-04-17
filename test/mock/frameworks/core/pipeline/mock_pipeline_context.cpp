@@ -44,6 +44,7 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/image/image_cache.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 

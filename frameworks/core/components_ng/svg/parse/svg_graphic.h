@@ -24,7 +24,6 @@
 #include "core/components_ng/render/drawing.h"
 
 #include "frameworks/core/components_ng/svg/parse/svg_node.h"
-#include "frameworks/core/components_ng/svg/parse/svg_pattern.h"
 
 namespace OHOS::Ace::NG {
 

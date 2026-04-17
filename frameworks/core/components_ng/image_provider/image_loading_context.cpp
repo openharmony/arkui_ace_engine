@@ -26,6 +26,7 @@
 #include "core/components_ng/render/image_painter.h"
 #include "core/image/image_file_cache.h"
 #include "core/image/image_loader.h"
+#include "core/image/image_cache.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

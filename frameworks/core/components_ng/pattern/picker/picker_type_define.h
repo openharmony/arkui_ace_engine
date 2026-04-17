@@ -18,7 +18,6 @@
 
 #include <string>
 
-#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_enums.h"
 #include "core/components_ng/pattern/picker/picker_data.h"
 #include "core/components_ng/pattern/picker/datepicker_event_types.h"

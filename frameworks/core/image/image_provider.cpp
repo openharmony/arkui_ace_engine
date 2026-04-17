@@ -26,6 +26,7 @@
 #include "core/components_ng/image_provider/drawing_image_data.h"
 #include "core/components_ng/render/adapter/drawing_image.h"
 #include "core/image/image_file_cache.h"
+#include "core/image/image_cache.h"
 #include "core/image/image_object.h"
 
 namespace OHOS::Ace {

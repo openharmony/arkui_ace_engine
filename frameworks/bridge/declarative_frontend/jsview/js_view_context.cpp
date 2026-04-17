@@ -34,6 +34,7 @@
 #include "bridge/declarative_frontend/jsview/models/view_context_model_impl.h"
 #include "core/animation/animation_pub.h"
 #include "core/common/ace_engine.h"
+#include "core/image/image_cache.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components_ng/base/view_stack_model.h"

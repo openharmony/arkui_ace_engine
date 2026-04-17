@@ -20,7 +20,6 @@
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
-#include "base/image/pixel_map.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/decoration.h"
