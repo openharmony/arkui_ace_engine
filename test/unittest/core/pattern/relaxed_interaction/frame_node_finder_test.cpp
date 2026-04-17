@@ -52,7 +52,7 @@ HWTEST_F(FrameNodeFinderFindAtTest, FindAt_NullContext, TestSize.Level1)
     WeakPtr<PipelineContext> nullContext;
     FrameNodeFinder finder(nullContext);
     auto result = finder.FindAt(100.0f, 100.0f);
-    EXPECT_EQ(result, nullptr);
+    EXPECT_EQ(result.first, nullptr);
 }
 
 HWTEST_F(FrameNodeFinderFindAtTest, FindAt_NullRootNode, TestSize.Level1)
@@ -60,7 +60,7 @@ HWTEST_F(FrameNodeFinderFindAtTest, FindAt_NullRootNode, TestSize.Level1)
     auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
     FrameNodeFinder finder(context);
     auto result = finder.FindAt(100.0f, 100.0f);
-    EXPECT_EQ(result, nullptr);
+    EXPECT_EQ(result.first, nullptr);
 }
 
 } // namespace OHOS::Ace::NG

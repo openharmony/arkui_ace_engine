@@ -20,6 +20,7 @@
 #include <set>
 #include <utility>
 
+#include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/relaxed_interaction/relaxed_interaction_types.h"
@@ -27,6 +28,16 @@
 namespace OHOS::Ace::NG {
 
 class PipelineContext;
+
+using GestureRecognizerPred = std::function<bool (const RefPtr<NGGestureRecognizer>& gestureRecognizer)>;
+
+struct PanRecognizerPred {
+    bool operator()(const RefPtr<NGGestureRecognizer>& gestureRecognizer);
+};
+
+struct ClickRecognizerPred {
+    bool operator()(const RefPtr<NGGestureRecognizer>& gestureRecognizer);
+};
 
 /**
  * @brief FrameNode finder providing FrameNode query functionality

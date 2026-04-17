@@ -17,12 +17,26 @@
 
 #include "base/log/log.h"
 #include "base/log/log_wrapper.h"
+#include "base/memory/ace_type.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
+#include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 #include "core/components_ng/gestures/gesture_group.h"
 #include "core/common/event_manager.h"
 
 namespace OHOS::Ace::NG {
+
+bool PanRecognizerPred::operator()(const RefPtr<NGGestureRecognizer>& gestureRecognizer)
+{
+    return AceType::InstanceOf<PanRecognizer>(gestureRecognizer);
+}
+
+bool ClickRecognizerPred::operator()(const RefPtr<NGGestureRecognizer>& gestureRecognizer)
+{
+    return AceType::InstanceOf<ClickRecognizer>(gestureRecognizer);
+}
+
 
 FrameNodeFinder::FrameNodeFinder(WeakPtr<PipelineContext> context)
     : context_(context), pred_(PanRecognizerPred()) {}

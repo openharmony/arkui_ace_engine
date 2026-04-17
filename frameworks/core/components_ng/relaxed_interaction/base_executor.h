@@ -19,6 +19,7 @@
 #include <string>
 
 #include "base/memory/referenced.h"
+#include "core/components_ng/relaxed_interaction/frame_node_finder.h"
 #include "core/components_ng/relaxed_interaction/relaxed_interaction_types.h"
 
 namespace OHOS::Ace::NG {
