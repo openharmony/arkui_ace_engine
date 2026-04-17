@@ -17,7 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SLIDER_SLIDER_TIP_MODIFIER_H
 
 #include "core/components_ng/base/modifier.h"
-#include "core/components_ng/pattern/slider/slider_content_modifier.h"
+#include "core/components/slider/slider_theme.h"
+#include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {

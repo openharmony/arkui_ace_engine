@@ -15,6 +15,11 @@
 
 #include "core/components_ng/pattern/slider/slider_paint_method.h"
 
+#include "core/components_ng/pattern/slider/slider_paint_property.h"
+#include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/paragraph.h"
+#include "core/pipeline/pipeline_base.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float HALF = 0.5f;

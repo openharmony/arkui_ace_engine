@@ -18,11 +18,9 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
-#include "core/components/common/properties/animation_option.h"
 #include "core/components/slider/slider_theme.h"
 #include "core/components_ng/base/modifier.h"
-#include "core/components_ng/pattern/slider/slider_paint_property.h"
-#include "core/components_ng/render/animation_utils.h"
+#include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/pipeline/pipeline_base.h"
 
