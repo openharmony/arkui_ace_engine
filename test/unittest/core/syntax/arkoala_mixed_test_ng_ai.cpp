@@ -41,6 +41,12 @@ constexpr int32_t INDEX_0 = 0;
 constexpr int32_t INDEX_1 = 1;
 constexpr int32_t INDEX_2 = 2;
 constexpr int32_t TOTAL_COUNT = 5;
+
+void SetCallbacksForTest(const RefPtr<ArkoalaLazyNode>& node, ArkoalaLazyNode::CreateItemCb create,
+    ArkoalaLazyNode::UpdateRangeCb update)
+{
+    node->SetCallbacks(create, update, []() {}, [](int32_t) {});
+}
 }
 
 class ArkoalaMixedTestNgAI : public testing::Test {
@@ -99,7 +105,7 @@ HWTEST_F(ArkoalaMixedTestNgAI, Integration_LazyNodeWithForEach_ChildrenManagemen
      * @tc.steps: step2. Set callbacks and configure LazyNode
      */
     lazyNode->SetTotalCount(TOTAL_COUNT);
-    lazyNode->SetCallbacks(
+    SetCallbacksForTest(lazyNode,
         [&forEachNode](int32_t index) -> RefPtr<UINode> {
             // Return ForEach node as child
             return forEachNode;
@@ -141,7 +147,7 @@ HWTEST_F(ArkoalaMixedTestNgAI, Integration_DragAcrossNestedComponentsTest, TestS
      * @tc.steps: step2. Set up callbacks and configure nodes
      */
     lazyNode->SetTotalCount(TOTAL_COUNT);
-    lazyNode->SetCallbacks(
+    SetCallbacksForTest(lazyNode,
         [&forEachNode](int32_t index) -> RefPtr<UINode> {
             return forEachNode;
         },
@@ -178,7 +184,7 @@ HWTEST_F(ArkoalaMixedTestNgAI, Integration_DataChangePropagatesToNestedNodesTest
      */
     bool updateRangeCalled = false;
     lazyNode->SetTotalCount(TOTAL_COUNT);
-    lazyNode->SetCallbacks(
+    SetCallbacksForTest(lazyNode,
         [&forEachNode](int32_t index) -> RefPtr<UINode> {
             return forEachNode;
         },
@@ -275,7 +281,7 @@ HWTEST_F(ArkoalaMixedTestNgAI, Integration_ComplexNestedStructure_LifecycleTest,
     forEachNode->AddChild(conditionScopeNode);
 
     lazyNode->SetTotalCount(INDEX_1);
-    lazyNode->SetCallbacks(
+    SetCallbacksForTest(lazyNode,
         [&forEachNode](int32_t index) -> RefPtr<UINode> {
             return forEachNode;
         },

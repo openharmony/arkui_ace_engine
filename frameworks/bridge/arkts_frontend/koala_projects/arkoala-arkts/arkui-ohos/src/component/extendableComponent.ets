@@ -135,6 +135,7 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
     private simpleEnvCallbackSets_: Map<string, Set<(value: Any) => void>> = new Map<string, Set<(value: Any) => void>>();
     private simpleEnvDispatchFuncs_: Map<string, (value: Any) => void> = new Map<string, (value: Any) => void>();
     private simpleEnvUnregisterFuncs_: Map<string, () => void> = new Map<string, () => void>();
+    protected memopt_: int32 = 0;
 
     private __activeFunc__Internal?: ActiveAndInactiveCallbackType;
     private __inactiveFunc__Internal?: ActiveAndInactiveCallbackType;
@@ -234,6 +235,14 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
 
     __getChildrenWeakRefMap__Internal(): Map<int32, WeakRef<ExtendableComponent>> {
         return this.childrenWeakRefMap_;
+    }
+
+    __clearReusePool__Internal(): void {
+        this.__getPeerNode__Internal()?.clearReusePool();
+        this.childrenWeakRefMap_.forEach((weak: WeakRef<ExtendableComponent>, _: int32) => {
+            const child = weak.deref();
+            child?.__clearReusePool__Internal();
+        });
     }
 
     __getActive__Internal(): number {
@@ -481,6 +490,22 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
 
     __getLocalStorage__Internal(): LocalStorage {
         return this.__localStorage__Internal;
+    }
+
+    public ClearParentReusePool() {
+        let parentCom = this.parent_;
+        while (parentCom !== undefined) {
+            const parentPeer = parentCom.__getPeerNode__Internal();
+            if (parentPeer !== undefined) {
+                parentPeer.clearReusePool();
+                return;
+            }
+            parentCom = parentCom.parent_;
+        }
+    }
+
+    public __getMemOpt__Internal(): int32 {
+        return this.memopt_;
     }
 
     public get __localStorage__Internal(): LocalStorage {

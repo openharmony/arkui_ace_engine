@@ -50,6 +50,8 @@ public:
 
     RefPtr<LayoutWrapperNode> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false) override;
 
+    void OnAttachToMainTree(bool) override;
+
     bool IsAtomicNode() const override
     {
         return true;
@@ -160,6 +162,8 @@ public:
     std::unique_ptr<JsonValue> GetStateInspectorInfo();
 
     void FireCustomDisappear() override;
+
+    void FireClearParentReusePoolIfNeeded();
 
     // called for DFX
     void DumpInfo() override;

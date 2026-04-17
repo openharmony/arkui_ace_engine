@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { IncrementalNode, Disposable } from '@koalaui/runtime'
+import { IncrementalNode, Disposable, scheduleCallback, callScheduledCallbacks } from '@koalaui/runtime'
 import { int32, KoalaCallsiteKey } from '@koalaui/common'
 import { nullptr, pointer, KPointer } from '@koalaui/interop'
 import { PeerNode, LazyItemNodeType, PeerNodeType, findPeerNode } from '../PeerNode'
@@ -111,6 +111,21 @@ export class LazyNodePeer extends PeerNode {
         }
         this._reusePool!.get(reuseKey)!.put(child)
         return true
+    }
+
+    public override clearReusePool(): void {
+        if (!this._reusePool) {
+            return
+        }
+
+        this._reusePool!.forEach((pool: ReusablePool) => {
+            scheduleCallback(() => {
+                pool!.dispose()
+            })
+        })
+        this._reusePool!.clear()
+        this._reusePool = undefined
+        callScheduledCallbacks()
     }
 }
 

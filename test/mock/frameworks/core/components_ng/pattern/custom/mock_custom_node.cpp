@@ -22,6 +22,11 @@ RefPtr<CustomNode> CustomNode::CreateCustomNode(int32_t nodeId, const std::strin
     return node;
 }
 
+void CustomNode::OnAttachToMainTree(bool recursive)
+{
+    UINode::OnAttachToMainTree(recursive);
+}
+
 void CustomNode::Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos)
 {}
 

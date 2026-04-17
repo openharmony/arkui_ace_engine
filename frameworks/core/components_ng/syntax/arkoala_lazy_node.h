@@ -24,7 +24,13 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/syntax/for_each_base_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/components_ng/syntax/lazy_for_each_builder.h"
+#include "core/components_ng/syntax/lazy_for_each_node.h"
+
+namespace {
+constexpr int64_t CACHE_TASK_DELAY_TIME = 2000000000;
+constexpr int32_t MEMORY_LEVEL_LOW = 1;
+constexpr int32_t MEMORY_LEVEL_CRITICAL = 2;
+}
 
 namespace OHOS::Ace::NG {
 
@@ -32,6 +38,12 @@ namespace OHOS::Ace::NG {
 struct LazyForEachOptions {
     LazyForEachCustomComponentFreezeMode customComponentFreezeMode;
     LazyForEachReleaseStrategy releaseStrategy;
+    LazyForEachMemOptStrategy memOptStrategy;
+};
+
+enum class RepeatMemoryOptimizationStrategy : int32_t {
+    DEFAULT = 0,
+    ENABLE_AUTO_CACHE_OPTIMIZATION = 1,
 };
 
 struct ActiveRangeParam {
@@ -56,20 +68,25 @@ class ArkoalaLazyNode : public ForEachBaseNode {
 
 public:
     explicit ArkoalaLazyNode(int32_t id, bool isRepeat = false);
-    ~ArkoalaLazyNode() override = default;
+    ~ArkoalaLazyNode() override;
+    void RegisterArkoalaLazyNode();
 
     using CreateItemCb = std::function<RefPtr<UINode>(int32_t)>;
     using UpdateRangeCb = std::function<void(int32_t, int32_t, int32_t, int32_t, bool)>;
+    using ClearCacheCb = std::function<void()>;
+    using releaseItemByIndexCb = std::function<void(int32_t)>;
 
     void SetTotalCount(int32_t value)
     {
         totalCount_ = value;
     }
 
-    void SetCallbacks(CreateItemCb create, UpdateRangeCb update)
+    void SetCallbacks(CreateItemCb create, UpdateRangeCb update, ClearCacheCb clearer, releaseItemByIndexCb release)
     {
         createItem_ = std::move(create);
         updateRange_ = std::move(update);
+        clearCache_ = std::move(clearer);
+        releaseItemByIndex_ = std::move(release);
     }
 
     void MoveData(int32_t from, int32_t to, bool isNeedUpdate = false) final;
@@ -104,6 +121,12 @@ public:
     void SetOptions(LazyForEachOptions options)
     {
         options_ = options;
+        if (options_.memOptStrategy == LazyForEachMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION ||
+            repeatMemoryOptimizationStrategy_ == RepeatMemoryOptimizationStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION) {
+            RegisterWindowStateChangedCallback();
+            RegisterMemoryLevelChangedCallback();
+            PostMemOptTask();
+        }
     }
 
     /**
@@ -137,6 +160,27 @@ public:
     int32_t GetFrameNodeIndex(const RefPtr<FrameNode>& node, bool isExpanded = true) override;
 
     void DumpInfo() override;
+
+    void OnWindowShow() override;
+    void OnWindowHide() override;
+    void OnNotifyMemoryLevel(int32_t level) override;
+    void RegisterWindowStateChangedCallback();
+    void UnregisterWindowStateChangedCallback();
+    void RegisterMemoryLevelChangedCallback();
+    void UnregisterMemoryLevelChangedCallback();
+    bool CheckParentFrameNodeVisibility();
+    void ScheduleCleanCacheTask();
+    void ScheduleRestoreCacheTask();
+    void TryExecuteScheduledCacheTask();
+    void CleanCache(bool syncClean);
+    void RestoreCache();
+    void SetNeedPrebuild(bool needPrebuild);
+    bool GetNeedPrebuild();
+    void SetParentVisibility(bool visibility);
+    bool GetParentVisibility();
+    void PostMemOptTask();
+
+    void SetRepeatMemoryOptimizationStrategy(int32_t strategy);
 
 private:
     RefPtr<UINode> GetFrameChildByIndexImpl(int32_t index, bool needBuild, bool isCache, bool addToRenderTree);
@@ -197,6 +241,8 @@ private:
     UniqueValuedMap<int32_t, RefPtr<UINode>, WeakPtr<UINode>::Hash> node4Index_;
     CreateItemCb createItem_;
     UpdateRangeCb updateRange_;
+    ClearCacheCb clearCache_;
+    releaseItemByIndexCb releaseItemByIndex_;
     int32_t totalCount_ = 0;
 
     // re-assembled by GetChildren called from idle task
@@ -205,13 +251,25 @@ private:
     // for tracking reused/recycled nodes
     std::unordered_set<int32_t> recycleNodeIds_;
 
+    std::unordered_set<int32_t> sparedIdx_;
+
     // true in the time from requesting idle / predict task until exec predict task.
     bool postUpdateTaskHasBeenScheduled_ = false;
 
     std::function<void(int32_t, int32_t)> onMoveFromTo_;
     // record (from, to), only valid during dragging item.
     std::optional<std::pair<int32_t, int32_t>> moveFromTo_;
-    LazyForEachOptions options_ = { LazyForEachCustomComponentFreezeMode::AUTO, LazyForEachReleaseStrategy::BATCH };
+    LazyForEachOptions options_ = { LazyForEachCustomComponentFreezeMode::AUTO, LazyForEachReleaseStrategy::BATCH,
+        LazyForEachMemOptStrategy::DEFAULT};
+    bool pendingCleanCache_ = false;
+    bool pendingRestoreCache_ = false;
+    bool isParentVisible_ = false;
+    bool needPreBuild_ = false;
+    int64_t cacheTaskPostTime_ = 0;
+    int64_t setActiveRangeTime_ = 0;
+
+    RepeatMemoryOptimizationStrategy repeatMemoryOptimizationStrategy_ =
+      RepeatMemoryOptimizationStrategy::DEFAULT;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_SYNTAX_ARKOALA_LAZY_NODE_H

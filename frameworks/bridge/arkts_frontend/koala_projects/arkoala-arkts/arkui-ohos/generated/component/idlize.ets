@@ -4080,12 +4080,15 @@ export class LazyForEachOps {
         LazyForEachOps.NotifyChange_serialize(node_casted, startIndex_casted, endIndex_casted, count_casted)
         return
     }
-    public static Sync(node: KPointer, totalCount: int32, creator: Callback_CreateItem, updater: Callback_RangeUpdate): void {
+    public static Sync(node: KPointer, totalCount: int32, creator: Callback_CreateItem, updater: Callback_RangeUpdate, clear: Callback_ClearCache, repeatMemOptStrategy: int32, release: Callback_ReleaseItemByIndex): void {
         const node_casted = node as (KPointer)
         const totalCount_casted = totalCount as (int32)
         const creator_casted = creator as (Callback_CreateItem)
         const updater_casted = updater as (Callback_RangeUpdate)
-        LazyForEachOps.Sync_serialize(node_casted, totalCount_casted, creator_casted, updater_casted)
+        const clear_casted = clear as (Callback_ClearCache)
+        const repeatMemOptStrategy_casted = repeatMemOptStrategy as (int32)
+        const release_casted = release as (Callback_ReleaseItemByIndex)
+        LazyForEachOps.Sync_serialize(node_casted, totalCount_casted, creator_casted, updater_casted, clear_casted, repeatMemOptStrategy_casted, release_casted)
         return
     }
     public static SyncOnMoveOps(node: KPointer, onMoveFromToOps: Callback_OnMoveFromTo, onMoveOps: OnMoveHandler | undefined, onMoveDragEventOps: ItemDragEventHandler | undefined): void {
@@ -4105,11 +4108,13 @@ export class LazyForEachOps {
     private static NotifyChange_serialize(node: KPointer, startIndex: int32, endIndex: int32, count: int32): void {
         ArkUIGeneratedNativeModule._LazyForEachOps_NotifyChange(node, startIndex, endIndex, count)
     }
-    private static Sync_serialize(node: KPointer, totalCount: int32, creator: Callback_CreateItem, updater: Callback_RangeUpdate): void {
+    private static Sync_serialize(node: KPointer, totalCount: int32, creator: Callback_CreateItem, updater: Callback_RangeUpdate, clear: Callback_ClearCache, repeatMemOptStrategy: int32, release: Callback_ReleaseItemByIndex): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteCallback(creator)
         thisSerializer.holdAndWriteCallback(updater)
-        ArkUIGeneratedNativeModule._LazyForEachOps_Sync(node, totalCount, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.holdAndWriteCallback(clear)
+        thisSerializer.holdAndWriteCallback(release)
+        ArkUIGeneratedNativeModule._LazyForEachOps_Sync(node, totalCount, thisSerializer.asBuffer(), thisSerializer.length(), repeatMemOptStrategy)
         thisSerializer.release()
     }
     private static SyncOnMoveOps_serialize(node: KPointer, onMoveFromToOps: Callback_OnMoveFromTo, onMoveOps: OnMoveHandler | undefined, onMoveDragEventOps: ItemDragEventHandler | undefined): void {
@@ -7396,6 +7401,8 @@ export interface CustomDialogControllerExternalOptionsExtender {
 export type Callback_RangeUpdate = (start: int32, end: int32, cacheStart: int32, cacheEnd: int32, isLoop: boolean) => void;
 export type Callback_CreateItem = (index: int32) => KPointer;
 export type Callback_OnMoveFromTo = (from: int32, to: int32) => void;
+export type Callback_ClearCache = () => void;
+export type Callback_ReleaseItemByIndex = (index: int32) => void;
 export class LengthMetricsCustom {
     unit: number = initializers.arkui.component.idlize.LengthMetricsCustomNS.unit;
     value: number = initializers.arkui.component.idlize.LengthMetricsCustomNS.value;

@@ -51,6 +51,12 @@ constexpr int32_t INDEX_10 = 10;
 constexpr int32_t INVALID_INDEX = -1;
 constexpr int32_t TOTAL_COUNT = 10;
 
+void SetCallbacksForTest(const RefPtr<ArkoalaLazyNode>& node, ArkoalaLazyNode::CreateItemCb create,
+    ArkoalaLazyNode::UpdateRangeCb update)
+{
+    node->SetCallbacks(create, update, []() {}, [](int32_t) {});
+}
+
 class NonFrameTestNode : public UINode {
 public:
     NonFrameTestNode() : UINode("non_frame", -1) {}
@@ -213,7 +219,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, SetCallbacks_SetsCallbacksTest, TestSize.Level1)
         updateRangeCalled = true;
     };
 
-    node->SetCallbacks(std::move(createCb), std::move(updateCb));
+    SetCallbacksForTest(node, std::move(createCb), std::move(updateCb));
 
     EXPECT_NE(node->createItem_, nullptr);
     EXPECT_NE(node->updateRange_, nullptr);
@@ -268,7 +274,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, DoSetActiveChildRange_SetsRangeTest, TestSize.Leve
     ASSERT_NE(node, nullptr);
 
     node->SetTotalCount(TOTAL_COUNT);
-    node->SetCallbacks([](int32_t) { return nullptr; }, [](int32_t, int32_t, int32_t, int32_t, bool) {});
+    SetCallbacksForTest(node, [](int32_t) { return nullptr; }, [](int32_t, int32_t, int32_t, int32_t, bool) {});
 
     node->DoSetActiveChildRange(INDEX_0, INDEX_2, INDEX_0, INDEX_1, false);
 
@@ -286,7 +292,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, DoSetActiveChildRange_SameRangeTest, TestSize.Leve
     auto node = CreateLazyNode();
     ASSERT_NE(node, nullptr);
 
-    node->SetCallbacks([](int32_t) { return nullptr; }, [](int32_t, int32_t, int32_t, int32_t, bool) {});
+    SetCallbacksForTest(node, [](int32_t) { return nullptr; }, [](int32_t, int32_t, int32_t, int32_t, bool) {});
 
     node->DoSetActiveChildRange(INDEX_0, INDEX_2, INDEX_0, INDEX_0, false);
 
@@ -307,7 +313,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, DoSetActiveChildRange_WithShowCacheTest, TestSize.
     auto node = CreateLazyNode();
     ASSERT_NE(node, nullptr);
 
-    node->SetCallbacks([](int32_t) { return nullptr; }, [](int32_t, int32_t, int32_t, int32_t, bool) {});
+    SetCallbacksForTest(node, [](int32_t) { return nullptr; }, [](int32_t, int32_t, int32_t, int32_t, bool) {});
 
     node->DoSetActiveChildRange(INDEX_1, INDEX_2, INDEX_0, INDEX_1, true);
 
@@ -491,7 +497,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, GetChildByIndex_CreatesAndCachesTest, TestSize.Lev
     ASSERT_NE(node, nullptr);
 
     bool createItemCalled = false;
-    node->SetCallbacks(
+    SetCallbacksForTest(node,
         [&createItemCalled](int32_t index) -> RefPtr<UINode> {
             createItemCalled = true;
             return AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
@@ -515,7 +521,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, GetChildByIndex_ReturnsCachedTest, TestSize.Level1
     ASSERT_NE(node, nullptr);
 
     int createCount = 0;
-    node->SetCallbacks(
+    SetCallbacksForTest(node,
         [&createCount](int32_t index) -> RefPtr<UINode> {
             createCount++;
             return AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
@@ -541,7 +547,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, GetFrameChildByIndex_WithBuildTest, TestSize.Level
     auto node = CreateLazyNode();
     ASSERT_NE(node, nullptr);
 
-    node->SetCallbacks(
+    SetCallbacksForTest(node,
         [](int32_t index) -> RefPtr<UINode> {
             return AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
         },
@@ -594,7 +600,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, BuildAllChildren_BuildsAllTest, TestSize.Level1)
     ASSERT_NE(node, nullptr);
 
     node->SetTotalCount(INDEX_2);
-    node->SetCallbacks(
+    SetCallbacksForTest(node,
         [](int32_t index) -> RefPtr<UINode> {
             return AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
         },
@@ -618,7 +624,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, GetChildren_ReassemblesChildrenTest, TestSize.Leve
     ASSERT_NE(node, nullptr);
 
     node->SetTotalCount(INDEX_2);
-    node->SetCallbacks(
+    SetCallbacksForTest(node,
         [](int32_t index) -> RefPtr<UINode> {
             return AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
         },
@@ -1321,7 +1327,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, GetChildren_WithOnMoveTest, TestSize.Level1)
     ASSERT_NE(node, nullptr);
 
     node->SetTotalCount(INDEX_2);
-    node->SetCallbacks(
+    SetCallbacksForTest(node,
         [](int32_t index) -> RefPtr<UINode> {
             return AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
         },
@@ -1431,7 +1437,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, GetFrameChildByIndexImpl_CreateFailsTest, TestSize
     auto node = CreateLazyNode();
     ASSERT_NE(node, nullptr);
 
-    node->SetCallbacks(
+    SetCallbacksForTest(node,
         [](int32_t) -> RefPtr<UINode> {
             return nullptr;
         },
@@ -1468,7 +1474,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, GetFrameChildByIndexImpl_IsCacheTest, TestSize.Lev
     auto node = CreateLazyNode();
     ASSERT_NE(node, nullptr);
 
-    node->SetCallbacks(
+    SetCallbacksForTest(node,
         [](int32_t index) -> RefPtr<UINode> {
             return AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
         },
@@ -1489,7 +1495,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, GetFrameChildByIndexImpl_AddToRenderTreeTest, Test
     auto node = CreateLazyNode();
     ASSERT_NE(node, nullptr);
 
-    node->SetCallbacks(
+    SetCallbacksForTest(node,
         [](int32_t index) -> RefPtr<UINode> {
             return AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
         },
@@ -1511,7 +1517,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, GetFrameChildByIndexImpl_WithOnMoveTest, TestSize.
     auto node = CreateLazyNode();
     ASSERT_NE(node, nullptr);
 
-    node->SetCallbacks(
+    SetCallbacksForTest(node,
         [](int32_t index) -> RefPtr<UINode> {
             return AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
         },
@@ -1533,7 +1539,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, GetFrameChildByIndexImpl_IsCacheRepeatTest, TestSi
     auto node = CreateLazyNode(true);
     ASSERT_NE(node, nullptr);
 
-    node->SetCallbacks(
+    SetCallbacksForTest(node,
         [](int32_t index) -> RefPtr<UINode> {
             return AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
         },
@@ -1554,7 +1560,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, GetFrameChildByIndexImpl_OnMainTreeTest, TestSize.
     auto node = CreateLazyNode();
     ASSERT_NE(node, nullptr);
 
-    node->SetCallbacks(
+    SetCallbacksForTest(node,
         [](int32_t index) -> RefPtr<UINode> {
             return AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
         },
@@ -1576,7 +1582,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, GetFrameChildByIndexImpl_AddToRenderTreeFalseTest,
     auto node = CreateLazyNode();
     ASSERT_NE(node, nullptr);
 
-    node->SetCallbacks(
+    SetCallbacksForTest(node,
         [](int32_t index) -> RefPtr<UINode> {
             return AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
         },
@@ -1597,7 +1603,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, GetFrameChildByIndexImpl_IsActiveFalseTest, TestSi
     auto node = CreateLazyNode();
     ASSERT_NE(node, nullptr);
 
-    node->SetCallbacks(
+    SetCallbacksForTest(node,
         [](int32_t index) -> RefPtr<UINode> {
             return AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
         },
@@ -1619,7 +1625,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, GetFrameChildByIndexImpl_CustomFreezeDisableTest, 
     auto node = CreateLazyNode();
     ASSERT_NE(node, nullptr);
 
-    node->SetCallbacks(
+    SetCallbacksForTest(node,
         [](int32_t index) -> RefPtr<UINode> {
             return AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
         },
@@ -1641,7 +1647,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, GetFrameChildByIndexImpl_CustomFreezeEnableTest, T
     auto node = CreateLazyNode();
     ASSERT_NE(node, nullptr);
 
-    node->SetCallbacks(
+    SetCallbacksForTest(node,
         [](int32_t index) -> RefPtr<UINode> {
             return AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
         },
@@ -1779,7 +1785,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, RebuildCache_RemovesInactiveTest, TestSize.Level1)
 
     node->SetTotalCount(TOTAL_COUNT);
 
-    node->SetCallbacks(
+    SetCallbacksForTest(node,
         [](int32_t index) -> RefPtr<UINode> {
             return AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
         },
@@ -1830,7 +1836,7 @@ HWTEST_F(ArkoalaLazyTestNgAI, RebuildCache_RepeatTest, TestSize.Level1)
     node->SetTotalCount(TOTAL_COUNT);
     node->isRepeat_ = true;
 
-    node->SetCallbacks(
+    SetCallbacksForTest(node,
         [](int32_t index) -> RefPtr<UINode> {
             return AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
         },
