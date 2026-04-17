@@ -15,6 +15,7 @@
 #include "core/components_ng/pattern/bubble/bubble_paint_method.h"
 
 #include "base/geometry/ng/rect_t.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
@@ -229,6 +230,10 @@ bool BubblePaintMethod::IsPaintDoubleBorder(PaintWrapper* paintWrapper)
     CHECK_NULL_RETURN(popupTheme, false);
     padding_ = isTips_ ? popupTheme->GetTipsPadding() : popupTheme->GetPadding();
     if (isTips_) {
+        // If user set material and device is not PC, don't paint double border for tips
+        if (IsUserSetMaterial() && SystemProperties::GetDeviceType() != DeviceType::TWO_IN_ONE) {
+            return false;
+        }
         if (paintProperty->GetShowAtAnchorValue(TipsAnchorType::TARGET) == TipsAnchorType::CURSOR) {
             return popupTheme->GetTipsDoubleBorderEnable();
         }
