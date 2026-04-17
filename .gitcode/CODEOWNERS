@@ -725,7 +725,7 @@ frameworks/bridge/declarative_frontend/ark_modifier/src/loading_progress_modifie
 frameworks/bridge/declarative_frontend/ark_modifier/src/marquee_modifier.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_modifier/src/menu_item_modifier.ts @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_modifier/src/menu_modifier.ts @arkuipopupwindow_all
-frameworks/bridge/declarative_frontend/ark_modifier/src/modifier_utilities.ts @arkui_framework_xnode
+frameworks/bridge/declarative_frontend/ark_modifier/src/modifier_utilities.ts @arkuieco3
 frameworks/bridge/declarative_frontend/ark_modifier/src/nav_destination_modifier.ts @arkui_navigation
 frameworks/bridge/declarative_frontend/ark_modifier/src/navigation_modifier.ts @arkui_navigation
 frameworks/bridge/declarative_frontend/ark_modifier/src/navigator_modifier.ts @arkui_navigation
