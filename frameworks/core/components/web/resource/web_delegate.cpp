@@ -28,6 +28,7 @@
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "arkweb_net_error_list.h"
+#include "base/utils/feature_param.h"
 #include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
@@ -2575,6 +2576,7 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineBase>& context)
 #endif
         }
     }
+    FetchCloudControlWebAutoLayoutConfig();
 }
 void WebDelegate::RegisterOHOSWebEventAndMethord()
 {
@@ -10318,6 +10320,22 @@ void WebDelegate::UpdateKeyboardAppearanceMode(const WebKeyboardAppearanceMode& 
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebKeyboardAppearnaceMode");
+}
+
+void WebDelegate::FetchCloudControlWebAutoLayoutConfig()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                delegate->nweb_->SetWebAutoLayoutConfig(FeatureParam::GetArkWebAutoLayoutConfig());
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebFetchCloudControlWebAutoLayoutConfig");
 }
 
 } // namespace OHOS::Ace
