@@ -42,6 +42,7 @@ struct IndexPage {
     new TextList(8, 'Grid', 'pages/grid/GridMainPage'),
     new TextList(9, 'Scroll', 'pages/Scroll/ScrollMainPage'),
     new TextList(10, 'LazyVGridLayout', 'pages/LazyVGridLayout/LazyVGridLayoutMainPage'),
+    new TextList(11, 'EmptyBranch', 'pages/EmptyBranch/Index')
   ]
   @State fontSize: Resource | undefined = undefined
   build() {
