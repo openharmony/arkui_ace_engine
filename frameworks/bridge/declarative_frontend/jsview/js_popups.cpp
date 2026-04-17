@@ -695,6 +695,51 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
     SetPopupBorderWidthInfo(popupObj, popupParam, INNER_BORDER_WIDTH);
     SetPopupBorderLinearGradientInfo(popupObj, popupParam, OUTER_BORDER_LINEAR_GRADIENT);
     SetPopupBorderLinearGradientInfo(popupObj, popupParam, INNER_BORDER_LINEAR_GRADIENT);
+
+    // Parse lifecycle callbacks
+    auto onWillAppearValue = popupObj->GetProperty("onWillAppear");
+    if (onWillAppearValue->IsFunction()) {
+        auto func = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(onWillAppearValue));
+        auto onWillAppearCallback = [execCtx = info.GetExecutionContext(), func = std::move(func)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Popup::onWillAppear");
+            func->Execute();
+        };
+        popupParam->SetOnWillAppear(std::move(onWillAppearCallback));
+    }
+
+    auto onDidAppearValue = popupObj->GetProperty("onDidAppear");
+    if (onDidAppearValue->IsFunction()) {
+        auto func = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(onDidAppearValue));
+        auto onDidAppearCallback = [execCtx = info.GetExecutionContext(), func = std::move(func)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Popup::onDidAppear");
+            func->Execute();
+        };
+        popupParam->SetOnDidAppear(std::move(onDidAppearCallback));
+    }
+
+    auto onWillDisappearValue = popupObj->GetProperty("onWillDisappear");
+    if (onWillDisappearValue->IsFunction()) {
+        auto func = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(onWillDisappearValue));
+        auto onWillDisappearCallback = [execCtx = info.GetExecutionContext(), func = std::move(func)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Popup::onWillDisappear");
+            func->Execute();
+        };
+        popupParam->SetOnWillDisappear(std::move(onWillDisappearCallback));
+    }
+
+    auto onDidDisappearValue = popupObj->GetProperty("onDidDisappear");
+    if (onDidDisappearValue->IsFunction()) {
+        auto func = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(onDidDisappearValue));
+        auto onDidDisappearCallback = [execCtx = info.GetExecutionContext(), func = std::move(func)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Popup::onDidDisappear");
+            func->Execute();
+        };
+        popupParam->SetOnDidDisappear(std::move(onDidDisappearCallback));
+    }
     SetPopupSystemMaterial(popupObj, popupParam);
 }
 

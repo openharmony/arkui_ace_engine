@@ -485,6 +485,40 @@ auto g_popupCommonParam = [](const auto& src, RefPtr<PopupParam>& popupParam) {
     if (keyboardAvoidMode.has_value()) {
         popupParam->SetKeyBoardAvoidMode(keyboardAvoidMode.value());
     }
+
+    // Parse lifecycle callbacks
+    auto arkOnWillAppear = GetOpt(src.onWillAppear);
+    if (arkOnWillAppear.has_value()) {
+        auto onWillAppearCallback = [arkCallback = CallbackHelper(*arkOnWillAppear)]() {
+            arkCallback.InvokeSync();
+        };
+        popupParam->SetOnWillAppear(std::move(onWillAppearCallback));
+    }
+
+    auto arkOnDidAppear = GetOpt(src.onDidAppear);
+    if (arkOnDidAppear.has_value()) {
+        auto onDidAppearCallback = [arkCallback = CallbackHelper(*arkOnDidAppear)]() {
+            arkCallback.InvokeSync();
+        };
+        popupParam->SetOnDidAppear(std::move(onDidAppearCallback));
+    }
+
+    auto arkOnWillDisappear = GetOpt(src.onWillDisappear);
+    if (arkOnWillDisappear.has_value()) {
+        auto onWillDisappearCallback = [arkCallback = CallbackHelper(*arkOnWillDisappear)]() {
+            arkCallback.InvokeSync();
+        };
+        popupParam->SetOnWillDisappear(std::move(onWillDisappearCallback));
+    }
+
+    auto arkOnDidDisappear = GetOpt(src.onDidDisappear);
+    if (arkOnDidDisappear.has_value()) {
+        auto onDidDisappearCallback = [arkCallback = CallbackHelper(*arkOnDidDisappear)]() {
+            arkCallback.InvokeSync();
+        };
+        popupParam->SetOnDidDisappear(std::move(onDidDisappearCallback));
+    }
+
     auto material = OptConvert<UiMaterial*>(src.systemMaterial);
     if (material.has_value()) {
         popupParam->SetSystemMaterial(material.value()->Copy());
