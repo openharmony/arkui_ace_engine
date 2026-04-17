@@ -141,6 +141,7 @@ void SetOnTouchEventImpl(Ark_NativePointer self, const Opt_Callback_TouchEvent_V
             .target = Converter::ArkValue<Ark_EventTarget>(info.GetTarget()),
             .timeStamp = Converter::ArkValue<Ark_Int64>(
                 static_cast<int64_t>(info.GetTimeStamp().time_since_epoch().count())),
+            .source = Converter::ArkValue<Ark_SourceType>(info.GetSourceDevice()),
             .pressure = Converter::ArkValue<Ark_Float64>(info.GetForce()),
             .tiltX = Converter::ArkValue<Ark_Float64>(static_cast<double>(info.GetTiltX().value_or(0))),
             .tiltY = Converter::ArkValue<Ark_Float64>(static_cast<double>(info.GetTiltY().value_or(0))),

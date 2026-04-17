@@ -4373,7 +4373,7 @@ ArkUI_ErrorCode OH_ArkUI_ClonedEvent_SetPressureByIndex(const ArkUI_UIInputEvent
             if (touchEvent && touchEvent->subKind == ON_HOVER_MOVE) {
                 RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
             }
-            if (!touchEvent || pointerIndex >= touchEvent->touchPointSize) {
+            if (!touchEvent || static_cast<uint32_t>(pointerIndex) >= touchEvent->touchPointSize) {
                 RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
             }
             touchEvent->touchPointes[pointerIndex].pressure = pressure;
@@ -4572,7 +4572,7 @@ ArkUI_ErrorCode OH_ArkUI_ClonedEvent_SetFingerIdByIndex(
     switch (event->eventTypeId) {
         case C_TOUCH_EVENT_ID: {
             auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
-            if (!touchEvent || pointerIndex >= touchEvent->touchPointSize) {
+            if (!touchEvent || static_cast<uint32_t>(pointerIndex) >= touchEvent->touchPointSize) {
                 RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
             }
             touchEvent->touchPointes[pointerIndex].id = fingerId;
@@ -4649,7 +4649,7 @@ ArkUI_ErrorCode OH_ArkUI_ClonedEvent_SetWindowPositionByIndex(
     switch (event->eventTypeId) {
         case C_TOUCH_EVENT_ID: {
             auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
-            if (!touchEvent || pointerIndex >= touchEvent->touchPointSize) {
+            if (!touchEvent || static_cast<uint32_t>(pointerIndex) >= touchEvent->touchPointSize) {
                 RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
             }
             touchEvent->touchPointes[pointerIndex].windowX = x;
@@ -4727,7 +4727,7 @@ ArkUI_ErrorCode OH_ArkUI_ClonedEvent_SetScreenPositionByIndex(
     switch (event->eventTypeId) {
         case C_TOUCH_EVENT_ID: {
             auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
-            if (!touchEvent || pointerIndex >= touchEvent->touchPointSize) {
+            if (!touchEvent || static_cast<uint32_t>(pointerIndex) >= touchEvent->touchPointSize) {
                 RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
             }
             touchEvent->touchPointes[pointerIndex].screenX = x;
@@ -4805,7 +4805,7 @@ ArkUI_ErrorCode OH_ArkUI_ClonedEvent_SetGlobalDisplayPositionByIndex(
     switch (event->eventTypeId) {
         case C_TOUCH_EVENT_ID: {
             auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
-            if (!touchEvent || pointerIndex >= touchEvent->touchPointSize) {
+            if (!touchEvent || static_cast<uint32_t>(pointerIndex) >= touchEvent->touchPointSize) {
                 RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
             }
             touchEvent->touchPointes[pointerIndex].globalDisplayX = x;
@@ -5040,7 +5040,7 @@ ArkUI_ErrorCode OH_ArkUI_ClonedEvent_SetTouchAreaByIndex(const ArkUI_UIInputEven
     switch (event->eventTypeId) {
         case C_TOUCH_EVENT_ID: {
             auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
-            if (!touchEvent || pointerIndex >= touchEvent->touchPointSize) {
+            if (!touchEvent || static_cast<uint32_t>(pointerIndex) >= touchEvent->touchPointSize) {
                 RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
             }
             touchEvent->touchPointes[pointerIndex].contactAreaWidth = width;
@@ -5096,14 +5096,15 @@ ArkUI_ErrorCode OH_ArkUI_ClonedEvent_SetInteractionHandByIndex(
         RETURN_RET_WITH_STATUS_CHECK(
             ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT, ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT);
     }
-    if (hand < ArkUI_InteractionHand::ARKUI_EVENT_HAND_NONE || hand > ArkUI_InteractionHand::ARKUI_EVENT_HAND_RIGHT) {
+    if (hand < ArkUI_InteractionHand::ARKUI_EVENT_HAND_NONE || hand > ArkUI_InteractionHand::ARKUI_EVENT_HAND_RIGHT ||
+        pointerIndex < 0) {
         RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
     }
 
     switch (event->eventTypeId) {
         case C_TOUCH_EVENT_ID: {
             auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
-            if (!touchEvent || pointerIndex >= touchEvent->touchPointSize) {
+            if (!touchEvent || static_cast<uint32_t>(pointerIndex) >= touchEvent->touchPointSize) {
                 RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
             }
             touchEvent->touchPointes[pointerIndex].operatingHand = hand;
@@ -5134,7 +5135,7 @@ ArkUI_ErrorCode OH_ArkUI_ClonedEvent_SetPressedTimeByIndex(
     switch (event->eventTypeId) {
         case C_TOUCH_EVENT_ID: {
             auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
-            if (!touchEvent || pointerIndex >= touchEvent->touchPointSize) {
+            if (!touchEvent || static_cast<uint32_t>(pointerIndex) >= touchEvent->touchPointSize) {
                 RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
             }
             touchEvent->touchPointes[pointerIndex].pressedTime = pressedTime;
