@@ -235,6 +235,10 @@ public:
     ACE_FORCE_EXPORT int32_t TotalCount() const;
 
     Axis GetDirection() const;
+    bool IsScrollAble(SmartGestureDirection direction = SmartGestureDirection::FORWARD) const override;
+    std::optional<ScrollingConfig> GetDefaultScrollingConfig(
+        SmartGestureDirection direction = SmartGestureDirection::FORWARD) const override;
+    void PerformScroll(const ScrollingConfig& config) override;
 
     FocusPattern GetFocusPattern() const override
     {
@@ -1396,6 +1400,8 @@ private:
     bool FakeDragCheckAtStart(float& offset);
     bool FakeDragCheckAtEnd(float& offset);
     void CheckOffsetAfterLyout(float offset);
+    void ShowNextWithStep(bool needCheckWillScroll, std::optional<int32_t> step);
+    void ShowPreviousWithStep(bool needCheckWillScroll, std::optional<int32_t> step);
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
