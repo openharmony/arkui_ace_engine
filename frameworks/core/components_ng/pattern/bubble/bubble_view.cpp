@@ -1161,6 +1161,7 @@ RefPtr<FrameNode> BubbleView::CreateButton(ButtonProperties& buttonParam, int32_
         } else {
             renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
         }
+        buttonProp->UpdateBackgroundColorFlagByUser(true);
     }
 
     auto buttonEventHub = buttonNode->GetOrCreateGestureEventHub();

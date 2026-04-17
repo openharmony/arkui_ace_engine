@@ -571,6 +571,7 @@ RefPtr<FrameNode> TextPickerDialogView::CreateConfirmNode(const RefPtr<FrameNode
     buttonConfirmRenderContext->UpdateBackgroundColor(buttonColor_);
     auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(buttonConfirmLayoutProperty, nullptr);
+    buttonConfirmLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     UpdateButtonStyles(buttonInfos, ACCEPT_BUTTON_INDEX, buttonConfirmLayoutProperty, buttonConfirmRenderContext);
     UpdateButtonDefaultFocus(buttonInfos, buttonConfirmNode, true);
 
@@ -819,6 +820,7 @@ void TextPickerDialogView::UpdateButtonStyles(const std::vector<ButtonInfo>& but
     }
     if (buttonInfos[index].fontColor.has_value()) {
         buttonLayoutProperty->UpdateFontColor(buttonInfos[index].fontColor.value());
+        buttonLayoutProperty->UpdateFontColorFlagByUser(true);
     }
     if (buttonInfos[index].fontWeight.has_value()) {
         buttonLayoutProperty->UpdateFontWeight(buttonInfos[index].fontWeight.value());
@@ -834,6 +836,7 @@ void TextPickerDialogView::UpdateButtonStyles(const std::vector<ButtonInfo>& but
     }
     if (buttonInfos[index].backgroundColor.has_value()) {
         buttonRenderContext->UpdateBackgroundColor(buttonInfos[index].backgroundColor.value());
+        buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     }
 }
 
@@ -909,6 +912,7 @@ RefPtr<FrameNode> TextPickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     auto buttonCancelRenderContext = buttonCancelNode->GetRenderContext();
     buttonCancelRenderContext->UpdateBackgroundColor(buttonColor_);
     auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
+    buttonCancelLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     UpdateButtonStyles(buttonInfos, CANCEL_BUTTON_INDEX, buttonCancelLayoutProperty, buttonCancelRenderContext);
     UpdateButtonDefaultFocus(buttonInfos, buttonCancelNode, false);
 
@@ -1339,6 +1343,7 @@ RefPtr<FrameNode> TextPickerDialogView::CreateForwardNode(NG::DialogGestureEvent
     const auto& buttonForwardRenderContext = buttonForwardNode->GetRenderContext();
     buttonForwardRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     auto buttonForwardLayoutProperty = buttonForwardNode->GetLayoutProperty<ButtonLayoutProperty>();
+    buttonForwardLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     UpdateButtonStyles(buttonInfos, ACCEPT_BUTTON_INDEX, buttonForwardLayoutProperty, buttonForwardRenderContext);
     UpdateButtonDefaultFocus(buttonInfos, buttonForwardNode, false);
 
@@ -1387,6 +1392,7 @@ RefPtr<FrameNode> TextPickerDialogView::CreateBackwardNode(NG::DialogGestureEven
     const auto& buttonBackwardRenderContext = buttonBackwardNode->GetRenderContext();
     buttonBackwardRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     auto buttonBackwardLayoutProperty = buttonBackwardNode->GetLayoutProperty<ButtonLayoutProperty>();
+    buttonBackwardLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     UpdateButtonStyles(buttonInfos, CANCEL_BUTTON_INDEX, buttonBackwardLayoutProperty, buttonBackwardRenderContext);
     UpdateButtonDefaultFocus(buttonInfos, buttonBackwardNode, false);
 

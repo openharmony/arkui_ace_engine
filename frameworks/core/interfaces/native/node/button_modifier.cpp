@@ -159,7 +159,7 @@ void SetButtonFontColor(ArkUINodeHandle node, uint32_t fontColor)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ButtonModelNG::SetFontColor(frameNode, Color(fontColor));
+    ButtonModelNG::SetFontColor(frameNode, Color(fontColor), true);
 }
 
 void SetButtonFontColorPtr(ArkUINodeHandle node, uint32_t fontColor, void* colorRawPtr)
@@ -197,7 +197,7 @@ void SetButtonFontColorUseColorPtr(ArkUINodeHandle node, const ArkUI_InnerColor*
         }
         ButtonModelNG::CreateWithColorResourceObj(frameNode, resObj, ButtonColorType::FONT_COLOR);
     }
-    ButtonModelNG::SetFontColor(frameNode, result);
+    ButtonModelNG::SetFontColor(frameNode, result, true);
 }
 
 void ResetButtonFontColor(ArkUINodeHandle node)
@@ -209,7 +209,7 @@ void ResetButtonFontColor(ArkUINodeHandle node)
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
     Color textColor = buttonTheme->GetTextStyle().GetTextColor();
-    ButtonModelNG::SetFontColor(frameNode, textColor);
+    ButtonModelNG::SetFontColor(frameNode, textColor, true);
     if (SystemProperties::ConfigChangePerform()) {
         ButtonModelNG::CreateWithColorResourceObj(frameNode, nullptr, ButtonColorType::FONT_COLOR);
     }
@@ -564,7 +564,7 @@ void ResetButtonBackgroundColor(ArkUINodeHandle node)
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
     backgroundColor = buttonTheme->GetBgColor();
-    ButtonModelNG::BackgroundColor(frameNode, backgroundColor, false);
+    ButtonModelNG::BackgroundColor(frameNode, backgroundColor, true);
     if (SystemProperties::ConfigChangePerform()) {
         ButtonModelNG::CreateWithColorResourceObj(frameNode, nullptr, ButtonColorType::BACKGROUND_COLOR);
     }
@@ -863,7 +863,7 @@ void SetButtonFontColorWithPlaceholder(ArkUINodeHandle node, uint32_t fontColor,
     CHECK_NULL_VOID(frameNode);
     Color result = Color(fontColor);
     result.SetPlaceholder(static_cast<ColorPlaceholder>(colorPlaceholder));
-    ButtonModelNG::SetFontColor(frameNode, result);
+    ButtonModelNG::SetFontColor(frameNode, result, true);
 }
 
 namespace NodeModifier {

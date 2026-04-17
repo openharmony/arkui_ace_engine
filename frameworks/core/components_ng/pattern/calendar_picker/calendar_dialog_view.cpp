@@ -717,6 +717,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateButtonNode(bool isConfirm, const std
     buttonRenderContext->UpdateBackgroundColor(defaultBGColor);
     auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(buttonLayoutProperty, nullptr);
+    buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     auto index = isConfirm ? ACCEPT_BUTTON_INDEX : CANCEL_BUTTON_INDEX;
     UpdateButtonStyles(buttonInfos, index, buttonLayoutProperty, buttonRenderContext);
     UpdateButtonDefaultFocus(buttonInfos, buttonNode, isConfirm);

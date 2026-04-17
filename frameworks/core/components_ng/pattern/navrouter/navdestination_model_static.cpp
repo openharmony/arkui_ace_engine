@@ -285,6 +285,7 @@ void NavDestinationModelStatic::CreateBackButton(const RefPtr<NavDestinationGrou
         padding.SetEdges(CalcLength(BUTTON_PADDING));
         backButtonLayoutProperty->UpdatePadding(padding);
     }
+    backButtonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
 
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
         SystemProperties::IsNeedSymbol()) {

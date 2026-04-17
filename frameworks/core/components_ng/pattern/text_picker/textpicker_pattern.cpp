@@ -239,6 +239,10 @@ void TextPickerPattern::SetButtonIdeaSize()
         if (!useButtonFocusArea_) {
             if (!columnPattern->isHover()) {
                 buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+                auto buttonNodeLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+                if (buttonNodeLayoutProperty) {
+                    buttonNodeLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+                }
             }
         } else {
             UpdateColumnButtonStyles(columnNode, haveFocus_ && (currentFocusButtonNode == buttonNode), false);

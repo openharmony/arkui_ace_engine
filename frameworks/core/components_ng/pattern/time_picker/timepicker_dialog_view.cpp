@@ -355,6 +355,7 @@ RefPtr<FrameNode> TimePickerDialogView::CreateNextPrevButtonNode(std::function<v
     }
     auto buttonNextPrevRenderContext = nextPrevButtonNode->GetRenderContext();
     buttonNextPrevRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    buttonNextPrevLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     UpdateButtonStyles(buttonInfos, CANCEL_BUTTON_INDEX, buttonNextPrevLayoutProperty, buttonNextPrevRenderContext);
     UpdateButtonDefaultFocus(buttonInfos, nextPrevButtonNode, false);
     nextPrevButtonNode->MarkModifyDone();
@@ -511,7 +512,9 @@ RefPtr<FrameNode> TimePickerDialogView::CreateTitleButtonNode(const RefPtr<Frame
     auto buttonTitleRenderContext = buttonTitleNode->GetRenderContext();
     CHECK_NULL_RETURN(buttonTitleRenderContext, nullptr);
     buttonTitleRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-
+    auto buttonLayoutProperty = buttonTitleNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_RETURN(buttonLayoutProperty, nullptr);
+    buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     auto layoutProps = buttonTitleNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProps, nullptr);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
@@ -733,6 +736,7 @@ RefPtr<FrameNode> TimePickerDialogView::CreateConfirmNode(const RefPtr<FrameNode
     UpdateButtonLayoutProperty(buttonConfirmLayoutProperty, pickerTheme);
     auto buttonConfirmRenderContext = buttonConfirmNode->GetRenderContext();
     buttonConfirmRenderContext->UpdateBackgroundColor(buttonColor_);
+    buttonConfirmLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     UpdateButtonStyles(buttonInfos, ACCEPT_BUTTON_INDEX, buttonConfirmLayoutProperty, buttonConfirmRenderContext);
     UpdateButtonDefaultFocus(buttonInfos, buttonConfirmNode, true);
 
@@ -898,6 +902,7 @@ RefPtr<FrameNode> TimePickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
 
     auto buttonCancelRenderContext = buttonCancelNode->GetRenderContext();
     buttonCancelRenderContext->UpdateBackgroundColor(buttonColor_);
+    buttonCancelLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     UpdateButtonStyles(buttonInfos, CANCEL_BUTTON_INDEX, buttonCancelLayoutProperty, buttonCancelRenderContext);
     UpdateButtonDefaultFocus(buttonInfos, buttonCancelNode, false);
     buttonCancelNode->MarkModifyDone();
@@ -954,6 +959,7 @@ void TimePickerDialogView::UpdateButtonStyles(const std::vector<ButtonInfo>& but
     }
     if (buttonInfos[index].fontColor.has_value()) {
         buttonLayoutProperty->UpdateFontColor(buttonInfos[index].fontColor.value());
+        buttonLayoutProperty->UpdateFontColorFlagByUser(true);
     }
     if (buttonInfos[index].fontWeight.has_value()) {
         buttonLayoutProperty->UpdateFontWeight(buttonInfos[index].fontWeight.value());
@@ -969,6 +975,7 @@ void TimePickerDialogView::UpdateButtonStyles(const std::vector<ButtonInfo>& but
     }
     if (buttonInfos[index].backgroundColor.has_value()) {
         buttonRenderContext->UpdateBackgroundColor(buttonInfos[index].backgroundColor.value());
+        buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     }
 }
 

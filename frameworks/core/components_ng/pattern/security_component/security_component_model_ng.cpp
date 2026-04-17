@@ -341,6 +341,7 @@ void SecurityComponentModelNG::SetInvisibleBackgroundButton(const RefPtr<FrameNo
     const auto& renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
 }
 

@@ -346,6 +346,7 @@ RefPtr<FrameNode> CreateToolbarItemInContainer(
     auto renderContext = toolBarItemNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    toolBarItemLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     MarginProperty margin;
     AddSafeIntervalBetweenToolbarItem(margin, count, toolbarItemSize, param.needMoreButton);
     toolBarItemLayoutProperty->UpdateMargin(margin);
@@ -418,6 +419,7 @@ RefPtr<FrameNode> CreateToolbarMoreMenuNode(const RefPtr<BarItemNode>& barItemNo
     auto renderContext = toolBarItemNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    menuItemLayoutProperty->UpdateBackgroundColorFlagByUser(true);
 
     MarginProperty menuButtonMargin;
     menuButtonMargin.left = CalcLength(theme->GetToolbarItemMargin());

@@ -1032,6 +1032,9 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
     auto renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
     renderContext->UpdateBackgroundColor(bgColor.value());
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_RETURN(buttonLayoutProperty, nullptr);
+    buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
 
     // set button default height
     auto layoutProps = buttonNode->GetLayoutProperty();
