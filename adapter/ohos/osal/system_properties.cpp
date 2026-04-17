@@ -84,6 +84,7 @@ constexpr int32_t FOLD_TYPE_TWO = 2;
 constexpr int32_t FOLD_TYPE_FOUR = 4;
 constexpr int32_t FOLD_TYPE_SEVEN = 7;
 constexpr float DEFAULT_SCROLL_COEFFICEIENT = 2.0f;
+constexpr int32_t DEFAULT_FORM_TASK_PRIORITY = 2;
 
 bool IsOpIncEnabled()
 {
@@ -1587,5 +1588,12 @@ UiMaterialLevel SystemProperties::GetUiMaterialLevel()
 {
     static auto uiMaterialLevel = ReadUiMaterialLevel();
     return uiMaterialLevel;
+}
+
+int32_t SystemProperties::GetFormTaskPriority()
+{
+    static auto formTaskPriority = system::GetIntParameter<int32_t>("const.form.task_priority",
+	                                                                DEFAULT_FORM_TASK_PRIORITY);
+    return formTaskPriority;
 }
 } // namespace OHOS::Ace
