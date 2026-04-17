@@ -1390,6 +1390,34 @@ private:
     bool FilterScrollEventHandleVelocity(const float velocity);
     void CheckAndSetWebNestedScrollExisted();
     void CalculateTooltipOffset(RefPtr<FrameNode>& tooltipNode, OffsetF& tooltipOfffset);
+
+    // Tooltip placement avoidance methods
+    struct TooltipPosition {
+        float x;
+        float y;
+    };
+
+    // Encapsulates parameters for tooltip placement calculation
+    struct TooltipCalculationContext {
+        float mouseX;
+        float mouseY;
+        float tooltipWidth;
+        float tooltipHeight;
+        float webWidth;
+        float webHeight;
+    };
+
+    OffsetF CalculateTooltipOffsetWithPlacement(const TooltipCalculationContext& context);
+
+    TooltipPosition GetPositionForPlacement(
+        Placement placement,
+        float mouseX, float mouseY,
+        float tooltipWidth, float tooltipHeight);
+
+    bool CheckPlacementAvailable(
+        const TooltipPosition& pos,
+        const TooltipCalculationContext& context);
+
     void HandleShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
     bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow);
     void ShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
