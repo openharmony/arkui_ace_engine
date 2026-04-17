@@ -2117,9 +2117,6 @@
       "OHOS::Ace::NG::TextSelectOverlay::PreProcessOverlay(OHOS::Ace::NG::OverlayRequest const&)";
       "OHOS::Ace::NG::TextSelectOverlay::UpdateClipHandleViewPort(OHOS::Ace::NG::RectT<float>&)";
       "OHOS::Ace::NG::TextSelectOverlay::UpdateSelectorOnHandleMove(OHOS::Ace::NG::OffsetT<float> const&, bool)";
-      "OHOS::Ace::NG::TokenThemeStorage::GetInstance()";
-      "OHOS::Ace::NG::TokenThemeStorage::GetTheme(int)";
-      "OHOS::Ace::NG::TokenThemeStorage::ObtainSystemTheme(OHOS::Ace::ColorMode)";
       "OHOS::Ace::NG::ToolbarManager::OnChangeSideBarColor()";
       "OHOS::Ace::NG::ToolbarManager::OnToolBarManagerModifyDone()";
       "OHOS::Ace::NG::ToolbarManager::SetSideBarDividerInfo(OHOS::Ace::NG::ToolbarInfo const&)";

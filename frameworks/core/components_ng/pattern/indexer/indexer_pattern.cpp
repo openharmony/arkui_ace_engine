@@ -50,7 +50,6 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/token_theme/token_theme_storage.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/pattern/list/list_properties.h"
 #include "core/event/mouse_event.h"
@@ -1095,8 +1094,12 @@ void IndexerPattern::UpdateBubbleBackgroundView()
 
         bool isPopupBackgroundSetByUser = layoutProperty->GetSetPopupBackgroundColorByUserValue(false);
         bool isPopupBackgroundBlurStyleSetByUser = layoutProperty->GetSetPopupBackgroundBlurStyleByUserValue(false);
-        if ((isPopupBackgroundSetByUser || isPopupBackgroundBlurStyleSetByUser) ||
-            Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        bool isGreatOrEqualVersionTwentySix = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX);
+        if (isGreatOrEqualVersionTwentySix && MaterialUtils::IsMaterialEnabled()) {
+            ApplyPopupSystemMaterial();
+            return;
+        }
+        if (!isGreatOrEqualVersionTwentySix || (isPopupBackgroundSetByUser || isPopupBackgroundBlurStyleSetByUser)) {
             ViewAbstract::SetSystemMaterial(AceType::RawPtr(popupNode_), nullptr);
             BlurStyleOption styleOption;
             if (paintProperty->GetPopupBackgroundBlurStyle().has_value()) {
@@ -1134,16 +1137,9 @@ void IndexerPattern::ApplyPopupSystemMaterial()
         material->SetImmersiveOptions(options);
         ViewAbstract::SetSystemMaterial(AceType::RawPtr(popupNode_), AceType::RawPtr(material));
     } else {
-        auto tokenTheme = TokenThemeStorage::GetInstance()->GetTheme(host->GetThemeScopeId());
-        if (!tokenTheme) {
-            tokenTheme = TokenThemeStorage::GetInstance()->ObtainSystemTheme();
-        }
-        if (tokenTheme) {
-            auto colors = tokenTheme->Colors();
-            if (colors) {
-                bubbleRenderContext->UpdateBackgroundColor(colors->CompBackgroundPrimary());
-            }
-        }
+        auto indexerTheme = host->GetTheme<IndexerTheme>(true);
+        CHECK_NULL_VOID(indexerTheme);
+        bubbleRenderContext->UpdateBackgroundColor(indexerTheme->GetPopupLowMaterialBgColor());
     }
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
