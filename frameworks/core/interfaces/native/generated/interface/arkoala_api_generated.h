@@ -15478,6 +15478,11 @@ typedef struct Ark_ColorMetricsExt {
     Ark_Int32 alpha;
     Ark_ColorSpace colorSpace;
     Ark_Int32 resourceId;
+    Ark_Float64 redValue;
+    Ark_Float64 greenValue;
+    Ark_Float64 blueValue;
+    Ark_Float64 headRoom;
+    Ark_Boolean isHDR;
 } Ark_ColorMetricsExt;
 typedef struct Opt_ColorMetricsExt {
     Ark_Tag tag;
