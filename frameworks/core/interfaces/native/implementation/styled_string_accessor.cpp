@@ -28,6 +28,7 @@
 #include "core/interfaces/native/implementation/gesture_style_peer.h"
 #include "core/interfaces/native/implementation/image_attachment_peer.h"
 #include "core/interfaces/native/implementation/letter_spacing_style_peer.h"
+#include "core/interfaces/native/implementation/layout_policy_peer_impl.h"
 #include "core/interfaces/native/implementation/line_height_style_peer.h"
 #include "core/interfaces/native/implementation/paragraph_style_peer.h"
 #include "core/interfaces/native/implementation/styled_string.h"
@@ -39,7 +40,49 @@
 #include "core/interfaces/native/implementation/user_data_span_holder.h"
 #include "core/text/html_utils.h"
 
+namespace OHOS::Ace::NG::GeneratedModifier {
+const GENERATED_ArkUILayoutPolicyAccessor* GetLayoutPolicyAccessor();
+}
+
 namespace OHOS::Ace::NG::Converter {
+namespace {
+Ark_LayoutPolicy GetCachedLayoutPolicyPeer(LayoutCalPolicy value)
+{
+    auto* accessor = GeneratedModifier::GetLayoutPolicyAccessor();
+    CHECK_NULL_RETURN(accessor, nullptr);
+    switch (value) {
+        case LayoutCalPolicy::MATCH_PARENT:
+            return accessor->getMatchParent ? accessor->getMatchParent() : nullptr;
+        case LayoutCalPolicy::WRAP_CONTENT:
+            return accessor->getWrapContent ? accessor->getWrapContent() : nullptr;
+        case LayoutCalPolicy::FIX_AT_IDEAL_SIZE:
+            return accessor->getFixAtIdealSize ? accessor->getFixAtIdealSize() : nullptr;
+        default:
+            return nullptr;
+    }
+}
+
+Opt_NativePointer CreateArkOptionalLayoutPolicyPtr(const std::optional<LayoutCalPolicy>& value)
+{
+    if (!value.has_value() || value.value() == LayoutCalPolicy::NO_MATCH) {
+        return ArkValue<Opt_NativePointer>(Ark_Empty());
+    }
+    return ArkValue<Opt_NativePointer>(reinterpret_cast<Ark_NativePointer>(GetCachedLayoutPolicyPeer(value.value())));
+}
+
+std::optional<LayoutCalPolicy> ConvertLayoutPolicyPtr(const Opt_NativePointer& src)
+{
+    if (src.tag == INTEROP_TAG_UNDEFINED) {
+        return std::nullopt;
+    }
+    auto peer = reinterpret_cast<LayoutPolicyPeer*>(src.value);
+    if (!peer || peer->layoutPolicy == LayoutCalPolicy::NO_MATCH) {
+        return std::nullopt;
+    }
+    return peer->layoutPolicy;
+}
+} // namespace
+
 template<>
 void AssignCast(std::optional<Ace::SpanType>& dst, const Ark_StyledStringKey& src)
 {
@@ -134,7 +177,7 @@ RefPtr<SpanBase> Convert(const Ark_CustomSpanWrapper& src)
     peer->SetObject(src.managed);
     peer->SetOnMeasure([arkCallback = CallbackHelper(src.onMeasure_callback)](
         const CustomSpanMeasureInfo& measureInfo) {
-        auto arkMeasureInfo = Converter::ArkValue<Ark_CustomSpanMeasureInfo>(measureInfo);
+        auto arkMeasureInfo = Converter::ArkValue<Ark_CustomSpanMeasureInfoProxy>(measureInfo);
         std::optional<CustomSpanMetrics> result = arkCallback.InvokeWithOptConvertResult<CustomSpanMetrics,
             Ark_CustomSpanMetrics, Callback_CustomSpanMetrics_Void>(arkMeasureInfo);
         return result.value_or(CustomSpanMetrics());
@@ -179,9 +222,11 @@ void AssignArkValue(Ark_CustomSpanDrawInfo& dst, const CustomSpanOptions& src, C
     dst.baseline = ArkValue<Ark_Float64>(src.baseline);
 }
 
-void AssignArkValue(Ark_CustomSpanMeasureInfo& dst, const CustomSpanMeasureInfo& src, ConvContext *ctx)
+void AssignArkValue(Ark_CustomSpanMeasureInfoProxy& dst, const CustomSpanMeasureInfo& src, ConvContext *ctx)
 {
     dst.fontSize = ArkValue<Ark_Float64>(src.fontSize);
+    dst.maxWidth = ArkValue<Opt_Float64>(src.maxWidth);
+    dst.layoutPolicyPtr = CreateArkOptionalLayoutPolicyPtr(src.layoutPolicy);
 }
 
 void AssignArkValue(Ark_CustomSpanMetrics& dst, const CustomSpanMetrics& src, ConvContext *ctx)
@@ -211,11 +256,14 @@ CustomSpanOptions Convert(const Ark_CustomSpanDrawInfo& src)
 }
 
 template<>
-CustomSpanMeasureInfo Convert(const Ark_CustomSpanMeasureInfo& src)
+CustomSpanMeasureInfo Convert(const Ark_CustomSpanMeasureInfoProxy& src)
 {
-    return CustomSpanMeasureInfo {
+    CustomSpanMeasureInfo info {
         .fontSize = Convert<float>(src.fontSize)
     };
+    info.maxWidth = OptConvert<float>(src.maxWidth);
+    info.layoutPolicy = ConvertLayoutPolicyPtr(src.layoutPolicyPtr);
+    return info;
 }
 } // namespace OHOS::Ace::NG::Converter
 

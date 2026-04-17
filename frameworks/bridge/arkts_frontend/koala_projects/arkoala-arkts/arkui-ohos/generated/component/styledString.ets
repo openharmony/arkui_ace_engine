@@ -28,7 +28,7 @@ import { global_resource_Resource_serializer } from './../framework/resource'
 import { TextDecorationType, Color as arkui_component_enums_Color, TextDecorationStyle, ImageSpanAlignment, ImageFit, TextAlign, TextOverflow, WordBreak, FontStyle, FontWeight } from './enums'
 import { Resource as global_resource_Resource } from 'global.resource'
 import { drawing_ColorFilter_serializer } from './../framework/ohos.graphics.drawing'
-import { PixelMap, ShadowOptions_serializer, ShadowOptions, ClickEvent, Callback as arkui_component_common_Callback, TouchEvent, ClickEvent_serializer } from './common'
+import { PixelMap, ShadowOptions_serializer, ShadowOptions, ClickEvent, Callback as arkui_component_common_Callback, TouchEvent, LayoutPolicy, ClickEvent_serializer } from './common'
 // instuctive change begin
 // no need import the CustomSpan
 import { extractors } from '#handwritten'
@@ -1540,6 +1540,8 @@ export interface CustomSpanDrawInfo {
 }
 export interface CustomSpanMeasureInfo {
     fontSize: double;
+    maxWidth?: double;
+    layoutPolicy?: LayoutPolicy;
 }
 export class UserDataSpan {
 }
@@ -1716,19 +1718,6 @@ export class CustomSpanDrawInfo_serializer {
         const lineBottomTmpResult: double = valueDeserializer.readFloat64()
         const baselineTmpResult: double = valueDeserializer.readFloat64()
         let value: CustomSpanDrawInfo = ({x: xTmpResult, lineTop: lineTopTmpResult, lineBottom: lineBottomTmpResult, baseline: baselineTmpResult} as CustomSpanDrawInfo)
-        return value
-    }
-}
-export class CustomSpanMeasureInfo_serializer {
-    public static write(buffer: SerializerBase, value: CustomSpanMeasureInfo): void {
-        let valueSerializer: SerializerBase = buffer
-        const valueHolderForFontSize = value.fontSize
-        valueSerializer.writeFloat64(valueHolderForFontSize)
-    }
-    public static read(buffer: DeserializerBase): CustomSpanMeasureInfo {
-        let valueDeserializer: DeserializerBase = buffer
-        const fontSizeTmpResult: double = valueDeserializer.readFloat64()
-        let value: CustomSpanMeasureInfo = ({fontSize: fontSizeTmpResult} as CustomSpanMeasureInfo)
         return value
     }
 }

@@ -24,6 +24,12 @@ interface CustomSpanWrapper {
     attribute Callback_DrawContext_CustomSpanDrawInfo_Void onDraw_callback;
 };
 
+interface CustomSpanMeasureInfoProxy {
+    attribute f64 fontSize;
+    [Optional] attribute (f64 or undefined) maxWidth;
+    [Optional] attribute (pointer or undefined) layoutPolicyPtr;
+};
+
 [Entity=Class]
 interface CustomSpanNative {
     void invalidate();
