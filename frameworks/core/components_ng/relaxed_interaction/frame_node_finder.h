@@ -52,21 +52,14 @@ public:
 
 private:
     WeakPtr<PipelineContext> context_;
-    std::set<WeakPtr<NG::FrameNode>> relaxedInteractionFrameNodes_;
 
-    void SetRelaxedInteractionFrameNode(const std::list<RefPtr<NG::NGGestureRecognizer>>& touchTestResults);
-    void CleanRelaxedInteractionGestureEventHub();
-    void CollectHittedFrameNodes(const TouchTestResult& touchTestResult);
-    void CleanGestureState(int32_t touchId);
-
-    // Helper function: find FrameNode at specified coordinates
     RefPtr<FrameNode> FindAt(const RefPtr<UINode>& rootNode, float x, float y);
-
-    // Helper function: extract FrameNode from touch test results
-    RefPtr<FrameNode> ExtractFrameNodeFromResult(const TouchTestResult& touchTestResult);
-
-    // Helper function: recursively find leaf gesture recognizer and get its attached node
-    RefPtr<FrameNode> FindLeafGestureRecognizerNode(const RefPtr<NGGestureRecognizer>& gestureRecognizer);
+    RefPtr<FrameNode> Find(const TouchTestResult& touchTestResult);
+    RefPtr<FrameNode> FindLeaf(const RefPtr<NGGestureRecognizer>& gestureRecognizer);
+    void CleanResult(const TouchTestResult& touchTestResult, int32_t touchId);
+    void GetFrameNodes(std::set<WeakPtr<NG::FrameNode>>& frameNodes,
+        const std::list<RefPtr<NG::NGGestureRecognizer>>& touchTestResults);
+    void CleanFrameNodes(std::set<WeakPtr<NG::FrameNode>>& frameNodes);
 };
 
 } // namespace OHOS::Ace::NG

@@ -63,78 +63,12 @@ RefPtr<FrameNode> FrameNodeFinder::FindAt(const RefPtr<UINode>& rootNode, float 
     rootNode->TouchTest(globalPoint, parentLocalPoint, parentRevertPoint,
         touchRestrict, touchTestResult, touchPoint.id, responseLinkResult);
 
-    // Collect FrameNodes on the touch path
-    CollectHittedFrameNodes(touchTestResult);
-
-    auto result = ExtractFrameNodeFromResult(touchTestResult);
-
-    // Clean gesture state
-    CleanGestureState(touchPoint.id);
-
+    auto result = Find(touchTestResult);
+    CleanResult(touchTestResult, touchPoint.id);
     return result;
 }
 
-void FrameNodeFinder::CollectHittedFrameNodes(const TouchTestResult& touchTestResult)
-{
-    std::list<RefPtr<NG::NGGestureRecognizer>> hitTestRecognizers;
-    for (const auto& item : touchTestResult) {
-        auto recognizer = AceType::DynamicCast<NG::NGGestureRecognizer>(item);
-        if (recognizer) {
-            hitTestRecognizers.emplace_back(recognizer);
-        }
-    }
-    SetRelaxedInteractionFrameNode(hitTestRecognizers);
-}
-
-void FrameNodeFinder::CleanGestureState(int32_t touchId)
-{
-    auto context = context_.Upgrade();
-    auto eventManager = context->GetEventManager();
-    auto ref = eventManager->GetGestureRefereeNG(nullptr);
-    if (ref) {
-        ref->CleanGestureStateVoluntarily(touchId);
-        ref->CleanGestureScope(touchId);
-        CleanRelaxedInteractionGestureEventHub();
-    }
-}
-
-void FrameNodeFinder::SetRelaxedInteractionFrameNode(const std::list<RefPtr<NG::NGGestureRecognizer>>& touchTestResults)
-{
-    if (touchTestResults.empty()) {
-        return;
-    }
-    for (const auto& item : touchTestResults) {
-        auto node = item->GetAttachedNode().Upgrade();
-        if (node) {
-            relaxedInteractionFrameNodes_.emplace(node);
-        }
-        auto group = AceType::DynamicCast<NG::RecognizerGroup>(item);
-        if (group) {
-            auto groupRecognizers = group->GetGroupRecognizer();
-            SetRelaxedInteractionFrameNode(groupRecognizers);
-        }
-    }
-}
-
-void FrameNodeFinder::CleanRelaxedInteractionGestureEventHub()
-{
-    for (const auto& item : relaxedInteractionFrameNodes_) {
-        auto frameNode = item.Upgrade();
-        if (!frameNode) {
-            continue;
-        }
-
-        auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
-        if (gestureEventHub) {
-            gestureEventHub->CleanExternalRecognizers();
-            gestureEventHub->CleanInnerRecognizer();
-            gestureEventHub->CleanNodeRecognizer();
-        }
-    }
-    relaxedInteractionFrameNodes_.clear();
-}
-
-RefPtr<FrameNode> FrameNodeFinder::ExtractFrameNodeFromResult(const TouchTestResult& touchTestResult)
+RefPtr<FrameNode> FrameNodeFinder::Find(const TouchTestResult& touchTestResult)
 {
     if (touchTestResult.empty()) {
         TAG_LOGW(AceLogTag::ACE_UIEVENT, "touchTestResult is empty");
@@ -151,7 +85,7 @@ RefPtr<FrameNode> FrameNodeFinder::ExtractFrameNodeFromResult(const TouchTestRes
             continue;
         }
 
-        auto frameNode = FindLeafGestureRecognizerNode(gestureRecognizer);
+        auto frameNode = FindLeaf(gestureRecognizer);
         if (frameNode) {
             return frameNode;
         }
@@ -160,7 +94,7 @@ RefPtr<FrameNode> FrameNodeFinder::ExtractFrameNodeFromResult(const TouchTestRes
     return nullptr;
 }
 
-RefPtr<FrameNode> FrameNodeFinder::FindLeafGestureRecognizerNode(const RefPtr<NGGestureRecognizer>& gestureRecognizer)
+RefPtr<FrameNode> FrameNodeFinder::FindLeaf(const RefPtr<NGGestureRecognizer>& gestureRecognizer)
 {
     if (!gestureRecognizer) {
         return nullptr;
@@ -179,13 +113,71 @@ RefPtr<FrameNode> FrameNodeFinder::FindLeafGestureRecognizerNode(const RefPtr<NG
         if (!childGestureRecognirozer) {
             continue;
         }
-        auto childNode = FindLeafGestureRecognizerNode(childGestureRecognirozer);
+        auto childNode = FindLeaf(childGestureRecognirozer);
         if (childNode) {
             currentNode = childNode;
             break;
         }
     }
     return currentNode;
+}
+
+void FrameNodeFinder::CleanResult(const TouchTestResult& touchTestResult, int32_t touchId)
+{
+    std::list<RefPtr<NG::NGGestureRecognizer>> hitTestRecognizers;
+    for (const auto& item : touchTestResult) {
+        auto recognizer = AceType::DynamicCast<NG::NGGestureRecognizer>(item);
+        if (recognizer) {
+            hitTestRecognizers.emplace_back(recognizer);
+        }
+    }
+    std::set<WeakPtr<NG::FrameNode>> relaxedInteractionFrameNodes;
+    GetFrameNodes(relaxedInteractionFrameNodes, hitTestRecognizers);
+
+    auto context = context_.Upgrade();
+    auto eventManager = context->GetEventManager();
+    auto ref = eventManager->GetGestureRefereeNG(nullptr);
+    if (ref) {
+        ref->CleanGestureStateVoluntarily(touchId);
+        ref->CleanGestureScope(touchId);
+        CleanFrameNodes(relaxedInteractionFrameNodes);
+    }
+}
+
+void FrameNodeFinder::GetFrameNodes(std::set<WeakPtr<NG::FrameNode>>& frameNodes,
+    const std::list<RefPtr<NG::NGGestureRecognizer>>& touchTestResults)
+{
+    if (touchTestResults.empty()) {
+        return;
+    }
+    for (const auto& item : touchTestResults) {
+        auto node = item->GetAttachedNode().Upgrade();
+        if (node) {
+            frameNodes.emplace(node);
+        }
+        auto group = AceType::DynamicCast<NG::RecognizerGroup>(item);
+        if (group) {
+            auto groupRecognizers = group->GetGroupRecognizer();
+            GetFrameNodes(frameNodes, groupRecognizers);
+        }
+    }
+}
+
+void FrameNodeFinder::CleanFrameNodes(std::set<WeakPtr<NG::FrameNode>>& frameNodes)
+{
+    for (const auto& item : frameNodes) {
+        auto frameNode = item.Upgrade();
+        if (!frameNode) {
+            continue;
+        }
+
+        auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+        if (gestureEventHub) {
+            gestureEventHub->CleanExternalRecognizers();
+            gestureEventHub->CleanInnerRecognizer();
+            gestureEventHub->CleanNodeRecognizer();
+        }
+    }
 }
 
 } // namespace OHOS::Ace::NG
