@@ -495,6 +495,7 @@ protected:
     void SetChainAnimationLayoutAlgorithm(
         RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm, const RefPtr<ListLayoutProperty>& listLayoutProperty);
 
+    void ReportStatisticEventScrollVisibleContentChange();
     virtual void OnScrollVisibleContentChange(const RefPtr<ListEventHub>& listEventHub, bool indexChanged);
     virtual float GetScrollUpdateFriction(float overScroll);
     virtual ScrollAlign GetScrollToNodeAlign()

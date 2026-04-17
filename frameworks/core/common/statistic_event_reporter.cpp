@@ -134,6 +134,8 @@ StatisticEventInfo StatisticEventReporter::ConvertToEvent(StatisticEventType eve
             return { "VIDEO", "EXCEED_PROGRESS_RATE" };
         case StatisticEventType::CALL_SET_CACHE_RANGE:
             return { "LIST", "CALL_SET_CACHE_RANGE" };
+        case StatisticEventType::SCROLL_VISIBLE_CONTENT_CHANGE:
+            return { "LIST", "SCROLL_VISIBLE_CONTENT_CHANGE" };
         case StatisticEventType::SEARCH_ONDIDINSERT:
             return { "SEARCH", "ONDIDINSERT" };
         case StatisticEventType::SEARCH_ONWILLDELETE:
