@@ -32,7 +32,7 @@ public:
     static DistortionComponentModel* GetInstance();
     virtual ~DistortionComponentModel() = default;
 
-    virtual void Create(const RefPtr<NG::FrameNode>& builderNode) {}
+    virtual void Create() {}
     virtual void SetDistortion(const NG::DistortionParam& distortion) {}
 
 private:
