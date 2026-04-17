@@ -1099,7 +1099,8 @@ void IndexerPattern::UpdateBubbleBackgroundView()
             ApplyPopupSystemMaterial();
             return;
         }
-        if (!isGreatOrEqualVersionTwentySix || (isPopupBackgroundSetByUser || isPopupBackgroundBlurStyleSetByUser)) {
+        if (!isGreatOrEqualVersionTwentySix || MaterialUtils::IsMaterialDisabled() ||
+            (isPopupBackgroundSetByUser || isPopupBackgroundBlurStyleSetByUser)) {
             ViewAbstract::SetSystemMaterial(AceType::RawPtr(popupNode_), nullptr);
             BlurStyleOption styleOption;
             if (paintProperty->GetPopupBackgroundBlurStyle().has_value()) {
