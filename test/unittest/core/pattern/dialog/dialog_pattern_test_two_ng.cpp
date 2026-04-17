@@ -56,6 +56,8 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "test/unittest/core/event/frame_node_on_tree.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 
 using namespace testing;
@@ -81,6 +83,8 @@ public:
 
 private:
     RefPtr<FrameNode> CreateActionSheetList(RefPtr<DialogPattern> pattern);
+    RefPtr<FrameNode> CreateButton(const std::string& text);
+    RefPtr<FrameNode> CreateMenu(const std::vector<ButtonInfo>& buttons);
 
     DialogProperties actionSheetProp_ = {
         .type = DialogType::ACTION_SHEET, .title = TITLE,
@@ -108,6 +112,10 @@ void DialogPatternAdditionalTwoTestNg::SetUpTestCase()
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
         if (type == DialogTheme::TypeId()) {
             return AceType::MakeRefPtr<DialogTheme>();
+        } else if (type == ButtonTheme::TypeId()) {
+            return AceType::MakeRefPtr<ButtonTheme>();
+        } else if (type == TextTheme::TypeId()) {
+            return AceType::MakeRefPtr<TextTheme>();
         } else {
             return nullptr;
         }
@@ -144,6 +152,36 @@ RefPtr<FrameNode> DialogPatternAdditionalTwoTestNg::CreateActionSheetList(RefPtr
         list->AddChild(itemNode);
     }
     return list;
+}
+
+RefPtr<FrameNode> DialogPatternAdditionalTwoTestNg::CreateButton(const std::string& text)
+{
+    auto buttonRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    auto buttonNode = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    textNode->GetOrCreateFocusHub()->SetFocusable(true);
+    auto textProps = textNode->GetLayoutProperty<TextLayoutProperty>();
+    textProps->UpdateContent(text);
+    textNode->MountToParent(buttonNode);
+    textNode->MarkModifyDone();
+    buttonNode->MountToParent(buttonRow);
+    return buttonRow;
+}
+
+RefPtr<FrameNode> DialogPatternAdditionalTwoTestNg::CreateMenu(const std::vector<ButtonInfo>& buttons)
+{
+    auto menu = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    for (size_t i = 0; i < buttons.size(); ++i) {
+        auto buttonRow = CreateButton(buttons[i].text);
+        buttonRow->MountToParent(menu);
+    }
+    auto buttonRow = CreateButton("");
+    buttonRow->MountToParent(menu);
+    return menu;
 }
 
 /**
@@ -1035,20 +1073,26 @@ HWTEST_F(DialogPatternAdditionalTwoTestNg, OnInjectionEvent_ActionMenu_004, Test
  */
 HWTEST_F(DialogPatternAdditionalTwoTestNg, OnInjectionEvent_ActionMenu_005, TestSize.Level1)
 {
+    std::vector<ButtonInfo> buttons;
+    ButtonInfo buttonInfo1 = { .text = "main button", .bgColor = Color::BLACK };
+    ButtonInfo buttonInfo2 = { .text = "second button", .bgColor = Color::BLUE };
+    buttons.emplace_back(buttonInfo1);
+    buttons.emplace_back(buttonInfo2);
     auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
     ASSERT_NE(dialogTheme, nullptr);
-    RefPtr<FrameNode> dialog = FrameNode::CreateFrameNode(
-        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
-    ASSERT_NE(dialog, nullptr);
-    auto pattern = dialog->GetPattern<DialogPattern>();
+    RefPtr<FrameNode> dialogNode = FrameNode::CreateFrameNode(V2::ACTION_SHEET_DIALOG_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(dialogNode, nullptr);
+    auto pattern = dialogNode->GetPattern<DialogPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->dialogProperties_.type = DialogType::COMMON;
-    pattern->dialogProperties_.isMenu = true;
-    pattern->isSuitableForElderly_ = true;
 
-    std::vector<ButtonInfo> buttons;
-    auto menu = pattern->BuildMenu(buttons, false);
+    pattern->isSuitableForElderly_ = true;
+    pattern->dialogProperties_.isMenu = true;
+    auto menu = CreateMenu(buttons);
+
     ASSERT_NE(menu, nullptr);
+    pattern->menuNode_ = menu;
     ASSERT_NE(pattern->menuNode_.Upgrade(), nullptr);
 
     pattern->ReportDestroyActionMenu(-2);
@@ -1064,19 +1108,22 @@ HWTEST_F(DialogPatternAdditionalTwoTestNg, OnInjectionEvent_ActionMenu_005, Test
  */
 HWTEST_F(DialogPatternAdditionalTwoTestNg, OnInjectionEvent_ActionMenu_006, TestSize.Level1)
 {
+    std::vector<ButtonInfo> buttons;
+    ButtonInfo buttonInfo1 = { .text = "main button", .bgColor = Color::BLACK };
+    ButtonInfo buttonInfo2 = { .text = "second button", .bgColor = Color::BLUE };
+    buttons.emplace_back(buttonInfo1);
+    buttons.emplace_back(buttonInfo2);
     auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
     ASSERT_NE(dialogTheme, nullptr);
-    RefPtr<FrameNode> dialog = FrameNode::CreateFrameNode(
-        V2::ALERT_DIALOG_ETS_TAG, 2, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
-    ASSERT_NE(dialog, nullptr);
-    auto pattern = dialog->GetPattern<DialogPattern>();
+    RefPtr<FrameNode> dialogNode = FrameNode::CreateFrameNode(V2::ACTION_SHEET_DIALOG_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(dialogNode, nullptr);
+    auto pattern = dialogNode->GetPattern<DialogPattern>();
     ASSERT_NE(pattern, nullptr);
-    pattern->dialogProperties_.type = DialogType::COMMON;
-    pattern->isSuitableForElderly_ = true;
+    auto menu = CreateMenu(buttons);
 
-    std::vector<ButtonInfo> buttons;
-    auto menu = pattern->BuildMenu(buttons, false);
     ASSERT_NE(menu, nullptr);
+    pattern->menuNode_ = menu;
     ASSERT_NE(pattern->menuNode_.Upgrade(), nullptr);
     auto buildJson = [] (int32_t buttonIndex) {
         auto json = JsonUtil::Create(true);
@@ -1092,8 +1139,8 @@ HWTEST_F(DialogPatternAdditionalTwoTestNg, OnInjectionEvent_ActionMenu_006, Test
     auto outOfRangeJson = buildJson(99);
     EXPECT_EQ(pattern->HandleActionMenuButtonClickCmd(outOfRangeJson), RET_FAILED);
     auto validJson = buildJson(0);
-    EXPECT_EQ(pattern->HandleActionMenuButtonClickCmd(validJson), RET_FAILED);
+    EXPECT_EQ(pattern->HandleActionMenuButtonClickCmd(validJson), RET_SUCCESS);
     auto cancelJson = buildJson(-1);
-    EXPECT_EQ(pattern->HandleActionMenuButtonClickCmd(cancelJson), RET_FAILED);
+    EXPECT_EQ(pattern->HandleActionMenuButtonClickCmd(cancelJson), RET_SUCCESS);
 }
 } // namespace OHOS::Ace::NG
