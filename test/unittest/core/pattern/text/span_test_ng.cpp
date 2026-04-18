@@ -2387,6 +2387,12 @@ HWTEST_F(SpanTestNg, SpanItemGetFontWeightConfigs002, TestSize.Level1)
  */
 HWTEST_F(SpanTestNg, SpanItemToJsonValue003, TestSize.Level1)
 {
+    // Test variableFontWeight and fontWeightConfigs JSON serialization
+    // Verify variableFontWeight is correctly serialized to string "350"
+    // Verify enableVariableFontWeight is set to true and serialized
+    // Verify enableDeviceFontWeightCategory is set to false and serialized
+    // Check fontWeightConfigs object contains both configuration properties
+    // Ensure all values match expected JSON output format
     /**
      * @tc.steps: step1. Initialize SpanModelNG and SpanNode
      */
@@ -2458,7 +2464,7 @@ HWTEST_F(SpanTestNg, SpanItemToJsonValue004, TestSize.Level1)
 
 /**
  * @tc.name: SpanItemFontWeightConfigsIndependence001
- * @tc.desc: Test enableVariableFontWeight and enableDeviceFontWeightCategory are independent - both true
+ * @tc.desc: Test enableVariableFontWeight and enableDeviceFontWeightCategory are independent
  * @tc.type: FUNC
  */
 HWTEST_F(SpanTestNg, SpanItemFontWeightConfigsIndependence001, TestSize.Level1)
