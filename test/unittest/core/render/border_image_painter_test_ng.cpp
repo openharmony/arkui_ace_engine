@@ -20,6 +20,7 @@
 #define private public
 #include "test/mock/frameworks/core/rosen/mock_canvas.h"
 
+#include "core/components/common/properties/border_image.h"
 #include "core/components_ng/render/border_image_painter.h"
 
 #undef private

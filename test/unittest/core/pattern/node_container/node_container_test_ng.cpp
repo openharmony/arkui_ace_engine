@@ -24,6 +24,7 @@
 #include "test/mock/frameworks/core/components_ng/render/mock_canvas_image.h"
 #include "ui/properties/ui_material.h"
 
+#include "core/components/common/properties/border_image.h"
 #include "core/components_ng/base/extension_handler.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"

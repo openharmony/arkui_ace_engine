@@ -28,7 +28,6 @@
 #include "base/utils/utils.h"
 #include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/alignment.h"
-#include "core/components/common/properties/border_image.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model.h"
@@ -47,6 +46,7 @@
 namespace OHOS::Ace {
 class SpanString;
 class CalcDimensionRect;
+class BorderImage;
 }
 namespace OHOS::Ace::NG {
 constexpr int32_t MAT4_ZERO = 0;
@@ -669,27 +669,7 @@ public:
         ViewAbstract::SetOuterBorderStyle(borderStyles);
     }
 
-    void SetBorderImage(const RefPtr<BorderImage>& borderImage, uint8_t bitset) override
-    {
-        CHECK_NULL_VOID(borderImage);
-        if (bitset & BorderImage::SOURCE_BIT) {
-            ViewAbstract::SetBorderImageSource(
-                borderImage->GetSrc(), borderImage->GetBundleName(), borderImage->GetModuleName());
-        }
-        if (bitset & BorderImage::OUTSET_BIT) {
-            ViewAbstract::SetHasBorderImageOutset(true);
-        }
-        if (bitset & BorderImage::SLICE_BIT) {
-            ViewAbstract::SetHasBorderImageSlice(true);
-        }
-        if (bitset & BorderImage::REPEAT_BIT) {
-            ViewAbstract::SetHasBorderImageRepeat(true);
-        }
-        if (bitset & BorderImage::WIDTH_BIT) {
-            ViewAbstract::SetHasBorderImageWidth(true);
-        }
-        ViewAbstract::SetBorderImage(borderImage);
-    }
+    void SetBorderImage(const RefPtr<BorderImage>& borderImage, uint8_t bitset) override;
 
     void SetBorderImageGradient(const NG::Gradient& gradient) override
     {

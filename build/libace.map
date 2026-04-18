@@ -337,10 +337,12 @@
       "OHOS::Ace::Declaration::SetCurrentStyle(std::__h::pair<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>> const&)";
       "OHOS::Ace::Declaration::SetShowAttr(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::Declaration::SetStyle(std::__h::vector<std::__h::pair<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>, std::__h::allocator<std::__h::pair<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>>> const&)";
+      "OHOS::Ace::Decoration::Decoration()";
       "OHOS::Ace::Decoration::HorizontalSpaceOccupied(double) const";
       "OHOS::Ace::Decoration::SetContextAndCallback(OHOS::Ace::WeakPtr<OHOS::Ace::PipelineContext> const&, std::__h::function<void ()> const&)";
       "OHOS::Ace::Decoration::SetGradient(OHOS::Ace::Gradient const&, OHOS::Ace::WeakPtr<OHOS::Ace::PipelineContext> const&, std::__h::function<void ()> const&)";
       "OHOS::Ace::Decoration::VerticalSpaceOccupied(double) const";
+      "OHOS::Ace::Decoration::~Decoration()";
       "OHOS::Ace::DecorationSpan::AddTextDecorationType(OHOS::Ace::TextDecoration)";
       "OHOS::Ace::DecorationSpan::DecorationSpan(std::__h::vector<OHOS::Ace::TextDecoration, std::__h::allocator<OHOS::Ace::TextDecoration>> const&, std::__h::optional<OHOS::Ace::Color>, std::__h::optional<OHOS::Ace::TextDecorationStyle>, std::__h::optional<float>, std::__h::optional<OHOS::Ace::TextDecorationOptions>, int, int, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> const&)";
       "OHOS::Ace::DecorationSpan::GetTextDecorationTypes() const";

@@ -19,6 +19,7 @@
 #include "core/common/ace_engine.h"
 #include "core/common/event_manager.h"
 #include "core/common/vibrator/vibrator_utils.h"
+#include "core/components/common/properties/border_image.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/event/focus_hub.h"

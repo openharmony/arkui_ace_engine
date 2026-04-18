@@ -109,7 +109,7 @@ class ACE_FORCE_EXPORT RenderContext : public virtual AceType {
     DECLARE_ACE_TYPE(NG::RenderContext, AceType);
 
 public:
-    ~RenderContext() override = default;
+    ~RenderContext() override;
 
     static RefPtr<RenderContext> Create();
 
@@ -637,8 +637,17 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImageResizableSlice, ImageResizableSlice);
 
     // BorderImage
-    ACE_DEFINE_PROPERTY_GROUP(BdImage, BorderImageProperty);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(BdImage, BorderImage, RefPtr<BorderImage>);
+    const std::unique_ptr<BorderImageProperty>& GetOrCreateBdImage();
+    const std::unique_ptr<BorderImageProperty>& GetBdImage() const;
+    std::unique_ptr<BorderImageProperty> CloneBdImage() const;
+    void ResetBdImage();
+
+    std::optional<RefPtr<BorderImage>> GetBorderImage() const;
+    bool HasBorderImage() const;
+    RefPtr<BorderImage> GetBorderImageValue(const RefPtr<BorderImage>& defaultValue) const;
+    void ResetBorderImage();
+    void UpdateBorderImage(const RefPtr<BorderImage>& value);
+
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(BdImage, BorderImageSource, ImageSourceInfo);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(BdImage, HasBorderImageSlice, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(BdImage, HasBorderImageWidth, bool);
@@ -906,7 +915,8 @@ public:
 
     virtual void UpdateForegroundFilterDistortionParam(const DistortionParam& param) {}
 protected:
-    RenderContext() = default;
+    RenderContext();
+    std::unique_ptr<BorderImageProperty> propBdImage_;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;
     std::shared_ptr<UiMaterialInfo> uiMaterial_;
     ShareId shareId_;

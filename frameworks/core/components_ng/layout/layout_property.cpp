@@ -17,6 +17,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/flex_property.h"
 
+#include "core/components/common/properties/border_image.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "base/utils/string_expression.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
