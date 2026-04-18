@@ -1819,6 +1819,7 @@
       "OHOS::Ace::NG::StackLayoutAlgorithm::IsAsyncLoadAvailable(OHOS::Ace::NG::LayoutWrapper*)";
       "OHOS::Ace::NG::StackLayoutAlgorithm::MeasureInNextFrame() const";
       "OHOS::Ace::NG::StackLayoutAlgorithm::StackLayoutAlgorithm()";
+      "OHOS::Ace::NG::StackPattern::OnDirtyLayoutWrapperSwap(OHOS::Ace::RefPtr<OHOS::Ace::NG::LayoutWrapper> const&, OHOS::Ace::NG::DirtySwapConfig const&)";
       "OHOS::Ace::NG::StackPattern::CreateEventHub()";
       "OHOS::Ace::NG::StackPattern::DumpInfo()";
       "OHOS::Ace::NG::StackPattern::GetOrCreateVerticalOverflowHandler(OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode> const&)";
