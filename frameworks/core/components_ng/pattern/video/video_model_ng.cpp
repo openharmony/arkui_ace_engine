@@ -20,20 +20,27 @@
 #include "core/components_ng/pattern/video/video_node.h"
 
 namespace OHOS::Ace::NG {
+void UpdateControlsIfNeeded(FrameNode* frameNode, bool controls)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(videoPattern);
+    auto layoutProperty = videoPattern->GetLayoutProperty<VideoLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (!layoutProperty->HasControls() || controls != layoutProperty->GetControlsValue(true)) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(VideoLayoutProperty, Controls, controls, frameNode);
+        videoPattern->UpdateControllerBar();
+    }
+}
+
 void UpdateControllerBar(FrameNode* frameNode, bool controls)
 {
     CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(VideoLayoutProperty, Controls, controls, frameNode);
+    UpdateControlsIfNeeded(frameNode, controls);
     auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(videoPattern);
-    videoPattern->UpdateControllerBar();
-
     auto fullScreenNode = videoPattern->GetFullScreenNode();
-    CHECK_NULL_VOID(fullScreenNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(VideoLayoutProperty, Controls, controls, fullScreenNode);
-    auto fullScreenPattern = AceType::DynamicCast<VideoPattern>(fullScreenNode->GetPattern());
-    CHECK_NULL_VOID(fullScreenPattern);
-    fullScreenPattern->UpdateControllerBar();
+    UpdateControlsIfNeeded(fullScreenNode.GetRawPtr(), controls);
 }
 
 void VideoModelNG::Create(const RefPtr<VideoControllerV2>& videoController)
