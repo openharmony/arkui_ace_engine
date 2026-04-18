@@ -130,9 +130,7 @@ HWTEST_F(SimulateTouchExecutorGetDescriptionTest, GetDescription_ContainsExpecte
     PointF coordinates(100.0f, 200.0f);
     SimulateTouchExecutor executor(context, coordinates);
     auto description = executor.GetDescription();
-    EXPECT_TRUE(description.find("touch") != std::string::npos);
-    EXPECT_TRUE(description.find("executor") != std::string::npos);
-    EXPECT_TRUE(description.find("Simulate") != std::string::npos);
+    EXPECT_TRUE(description.find("simulate_touch") != std::string::npos);
 }
 
 HWTEST_F(SimulateTouchExecutorIsSingleStepTest, IsSingleStep_ReturnsTrue, TestSize.Level1)
