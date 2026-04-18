@@ -1318,10 +1318,10 @@ bool ArkTSUtils::ParseResourceToDouble(const EcmaVM* vm, const Local<JSValueRef>
     auto jsObj = jsValue->ToObject(vm);
     int32_t resId;
     int32_t resType;
+    CompleteResourceObject(vm, jsObj);
     if (jsObj->IsNull() || !GetResourceIdAndType(vm, jsObj, resId, resType)) {
         return false;
     }
-    CompleteResourceObject(vm, jsObj);
     resourceObject = GetResourceObject(vm, jsObj);
     auto resourceWrapper = CreateResourceWrapper(vm, jsObj, resourceObject);
     CHECK_NULL_RETURN(resourceWrapper, false);
@@ -2028,6 +2028,33 @@ bool ArkTSUtils::ParseJsResource(const EcmaVM *vm, const Local<JSValueRef> &jsVa
         return false;
     } else {
         resourceType = type->Uint32Value(vm);
+    }
+    auto resIdNum = id->Int32Value(vm);
+    if (resIdNum == -1) {
+        if (!IsGetResourceByName(vm, jsValue)) {
+            return false;
+        }
+        auto args = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "params"));
+        if (!args->IsArray(vm)) {
+            return false;
+        }
+        Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
+        auto param = panda::ArrayRef::GetValueAt(vm, params, 0);
+        auto resName = param->ToString(vm)->ToString(vm);
+        if (resourceType == static_cast<uint32_t>(ResourceType::STRING)) {
+            auto value = resourceWrapper->GetStringByName(resName);
+            return StringUtils::StringToCalcDimensionNG(value, result, false);
+        }
+        if (resourceType == static_cast<uint32_t>(ResourceType::INTEGER)) {
+            auto value = std::to_string(resourceWrapper->GetIntByName(resName));
+            StringUtils::StringToDimensionWithUnitNG(value, result);
+            return true;
+        }
+        if (resourceType == static_cast<uint32_t>(ResourceType::FLOAT)) {
+            result = resourceWrapper->GetDimensionByName(resName);
+            return true;
+        }
+        return false;
     }
     if (resourceType == static_cast<uint32_t>(ResourceType::STRING)) {
         auto value = resourceWrapper->GetString(id->Uint32Value(vm));
