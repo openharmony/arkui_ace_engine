@@ -70,6 +70,7 @@
 #include "core/interfaces/native/implementation/dialog_common.h"
 #include "core/interfaces/native/implementation/dismiss_popup_action_peer.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
+#include "core/interfaces/native/implementation/finger_info_peer.h"
 #include "core/interfaces/native/implementation/focus_axis_event_peer.h"
 #include "frameworks/core/interfaces/native/ani/frame_node_peer_impl.h"
 #include "core/interfaces/native/implementation/gesture_recognizer_peer_impl.h"
@@ -2217,19 +2218,12 @@ void AssignCast(std::optional<GestureJudgeResult> &dst, const Ark_GestureJudgeRe
 
 void AssignArkValue(Ark_FingerInfo& dst, const FingerInfo& src)
 {
-    dst.id = ArkValue<Ark_Int32>(src.fingerId_);
-    dst.globalX = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.globalLocation_.GetX()));
-    dst.globalY = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.globalLocation_.GetY()));
-    dst.localX = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.localLocation_.GetX()));
-    dst.localY = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.localLocation_.GetY()));
-    dst.displayX = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.screenLocation_.GetX()));
-    dst.displayY = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.screenLocation_.GetY()));
-    // Handle globalDisplayX/Y
-    dst.globalDisplayX =
-        ArkValue<Opt_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.globalDisplayLocation_.GetX()));
-    dst.globalDisplayY =
-        ArkValue<Opt_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.globalDisplayLocation_.GetY()));
-    dst.hand = ArkValue<Opt_InteractionHand>(static_cast<Ark_InteractionHand>(src.operatingHand_));
+    if (!dst) {
+        dst = PeerUtils::CreatePeer<FingerInfoPeer>();
+    }
+    CHECK_NULL_VOID(dst);
+
+    dst->SetHandler(src);
 }
 } // namespace Converter
 } // namespace OHOS::Ace::NG

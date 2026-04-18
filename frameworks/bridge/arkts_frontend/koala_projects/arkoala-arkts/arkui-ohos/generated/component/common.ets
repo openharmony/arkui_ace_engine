@@ -26,7 +26,7 @@ import { ArkUIGeneratedNativeModule } from '#components'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { unifiedDataChannel_UnifiedData_serializer } from './../framework/ohos.data.unifiedDataChannel'
 import { default as unifiedDataChannel } from '@ohos.data.unifiedDataChannel'
-import { VoidCallback, Position_serializer, DirectionalEdgesT_F64_serializer, Position, DirectionalEdgesT, ConstraintSizeOptions_serializer, ConstraintSizeOptions, ResourceColor, Resource as arkui_component_units_Resource, SizeOptions, SizeOptions_serializer, ChainWeightOptions_serializer, Padding_serializer, LocalizedPadding_serializer, BorderOptions_serializer, EdgeStyles_serializer, EdgeWidths_serializer, LocalizedEdgeWidths_serializer, EdgeColors_serializer, LocalizedEdgeColors_serializer, OutlineOptions_serializer, EdgeOutlineStyles_serializer, EdgeOutlineWidths_serializer, OutlineRadiuses_serializer, Edges_serializer, LocalizedEdges_serializer, LocalizedPosition_serializer, AccessibilityActionOptions_serializer, BorderRadiuses_serializer, LocalizedBorderRadiuses_serializer, AccessibilityOptions_serializer, Length, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ColorMetrics as arkui_component_units_ColorMetrics, ResourceStr, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, AccessibilityActionOptions, BorderRadiuses, LocalizedBorderRadiuses, AccessibilityOptions, LengthMetrics as arkui_component_units_LengthMetrics, ScrollBarMargin_serializer, ScrollBarMargin, Bias, Font as arkui_component_units_Font, EdgeWidth, Bias_serializer, Area_serializer, arkui_component_units_Font_serializer } from './units'
+import { VoidCallback, Position_serializer, DirectionalEdgesT_F64_serializer, Position, DirectionalEdgesT, ConstraintSizeOptions_serializer, ConstraintSizeOptions, ResourceColor, Resource as arkui_component_units_Resource, Coordinate2D_serializer, Coordinate2D, SizeOptions, SizeOptions_serializer, ChainWeightOptions_serializer, Padding_serializer, LocalizedPadding_serializer, BorderOptions_serializer, EdgeStyles_serializer, EdgeWidths_serializer, LocalizedEdgeWidths_serializer, EdgeColors_serializer, LocalizedEdgeColors_serializer, OutlineOptions_serializer, EdgeOutlineStyles_serializer, EdgeOutlineWidths_serializer, OutlineRadiuses_serializer, Edges_serializer, LocalizedEdges_serializer, LocalizedPosition_serializer, AccessibilityActionOptions_serializer, BorderRadiuses_serializer, LocalizedBorderRadiuses_serializer, AccessibilityOptions_serializer, Length, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ColorMetrics as arkui_component_units_ColorMetrics, ResourceStr, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, AccessibilityActionOptions, BorderRadiuses, LocalizedBorderRadiuses, AccessibilityOptions, LengthMetrics as arkui_component_units_LengthMetrics, ScrollBarMargin_serializer, ScrollBarMargin, Bias, Font as arkui_component_units_Font, EdgeWidth, Bias_serializer, Area_serializer, arkui_component_units_Font_serializer } from './units'
 import { KeyType, KeySource, Color as arkui_component_enums_Color, HitTestMode, GestureCollectIntervention, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, LocalizedAlignment, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, RenderStrategy, Axis, ResponseType, FunctionKey, ModifierKey, InteractionHand, GradientDirection, Curve, SharedTransitionEffectType, ArrowPointPosition, TipsAnchorType, Placement, BarState, LineCapStyle, LineJoinStyle, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, ResponseRegionSupportedTool, PlayMode, VerticalAlign, HorizontalAlign, FontWeight, FontStyle, TouchType, CrownAction, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, ScrollSource, IlluminatedType, InputEventInterceptAction, AccessibilityHoverType, AxisAction, AxisType, AxisModel, MouseButton, MouseAction } from './enums'
 import { IntentionCode } from '@ohos.multimodalInput.intentionCode'
 import { global_resource_Resource_serializer } from './../framework/resource'
@@ -2473,6 +2473,437 @@ export class TextContentControllerBase implements MaterializedBase {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextContentControllerBase_scrollToVisible(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
+export interface TouchObject {
+    type: TouchType
+    id: int32
+    displayX: double
+    displayY: double
+    windowX: double
+    windowY: double
+    x: double
+    y: double
+    hand?: InteractionHand | undefined
+    pressedTime?: int64 | undefined
+    pressure?: double | undefined
+    width?: double | undefined
+    height?: double | undefined
+    globalDisplayX?: double | undefined
+    globalDisplayY?: double | undefined
+    getCurrentLocalPosition(): Coordinate2D
+}
+export class TouchObjectInternal implements MaterializedBase,TouchObject {
+    public peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    public type: TouchType
+    public id: int32
+    public displayX: double
+    public displayY: double
+    public windowX: double
+    public windowY: double
+    public x: double
+    public y: double
+    public hand?: InteractionHand | undefined
+    public pressedTime?: int64 | undefined
+    public pressure?: double | undefined
+    public width?: double | undefined
+    public height?: double | undefined
+    public globalDisplayX?: double | undefined
+    public globalDisplayY?: double | undefined
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, TouchObjectInternal.getFinalizer())
+        this.type = this.getType()
+        this.id = this.getId()
+        this.displayX = this.getDisplayX()
+        this.displayY = this.getDisplayY()
+        this.windowX = this.getWindowX()
+        this.windowY = this.getWindowY()
+        this.x = this.getX()
+        this.y = this.getY()
+        this.hand = this.getHand()
+        this.pressedTime = this.getPressedTime()
+        this.pressure = this.getPressure()
+        this.width = this.getWidth()
+        this.height = this.getHeight()
+        this.globalDisplayX = this.getGlobalDisplayX()
+        this.globalDisplayY = this.getGlobalDisplayY()
+    }
+    constructor() {
+        this(MaterializedBaseTag.NOP, TouchObjectInternal.construct())
+        this.type = this.getType()
+        this.id = this.getId()
+        this.displayX = this.getDisplayX()
+        this.displayY = this.getDisplayY()
+        this.windowX = this.getWindowX()
+        this.windowY = this.getWindowY()
+        this.x = this.getX()
+        this.y = this.getY()
+        this.hand = this.getHand()
+        this.pressedTime = this.getPressedTime()
+        this.pressure = this.getPressure()
+        this.width = this.getWidth()
+        this.height = this.getHeight()
+        this.globalDisplayX = this.getGlobalDisplayX()
+        this.globalDisplayY = this.getGlobalDisplayY()
+    }
+    static construct(): KPointer {
+        const retval = ArkUIGeneratedNativeModule._TouchObject_construct()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._TouchObject_getFinalizer()
+    }
+    public static fromPtr(ptr: KPointer): TouchObjectInternal {
+        return new TouchObjectInternal(MaterializedBaseTag.NOP, ptr)
+    }
+    public getCurrentLocalPosition(): Coordinate2D {
+        return this.getCurrentLocalPosition_serialize()
+    }
+    private getType(): TouchType {
+        return this.getType_serialize()
+    }
+    private setType(type: TouchType): void {
+        const type_casted = type as (TouchType)
+        this.setType_serialize(type_casted)
+        return
+    }
+    private getId(): int32 {
+        return this.getId_serialize()
+    }
+    private setId(id: int32): void {
+        const id_casted = id as (int32)
+        this.setId_serialize(id_casted)
+        return
+    }
+    private getDisplayX(): double {
+        return this.getDisplayX_serialize()
+    }
+    private setDisplayX(displayX: double): void {
+        const displayX_casted = displayX as (double)
+        this.setDisplayX_serialize(displayX_casted)
+        return
+    }
+    private getDisplayY(): double {
+        return this.getDisplayY_serialize()
+    }
+    private setDisplayY(displayY: double): void {
+        const displayY_casted = displayY as (double)
+        this.setDisplayY_serialize(displayY_casted)
+        return
+    }
+    private getWindowX(): double {
+        return this.getWindowX_serialize()
+    }
+    private setWindowX(windowX: double): void {
+        const windowX_casted = windowX as (double)
+        this.setWindowX_serialize(windowX_casted)
+        return
+    }
+    private getWindowY(): double {
+        return this.getWindowY_serialize()
+    }
+    private setWindowY(windowY: double): void {
+        const windowY_casted = windowY as (double)
+        this.setWindowY_serialize(windowY_casted)
+        return
+    }
+    private getX(): double {
+        return this.getX_serialize()
+    }
+    private setX(x: double): void {
+        const x_casted = x as (double)
+        this.setX_serialize(x_casted)
+        return
+    }
+    private getY(): double {
+        return this.getY_serialize()
+    }
+    private setY(y: double): void {
+        const y_casted = y as (double)
+        this.setY_serialize(y_casted)
+        return
+    }
+    private getHand(): InteractionHand | undefined {
+        return this.getHand_serialize()
+    }
+    private setHand(hand: InteractionHand | undefined): void {
+        const hand_casted = hand as (InteractionHand | undefined)
+        this.setHand_serialize(hand_casted)
+        return
+    }
+    private getPressedTime(): int64 | undefined {
+        return this.getPressedTime_serialize()
+    }
+    private setPressedTime(pressedTime: int64 | undefined): void {
+        const pressedTime_casted = pressedTime as (int64 | undefined)
+        this.setPressedTime_serialize(pressedTime_casted)
+        return
+    }
+    private getPressure(): double | undefined {
+        return this.getPressure_serialize()
+    }
+    private setPressure(pressure: double | undefined): void {
+        const pressure_casted = pressure as (double | undefined)
+        this.setPressure_serialize(pressure_casted)
+        return
+    }
+    private getWidth(): double | undefined {
+        return this.getWidth_serialize()
+    }
+    private setWidth(width: double | undefined): void {
+        const width_casted = width as (double | undefined)
+        this.setWidth_serialize(width_casted)
+        return
+    }
+    private getHeight(): double | undefined {
+        return this.getHeight_serialize()
+    }
+    private setHeight(height: double | undefined): void {
+        const height_casted = height as (double | undefined)
+        this.setHeight_serialize(height_casted)
+        return
+    }
+    private getGlobalDisplayX(): double | undefined {
+        return this.getGlobalDisplayX_serialize()
+    }
+    private setGlobalDisplayX(globalDisplayX: double | undefined): void {
+        const globalDisplayX_casted = globalDisplayX as (double | undefined)
+        this.setGlobalDisplayX_serialize(globalDisplayX_casted)
+        return
+    }
+    private getGlobalDisplayY(): double | undefined {
+        return this.getGlobalDisplayY_serialize()
+    }
+    private setGlobalDisplayY(globalDisplayY: double | undefined): void {
+        const globalDisplayY_casted = globalDisplayY as (double | undefined)
+        this.setGlobalDisplayY_serialize(globalDisplayY_casted)
+        return
+    }
+    private getCurrentLocalPosition_serialize(): Coordinate2D {
+        const retval = ArkUIGeneratedNativeModule._TouchObject_getCurrentLocalPosition(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult: Coordinate2D = Coordinate2D_serializer.read(retvalDeserializer)
+        return returnResult
+    }
+    private getType_serialize(): TouchType {
+        const retval = ArkUIGeneratedNativeModule._TouchObject_getType(this.peer!.ptr)
+        return TouchType.fromValue(retval)
+    }
+    private setType_serialize(type: TouchType): void {
+        ArkUIGeneratedNativeModule._TouchObject_setType(this.peer!.ptr, type.valueOf())
+    }
+    private getId_serialize(): int32 {
+        const retval = ArkUIGeneratedNativeModule._TouchObject_getId(this.peer!.ptr)
+        return retval
+    }
+    private setId_serialize(id: int32): void {
+        ArkUIGeneratedNativeModule._TouchObject_setId(this.peer!.ptr, id)
+    }
+    private getDisplayX_serialize(): double {
+        const retval = ArkUIGeneratedNativeModule._TouchObject_getDisplayX(this.peer!.ptr)
+        return retval
+    }
+    private setDisplayX_serialize(displayX: double): void {
+        ArkUIGeneratedNativeModule._TouchObject_setDisplayX(this.peer!.ptr, displayX)
+    }
+    private getDisplayY_serialize(): double {
+        const retval = ArkUIGeneratedNativeModule._TouchObject_getDisplayY(this.peer!.ptr)
+        return retval
+    }
+    private setDisplayY_serialize(displayY: double): void {
+        ArkUIGeneratedNativeModule._TouchObject_setDisplayY(this.peer!.ptr, displayY)
+    }
+    private getWindowX_serialize(): double {
+        const retval = ArkUIGeneratedNativeModule._TouchObject_getWindowX(this.peer!.ptr)
+        return retval
+    }
+    private setWindowX_serialize(windowX: double): void {
+        ArkUIGeneratedNativeModule._TouchObject_setWindowX(this.peer!.ptr, windowX)
+    }
+    private getWindowY_serialize(): double {
+        const retval = ArkUIGeneratedNativeModule._TouchObject_getWindowY(this.peer!.ptr)
+        return retval
+    }
+    private setWindowY_serialize(windowY: double): void {
+        ArkUIGeneratedNativeModule._TouchObject_setWindowY(this.peer!.ptr, windowY)
+    }
+    private getX_serialize(): double {
+        const retval = ArkUIGeneratedNativeModule._TouchObject_getX(this.peer!.ptr)
+        return retval
+    }
+    private setX_serialize(x: double): void {
+        ArkUIGeneratedNativeModule._TouchObject_setX(this.peer!.ptr, x)
+    }
+    private getY_serialize(): double {
+        const retval = ArkUIGeneratedNativeModule._TouchObject_getY(this.peer!.ptr)
+        return retval
+    }
+    private setY_serialize(y: double): void {
+        ArkUIGeneratedNativeModule._TouchObject_setY(this.peer!.ptr, y)
+    }
+    private getHand_serialize(): InteractionHand | undefined {
+        const retval = ArkUIGeneratedNativeModule._TouchObject_getHand(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: InteractionHand | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = InteractionHand.fromValue(retvalDeserializer.readInt32())
+        }
+        const returnResult: InteractionHand | undefined = buffer
+        return returnResult
+    }
+    private setHand_serialize(hand: InteractionHand | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (hand !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const handTmpValue = (hand as InteractionHand)
+            thisSerializer.writeInt32(handTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TouchObject_setHand(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private getPressedTime_serialize(): int64 | undefined {
+        const retval = ArkUIGeneratedNativeModule._TouchObject_getPressedTime(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: int64 | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readInt64()
+        }
+        const returnResult: int64 | undefined = buffer
+        return returnResult
+    }
+    private setPressedTime_serialize(pressedTime: int64 | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (pressedTime !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const pressedTimeTmpValue = pressedTime!
+            thisSerializer.writeInt64(pressedTimeTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TouchObject_setPressedTime(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private getPressure_serialize(): double | undefined {
+        const retval = ArkUIGeneratedNativeModule._TouchObject_getPressure(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: double | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readFloat64()
+        }
+        const returnResult: double | undefined = buffer
+        return returnResult
+    }
+    private setPressure_serialize(pressure: double | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (pressure !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const pressureTmpValue = pressure!
+            thisSerializer.writeFloat64(pressureTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TouchObject_setPressure(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private getWidth_serialize(): double | undefined {
+        const retval = ArkUIGeneratedNativeModule._TouchObject_getWidth(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: double | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readFloat64()
+        }
+        const returnResult: double | undefined = buffer
+        return returnResult
+    }
+    private setWidth_serialize(width: double | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (width !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const widthTmpValue = width!
+            thisSerializer.writeFloat64(widthTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TouchObject_setWidth(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private getHeight_serialize(): double | undefined {
+        const retval = ArkUIGeneratedNativeModule._TouchObject_getHeight(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: double | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readFloat64()
+        }
+        const returnResult: double | undefined = buffer
+        return returnResult
+    }
+    private setHeight_serialize(height: double | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (height !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const heightTmpValue = height!
+            thisSerializer.writeFloat64(heightTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TouchObject_setHeight(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private getGlobalDisplayX_serialize(): double | undefined {
+        const retval = ArkUIGeneratedNativeModule._TouchObject_getGlobalDisplayX(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: double | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readFloat64()
+        }
+        const returnResult: double | undefined = buffer
+        return returnResult
+    }
+    private setGlobalDisplayX_serialize(globalDisplayX: double | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (globalDisplayX !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const globalDisplayXTmpValue = globalDisplayX!
+            thisSerializer.writeFloat64(globalDisplayXTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TouchObject_setGlobalDisplayX(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private getGlobalDisplayY_serialize(): double | undefined {
+        const retval = ArkUIGeneratedNativeModule._TouchObject_getGlobalDisplayY(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: double | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readFloat64()
+        }
+        const returnResult: double | undefined = buffer
+        return returnResult
+    }
+    private setGlobalDisplayY_serialize(globalDisplayY: double | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (globalDisplayY !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const globalDisplayYTmpValue = globalDisplayY!
+            thisSerializer.writeFloat64(globalDisplayYTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TouchObject_setGlobalDisplayY(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -7732,23 +8163,6 @@ export interface MouseHistoricalPoint {
     globalDisplayY: double;
     timestamp: int64;
 }
-export interface TouchObject {
-    type: TouchType;
-    id: int32;
-    displayX: double;
-    displayY: double;
-    windowX: double;
-    windowY: double;
-    x: double;
-    y: double;
-    hand?: InteractionHand;
-    pressedTime?: int64;
-    pressure?: double;
-    width?: double;
-    height?: double;
-    globalDisplayX?: double;
-    globalDisplayY?: double;
-}
 export interface HistoricalPoint {
     touchObject: TouchObject;
     size: int32;
@@ -12051,7 +12465,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         return this
     }
     public onGestureCollectIntercept(value: GestureCollectInterceptCallback): this {
-        InteropNativeModule._NativeLog("zx onGestureCollectIntercept public onGestureCollectIntercept1");
         const value_casted = value as (GestureCollectInterceptCallback)
         this.getPeer()?.setOnGestureCollectInterceptAttribute(value_casted)
         return this
@@ -13056,6 +13469,17 @@ export class TextContentControllerBase_serializer {
         let valueDeserializer: DeserializerBase = buffer
         let ptr: KPointer = valueDeserializer.readPointer()
         return TextContentControllerBaseInternal.fromPtr(ptr)
+    }
+}
+export class TouchObject_serializer {
+    public static write(buffer: SerializerBase, value: TouchObject): void {
+        let valueSerializer: SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): TouchObject {
+        let valueDeserializer: DeserializerBase = buffer
+        let ptr: KPointer = valueDeserializer.readPointer()
+        return TouchObjectInternal.fromPtr(ptr)
     }
 }
 export class TouchTestInfo_serializer {
@@ -14183,6 +14607,28 @@ export class GeometryTransitionOptions_serializer {
         }
         const hierarchyStrategyTmpResult: TransitionHierarchyStrategy | undefined = hierarchyStrategyTmpBuf
         let value: GeometryTransitionOptions = ({follow: followTmpResult, hierarchyStrategy: hierarchyStrategyTmpResult} as GeometryTransitionOptions)
+        return value
+    }
+}
+export class HistoricalPoint_serializer {
+    public static write(buffer: SerializerBase, value: HistoricalPoint): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForTouchObject = value.touchObject
+        TouchObject_serializer.write(valueSerializer, valueHolderForTouchObject)
+        const valueHolderForSize = value.size
+        valueSerializer.writeInt32(valueHolderForSize)
+        const valueHolderForForce = value.force
+        valueSerializer.writeFloat64(valueHolderForForce)
+        const valueHolderForTimestamp = value.timestamp
+        valueSerializer.writeInt64(valueHolderForTimestamp)
+    }
+    public static read(buffer: DeserializerBase): HistoricalPoint {
+        let valueDeserializer: DeserializerBase = buffer
+        const touchObjectTmpResult: TouchObject = (TouchObject_serializer.read(valueDeserializer) as TouchObject)
+        const sizeTmpResult: int32 = valueDeserializer.readInt32()
+        const forceTmpResult: double = valueDeserializer.readFloat64()
+        const timestampTmpResult: int64 = valueDeserializer.readInt64()
+        let value: HistoricalPoint = ({touchObject: touchObjectTmpResult, size: sizeTmpResult, force: forceTmpResult, timestamp: timestampTmpResult} as HistoricalPoint)
         return value
     }
 }
@@ -15497,138 +15943,6 @@ export class TextContentControllerOptions_serializer {
         }
         const offsetTmpResult: int32 | undefined = offsetTmpBuf
         let value: TextContentControllerOptions = ({offset: offsetTmpResult} as TextContentControllerOptions)
-        return value
-    }
-}
-export class TouchObject_serializer {
-    public static write(buffer: SerializerBase, value: TouchObject): void {
-        let valueSerializer: SerializerBase = buffer
-        const valueHolderForType = value.type
-        valueSerializer.writeInt32(valueHolderForType.valueOf())
-        const valueHolderForId = value.id
-        valueSerializer.writeInt32(valueHolderForId)
-        const valueHolderForDisplayX = value.displayX
-        valueSerializer.writeFloat64(valueHolderForDisplayX)
-        const valueHolderForDisplayY = value.displayY
-        valueSerializer.writeFloat64(valueHolderForDisplayY)
-        const valueHolderForWindowX = value.windowX
-        valueSerializer.writeFloat64(valueHolderForWindowX)
-        const valueHolderForWindowY = value.windowY
-        valueSerializer.writeFloat64(valueHolderForWindowY)
-        const valueHolderForX = value.x
-        valueSerializer.writeFloat64(valueHolderForX)
-        const valueHolderForY = value.y
-        valueSerializer.writeFloat64(valueHolderForY)
-        const valueHolderForHand = value.hand
-        if (valueHolderForHand !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForHandTmpValue = (valueHolderForHand as InteractionHand)
-            valueSerializer.writeInt32(valueHolderForHandTmpValue.valueOf())
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForPressedTime = value.pressedTime
-        if (valueHolderForPressedTime !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForPressedTimeTmpValue = valueHolderForPressedTime!
-            valueSerializer.writeInt64(valueHolderForPressedTimeTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForPressure = value.pressure
-        if (valueHolderForPressure !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForPressureTmpValue = valueHolderForPressure!
-            valueSerializer.writeFloat64(valueHolderForPressureTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForWidth = value.width
-        if (valueHolderForWidth !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForWidthTmpValue = valueHolderForWidth!
-            valueSerializer.writeFloat64(valueHolderForWidthTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForHeight = value.height
-        if (valueHolderForHeight !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForHeightTmpValue = valueHolderForHeight!
-            valueSerializer.writeFloat64(valueHolderForHeightTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForGlobalDisplayX = value.globalDisplayX
-        if (valueHolderForGlobalDisplayX !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForGlobalDisplayXTmpValue = valueHolderForGlobalDisplayX!
-            valueSerializer.writeFloat64(valueHolderForGlobalDisplayXTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForGlobalDisplayY = value.globalDisplayY
-        if (valueHolderForGlobalDisplayY !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForGlobalDisplayYTmpValue = valueHolderForGlobalDisplayY!
-            valueSerializer.writeFloat64(valueHolderForGlobalDisplayYTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-    }
-    public static read(buffer: DeserializerBase): TouchObject {
-        let valueDeserializer: DeserializerBase = buffer
-        const typeTmpResult: TouchType = TouchType.fromValue(valueDeserializer.readInt32())
-        const idTmpResult: int32 = valueDeserializer.readInt32()
-        const displayXTmpResult: double = valueDeserializer.readFloat64()
-        const displayYTmpResult: double = valueDeserializer.readFloat64()
-        const windowXTmpResult: double = valueDeserializer.readFloat64()
-        const windowYTmpResult: double = valueDeserializer.readFloat64()
-        const xTmpResult: double = valueDeserializer.readFloat64()
-        const yTmpResult: double = valueDeserializer.readFloat64()
-        const handTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
-        let handTmpBuf: InteractionHand | undefined = undefined
-        if ((handTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            handTmpBuf = InteractionHand.fromValue(valueDeserializer.readInt32())
-        }
-        const handTmpResult: InteractionHand | undefined = handTmpBuf
-        const pressedTimeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
-        let pressedTimeTmpBuf: int64 | undefined = undefined
-        if ((pressedTimeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            pressedTimeTmpBuf = valueDeserializer.readInt64()
-        }
-        const pressedTimeTmpResult: int64 | undefined = pressedTimeTmpBuf
-        const pressureTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
-        let pressureTmpBuf: double | undefined = undefined
-        if ((pressureTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            pressureTmpBuf = valueDeserializer.readFloat64()
-        }
-        const pressureTmpResult: double | undefined = pressureTmpBuf
-        const widthTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
-        let widthTmpBuf: double | undefined = undefined
-        if ((widthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            widthTmpBuf = valueDeserializer.readFloat64()
-        }
-        const widthTmpResult: double | undefined = widthTmpBuf
-        const heightTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
-        let heightTmpBuf: double | undefined = undefined
-        if ((heightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            heightTmpBuf = valueDeserializer.readFloat64()
-        }
-        const heightTmpResult: double | undefined = heightTmpBuf
-        const globalDisplayXTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
-        let globalDisplayXTmpBuf: double | undefined = undefined
-        if ((globalDisplayXTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            globalDisplayXTmpBuf = valueDeserializer.readFloat64()
-        }
-        const globalDisplayXTmpResult: double | undefined = globalDisplayXTmpBuf
-        const globalDisplayYTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
-        let globalDisplayYTmpBuf: double | undefined = undefined
-        if ((globalDisplayYTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            globalDisplayYTmpBuf = valueDeserializer.readFloat64()
-        }
-        const globalDisplayYTmpResult: double | undefined = globalDisplayYTmpBuf
-        let value: TouchObject = ({type: typeTmpResult, id: idTmpResult, displayX: displayXTmpResult, displayY: displayYTmpResult, windowX: windowXTmpResult, windowY: windowYTmpResult, x: xTmpResult, y: yTmpResult, hand: handTmpResult, pressedTime: pressedTimeTmpResult, pressure: pressureTmpResult, width: widthTmpResult, height: heightTmpResult, globalDisplayX: globalDisplayXTmpResult, globalDisplayY: globalDisplayYTmpResult} as TouchObject)
         return value
     }
 }
@@ -16975,28 +17289,6 @@ export class ForegroundBlurStyleOptions_serializer {
         }
         const blurOptionsTmpResult: BlurOptions | undefined = blurOptionsTmpBuf
         let value: ForegroundBlurStyleOptions = ({colorMode: colorModeTmpResult, adaptiveColor: adaptiveColorTmpResult, scale: scaleTmpResult, blurOptions: blurOptionsTmpResult} as ForegroundBlurStyleOptions)
-        return value
-    }
-}
-export class HistoricalPoint_serializer {
-    public static write(buffer: SerializerBase, value: HistoricalPoint): void {
-        let valueSerializer: SerializerBase = buffer
-        const valueHolderForTouchObject = value.touchObject
-        TouchObject_serializer.write(valueSerializer, valueHolderForTouchObject)
-        const valueHolderForSize = value.size
-        valueSerializer.writeInt32(valueHolderForSize)
-        const valueHolderForForce = value.force
-        valueSerializer.writeFloat64(valueHolderForForce)
-        const valueHolderForTimestamp = value.timestamp
-        valueSerializer.writeInt64(valueHolderForTimestamp)
-    }
-    public static read(buffer: DeserializerBase): HistoricalPoint {
-        let valueDeserializer: DeserializerBase = buffer
-        const touchObjectTmpResult: TouchObject = TouchObject_serializer.read(valueDeserializer)
-        const sizeTmpResult: int32 = valueDeserializer.readInt32()
-        const forceTmpResult: double = valueDeserializer.readFloat64()
-        const timestampTmpResult: int64 = valueDeserializer.readInt64()
-        let value: HistoricalPoint = ({touchObject: touchObjectTmpResult, size: sizeTmpResult, force: forceTmpResult, timestamp: timestampTmpResult} as HistoricalPoint)
         return value
     }
 }
@@ -26394,6 +26686,7 @@ export interface AxisEvent extends BaseEvent {
     getVerticalAxisValue(): double
     getPinchAxisScaleValue(): double
     hasAxis(axisType: AxisType): boolean
+    getCurrentLocalPosition(): Coordinate2D
 }
 export class AxisEventInternal extends BaseEventInternal implements MaterializedBase,AxisEvent {
     // instructive change begin
@@ -26515,6 +26808,9 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
         const axisType_casted = axisType as (AxisType)
         return this.hasAxis_serialize(axisType_casted)
     }
+    public getCurrentLocalPosition(): Coordinate2D {
+        return this.getCurrentLocalPosition_serialize()
+    }
     private getAction(): AxisAction {
         return this.getAction_serialize()
     }
@@ -26613,6 +26909,12 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
     private hasAxis_serialize(axisType: AxisType): boolean {
         const retval = ArkUIGeneratedNativeModule._AxisEvent_hasAxis(this.peer!.ptr, axisType.valueOf())
         return retval
+    }
+    private getCurrentLocalPosition_serialize(): Coordinate2D {
+        const retval = ArkUIGeneratedNativeModule._AxisEvent_getCurrentLocalPosition(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult: Coordinate2D = Coordinate2D_serializer.read(retvalDeserializer)
+        return returnResult
     }
     private getAction_serialize(): AxisAction {
         const retval = ArkUIGeneratedNativeModule._AxisEvent_getAction(this.peer!.ptr)
@@ -26747,6 +27049,7 @@ export interface ClickEvent extends BaseEvent {
     globalDisplayX?: double | undefined
     globalDisplayY?: double | undefined
     preventDefault(): void
+    getCurrentLocalPosition(): Coordinate2D
 }
 export class ClickEventInternal extends BaseEventInternal implements MaterializedBase,ClickEvent {
     // instructive change begin
@@ -26849,6 +27152,9 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
         // instructive change end
         return
     }
+    public getCurrentLocalPosition(): Coordinate2D {
+        return this.getCurrentLocalPosition_serialize()
+    }
     private getDisplayX(): double {
         return this.getDisplayX_serialize()
     }
@@ -26923,6 +27229,12 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
     }
     private preventDefault_serialize(): void {
         ArkUIGeneratedNativeModule._ClickEvent_preventDefault(this.peer!.ptr)
+    }
+    private getCurrentLocalPosition_serialize(): Coordinate2D {
+        const retval = ArkUIGeneratedNativeModule._ClickEvent_getCurrentLocalPosition(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult: Coordinate2D = Coordinate2D_serializer.read(retvalDeserializer)
+        return returnResult
     }
     private getDisplayX_serialize(): double {
         const retval = ArkUIGeneratedNativeModule._ClickEvent_getDisplayX(this.peer!.ptr)
@@ -27495,6 +27807,7 @@ export interface MouseEvent extends BaseEvent {
     globalDisplayY?: double | undefined
     stopPropagation(): void
     getHistoricalPoints(): Array<MouseHistoricalPoint> | undefined
+    getCurrentLocalPosition(): Coordinate2D
 }
 export class MouseEventInternal extends BaseEventInternal implements MaterializedBase,MouseEvent {
     // instructive change begin
@@ -27630,6 +27943,9 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
     public getHistoricalPoints(): Array<MouseHistoricalPoint> | undefined {
         return this.getHistoricalPoints_serialize()
     }
+    public getCurrentLocalPosition(): Coordinate2D {
+        return this.getCurrentLocalPosition_serialize()
+    }
     private getButton(): MouseButton {
         return this.getButton_serialize()
     }
@@ -27751,6 +28067,12 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
         }
         const returnResult: Array<MouseHistoricalPoint> | undefined = buffer
         retvalDeserializer.dispose()
+        return returnResult
+    }
+    private getCurrentLocalPosition_serialize(): Coordinate2D {
+        const retval = ArkUIGeneratedNativeModule._MouseEvent_getCurrentLocalPosition(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult: Coordinate2D = Coordinate2D_serializer.read(retvalDeserializer)
         return returnResult
     }
     private getButton_serialize(): MouseButton {
