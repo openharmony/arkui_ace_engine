@@ -26,6 +26,7 @@
 #include "core/common/clipboard/clipboard.h"
 #include "core/common/event_manager.h"
 #include "core/common/font_manager.h"
+#include "core/image/image_cache.h"
 #include "core/common/manager_interface.h"
 #include "core/common/statistic_event_reporter.h"
 #include "core/common/window.h"

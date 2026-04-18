@@ -21,11 +21,13 @@
 #include "base/geometry/calc_dimension.h"
 #include "base/geometry/dimension.h"
 #include "core/components/common/properties/animation_option.h"
-#include "core/components_ng/pattern/picker/picker_data.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/grid_layout/grid_container_util_class.h"
 
+namespace OHOS::Ace {
+class PickerDate;
+}
 namespace OHOS::Ace::NG {
 namespace Validator {
 void ClampByRange(std::optional<float>& opt, const float& left, const float& right);

@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/image_provider/image_utils.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/image/image_cache.h"
 #include "core/components_ng/pattern/window_scene/scene/window_event_process.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"

@@ -21,7 +21,6 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/size.h"
-#include "base/image/pixel_map.h"
 #include "base/resource/internal_resource.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"

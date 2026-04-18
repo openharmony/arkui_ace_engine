@@ -60,7 +60,6 @@
 #include "core/event/rotation_event.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/gesture_info.h"
-#include "core/image/image_cache.h"
 #include "core/pipeline/container_window_manager.h"
 
 namespace OHOS::Rosen {
@@ -100,6 +99,7 @@ struct FontConfigJsonInfo;
 struct FrameMetrics;
 class Clipboard;
 class Frontend;
+class ImageCache;
 class OffscreenCanvas;
 class Window;
 class FontManager;

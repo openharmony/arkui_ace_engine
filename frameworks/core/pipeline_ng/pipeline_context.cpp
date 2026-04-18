@@ -53,6 +53,7 @@
 #include "core/common/back_press_handler_manager.h"
 #include "core/common/font_change_observer.h"
 #include "core/common/font_manager.h"
+#include "core/image/image_cache.h"
 #include "core/common/ime/input_method_manager.h"
 #include "core/common/layout_inspector.h"
 #include "core/common/resource/resource_configuration.h"

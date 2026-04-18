@@ -39,6 +39,7 @@
 #include "core/event/crown_event.h"
 #include "core/components/text_overlay/text_overlay_manager.h"
 #include "core/common/font_manager.h"
+#include "core/image/image_cache.h"
 #include "core/focus/focus_node.h"
 #include "core/common/layout_inspector.h"
 #include "core/common/statistic_event_reporter.h"

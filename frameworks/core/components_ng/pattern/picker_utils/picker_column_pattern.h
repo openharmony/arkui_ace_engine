@@ -15,10 +15,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PICKER_UTILS_PICKER_COLUMN_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PICKER_UTILS_PICKER_COLUMN_PATTERN_H
 #include <cstdint>
-
 #include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_ng/pattern/picker/datepicker_layout_property.h"
 #include "core/components_ng/pattern/picker_utils/picker_column_pattern_utils.h"
 #include "core/components_ng/pattern/picker_utils/picker_layout_property.h"
 #include "core/components_ng/pattern/picker_utils/toss_animation_controller.h"

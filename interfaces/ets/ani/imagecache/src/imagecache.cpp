@@ -17,6 +17,7 @@
 #include <array>
 #include <iostream>
 #include "base/memory/referenced.h"
+#include "core/image/image_cache.h"
 #include "frameworks/core/common/container.h"
 #include "frameworks/core/pipeline/pipeline_base.h"
 
