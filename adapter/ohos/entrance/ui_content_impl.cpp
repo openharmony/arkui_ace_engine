@@ -4099,6 +4099,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
             if (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION ||
                 reason == OHOS::Rosen::WindowSizeChangeReason::SCENE_WITH_ANIMATION) {
                 pipelineContext->FlushBuild();
+                LOGI("StartWindowAnimation with reason: %{public}d", reason);
                 pipelineContext->StartWindowAnimation();
                 if (container->GetUIContentType() != UIContentType::DYNAMIC_COMPONENT) {
                     container->NotifyDirectionUpdate();
@@ -4437,6 +4438,8 @@ void UIContentImpl::UpdateTitleInTargetPos(bool isShow, int32_t height)
 
 void UIContentImpl::NotifyRotationAnimationEnd()
 {
+    LOGI("[%{public}s][%{public}s][%{public}d]: NotifyRotationAnimationEnd", bundleName_.c_str(), moduleName_.c_str(),
+        instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId_);
@@ -4446,6 +4449,7 @@ void UIContentImpl::NotifyRotationAnimationEnd()
         [container]() {
             auto pipelineContext = container->GetPipelineContext();
             if (pipelineContext) {
+                LOGI("StopWindowAnimation: %{public}d", pipelineContext->GetInstanceId());
                 pipelineContext->StopWindowAnimation();
             }
         },
