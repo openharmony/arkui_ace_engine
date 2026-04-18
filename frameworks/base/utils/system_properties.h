@@ -781,6 +781,8 @@ public:
     static UiMaterialLevel GetUiMaterialLevel();
 
     static void ReadSystemParametersCallOnce();
+	
+    static int32_t GetFormTaskPriority();
 
 private:
     static bool opincEnabled_;

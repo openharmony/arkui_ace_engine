@@ -34,6 +34,7 @@ constexpr char PROPERTY_DEVICE_TYPE_CAR[] = "car";
 constexpr int32_t DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD = 20;
 
 constexpr int32_t DEFAULT_VELOCITY_TRACKER_POINTNUMBER_VALUE = 20;
+constexpr int32_t DEFAULT_FORM_TASK_PRIORITY = 2;
 
 static constexpr char UNDEFINED_PARAM[] = "undefined parameter";
 
@@ -640,5 +641,10 @@ void SystemProperties::SetFocusCanBeActive(bool focusCanBeActive)
 UiMaterialLevel SystemProperties::GetUiMaterialLevel()
 {
     return UiMaterialLevel::DEFAULT;
+}
+
+int32_t SystemProperties::GetFormTaskPriority()
+{
+    return DEFAULT_FORM_TASK_PRIORITY;
 }
 } // namespace OHOS::Ace
