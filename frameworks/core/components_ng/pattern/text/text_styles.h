@@ -76,6 +76,26 @@ struct TextDecorationOptions {
     }
 };
 
+struct LineSpacingOptions {
+    std::optional<bool> onlyBetweenLines;
+ 
+    bool IsEqual(const LineSpacingOptions& other) const
+    {
+        return this->onlyBetweenLines.has_value() == other.onlyBetweenLines.has_value() &&
+            this->onlyBetweenLines.value_or(false) == other.onlyBetweenLines.value_or(false);
+    }
+
+    bool operator==(const LineSpacingOptions& other) const
+    {
+        return IsEqual(other);
+    }
+
+    bool operator!=(const LineSpacingOptions& other) const
+    {
+        return !IsEqual(other);
+    }
+};
+
 struct ImageSpanSize {
     std::optional<CalcDimension> width;
     std::optional<CalcDimension> height;
@@ -291,6 +311,7 @@ struct FontStyle {
 
 struct TextLineStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LineHeight, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(LineHeightMultiply, double);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextBaseline, TextBaseline);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BaselineOffset, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextOverflow, TextOverflow);

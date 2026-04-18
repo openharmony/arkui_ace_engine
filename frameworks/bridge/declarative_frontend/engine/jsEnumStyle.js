@@ -4697,6 +4697,7 @@ let StyledStringKey;
   StyledStringKey[StyledStringKey.PARAGRAPH_STYLE = 200] = 'PARAGRAPH_STYLE';
   StyledStringKey[StyledStringKey.BACKGROUND_COLOR = 6] = 'BACKGROUND_COLOR';
   StyledStringKey[StyledStringKey.URL = 7] = 'URL';
+  StyledStringKey[StyledStringKey.LINE_SPACING = 8] = 'LINE_SPACING';
   StyledStringKey[StyledStringKey.GESTURE = 100] = 'GESTURE';
   StyledStringKey[StyledStringKey.IMAGE = 300] = 'IMAGE';
   StyledStringKey[StyledStringKey.CUSTOM_SPAN = 400] = 'CUSTOM_SPAN';

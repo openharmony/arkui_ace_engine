@@ -5278,11 +5278,23 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _LinearGradientStyle_setOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
-    native static _LineHeightStyle_construct(thisArray: KSerializerBuffer, thisLength: KInt): KPointer
+    native static _LineHeightStyle_construct0(thisArray: KSerializerBuffer, thisLength: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _LineHeightStyle_construct1(thisArray: KSerializerBuffer, thisLength: KInt, lineHeightMultiple: KDouble): KPointer
     @ani.unsafe.Direct
     native static _LineHeightStyle_getFinalizer(): KPointer
     @ani.unsafe.Direct
     native static _LineHeightStyle_getLineHeight(ptr: KPointer): KDouble
+    @ani.unsafe.Quick
+    native static _LineHeightStyle_getLineHeightMultiple(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _LineSpacingStyle_construct(thisArray: KSerializerBuffer, thisLength: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _LineSpacingStyle_getFinalizer(): KPointer
+    @ani.unsafe.Direct
+    native static _LineSpacingStyle_getLineSpacing(ptr: KPointer): KDouble
+    @ani.unsafe.Quick
+    native static _LineSpacingStyle_getOptions(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _ListItemSwipeActionManager_construct(): KPointer
     @ani.unsafe.Direct
