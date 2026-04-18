@@ -552,6 +552,9 @@ RefPtr<UINode> GetRoot(const RefPtr<UINode>& uiNode)
     if (uiNode == nullptr) {
         return uiNode;
     }
+    if (uiNode->IsOnMainTree()) {
+        return nullptr;
+    }
     if (const auto& parent = uiNode->GetParent()) {
         if (parent->GetChildIndex(uiNode) == -1) {
             LOGW("parent [%{public}d %{public}s] do not contain child [%{public}d %{public}s]",
@@ -567,7 +570,10 @@ std::set<RefPtr<UINode>, RootComp> GetAllRoots()
     std::set<RefPtr<UINode>, RootComp> roots;
     ElementRegister::GetInstance()->IterateElements([&roots](auto id, auto& element) {
         if (const auto& uiNode = AceType::DynamicCast<UINode>(element)) {
-            roots.emplace(GetRoot(uiNode));
+            auto uiNodeRoot = GetRoot(uiNode);
+            if (uiNodeRoot) {
+                roots.emplace(uiNodeRoot);
+            }
         }
         return false;
     });
