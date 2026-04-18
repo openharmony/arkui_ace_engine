@@ -20,11 +20,11 @@
 #include "base/memory/referenced.h"
 #include "base/geometry/ng/vector.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 
 namespace OHOS::Ace::NG {
 class FrameNode;
 struct GatherNodeChildInfo;
+struct ScaleDataInfo;
 class ACE_FORCE_EXPORT DragControllerFuncWrapper {
 public:
     static OffsetF GetUpdateDragMovePosition(int32_t containerId);

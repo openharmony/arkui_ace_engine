@@ -55,6 +55,7 @@
 #include "bridge/declarative_frontend/jsview/js_popups.h"
 #include "bridge/declarative_frontend/style_string/js_span_string.h"
 #include "interfaces/native/native_type.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 
 using namespace OHOS::Ace::Framework;
 

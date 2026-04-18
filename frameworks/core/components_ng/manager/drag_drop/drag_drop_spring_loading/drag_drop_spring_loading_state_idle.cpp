@@ -16,6 +16,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_spring_loading/drag_drop_spring_loading_state_idle.h"
 
 #include "core/components_ng/manager/drag_drop/drag_drop_spring_loading/drag_drop_spring_loading_state_machine.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 
 namespace OHOS::Ace::NG {
 void DragDropSpringLoadingStateIdle::OnEnter(std::string_view extraInfo)
