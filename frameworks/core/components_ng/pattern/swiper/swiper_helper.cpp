@@ -80,6 +80,7 @@ void SwiperHelper::InitSwiperController(const RefPtr<SwiperController>& controll
     });
 
     SetFakeDragImpl(controller, weak);
+    SetPreMakeItemsImpl(controller, weak);
 }
 
 void SwiperHelper::SetChangeIndexWithModeImpl(const RefPtr<SwiperController>& controller,
@@ -119,6 +120,15 @@ void SwiperHelper::SetFakeDragImpl(const RefPtr<SwiperController>& controller, c
         auto swiper = weak.Upgrade();
         CHECK_NULL_RETURN(swiper, false);
         return swiper->IsFakeDragging();
+    });
+}
+
+void SwiperHelper::SetPreMakeItemsImpl(const RefPtr<SwiperController>& controller, const WeakPtr<SwiperPattern>& weak)
+{
+    controller->SetPreMakeItemsImpl([weak](const std::set<int32_t>& indexSet) {
+        auto swiper = weak.Upgrade();
+        CHECK_NULL_VOID(swiper);
+        swiper->PreMakeItems(indexSet);
     });
 }
 

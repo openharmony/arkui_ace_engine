@@ -24,6 +24,7 @@
 #include "base/mousestyle/mouse_style.h"
 #include "base/ressched/ressched_click_optimizer.h"
 #include "base/ressched/ressched_touch_optimizer.h"
+#include "base/ressched/taihang_optimizer.h"
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/accessibility/accessibility_manager_ng.h"
@@ -211,6 +212,11 @@ const std::unique_ptr<ResSchedTouchOptimizer>& PipelineContext::GetTouchOptimize
 const std::shared_ptr<ResSchedClickOptimizer>& PipelineContext::GetClickOptimizer() const
 {
     return clickOptimizer_;
+}
+
+const std::shared_ptr<TaihangOptimizer>& PipelineContext::GetTaihangOptimizer() const
+{
+    return taihangOptimizer_;
 }
 
 bool PipelineContext::GetIsRequestFrame() const
@@ -1401,6 +1407,7 @@ void PipelineContext::InitManagers()
     formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();
     formEventMgr_ = MakeRefPtr<FormEventManager>();
     formGestureMgr_ = MakeRefPtr<FormGestureManager>();
+    taihangOptimizer_ = std::make_shared<TaihangOptimizer>();
 }
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================

@@ -50,6 +50,7 @@
 #include "base/ressched/ressched_click_optimizer.h"
 #include "base/ressched/ressched_report.h"
 #include "base/ressched/ressched_touch_optimizer.h"
+#include "base/ressched/taihang_optimizer.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/cpu_boost.h"
 #include "core/common/ace_engine.h"
@@ -272,6 +273,8 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     clickOptimizer_->Init();
     contentChangeMgr_ = MakeRefPtr<ContentChangeManager>(taskExecutor_);
     dynamicComponentSafeManager_ = AceType::MakeRefPtr<DynamicComponentSafeManager>();
+    taihangOptimizer_ = std::make_shared<TaihangOptimizer>();
+    taihangOptimizer_->Init();
 }
 
 PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
@@ -304,6 +307,8 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     clickOptimizer_->Init();
     contentChangeMgr_ = MakeRefPtr<ContentChangeManager>(taskExecutor_);
     dynamicComponentSafeManager_ = AceType::MakeRefPtr<DynamicComponentSafeManager>();
+    taihangOptimizer_ = std::make_shared<TaihangOptimizer>();
+    taihangOptimizer_->Init();
 }
 
 PipelineContext::PipelineContext()
@@ -331,6 +336,8 @@ PipelineContext::PipelineContext()
     clickOptimizer_->Init();
     contentChangeMgr_ = MakeRefPtr<ContentChangeManager>(taskExecutor_);
     dynamicComponentSafeManager_ = AceType::MakeRefPtr<DynamicComponentSafeManager>();
+    taihangOptimizer_ = std::make_shared<TaihangOptimizer>();
+    taihangOptimizer_->Init();
 }
 
 bool PipelineContext::GetIsRequestVsync()
@@ -7844,6 +7851,11 @@ const std::unique_ptr<ResSchedTouchOptimizer>& PipelineContext::GetTouchOptimize
 const std::shared_ptr<ResSchedClickOptimizer>& PipelineContext::GetClickOptimizer() const
 {
     return clickOptimizer_;
+}
+
+const std::shared_ptr<TaihangOptimizer>& PipelineContext::GetTaihangOptimizer() const
+{
+    return taihangOptimizer_;
 }
 
 void PipelineContext::SetParentPipeline(const WeakPtr<PipelineBase>& weakPipeline)

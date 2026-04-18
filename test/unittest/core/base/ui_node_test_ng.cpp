@@ -2170,4 +2170,246 @@ HWTEST_F(UINodeTestNg, UINodeTestInspectorLabel, TestSize.Level1)
     testNode->SetInspectorLabel(EMPTY_INSPECTOR_LABEL);
     EXPECT_EQ(testNode->GetInspectorLabel(), EMPTY_INSPECTOR_LABEL);
 }
+
+/**
+ * @tc.name: UINodeTestGetPath001
+ * @tc.desc: Test GetPath method with single node
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestGetPath001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a single node without parent
+     */
+    auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
+
+    /**
+     * @tc.steps: step2. call GetPath on the node
+     * @tc.expected: returns "/testNode" (no parent, no index)
+     */
+    auto path = testNode->GetPath();
+    EXPECT_EQ(path, "/" + testNode->GetTag());
+}
+
+/**
+ * @tc.name: UINodeTestGetPath002
+ * @tc.desc: Test GetPath method with parent-child hierarchy
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestGetPath002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create parent-child hierarchy
+     */
+    auto parent = TestNode::CreateTestNode(TEST_ID_ONE);
+    auto child1 = TestNode::CreateTestNode(TEST_ID_TWO);
+    auto child2 = TestNode::CreateTestNode(TEST_ID_THREE);
+
+    /**
+     * @tc.steps: step2. build hierarchy
+     */
+    parent->AddChild(child1);
+    parent->AddChild(child2);
+
+    /**
+     * @tc.steps: step3. call GetPath on child1
+     * @tc.expected: returns "/parentTag[childIndex]/child1Tag[0]"
+     */
+    auto path = child1->GetPath();
+    EXPECT_TRUE(path.find(parent->GetTag()) != std::string::npos);
+    EXPECT_TRUE(path.find("[0]") != std::string::npos);
+    EXPECT_TRUE(path.find(child1->GetTag()) != std::string::npos);
+}
+
+/**
+ * @tc.name: UINodeTestGetPath003
+ * @tc.desc: Test GetPath method with nested hierarchy
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestGetPath003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create nested hierarchy
+     */
+    auto root = TestNode::CreateTestNode(TEST_ID_ONE);
+    auto child1 = TestNode::CreateTestNode(TEST_ID_TWO);
+    auto grandChild1 = TestNode::CreateTestNode(TEST_ID_THREE);
+
+    /**
+     * @tc.steps: step2. build hierarchy: root -> child1 -> grandChild1
+     */
+    root->AddChild(child1);
+    child1->AddChild(grandChild1);
+
+    /**
+     * @tc.steps: step3. call GetPath on grandChild1
+     * @tc.expected: returns full path with all ancestors
+     */
+    auto path = grandChild1->GetPath();
+    EXPECT_TRUE(path.find(root->GetTag()) != std::string::npos);
+    EXPECT_TRUE(path.find(child1->GetTag()) != std::string::npos);
+    EXPECT_TRUE(path.find(grandChild1->GetTag()) != std::string::npos);
+}
+
+/**
+ * @tc.name: UINodeTestGetPath004
+ * @tc.desc: Test GetPath method with multiple children at same level
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestGetPath004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create parent with multiple children
+     */
+    auto parent = TestNode::CreateTestNode(TEST_ID_ONE);
+    auto child0 = TestNode::CreateTestNode(TEST_ID_TWO);
+    auto child1 = TestNode::CreateTestNode(TEST_ID_THREE);
+    auto child2 = TestNode::CreateTestNode(TEST_ID_FOUR);
+
+    /**
+     * @tc.steps: step2. add children in order
+     */
+    parent->AddChild(child0);
+    parent->AddChild(child1);
+    parent->AddChild(child2);
+
+    /**
+     * @tc.steps: step3. verify each child has correct index in path
+     */
+    auto path0 = child0->GetPath();
+    EXPECT_TRUE(path0.find("[0]") != std::string::npos);
+
+    auto path1 = child1->GetPath();
+    EXPECT_TRUE(path1.find("[1]") != std::string::npos);
+
+    auto path2 = child2->GetPath();
+    EXPECT_TRUE(path2.find("[2]") != std::string::npos);
+}
+
+/**
+ * @tc.name: UINodeTestIsPreloadMemoryLevel001
+ * @tc.desc: Test IsPreloadMemoryLevel method default value
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestIsPreloadMemoryLevel001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node without PreMakeScope
+     * @tc.expected: isPreloadMemoryLevel_ is false by default
+     */
+    auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
+    EXPECT_FALSE(testNode->IsPreloadMemoryLevel());
+}
+
+/**
+ * @tc.name: UINodeTestIsPreloadMemoryLevel002
+ * @tc.desc: Test SetPreloadMemoryLevel method
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestIsPreloadMemoryLevel002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node and set preload flag
+     */
+    auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
+    testNode->SetPreloadMemoryLevel(true);
+    EXPECT_TRUE(testNode->IsPreloadMemoryLevel());
+
+    /**
+     * @tc.steps: step2. reset preload flag
+     */
+    testNode->SetPreloadMemoryLevel(false);
+    EXPECT_FALSE(testNode->IsPreloadMemoryLevel());
+}
+
+/**
+ * @tc.name: UINodeTestDetachFromMainTreeByPreloadFlag001
+ * @tc.desc: Test DetachFromMainTreeByPreloadFlag with no preload children
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestDetachFromMainTreeByPreloadFlag001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node with regular children (not preload)
+     */
+    auto parent = TestNode::CreateTestNode(TEST_ID_ONE);
+    auto child = TestNode::CreateTestNode(TEST_ID_TWO);
+    parent->AddChild(child);
+
+    /**
+     * @tc.steps: step2. call DetachFromMainTreeByPreloadFlag
+     * @tc.expected: no crash, children still present
+     */
+    parent->DetachFromMainTreeByPreloadFlag();
+    EXPECT_EQ(parent->GetChildren().size(), 1);
+}
+
+/**
+ * @tc.name: UINodeTestDetachFromMainTreeByPreloadFlag002
+ * @tc.desc: Test DetachFromMainTreeByPreloadFlag with preload child
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestDetachFromMainTreeByPreloadFlag002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node with preload child
+     */
+    auto parent = TestNode::CreateTestNode(TEST_ID_ONE);
+    auto child = TestNode::CreateTestNode(TEST_ID_TWO);
+    child->SetPreloadMemoryLevel(true);
+    parent->AddChild(child);
+
+    /**
+     * @tc.steps: step2. call DetachFromMainTreeByPreloadFlag
+     * @tc.expected: method processes preload child correctly
+     */
+    parent->DetachFromMainTreeByPreloadFlag();
+    EXPECT_TRUE(parent->GetChildren().size() > 0);
+}
+
+/**
+ * @tc.name: UINodeTestDetachFromMainTreeByPreloadFlag003
+ * @tc.desc: Test DetachFromMainTreeByPreloadFlag with nested preload children
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestDetachFromMainTreeByPreloadFlag003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create nested hierarchy with preload flag on leaf
+     */
+    auto root = TestNode::CreateTestNode(TEST_ID_ONE);
+    auto child = TestNode::CreateTestNode(TEST_ID_TWO);
+    auto grandChild = TestNode::CreateTestNode(TEST_ID_THREE);
+    grandChild->SetPreloadMemoryLevel(true);
+
+    root->AddChild(child);
+    child->AddChild(grandChild);
+
+    /**
+     * @tc.steps: step2. call DetachFromMainTreeByPreloadFlag on root
+     * @tc.expected: method traverses hierarchy correctly
+     */
+    root->DetachFromMainTreeByPreloadFlag();
+    EXPECT_TRUE(root->GetChildren().size() > 0);
+}
+
+/**
+ * @tc.name: UINodeTestDetachFromMainTreeByPreloadFlag004
+ * @tc.desc: Test DetachFromMainTreeByPreloadFlag with empty children
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestDetachFromMainTreeByPreloadFlag004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create node without children
+     */
+    auto node = TestNode::CreateTestNode(TEST_ID_ONE);
+
+    /**
+     * @tc.steps: step2. call DetachFromMainTreeByPreloadFlag
+     * @tc.expected: no crash, method handles empty children correctly
+     */
+    node->DetachFromMainTreeByPreloadFlag();
+    EXPECT_TRUE(node->GetChildren().empty());
+}
 } // namespace OHOS::Ace::NG

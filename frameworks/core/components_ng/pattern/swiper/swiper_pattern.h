@@ -854,6 +854,7 @@ public:
     }
 
     void NotifyDataChange(int32_t index, int32_t count) override;
+    void NotifyScrollStateEvent(ScrollState scrollState);
 
     void OnColorModeChange(uint32_t colorMode) override;
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
@@ -1098,6 +1099,7 @@ private:
     float MainSize() const;
     float GetMainContentSize() const;
     void FireChangeEvent(int32_t preIndex, int32_t currentIndex, bool isInLayout = false) const;
+    void ReportSwiperChangeContent(int32_t currentIndex) const;
     void FireAnimationEndEvent(int32_t currentIndex, const AnimationCallbackInfo& info, bool isInterrupt = false) const;
     void FireGestureSwipeEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const;
     void FireUnselectedEvent(int32_t currentIndex, int32_t targetIndex);
@@ -1271,6 +1273,9 @@ private:
     void PreloadItems(const std::set<int32_t>& indexSet);
     void DoTabsPreloadItems(const std::set<int32_t>& indexSet);
     void DoSwiperPreloadItems(const std::set<int32_t>& indexSet);
+    void PreMakeItems(const std::set<int32_t>& indexSet);
+    void DoSwiperPreMakeItems(const std::set<int32_t>& indexSet);
+    void OnNotifyMemoryLevel(int32_t level) override;
     void BuildForEachChild(const std::set<int32_t>& indexSet, const RefPtr<UINode>& child);
     void FirePreloadFinishEvent(int32_t errorCode, std::string message = "");
     // capture node start
@@ -1582,6 +1587,7 @@ private:
     std::set<WeakPtr<FrameNode>> groupedItems_;
 
     std::set<int32_t> cachedItems_;
+    std::set<int32_t> premakeItems_;
     LayoutConstraintF layoutConstraint_;
     bool requestLongPredict_ = false;
 

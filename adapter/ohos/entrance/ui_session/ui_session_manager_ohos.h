@@ -139,6 +139,8 @@ public:
     void SendWebInfoByRequest(uint32_t windowId, int32_t webId, const std::string& request,
         const std::string& result, WebRequestErrorCode errorCode) override;
 
+    void SaveNotifyComponentPreMakeFunction(NotifyComponentPreMakeFunction&& function) override;
+    void ExeAppComponentPreMake(int32_t componentType, const std::string& params) override;
     void SaveReportStub(sptr<IRemoteObject> reportStub, int32_t processId);
 
 private:

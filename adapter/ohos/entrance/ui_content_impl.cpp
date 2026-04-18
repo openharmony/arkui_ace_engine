@@ -52,6 +52,7 @@
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "base/ressched/taihang_optimizer.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/module_buffer_reader.h"
@@ -6157,6 +6158,7 @@ void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& t
     RegisterSelectTextCallback(taskExecutor);
     SaveGetStateMgmtInfoFunction(taskExecutor);
     SaveGetWebInfoByRequestFunction(taskExecutor);
+    SaveNotifyComponentPreMakeFunction(taskExecutor);
 }
 
 void UIContentImpl::SaveGetWebInfoByRequestFunction(const WeakPtr<TaskExecutor>& taskExecutor)
@@ -6810,5 +6812,22 @@ const std::shared_ptr<const OHOS::MMI::PointerEvent> UIContentImpl::GetPointerEv
         return touchEventInfo->GetPointerEvent();
     }
     return nullptr;
+}
+
+void UIContentImpl::SaveNotifyComponentPreMakeFunction(const WeakPtr<TaskExecutor>& taskExecutor)
+{
+    auto&& componentPreMakeFunc = [weakTaskExecutor = taskExecutor](int32_t componentType, const std::string& params) {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [componentType, params]() {
+                auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+                CHECK_NULL_VOID(pipeline);
+                CHECK_NULL_VOID(pipeline->GetTaihangOptimizer());
+                pipeline->GetTaihangOptimizer()->ComponentPreMake(componentType, params);
+            },
+            TaskExecutor::TaskType::UI, "ArkUINotifyComponentPreMake");
+    };
+    UiSessionManager::GetInstance()->SaveNotifyComponentPreMakeFunction(componentPreMakeFunc);
 }
 } // namespace OHOS::Ace

@@ -154,6 +154,7 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/test/mock/frameworks/base/ressched/mock_ressched_touch_optimizer.cpp",
     "$ace_root/test/mock/frameworks/base/ressched/mock_ressched_click_optimizer.cpp",
     "$ace_root/test/mock/frameworks/base/ressched/mock_ressched_report.cpp",
+    "$ace_root/test/mock/frameworks/base/ressched/mock_taihang_optimizer.cpp",
     "$ace_root/test/mock/frameworks/core/common/mock_statistic_event_reporter.cpp",
     "$ace_root/test/mock/frameworks/base/subwindow/mock_subwindow.cpp",
     "$ace_root/test/mock/frameworks/base/subwindow/mock_subwindow_manager.cpp",

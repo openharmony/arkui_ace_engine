@@ -3880,4 +3880,97 @@ HWTEST_F(FrameNodeTestNg, FrameNodeLpxAttribute004, TestSize.Level1)
 
     EXPECT_EQ(frameNode->layoutProperty_->propertyChangeFlag_ & PROPERTY_UPDATE_MEASURE, PROPERTY_UPDATE_MEASURE);
 }
+
+/**
+ * @tc.name: FrameNodeIsPreMake001
+ * @tc.desc: Test IsPreMake method default value
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeIsPreMake001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(
+        "testNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    EXPECT_FALSE(frameNode->IsPreMake());
+}
+
+/**
+ * @tc.name: FrameNodeIsPreMake002
+ * @tc.desc: Test isPreMake_ flag can be set
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeIsPreMake002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(
+        "testNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    frameNode->isPreMake_ = true;
+    EXPECT_TRUE(frameNode->IsPreMake());
+
+    frameNode->isPreMake_ = false;
+    EXPECT_FALSE(frameNode->IsPreMake());
+}
+
+/**
+ * @tc.name: FrameNodePreMakeScopeTest001
+ * @tc.desc: Test FrameNode creation with PreMakeScope context
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodePreMakeScopeTest001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(
+        "testNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    EXPECT_FALSE(frameNode->IsPreMake());
+}
+
+/**
+ * @tc.name: FrameNodeIsPreMakeAndScroll001
+ * @tc.desc: Test IsPreMakeAndScroll method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeIsPreMakeAndScroll001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(
+        "testNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    frameNode->isActive_ = false;
+    frameNode->isPreMake_ = false;
+    EXPECT_FALSE(frameNode->IsPreMakeAndScroll());
+
+    frameNode->isActive_ = true;
+    frameNode->isPreMake_ = false;
+    EXPECT_FALSE(frameNode->IsPreMakeAndScroll());
+
+    frameNode->isActive_ = false;
+    frameNode->isPreMake_ = true;
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto manager = context->GetContentChangeManager();
+    ASSERT_NE(manager, nullptr);
+
+    manager->scrollingSwiperNodes_.clear();
+    manager->scrollingNodes_.clear();
+    EXPECT_FALSE(frameNode->IsPreMakeAndScroll());
+
+    manager->scrollingSwiperNodes_.clear();
+    manager->scrollingNodes_.clear();
+    manager->scrollingSwiperNodes_.emplace(1);
+    EXPECT_TRUE(frameNode->IsPreMakeAndScroll());
+
+    manager->scrollingSwiperNodes_.clear();
+    manager->scrollingNodes_.clear();
+    manager->scrollingNodes_.emplace(1);
+    EXPECT_TRUE(frameNode->IsPreMakeAndScroll());
+
+    manager->scrollingSwiperNodes_.clear();
+    manager->scrollingNodes_.clear();
+    manager->scrollingSwiperNodes_.emplace(1);
+    manager->scrollingNodes_.emplace(1);
+    EXPECT_TRUE(frameNode->IsPreMakeAndScroll());
+}
 } // namespace OHOS::Ace::NG

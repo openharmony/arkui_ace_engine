@@ -140,6 +140,7 @@ public:
     void SaveGetStateMgmtInfoFunction(const WeakPtr<TaskExecutor>& taskExecutor);
     void SaveGetWebInfoByRequestFunction(const WeakPtr<TaskExecutor>& taskExecutor);
     void ChangeSensitiveNodes(bool isSensitive) override;
+    void SaveNotifyComponentPreMakeFunction(const WeakPtr<TaskExecutor>& taskExecutor);
 
     // Window color
     uint32_t GetBackgroundColor() override;

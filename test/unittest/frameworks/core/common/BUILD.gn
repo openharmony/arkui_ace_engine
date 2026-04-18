@@ -72,3 +72,23 @@ ace_unittest("color_inverter_test") {
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }
+
+ohos_unittest("premake_scope_test") {
+  module_out_path = frameworks_test_output_path
+  sources = [
+    "$ace_root/frameworks/base/log/dump_log.cpp",
+    "$ace_root/frameworks/base/log/log_wrapper.cpp",
+    "$ace_root/frameworks/core/common/premake_scope.cpp",
+    "$ace_root/test/mock/adapter/ohos/osal/mock_system_properties.cpp",
+    "premake_scope_test.cpp",
+  ]
+
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+
+  external_deps = [
+    "googletest:gmock",
+    "googletest:gtest",
+  ]
+
+  deps = [ "$ace_root/test/unittest:ace_unittest_log" ]
+}

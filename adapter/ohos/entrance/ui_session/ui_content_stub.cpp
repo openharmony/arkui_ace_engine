@@ -217,6 +217,10 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
             GetWebInfoByRequestInner(data, reply, option);
             break;
         }
+        case EXE_COMPONENT_PREMAKE: {
+            ExeComponentPreMakeInner(data, reply, option);
+            break;
+        }
         default: {
             LOGI("ui_session unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -600,6 +604,16 @@ int32_t UiContentStub::GetWebInfoByRequestInner(MessageParcel& data, MessageParc
     int32_t webId = data.ReadInt32();
     std::string request = data.ReadString();
     reply.WriteInt32(GetWebInfoByRequest(webId, request, nullptr));
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::ExeComponentPreMakeInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    int32_t processId = IPCSkeleton::GetCallingRealPid();
+    UiSessionManager::GetInstance()->SaveProcessId("ExeComponentPreMake", processId);
+    int32_t componentType = data.ReadInt32();
+    std::string params = data.ReadString();
+    reply.WriteInt32(ExeAppComponentPreMake(componentType, params));
     return NO_ERROR;
 }
 } // namespace OHOS::Ace

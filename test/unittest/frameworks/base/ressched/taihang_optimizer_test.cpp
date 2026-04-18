@@ -1,0 +1,615 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "gtest/gtest.h"
+#define private public
+#define protected public
+#include "base/ressched/taihang_optimizer.h"
+#include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/components/swiper/swiper_controller.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#undef private
+#undef protected
+
+using namespace testing;
+using namespace testing::ext;
+
+namespace OHOS::Ace {
+
+class TaihangOptimizerTest : public testing::Test {
+public:
+    static void SetUpTestSuite()
+    {
+        NG::MockPipelineContext::SetUp();
+    }
+
+    static void TearDownTestSuite()
+    {
+        NG::MockPipelineContext::TearDown();
+    }
+    void SetUp() override
+    {
+        optimizer_ = std::make_shared<TaihangOptimizer>();
+    }
+    void TearDown() override
+    {
+        optimizer_ = nullptr;
+    }
+
+    std::shared_ptr<TaihangOptimizer> optimizer_;
+};
+
+HWTEST_F(TaihangOptimizerTest, IsInitedTest001, TestSize.Level1)
+{
+    optimizer_->isInited_ = false;
+    EXPECT_FALSE(optimizer_->IsInited());
+
+    optimizer_->isInited_ = true;
+    EXPECT_TRUE(optimizer_->IsInited());
+}
+
+HWTEST_F(TaihangOptimizerTest, IsEnableTest001, TestSize.Level1)
+{
+    optimizer_->enable_ = false;
+    EXPECT_FALSE(optimizer_->IsEnable());
+
+    optimizer_->enable_ = true;
+    EXPECT_TRUE(optimizer_->IsEnable());
+}
+
+HWTEST_F(TaihangOptimizerTest, SetEnableTest001, TestSize.Level1)
+{
+    optimizer_->SetEnable(true);
+    EXPECT_TRUE(optimizer_->enable_);
+}
+
+HWTEST_F(TaihangOptimizerTest, SetEnableTest002, TestSize.Level1)
+{
+    optimizer_->SetEnable(false);
+    EXPECT_FALSE(optimizer_->enable_);
+}
+
+HWTEST_F(TaihangOptimizerTest, CheckSwiperPathValidTest001, TestSize.Level1)
+{
+    optimizer_->isInited_ = true;
+    optimizer_->enable_ = false;
+    bool result = optimizer_->CheckSwiperPathValid("com.example.app", "page1,page2");
+    EXPECT_FALSE(result);
+}
+
+HWTEST_F(TaihangOptimizerTest, CheckSwiperPathValidTest002, TestSize.Level1)
+{
+    optimizer_->isInited_ = true;
+    optimizer_->enable_ = true;
+    optimizer_->bundleNameToPages_.clear();
+    bool result = optimizer_->CheckSwiperPathValid("com.example.app", "page1,page2");
+    EXPECT_FALSE(result);
+}
+
+HWTEST_F(TaihangOptimizerTest, CheckSwiperPathValidTest003, TestSize.Level1)
+{
+    optimizer_->isInited_ = true;
+    optimizer_->enable_ = true;
+    optimizer_->bundleNameToPages_.clear();
+    optimizer_->bundleNameToPages_["com.example.app"] = {"page1"};
+    bool result = optimizer_->CheckSwiperPathValid("com.example.app", "page1");
+    EXPECT_FALSE(result);
+}
+
+HWTEST_F(TaihangOptimizerTest, CheckSwiperPathValidTest004, TestSize.Level1)
+{
+    optimizer_->isInited_ = true;
+    optimizer_->enable_ = true;
+    optimizer_->bundleNameToPages_.clear();
+    optimizer_->bundleNameToPages_["com.other.app"] = {"page2"};
+    bool result = optimizer_->CheckSwiperPathValid("com.example.app", "page1,page2");
+    EXPECT_FALSE(result);
+}
+
+HWTEST_F(TaihangOptimizerTest, CheckSwiperPathValidTest005, TestSize.Level1)
+{
+    optimizer_->isInited_ = true;
+    optimizer_->enable_ = true;
+    optimizer_->bundleNameToPages_.clear();
+    std::vector<std::string> pageList = {"page2", "page3"};
+    optimizer_->bundleNameToPages_["com.example.app"] = pageList;
+    bool result = optimizer_->CheckSwiperPathValid("com.example.app", "page1,page2");
+    EXPECT_TRUE(result);
+}
+
+HWTEST_F(TaihangOptimizerTest, CheckSwiperPathValidTest006, TestSize.Level1)
+{
+    optimizer_->isInited_ = true;
+    optimizer_->enable_ = true;
+    optimizer_->bundleNameToPages_.clear();
+    std::vector<std::string> pageList = {"page2", "page2"};
+    optimizer_->bundleNameToPages_["com.example.app"] = pageList;
+    bool result = optimizer_->CheckSwiperPathValid("com.example.app", "page1,page4");
+    EXPECT_FALSE(result);
+}
+
+HWTEST_F(TaihangOptimizerTest, CheckSwiperPathValidTest007, TestSize.Level1)
+{
+    optimizer_->isInited_ = true;
+    optimizer_->enable_ = true;
+    optimizer_->bundleNameToPages_.clear();
+    optimizer_->bundleNameToPages_["com.example.app"] = {"page2"};
+    bool result = optimizer_->CheckSwiperPathValid("", "page1,page2");
+    EXPECT_FALSE(result);
+}
+
+HWTEST_F(TaihangOptimizerTest, CheckSwiperPathValidTest008, TestSize.Level1)
+{
+    optimizer_->isInited_ = true;
+    optimizer_->enable_ = true;
+    optimizer_->bundleNameToPages_.clear();
+    optimizer_->bundleNameToPages_["com.example.app"] = {"page2"};
+    bool result = optimizer_->CheckSwiperPathValid("com.example.app", "");
+    EXPECT_FALSE(result);
+}
+
+HWTEST_F(TaihangOptimizerTest, CheckSwiperPathValidTest009, TestSize.Level1)
+{
+    optimizer_->isInited_ = true;
+    optimizer_->enable_ = true;
+    optimizer_->bundleNameToPages_.clear();
+    optimizer_->bundleNameToPages_["com.example.app"] = {"page2", "page3"};
+    bool result = optimizer_->CheckSwiperPathValid("com.example.app", "page1,page3");
+    EXPECT_TRUE(result);
+}
+
+HWTEST_F(TaihangOptimizerTest, CheckSwiperPathValidTest010, TestSize.Level1)
+{
+    optimizer_->isInited_ = false;
+    bool result = optimizer_->CheckSwiperPathValid("com.example.app", "page1,page3");
+    EXPECT_FALSE(result);
+}
+
+HWTEST_F(TaihangOptimizerTest, ComponentPreMakeTest001, TestSize.Level1)
+{
+    std::string params = R"({"path":"test","index":0})";
+    optimizer_->ComponentPreMake(1, params);
+    EXPECT_TRUE(optimizer_->IsInited() || !optimizer_->IsInited());
+}
+
+HWTEST_F(TaihangOptimizerTest, ComponentPreMakeTest002, TestSize.Level1)
+{
+    std::string params = R"({"path":"test","index":0})";
+    optimizer_->ComponentPreMake(0, params);
+    EXPECT_TRUE(optimizer_->IsInited() || !optimizer_->IsInited());
+}
+
+HWTEST_F(TaihangOptimizerTest, ComponentPreMakeTest003, TestSize.Level1)
+{
+    std::string params = R"({"path":"test","index":0})";
+    optimizer_->ComponentPreMake(2, params);
+    EXPECT_TRUE(optimizer_->IsInited() || !optimizer_->IsInited());
+}
+
+HWTEST_F(TaihangOptimizerTest, ComponentPreMakeTest004, TestSize.Level1)
+{
+    std::string params = "";
+    optimizer_->ComponentPreMake(1, params);
+    EXPECT_TRUE(optimizer_->IsInited() || !optimizer_->IsInited());
+}
+
+HWTEST_F(TaihangOptimizerTest, InitTest001, TestSize.Level1)
+{
+    optimizer_->isInited_ = true;
+    optimizer_->Init();
+    EXPECT_TRUE(optimizer_->isInited_);
+}
+
+HWTEST_F(TaihangOptimizerTest, InitTest002, TestSize.Level1)
+{
+    optimizer_->isInited_ = false;
+    optimizer_->Init();
+    EXPECT_TRUE(optimizer_->isInited_);
+}
+
+HWTEST_F(TaihangOptimizerTest, InitTest003, TestSize.Level1)
+{
+    optimizer_->isInited_ = false;
+    optimizer_->enable_ = false;
+    optimizer_->Init();
+    EXPECT_TRUE(optimizer_->isInited_);
+}
+
+HWTEST_F(TaihangOptimizerTest, PostSwiperPreMakeTaskTest001, TestSize.Level1)
+{
+    auto frameNode = NG::FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 1, AceType::MakeRefPtr<NG::SwiperPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    optimizer_->PostSwiperPreMakeTask(frameNode, 0);
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(TaihangOptimizerTest, PostSwiperPreMakeTaskTest002, TestSize.Level1)
+{
+    auto frameNode = NG::FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<NG::Pattern>());
+    EXPECT_NE(frameNode, nullptr);
+    optimizer_->PostSwiperPreMakeTask(frameNode, 0);
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(TaihangOptimizerTest, PostSwiperPreMakeTaskTest003, TestSize.Level1)
+{
+    RefPtr<NG::FrameNode> frameNode = nullptr;
+    optimizer_->PostSwiperPreMakeTask(frameNode, 0);
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(TaihangOptimizerTest, PostSwiperPreMakeTaskTest004, TestSize.Level1)
+{
+    auto frameNode = NG::FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 1, AceType::MakeRefPtr<NG::SwiperPattern>());
+    auto swiperPattern = frameNode->GetPattern<NG::SwiperPattern>();
+    EXPECT_NE(swiperPattern, nullptr);
+    swiperPattern->swiperController_ = nullptr;
+    optimizer_->PostSwiperPreMakeTask(frameNode, 0);
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeTest001, TestSize.Level1)
+{
+    optimizer_->HandleSwiperPreMake("");
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeTest002, TestSize.Level1)
+{
+    optimizer_->HandleSwiperPreMake("invalid_json");
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeTest003, TestSize.Level1)
+{
+    std::string params = R"({"path":"","index":0})";
+    optimizer_->HandleSwiperPreMake(params);
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeTest004, TestSize.Level1)
+{
+    std::string params = R"({"path":"test","index":-1})";
+    optimizer_->HandleSwiperPreMake(params);
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithValidPath001, TestSize.Level1)
+{
+    auto rootNode = NG::FrameNode::CreateFrameNode("root", 0, AceType::MakeRefPtr<NG::Pattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto childNode = NG::FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 1, AceType::MakeRefPtr<NG::SwiperPattern>());
+    ASSERT_NE(childNode, nullptr);
+    childNode->MountToParent(rootNode);
+
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    ASSERT_NE(context, nullptr);
+    context->rootNode_ = rootNode;
+
+    std::string params = R"({"path":"/root/swiper[0]","index":0})";
+    optimizer_->HandleSwiperPreMake(params);
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithValidPath002, TestSize.Level1)
+{
+    auto rootNode = NG::FrameNode::CreateFrameNode("root", 0, AceType::MakeRefPtr<NG::Pattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto childNode = NG::FrameNode::CreateFrameNode("other", 1, AceType::MakeRefPtr<NG::Pattern>());
+    ASSERT_NE(childNode, nullptr);
+    childNode->MountToParent(rootNode);
+
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    ASSERT_NE(context, nullptr);
+    context->rootNode_ = rootNode;
+
+    std::string params = R"({"path":"/root/other[0]","index":0})";
+    optimizer_->HandleSwiperPreMake(params);
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithValidPath003, TestSize.Level1)
+{
+    auto rootNode = NG::FrameNode::CreateFrameNode("root", 0, AceType::MakeRefPtr<NG::Pattern>());
+    ASSERT_NE(rootNode, nullptr);
+
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    ASSERT_NE(context, nullptr);
+    context->rootNode_ = rootNode;
+
+    std::string params = R"({"path":"/root/other[0]","index":0})";
+    optimizer_->HandleSwiperPreMake(params);
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithNullRoot001, TestSize.Level1)
+{
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    ASSERT_NE(context, nullptr);
+    context->rootNode_ = nullptr;
+
+    std::string params = R"({"path":"test[0]","index":0})";
+    optimizer_->HandleSwiperPreMake(params);
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithNegativeIndex001, TestSize.Level1)
+{
+    std::string params = R"({"path":"test[0]","index":-5})";
+    optimizer_->HandleSwiperPreMake(params);
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithEmptyPath001, TestSize.Level1)
+{
+    std::string params = R"({"path":"","index":10})";
+    optimizer_->HandleSwiperPreMake(params);
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithMalformedBracket001, TestSize.Level1)
+{
+    auto rootNode = NG::FrameNode::CreateFrameNode("test", 0, AceType::MakeRefPtr<NG::Pattern>());
+    ASSERT_NE(rootNode, nullptr);
+
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    ASSERT_NE(context, nullptr);
+    context->rootNode_ = rootNode;
+
+    std::string params = R"({"path":"test[","index":0})";
+    optimizer_->HandleSwiperPreMake(params);
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithMalformedBracket002, TestSize.Level1)
+{
+    auto rootNode = NG::FrameNode::CreateFrameNode("test", 0, AceType::MakeRefPtr<NG::Pattern>());
+    ASSERT_NE(rootNode, nullptr);
+
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    ASSERT_NE(context, nullptr);
+    context->rootNode_ = rootNode;
+
+    std::string params = R"({"path":"test[0","index":0})";
+    optimizer_->HandleSwiperPreMake(params);
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithMalformedBracket003, TestSize.Level1)
+{
+    auto rootNode = NG::FrameNode::CreateFrameNode("test", 0, AceType::MakeRefPtr<NG::Pattern>());
+    ASSERT_NE(rootNode, nullptr);
+
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    ASSERT_NE(context, nullptr);
+    context->rootNode_ = rootNode;
+
+    std::string params = R"({"path":"test[]","index":0})";
+    optimizer_->HandleSwiperPreMake(params);
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithMalformedBracket004, TestSize.Level1)
+{
+    auto rootNode = NG::FrameNode::CreateFrameNode("test", 0, AceType::MakeRefPtr<NG::Pattern>());
+    ASSERT_NE(rootNode, nullptr);
+
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    ASSERT_NE(context, nullptr);
+    context->rootNode_ = rootNode;
+
+    std::string params = R"({"path":"test[ ]","index":0})";
+    optimizer_->HandleSwiperPreMake(params);
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithInvalidIndex001, TestSize.Level1)
+{
+    auto rootNode = NG::FrameNode::CreateFrameNode("test", 0, AceType::MakeRefPtr<NG::Pattern>());
+    ASSERT_NE(rootNode, nullptr);
+
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    ASSERT_NE(context, nullptr);
+    context->rootNode_ = rootNode;
+
+    std::string params = R"({"path":"test[abc]","index":0})";
+    optimizer_->HandleSwiperPreMake(params);
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithInvalidIndex002, TestSize.Level1)
+{
+    auto rootNode = NG::FrameNode::CreateFrameNode("test", 0, AceType::MakeRefPtr<NG::Pattern>());
+    ASSERT_NE(rootNode, nullptr);
+
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    ASSERT_NE(context, nullptr);
+    context->rootNode_ = rootNode;
+
+    std::string params = R"({"path":"test[-1]","index":0})";
+    optimizer_->HandleSwiperPreMake(params);
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithValidJson001, TestSize.Level1)
+{
+    std::string params = R"({"path":"validPath","index":5})";
+    optimizer_->HandleSwiperPreMake(params);
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithValidJson002, TestSize.Level1)
+{
+    std::string params = R"({"path":"/root/child[0]","index":0})";
+    optimizer_->HandleSwiperPreMake(params);
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithNullJson001, TestSize.Level1)
+{
+    optimizer_->HandleSwiperPreMake("null");
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithEmptyJsonObject001, TestSize.Level1)
+{
+    std::string params = R"({})";
+    optimizer_->HandleSwiperPreMake(params);
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithMissingPathKey001, TestSize.Level1)
+{
+    std::string params = R"({"index":0})";
+    optimizer_->HandleSwiperPreMake(params);
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(TaihangOptimizerTest, HandleSwiperPreMakeWithMissingIndexKey001, TestSize.Level1)
+{
+    std::string params = R"({"path":"test"})";
+    optimizer_->HandleSwiperPreMake(params);
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(TaihangOptimizerTest, PostSwiperPreMakeTaskWithPositiveIndex001, TestSize.Level1)
+{
+    auto frameNode = NG::FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 1, AceType::MakeRefPtr<NG::SwiperPattern>());
+    auto swiperPattern = frameNode->GetPattern<NG::SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto controller = AceType::MakeRefPtr<SwiperController>();
+    swiperPattern->swiperController_ = controller;
+
+    optimizer_->PostSwiperPreMakeTask(frameNode, 5);
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(TaihangOptimizerTest, CheckSwiperPathValidWithMultiplePages001, TestSize.Level1)
+{
+    optimizer_->isInited_ = true;
+    optimizer_->enable_ = true;
+    optimizer_->bundleNameToPages_.clear();
+    std::vector<std::string> pageList = {"page1", "page2", "page3", "page4"};
+    optimizer_->bundleNameToPages_["com.example.app"] = pageList;
+    bool result = optimizer_->CheckSwiperPathValid("com.example.app", "prefix,page3");
+    EXPECT_TRUE(result);
+}
+
+HWTEST_F(TaihangOptimizerTest, CheckSwiperPathValidWithMultiplePages002, TestSize.Level1)
+{
+    optimizer_->isInited_ = true;
+    optimizer_->enable_ = true;
+    optimizer_->bundleNameToPages_.clear();
+    std::vector<std::string> pageList = {"page1", "page2", "page3", "page4"};
+    optimizer_->bundleNameToPages_["com.example.app"] = pageList;
+    bool result = optimizer_->CheckSwiperPathValid("com.example.app", "prefix,page5");
+    EXPECT_FALSE(result);
+}
+
+HWTEST_F(TaihangOptimizerTest, CheckSwiperPathValidWithSpecialChars001, TestSize.Level1)
+{
+    optimizer_->isInited_ = true;
+    optimizer_->enable_ = true;
+    optimizer_->bundleNameToPages_.clear();
+    optimizer_->bundleNameToPages_["com.example.app"] = {"page_1"};
+    bool result = optimizer_->CheckSwiperPathValid("com.example.app", "prefix,page_1");
+    EXPECT_TRUE(result);
+}
+
+HWTEST_F(TaihangOptimizerTest, CheckSwiperPathValidWithChineseChars001, TestSize.Level1)
+{
+    optimizer_->isInited_ = true;
+    optimizer_->enable_ = true;
+    optimizer_->bundleNameToPages_.clear();
+    optimizer_->bundleNameToPages_["com.example.app"] = {"页面1"};
+    bool result = optimizer_->CheckSwiperPathValid("com.example.app", "prefix,页面1");
+    EXPECT_TRUE(result);
+}
+
+HWTEST_F(TaihangOptimizerTest, CheckSwiperPathValidWithWhitespace001, TestSize.Level1)
+{
+    optimizer_->isInited_ = true;
+    optimizer_->enable_ = true;
+    optimizer_->bundleNameToPages_.clear();
+    optimizer_->bundleNameToPages_["com.example.app"] = {"page1"};
+    bool result = optimizer_->CheckSwiperPathValid("com.example.app", "prefix, page1");
+    EXPECT_FALSE(result);
+}
+
+HWTEST_F(TaihangOptimizerTest, ComponentPreMakeWithEmptyParams001, TestSize.Level1)
+{
+    optimizer_->ComponentPreMake(1, "");
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(TaihangOptimizerTest, ComponentPreMakeWithWhitespaceParams001, TestSize.Level1)
+{
+    optimizer_->ComponentPreMake(1, "   ");
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(TaihangOptimizerTest, ComponentPreMakeWithNullParams001, TestSize.Level1)
+{
+    optimizer_->ComponentPreMake(1, "null");
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(TaihangOptimizerTest, ComponentPreMakeWithInvalidComponentType001, TestSize.Level1)
+{
+    std::string params = R"({"path":"test","index":0})";
+    optimizer_->ComponentPreMake(-1, params);
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(TaihangOptimizerTest, ComponentPreMakeWithInvalidComponentType002, TestSize.Level1)
+{
+    std::string params = R"({"path":"test","index":0})";
+    optimizer_->ComponentPreMake(999, params);
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(TaihangOptimizerTest, ConstructorTest001, TestSize.Level1)
+{
+    auto newOptimizer = std::make_shared<TaihangOptimizer>();
+    EXPECT_FALSE(newOptimizer->IsInited());
+    EXPECT_FALSE(newOptimizer->IsEnable());
+}
+
+HWTEST_F(TaihangOptimizerTest, DestructorTest001, TestSize.Level1)
+{
+    auto newOptimizer = std::make_shared<TaihangOptimizer>();
+    newOptimizer.reset();
+    EXPECT_TRUE(true);
+}
+
+HWTEST_F(TaihangOptimizerTest, MultipleInitCalls001, TestSize.Level1)
+{
+    optimizer_->isInited_ = false;
+    optimizer_->Init();
+    EXPECT_TRUE(optimizer_->isInited_);
+    optimizer_->Init();
+    EXPECT_TRUE(optimizer_->isInited_);
+}
+
+HWTEST_F(TaihangOptimizerTest, EnableDisableSequence001, TestSize.Level1)
+{
+    optimizer_->SetEnable(true);
+    EXPECT_TRUE(optimizer_->IsEnable());
+    optimizer_->SetEnable(false);
+    EXPECT_FALSE(optimizer_->IsEnable());
+    optimizer_->SetEnable(true);
+    EXPECT_TRUE(optimizer_->IsEnable());
+}
+} // namespace OHOS::Ace

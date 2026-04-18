@@ -100,6 +100,8 @@ public:
         int32_t webId,
         const std::string& request,
         const GetWebInfoByRequestCallback& finishCallback) override;
+
+    int32_t ExeAppComponentPreMake(int32_t componentType, const std::string& params) override;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_STUB_IMPL_H

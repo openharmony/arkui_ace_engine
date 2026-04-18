@@ -80,12 +80,15 @@ public:
         std::unordered_map<std::string, std::string>& reply);
     bool AppClickExtEnableCheck(const std::unordered_map<std::string, std::string>& payload,
         std::unordered_map<std::string, std::string>& reply);
+    bool AppSwiperReportEnableCheck(const std::unordered_map<std::string, std::string>& payload,
+        std::unordered_map<std::string, std::string>& reply);
     void OnKeyEvent(const KeyEvent& event);
     void LoadPageEvent(int32_t value);
     void OnAxisEvent(const AxisEvent& axisEvent);
     void AxisEventReportEnd();
     void HandlePageTransition(const std::string& fromPage, const std::string& toPage, const std::string& mode,
         const std::string& fromComponentName = {}, const std::string& toComponentName = {});
+    void HandleSwiperChange(std::unordered_map<std::string, std::string>& payload);
     static std::atomic<int32_t> createPageCount; // not consider multi-instances.
     static bool triggerExecuted; // not consider multi-instances.
     int64_t GetTid();

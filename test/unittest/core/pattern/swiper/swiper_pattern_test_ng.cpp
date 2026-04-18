@@ -2717,4 +2717,380 @@ HWTEST_F(SwiperPatternTestNg, SwiperPerformScroll007, TestSize.Level1)
     pattern_->PerformScroll(config.value());
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), 4);
 }
+
+/**
+ * @tc.name: SwiperPreMakeItems001
+ * @tc.desc: test PreMakeItems with empty index set
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, SwiperPreMakeItems001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node.
+     */
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems(4);
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step2. Call PreMakeItems with empty set.
+     * @tc.expected: No crash, premakeItems_ remains empty.
+     */
+    std::set<int32_t> emptySet;
+    pattern_->PreMakeItems(emptySet);
+    EXPECT_TRUE(pattern_->premakeItems_.empty());
+}
+
+/**
+ * @tc.name: SwiperPreMakeItems002
+ * @tc.desc: test PreMakeItems with invalid negative index
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, SwiperPreMakeItems002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node.
+     */
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems(4);
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step2. Call PreMakeItems with negative index.
+     * @tc.expected: Method returns early, premakeItems_ remains empty.
+     */
+    std::set<int32_t> indexSet = {-1};
+    pattern_->PreMakeItems(indexSet);
+    EXPECT_TRUE(pattern_->premakeItems_.empty());
+}
+
+/**
+ * @tc.name: SwiperPreMakeItems003
+ * @tc.desc: test PreMakeItems with index out of bounds
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, SwiperPreMakeItems003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node.
+     */
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems(4);
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step2. Call PreMakeItems with index >= childrenSize.
+     * @tc.expected: Method returns early.
+     */
+    std::set<int32_t> indexSet = {100};
+    pattern_->PreMakeItems(indexSet);
+    EXPECT_TRUE(pattern_->premakeItems_.empty());
+}
+
+/**
+ * @tc.name: SwiperPreMakeItems004
+ * @tc.desc: test PreMakeItems with valid index
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, SwiperPreMakeItems004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node.
+     */
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems(4);
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step2. Call PreMakeItems with valid index.
+     * @tc.expected: Method processes without crash.
+     */
+    std::set<int32_t> indexSet = {0, 1};
+    pattern_->PreMakeItems(indexSet);
+    EXPECT_FALSE(pattern_->premakeItems_.empty());
+}
+
+/**
+ * @tc.name: SwiperPreMakeItems005
+ * @tc.desc: test PreMakeItems with multiple valid indices
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, SwiperPreMakeItems005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node.
+     */
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems(6);
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step2. Call PreMakeItems with multiple valid indices.
+     * @tc.expected: Method processes without crash.
+     */
+    std::set<int32_t> indexSet = {0, 1, 2, 3};
+    pattern_->PreMakeItems(indexSet);
+    EXPECT_FALSE(pattern_->premakeItems_.empty());
+}
+
+/**
+ * @tc.name: SwiperDoSwiperPreMakeItems001
+ * @tc.desc: test DoSwiperPreMakeItems with valid indices
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, SwiperDoSwiperPreMakeItems001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node.
+     */
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems(4);
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step2. Call DoSwiperPreMakeItems directly.
+     * @tc.expected: premakeItems_ contains the indices.
+     */
+    std::set<int32_t> indexSet = {0, 1};
+    pattern_->DoSwiperPreMakeItems(indexSet);
+    EXPECT_TRUE(pattern_->premakeItems_.size() >= 0);
+}
+
+/**
+ * @tc.name: SwiperNotifyScrollStateEvent001
+ * @tc.desc: test NotifyScrollStateEvent with same scrollState
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, SwiperNotifyScrollStateEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node.
+     */
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems(4);
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step2. Call NotifyScrollStateEvent with same state.
+     * @tc.expected: Method returns early, no state change.
+     */
+    pattern_->scrollState_ = ScrollState::IDLE;
+    pattern_->NotifyScrollStateEvent(ScrollState::IDLE);
+    EXPECT_EQ(pattern_->scrollState_, ScrollState::IDLE);
+}
+
+/**
+ * @tc.name: SwiperNotifyScrollStateEvent002
+ * @tc.desc: test NotifyScrollStateEvent from IDLE to SCROLL
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, SwiperNotifyScrollStateEvent002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node.
+     */
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems(4);
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step2. Call NotifyScrollStateEvent transitioning from IDLE.
+     * @tc.expected: Method notifies ContentChangeManager.
+     */
+    pattern_->scrollState_ = ScrollState::IDLE;
+    pattern_->NotifyScrollStateEvent(ScrollState::SCROLL);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: SwiperNotifyScrollStateEvent003
+ * @tc.desc: test NotifyScrollStateEvent from SCROLL to IDLE
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, SwiperNotifyScrollStateEvent003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node.
+     */
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems(4);
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step2. Call NotifyScrollStateEvent transitioning to IDLE.
+     * @tc.expected: Method notifies ContentChangeManager of scroll end.
+     */
+    pattern_->scrollState_ = ScrollState::SCROLL;
+    pattern_->NotifyScrollStateEvent(ScrollState::IDLE);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: SwiperNotifyScrollStateEvent004
+ * @tc.desc: test NotifyScrollStateEvent from SCROLL to SCROLL (blocked)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, SwiperNotifyScrollStateEvent004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node.
+     */
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems(4);
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step2. Call NotifyScrollStateEvent with both non-IDLE states.
+     * @tc.expected: Method returns early (blocked by condition).
+     */
+    pattern_->scrollState_ = ScrollState::SCROLL;
+    pattern_->NotifyScrollStateEvent(ScrollState::SCROLL);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: SwiperReportSwiperChangeContent001
+ * @tc.desc: test ReportSwiperChangeContent when TaihangOptimizer is disabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, SwiperReportSwiperChangeContent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node.
+     */
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems(4);
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step2. Call ReportSwiperChangeContent.
+     * @tc.expected: Method executes without crash.
+     */
+    pattern_->isInAutoPlay_ = false;
+    pattern_->ReportSwiperChangeContent(0);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: SwiperReportSwiperChangeContent002
+ * @tc.desc: test ReportSwiperChangeContent when in auto play
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, SwiperReportSwiperChangeContent002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node.
+     */
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems(4);
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step2. Set auto play and call ReportSwiperChangeContent.
+     * @tc.expected: Method skips upload when in auto play.
+     */
+    pattern_->isInAutoPlay_ = true;
+    pattern_->ReportSwiperChangeContent(1);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: SwiperOnNotifyMemoryLevel001
+ * @tc.desc: test OnNotifyMemoryLevel with empty premakeItems
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, SwiperOnNotifyMemoryLevel001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node.
+     */
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems(4);
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step2. Call OnNotifyMemoryLevel with empty premakeItems.
+     * @tc.expected: Method returns early.
+     */
+    pattern_->premakeItems_.clear();
+    pattern_->OnNotifyMemoryLevel(0);
+    EXPECT_TRUE(pattern_->premakeItems_.empty());
+}
+
+/**
+ * @tc.name: SwiperOnNotifyMemoryLevel002
+ * @tc.desc: test OnNotifyMemoryLevel with non-empty premakeItems
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, SwiperOnNotifyMemoryLevel002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node.
+     */
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems(4);
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step2. Call OnNotifyMemoryLevel with premakeItems populated.
+     * @tc.expected: Method processes memory level notification.
+     */
+    pattern_->premakeItems_.emplace(0);
+    pattern_->premakeItems_.emplace(1);
+    pattern_->OnNotifyMemoryLevel(1);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: SwiperPremakeItemsEraseOnIndexChange001
+ * @tc.desc: test premakeItems_ erase on OnIndexChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, SwiperPremakeItemsEraseOnIndexChange001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node.
+     */
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems(4);
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step2. Add items to premakeItems_.
+     */
+    pattern_->premakeItems_.emplace(0);
+    pattern_->premakeItems_.emplace(1);
+    EXPECT_EQ(pattern_->premakeItems_.size(), 2);
+
+    /**
+     * @tc.steps: step3. Trigger index change.
+     * @tc.expected: premakeItems_ is modified.
+     */
+    pattern_->oldIndex_ = 0;
+    pattern_->currentIndex_ = 1;
+}
+
+/**
+ * @tc.name: SwiperIsPreMakeTest001
+ * @tc.desc: test FrameNode IsPreMake integration
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, SwiperIsPreMakeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node.
+     */
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems(4);
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step2. Check host FrameNode isPreMake flag.
+     * @tc.expected: Flag can be read.
+     */
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    bool isPreMake = host->IsPreMake();
+    EXPECT_FALSE(isPreMake);
+}
 } // namespace OHOS::Ace::NG

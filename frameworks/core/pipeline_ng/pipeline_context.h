@@ -70,6 +70,7 @@ namespace OHOS::Ace {
 class AIWriteAdapter;
 class ResSchedClickOptimizer;
 class ResSchedTouchOptimizer;
+class TaihangOptimizer;
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
@@ -1292,6 +1293,7 @@ public:
 
     const std::unique_ptr<ResSchedTouchOptimizer>& GetTouchOptimizer() const;
     const std::shared_ptr<ResSchedClickOptimizer>& GetClickOptimizer() const;
+    const std::shared_ptr<TaihangOptimizer>& GetTaihangOptimizer() const;
 
     void SetMagnifierController(const RefPtr<MagnifierController>& magnifierController);
     RefPtr<MagnifierController> GetMagnifierController() const;
@@ -1744,6 +1746,7 @@ private:
     RefPtr<MagnifierController> magnifierController_;
     std::unique_ptr<ResSchedTouchOptimizer> touchOptimizer_;
     std::shared_ptr<ResSchedClickOptimizer> clickOptimizer_;
+    std::shared_ptr<TaihangOptimizer> taihangOptimizer_;
     RefPtr<ContentChangeManager> contentChangeMgr_;
     std::set<WeakPtr<FrameNode>> needRenderNodeByUniqueId_;
     std::set<WeakPtr<NG::UINode>> needRenderForLayoutChildrenNodes_;

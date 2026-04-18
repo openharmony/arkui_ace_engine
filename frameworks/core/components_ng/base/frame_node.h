@@ -200,6 +200,11 @@ public:
 
     void OnDelete() override;
 
+    bool IsPreMake()
+    {
+        return isPreMake_;
+    }
+
     int32_t FrameCount() const override
     {
         return 1;
@@ -1718,6 +1723,7 @@ private:
     PipelineContext* GetOffMainTreeNodeContext();
     RefPtr<AccessibilityProperty>& GetOrCreateAccessibilityProperty();
     void OnHoverWithHightLight(bool isHover) const;
+    bool IsPreMakeAndScroll();
     bool isAccessibilityPropertyInitialized_ = false;
     bool isTrimMemRecycle_ = false;
     // sort in ZIndex.
@@ -1833,6 +1839,8 @@ private:
     // Marks whether the background builder needs to be refreshed due to surface changes.
     bool isNeedRefreshBackgroundBuilder_ = false;
     int32_t refreshBackgroundBuilderId_ = 0;
+
+    bool isPreMake_ = false;
 
     RefPtr<FrameNode> overlayNode_;
 

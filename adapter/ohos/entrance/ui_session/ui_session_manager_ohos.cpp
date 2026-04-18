@@ -1149,4 +1149,21 @@ void UiSessionManagerOhos::SendWebInfoByRequest(uint32_t windowId, int32_t webId
     }
     processIter->second.clear();
 }
+
+
+void UiSessionManagerOhos::SaveNotifyComponentPreMakeFunction(NotifyComponentPreMakeFunction&& function)
+{
+    std::unique_lock<std::mutex> lock(notifyComponentPreMakeFunctionMutex_);
+    notifyComponentPreMakeFunction_ = std::move(function);
+}
+
+void UiSessionManagerOhos::ExeAppComponentPreMake(int32_t componentType, const std::string& params)
+{
+    std::unique_lock<std::mutex> lock(notifyComponentPreMakeFunctionMutex_);
+    if (notifyComponentPreMakeFunction_) {
+        notifyComponentPreMakeFunction_(componentType, params);
+    } else {
+        LOGW("Execute component premake failed, function is nullptr");
+    }
+}
 } // namespace OHOS::Ace

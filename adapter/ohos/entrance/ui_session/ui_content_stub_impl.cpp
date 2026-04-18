@@ -297,4 +297,10 @@ int32_t UIContentServiceStubImpl::GetWebInfoByRequest(
     UiSessionManager::GetInstance()->GetWebInfoByRequest(webId, request);
     return NO_ERROR;
 }
+
+int32_t UIContentServiceStubImpl::ExeAppComponentPreMake(int32_t componentType, const std::string& params)
+{
+    UiSessionManager::GetInstance()->ExeAppComponentPreMake(componentType, params);
+    return NO_ERROR;
+}
 } // namespace OHOS::Ace

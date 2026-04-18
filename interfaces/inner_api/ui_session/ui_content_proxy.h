@@ -79,6 +79,7 @@ public:
         const std::map<int32_t, std::vector<int32_t>>& arkWebs,
         const std::function<void(int32_t, const std::map<int32_t, std::map<int32_t,
             std::shared_ptr<Media::PixelMap>>>&, MultiImageQueryErrorCode)>& arkWebfinishCallback) override;
+    virtual int32_t ExeAppComponentPreMake(int32_t componentType, const std::string& params) override;
     virtual int32_t GetVisibleInspectorTree(const std::function<void(std::string, int32_t, bool)>& eventCallback,
         ParamConfig config = ParamConfig(), int32_t timeout = DEFAULT_INSPECTOR_TREE_CALLBACK_TIMEOUT_MS) override;
     virtual int32_t GetLatestHitTestNodeInfosForTouch(

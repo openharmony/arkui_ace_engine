@@ -85,6 +85,7 @@ public:
         REQUEST_STATE_MGMT_INFO,
         GET_MULTI_IMAGES_BY_ID,
         GET_WEBINFO_BY_REQUEST,
+        EXE_COMPONENT_PREMAKE,
     };
 
     /**
@@ -373,6 +374,8 @@ public:
         int32_t webId,
         const std::string& request,
         const GetWebInfoByRequestCallback& finishCallback) = 0;
+
+    virtual int32_t ExeAppComponentPreMake(int32_t componentType, const std::string& params) = 0;
 };
 class ACE_FORCE_EXPORT ReportService : public OHOS::IRemoteBroker {
 public:
