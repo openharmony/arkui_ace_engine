@@ -3823,7 +3823,7 @@ void KeyboardAvoid(OHOS::Rosen::WindowSizeChangeReason reason, int32_t instanceI
     pipelineContext->OnVirtualKeyboardAreaChange(keyboardRect, textFieldPositionY, textFieldHeight);
 }
 
-void UIContentImpl::ProcessWindowSizeLayoutBreakPointChange()
+void UIContentImpl::ProcessWindowSizeLayoutBreakPointChange(double density)
 {
     auto container = Platform::AceContainer::GetContainer(GetInstanceId());
     CHECK_NULL_VOID(container);
@@ -3832,7 +3832,7 @@ void UIContentImpl::ProcessWindowSizeLayoutBreakPointChange()
 
     auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
 
-    auto task = [instanceId = GetInstanceId()]() {
+    auto task = [instanceId = GetInstanceId(), density]() {
         auto container = Platform::AceContainer::GetContainer(instanceId);
         CHECK_NULL_VOID(container);
 
@@ -3842,6 +3842,7 @@ void UIContentImpl::ProcessWindowSizeLayoutBreakPointChange()
         CHECK_NULL_VOID(pipelineContext);
         auto window = pipelineContext->GetWindow();
         CHECK_NULL_VOID(window);
+        window->SetDensity(density);
 
         window->NotifyBreakpointChangeIfNeeded(instanceId, layoutWidthBreakpoints, layoutHeightBreakpoints);
     };
@@ -3859,7 +3860,7 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas,
     const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info)
 {
-    ProcessWindowSizeLayoutBreakPointChange();
+    ProcessWindowSizeLayoutBreakPointChange(config.Density());
     if (KeyFrameActionPolicy(config, reason, rsTransaction, avoidAreas)) {
         return;
     }
