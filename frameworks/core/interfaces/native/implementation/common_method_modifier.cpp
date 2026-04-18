@@ -2319,6 +2319,7 @@ void SetWidthImpl(Ark_NativePointer node,
         [frameNode](const Ark_Length& src) {
             auto result = Converter::OptConvert<CalcDimension>(src);
             SetWidthInternal(frameNode, result);
+            ViewAbstractModelStatic::ResetLayoutPolicyProperty(frameNode, true);
         },
         [frameNode](const Ark_LayoutPolicy& src) {
             auto result = Converter::OptConvert<LayoutCalPolicy>(src);
@@ -2327,6 +2328,7 @@ void SetWidthImpl(Ark_NativePointer node,
         },
         [frameNode]() {
             SetWidthInternal(frameNode, std::nullopt);
+            ViewAbstractModelStatic::ResetLayoutPolicyProperty(frameNode, true);
         });
 }
 void SetHeightInternal(FrameNode *frameNode, std::optional<CalcDimension> value)
@@ -2376,6 +2378,7 @@ void SetHeightImpl(Ark_NativePointer node,
             auto result = Converter::OptConvert<CalcDimension>(src);
             SetHeightInternal(frameNode, result);
             SetBlankHeight(frameNode, result);
+            ViewAbstractModelStatic::ResetLayoutPolicyProperty(frameNode, false);
         },
         [frameNode](const Ark_LayoutPolicy& src) {
             auto result = Converter::OptConvert<LayoutCalPolicy>(src);
@@ -2384,6 +2387,7 @@ void SetHeightImpl(Ark_NativePointer node,
         },
         [frameNode]() {
             SetHeightInternal(frameNode, std::nullopt);
+            ViewAbstractModelStatic::ResetLayoutPolicyProperty(frameNode, false);
         });
 }
 void SetDrawModifierImpl(Ark_NativePointer node,

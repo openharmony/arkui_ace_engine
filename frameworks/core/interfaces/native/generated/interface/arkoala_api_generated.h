@@ -2271,8 +2271,8 @@ typedef struct Ark_CustomDialogControllerExternalOptionsExtender Ark_CustomDialo
 typedef struct Opt_CustomDialogControllerExternalOptionsExtender Opt_CustomDialogControllerExternalOptionsExtender;
 typedef struct Ark_CustomSpanDrawInfo Ark_CustomSpanDrawInfo;
 typedef struct Opt_CustomSpanDrawInfo Opt_CustomSpanDrawInfo;
-typedef struct Ark_CustomSpanMeasureInfo Ark_CustomSpanMeasureInfo;
-typedef struct Opt_CustomSpanMeasureInfo Opt_CustomSpanMeasureInfo;
+typedef struct Ark_CustomSpanMeasureInfoProxy Ark_CustomSpanMeasureInfoProxy;
+typedef struct Opt_CustomSpanMeasureInfoProxy Opt_CustomSpanMeasureInfoProxy;
 typedef struct Ark_CustomSpanMetrics Ark_CustomSpanMetrics;
 typedef struct Opt_CustomSpanMetrics Opt_CustomSpanMetrics;
 typedef struct Ark_CustomSpanWrapper Ark_CustomSpanWrapper;
@@ -11487,8 +11487,8 @@ typedef struct Opt_Callback_CrownEvent_Void {
 typedef struct Callback_CustomSpanMeasureInfo_CustomSpanMetrics {
     /* kind: Callback */
     Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_CustomSpanMeasureInfo measureInfo, const Callback_CustomSpanMetrics_Void continuation);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_CustomSpanMeasureInfo measureInfo, const Callback_CustomSpanMetrics_Void continuation);
+    void (*call)(const Ark_Int32 resourceId, const Ark_CustomSpanMeasureInfoProxy measureInfo, const Callback_CustomSpanMetrics_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_CustomSpanMeasureInfoProxy measureInfo, const Callback_CustomSpanMetrics_Void continuation);
 } Callback_CustomSpanMeasureInfo_CustomSpanMetrics;
 typedef struct Opt_Callback_CustomSpanMeasureInfo_CustomSpanMetrics {
     Ark_Tag tag;
@@ -15605,16 +15605,16 @@ typedef struct Opt_CustomSpanDrawInfo {
     Ark_Tag tag;
     Ark_CustomSpanDrawInfo value;
 } Opt_CustomSpanDrawInfo;
-typedef struct Ark_CustomSpanMeasureInfo {
+typedef struct Ark_CustomSpanMeasureInfoProxy {
     /* kind: Interface */
     Ark_Float64 fontSize;
     Opt_Float64 maxWidth;
-    Opt_LayoutPolicy layoutPolicy;
-} Ark_CustomSpanMeasureInfo;
-typedef struct Opt_CustomSpanMeasureInfo {
+    Opt_NativePointer layoutPolicyPtr;
+} Ark_CustomSpanMeasureInfoProxy;
+typedef struct Opt_CustomSpanMeasureInfoProxy {
     Ark_Tag tag;
-    Ark_CustomSpanMeasureInfo value;
-} Opt_CustomSpanMeasureInfo;
+    Ark_CustomSpanMeasureInfoProxy value;
+} Opt_CustomSpanMeasureInfoProxy;
 typedef struct Ark_CustomSpanMetrics {
     /* kind: Interface */
     Ark_Float64 width;
@@ -32684,3 +32684,4 @@ struct OH_AnyAPI {
 /* clang-format on */
 
 #endif  // GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_API_H
+

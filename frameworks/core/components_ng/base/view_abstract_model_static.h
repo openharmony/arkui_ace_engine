@@ -68,6 +68,11 @@ public:
         ViewAbstract::UpdateLayoutPolicyProperty(frameNode, layoutPolicy, isWidth);
     }
 
+    static void ResetLayoutPolicyProperty(FrameNode* frameNode, bool isWidth)
+    {
+        ViewAbstract::ResetLayoutPolicyProperty(frameNode, isWidth);
+    }
+
     static void SetHeight(FrameNode* frameNode, const CalcDimension& height)
     {
         if (height.Unit() == DimensionUnit::CALC) {

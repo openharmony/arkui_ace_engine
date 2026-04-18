@@ -24,6 +24,7 @@
 #include "core/interfaces/native/implementation/custom_span_peer.h"
 #include "core/interfaces/native/implementation/decoration_style_peer.h"
 #include "core/interfaces/native/implementation/gesture_style_peer.h"
+#include "core/interfaces/native/implementation/layout_policy_peer_impl.h"
 #include "core/interfaces/native/implementation/length_metrics_peer.h"
 #include "core/interfaces/native/implementation/letter_spacing_style_peer.h"
 #include "core/interfaces/native/implementation/line_height_style_peer.h"
@@ -159,6 +160,7 @@ const std::vector<std::pair<int, Ace::SpanType>> SPAN_TYPE_TEST_VALUES = {
 
 namespace GeneratedModifier {
     const GENERATED_ArkUIImageAttachmentAccessor* GetImageAttachmentAccessor();
+    const GENERATED_ArkUILayoutPolicyAccessor* GetLayoutPolicyAccessor();
     const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor();
     const GENERATED_ArkUITextStyleAccessor* GetTextStyleAccessor();
     const GENERATED_ArkUIDecorationStyleAccessor* GetDecorationStyleAccessor();
@@ -428,22 +430,17 @@ struct StyledStringUnionCustomSpan {
     Ark_Union_String_ImageAttachment_CustomSpanWrapper* Union()
     {
         peer = AceType::MakeRefPtr<CustomSpanNativePeer>();
-        peer->IncRefCount();
         Ark_CustomSpanWrapper wrap {
             .nativeObj = Referenced::RawPtr(peer)
         };
-        static Ark_Union_String_ImageAttachment_CustomSpanWrapper value = Converter::ArkUnion<
+        value = Converter::ArkUnion<
             Ark_Union_String_ImageAttachment_CustomSpanWrapper, Ark_CustomSpanWrapper>(wrap);
         return &value;
     }
     Opt_Array_StyleOptions* Styles() { return nullptr; }
-    void TearDown()
-    {
-        if (peer) {
-            peer->DecRefCount();
-        }
-    }
+    void TearDown() {}
 private:
+    Ark_Union_String_ImageAttachment_CustomSpanWrapper value {};
     RefPtr<CustomSpanNativePeer> peer = nullptr;
 };
 
@@ -1038,6 +1035,49 @@ constexpr int32_t TEST_NEW_USERDATASPAN_ID = 567;
 std::string marshallResult("the user data marshalling result");
 std::optional<Ark_Int32> marshallResourceId;
 std::optional<std::string> unmarshallResult;
+struct CustomSpanMeasureCheck {
+    float fontSize = 0.0f;
+    std::optional<float> maxWidth;
+    std::optional<LayoutCalPolicy> layoutPolicy;
+    bool maxWidthDefined = true;
+    bool layoutPolicyDefined = true;
+};
+
+std::optional<CustomSpanMeasureCheck> g_customSpanMeasureCheck;
+
+void CustomSpanMeasureWithValues(Ark_VMContext context, const Ark_Int32 resourceId,
+    const Ark_CustomSpanMeasureInfoProxy measureInfo, const Callback_CustomSpanMetrics_Void continuation)
+{
+    g_customSpanMeasureCheck = CustomSpanMeasureCheck {};
+    g_customSpanMeasureCheck->fontSize = Converter::Convert<float>(measureInfo.fontSize);
+    g_customSpanMeasureCheck->maxWidth = Converter::OptConvert<float>(measureInfo.maxWidth);
+    g_customSpanMeasureCheck->maxWidthDefined = measureInfo.maxWidth.tag != INTEROP_TAG_UNDEFINED;
+    g_customSpanMeasureCheck->layoutPolicyDefined = measureInfo.layoutPolicyPtr.tag != INTEROP_TAG_UNDEFINED;
+    if (measureInfo.layoutPolicyPtr.tag != INTEROP_TAG_UNDEFINED && measureInfo.layoutPolicyPtr.value) {
+        auto* peer = reinterpret_cast<LayoutPolicyPeer*>(measureInfo.layoutPolicyPtr.value);
+        if (peer) {
+            g_customSpanMeasureCheck->layoutPolicy = peer->layoutPolicy;
+        }
+    }
+    Ark_CustomSpanMetrics metrics {
+        .width = Converter::ArkValue<Ark_Float64>(321.0),
+        .height = Converter::ArkValue<Opt_Float64>(123.0),
+    };
+    CallbackHelper(continuation).InvokeSync(metrics);
+}
+
+void CustomSpanMeasureNoMatch(Ark_VMContext context, const Ark_Int32 resourceId,
+    const Ark_CustomSpanMeasureInfoProxy measureInfo, const Callback_CustomSpanMetrics_Void continuation)
+{
+    g_customSpanMeasureCheck = CustomSpanMeasureCheck {};
+    g_customSpanMeasureCheck->maxWidthDefined = measureInfo.maxWidth.tag != INTEROP_TAG_UNDEFINED;
+    g_customSpanMeasureCheck->layoutPolicyDefined = measureInfo.layoutPolicyPtr.tag != INTEROP_TAG_UNDEFINED;
+    Ark_CustomSpanMetrics metrics {
+        .width = Converter::ArkValue<Ark_Float64>(111.0),
+        .height = Converter::ArkValue<Opt_Float64>(Ark_Empty()),
+    };
+    CallbackHelper(continuation).InvokeSync(metrics);
+}
 
 void MarshallUserDataFunc(Ark_VMContext vmContext, const Ark_Int32 resourceId,
     const Ark_UserDataSpan marshallableVal, const Callback_Buffer_Void continuation)
@@ -1259,5 +1299,134 @@ HWTEST_F(StyledStringAccessorUnionCustomSpanTest, constructTestCustomSpan, TestS
     EXPECT_EQ(customSpan->GetStartIndex(), 0);
     EXPECT_EQ(customSpan->GetEndIndex(), 1);
     EXPECT_EQ(customSpan->GetSpanType(), SpanType::CustomSpan);
+}
+
+/**
+ * @tc.name: constructTestCustomSpanOnMeasureInfoWithValues
+ * @tc.desc: Verify onMeasure callback receives maxWidth and layoutPolicy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StyledStringAccessorUnionCustomSpanTest, constructTestCustomSpanOnMeasureInfoWithValues, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->construct, nullptr);
+    ASSERT_NE(GeneratedModifier::GetLayoutPolicyAccessor(), nullptr);
+    g_customSpanMeasureCheck = std::nullopt;
+
+    auto customPeer = AceType::MakeRefPtr<CustomSpanNativePeer>();
+    Ark_CustomSpanWrapper wrap {
+        .nativeObj = Referenced::RawPtr(customPeer),
+        .onMeasure_callback =
+            Converter::ArkValue<Callback_CustomSpanMeasureInfo_CustomSpanMetrics>(
+                CustomSpanMeasureWithValues, EXPECTED_NODE_ID),
+    };
+    auto value = Converter::ArkUnion<Ark_Union_String_ImageAttachment_CustomSpanWrapper, Ark_CustomSpanWrapper>(wrap);
+    auto styledStringPeer = accessor_->construct(&value, nullptr);
+    ASSERT_NE(styledStringPeer, nullptr);
+    ASSERT_NE(styledStringPeer->spanString, nullptr);
+
+    auto spans = styledStringPeer->spanString->GetSpans(0, 1);
+    ASSERT_EQ(spans.size(), 1);
+    auto customSpan = AceType::DynamicCast<CustomSpan>(spans[0]);
+    ASSERT_NE(customSpan, nullptr);
+    ASSERT_TRUE(customSpan->GetOnMeasure().has_value());
+
+    auto result = customSpan->GetOnMeasure().value()(CustomSpanMeasureInfo {
+        .fontSize = 12.0f,
+        .maxWidth = 456.0f,
+        .layoutPolicy = LayoutCalPolicy::MATCH_PARENT,
+    });
+
+    ASSERT_TRUE(g_customSpanMeasureCheck.has_value());
+    EXPECT_FLOAT_EQ(g_customSpanMeasureCheck->fontSize, 12.0f);
+    ASSERT_TRUE(g_customSpanMeasureCheck->maxWidth.has_value());
+    EXPECT_FLOAT_EQ(g_customSpanMeasureCheck->maxWidth.value(), 456.0f);
+    ASSERT_TRUE(g_customSpanMeasureCheck->layoutPolicy.has_value());
+    EXPECT_EQ(g_customSpanMeasureCheck->layoutPolicy.value(), LayoutCalPolicy::MATCH_PARENT);
+    EXPECT_FLOAT_EQ(result.width, 321.0f);
+    ASSERT_TRUE(result.height.has_value());
+    EXPECT_FLOAT_EQ(result.height.value(), 123.0f);
+    accessor_->destroyPeer(styledStringPeer);
+}
+
+/**
+ * @tc.name: layoutPolicyAccessorStaticPoliciesReused
+ * @tc.desc: Verify static layout policies reuse the same native peer and destroy is safe.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StyledStringAccessorUnionCustomSpanTest, layoutPolicyAccessorStaticPoliciesReused, TestSize.Level1)
+{
+    auto* layoutPolicyAccessor = GeneratedModifier::GetLayoutPolicyAccessor();
+    ASSERT_NE(layoutPolicyAccessor, nullptr);
+    ASSERT_NE(layoutPolicyAccessor->getMatchParent, nullptr);
+    ASSERT_NE(layoutPolicyAccessor->getWrapContent, nullptr);
+    ASSERT_NE(layoutPolicyAccessor->getFixAtIdealSize, nullptr);
+    ASSERT_NE(layoutPolicyAccessor->destroyPeer, nullptr);
+
+    auto matchParent1 = layoutPolicyAccessor->getMatchParent();
+    auto matchParent2 = layoutPolicyAccessor->getMatchParent();
+    auto wrapContent1 = layoutPolicyAccessor->getWrapContent();
+    auto wrapContent2 = layoutPolicyAccessor->getWrapContent();
+    auto fixAtIdealSize1 = layoutPolicyAccessor->getFixAtIdealSize();
+    auto fixAtIdealSize2 = layoutPolicyAccessor->getFixAtIdealSize();
+
+    ASSERT_NE(matchParent1, nullptr);
+    ASSERT_NE(wrapContent1, nullptr);
+    ASSERT_NE(fixAtIdealSize1, nullptr);
+    EXPECT_EQ(matchParent1, matchParent2);
+    EXPECT_EQ(wrapContent1, wrapContent2);
+    EXPECT_EQ(fixAtIdealSize1, fixAtIdealSize2);
+    EXPECT_EQ(matchParent1->layoutPolicy, LayoutCalPolicy::MATCH_PARENT);
+    EXPECT_EQ(wrapContent1->layoutPolicy, LayoutCalPolicy::WRAP_CONTENT);
+    EXPECT_EQ(fixAtIdealSize1->layoutPolicy, LayoutCalPolicy::FIX_AT_IDEAL_SIZE);
+
+    layoutPolicyAccessor->destroyPeer(matchParent1);
+    layoutPolicyAccessor->destroyPeer(wrapContent1);
+    layoutPolicyAccessor->destroyPeer(fixAtIdealSize1);
+
+    EXPECT_EQ(layoutPolicyAccessor->getMatchParent(), matchParent1);
+    EXPECT_EQ(layoutPolicyAccessor->getWrapContent(), wrapContent1);
+    EXPECT_EQ(layoutPolicyAccessor->getFixAtIdealSize(), fixAtIdealSize1);
+}
+
+/**
+ * @tc.name: constructTestCustomSpanOnMeasureInfoNoMatch
+ * @tc.desc: Verify NO_MATCH layoutPolicy is passed as undefined to onMeasure callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StyledStringAccessorUnionCustomSpanTest, constructTestCustomSpanOnMeasureInfoNoMatch, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->construct, nullptr);
+    g_customSpanMeasureCheck = std::nullopt;
+
+    auto customPeer = AceType::MakeRefPtr<CustomSpanNativePeer>();
+    Ark_CustomSpanWrapper wrap {
+        .nativeObj = Referenced::RawPtr(customPeer),
+        .onMeasure_callback =
+            Converter::ArkValue<Callback_CustomSpanMeasureInfo_CustomSpanMetrics>(
+                CustomSpanMeasureNoMatch, EXPECTED_NODE_ID),
+    };
+    auto value = Converter::ArkUnion<Ark_Union_String_ImageAttachment_CustomSpanWrapper, Ark_CustomSpanWrapper>(wrap);
+    auto styledStringPeer = accessor_->construct(&value, nullptr);
+    ASSERT_NE(styledStringPeer, nullptr);
+    ASSERT_NE(styledStringPeer->spanString, nullptr);
+
+    auto spans = styledStringPeer->spanString->GetSpans(0, 1);
+    ASSERT_EQ(spans.size(), 1);
+    auto customSpan = AceType::DynamicCast<CustomSpan>(spans[0]);
+    ASSERT_NE(customSpan, nullptr);
+    ASSERT_TRUE(customSpan->GetOnMeasure().has_value());
+
+    auto result = customSpan->GetOnMeasure().value()(CustomSpanMeasureInfo {
+        .fontSize = 20.0f,
+        .maxWidth = std::nullopt,
+        .layoutPolicy = LayoutCalPolicy::NO_MATCH,
+    });
+
+    ASSERT_TRUE(g_customSpanMeasureCheck.has_value());
+    EXPECT_FALSE(g_customSpanMeasureCheck->maxWidthDefined);
+    EXPECT_FALSE(g_customSpanMeasureCheck->layoutPolicyDefined);
+    EXPECT_FLOAT_EQ(result.width, 111.0f);
+    EXPECT_FALSE(result.height.has_value());
+    accessor_->destroyPeer(styledStringPeer);
 }
 } // namespace OHOS::Ace::NG
