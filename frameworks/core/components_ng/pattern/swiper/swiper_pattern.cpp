@@ -1379,6 +1379,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_TAB_SWITCH, true);
                 AceAsyncTraceEndCommercial(
                     0, swiper->hasTabsAncestor_ ? APP_TABS_NO_ANIMATION_SWITCH : APP_SWIPER_NO_ANIMATION_SWITCH);
+                swiper->ContentChangeReport(swiper->GetHost(), needSwiperChangeEnd);
             });
         }
         UpdateCurrentIndex(algo->GetCurrentIndex());
@@ -4035,11 +4036,14 @@ void SwiperPattern::PropertyPrefMonitor(bool isBeginPerf)
         isInAutoPlay_ = false;
         if (hasTabsAncestor_) {
             AceAsyncTraceEndCommercial(0, APP_TABS_FLING);
+            ContentChangeReport(GetHost(), true);
         } else if (isAutoPlayAnimationRunning_) {
             isAutoPlayAnimationRunning_ = false;
             PerfMonitor::GetPerfMonitor()->EndCommercial(PerfConstants::AUTO_APP_SWIPER_FLING, true);
+            ContentChangeReport(GetHost(), true);
     } else {
             PerfMonitor::GetPerfMonitor()->EndCommercial(PerfConstants::APP_SWIPER_FLING, true);
+            ContentChangeReport(GetHost(), true);
         }
     }
 }
@@ -4535,6 +4539,7 @@ void SwiperPattern::PlayTranslateAnimation(
             CHECK_NULL_VOID(swiper);
             AceAsyncTraceEndCommercial(
                 0, swiper->hasTabsAncestor_ ? APP_TABS_FRAME_ANIMATION : APP_SWIPER_FRAME_ANIMATION);
+            swiper->ContentChangeReport(swiper->GetHost(), true);
             if (finishAnimation && swiper->translateAnimationIsRunning_) {
                 swiper->isFinishAnimation_ = true;
             }
@@ -6587,6 +6592,7 @@ void SwiperPattern::TriggerCustomContentTransitionEvent(int32_t fromIndex, int32
     auto transition = tabContentAnimatedTransition.transition;
 
     if (!transition) {
+        ContentChangeReport(GetHost(), true);
         OnCustomAnimationFinish(fromIndex, toIndex, false);
         return;
     }
@@ -6598,6 +6604,7 @@ void SwiperPattern::TriggerCustomContentTransitionEvent(int32_t fromIndex, int32
         auto swiperPattern = weak.Upgrade();
         CHECK_NULL_VOID(swiperPattern);
         swiperPattern->OnCustomAnimationFinish(fromIndex, toIndex, hasOnChanged);
+        swiperPattern->ContentChangeReport(swiperPattern->GetHost(), true);
     });
 
     transition(proxy);
@@ -8056,7 +8063,6 @@ std::vector<SwiperItemInfoNG> SwiperPattern::GetShownItemInfoFromIndex(int32_t i
     }
     return infos;
 }
-
 
 void SwiperPattern::ContentChangeReport(const RefPtr<FrameNode>& keyNode, bool needSwiperChangeEnd)
 {
