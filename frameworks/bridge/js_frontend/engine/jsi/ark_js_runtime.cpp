@@ -255,6 +255,25 @@ bool ArkJSRuntime::ExecuteModuleBuffer(const uint8_t* data, int32_t size, const 
     return ret;
 }
 
+bool ArkJSRuntime::ExecuteModuleBufferSecure(uint8_t* data, int32_t size, const std::string& filename,
+    bool needUpdate, void *fileMapper)
+{
+    JSExecutionScope executionScope(vm_);
+    LocalScope scope(vm_);
+    panda::TryCatch trycatch(vm_);
+    bool ret = JSNApi::ExecuteModuleBufferSecure(vm_, data, size, filename, needUpdate, fileMapper);
+    HandleUncaughtException(trycatch);
+    return ret;
+}
+
+void ArkJSRuntime::SetReleaseWorkerSafeMemFunc(ReleaseWorkerSafeMemFunc func)
+{
+    if (func == nullptr) {
+        return;
+    }
+    JSNApi::SetReleaseSecureMemCallback(func);
+}
+
 shared_ptr<JsValue> ArkJSRuntime::EvaluateJsCode([[maybe_unused]] const std::string& src)
 {
     return NewUndefined();
