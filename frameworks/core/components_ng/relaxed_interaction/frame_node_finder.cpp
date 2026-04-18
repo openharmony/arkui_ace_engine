@@ -27,40 +27,53 @@
 
 namespace OHOS::Ace::NG {
 
-bool PanRecognizerPred::operator()(const RefPtr<NGGestureRecognizer>& gestureRecognizer)
-{
-    return AceType::InstanceOf<PanRecognizer>(gestureRecognizer);
-}
-
 bool ClickRecognizerPred::operator()(const RefPtr<NGGestureRecognizer>& gestureRecognizer)
 {
+    auto currentNode = gestureRecognizer->GetAttachedNode().Upgrade();
     return AceType::InstanceOf<ClickRecognizer>(gestureRecognizer);
 }
 
+bool ContentSwitchRecognizerPred::operator()(const RefPtr<NGGestureRecognizer>& gestureRecognizer)
+{
+    std::set<std::string> tags = {
+        V2::SWIPER_ETS_TAG,
+        V2::TABS_ETS_TAG,
+    };
+    auto currentNode = gestureRecognizer->GetAttachedNode().Upgrade();
+    return tags.count(currentNode->GetTag());
+}
 
-FrameNodeFinder::FrameNodeFinder(WeakPtr<PipelineContext> context)
-    : context_(context), pred_(PanRecognizerPred()) {}
+bool ScrollRecognizerPred::operator()(const RefPtr<NGGestureRecognizer>& gestureRecognizer)
+{
+    std::set<std::string> tags = {
+        V2::SCROLL_ETS_TAG,
+        V2::LIST_ETS_TAG,
+    };
+    auto currentNode = gestureRecognizer->GetAttachedNode().Upgrade();
+    return tags.count(currentNode->GetTag());
+}
 
 FrameNodeFinder::FrameNodeFinder(WeakPtr<PipelineContext> context, GestureRecognizerPred pred)
     : context_(context), pred_(pred) {}
 
-std::pair<RefPtr<FrameNode>, GestureEventFunc> FrameNodeFinder::FindAt(float x, float y)
+FrameNodeMatch FrameNodeFinder::FindAt(float x, float y)
 {
     auto context = context_.Upgrade();
     if (!context) {
         TAG_LOGW(AceLogTag::ACE_UIEVENT, "Pipeline context is null, cannot query FrameNode");
-        return std::make_pair(nullptr, nullptr);
+        return {};
     }
 
     auto rootNode = context->GetRootElement();
     if (!rootNode) {
         TAG_LOGW(AceLogTag::ACE_UIEVENT, "Root node is null, cannot query FrameNode at coordinates");
-        return std::make_pair(nullptr, nullptr);
+        return {};
     }
-    return FindAt(rootNode, x, y);
+    auto result = FindAt(rootNode, x, y);
+    return result;
 }
 
-std::pair<RefPtr<FrameNode>, GestureEventFunc> FrameNodeFinder::FindAt(const RefPtr<UINode>& rootNode, float x, float y)
+FrameNodeMatch FrameNodeFinder::FindAt(const RefPtr<UINode>& rootNode, float x, float y)
 {
     TouchEvent touchPoint;
     touchPoint.x = x;
@@ -85,11 +98,11 @@ std::pair<RefPtr<FrameNode>, GestureEventFunc> FrameNodeFinder::FindAt(const Ref
     return result;
 }
 
-std::pair<RefPtr<FrameNode>, GestureEventFunc> FrameNodeFinder::Find(const TouchTestResult& touchTestResult)
+FrameNodeMatch FrameNodeFinder::Find(const TouchTestResult& touchTestResult)
 {
     if (touchTestResult.empty()) {
         TAG_LOGW(AceLogTag::ACE_UIEVENT, "touchTestResult is empty");
-        return std::make_pair(nullptr, nullptr);
+        return {};
     }
 
     for (const auto& recognizer : touchTestResult) {
@@ -103,46 +116,42 @@ std::pair<RefPtr<FrameNode>, GestureEventFunc> FrameNodeFinder::Find(const Touch
         }
 
         auto result = FindLeaf(gestureRecognizer);
-        if (result.first) {
+        if (result) {
             return result;
         }
     }
 
-    return std::make_pair(nullptr, nullptr);
+    return {};
 }
 
-std::pair<RefPtr<FrameNode>, GestureEventFunc> FrameNodeFinder::FindLeaf(
+FrameNodeMatch FrameNodeFinder::FindLeaf(
     const RefPtr<NGGestureRecognizer>& gestureRecognizer)
 {
     if (!gestureRecognizer) {
-        return std::make_pair(nullptr, nullptr);
+        return {};
     }
 
-    // Get attached node of current recognizer
     auto currentNode = gestureRecognizer->GetAttachedNode().Upgrade();
     auto recognizerGroup = AceType::DynamicCast<RecognizerGroup>(gestureRecognizer);
-    auto ret = pred_(gestureRecognizer);
-    if ((!recognizerGroup || recognizerGroup->GetGroupRecognizer().empty()) && ret) {
-        auto clickRecognizer = AceType::DynamicCast<ClickRecognizer>(gestureRecognizer);
-        if (clickRecognizer) {
-            return std::make_pair(currentNode, clickRecognizer->GetTapActionFunc());
+    if (!recognizerGroup || recognizerGroup->GetGroupRecognizer().empty()) {
+        if (pred_(gestureRecognizer)) {
+            return gestureRecognizer;
         }
-        return std::make_pair(currentNode, nullptr);
+        return {};
     }
 
-    // Recursively find leaf node - prioritize child recognizers
     for (const auto& childRecognizer : recognizerGroup->GetGroupRecognizer()) {
         auto childGestureRecognirozer = AceType::DynamicCast<NGGestureRecognizer>(childRecognizer);
         if (!childGestureRecognirozer) {
             continue;
         }
         auto childResult = FindLeaf(childGestureRecognirozer);
-        if (childResult.first) {
-            currentNode = childResult.first;
-            break;
+        if (childResult) {
+            return childResult;
         }
     }
-    return std::make_pair(currentNode, nullptr);
+
+    return {};
 }
 
 void FrameNodeFinder::CleanResult(const TouchTestResult& touchTestResult, int32_t touchId)

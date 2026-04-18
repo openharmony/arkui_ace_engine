@@ -62,7 +62,6 @@ public:
 
 private:
     Command cmd_;
-
     std::queue<TouchEvent> touchEvents_;
 };
 

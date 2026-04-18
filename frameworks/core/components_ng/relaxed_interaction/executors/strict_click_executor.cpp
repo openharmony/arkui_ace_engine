@@ -28,6 +28,7 @@ StrictClickExecutor::StrictClickExecutor(WeakPtr<PipelineContext> context, const
 
 ExecutorResult StrictClickExecutor::ExecuteStep()
 {
+    TAG_LOGD(AceLogTag::ACE_UIEVENT, "StrictClickExecutor ExecuteStep begin.");
     auto context = context_.Upgrade();
     if (!context) {
         TAG_LOGE(AceLogTag::ACE_UIEVENT, "Pipeline context is null");
@@ -36,18 +37,20 @@ ExecutorResult StrictClickExecutor::ExecuteStep()
 
     // Use FrameNodeFinder to query FrameNode at coordinates
     auto result = FindFrameNode(coordinates_.GetX(), coordinates_.GetY(), ClickRecognizerPred());
-    if (!result.first) {
+    if (!result.GetNode()) {
         TAG_LOGD(AceLogTag::ACE_UIEVENT, "No FrameNode found at coordinates (%{private}.2f, %{private}.2f)",
                  coordinates_.GetX(), coordinates_.GetY());
         return ExecutorResult::FAILED;
     }
-
-    if (result.second) {
-        auto info = RelaxedEventFactory::CreateClickGestureEvent(result.first);
-        result.second(info);
-        return ExecutorResult::SUCCESS;
+    if (!result.GetClickFunc()) {
+        TAG_LOGD(AceLogTag::ACE_UIEVENT, "StrictClickExecutor GetClickFun failed.");
+        return ExecutorResult::FAILED;
     }
-    return ExecutorResult::FAILED;
+
+    auto info = RelaxedEventFactory::CreateClickGestureEvent(result.GetNode());
+    result.GetClickFunc()(info);
+    TAG_LOGD(AceLogTag::ACE_UIEVENT, "StrictClickExecutor ExecuteStep end.");
+    return ExecutorResult::SUCCESS;
 }
 
 } // namespace OHOS::Ace::NG

@@ -31,11 +31,51 @@ class PipelineContext;
 
 using GestureRecognizerPred = std::function<bool (const RefPtr<NGGestureRecognizer>& gestureRecognizer)>;
 
-struct PanRecognizerPred {
-    bool operator()(const RefPtr<NGGestureRecognizer>& gestureRecognizer);
+class FrameNodeMatch {
+public:
+    FrameNodeMatch() = default;
+    FrameNodeMatch(const RefPtr<NGGestureRecognizer>& gestureRecognizer)
+        : gestureRecognizer_(gestureRecognizer)
+    {
+        if (!gestureRecognizer_) {
+            return;
+        }
+        node_ = gestureRecognizer_->GetAttachedNode().Upgrade();
+    }
+
+    explicit operator bool() const noexcept
+    {
+        return gestureRecognizer_;
+    }
+
+    RefPtr<FrameNode> GetNode() const
+    {
+        return node_;
+    }
+
+    GestureEventFunc GetClickFunc() const
+    {
+        auto clickRecognizer = AceType::DynamicCast<ClickRecognizer>(gestureRecognizer_);
+        if (!clickRecognizer) {
+            return nullptr;
+        }
+        return clickRecognizer->GetTapActionFunc();
+    }
+
+private:
+    RefPtr<NGGestureRecognizer> gestureRecognizer_;
+    RefPtr<FrameNode> node_;
 };
 
 struct ClickRecognizerPred {
+    bool operator()(const RefPtr<NGGestureRecognizer>& gestureRecognizer);
+};
+
+struct ContentSwitchRecognizerPred {
+    bool operator()(const RefPtr<NGGestureRecognizer>& gestureRecognizer);
+};
+
+struct ScrollRecognizerPred {
     bool operator()(const RefPtr<NGGestureRecognizer>& gestureRecognizer);
 };
 
@@ -48,7 +88,6 @@ struct ClickRecognizerPred {
  */
 class FrameNodeFinder {
 public:
-    explicit FrameNodeFinder(WeakPtr<PipelineContext> context);
     explicit FrameNodeFinder(WeakPtr<PipelineContext> context, GestureRecognizerPred pred);
     ~FrameNodeFinder() = default;
 
@@ -62,15 +101,15 @@ public:
      * @param y Screen Y coordinate
      * @return RefPtr<FrameNode> Pointer to the found FrameNode, returns nullptr if not found
      */
-    std::pair<RefPtr<FrameNode>, GestureEventFunc> FindAt(float x, float y);
+    FrameNodeMatch FindAt(float x, float y);
 
 private:
     WeakPtr<PipelineContext> context_;
     GestureRecognizerPred pred_;
 
-    std::pair<RefPtr<FrameNode>, GestureEventFunc> FindAt(const RefPtr<UINode>& rootNode, float x, float y);
-    std::pair<RefPtr<FrameNode>, GestureEventFunc> Find(const TouchTestResult& touchTestResult);
-    std::pair<RefPtr<FrameNode>, GestureEventFunc> FindLeaf(const RefPtr<NGGestureRecognizer>& gestureRecognizer);
+    FrameNodeMatch FindAt(const RefPtr<UINode>& rootNode, float x, float y);
+    FrameNodeMatch Find(const TouchTestResult& touchTestResult);
+    FrameNodeMatch FindLeaf(const RefPtr<NGGestureRecognizer>& gestureRecognizer);
     void CleanResult(const TouchTestResult& touchTestResult, int32_t touchId);
     void GetFrameNodes(std::set<WeakPtr<NG::FrameNode>>& frameNodes,
         const std::list<RefPtr<NG::NGGestureRecognizer>>& touchTestResults);
