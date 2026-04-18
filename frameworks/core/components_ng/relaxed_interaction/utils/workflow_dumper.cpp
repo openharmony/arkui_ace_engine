@@ -13,18 +13,35 @@
  * limitations under the License.
  */
 
-#include "relaxed_interaction_manager_test_ng.h"
+#include "core/components_ng/relaxed_interaction/utils/workflow_dumper.h"
 
-using namespace testing;
-using namespace testing::ext;
+#include <sstream>
 
 namespace OHOS::Ace::NG {
 
-class RelaxedInteractionManagerTestCore : public RelaxedInteractionManagerTestBase {};
-
-HWTEST_F(RelaxedInteractionManagerTestCore, RelaxedInteractionManagerTestPlaceholder, TestSize.Level1)
+WorkflowDumper& WorkflowDumper::GetInstance()
 {
-    EXPECT_TRUE(true);
+    static WorkflowDumper instance;
+    return instance;
+}
+
+void WorkflowDumper::AddLog(const std::string& log)
+{
+    if (logs_.size() >= LIMIT) {
+        logs_.pop_front();
+    }
+
+    logs_.push_back(log);
+}
+
+std::string WorkflowDumper::Dump() const
+{
+    std::ostringstream buffer("\n");
+    for (const auto& log : logs_) {
+        buffer << log << "\n";
+    }
+
+    return buffer.str();
 }
 
 } // namespace OHOS::Ace::NG

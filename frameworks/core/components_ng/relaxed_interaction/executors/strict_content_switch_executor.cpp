@@ -13,30 +13,37 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/relaxed_interaction/executors/backpress_executor.h"
-
-#include "interfaces/inner_api/ace/ui_content.h"
+#include "core/components_ng/relaxed_interaction/executors/strict_content_switch_executor.h"
 
 #include "base/log/log_wrapper.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
-BackpressExecutor::BackpressExecutor(WeakPtr<PipelineContext> context) : BaseExecutor(context) {}
+StrictContentSwitchExecutor::StrictContentSwitchExecutor(WeakPtr<PipelineContext> context, const std::string mode,
+    const std::string direction, const uint32_t count, const PointF& coordinates)
+    : BaseExecutor(context), mode_(mode), direction_(direction), count_(count), coordinates_(coordinates)
+{}
 
-ExecutorResult BackpressExecutor::ExecuteStep()
+ExecutorResult StrictContentSwitchExecutor::ExecuteStep()
 {
     auto context = context_.Upgrade();
     if (!context) {
+        TAG_LOGW(AceLogTag::ACE_UIEVENT, "Pipeline context is null");
         return ExecutorResult::FAILED;
     }
 
-    UIContent* uiContent = UIContent::GetUIContent(context->GetInstanceId());
-    if (!uiContent) {
+    auto result = FindFrameNode(coordinates_.GetX(), coordinates_.GetY(), ContentSwitchRecognizerPred());
+    if (!result.GetNode()) {
         return ExecutorResult::FAILED;
     }
-    bool result = uiContent->ProcessBackPressed();
-    return result ? ExecutorResult::SUCCESS : ExecutorResult::FAILED;
+
+    return TriggerContentSwitch(result.GetNode());
+}
+
+ExecutorResult StrictContentSwitchExecutor::TriggerContentSwitch(const RefPtr<FrameNode> frameNode)
+{
+    return ExecutorResult::SUCCESS;
 }
 
 } // namespace OHOS::Ace::NG

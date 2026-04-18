@@ -13,18 +13,27 @@
  * limitations under the License.
  */
 
-#include "relaxed_interaction_manager_test_ng.h"
+#include "core/components_ng/relaxed_interaction/utils/json_utils.h"
 
-using namespace testing;
-using namespace testing::ext;
+#include <cmath>
+
+#include "base/log/log_wrapper.h"
 
 namespace OHOS::Ace::NG {
 
-class RelaxedInteractionManagerTestCore : public RelaxedInteractionManagerTestBase {};
-
-HWTEST_F(RelaxedInteractionManagerTestCore, RelaxedInteractionManagerTestPlaceholder, TestSize.Level1)
+bool JsonUtils::IsUint(const std::unique_ptr<JsonValue>& json)
 {
-    EXPECT_TRUE(true);
+    return IsUint(json.get());
+}
+
+bool JsonUtils::IsUint(const JsonValue* json)
+{
+    if (!json || !json->IsNumber()) {
+        return false;
+    }
+
+    double value = json->GetDouble();
+    return value >= 0.0 && std::fabs(value - std::floor(value)) < 1e-10;
 }
 
 } // namespace OHOS::Ace::NG

@@ -13,38 +13,49 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RELAXED_INTERACTION_BACKPRESS_EXECUTOR_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RELAXED_INTERACTION_BACKPRESS_EXECUTOR_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RELAXED_INTERACTION_SCROLL_EXECUTOR_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RELAXED_INTERACTION_SCROLL_EXECUTOR_H
 
+#include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/relaxed_interaction/base_executor.h"
 
 namespace OHOS::Ace::NG {
 
 class PipelineContext;
 
-class BackpressExecutor : public BaseExecutor {
+class ScrollTouchExecutor : public BaseExecutor {
 public:
-    explicit BackpressExecutor(WeakPtr<PipelineContext> context);
-    ~BackpressExecutor() override = default;
+    explicit ScrollTouchExecutor(WeakPtr<PipelineContext> context, const Command& cmd);
+    ~ScrollTouchExecutor() override = default;
 
     ExecutorResult ExecuteStep() override;
 
-    std::string GetType() const override
+    virtual std::string GetType() const override
     {
-        return BACKPRESS;
+        return "scroll_touch";
     }
 
-    std::string GetDescription() const override
+    virtual std::string GetDescription() const override
     {
         return BaseExecutor::GetDescription();
     }
 
-    bool IsSingleStep() const override
+    virtual bool IsSingleStep() const override
     {
         return true;
     }
+
+    static PointF ToPoint(const ScrollActionInfo& actionInfo);
+
+private:
+    bool ExecuteTargetMode();
+
+    RefPtr<ScrollPattern> FindScrollPattern(float x, float y);
+
+private:
+    Command cmd_;
 };
 
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RELAXED_INTERACTION_BACKPRESS_EXECUTOR_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RELAXED_INTERACTION_SCROLL_EXECUTOR_H

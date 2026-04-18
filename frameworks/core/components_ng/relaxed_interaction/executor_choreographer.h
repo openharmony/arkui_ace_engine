@@ -53,6 +53,8 @@ public:
 private:
     bool MoveToNext();
 
+    std::string ExecutorResultToString(ExecutorResult result);
+
     std::deque<std::unique_ptr<BaseExecutor>> executorQueue_;
 
     std::unique_ptr<BaseExecutor> currentExecutor_;

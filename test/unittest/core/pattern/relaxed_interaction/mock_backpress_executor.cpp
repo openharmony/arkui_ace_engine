@@ -14,10 +14,6 @@
  */
 
 #include "core/components_ng/relaxed_interaction/executors/backpress_executor.h"
-
-#include "interfaces/inner_api/ace/ui_content.h"
-
-#include "base/log/log_wrapper.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -26,17 +22,7 @@ BackpressExecutor::BackpressExecutor(WeakPtr<PipelineContext> context) : BaseExe
 
 ExecutorResult BackpressExecutor::ExecuteStep()
 {
-    auto context = context_.Upgrade();
-    if (!context) {
-        return ExecutorResult::FAILED;
-    }
-
-    UIContent* uiContent = UIContent::GetUIContent(context->GetInstanceId());
-    if (!uiContent) {
-        return ExecutorResult::FAILED;
-    }
-    bool result = uiContent->ProcessBackPressed();
-    return result ? ExecutorResult::SUCCESS : ExecutorResult::FAILED;
+    return ExecutorResult::FAILED;
 }
 
 } // namespace OHOS::Ace::NG

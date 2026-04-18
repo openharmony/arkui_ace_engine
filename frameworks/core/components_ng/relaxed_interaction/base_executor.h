@@ -18,15 +18,14 @@
 
 #include <string>
 
-#include "base/geometry/ng/point_t.h"
 #include "base/memory/referenced.h"
+#include "core/components_ng/relaxed_interaction/frame_node_finder.h"
 #include "core/components_ng/relaxed_interaction/relaxed_interaction_types.h"
 
 namespace OHOS::Ace::NG {
 
 class PipelineContext;
-class Component;
-class Window;
+class FrameNode;
 
 class BaseExecutor {
 public:
@@ -37,18 +36,16 @@ public:
 
     virtual std::string GetType() const = 0;
 
-    virtual std::string GetDescription() const = 0;
-
     virtual bool IsSingleStep() const = 0;
 
-protected:
-    WeakPtr<PipelineContext> context_;
+    virtual std::string GetDescription() const
+    {
+        return "{executorType='" + GetType() + "', isSingleStep=" + (IsSingleStep() ? "true" : "false") + "}";
+    }
 
-    Component* QueryComponentAt(float x, float y);
-    Component* GetPrimaryActionTarget();
-    Window* GetWindow();
-    void* GetSmartGesture();
-    PointF GetWindowCenter();
+protected:
+    FrameNodeMatch FindFrameNode(double x, double y, GestureRecognizerPred pred);
+    WeakPtr<PipelineContext> context_;
 };
 
 } // namespace OHOS::Ace::NG

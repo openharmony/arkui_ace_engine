@@ -13,38 +13,45 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RELAXED_INTERACTION_BACKPRESS_EXECUTOR_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RELAXED_INTERACTION_BACKPRESS_EXECUTOR_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RELAXED_INTERACTION_STRICT_CLICK_EXECUTOR_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RELAXED_INTERACTION_STRICT_CLICK_EXECUTOR_H
 
+#include <list>
+#include <memory>
+
+#include "base/geometry/ng/point_t.h"
 #include "core/components_ng/relaxed_interaction/base_executor.h"
 
 namespace OHOS::Ace::NG {
 
 class PipelineContext;
 
-class BackpressExecutor : public BaseExecutor {
+class StrictClickExecutor : public BaseExecutor {
 public:
-    explicit BackpressExecutor(WeakPtr<PipelineContext> context);
-    ~BackpressExecutor() override = default;
+    explicit StrictClickExecutor(WeakPtr<PipelineContext> context, const PointF& coordinates);
+    ~StrictClickExecutor() override = default;
 
     ExecutorResult ExecuteStep() override;
 
-    std::string GetType() const override
+    virtual std::string GetType() const override
     {
-        return BACKPRESS;
+        return "strict_click";
     }
 
-    std::string GetDescription() const override
+    virtual std::string GetDescription() const override
     {
         return BaseExecutor::GetDescription();
     }
 
-    bool IsSingleStep() const override
+    virtual bool IsSingleStep() const override
     {
         return true;
     }
+
+private:
+    PointF coordinates_;
 };
 
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RELAXED_INTERACTION_BACKPRESS_EXECUTOR_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RELAXED_INTERACTION_STRICT_CLICK_EXECUTOR_H
