@@ -455,7 +455,7 @@ public:
     int32_t CalcExpectedFrameRate(const std::string& scene, float speed) override;
 
     void SetBackgroundShader(const std::shared_ptr<Rosen::RSShader>& shader);
-    void SetHDRColorHeadRoom(float headRoom);
+    ACE_FORCE_EXPORT void SetHDRColorHeadRoom(float headRoom);
 
     // used in arkts_native_render_node_modifier set property directly to rsNode
     void SetRotation(float rotationX, float rotationY, float rotationZ) override;
