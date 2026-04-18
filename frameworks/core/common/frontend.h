@@ -187,6 +187,8 @@ public:
         return UIContentErrorCode::NO_ERRORS;
     }
 
+    virtual void CallRunIntentPageFromNative(const std::string& url, const std::string& paramStr) {}
+
     virtual std::string GetTopNavDestinationInfo(bool onlyFullScreen, bool needParam)
     {
         return "";

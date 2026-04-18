@@ -4257,26 +4257,12 @@ void AssignCast(std::optional<double>& dst, const Ark_LevelOrderExtender& src)
 template<>
 void AssignCast(std::optional<Color>& dst, const Ark_ColorMetricsExt& src)
 {
-    bool isHDR = Converter::Convert<bool>(src.isHDR);
-    ColorSpace colorSpace = static_cast<ColorSpace>(src.colorSpace);
-    if (!isHDR && colorSpace != ColorSpace::BT2020) {
-        uint8_t red = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.red));
-        uint8_t green = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.green));
-        uint8_t blue = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.blue));
-        uint8_t alpha = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.alpha));
-        dst = Color::FromARGB(alpha, red, green, blue);
-        dst->SetColorSpace(colorSpace);
-        return;
-    } else {
-        double red = Converter::Convert<double>(src.redValue);
-        double green = Converter::Convert<double>(src.greenValue);
-        double blue = Converter::Convert<double>(src.blueValue);
-        double alpha = static_cast<double>(Converter::Convert<uint32_t>(src.alpha));
-        double headRoom = Converter::Convert<double>(src.headRoom);
-        dst = Color::FromFloat(red, green, blue, alpha, headRoom);
-        dst->SetColorSpace(colorSpace);
-        return;
-    }
+    uint8_t red = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.red));
+    uint8_t green = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.green));
+    uint8_t blue = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.blue));
+    uint8_t alpha = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.alpha));
+    dst = Color::FromARGB(alpha, red, green, blue);
+    dst->SetColorSpace(static_cast<ColorSpace>(src.colorSpace));
 }
 
 template<>

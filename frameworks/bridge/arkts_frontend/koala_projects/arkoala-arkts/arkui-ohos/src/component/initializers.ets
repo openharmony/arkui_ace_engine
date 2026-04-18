@@ -75,11 +75,6 @@ export namespace initializers {
                 export const alpha = 0
                 export const colorSpace = ColorSpace.SRGB
                 export const resourceId = -1
-                export const redValue = 0.0
-                export const greenValue = 0.0
-                export const blueValue = 0.0
-                export const headRoom = 1.0
-                export const isHDR = false
             }
             export namespace TouchEventProxyNS {
                 export const target: EventTarget = { area: { width: 0, height: 0, position: {}, globalPosition: {} } }

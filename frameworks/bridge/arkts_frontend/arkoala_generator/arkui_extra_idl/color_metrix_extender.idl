@@ -30,15 +30,4 @@ interface ColorMetricsExt {
     attribute ColorSpace colorSpace;
     [Accessor=Getter]
     attribute i32 resourceId;
-
-    [Accessor=Getter]
-    attribute f64 redValue;
-    [Accessor=Getter]
-    attribute f64 greenValue;
-    [Accessor=Getter]
-    attribute f64 blueValue;
-    [Accessor=Getter]
-    attribute f64 headRoom;
-    [Accessor=Getter]
-    attribute boolean isHDR;
 };

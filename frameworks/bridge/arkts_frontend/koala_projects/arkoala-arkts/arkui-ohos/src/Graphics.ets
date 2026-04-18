@@ -122,7 +122,6 @@ export class ColorMetrics {
     private redValue_: double = 0.0;
     private greenValue_: double = 0.0;
     private blueValue_: double = 0.0;
-    private headRoom_: double = 1.0;
     static readonly WHITE: int32 = 0xffffffff.toInt();
     static readonly BLACK: int32 = 0xff000000.toInt();
     static readonly BLUE: int32 = 0xff0000ff.toInt();
@@ -161,30 +160,6 @@ export class ColorMetrics {
     }
     set alpha(alpha: int32) {
         this.alpha_ = alpha;
-    }
-    get redValue(): double {
-        return this.redValue_;
-    }
-    set redValue(redValue: double) {
-        this.redValue_ = redValue;
-    }
-    get greenValue(): double {
-        return this.greenValue_;
-    }
-    set greenValue(greenValue: double) {
-        this.greenValue_ = greenValue;
-    }
-    get blueValue(): double {
-        return this.blueValue_;
-    }
-    set blueValue(blueValue: double) {
-        this.blueValue_ = blueValue;
-    }
-    get headRoom(): double {
-        return this.headRoom_;
-    }
-    set headRoom(headRoom: double) {
-        this.headRoom_ = headRoom;
     }
     set resourceId(id: int32) {
         this.resourceId_ = id;
@@ -238,9 +213,6 @@ export class ColorMetrics {
         }
         const colorMetrics = new ColorMetrics(red_casted, green_casted, blue_casted, alpha_casted);
         colorMetrics.setColorSpace(colorSpace);
-        if (colorSpace === ColorSpace.BT2020) {
-            colorMetrics.setColorWithHeadRoom(red, green, blue);
-        }
         return colorMetrics;
     }
     private static rgbOrRGBA(format: string): ColorMetrics {
@@ -358,74 +330,75 @@ export class ColorMetrics {
         return this.resourceId_;
     }
     setColorSpace(colorSpace: ColorSpace): void {
-        if (ColorSpace.DISPLAY_P3 === colorSpace || ColorSpace.SRGB === colorSpace ||
-            ColorSpace.BT2020 === colorSpace) {
+        if (ColorSpace.DISPLAY_P3 === colorSpace || ColorSpace.SRGB === colorSpace) {
             this.colorSpace_ = colorSpace;
         }
     }
     getColorSpace(): ColorSpace {
         return this.colorSpace_;
     }
-    setColorWithHeadRoom(red: double, green: double, blue: double, headRoom: double = 1.0): void {
-        this.redValue_ = red;
-        this.greenValue_ = green;
-        this.blueValue_ = blue;
-        this.headRoom_ = headRoom;
-    }
-    setIsHDR(isHDR: boolean): void {
-        this.isHDR_ = isHDR;
-    }
     isHDR(): boolean {
         return this.isHDR_;
     }
     getRedValue(): double {
-        return this.redValue_ * this.headRoom_;
+        return this.redValue_;
     }
     getGreenValue(): double {
-        return this.greenValue_ * this.headRoom_;
+        return this.greenValue_;
     }
     getBlueValue(): double {
-        return this.blueValue_ * this.headRoom_;
+        return this.blueValue_;
     }
-    getHeadRoomValue(): double {
-        return this.headRoom_;
-    }
-    public static createHDRColorWithLinearExposure(linearExposure: double, colorSpace: ColorSpace, red: double, green: double, blue: double, alpha: double = 1.0): ColorMetrics {
-        const clampedLinearExposure = Math.max(linearExposure, 1);
-        const colorMetrics = new ColorMetrics(0, 0, 0, alpha);
-        colorMetrics.setIsHDR(true);
-        colorMetrics.setColorSpace(colorSpace);
-        const clampedRed = Math.min(Math.max(red, 0), 1);
-        const clampedGreen = Math.min(Math.max(green, 0), 1);
-        const clampedBlue = Math.min(Math.max(blue, 0), 1);
-        colorMetrics.setColorWithHeadRoom(clampedRed, clampedGreen, clampedBlue, clampedLinearExposure);
-        return colorMetrics;
-    }
-    public static createHDRColorWithLogExposure(exposure: double, colorSpace: ColorSpace, red: double, green: double, blue: double, alpha: double = 1.0): ColorMetrics {
-        const clampedExposure = Math.max(exposure, 0);
-        const colorMetrics = new ColorMetrics(0, 0, 0, alpha);
-        colorMetrics.setIsHDR(true);
-        colorMetrics.setColorSpace(colorSpace);
-        const linearExposure = Math.pow(2.0, clampedExposure);
-        const clampedRed = Math.min(Math.max(red, 0), 1);
-        const clampedGreen = Math.min(Math.max(green, 0), 1);
-        const clampedBlue = Math.min(Math.max(blue, 0), 1);
-        colorMetrics.setColorWithHeadRoom(clampedRed, clampedGreen, clampedBlue, linearExposure);
-        return colorMetrics;
-    }
-    public static createHDRColor(colorSpace: ColorSpace, red: double, green: double, blue: double, alpha: double = 1.0): ColorMetrics {
-        const colorMetrics = new ColorMetrics(0, 0, 0, alpha);
-        colorMetrics.setIsHDR(true);
-        colorMetrics.setColorSpace(colorSpace);
-        const clampedRed = Math.max(red, 0);
-        const clampedGreen = Math.max(green, 0);
-        const clampedBlue = Math.max(blue, 0);
-        const maxValue = Math.max(clampedRed, clampedGreen, clampedBlue);
-        let headRoom = 1.0;
-        if (maxValue > 1.0) {
-            headRoom = maxValue;
+    public static createHDRColorWithLinearExposure(linearExposure: double, colorSpace: ColorSpace, red: double, green: double, blue: double, alpha?: double): ColorMetrics {
+        const colorMetrics = new ColorMetrics();
+        colorMetrics.isHDR_ = true;
+        colorMetrics.colorSpace_ = colorSpace;
+        colorMetrics.redValue_ = red * linearExposure;
+        colorMetrics.greenValue_ = green * linearExposure;
+        colorMetrics.blueValue_ = blue * linearExposure;
+        colorMetrics.red_ = ColorMetrics.clamp(Math.round(colorMetrics.redValue_ * MAX_CHANNEL_VALUE)) as int32;
+        colorMetrics.green_ = ColorMetrics.clamp(Math.round(colorMetrics.greenValue_ * MAX_CHANNEL_VALUE)) as int32;
+        colorMetrics.blue_ = ColorMetrics.clamp(Math.round(colorMetrics.blueValue_ * MAX_CHANNEL_VALUE)) as int32;
+        if (alpha !== undefined && alpha !== null) {
+            colorMetrics.alpha_ = ColorMetrics.clamp(Math.round(alpha * MAX_CHANNEL_VALUE)) as int32;
+        } else {
+            colorMetrics.alpha_ = MAX_CHANNEL_VALUE;
         }
-        colorMetrics.setColorWithHeadRoom(clampedRed / headRoom, clampedGreen / headRoom, clampedBlue / headRoom, headRoom);
+        return colorMetrics;
+    }
+    public static createHDRColorWithLogExposure(exposure: double, colorSpace: ColorSpace, red: double, green: double, blue: double, alpha?: double): ColorMetrics {
+        const colorMetrics = new ColorMetrics();
+        colorMetrics.isHDR_ = true;
+        colorMetrics.colorSpace_ = colorSpace;
+        const linearExposure = Math.pow(2.0, exposure);
+        colorMetrics.redValue_ = red * linearExposure;
+        colorMetrics.greenValue_ = green * linearExposure;
+        colorMetrics.blueValue_ = blue * linearExposure;
+        colorMetrics.red_ = ColorMetrics.clamp(Math.round(colorMetrics.redValue_ * MAX_CHANNEL_VALUE)) as int32;
+        colorMetrics.green_ = ColorMetrics.clamp(Math.round(colorMetrics.greenValue_ * MAX_CHANNEL_VALUE)) as int32;
+        colorMetrics.blue_ = ColorMetrics.clamp(Math.round(colorMetrics.blueValue_ * MAX_CHANNEL_VALUE)) as int32;
+        if (alpha !== undefined && alpha !== null) {
+            colorMetrics.alpha_ = ColorMetrics.clamp(Math.round(alpha * MAX_CHANNEL_VALUE)) as int32;
+        } else {
+            colorMetrics.alpha_ = MAX_CHANNEL_VALUE;
+        }
+        return colorMetrics;
+    }
+    public static createHDRColor(colorSpace: ColorSpace, red: double, green: double, blue: double, alpha?: double): ColorMetrics {
+        const colorMetrics = new ColorMetrics();
+        colorMetrics.isHDR_ = true;
+        colorMetrics.colorSpace_ = colorSpace;
+        colorMetrics.redValue_ = red;
+        colorMetrics.greenValue_ = green;
+        colorMetrics.blueValue_ = blue;
+        colorMetrics.red_ = ColorMetrics.clamp(Math.round(red * MAX_CHANNEL_VALUE)) as int32;
+        colorMetrics.green_ = ColorMetrics.clamp(Math.round(green * MAX_CHANNEL_VALUE)) as int32;
+        colorMetrics.blue_ = ColorMetrics.clamp(Math.round(blue * MAX_CHANNEL_VALUE)) as int32;
+        if (alpha !== undefined && alpha !== null) {
+            colorMetrics.alpha_ = ColorMetrics.clamp(Math.round(alpha * MAX_CHANNEL_VALUE)) as int32;
+        } else {
+            colorMetrics.alpha_ = MAX_CHANNEL_VALUE;
+        }
         return colorMetrics;
     }
 }

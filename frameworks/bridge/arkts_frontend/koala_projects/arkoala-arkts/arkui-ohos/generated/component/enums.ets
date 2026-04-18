@@ -622,8 +622,7 @@ export enum AnimationPropertyType {
 }
 export enum ColorSpace {
     SRGB = 0,
-    DISPLAY_P3 = 1,
-    BT2020,
+    DISPLAY_P3 = 1
 }
 export enum AxisType {
     VERTICAL_AXIS = 0,

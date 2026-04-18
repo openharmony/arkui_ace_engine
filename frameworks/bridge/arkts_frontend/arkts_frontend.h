@@ -112,6 +112,12 @@ public:
 
     UIContentErrorCode RunPageByNamedRouter(const std::string& name, const std::string& params) override;
 
+    UIContentErrorCode RunIntentPage() override;
+    void CallRunIntentPageFromNative(const std::string& url, const std::string& paramStr) override;
+
+    UIContentErrorCode SetRouterIntentInfo(const std::string& intentInfoSerialized, bool isColdStart,
+        const std::function<void()>&& loadPageCallback) override;
+
     void ReplacePage(const std::string& url, const std::string& params) override {}
 
     void PushPage(const std::string& url, const std::string& params) override {}
