@@ -4017,10 +4017,13 @@ class ArkComponent {
         if (this._instanceId !== -1) {
           __JSScopeUtil__.syncInstanceId(this._instanceId);
         }
-        value.applyStageImmediately(this.nativePtr, this);
-        getUINativeModule().frameNode.propertyUpdate(this.nativePtr);
-        if (this._instanceId !== -1) {
-          __JSScopeUtil__.restoreInstanceId();
+        try {
+          value.applyStageImmediately(this.nativePtr, this);
+          getUINativeModule().frameNode.propertyUpdate(this.nativePtr);
+        } finally {
+          if (this._instanceId !== -1) {
+            __JSScopeUtil__.restoreInstanceId();
+          }
         }
       });
       this._modifiersWithKeys.setFrameNode(true);

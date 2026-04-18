@@ -136,19 +136,23 @@ class JSBuilderNode extends BaseNode {
   }
   public static createForTrans(uiContext: UIContext, nodePtr: number, frameNodePtr: number): JSBuilderNode {
     __JSScopeUtil__.syncInstanceId(uiContext.instanceId_);
-    let jsBuilderNode = new JSBuilderNode(uiContext, {});
-    let nativeRef = getUINativeModule().frameNode.createNativeStrongRefWithPtrVal(nodePtr);
-    let frameNode = new BuilderRootFrameNode(uiContext, 'BuilderRootFrameNode', frameNodePtr); 
-    frameNode.setNodePtr(nativeRef, nativeRef.getNativeHandle());
-    frameNode.setRenderNode(nativeRef);
-    frameNode.setBaseNode(jsBuilderNode);
-    frameNode.setBuilderNode(jsBuilderNode);
-    FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.set(frameNode.getUniqueId(), new WeakRef(frameNode));
+    let jsBuilderNode: JSBuilderNode;
+    try {
+      jsBuilderNode = new JSBuilderNode(uiContext, {});
+      let nativeRef = getUINativeModule().frameNode.createNativeStrongRefWithPtrVal(nodePtr);
+      let frameNode = new BuilderRootFrameNode(uiContext, 'BuilderRootFrameNode', frameNodePtr); 
+      frameNode.setNodePtr(nativeRef, nativeRef.getNativeHandle());
+      frameNode.setRenderNode(nativeRef);
+      frameNode.setBaseNode(jsBuilderNode);
+      frameNode.setBuilderNode(jsBuilderNode);
+      FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.set(frameNode.getUniqueId(), new WeakRef(frameNode));
 
-    jsBuilderNode._nativeRef = nativeRef;
-    jsBuilderNode.nodePtr_ = nativeRef.getNativeHandle();
-    jsBuilderNode.frameNode_ = frameNode;
-    __JSScopeUtil__.restoreInstanceId();
+      jsBuilderNode._nativeRef = nativeRef;
+      jsBuilderNode.nodePtr_ = nativeRef.getNativeHandle();
+      jsBuilderNode.frameNode_ = frameNode;
+    } finally {
+      __JSScopeUtil__.restoreInstanceId();
+    }
     return jsBuilderNode;
   }
   public findProvidePU__(providePropName: string): ObservedPropertyAbstractPU<any> | undefined {
@@ -194,13 +198,19 @@ class JSBuilderNode extends BaseNode {
   }
   public onReuseWithBindObject(param?: Object): void {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    super.onReuseWithBindObject(param);
-    __JSScopeUtil__.restoreInstanceId();
+    try {
+      super.onReuseWithBindObject(param);
+    } finally {
+      __JSScopeUtil__.restoreInstanceId();
+    }
   }
   public onRecycleWithBindObject(): void {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    super.onRecycleWithBindObject();
-    __JSScopeUtil__.restoreInstanceId();
+    try {
+      super.onRecycleWithBindObject();
+    } finally {
+      __JSScopeUtil__.restoreInstanceId();
+    }
   }
   public inheritFreezeOptions(enable: boolean): void {
     this.inheritFreeze = enable;
@@ -267,39 +277,42 @@ class JSBuilderNode extends BaseNode {
   }
   public build(builder: WrappedBuilder<Object[]>, params?: Object, options?: BuildOptions): void {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    this._supportNestingBuilder = options?.nestingBuilderSupported ? options.nestingBuilderSupported : false;
-    this.clearChildBuilderNodeWeakMap();
-    const supportLazyBuild = options?.lazyBuildSupported ? options.lazyBuildSupported : false;
-    this.bindedViewOfBuilderNode = options?.bindedViewOfBuilderNode;
-    this.__enableBuilderNodeConsume__ = (options?.enableProvideConsumeCrossing) ? (options?.enableProvideConsumeCrossing) : false;
-    this.params_ = params;
-    if (options?.localStorage instanceof LocalStorage) {
-      this.setShareLocalStorage(options.localStorage);
+    try {
+      this._supportNestingBuilder = options?.nestingBuilderSupported ? options.nestingBuilderSupported : false;
+      this.clearChildBuilderNodeWeakMap();
+      const supportLazyBuild = options?.lazyBuildSupported ? options.lazyBuildSupported : false;
+      this.bindedViewOfBuilderNode = options?.bindedViewOfBuilderNode;
+      this.__enableBuilderNodeConsume__ = (options?.enableProvideConsumeCrossing) ? (options?.enableProvideConsumeCrossing) : false;
+      this.params_ = params;
+      if (options?.localStorage instanceof LocalStorage) {
+        this.setShareLocalStorage(options.localStorage);
+      }
+      this.updateFuncByElmtId.clear();
+      if (this.bindedViewOfBuilderNode) {
+        globalThis.__viewPuStack__?.push(this.bindedViewOfBuilderNode);
+      }
+      this.buildWithNestingBuilder(builder, supportLazyBuild);
+      if (this.bindedViewOfBuilderNode) {
+        globalThis.__viewPuStack__?.pop();
+      }
+      this._nativeRef = getUINativeModule().nativeUtils.createNativeStrongRef(this.nodePtr_);
+      if (this.frameNode_ === undefined || this.frameNode_ === null) {
+        this.frameNode_ = new BuilderRootFrameNode(this.uiContext_);
+      }
+      this.frameNode_.setNodePtr(this._nativeRef, this.nodePtr_);
+      this.frameNode_.setRenderNode(this._nativeRef);
+      this.frameNode_.setBaseNode(this);
+      this.frameNode_.setBuilderNode(this);
+      let id = this.frameNode_.getUniqueId();
+      if (this.id_ && this.id_ !== id) {
+        this.__parentViewOfBuildNode?.deref()?.removeChildBuilderNode(this.id_);
+      }
+      this.id_ = id;
+      this.__parentViewOfBuildNode?.deref()?.addChildBuilderNode(this);
+      FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.set(this.frameNode_.getUniqueId(), new WeakRef(this.frameNode_));
+    } finally {
+      __JSScopeUtil__.restoreInstanceId();
     }
-    this.updateFuncByElmtId.clear();
-    if (this.bindedViewOfBuilderNode) {
-      globalThis.__viewPuStack__?.push(this.bindedViewOfBuilderNode);
-    }
-    this.buildWithNestingBuilder(builder, supportLazyBuild);
-    if (this.bindedViewOfBuilderNode) {
-      globalThis.__viewPuStack__?.pop();
-    }
-    this._nativeRef = getUINativeModule().nativeUtils.createNativeStrongRef(this.nodePtr_);
-    if (this.frameNode_ === undefined || this.frameNode_ === null) {
-      this.frameNode_ = new BuilderRootFrameNode(this.uiContext_);
-    }
-    this.frameNode_.setNodePtr(this._nativeRef, this.nodePtr_);
-    this.frameNode_.setRenderNode(this._nativeRef);
-    this.frameNode_.setBaseNode(this);
-    this.frameNode_.setBuilderNode(this);
-    let id = this.frameNode_.getUniqueId();
-    if (this.id_ && this.id_ !== id) {
-      this.__parentViewOfBuildNode?.deref()?.removeChildBuilderNode(this.id_);
-    }
-    this.id_ = id;
-    this.__parentViewOfBuildNode?.deref()?.addChildBuilderNode(this);
-    FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.set(this.frameNode_.getUniqueId(), new WeakRef(this.frameNode_));
-    __JSScopeUtil__.restoreInstanceId();
   }
   public update(param: Object) {
     if (this.isFreeze) {
@@ -316,6 +329,7 @@ class JSBuilderNode extends BaseNode {
       }).forEach(elmtId => this.UpdateElement(elmtId));
     } catch (err) {
       this.updateEnd();
+      __JSScopeUtil__.restoreInstanceId();
       throw err;
     }
     this.updateEnd();
@@ -341,6 +355,7 @@ class JSBuilderNode extends BaseNode {
       getUINativeModule().frameNode.updateConfiguration(this.getFrameNode()?.getNodePtr());
     } catch (err) {
       this.updateEnd();
+      __JSScopeUtil__.restoreInstanceId();
       throw err;
     }
     this.updateEnd();
@@ -422,30 +437,33 @@ class JSBuilderNode extends BaseNode {
       classObject && 'pop' in classObject ? classObject.pop! : () => { };
     const updateFunc = (elmtId: number, isFirstRender: boolean): void => {
       __JSScopeUtil__.syncInstanceId(this.instanceId_);
-      ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateEnter(_componentName, elmtId, isFirstRender, this);
-      ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
-      // if V2 @Observed/@Track used anywhere in the app (there is no more fine grained criteria),
-      // enable V2 object deep observation
-      // FIXME: A @Component should only use PU or V2 state, but ReactNative dynamic viewer uses both.
-      if (ConfigureStateMgmt.instance.needsV2Observe()) {
-        // FIXME: like in V2 setting bindId_ in ObserveV2 does not work with 'stacked'
-        // update + initial render calls, like in if and ForEach case, convert to stack as well
-        ObserveV2.getObserve().startRecordDependencies(this, elmtId, true);
+      try {
+        ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateEnter(_componentName, elmtId, isFirstRender, this);
+        ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
+        // if V2 @Observed/@Track used anywhere in the app (there is no more fine grained criteria),
+        // enable V2 object deep observation
+        // FIXME: A @Component should only use PU or V2 state, but ReactNative dynamic viewer uses both.
+        if (ConfigureStateMgmt.instance.needsV2Observe()) {
+          // FIXME: like in V2 setting bindId_ in ObserveV2 does not work with 'stacked'
+          // update + initial render calls, like in if and ForEach case, convert to stack as well
+          ObserveV2.getObserve().startRecordDependencies(this, elmtId, true);
+        }
+        if (this._supportNestingBuilder || this.__isReactiveBuilderNode__ViewBuildNodeBase__Internal()) {
+          compilerAssignedUpdateFunc(elmtId, isFirstRender);
+        } else {
+          compilerAssignedUpdateFunc(elmtId, isFirstRender, this.params_);
+        }
+        if (!isFirstRender) {
+          _popFunc();
+        }
+        if (ConfigureStateMgmt.instance.needsV2Observe()) {
+          ObserveV2.getObserve().stopRecordDependencies();
+        }
+        ViewStackProcessor.StopGetAccessRecording();
+        ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateExit(elmtId);
+      } finally {
+        __JSScopeUtil__.restoreInstanceId();
       }
-      if (this._supportNestingBuilder || this.__isReactiveBuilderNode__ViewBuildNodeBase__Internal()) {
-        compilerAssignedUpdateFunc(elmtId, isFirstRender);
-      } else {
-        compilerAssignedUpdateFunc(elmtId, isFirstRender, this.params_);
-      }
-      if (!isFirstRender) {
-        _popFunc();
-      }
-      if (ConfigureStateMgmt.instance.needsV2Observe()) {
-        ObserveV2.getObserve().stopRecordDependencies();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-      ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateExit(elmtId);
-      __JSScopeUtil__.restoreInstanceId();
     };
 
     const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
