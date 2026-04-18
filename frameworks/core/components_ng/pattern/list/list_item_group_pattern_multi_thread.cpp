@@ -23,17 +23,12 @@
 #include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
-
-void ListItemGroupPattern::OnAttachToFrameNodeMultiThread()
-{
-    // do nothing unsafe thread
-}
 void ListItemGroupPattern::OnAttachToMainTreeMultiThread()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (listItemGroupStyle_ == V2::ListItemGroupStyle::CARD) {
-        SetListItemGroupDefaultAttributes(host);
+        ApplyListItemGroupDefaultAttributes(host);
     }
 }
 } // namespace OHOS::Ace::NG
