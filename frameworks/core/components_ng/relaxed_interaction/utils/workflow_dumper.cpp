@@ -15,6 +15,8 @@
 
 #include "core/components_ng/relaxed_interaction/utils/workflow_dumper.h"
 
+#include <sstream>
+
 namespace OHOS::Ace::NG {
 
 WorkflowDumper& WorkflowDumper::GetInstance()
@@ -34,12 +36,12 @@ void WorkflowDumper::AddLog(const std::string& log)
 
 std::string WorkflowDumper::Dump() const
 {
-    std::string result;
+    std::ostringstream buffer("\n");
     for (const auto& log : logs_) {
-        result += log + "\n";
+        buffer << log << "\n";
     }
 
-    return result;
+    return buffer.str();
 }
 
 } // namespace OHOS::Ace::NG

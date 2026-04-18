@@ -34,14 +34,17 @@ RelaxedInteractionManager::RelaxedInteractionManager(WeakPtr<PipelineContext> co
 
 ProcessResult RelaxedInteractionManager::ProcessCommand(const std::string& jsonStr)
 {
+    WorkflowDumper::GetInstance().AddLog("Processing command: " + jsonStr);
     auto json = JsonUtil::ParseJsonString(jsonStr);
     if (!json || !json->IsValid() || !json->IsObject()) {
-        TAG_LOGE(AceLogTag::ACE_UIEVENT, "Invalid command format");
+        WorkflowDumper::GetInstance().AddLog("Failed to parse command because of invalid JSON format");
+        TAG_LOGE(AceLogTag::ACE_UIEVENT, "Failed to parse command because of invalid JSON format");
         return ProcessResult::PARSE_ERROR;
     }
 
     std::vector<std::unique_ptr<BaseExecutor>> executors = executorGenerator_->ParseCommand(json);
     if (executors.empty()) {
+        WorkflowDumper::GetInstance().AddLog("No valid executor parsed from command");
         TAG_LOGE(AceLogTag::ACE_UIEVENT, "No valid executor parsed from command");
         return ProcessResult::VALIDATION_ERROR;
     }
@@ -51,7 +54,7 @@ ProcessResult RelaxedInteractionManager::ProcessCommand(const std::string& jsonS
             ExecutorsToString(executors).c_str());
     }
 
-    WorkflowDumper::GetInstance().AddLog(ExecutorsToString(executors));
+    WorkflowDumper::GetInstance().AddLog("Parsed executors: " + ExecutorsToString(executors));
     choreographer_->Enqueue(std::move(executors));
     return ProcessResult::SUCCESS;
 }
@@ -102,14 +105,14 @@ void RelaxedInteractionManager::Clear()
 std::string RelaxedInteractionManager::ExecutorsToString(
     const std::vector<std::unique_ptr<BaseExecutor>>& executors)
 {
-    std::ostringstream oss;
+    std::ostringstream buffer;
     for (size_t i = 0; i < executors.size(); ++i) {
         if (i != 0) {
-            oss << ",";
+            buffer << ",";
         }
-        oss << executors[i]->GetDescription();
+        buffer << executors[i]->GetDescription();
     }
-    return oss.str();
+    return buffer.str();
 }
 
 std::string RelaxedInteractionManager::ExecutionStateToString(ExecutionState state)
