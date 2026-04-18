@@ -17,6 +17,7 @@
 
 #include "core/components_ng/manager/drag_drop/drag_drop_spring_loading/drag_drop_spring_loading_state_machine.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 
 namespace OHOS::Ace::NG {
 DragSpringLoadingState DragDropSpringLoadingStateBase::ConvertDragSpringLoadingState(

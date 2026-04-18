@@ -19,6 +19,7 @@
 #include "gtest/gtest.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/unittest/core/manager/drag_drop_manager_test_ng.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 
 #include "core/components_ng/manager/drag_drop/drag_drop_spring_loading/drag_drop_spring_loading_state_base.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_spring_loading/drag_drop_spring_loading_state_machine.h"
