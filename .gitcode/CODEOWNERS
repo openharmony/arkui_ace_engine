@@ -558,9 +558,13 @@ frameworks/bridge/common/utils/ @arkui_framework_xnode
 frameworks/bridge/common/utils/module_buffer_reader.h @arkui_framework_resource
 frameworks/bridge/common/utils/module_buffer_reader.cpp @arkui_framework_resource
 frameworks/bridge/declarative_frontend/ark_breakpoint/ @arkui_framework_xnode
+frameworks/bridge/declarative_frontend/ark_component/components/arkhyperlink.js @huawei_g_five
+frameworks/bridge/declarative_frontend/ark_component/components/arkmarquee.js @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_component/components/arkmenu.js @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/components/arkmenuitem.js @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/components/arkmenuitemgroup.js @arkuipopupwindow_all
+frameworks/bridge/declarative_frontend/ark_component/components/arksearch.js @huawei_g_five
+frameworks/bridge/declarative_frontend/ark_component/components/arksymbolglyph.js @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_component/src_dir/ @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/types/ @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/.gitignore @arkuieco3
