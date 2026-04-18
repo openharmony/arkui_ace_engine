@@ -84,7 +84,8 @@ void CalendarDialogPattern::OnModifyDone()
     InitEntryChangeEvent();
 
     auto host = GetHost();
-    const bool isTargetApi26Plus = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX);
+    CHECK_NULL_VOID(host);
+    const bool isTargetApi26Plus = host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX);
     const bool freezeTitleArrowsInThemeScope =
         isTargetApi26Plus && host && host->GetThemeScopeId() != 0 && hasInitTitleArrowsColor_;
     // Target API 26+: non-default theme scope (e.g. WithTheme) should keep title arrow images and tint
@@ -1545,7 +1546,7 @@ void CalendarDialogPattern::OnColorConfigurationUpdate()
     // Target API 26+: non-default theme scope (e.g. WithTheme) keeps the dialog title in the originally
     // scoped palette and ignores subsequent system dark/light configuration updates here.
     // Below target API 26: always apply configuration-driven title color refresh.
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
+    if (titleNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
         titleNode->GetThemeScopeId() != 0) {
         return;
     }
