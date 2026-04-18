@@ -291,10 +291,23 @@ void SvgGraphic::SetBrushColor(RSBrush& brush, bool useFillColor)
         opacityFillColor.SetPlaceholder(imageComponentColor->GetPlaceholder());
         brush.SetColor(ToRSColor(opacityFillColor));
     } else if (imageComponentColor->GetColorSpace() == ColorSpace::DISPLAY_P3) {
-        auto p3Color = imageComponentColor->BlendOpacity(curOpacity);
-        brush.SetColor({ p3Color.GetRed() / 255.0, p3Color.GetGreen() / 255.0, p3Color.GetBlue() / 255.0,
-                       p3Color.GetAlpha() / 255.0 },
-            RSColorSpace::CreateRGB(RSCMSTransferFuncType::SRGB, RSCMSMatrixType::DCIP3));
+        if (imageComponentColor->GetHeadRoomColor().has_value()) {
+            auto colorFloat = imageComponentColor->GetHeadRoomColor().value();
+            auto uiColor =
+                RSUIColor(colorFloat.red, colorFloat.green, colorFloat.blue, colorFloat.alpha, colorFloat.headRoom);
+            brush.SetUIColor(
+                uiColor, RSColorSpace::CreateRGB(RSCMSTransferFuncType::SRGB, RSCMSMatrixType::DCIP3));
+        } else {
+            auto p3Color = imageComponentColor->BlendOpacity(curOpacity);
+            brush.SetColor({ p3Color.GetRed() / 255.0, p3Color.GetGreen() / 255.0, p3Color.GetBlue() / 255.0,
+                                    p3Color.GetAlpha() / 255.0 },
+                RSColorSpace::CreateRGB(RSCMSTransferFuncType::SRGB, RSCMSMatrixType::DCIP3));
+        }
+    } else if (imageComponentColor->GetColorSpace() == ColorSpace::BT2020) {
+        auto colorFloat = imageComponentColor->GetHeadRoomColor().value();
+        auto uiColor =
+            RSUIColor(colorFloat.red, colorFloat.green, colorFloat.blue, colorFloat.alpha, colorFloat.headRoom);
+        brush.SetUIColor(uiColor, RSColorSpace::CreateRGB(RSCMSTransferFuncType::SRGB, RSCMSMatrixType::REC2020));
     } else {
         brush.SetColor(imageComponentColor->BlendOpacity(curOpacity).GetValue());
     }
@@ -352,10 +365,24 @@ bool SvgGraphic::UpdateFillStyle(const std::optional<Color>& color, bool antiAli
             opacityFillColor.SetPlaceholder(fillColor.GetPlaceholder());
             fillBrush_.SetColor(ToRSColor(opacityFillColor));
         } else if (fillColor.GetColorSpace() == ColorSpace::DISPLAY_P3) {
-            auto p3Color = fillColor.BlendOpacity(curOpacity);
-            fillBrush_.SetColor({ p3Color.GetRed() / 255.0, p3Color.GetGreen() / 255.0, p3Color.GetBlue() / 255.0,
-                                    p3Color.GetAlpha() / 255.0 },
-                RSColorSpace::CreateRGB(RSCMSTransferFuncType::SRGB, RSCMSMatrixType::DCIP3));
+            if (fillColor.GetHeadRoomColor().has_value()) {
+                auto colorFloat = fillColor.GetHeadRoomColor().value();
+                auto uiColor =
+                    RSUIColor(colorFloat.red, colorFloat.green, colorFloat.blue, colorFloat.alpha, colorFloat.headRoom);
+                fillBrush_.SetUIColor(
+                    uiColor, RSColorSpace::CreateRGB(RSCMSTransferFuncType::SRGB, RSCMSMatrixType::DCIP3));
+            } else {
+                auto p3Color = fillColor.BlendOpacity(curOpacity);
+                fillBrush_.SetColor({ p3Color.GetRed() / 255.0, p3Color.GetGreen() / 255.0, p3Color.GetBlue() / 255.0,
+                                        p3Color.GetAlpha() / 255.0 },
+                    RSColorSpace::CreateRGB(RSCMSTransferFuncType::SRGB, RSCMSMatrixType::DCIP3));
+            }
+        } else if (fillColor.GetColorSpace() == ColorSpace::BT2020) {
+            auto colorFloat = fillColor.GetHeadRoomColor().value();
+            auto uiColor =
+                RSUIColor(colorFloat.red, colorFloat.green, colorFloat.blue, colorFloat.alpha, colorFloat.headRoom);
+            fillBrush_.SetUIColor(
+                uiColor, RSColorSpace::CreateRGB(RSCMSTransferFuncType::SRGB, RSCMSMatrixType::REC2020));
         } else {
             fillBrush_.SetColor(fillColor.BlendOpacity(curOpacity).GetValue());
         }
