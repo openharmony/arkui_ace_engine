@@ -26,6 +26,7 @@
 
 #include "core/components_ng/pattern/overlay/sheet_wrapper_layout_algorithm.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;

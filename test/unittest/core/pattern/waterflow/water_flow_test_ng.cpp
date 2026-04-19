@@ -45,6 +45,7 @@
 #undef protected
 #include "test/mock/interfaces/inner_api/ui_session/mock_ui_session_manager.h"
 #include "test/mock/frameworks/core/animation/mock_animation_manager.h"
+#include "core/components/button/button_theme.h"
 
 namespace OHOS::Ace::NG {
 

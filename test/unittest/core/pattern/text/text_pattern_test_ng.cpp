@@ -25,6 +25,7 @@
 #include "test/mock/frameworks/core/common/mock_udmf.h"
 #include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 #include "test/mock/frameworks/core/rosen/mock_canvas.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
 

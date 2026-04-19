@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "test/unittest/core/manager/safe_area_manager_test_ng.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 
 namespace OHOS::Ace::NG {
 /**

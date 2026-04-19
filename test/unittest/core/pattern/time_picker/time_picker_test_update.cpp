@@ -35,6 +35,7 @@
 #include "core/components_ng/pattern/time_picker/timepicker_dialog_view.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
 #include "core/components/common/properties/shadow_config.h"
+#include "core/components/button/button_theme.h"
 
 #undef private
 #undef protected

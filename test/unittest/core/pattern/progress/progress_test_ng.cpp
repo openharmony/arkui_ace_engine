@@ -18,6 +18,7 @@
 #include "test/mock/frameworks/core/common/mock_container.h"
 
 #include "core/components_ng/pattern/progress/progress_model_static.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
 namespace {
