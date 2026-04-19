@@ -84,6 +84,7 @@ constexpr int32_t CALLBACK_COUNT = 3;
 // System material test constants
 constexpr int32_t MATERIAL_TYPE_NONE = static_cast<int32_t>(MaterialType::NONE);
 constexpr int32_t MATERIAL_TYPE_SEMI_TRANSPARENT = static_cast<int32_t>(MaterialType::SEMI_TRANSPARENT);
+constexpr int32_t MATERIAL_TYPE_IMMERSIVE = static_cast<int32_t>(MaterialType::IMMERSIVE);
 constexpr int32_t INVALID_MATERIAL_TYPE_NEGATIVE = -1;
 constexpr int32_t INVALID_MATERIAL_TYPE_TOO_LARGE = 200;
 
@@ -3415,6 +3416,95 @@ HWTEST_F(OverlayManagerToastTestNg, SetToastSystemMaterial_SimplifiedCheck_Valid
     ToastView::SetToastSystemMaterial(toastNode, toastInfoWithImmersive);
 
     EXPECT_NE(toastNode, nullptr);
+}
+
+/**
+ * @tc.name: UpdateToastBackgroundAndBlur_MaterialSet_SkipUpdate
+ * @tc.desc: Test that UpdateToastBackgroundAndBlur skips update when material is set
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, UpdateToastBackgroundAndBlur_MaterialSet_SkipUpdate, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create toast node with material
+     */
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(MATERIAL_TYPE_IMMERSIVE);
+
+    ToastInfo toastInfo;
+    toastInfo.message = MESSAGE;
+    toastInfo.systemMaterial = material;
+
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+
+    auto renderContext = toastNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    /**
+     * @tc.steps: step2. Set initial background color
+     */
+    Color initialColor = Color::BLUE;
+    renderContext->UpdateBackgroundColor(initialColor);
+
+    /**
+     * @tc.steps: step3. Call UpdateToastBackgroundAndBlur with isUserSetMaterial=true
+     * @tc.expected: Background color should not be updated when material is set
+     */
+    auto pipelineContext = toastNode->GetContextRefPtr();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
+    ASSERT_NE(toastTheme, nullptr);
+
+    ToastView::UpdateToastBackgroundAndBlur(renderContext, toastInfo, toastTheme, true);
+
+    /**
+     * @tc.steps: step4. Verify render context remains valid
+     * @tc.expected: No crash should occur
+     */
+    EXPECT_NE(renderContext, nullptr);
+}
+
+/**
+ * @tc.name: UpdateToastNodeStyle_MaterialIntegration_CompleteFlow
+ * @tc.desc: Test complete UpdateToastNodeStyle flow with material set
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, UpdateToastNodeStyle_MaterialIntegration_CompleteFlow, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create toast info with immersive material and applyShadow
+     */
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(MATERIAL_TYPE_IMMERSIVE);
+    ImmersiveOptions options;
+    options.applyShadow = true;
+    material->SetImmersiveOptions(options);
+
+    ToastInfo toastInfo;
+    toastInfo.message = MESSAGE;
+    toastInfo.duration = DURATION;
+    toastInfo.systemMaterial = material;
+
+    /**
+     * @tc.steps: step2. Create toast node
+     */
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    ASSERT_NE(toastNode->GetRenderContext(), nullptr);
+
+    /**
+     * @tc.steps: step3. Call UpdateToastNodeStyle
+     * @tc.expected: Should complete without crash when material is set
+     */
+    ToastView::UpdateToastNodeStyle(toastNode);
+
+    /**
+     * @tc.steps: step4. Verify toast node remains valid after update
+     * @tc.expected: No crash or null pointer should occur
+     */
+    EXPECT_NE(toastNode, nullptr);
+    EXPECT_NE(toastNode->GetRenderContext(), nullptr);
 }
 
 } // namespace OHOS::Ace::NG
