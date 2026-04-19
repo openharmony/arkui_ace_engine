@@ -165,19 +165,17 @@ std::unordered_map<int64_t, std::shared_ptr<ISmartLayoutNode>> SmartLayoutAlgori
 
 OffsetF SmartLayoutAlgorithm::CalculateOffsetWithMargin(
     const ISmartLayoutNode& layoutNode,
-    const RefPtr<GeometryNode> geoNode)
+    const RefPtr<GeometryNode> geoNode,
+    double boundingBoxOffsetX,
+    double boundingBoxOffsetY)
 {
     double offsetX = layoutNode.GetPosition().offsetX.value;
     double offsetY = layoutNode.GetPosition().offsetY.value;
 
-    auto rect = rootNode_->GetChildrenBoundingBox();
-    rootNode_->SyncData();
-    double offsetOfBoundingBoxX = (rootNode_->GetSize().width.value - rect.width) / 2 - rect.Left();
-    double offsetOfBoundingBoxY = (rootNode_->GetSize().height.value - rect.height) / 2 - rect.Top();
     if (rootNode_->GetLayoutType() == SmartLayoutType::ROW) {
-        return OffsetF(static_cast<float>(offsetX), static_cast<float>(offsetY + offsetOfBoundingBoxY));
+        return OffsetF(static_cast<float>(offsetX), static_cast<float>(offsetY + boundingBoxOffsetY));
     } else if (rootNode_->GetLayoutType() == SmartLayoutType::COLUMN) {
-        return OffsetF(static_cast<float>(offsetX + offsetOfBoundingBoxX), static_cast<float>(offsetY));
+        return OffsetF(static_cast<float>(offsetX + boundingBoxOffsetX), static_cast<float>(offsetY));
     }
     return OffsetF(static_cast<float>(offsetX), static_cast<float>(offsetY));
 }
@@ -185,7 +183,9 @@ OffsetF SmartLayoutAlgorithm::CalculateOffsetWithMargin(
 void SmartLayoutAlgorithm::ApplyChildLayout(
     const RefPtr<LayoutWrapper>& childWrapper,
     const std::unordered_map<int64_t, std::shared_ptr<ISmartLayoutNode>>& nodeMap,
-    double sizeScale)
+    double sizeScale,
+    double boundingBoxOffsetX,
+    double boundingBoxOffsetY)
 {
     CHECK_NULL_VOID(childWrapper);
     auto hostNode = childWrapper->GetHostNode();
@@ -198,11 +198,10 @@ void SmartLayoutAlgorithm::ApplyChildLayout(
     }
 
     auto& layoutNode = it->second;
-    layoutNode->SyncData();
 
     auto geoNode = childWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geoNode);
-    OffsetF offset = CalculateOffsetWithMargin(*layoutNode, geoNode);
+    OffsetF offset = CalculateOffsetWithMargin(*layoutNode, geoNode, boundingBoxOffsetX, boundingBoxOffsetY);
     geoNode->SetFrameOffset(offset);
 
     auto renderContext = hostNode->GetRenderContext();
@@ -232,12 +231,36 @@ void SmartLayoutAlgorithm::ApplyLayoutResults(LayoutWrapper* layoutWrapper)
         return;
     }
 
+    // Pre-sync all data once to avoid O(N²) SyncData calls
+    rootNode_->SyncData();
+    for (const auto& child : children) {
+        if (child != nullptr) {
+            child->SyncData();
+        }
+    }
+
+    // Pre-calculate bounding box offsets once
+    auto [boundingBoxOffsetX, boundingBoxOffsetY] = CalculateBoundingBoxOffsets();
+
     auto nodeMap = BuildNodeIdMap(children);
     double sizeScale = rootNode_->GetScaleInfo().sizeScale.value;
 
     for (const auto& childWrapper : layoutWrapper->GetAllChildrenWithBuild(false)) {
-        ApplyChildLayout(childWrapper, nodeMap, sizeScale);
+        ApplyChildLayout(childWrapper, nodeMap, sizeScale, boundingBoxOffsetX, boundingBoxOffsetY);
     }
+}
+
+std::pair<double, double> SmartLayoutAlgorithm::CalculateBoundingBoxOffsets()
+{
+    if (rootNode_ == nullptr) {
+        return {0.0, 0.0};
+    }
+
+    auto rect = rootNode_->GetChildrenBoundingBox();
+    double offsetOfBoundingBoxX = (rootNode_->GetSize().width.value - rect.width) / 2 - rect.Left();
+    double offsetOfBoundingBoxY = (rootNode_->GetSize().height.value - rect.height) / 2 - rect.Top();
+
+    return {offsetOfBoundingBoxX, offsetOfBoundingBoxY};
 }
 
 bool SmartLayoutAlgorithm::InitializeLayoutContext(LayoutWrapper* layoutWrapper)

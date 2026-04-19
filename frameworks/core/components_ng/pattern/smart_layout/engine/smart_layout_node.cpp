@@ -19,6 +19,9 @@
 
 namespace OHOS::Ace::NG {
 
+// Maximum layout size bound (16K resolution, sufficient for all practical screen sizes)
+constexpr double MAX_LAYOUT_SIZE = 16384.0;
+
 std::shared_ptr<SmartLayoutNode> SmartLayoutNode::CreateRootNode(const std::string& name)
 {
     auto engine = std::make_shared<localsmt::Engine>();
@@ -29,12 +32,14 @@ SmartLayoutNode::SmartLayoutNode(std::shared_ptr<localsmt::Engine> engine, const
     : engine_(engine),
       name_(name),
       position_{
-          {engine_->Var((name_ + ".x").c_str()), 0.0},
-          {engine_->Var((name_ + ".y").c_str()), 0.0}
+          // Set bounds: offsetX/offsetY >= 0 (eliminates 2 non-negativity constraints per child)
+          {engine_->Var((name_ + ".x").c_str(), 0.0, MAX_LAYOUT_SIZE), 0.0},
+          {engine_->Var((name_ + ".y").c_str(), 0.0, MAX_LAYOUT_SIZE), 0.0}
       },
       size_{
-          {engine_->Var((name_ + ".w").c_str()), 0.0},
-          {engine_->Var((name_ + ".h").c_str()), 0.0}
+          // Set bounds: width/height >= 0 (eliminates 2 non-negativity constraints per node)
+          {engine_->Var((name_ + ".w").c_str(), 0.0, MAX_LAYOUT_SIZE), 0.0},
+          {engine_->Var((name_ + ".h").c_str(), 0.0, MAX_LAYOUT_SIZE), 0.0}
       },
       scaleInfo_{
           {engine_->Var((name_ + ".mainAxisSpaceScale").c_str(), 1.0), 1.0},
@@ -228,7 +233,6 @@ SmartLayoutRect SmartLayoutNode::GetChildrenBoundingBox() const
     double maxBottom = std::numeric_limits<double>::lowest();
 
     for (const auto& child : children_) {
-        child->SyncData();
         double childX = child->GetPosition().offsetX.value;
         double childY = child->GetPosition().offsetY.value;
         double childW = child->GetSize().width.value;

@@ -136,13 +136,13 @@ void SmartLayoutConstraints::AddColumnConstraints(SmartLayoutNode& parent)
     }
     AddDefaultConstraints(parent);
 
-    double sumOfAllChildHeight = GetSumOfAllChildHeight(parent);
-    double maxChildWidth = GetMaxWidthOfAllChild(parent);
-    if (sumOfAllChildHeight == 0 || maxChildWidth == 0) {
+    // Single pass to calculate all statistics
+    ChildStatistics stats = CalculateChildStatistics(parent);
+    if (stats.sumOfAllChildHeight == 0 || stats.maxChildWidth == 0) {
         return;
     }
 
-    AddSizeScaleConstraint(parent, sumOfAllChildHeight, maxChildWidth);
+    AddSizeScaleConstraint(parent, stats.sumOfAllChildHeight, stats.maxChildWidth);
 
     engine->Add(parent.GetScaleInfo().mainAxisSpaceScale.expr >= 0.0);
     engine->Add(parent.GetScaleInfo().mainAxisSpaceScale.expr <= 1.0);
@@ -170,13 +170,13 @@ void SmartLayoutConstraints::AddRowConstraints(SmartLayoutNode& parent)
     }
     AddDefaultConstraints(parent);
 
-    double sumOfAllChildWidth = GetSumOfAllChildWidth(parent);
-    double maxChildHeight = GetMaxHeightOfAllChild(parent);
-    if (sumOfAllChildWidth == 0 || maxChildHeight == 0) {
+    // Single pass to calculate all statistics
+    ChildStatistics stats = CalculateChildStatistics(parent);
+    if (stats.sumOfAllChildWidth == 0 || stats.maxChildHeight == 0) {
         return;
     }
 
-    AddRowSizeScaleConstraint(parent, sumOfAllChildWidth, maxChildHeight);
+    AddRowSizeScaleConstraint(parent, stats.sumOfAllChildWidth, stats.maxChildHeight);
 
     engine->Add(parent.GetScaleInfo().mainAxisSpaceScale.expr >= 0.0);
     engine->Add(parent.GetScaleInfo().mainAxisSpaceScale.expr <= 1.0);
@@ -203,20 +203,10 @@ void SmartLayoutConstraints::AddDefaultConstraints(SmartLayoutNode& parent)
         return;
     }
 
-    // Ensure parent non-negative
-    engine->Add(parent.GetSize().width.expr >= 0.0);
-    engine->Add(parent.GetSize().height.expr >= 0.0);
     engine->Add(parent.GetPosition().offsetX.expr == 0.0);
     engine->Add(parent.GetPosition().offsetY.expr == 0.0);
 
-    // For every direct child, ensure size/offset non-negative and child is inside parent
     for (const auto& child : parent.GetChildren()) {
-        // non-negativity for child
-        engine->Add(child->GetSize().width.expr >= 0.0);
-        engine->Add(child->GetSize().height.expr >= 0.0);
-        engine->Add(child->GetPosition().offsetX.expr >= 0.0);
-        engine->Add(child->GetPosition().offsetY.expr >= 0.0);
-
         // child offset must be no less than parent offset (stay inside)
         engine->Add(child->GetPosition().offsetX.expr >= parent.GetPosition().offsetX.expr);
         engine->Add(child->GetPosition().offsetY.expr >= parent.GetPosition().offsetY.expr);
@@ -229,48 +219,41 @@ void SmartLayoutConstraints::AddDefaultConstraints(SmartLayoutNode& parent)
     }
 }
 
-double SmartLayoutConstraints::GetSumOfAllChildHeight(const SmartLayoutNode& parent)
+ChildStatistics SmartLayoutConstraints::CalculateChildStatistics(const SmartLayoutNode& parent)
 {
-    double sumOfAllChildHeight = 0.0;
-    for (const auto& c : parent.GetChildren()) {
+    ChildStatistics stats;
+    const auto& children = parent.GetChildren();
+    stats.childCount = children.size();
+
+    for (const auto& c : children) {
         if (c != nullptr) {
-            sumOfAllChildHeight += c->GetSize().height.value;
+            stats.sumOfAllChildHeight += c->GetSize().height.value;
+            stats.sumOfAllChildWidth += c->GetSize().width.value;
+            stats.maxChildWidth = std::max(stats.maxChildWidth, c->GetSize().width.value);
+            stats.maxChildHeight = std::max(stats.maxChildHeight, c->GetSize().height.value);
         }
     }
-    return sumOfAllChildHeight;
+    return stats;
+}
+
+double SmartLayoutConstraints::GetSumOfAllChildHeight(const SmartLayoutNode& parent)
+{
+    return CalculateChildStatistics(parent).sumOfAllChildHeight;
 }
 
 double SmartLayoutConstraints::GetSumOfAllChildWidth(const SmartLayoutNode& parent)
 {
-    double sumOfAllChildWidth = 0.0;
-    for (const auto& c : parent.GetChildren()) {
-        if (c != nullptr) {
-            sumOfAllChildWidth += c->GetSize().width.value;
-        }
-    }
-    return sumOfAllChildWidth;
+    return CalculateChildStatistics(parent).sumOfAllChildWidth;
 }
 
 double SmartLayoutConstraints::GetMaxWidthOfAllChild(const SmartLayoutNode& parent)
 {
-    double maxWidth = 0.0;
-    for (const auto& c : parent.GetChildren()) {
-        if (c != nullptr) {
-            maxWidth = std::max(maxWidth, c->GetSize().width.value);
-        }
-    }
-    return maxWidth;
+    return CalculateChildStatistics(parent).maxChildWidth;
 }
 
 double SmartLayoutConstraints::GetMaxHeightOfAllChild(const SmartLayoutNode& parent)
 {
-    double maxHeight = 0.0;
-    for (const auto& c : parent.GetChildren()) {
-        if (c != nullptr) {
-            maxHeight = std::max(maxHeight, c->GetSize().height.value);
-        }
-    }
-    return maxHeight;
+    return CalculateChildStatistics(parent).maxChildHeight;
 }
 
 } // namespace OHOS::Ace::NG
