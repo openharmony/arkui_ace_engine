@@ -14,16 +14,11 @@
  */
 import { PageClass } from '../../common/PageClass'
 
+
 const testList1: PageClass[] = [
-  new PageClass('菜单基础场景', 'pages/MenuUX/MenuKeyboardAvoid/baseMenu', 'bindMenu'),
-  new PageClass('selet基础场景', 'pages/MenuUX/MenuKeyboardAvoid/baseSelect', 'select'),
-  new PageClass('bindMenu', 'pages/MenuUX/MenuKeyboardAvoid/bindMenu', 'bindMenu'),
-  new PageClass('select', 'pages/MenuUX/MenuKeyboardAvoid/select', 'select'),
-  new PageClass('bindContextMenu', 'pages/MenuUX/MenuKeyboardAvoid/bindContextMenu', 'bindContextMenu'),
-  new PageClass('openMenu', 'pages/MenuUX/MenuKeyboardAvoid/openMenu', 'openMenu'),
-  new PageClass('openMenu', 'pages/MenuUX/MenuKeyboardAvoid/updateMenu', 'updateMenu'),
-  new PageClass('selectAttribute', 'pages/MenuUX/MenuKeyboardAvoid/selectAttribute', 'selectAttribute'),
-  new PageClass('previewLayoutRegionMargin', 'pages/MenuUX/MenuKeyboardAvoid/previewLayoutRegionMargin', 'previewLayoutRegionMargin'),
+  new PageClass('自定义全量Case', 'pages/MenuUX/SDFArrow/totalCase', 'totalCase'),
+  new PageClass('避让软键盘', 'pages/MenuUX/SDFArrow/avoidKeyboardCase', 'avoidKeyboard'),
+  new PageClass('隐式动画场景', 'pages/MenuUX/SDFArrow/animationCase', 'animationCase'),
 ]
 
 @Entry

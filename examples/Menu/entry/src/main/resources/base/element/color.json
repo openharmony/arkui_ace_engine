@@ -137,6 +137,10 @@
     {
       "name": "single_light_popupBtnColor",
       "value": "#0aa1f4"
+    },
+    {
+      "name": "outlineColor",
+      "value": "#ffe07e00"
     }
   ]
 }
