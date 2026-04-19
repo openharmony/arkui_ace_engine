@@ -1362,7 +1362,7 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew051, TestSize.Level1)
     overlay.align = Alignment::TOP_LEFT;
     overlay.x = Dimension(10.0_px);
     overlay.y = Dimension(5.0_px);
-    rosenRenderContext->UpdateOverlayText(overlay);
+    rosenRenderContext->OnOverlayTextUpdate(overlay);
     ASSERT_NE(rosenRenderContext->overlayTextModifier_, nullptr);
     ASSERT_NE(rosenRenderContext->drawRegionRects_[DRAW_REGION_OVERLAY_TEXT_INDEX], nullptr);
 
@@ -1370,7 +1370,7 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew051, TestSize.Level1)
     EXPECT_FALSE(*rosenRenderContext->drawRegionRects_[DRAW_REGION_OVERLAY_TEXT_INDEX] == *expectedClearRect);
 
     overlay.content = "";
-    rosenRenderContext->UpdateOverlayText(overlay);
+    rosenRenderContext->OnOverlayTextUpdate(overlay);
     ASSERT_NE(rosenRenderContext->overlayTextModifier_, nullptr);
     ASSERT_NE(rosenRenderContext->drawRegionRects_[DRAW_REGION_OVERLAY_TEXT_INDEX], nullptr);
     EXPECT_TRUE(*rosenRenderContext->drawRegionRects_[DRAW_REGION_OVERLAY_TEXT_INDEX] == *expectedClearRect);

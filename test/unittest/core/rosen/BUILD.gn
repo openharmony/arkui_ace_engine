@@ -170,6 +170,7 @@ ohos_unittest("arkui_rosen_render_context_test") {
     "$ace_root/test/unittest/core/rosen/mock_internal_resource.cpp",
     "$ace_root/test/unittest/core/rosen/mock_task_runner_adapter_factory.cpp",
     "detached_rs_node_manager_test.cpp",
+    "overlay_modifier_test_ng.cpp",
     "rosen_render_context_test.cpp",
     "rosen_render_context_test_new.cpp",
   ]

@@ -40,21 +40,7 @@ constexpr float TEST_CHILD_WIDTH = 200.0f;
 constexpr float TEST_CHILD_HEIGHT = 100.0f;
 } // namespace
 
-class OverlayModifierTestNg : public testing::Test {
-public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
-};
-
-void OverlayModifierTestNg::SetUpTestCase()
-{
-    NG::MockPipelineContext::SetUp();
-}
-
-void OverlayModifierTestNg::TearDownTestCase()
-{
-    NG::MockPipelineContext::TearDownTestCase();
-}
+class OverlayModifierTestNg : public testing::Test {};
 
 /**
  * @tc.name: GetOverlayOffsetWithDirection001
