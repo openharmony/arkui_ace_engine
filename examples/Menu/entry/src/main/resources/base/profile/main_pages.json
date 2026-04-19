@@ -260,6 +260,11 @@
     "pages/MenuUX/MenuKeyboardAvoid/selectAttribute",
     "pages/MenuUX/MenuKeyboardAvoid/previewLayoutRegionMargin",
 
+    "pages/MenuUX/menuSDFArrow",
+    "pages/MenuUX/SDFArrow/animationCase",
+    "pages/MenuUX/SDFArrow/avoidKeyboardCase",
+    "pages/MenuUX/SDFArrow/totalCase",
+
     "pages/MenuPlacement/Index",
     "pages/MenuPlacement/RightClick/Index",
     "pages/MenuPlacement/RightClick/RightWidth",
