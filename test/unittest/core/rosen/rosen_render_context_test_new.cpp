@@ -1341,4 +1341,38 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew050, TestSize.Level1)
     rosenRenderContext->UpdateFrontBlurRadius(0.0_px);
     EXPECT_EQ(rosenRenderContext->GetFrontBlurRadius().value(), 0.0_px);
 }
+
+/**
+ * @tc.name: RosenRenderContextTestNew051
+ * @tc.desc: PaintOverlayText should refresh draw region when overlay content is cleared.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew051, TestSize.Level1)
+{
+    constexpr uint32_t DRAW_REGION_OVERLAY_TEXT_INDEX = 4;
+    constexpr float PAINT_WIDTH = 200.0f;
+    constexpr float PAINT_HEIGHT = 100.0f;
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    rosenRenderContext->paintRect_ = RectF(0.0f, 0.0f, PAINT_WIDTH, PAINT_HEIGHT);
+
+    OverlayOptions overlay;
+    overlay.content = "overlay-text";
+    overlay.align = Alignment::TOP_LEFT;
+    overlay.x = Dimension(10.0_px);
+    overlay.y = Dimension(5.0_px);
+    rosenRenderContext->UpdateOverlayText(overlay);
+    ASSERT_NE(rosenRenderContext->overlayTextModifier_, nullptr);
+    ASSERT_NE(rosenRenderContext->drawRegionRects_[DRAW_REGION_OVERLAY_TEXT_INDEX], nullptr);
+
+    auto expectedClearRect = std::make_shared<Rosen::RectF>(0.0f, 0.0f, PAINT_WIDTH, PAINT_HEIGHT);
+    EXPECT_FALSE(*rosenRenderContext->drawRegionRects_[DRAW_REGION_OVERLAY_TEXT_INDEX] == *expectedClearRect);
+
+    overlay.content = "";
+    rosenRenderContext->UpdateOverlayText(overlay);
+    ASSERT_NE(rosenRenderContext->overlayTextModifier_, nullptr);
+    ASSERT_NE(rosenRenderContext->drawRegionRects_[DRAW_REGION_OVERLAY_TEXT_INDEX], nullptr);
+    EXPECT_TRUE(*rosenRenderContext->drawRegionRects_[DRAW_REGION_OVERLAY_TEXT_INDEX] == *expectedClearRect);
+}
 } // namespace OHOS::Ace::NG
