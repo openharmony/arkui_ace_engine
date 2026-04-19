@@ -16,9 +16,6 @@
 #ifndef ARKUI_ERROR_MESSAGE_MANAGER_H
 #define ARKUI_ERROR_MESSAGE_MANAGER_H
 
-#include <cstdint>
-#include <string>
-
 #include "ui/base/macros.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 
@@ -28,9 +25,10 @@ class ACE_FORCE_EXPORT ErrorMessageManager {
 public:
     static ErrorMessageManager& GetInstance();
 
-    void SetLastError(ArkUIErrorInfo lastErrorInfo);
+    void SetErrorCodeAndMessage(ArkUI_Int32 errorCode, const char* errorMessage);
+    void SetFunctionName(const char* functionName);
 
-    const char* GetLastError() const;
+    const char* GetErrorMessage() const;
 
 private:
     ErrorMessageManager() = default;

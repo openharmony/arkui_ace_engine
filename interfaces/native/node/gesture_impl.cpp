@@ -15,7 +15,7 @@
 
 #include "node_model.h"
 #include "gesture_impl.h"
-#include "interfaces/native/error_message_macros.h"
+#include "interfaces/native/native_error_message_macros.h"
 
 #include "core/gestures/gesture_event.h"
 #include "interfaces/native/event/ui_input_event_impl.h"

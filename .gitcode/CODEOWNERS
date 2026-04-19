@@ -3059,6 +3059,9 @@ frameworks/core/interfaces/native/implementation/axis_event_accessor.cpp @ArkUI_
 frameworks/core/interfaces/native/implementation/form_component_modifier.cpp @form_framework
 frameworks/core/interfaces/native/implementation/screen_modifier.cpp @window_scene
 frameworks/core/interfaces/native/implementation/window_scene_modifier.cpp @window_scene
+frameworks/core/interfaces/native/utility/error_message_macros.h @arkui_framework_xnode
+frameworks/core/interfaces/native/utility/error_message_manager.h @arkui_framework_xnode
+frameworks/core/interfaces/native/utility/error_message_manager.cpp @arkui_framework_xnode
 interfaces/native/BUILD.gn @arkui_architecture
 interfaces/native/drag_and_drop.h @ArkUI_Event
 interfaces/native/drawable_descriptor.h @arkui001
@@ -3068,6 +3071,9 @@ interfaces/native/event/ui_input_event_impl.h @ArkUI_Event
 interfaces/native/libace.ndk.json @arkui_architecture
 interfaces/native/native_animate.h @arkuicodepulse
 interfaces/native/native_dialog.h @arkuipopupwindow_all
+interfaces/native/native_error_message_macros.h @arkui_framework_xnode
+interfaces/native/native_error_message_wrapper.cpp @arkui_framework_xnode
+interfaces/native/native_error_message_wrapper.h @arkui_framework_xnode
 interfaces/native/native_gesture.h @ArkUI_Event
 interfaces/native/native_interface.h @arkui_framework_xnode
 interfaces/native/native_interface_accessibility.cpp @ArkUI_ability_group
@@ -3128,9 +3134,6 @@ interfaces/native/node/waterflow_section_option.h @arkuiscroll
 interfaces/native/ui_input_event.h @ArkUI_Event
 interfaces/native/node/text_native_impl.h @huawei_g_five
 interfaces/native/node/text_native_impl.cpp @huawei_g_five
-interfaces/native/error_message_macros.h @arkui_framework_xnode
-interfaces/native/error_message_manager.h @arkui_framework_xnode
-interfaces/native/error_message_manager.cpp @arkui_framework_xnode
 interfaces/native/node/rich_editor_native_impl.h @arkui_rich_editor
 interfaces/native/node/rich_editor_native_impl.cpp @arkui_rich_editor
 interfaces/native/node/span_style_native_impl.h @arkui_rich_editor
@@ -3549,8 +3552,9 @@ test/mock/core/common/mock_container.h @arkui_framework_xnode
 test/mock/core/common/mock_data_detector_adapter.cpp @huawei_g_five
 test/mock/core/common/mock_data_detector_mgr.cpp @huawei_g_five
 test/mock/core/common/mock_interaction_interface.h @ArkUI_Event
+test/mock/frameworks/core/interfaces/native/utility/mock_error_message_manager.cpp @arkui_framework_xnode
+test/mock/interfaces/native/mock_native_error_message_wrapper.cpp @arkui_framework_xnode
 test/mock/ohos_mock/ @arkui_framework_xnode
-test/mock/interfaces/native/mock_error_message_manager.cpp @arkui_framework_xnode
 
 test/mock/core/render/mock_font_collection.cpp @huawei_g_five
 test/mock/interfaces/ @arkui_architecture

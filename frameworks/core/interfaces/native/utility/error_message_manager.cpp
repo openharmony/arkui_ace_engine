@@ -18,14 +18,21 @@
 namespace OHOS::Ace {
 namespace {
 
-std::string& GetThreadLocalErrorInfo()
-{
-    thread_local std::string errorInfoMessage;
-    return errorInfoMessage;
-}
-} // namespace
+struct ThreadLocalErrorInfo {
+    ArkUI_Int32 errorCode = 0;
+    std::string functionName;
+    std::string errorMessage;
+    std::string formattedErrorInfo;
+    bool needRefresh = true;
+};
 
-std::string ErrorInfoToString(ArkUIErrorInfo& errorInfo)
+ThreadLocalErrorInfo& GetThreadLocalErrorInfo()
+{
+    thread_local ThreadLocalErrorInfo errorInfo;
+    return errorInfo;
+}
+
+std::string ErrorInfoToString(const ThreadLocalErrorInfo& errorInfo)
 {
     std::string formattedErrorInfo = "errorCode: " + std::to_string(errorInfo.errorCode);
     if (!errorInfo.functionName.empty()) {
@@ -38,6 +45,7 @@ std::string ErrorInfoToString(ArkUIErrorInfo& errorInfo)
     }
     return formattedErrorInfo;
 }
+} // namespace
 
 ErrorMessageManager& ErrorMessageManager::GetInstance()
 {
@@ -45,13 +53,28 @@ ErrorMessageManager& ErrorMessageManager::GetInstance()
     return instance;
 }
 
-void ErrorMessageManager::SetLastError(ArkUIErrorInfo lastError)
+void ErrorMessageManager::SetErrorCodeAndMessage(ArkUI_Int32 errorCode, const char* errorMessage)
 {
-    GetThreadLocalErrorInfo() = ErrorInfoToString(lastError);
+    auto& errorInfo = GetThreadLocalErrorInfo();
+    errorInfo.errorCode = errorCode;
+    errorInfo.errorMessage = (errorMessage != nullptr ? errorMessage : "");
+    errorInfo.needRefresh = true;
 }
 
-const char* ErrorMessageManager::GetLastError() const
+void ErrorMessageManager::SetFunctionName(const char* functionName)
 {
-    return GetThreadLocalErrorInfo().c_str();
+    auto& errorInfo = GetThreadLocalErrorInfo();
+    errorInfo.functionName = (functionName != nullptr ? functionName : "");
+    errorInfo.needRefresh = true;
+}
+
+const char* ErrorMessageManager::GetErrorMessage() const
+{
+    auto& errorInfo = GetThreadLocalErrorInfo();
+    if (errorInfo.needRefresh) {
+        errorInfo.formattedErrorInfo = ErrorInfoToString(errorInfo);
+        errorInfo.needRefresh = false;
+    }
+    return errorInfo.formattedErrorInfo.c_str();
 }
 } // namespace OHOS::Ace

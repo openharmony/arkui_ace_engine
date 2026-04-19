@@ -26,7 +26,7 @@
 #include "base/error/error_code.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
-#include "error_message_macros.h"
+#include "interfaces/native/native_error_message_macros.h"
 
 namespace OHOS::Ace::NodeModel {
 namespace {
@@ -86,6 +86,7 @@ void* FindFunction(void* library, const char* name)
 #endif
 
 ArkUIFullNodeAPI* impl = nullptr;
+ArkUIFullNodeAPI* errorMessageImpl = nullptr;
 constexpr int32_t ANIMATION_STOP_MODE_FIRST_FRAME = 0;
 constexpr int32_t ANIMATION_STOP_MODE_LAST_FRAME = 1;
 using GetArkUIDrawableDescriptorFunc = const ArkUIDrawableDescriptor* (*)();
@@ -115,9 +116,9 @@ const ArkUIDrawableDescriptor* GetArkUIDrawableModifier()
     return modifier;
 }
 
-bool InitialFullNodeImpl(int version)
+bool InitialFullNodeImpl(int version, ArkUIFullNodeAPI*& inputImpl)
 {
-    if (!impl) {
+    if (!inputImpl) {
         typedef ArkUIAnyAPI* (*GetAPI_t)(int);
         GetAPI_t getAPI = nullptr;
         void* module = FindModule();
@@ -132,22 +133,22 @@ bool InitialFullNodeImpl(int version)
             return false;
         }
 
-        impl = reinterpret_cast<ArkUIFullNodeAPI*>((*getAPI)(version));
-        if (!impl) {
+        inputImpl = reinterpret_cast<ArkUIFullNodeAPI*>((*getAPI)(version));
+        if (!inputImpl) {
             TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "getAPI() returned null");
             return false;
         }
 
-        if (impl->version != version) {
+        if (inputImpl->version != version) {
             TAG_LOGE(AceLogTag::ACE_NATIVE_NODE,
                 "API version mismatch: expected %{public}d, but get the version %{public}d", version, impl->version);
             return false;
         }
     }
 
-    impl->getBasicAPI()->registerNodeAsyncEventReceiver(OHOS::Ace::NodeModel::HandleInnerEvent);
-    impl->getExtendedAPI()->registerCustomNodeAsyncEventReceiver(OHOS::Ace::NodeModel::HandleInnerCustomEvent);
-    impl->getBasicAPI()->registerNodeAsyncCommonEventReceiver(OHOS::Ace::NodeModel::HandleInnerNodeCommonEvent);
+    inputImpl->getBasicAPI()->registerNodeAsyncEventReceiver(OHOS::Ace::NodeModel::HandleInnerEvent);
+    inputImpl->getExtendedAPI()->registerCustomNodeAsyncEventReceiver(OHOS::Ace::NodeModel::HandleInnerCustomEvent);
+    inputImpl->getBasicAPI()->registerNodeAsyncCommonEventReceiver(OHOS::Ace::NodeModel::HandleInnerNodeCommonEvent);
     return true;
 }
 } // namespace
@@ -157,9 +158,17 @@ ArkUIFullNodeAPI* GetFullImpl()
     return impl;
 }
 
+ArkUIFullNodeAPI* GetFullImplForErrorMessage()
+{
+    if (!errorMessageImpl && !InitialFullNodeImpl(ARKUI_NODE_API_VERSION, errorMessageImpl)) {
+        return nullptr;
+    }
+    return errorMessageImpl;
+}
+
 bool InitialFullImpl()
 {
-    return InitialFullNodeImpl(ARKUI_NODE_API_VERSION);
+    return InitialFullNodeImpl(ARKUI_NODE_API_VERSION, impl);
 }
 
 std::set<ArkUI_NodeHandle> g_nodeSet;
@@ -282,12 +291,9 @@ int32_t AddChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode)
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     const auto* impl = GetFullImpl();
-    // already check in entry point.
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo { ERROR_CODE_NO_ERROR, __FUNCTION__, "" });
-    int result = impl->getBasicAPI()->addChild(parentNode->uiNodeHandle, childNode->uiNodeHandle,
-        reinterpret_cast<void*>(&errorInfoPtr));
+    int result = impl->getBasicAPI()->addChild(parentNode->uiNodeHandle, childNode->uiNodeHandle);
     if (result != ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     impl->getBasicAPI()->markDirty(parentNode->uiNodeHandle, ARKUI_DIRTY_FLAG_MEASURE_BY_CHILD_REQUEST);
     return result;
@@ -340,11 +346,10 @@ int32_t InsertChildAfter(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     const auto* impl = GetFullImpl();
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo { ERROR_CODE_NO_ERROR, __FUNCTION__, "" });
     int result = impl->getBasicAPI()->insertChildAfter(parentNode->uiNodeHandle, childNode->uiNodeHandle,
-        siblingNode ? siblingNode->uiNodeHandle : nullptr, reinterpret_cast<void*>(&errorInfoPtr));
+        siblingNode ? siblingNode->uiNodeHandle : nullptr);
     if (result != ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     impl->getBasicAPI()->markDirty(parentNode->uiNodeHandle, ARKUI_DIRTY_FLAG_MEASURE_BY_CHILD_REQUEST);
     return result;
@@ -371,11 +376,10 @@ int32_t InsertChildBefore(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNod
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     const auto* impl = GetFullImpl();
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo { ERROR_CODE_NO_ERROR, __FUNCTION__, "" });
     int result = impl->getBasicAPI()->insertChildBefore(parentNode->uiNodeHandle, childNode->uiNodeHandle,
-        siblingNode ? siblingNode->uiNodeHandle : nullptr, reinterpret_cast<void*>(&errorInfoPtr));
+        siblingNode ? siblingNode->uiNodeHandle : nullptr);
     if (result != ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     impl->getBasicAPI()->markDirty(parentNode->uiNodeHandle, ARKUI_DIRTY_FLAG_MEASURE_BY_CHILD_REQUEST);
     return result;
@@ -402,11 +406,9 @@ int32_t InsertChildAt(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode, i
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     const auto* impl = GetFullImpl();
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo { ERROR_CODE_NO_ERROR, __FUNCTION__, "" });
-    int result = impl->getBasicAPI()->insertChildAt(parentNode->uiNodeHandle, childNode->uiNodeHandle, position,
-        reinterpret_cast<void*>(&errorInfoPtr));
+    int result = impl->getBasicAPI()->insertChildAt(parentNode->uiNodeHandle, childNode->uiNodeHandle, position);
     if (result != ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     impl->getBasicAPI()->markDirty(parentNode->uiNodeHandle, ARKUI_DIRTY_FLAG_MEASURE_BY_CHILD_REQUEST);
     return result;
@@ -446,10 +448,9 @@ int32_t SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, c
             ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR, __FUNCTION__, "Builder node attribute is not supported");
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo { ERROR_CODE_NO_ERROR, __FUNCTION__, "" });
-    auto result = SetNodeAttribute(node, attribute, value, reinterpret_cast<void*>(&errorInfoPtr));
+    auto result = SetNodeAttribute(node, attribute, value);
     if (result != ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -465,10 +466,9 @@ int32_t ResetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute)
             ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR, __FUNCTION__, "Builder node attribute is not supported");
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo { ERROR_CODE_NO_ERROR, __FUNCTION__, "" });
-    auto result = ResetNodeAttribute(node, attribute, reinterpret_cast<void*>(&errorInfoPtr));
+    auto result = ResetNodeAttribute(node, attribute);
     if (result != ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -1774,12 +1774,10 @@ int32_t OH_ArkUI_NodeContent_AddNode(ArkUI_NodeContentHandle content, ArkUI_Node
         __FUNCTION__, "Native module not initialized");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNodeContentModifier()->addChild(
-        reinterpret_cast<ArkUINodeContentHandle>(content), node->uiNodeHandle, reinterpret_cast<void*>(&errorInfoPtr));
+        reinterpret_cast<ArkUINodeContentHandle>(content), node->uiNodeHandle);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -1791,13 +1789,10 @@ int32_t OH_ArkUI_NodeContent_InsertNode(ArkUI_NodeContentHandle content, ArkUI_N
         __FUNCTION__, "Native module not initialized");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNodeContentModifier()->insertChild(
-        reinterpret_cast<ArkUINodeContentHandle>(content), node->uiNodeHandle, position,
-        reinterpret_cast<void*>(&errorInfoPtr));
+        reinterpret_cast<ArkUINodeContentHandle>(content), node->uiNodeHandle, position);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -1809,12 +1804,10 @@ int32_t OH_ArkUI_NodeContent_RemoveNode(ArkUI_NodeContentHandle content, ArkUI_N
         __FUNCTION__, "Native module not initialized");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNodeContentModifier()->removeChild(
-        reinterpret_cast<ArkUINodeContentHandle>(content), node->uiNodeHandle, reinterpret_cast<void*>(&errorInfoPtr));
+        reinterpret_cast<ArkUINodeContentHandle>(content), node->uiNodeHandle);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -1825,13 +1818,10 @@ int32_t OH_ArkUI_NodeContent_RegisterCallback(ArkUI_NodeContentHandle content, A
     CHECK_NULL_RETURN_WITH_MESSAGE(impl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND,
         __FUNCTION__, "Native module not initialized");
     auto innerCallback = reinterpret_cast<void (*)(ArkUINodeContentEvent* event)>(callback);
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNodeContentModifier()->registerEvent(
-        reinterpret_cast<ArkUINodeContentHandle>(content), nullptr, innerCallback,
-        reinterpret_cast<void*>(&errorInfoPtr));
+        reinterpret_cast<ArkUINodeContentHandle>(content), nullptr, innerCallback);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -1855,12 +1845,10 @@ int32_t OH_ArkUI_NodeContent_SetUserData(ArkUI_NodeContentHandle content, void* 
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(impl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND,
         __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNodeContentModifier()->setUserData(
-        reinterpret_cast<ArkUINodeContentHandle>(content), userData, reinterpret_cast<void*>(&errorInfoPtr));
+        reinterpret_cast<ArkUINodeContentHandle>(content), userData);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
