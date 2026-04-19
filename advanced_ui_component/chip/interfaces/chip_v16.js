@@ -106,6 +106,8 @@ export function Chip(options, parent = null) {
               chipActivated: options.activated,
               chipNodeBackgroundColor: options.backgroundColor,
               chipNodeActivatedBackgroundColor: options.activatedBackgroundColor,
+              backgroundSystemMaterial: options.backgroundSystemMaterial,
+              activatedBackgroundSystemMaterial: options.activatedBackgroundSystemMaterial,
               chipNodeRadius: options.borderRadius,
               chipDirection: options.direction,
               chipAccessibilitySelectedType: options.accessibilitySelectedType,
@@ -121,7 +123,7 @@ export function Chip(options, parent = null) {
             undefined,
             elmtId,
             () => {},
-            { page: 'components/src/main/ets/components/Chip.ets', line: 280, col: 3 }
+            { page: 'components/src/main/ets/components/Chip.ets', line: 283, col: 3 }
           );
           ViewPU.create(componentCall);
           let paramsLambda = () => {
@@ -139,6 +141,8 @@ export function Chip(options, parent = null) {
               chipActivated: options.activated,
               chipNodeBackgroundColor: options.backgroundColor,
               chipNodeActivatedBackgroundColor: options.activatedBackgroundColor,
+              backgroundSystemMaterial: options.backgroundSystemMaterial,
+              activatedBackgroundSystemMaterial: options.activatedBackgroundSystemMaterial,
               chipNodeRadius: options.borderRadius,
               chipDirection: options.direction,
               chipAccessibilitySelectedType: options.accessibilitySelectedType,
@@ -168,6 +172,8 @@ export function Chip(options, parent = null) {
             chipActivated: options.activated,
             chipNodeBackgroundColor: options.backgroundColor,
             chipNodeActivatedBackgroundColor: options.activatedBackgroundColor,
+            backgroundSystemMaterial: options.backgroundSystemMaterial,
+            activatedBackgroundSystemMaterial: options.activatedBackgroundSystemMaterial,
             chipNodeRadius: options.borderRadius,
             chipDirection: options.direction,
             chipAccessibilitySelectedType: options.accessibilitySelectedType,
@@ -648,6 +654,16 @@ export class ChipComponent extends ViewPU {
       this,
       'chipNodeActivatedBackgroundColor'
     );
+    this.__backgroundSystemMaterial = new SynchedPropertyObjectOneWayPU(
+      params.backgroundSystemMaterial,
+      this,
+      'backgroundSystemMaterial'
+    );
+    this.__activatedBackgroundSystemMaterial = new SynchedPropertyObjectOneWayPU(
+      params.activatedBackgroundSystemMaterial,
+      this,
+      'activatedBackgroundSystemMaterial'
+    );
     this.__chipNodeRadius = new SynchedPropertyObjectOneWayPU(params.chipNodeRadius, this, 'chipNodeRadius');
     this.__chipEnabled = new SynchedPropertySimpleOneWayPU(params.chipEnabled, this, 'chipEnabled');
     this.__chipActivated = new SynchedPropertySimpleOneWayPU(params.chipActivated, this, 'chipActivated');
@@ -670,6 +686,7 @@ export class ChipComponent extends ViewPU {
     this.__minFontScale = new SynchedPropertyObjectOneWayPU(params.minFontScale, this, 'minFontScale');
     this.__chipPadding = new SynchedPropertyObjectOneWayPU(params.chipPadding, this, 'chipPadding');
     this.__chipFontSize = new SynchedPropertyObjectOneWayPU(params.chipFontSize, this, 'chipFontSize');
+    this.__inGroup = this.initializeConsume('inGroup', 'inGroup', false);
     this.__isChipExist = new ObservedPropertySimplePU(true, this, 'isChipExist');
     this.__chipScale = new ObservedPropertyObjectPU({ x: 1, y: 1 }, this, 'chipScale');
     this.__chipOpacity = new ObservedPropertySimplePU(1, this, 'chipOpacity');
@@ -705,11 +722,71 @@ export class ChipComponent extends ViewPU {
     if (params.chipSize === undefined) {
       this.__chipSize.set(ChipSize.NORMAL);
     }
+    if (params.allowClose === undefined) {
+      this.__allowClose.set(undefined);
+    }
+    if (params.closeOptions === undefined) {
+      this.__closeOptions.set(undefined);
+    }
     if (params.chipDirection === undefined) {
       this.__chipDirection.set(Direction.Auto);
     }
+    if (params.prefixIcon === undefined) {
+      this.__prefixIcon.set(undefined);
+    }
+    if (params.prefixSymbol === undefined) {
+      this.__prefixSymbol.set(undefined);
+    }
+    if (params.suffixIcon === undefined) {
+      this.__suffixIcon.set(undefined);
+    }
+    if (params.suffixSymbol === undefined) {
+      this.__suffixSymbol.set(undefined);
+    }
+    if (params.suffixSymbolOptions === undefined) {
+      this.__suffixSymbolOptions.set(undefined);
+    }
+    if (params.chipNodeBackgroundColor === undefined) {
+      this.__chipNodeBackgroundColor.set(undefined);
+    }
+    if (params.chipNodeActivatedBackgroundColor === undefined) {
+      this.__chipNodeActivatedBackgroundColor.set(undefined);
+    }
+    if (params.backgroundSystemMaterial === undefined) {
+      this.__backgroundSystemMaterial.set(undefined);
+    }
+    if (params.activatedBackgroundSystemMaterial === undefined) {
+      this.__activatedBackgroundSystemMaterial.set(undefined);
+    }
+    if (params.chipNodeRadius === undefined) {
+      this.__chipNodeRadius.set(undefined);
+    }
     if (params.chipEnabled === undefined) {
       this.__chipEnabled.set(true);
+    }
+    if (params.chipActivated === undefined) {
+      this.__chipActivated.set(undefined);
+    }
+    if (params.chipAccessibilitySelectedType === undefined) {
+      this.__chipAccessibilitySelectedType.set(undefined);
+    }
+    if (params.chipAccessibilityDescription === undefined) {
+      this.__chipAccessibilityDescription.set(undefined);
+    }
+    if (params.chipAccessibilityLevel === undefined) {
+      this.__chipAccessibilityLevel.set(undefined);
+    }
+    if (params.maxFontScale === undefined) {
+      this.__maxFontScale.set(undefined);
+    }
+    if (params.minFontScale === undefined) {
+      this.__minFontScale.set(undefined);
+    }
+    if (params.chipPadding === undefined) {
+      this.__chipPadding.set(undefined);
+    }
+    if (params.chipFontSize === undefined) {
+      this.__chipFontSize.set(undefined);
     }
     if (params.isChipExist !== undefined) {
       this.isChipExist = params.isChipExist;
@@ -782,6 +859,8 @@ export class ChipComponent extends ViewPU {
     this.__suffixSymbolOptions.reset(params.suffixSymbolOptions);
     this.__chipNodeBackgroundColor.reset(params.chipNodeBackgroundColor);
     this.__chipNodeActivatedBackgroundColor.reset(params.chipNodeActivatedBackgroundColor);
+    this.__backgroundSystemMaterial.reset(params.backgroundSystemMaterial);
+    this.__activatedBackgroundSystemMaterial.reset(params.activatedBackgroundSystemMaterial);
     this.__chipNodeRadius.reset(params.chipNodeRadius);
     this.__chipEnabled.reset(params.chipEnabled);
     this.__chipActivated.reset(params.chipActivated);
@@ -806,6 +885,8 @@ export class ChipComponent extends ViewPU {
     this.__suffixSymbolOptions.purgeDependencyOnElmtId(rmElmtId);
     this.__chipNodeBackgroundColor.purgeDependencyOnElmtId(rmElmtId);
     this.__chipNodeActivatedBackgroundColor.purgeDependencyOnElmtId(rmElmtId);
+    this.__backgroundSystemMaterial.purgeDependencyOnElmtId(rmElmtId);
+    this.__activatedBackgroundSystemMaterial.purgeDependencyOnElmtId(rmElmtId);
     this.__chipNodeRadius.purgeDependencyOnElmtId(rmElmtId);
     this.__chipEnabled.purgeDependencyOnElmtId(rmElmtId);
     this.__chipActivated.purgeDependencyOnElmtId(rmElmtId);
@@ -816,6 +897,7 @@ export class ChipComponent extends ViewPU {
     this.__minFontScale.purgeDependencyOnElmtId(rmElmtId);
     this.__chipPadding.purgeDependencyOnElmtId(rmElmtId);
     this.__chipFontSize.purgeDependencyOnElmtId(rmElmtId);
+    this.__inGroup.purgeDependencyOnElmtId(rmElmtId);
     this.__isChipExist.purgeDependencyOnElmtId(rmElmtId);
     this.__chipScale.purgeDependencyOnElmtId(rmElmtId);
     this.__chipOpacity.purgeDependencyOnElmtId(rmElmtId);
@@ -839,6 +921,8 @@ export class ChipComponent extends ViewPU {
     this.__suffixSymbolOptions.aboutToBeDeleted();
     this.__chipNodeBackgroundColor.aboutToBeDeleted();
     this.__chipNodeActivatedBackgroundColor.aboutToBeDeleted();
+    this.__backgroundSystemMaterial.aboutToBeDeleted();
+    this.__activatedBackgroundSystemMaterial.aboutToBeDeleted();
     this.__chipNodeRadius.aboutToBeDeleted();
     this.__chipEnabled.aboutToBeDeleted();
     this.__chipActivated.aboutToBeDeleted();
@@ -849,6 +933,7 @@ export class ChipComponent extends ViewPU {
     this.__minFontScale.aboutToBeDeleted();
     this.__chipPadding.aboutToBeDeleted();
     this.__chipFontSize.aboutToBeDeleted();
+    this.__inGroup.aboutToBeDeleted();
     this.__isChipExist.aboutToBeDeleted();
     this.__chipScale.aboutToBeDeleted();
     this.__chipOpacity.aboutToBeDeleted();
@@ -933,6 +1018,18 @@ export class ChipComponent extends ViewPU {
   set chipNodeActivatedBackgroundColor(newValue) {
     this.__chipNodeActivatedBackgroundColor.set(newValue);
   }
+  get backgroundSystemMaterial() {
+    return this.__backgroundSystemMaterial.get();
+  }
+  set backgroundSystemMaterial(newValue) {
+    this.__backgroundSystemMaterial.set(newValue);
+  }
+  get activatedBackgroundSystemMaterial() {
+    return this.__activatedBackgroundSystemMaterial.get();
+  }
+  set activatedBackgroundSystemMaterial(newValue) {
+    this.__activatedBackgroundSystemMaterial.set(newValue);
+  }
   get chipNodeRadius() {
     return this.__chipNodeRadius.get();
   }
@@ -992,6 +1089,12 @@ export class ChipComponent extends ViewPU {
   }
   set chipFontSize(newValue) {
     this.__chipFontSize.set(newValue);
+  }
+  get inGroup() {
+    return this.__inGroup.get();
+  }
+  set inGroup(newValue) {
+    this.__inGroup.set(newValue);
   }
   get isChipExist() {
     return this.__isChipExist.get();
@@ -1142,6 +1245,8 @@ export class ChipComponent extends ViewPU {
       Button.enabled(this.isChipEnabled());
       Button.direction(this.chipDirection);
       Button.backgroundColor(this.getChipBackgroundColor());
+      Button.systemMaterial(this.getBackgroundSystemMaterial());
+      Button.useEffect(this.inGroup ? true : undefined);
       Button.borderWidth(this.getChipNodeBorderWidth());
       Button.borderColor(this.getChipNodeBorderColor());
       Button.borderRadius(this.getChipBorderRadius());
@@ -1817,10 +1922,16 @@ export class ChipComponent extends ViewPU {
     return this.chipNodeInFocus ? this.theme.label.focusFontColor : this.theme.label.fontColor;
   }
   getChipNodeBorderColor() {
+    if (this.getBackgroundSystemMaterial()) {
+      return undefined;
+    }
     let themeChipNode = this.theme.chipNode;
     return this.isChipActivated() ? themeChipNode.activatedBorderColor : themeChipNode.borderColor;
   }
   getChipNodeBorderWidth() {
+    if (this.getBackgroundSystemMaterial()) {
+      return undefined;
+    }
     let themeChipNode = this.theme.chipNode;
     return this.isChipActivated() ? themeChipNode.activatedBorderWidth : themeChipNode.defaultBorderWidth;
   }
@@ -1919,6 +2030,15 @@ export class ChipComponent extends ViewPU {
     return this.chipNodeInFocus && !this.isSetNormalChipBgColor()
       ? themeChipNode.focusBgColor
       : this.getColor(this.chipNodeBackgroundColor, this.theme.chipNode.backgroundColor);
+  }
+  getBackgroundSystemMaterial() {
+    if (deviceInfo.sdkApiVersion < 26 || this.inGroup) {
+      return undefined;
+    }
+    if (this.isChipActivated()) {
+      return this.activatedBackgroundSystemMaterial;
+    }
+    return this.backgroundSystemMaterial;
   }
   getColor(color, defaultColor) {
     if (!color) {
