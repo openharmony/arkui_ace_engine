@@ -38,6 +38,7 @@
 #include "core/common/recorder/event_recorder.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/select/select_theme.h"
+#include "core/components/button/button_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/action_sheet/action_sheet_model_ng.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -59,6 +60,7 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
+#include "core/common/ace_engine.h"
 
 using namespace testing;
 using namespace testing::ext;

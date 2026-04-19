@@ -16,7 +16,9 @@
 #include "core/components_ng/pattern/select_overlay/select_overlay_modifier.h"
 
 #include "core/components/text_overlay/text_overlay_theme.h"
+#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/node_paint_method.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

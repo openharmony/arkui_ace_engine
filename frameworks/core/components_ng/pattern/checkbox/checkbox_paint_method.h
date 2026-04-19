@@ -20,7 +20,10 @@
 #include "base/utils/macros.h"
 #include "core/components_ng/pattern/checkbox/checkbox_modifier.h"
 #include "core/components_ng/render/node_paint_method.h"
-#include "core/components/checkable/checkable_theme.h"
+namespace OHOS::Ace {
+class CheckboxTheme;
+}
+
 namespace OHOS::Ace::NG {
 class CheckBoxPaintProperty;
 constexpr float CHECKBOX_MARK_STROKEWIDTH_LIMIT_RATIO = 0.25f;

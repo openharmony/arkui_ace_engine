@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
 #include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #undef private
 #undef protected
 

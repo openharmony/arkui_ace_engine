@@ -20,6 +20,7 @@
 #include "base/error/error_code.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "frameworks/core/components/dialog/dialog_properties.h"
 #include "frameworks/core/components/theme/shadow_theme.h"

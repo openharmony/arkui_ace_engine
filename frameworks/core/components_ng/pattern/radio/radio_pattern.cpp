@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/radio/radio_pattern.h"
 
+#include "core/components/checkable/checkable_theme.h"
 #include "base/log/dump_log.h"
 #include "base/utils/multi_thread.h"
 #include "core/components/theme/icon_theme.h"

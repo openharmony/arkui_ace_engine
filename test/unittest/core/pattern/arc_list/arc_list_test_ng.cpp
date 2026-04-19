@@ -14,6 +14,7 @@
  */
 
 #include "arc_list_test_ng.h"
+#include "core/components/button/button_theme.h"
 
 namespace OHOS::Ace::NG {
 void ArcListTestNg::SetUpTestSuite()

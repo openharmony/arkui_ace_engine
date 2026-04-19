@@ -27,6 +27,10 @@
 #include "core/components_ng/pattern/radio/radio_paint_method.h"
 #include "core/components_ng/pattern/radio/radio_paint_property.h"
 
+namespace OHOS::Ace {
+class RadioTheme;
+}
+
 namespace OHOS::Ace::NG {
 class GroupManager;
 constexpr float DEFAULT_RADIO_IMAGE_SCALE = 0.7F;

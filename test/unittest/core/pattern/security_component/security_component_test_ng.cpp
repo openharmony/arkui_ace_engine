@@ -54,6 +54,7 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "security_component_test_ng.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #undef protected
 #undef private
 

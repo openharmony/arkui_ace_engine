@@ -36,6 +36,7 @@
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "frameworks/core/components_ng/pattern/text/text_pattern.h"
 #include "frameworks/core/interfaces/arkoala/arkoala_api.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 using namespace testing;
 using namespace testing::ext;

@@ -24,6 +24,7 @@
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "core/common/recorder/event_recorder.h"
 
+#include "core/common/ace_engine.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components_ng/base/view_stack_processor.h"

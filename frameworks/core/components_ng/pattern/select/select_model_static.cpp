@@ -14,7 +14,9 @@
  */
 
 #include "core/components_ng/pattern/select/select_model_static.h"
+#include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
+#include "core/components_ng/pattern/select/select_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 
 namespace OHOS::Ace::NG {

@@ -15,9 +15,13 @@
 #include "core/components_ng/pattern/checkbox/checkbox_paint_method.h"
 #include "ui/base/utils/utils.h"
 
+#include "core/animation/spring_curve.h"
+#include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/components_ng/render/paint_wrapper.h"
+#include "core/components_ng/token_theme/token_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

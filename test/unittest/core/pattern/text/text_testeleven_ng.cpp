@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/text_field/content_controller.h"
 #undef private
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
 

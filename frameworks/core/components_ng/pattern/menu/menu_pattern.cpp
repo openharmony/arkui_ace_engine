@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 
+#include "base/subwindow/subwindow_manager.h"
 #include "base/geometry/dimension.h"
 #include "base/log/dump_log.h"
 #include "core/components/common/layout/grid_system_manager.h"

@@ -15,11 +15,13 @@
 
 #include "core/components_ng/pattern/menu/menu_view.h"
 
+#include "base/subwindow/subwindow_manager.h"
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
