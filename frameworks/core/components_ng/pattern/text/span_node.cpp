@@ -1287,9 +1287,7 @@ void SpanItem::GetFontStyleSpanItem(RefPtr<SpanItem>& sameSpan) const
 void SpanItem::GetTextLineStyleSpanItem(RefPtr<SpanItem>& sameSpan) const
 {
     COPY_TEXT_STYLE(textLineStyle, LineHeight, UpdateLineHeight);
-    COPY_TEXT_STYLE(textLineStyle, LineHeightMultiply, UpdateLineHeightMultiply);
     COPY_TEXT_STYLE(textLineStyle, LineSpacing, UpdateLineSpacing);
-    COPY_TEXT_STYLE(textLineStyle, IsOnlyBetweenLines, UpdateIsOnlyBetweenLines);
     COPY_TEXT_STYLE(textLineStyle, OptimizeTrailingSpace, UpdateOptimizeTrailingSpace);
     COPY_TEXT_STYLE(textLineStyle, CompressLeadingPunctuation, UpdateCompressLeadingPunctuation);
     COPY_TEXT_STYLE(textLineStyle, TextBaseline, UpdateTextBaseline);
@@ -1426,10 +1424,7 @@ void SpanItem::EncodeFontStyleTlv(std::vector<uint8_t>& buff) const
 void SpanItem::EncodeTextLineStyleTlv(std::vector<uint8_t>& buff) const
 {
     WRITE_TLV_INHERIT(textLineStyle, LineHeight, TLV_SPAN_TEXT_LINE_STYLE_LINEHEIGHT, Dimension, LineHeight);
-    WRITE_TEXT_STYLE_TLV(textLineStyle, LineHeightMultiply, TLV_SPAN_TEXT_LINE_STYLE_LINEHEIGHTMULTIPLY, Double);
     WRITE_TLV_INHERIT(textLineStyle, LineSpacing, TLV_SPAN_TEXT_LINE_STYLE_LINESPACING, Dimension, LineSpacing);
-    WRITE_TLV_INHERIT(textLineStyle, IsOnlyBetweenLines,
-        TLV_SPAN_TEXT_LINE_STYLE_ISONLYBETWEENLINES, Bool, IsOnlyBetweenLines);
     WRITE_TLV_INHERIT(textLineStyle, TextBaseline, TLV_SPAN_TEXT_LINE_STYLE_TEXTBASELINE, TextBaseline, TextBaseline);
     // text's baselineOffset attribute is not span's baselineOffset attribute
     WRITE_TEXT_STYLE_TLV(textLineStyle, BaselineOffset, TLV_SPAN_TEXT_LINE_STYLE_BASELINEOFFSET, Dimension);
@@ -1502,11 +1497,7 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
             }
 
             READ_TEXT_STYLE_TLV(textLineStyle, UpdateLineHeight, TLV_SPAN_TEXT_LINE_STYLE_LINEHEIGHT, Dimension);
-            READ_TEXT_STYLE_TLV(textLineStyle, UpdateLineHeightMultiply,
-                TLV_SPAN_TEXT_LINE_STYLE_LINEHEIGHTMULTIPLY, Double);
             READ_TEXT_STYLE_TLV(textLineStyle, UpdateLineSpacing, TLV_SPAN_TEXT_LINE_STYLE_LINESPACING, Dimension);
-            READ_TEXT_STYLE_TLV(textLineStyle, UpdateIsOnlyBetweenLines,
-                TLV_SPAN_TEXT_LINE_STYLE_ISONLYBETWEENLINES, Bool);
             READ_TEXT_STYLE_TLV(textLineStyle, UpdateTextBaseline, TLV_SPAN_TEXT_LINE_STYLE_TEXTBASELINE, TextBaseline);
             READ_TEXT_STYLE_TLV(textLineStyle, UpdateBaselineOffset,
                 TLV_SPAN_TEXT_LINE_STYLE_BASELINEOFFSET, Dimension);

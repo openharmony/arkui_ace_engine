@@ -75,9 +75,6 @@ public:
     static JSRef<JSObject> CreateJsLineHeightSpan(const RefPtr<SpanBase>& spanObject);
     static RefPtr<SpanBase> ParseJsLineHeightSpan(int32_t start, int32_t length, const JSRef<JSObject>& obj);
 
-    static JSRef<JSObject> CreateJsLineSpacingSpan(const RefPtr<SpanBase>& spanObject);
-    static RefPtr<SpanBase> ParseJsLineSpacingSpan(int32_t start, int32_t length, const JSRef<JSObject>& obj);
-
     static JSRef<JSObject> CreateJsImageSpan(const RefPtr<SpanBase>& spanObject);
     static RefPtr<SpanBase> GetImageAttachment(int32_t start, int32_t length, const JSRef<JSObject>& obj);
     static ImageSpanOptions ParseJsImageAttachment(const JSRef<JSObject>& obj);

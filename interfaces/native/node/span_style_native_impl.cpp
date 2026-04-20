@@ -212,20 +212,7 @@ ArkUILineHeightStyle ConvertToOriginLineHeightStyle(const OH_ArkUI_LineHeightSty
 {
     ArkUILineHeightStyle lineHeightStyle;
     lineHeightStyle.lineHeight = style.lineHeight;
-    std::optional<double> heightMultiple;
-    if (style.lineHeightMultiple.has_value() && !LessNotEqual(style.lineHeightMultiple.value(), 0.0f)) {
-        heightMultiple = static_cast<double>(style.lineHeightMultiple.value());
-    }
-    lineHeightStyle.lineHeightMultiple = heightMultiple;
     return lineHeightStyle;
-}
-
-ArkUILineSpacingStyle ConvertToOriginLineSpacingStyle(const OH_ArkUI_LineSpacingStyle& style)
-{
-    ArkUILineSpacingStyle lineSpacingStyle;
-    lineSpacingStyle.lineSpacing = style.lineSpacing;
-    lineSpacingStyle.onlyBetweenLines = style.onlyBetweenLines;
-    return lineSpacingStyle;
 }
 
 ArkUIUrlStyle ConvertToOriginUrlStyle(const OH_ArkUI_UrlStyle& spanStyle)
@@ -306,7 +293,6 @@ ArkUISpanStyle ConvertToOriginSpanStyle(const OH_ArkUI_SpanStyle* spanStyle)
         PARSE_STYLED_STRING(OH_ARKUI_STYLEDSTRINGKEY_DECORATION, decorationStyle, DecorationStyle);
         PARSE_STYLED_STRING(OH_ARKUI_STYLEDSTRINGKEY_TEXT_SHADOW, textShadowStyle, TextShadowStyle);
         PARSE_STYLED_STRING(OH_ARKUI_STYLEDSTRINGKEY_LINE_HEIGHT, lineHeightStyle, LineHeightStyle);
-        PARSE_STYLED_STRING(OH_ARKUI_STYLEDSTRINGKEY_LINE_SPACING, lineSpacingStyle, LineSpacingStyle);
         PARSE_STYLED_STRING(OH_ARKUI_STYLEDSTRINGKEY_PARAGRAPH_STYLE, paragraphStyle, ParagraphStyle);
         PARSE_STYLED_STRING(OH_ARKUI_STYLEDSTRINGKEY_LETTER_SPACING, letterSpacingStyle, LetterSpacing);
         PARSE_STYLED_STRING(OH_ARKUI_STYLEDSTRINGKEY_BASELINE_OFFSET, baselineOffsetStyle, BaselineOffset);
@@ -420,18 +406,7 @@ OH_ArkUI_LineHeightStyle ConvertToCLineHeightStyle(const ArkUILineHeightStyle& s
 {
     OH_ArkUI_LineHeightStyle lineHeightStyle;
     lineHeightStyle.lineHeight = style.lineHeight;
-    if (style.lineHeightMultiple.has_value()) {
-        lineHeightStyle.lineHeightMultiple = style.lineHeightMultiple.value();
-    }
     return lineHeightStyle;
-}
-
-OH_ArkUI_LineSpacingStyle ConvertToCLineSpacingStyle(const ArkUILineSpacingStyle& style)
-{
-    OH_ArkUI_LineSpacingStyle lineSpacingStyle;
-    lineSpacingStyle.lineSpacing = style.lineSpacing;
-    lineSpacingStyle.onlyBetweenLines = style.onlyBetweenLines;
-    return lineSpacingStyle;
 }
 
 OH_ArkUI_LetterSpacingStyle ConvertToCLetterSpacing(const ArkUILetterSpacingStyle& style)
@@ -509,7 +484,6 @@ OH_ArkUI_SpanStyle ConvertToCSpanStyle(const ArkUISpanStyle& spanStyle)
         PARSE_CAPI_STYLED_STRING(OH_ARKUI_STYLEDSTRINGKEY_DECORATION, decorationStyle, DecorationStyle);
         PARSE_CAPI_STYLED_STRING(OH_ARKUI_STYLEDSTRINGKEY_TEXT_SHADOW, textShadowStyle, TextShadowStyle);
         PARSE_CAPI_STYLED_STRING(OH_ARKUI_STYLEDSTRINGKEY_LINE_HEIGHT, lineHeightStyle, LineHeightStyle);
-        PARSE_CAPI_STYLED_STRING(OH_ARKUI_STYLEDSTRINGKEY_LINE_SPACING, lineSpacingStyle, LineSpacingStyle);
         PARSE_CAPI_STYLED_STRING(OH_ARKUI_STYLEDSTRINGKEY_PARAGRAPH_STYLE, paragraphStyle, ParagraphStyle);
         PARSE_CAPI_STYLED_STRING(OH_ARKUI_STYLEDSTRINGKEY_LETTER_SPACING, letterSpacingStyle, LetterSpacing);
         PARSE_CAPI_STYLED_STRING(OH_ARKUI_STYLEDSTRINGKEY_BASELINE_OFFSET, baselineOffsetStyle, BaselineOffset);
@@ -953,7 +927,6 @@ ArkUI_ErrorCode OH_ArkUI_SpanStyle_SetLineHeightStyle(
     ClearSpanStyle(spanStyle);
     spanStyle->styledKey = OH_ArkUI_StyledStringKey::OH_ARKUI_STYLEDSTRINGKEY_LINE_HEIGHT;
     spanStyle->lineHeightStyle.lineHeight = lineHeightStyle->lineHeight;
-    spanStyle->lineHeightStyle.lineHeightMultiple = lineHeightStyle->lineHeightMultiple;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
 
@@ -964,28 +937,6 @@ ArkUI_ErrorCode OH_ArkUI_SpanStyle_GetLineHeightStyle(
     CHECK_NULL_RETURN(spanStyle->styledKey == OH_ArkUI_StyledStringKey::OH_ARKUI_STYLEDSTRINGKEY_LINE_HEIGHT,
         ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     lineHeightStyle->lineHeight = spanStyle->lineHeightStyle.lineHeight;
-    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
-}
-
-ArkUI_ErrorCode OH_ArkUI_SpanStyle_SetLineSpacingStyle(
-    OH_ArkUI_SpanStyle* spanStyle, const OH_ArkUI_LineSpacingStyle* lineSpacingStyle)
-{
-    CHECK_NULL_RETURN(spanStyle && lineSpacingStyle, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    ClearSpanStyle(spanStyle);
-    spanStyle->styledKey = OH_ArkUI_StyledStringKey::OH_ARKUI_STYLEDSTRINGKEY_LINE_SPACING;
-    spanStyle->lineSpacingStyle.lineSpacing = lineSpacingStyle->lineSpacing;
-    spanStyle->lineSpacingStyle.onlyBetweenLines = lineSpacingStyle->onlyBetweenLines;
-    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
-}
-
-ArkUI_ErrorCode OH_ArkUI_SpanStyle_GetLineSpacingStyle(
-    const OH_ArkUI_SpanStyle* spanStyle, OH_ArkUI_LineSpacingStyle* lineSpacingStyle)
-{
-    CHECK_NULL_RETURN(spanStyle && lineSpacingStyle, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(spanStyle->styledKey == OH_ArkUI_StyledStringKey::OH_ARKUI_STYLEDSTRINGKEY_LINE_SPACING,
-        ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    lineSpacingStyle->lineSpacing = spanStyle->lineSpacingStyle.lineSpacing;
-    lineSpacingStyle->onlyBetweenLines = spanStyle->lineSpacingStyle.onlyBetweenLines;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
 
@@ -1762,69 +1713,6 @@ ArkUI_ErrorCode OH_ArkUI_LineHeightStyle_GetLineHeight(const OH_ArkUI_LineHeight
     CHECK_NULL_RETURN(lineHeightStyle, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(lineHeight, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     *lineHeight = lineHeightStyle->lineHeight;
-    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
-}
-
-ArkUI_ErrorCode OH_ArkUI_LineHeightStyle_SetLineHeightMultiple(OH_ArkUI_LineHeightStyle* lineHeightStyle,
-    float lineHeightMultiple)
-{
-    CHECK_NULL_RETURN(lineHeightStyle, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    lineHeightStyle->lineHeightMultiple = lineHeightMultiple;
-    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
-}
-
-ArkUI_ErrorCode OH_ArkUI_LineHeightStyle_GetLineHeightMultiple(const OH_ArkUI_LineHeightStyle* lineHeightStyle,
-    float* lineHeightMultiple)
-{
-    CHECK_NULL_RETURN(lineHeightStyle, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(lineHeightMultiple, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    *lineHeightMultiple = lineHeightStyle->lineHeightMultiple.has_value() ?
-        lineHeightStyle->lineHeightMultiple.value() : 0.0f;
-    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
-}
-
-OH_ArkUI_LineSpacingStyle* OH_ArkUI_LineSpacingStyle_Create()
-{
-    return new OH_ArkUI_LineSpacingStyle;
-}
-
-void OH_ArkUI_LineSpacingStyle_Destroy(OH_ArkUI_LineSpacingStyle* lineSpacingStyle)
-{
-    delete lineSpacingStyle;
-    lineSpacingStyle = nullptr;
-}
-
-ArkUI_ErrorCode OH_ArkUI_LineSpacingStyle_SetLineSpacing(OH_ArkUI_LineSpacingStyle* lineSpacingStyle,
-    float lineSpacing)
-{
-    CHECK_NULL_RETURN(lineSpacingStyle, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    lineSpacingStyle->lineSpacing = lineSpacing;
-    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
-}
-
-ArkUI_ErrorCode OH_ArkUI_LineSpacingStyle_GetLineSpacing(const OH_ArkUI_LineSpacingStyle* lineSpacingStyle,
-    float* lineSpacing)
-{
-    CHECK_NULL_RETURN(lineSpacingStyle, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(lineSpacing, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    *lineSpacing = lineSpacingStyle->lineSpacing;
-    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
-}
-
-ArkUI_ErrorCode OH_ArkUI_LineSpacingStyle_SetOnlyBetweenLines(
-    OH_ArkUI_LineSpacingStyle* lineSpacingStyle, bool onlyBetweenLines)
-{
-    CHECK_NULL_RETURN(lineSpacingStyle, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    lineSpacingStyle->onlyBetweenLines = onlyBetweenLines;
-    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
-}
-
-ArkUI_ErrorCode OH_ArkUI_LineSpacingStyle_GetOnlyBetweenLines(
-    const OH_ArkUI_LineSpacingStyle* lineSpacingStyle, bool* onlyBetweenLines)
-{
-    CHECK_NULL_RETURN(lineSpacingStyle, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(onlyBetweenLines, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
-    *onlyBetweenLines = lineSpacingStyle->onlyBetweenLines;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
 

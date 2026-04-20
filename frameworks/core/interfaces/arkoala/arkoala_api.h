@@ -2865,12 +2865,6 @@ struct ArkUILetterSpacingStyle {
 
 struct ArkUILineHeightStyle {
     float lineHeight;
-    std::optional<double> lineHeightMultiple;
-};
-
-struct ArkUILineSpacingStyle {
-    float lineSpacing = 0.0f;
-    bool onlyBetweenLines = false;
 };
 
 struct ArkUIBackgroundColorStyle {
@@ -2935,7 +2929,6 @@ struct ArkUISpanStyle {
     ArkUIBaselineOffsetStyle baselineOffsetStyle;
     ArkUILetterSpacingStyle letterSpacingStyle;
     ArkUILineHeightStyle lineHeightStyle;
-    ArkUILineSpacingStyle lineSpacingStyle;
     ArkUIUrlStyle urlStyle;
     ArkUIBackgroundColorStyle backgroundColorStyle;
     ArkUIUserDataSpan userDataSpan;

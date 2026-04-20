@@ -123,7 +123,6 @@ void UseSelfTextLineStyleWithTheme(const std::unique_ptr<TextLineStyle>& textLin
     const RefPtr<TextTheme>& textTheme)
 {
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, LineHeight, LineHeight);
-    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, LineHeightMultiply, LineHeightMultiply);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, BaselineOffset, BaselineOffset);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, TextIndent, TextIndent);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, LineSpacing, LineSpacing);
@@ -191,7 +190,6 @@ void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique
     }
     if (textLineStyle) {
         UPDATE_TEXT_STYLE(textLineStyle, LineHeight, SetLineHeight);
-        UPDATE_TEXT_STYLE(textLineStyle, LineHeightMultiply, SetLineHeightMultiply);
         UPDATE_TEXT_STYLE(textLineStyle, BaselineOffset, SetBaselineOffset);
         UPDATE_TEXT_STYLE(textLineStyle, TextIndent, SetTextIndent);
         UPDATE_TEXT_STYLE(textLineStyle, LineSpacing, SetLineSpacing);

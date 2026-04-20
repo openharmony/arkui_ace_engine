@@ -794,7 +794,6 @@ void AssignArkValue(Ark_StyledStringKey& dst, OHOS::Ace::SpanType src)
         case Ace::SpanType::LetterSpacing: dst = ARK_STYLED_STRING_KEY_LETTER_SPACING; break;
         case Ace::SpanType::TextShadow: dst = ARK_STYLED_STRING_KEY_TEXT_SHADOW; break;
         case Ace::SpanType::LineHeight: dst = ARK_STYLED_STRING_KEY_LINE_HEIGHT; break;
-        case Ace::SpanType::LineSpacing: dst = ARK_STYLED_STRING_KEY_LINE_SPACING; break;
         case Ace::SpanType::BackgroundColor: dst = ARK_STYLED_STRING_KEY_BACKGROUND_COLOR; break;
         case Ace::SpanType::Url: dst = ARK_STYLED_STRING_KEY_URL; break;
         case Ace::SpanType::Gesture: dst = ARK_STYLED_STRING_KEY_GESTURE; break;

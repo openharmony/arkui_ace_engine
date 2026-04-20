@@ -128,9 +128,6 @@ void ParagraphUtil::GetSpanParagraphStyle(
     if (lineStyle->HasLineHeight()) {
         pStyle.lineHeight = lineStyle->GetLineHeightValue();
     }
-    if (lineStyle->HasIsOnlyBetweenLines()) {
-        pStyle.isOnlyBetweenLines = lineStyle->GetIsOnlyBetweenLinesValue();
-    }
     if (lineStyle->HasHalfLeading()) {
         pStyle.halfLeading = lineStyle->GetHalfLeadingValue();
     }

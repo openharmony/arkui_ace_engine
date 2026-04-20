@@ -732,7 +732,6 @@ void AssignUnionTo(std::optional<T>& dst,
         case SELECTOR_ID_10: AssignTo(dst, src.value10); break;
         case SELECTOR_ID_11: AssignTo(dst, src.value11); break;
         case SELECTOR_ID_12: AssignTo(dst, src.value12); break;
-        case SELECTOR_ID_13: AssignTo(dst, src.value13); break;
         default:
         {
             LOGE("Unexpected src->selector: %{public}d\n", src.selector);
@@ -3801,7 +3800,6 @@ ASSIGN_OPT(Opt_LineBreakStrategy)
 ASSIGN_OPT(Opt_LineCapStyle)
 ASSIGN_OPT(Opt_LineHeightStyle)
 ASSIGN_OPT(Opt_LineJoinStyle)
-ASSIGN_OPT(Opt_LineSpacingStyle)
 ASSIGN_OPT(Opt_ListItemAlign)
 ASSIGN_OPT(Opt_ListItemGroupArea)
 ASSIGN_OPT(Opt_ListItemGroupStyle)

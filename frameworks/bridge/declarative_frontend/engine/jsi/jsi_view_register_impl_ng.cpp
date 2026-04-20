@@ -354,7 +354,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSImageAttachment::JSBind(globalObj);
     JSParagraphStyleSpan::JSBind(globalObj);
     JSLineHeightSpan::JSBind(globalObj);
-    JSLineSpacingSpan::JSBind(globalObj);
     JSUrlSpan::JSBind(globalObj);
     JSTextLayout::JSBind(globalObj);
     JSTabs::JSBind(globalObj);

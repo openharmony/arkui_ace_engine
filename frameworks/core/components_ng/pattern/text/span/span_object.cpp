@@ -1209,13 +1209,6 @@ void NapiParagraphStyleSpan::ClearSpecialData()
 // LineHeightSpan
 LineHeightSpan::LineHeightSpan(Dimension lineHeight) : SpanBase(0, 0), lineHeight_(lineHeight) {}
 
-LineHeightSpan::LineHeightSpan(Dimension lineHeight, std::optional<double> lineHeightMultiple)
-    : SpanBase(0, 0), lineHeight_(lineHeight), lineHeightMultiple_(lineHeightMultiple) {}
-
-LineHeightSpan::LineHeightSpan(Dimension lineHeight, std::optional<double> lineHeightMultiple,
-    int32_t start, int32_t end)
-    : SpanBase(start, end), lineHeight_(lineHeight), lineHeightMultiple_(lineHeightMultiple) {}
-
 LineHeightSpan::LineHeightSpan(Dimension lineHeight, int32_t start, int32_t end)
     : SpanBase(start, end), lineHeight_(lineHeight)
 {}
@@ -1233,32 +1226,23 @@ void LineHeightSpan::ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanO
 
 RefPtr<SpanBase> LineHeightSpan::GetSubSpan(int32_t start, int32_t end)
 {
-    RefPtr<SpanBase> spanBase = MakeRefPtr<LineHeightSpan>(lineHeight_, lineHeightMultiple_, start, end);
+    RefPtr<SpanBase> spanBase = MakeRefPtr<LineHeightSpan>(GetLineHeight(), start, end);
     return spanBase;
 }
 
 void LineHeightSpan::AddLineHeightStyle(const RefPtr<NG::SpanItem>& spanItem) const
 {
     spanItem->textLineStyle->UpdateLineHeight(lineHeight_);
-    if (lineHeightMultiple_.has_value()) {
-        spanItem->textLineStyle->UpdateLineHeightMultiply(lineHeightMultiple_.value());
-    }
 }
 
 void LineHeightSpan::RemoveLineHeightStyle(const RefPtr<NG::SpanItem>& spanItem) const
 {
     spanItem->textLineStyle->ResetLineHeight();
-    spanItem->textLineStyle->ResetLineHeightMultiply();
 }
 
 Dimension LineHeightSpan::GetLineHeight() const
 {
     return lineHeight_;
-}
-
-std::optional<double> LineHeightSpan::GetLineHeightMultiple() const
-{
-    return lineHeightMultiple_;
 }
 
 SpanType LineHeightSpan::GetSpanType() const
@@ -1275,7 +1259,6 @@ std::string LineHeightSpan::ToString() const
     ss << GetEndIndex();
     ss << "]";
     ss << " baselineOffset:" << lineHeight_.ToString();
-    ss << " lineHeightMultiple:" << (lineHeightMultiple_.has_value() ? lineHeightMultiple_.value() : 0);
     std::string output = ss.str();
     return output;
 }
@@ -1286,108 +1269,8 @@ bool LineHeightSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
     if (!lineHeightSpan) {
         return false;
     }
-    if (lineHeight_ != lineHeightSpan->GetLineHeight()) {
-        return false;
-    }
-    if (lineHeightMultiple_.has_value() != lineHeightSpan->lineHeightMultiple_.has_value()) {
-        return false;
-    }
-    if (lineHeightMultiple_.has_value()) {
-        return NearEqual(lineHeightMultiple_.value(), lineHeightSpan->lineHeightMultiple_.value());
-    }
-    return true;
-}
-
-// LineSpacingSpan
-LineSpacingSpan::LineSpacingSpan(Dimension lineSpacing) : SpanBase(0, 0), lineSpacing_(lineSpacing) {}
-
-LineSpacingSpan::LineSpacingSpan(Dimension lineSpacing, std::optional<LineSpacingOptions> options)
-    : SpanBase(0, 0), lineSpacing_(lineSpacing), options_(options)
-{}
-
-LineSpacingSpan::LineSpacingSpan(Dimension lineSpacing, std::optional<LineSpacingOptions> options,
-    int32_t start, int32_t end)
-    : SpanBase(start, end), lineSpacing_(lineSpacing), options_(options)
-{}
-
-void LineSpacingSpan::ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const
-{
-    switch (operation) {
-        case SpanOperation::ADD:
-            AddLineSpacingStyle(spanItem);
-            break;
-        case SpanOperation::REMOVE:
-            RemoveLineSpacingStyle(spanItem);
-    }
-}
-
-RefPtr<SpanBase> LineSpacingSpan::GetSubSpan(int32_t start, int32_t end)
-{
-    RefPtr<SpanBase> spanBase = MakeRefPtr<LineSpacingSpan>(lineSpacing_, options_, start, end);
-    return spanBase;
-}
-
-void LineSpacingSpan::AddLineSpacingStyle(const RefPtr<NG::SpanItem>& spanItem) const
-{
-    spanItem->textLineStyle->UpdateLineSpacing(lineSpacing_);
-    if (options_.has_value()) {
-        spanItem->textLineStyle->UpdateIsOnlyBetweenLines(options_.value().onlyBetweenLines.value_or(false));
-    } else {
-        spanItem->textLineStyle->UpdateIsOnlyBetweenLines(false);
-    }
-}
-
-void LineSpacingSpan::RemoveLineSpacingStyle(const RefPtr<NG::SpanItem>& spanItem) const
-{
-    spanItem->textLineStyle->ResetLineSpacing();
-    spanItem->textLineStyle->ResetIsOnlyBetweenLines();
-}
-
-Dimension LineSpacingSpan::GetLineSpacing() const
-{
-    return lineSpacing_;
-}
-
-std::optional<LineSpacingOptions> LineSpacingSpan::GetLineSpacingOptions() const
-{
-    return options_;
-}
-
-void LineSpacingSpan::SetLineSpacingOptions(const LineSpacingOptions& options)
-{
-    options_ = options;
-}
-
-SpanType LineSpacingSpan::GetSpanType() const
-{
-    return SpanType::LineSpacing;
-}
-
-std::string LineSpacingSpan::ToString() const
-{
-    std::stringstream ss;
-    ss << "LineSpacingSpan [";
-    ss << GetStartIndex();
-    ss << ":";
-    ss << GetEndIndex();
-    ss << "]";
-    ss << " lineSpacing:" << lineSpacing_.ToString();
-    ss << " onlyBetweenLines:" << (options_.has_value() && options_.value().onlyBetweenLines.value_or(false)
-        ? "true" : "false");
-    std::string output = ss.str();
-    return output;
-}
-
-bool LineSpacingSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
-{
-    auto lineSpacingSpan = DynamicCast<LineSpacingSpan>(other);
-    if (!lineSpacingSpan) {
-        return false;
-    }
-    auto lineSpacing = lineSpacingSpan->GetLineSpacing();
-    std::optional<LineSpacingOptions> options = lineSpacingSpan->GetLineSpacingOptions();
-    return lineSpacing_ == lineSpacing &&
-        options_.value_or(LineSpacingOptions()) == options.value_or(LineSpacingOptions());
+    auto lineHeight = lineHeightSpan->GetLineHeight();
+    return lineHeight_ == lineHeight;
 }
 
 // HalfLeadingSpan

@@ -45,7 +45,6 @@ enum class SpanType {
     LineHeight = 5,
     BackgroundColor = 6,
     Url = 7,
-    LineSpacing = 8,
     HalfLeading,
     Gesture = 100,
     ParagraphStyle = 200,
@@ -451,12 +450,8 @@ class LineHeightSpan : public SpanBase {
 public:
     LineHeightSpan() = default;
     explicit LineHeightSpan(Dimension lineHeight);
-    explicit LineHeightSpan(Dimension lineHeight, std::optional<double> lineHeightMultiple);
-    explicit LineHeightSpan(Dimension lineHeight, std::optional<double> lineHeightMultiple,
-        int32_t start, int32_t end);
     ACE_FORCE_EXPORT LineHeightSpan(Dimension lineHeight, int32_t start, int32_t end);
     Dimension GetLineHeight() const;
-    std::optional<double> GetLineHeightMultiple() const;
     RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
     bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
     SpanType GetSpanType() const override;
@@ -468,33 +463,6 @@ private:
     void RemoveLineHeightStyle(const RefPtr<NG::SpanItem>& spanItem) const;
 
     Dimension lineHeight_;
-    std::optional<double> lineHeightMultiple_;
-};
-
-class LineSpacingSpan : public SpanBase {
-    DECLARE_ACE_TYPE(LineSpacingSpan, SpanBase);
-
-public:
-    LineSpacingSpan() = default;
-    explicit LineSpacingSpan(Dimension lineSpacing);
-    explicit LineSpacingSpan(Dimension lineSpacing, std::optional<LineSpacingOptions> options);
-    ACE_FORCE_EXPORT LineSpacingSpan(Dimension lineSpacing, std::optional<LineSpacingOptions> options,
-        int32_t start, int32_t end);
-    Dimension GetLineSpacing() const;
-    std::optional<LineSpacingOptions> GetLineSpacingOptions() const;
-    void SetLineSpacingOptions(const LineSpacingOptions& options);
-    RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
-    bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
-    SpanType GetSpanType() const override;
-    std::string ToString() const override;
-    void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override;
-
-private:
-    void AddLineSpacingStyle(const RefPtr<NG::SpanItem>& spanItem) const;
-    void RemoveLineSpacingStyle(const RefPtr<NG::SpanItem>& spanItem) const;
-
-    Dimension lineSpacing_;
-    std::optional<LineSpacingOptions> options_;
 };
 
 class HalfLeadingSpan : public SpanBase {
