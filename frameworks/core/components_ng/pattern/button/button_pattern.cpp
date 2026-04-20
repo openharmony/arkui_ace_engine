@@ -37,6 +37,12 @@ constexpr float MINFONTSCALE = 0.85f;
 constexpr float MAXFONTSCALE = 3.20f;
 constexpr Dimension MIN_HOT_ZONE_HEIGHT = 32.0_vp;
 
+#ifdef ARKUI_WEARABLE
+constexpr TextAlign DEFAULT_TEXT_ALIGN = TextAlign::CENTER;
+#else
+constexpr TextAlign DEFAULT_TEXT_ALIGN = TextAlign::START;
+#endif
+
 RectF ExpandRectHeightToMinimum(RectF rect, float minHeight)
 {
     if (GreatOrEqual(rect.Height(), minHeight)) {
@@ -274,9 +280,8 @@ void ButtonPattern::ToJsonValueAttribute(std::unique_ptr<JsonValue>& json, const
         V2::ConvertWrapTextHeightAdaptivePolicyToString(
             layoutProperty->GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST))
             .c_str());
-    if (layoutProperty->GetTextAlign().has_value()) {
-        labelJsValue->Put("textAlign", V2::ConvertWrapTextAlignToString(layoutProperty->GetTextAlignValue()).c_str());
-    }
+    labelJsValue->Put(
+        "textAlign", V2::ConvertWrapTextAlignToString(layoutProperty->GetTextAlignValue(DEFAULT_TEXT_ALIGN)).c_str());
     labelJsValue->Put("font", fontJsValue->ToString().c_str());
     json->PutExtAttr("labelStyle", labelJsValue->ToString().c_str(), filter);
 
