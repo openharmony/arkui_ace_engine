@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,9 +24,15 @@ RefPtr<NodePaintMethod> MenuDividerPattern::CreateNodePaintMethod()
     if (!paintMethod_) {
         paintMethod_ = MakeRefPtr<MenuDividerPaintMethod>();
     }
-    auto context = GetContext();
-    CHECK_NULL_RETURN(context, paintMethod_);
-    auto theme = context->GetTheme<SelectTheme>();
+    auto menuItemNode = GetMenuItem();
+    RefPtr<SelectTheme> theme;
+    if (menuItemNode && menuItemNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        theme = menuItemNode->GetTheme<SelectTheme>(true);
+    } else {
+        auto context = GetContext();
+        CHECK_NULL_RETURN(context, paintMethod_);
+        theme = context->GetTheme<SelectTheme>();
+    }
     CHECK_NULL_RETURN(theme, paintMethod_);
     auto themeOutPadding = static_cast<float>(theme->GetMenuIconPadding().ConvertToPx()) -
                            static_cast<float>(theme->GetOutPadding().ConvertToPx());

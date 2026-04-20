@@ -362,6 +362,7 @@ bool MenuItemGroupPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     }
     UpdateFooterColor();
     UpdateHeaderColor();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     return true;
 }
 } // namespace OHOS::Ace::NG

@@ -1586,6 +1586,19 @@ HWTEST_F(MenuPattern2TwoTestNg, UpdateStyleOptionColorModeTest001, TestSize.Leve
 }
 
 /**
+ * @tc.name: UpdateStyleOptionColorModeTest002
+ * @tc.desc: Verify UpdateStyleOptionColorMode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TwoTestNg, UpdateStyleOptionColorModeTest002, TestSize.Level0)
+{
+    BlurStyleOption styleOption = {};
+    styleOption.colorMode = OHOS::Ace::ThemeColorMode::LIGHT;
+    MenuView::UpdateStyleOptionColorMode(OHOS::Ace::ColorMode::DARK, styleOption, false);
+    EXPECT_EQ(styleOption.colorMode, OHOS::Ace::ThemeColorMode::LIGHT);
+}
+
+/**
  * @tc.name: UpdateNodeThemeScopeId001
  * @tc.desc: Verify UpdateNodeThemeScopeId when version less 26.
  * @tc.type: FUNC
