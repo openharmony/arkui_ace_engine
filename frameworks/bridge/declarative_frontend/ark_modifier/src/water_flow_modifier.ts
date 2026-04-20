@@ -228,6 +228,15 @@ class LazyArkWaterFlowComponent extends ArkScrollable {
    this.lazyComponent.onDidStopFling(value);
    return this;
   }
+  onWillScroll(
+    value: (scrollOffset: number, scrollState: ScrollState, scrollSource: ScrollSource) => void | ScrollResult): this {
+    this.lazyComponent.onWillScroll(value);
+    return this;
+  }
+  onDidScroll(value: (scrollOffset: number, scrollState: ScrollState) => void): this {
+    this.lazyComponent.onDidScroll(value);
+    return this;
+  }
 }class WaterFlowModifier extends LazyArkWaterFlowComponent implements AttributeModifier<WaterFlowAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {
