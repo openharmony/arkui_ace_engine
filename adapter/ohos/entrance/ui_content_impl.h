@@ -99,6 +99,7 @@ public:
     void SetHostParams(const OHOS::AAFwk::WantParams& params) override;
     void UpdateFontScale(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
     static int32_t GetUIContentWindowID(int32_t instanceId);
+    OHOS::Rosen::Window* GetUIContentWindow() override;
     // UI content event process
     bool ProcessBackPressed() override;
     void UpdateDialogResourceConfiguration(RefPtr<Container>& container,
