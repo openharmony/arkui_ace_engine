@@ -179,6 +179,11 @@ public:
         return crossMatchChild_;
     }
 
+    void SetCrossMatchChild(bool crossMatchChild)
+    {
+        crossMatchChild_ = crossMatchChild;
+    }
+
     void SetUseCustomAnimation(bool useCustomAnimation)
     {
         useCustomAnimation_ = useCustomAnimation;
