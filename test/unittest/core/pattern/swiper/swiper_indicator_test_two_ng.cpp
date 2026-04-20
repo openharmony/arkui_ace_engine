@@ -897,4 +897,30 @@ HWTEST_F(SwiperIndicatorTestTwoNg, SetSwiperNode001, TestSize.Level1)
     controller->SetSwiperNode(frameNode_);
     EXPECT_EQ(indicatorNode_->GetPattern<IndicatorPattern>(), nullptr);
 }
+
+/**
+ * @tc.name: OnThemeScopeUpdate001
+ * @tc.desc: Test SwiperIndicator OnThemeScopeUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestTwoNg, OnThemeScopeUpdate001, TestSize.Level1)
+{
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto mockIndicatorNode = FrameNode::GetOrCreateFrameNode(
+        V2::SWIPER_INDICATOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<IndicatorPattern>(); });
+    EXPECT_NE(mockIndicatorNode, nullptr);
+    auto indicatorPattern = mockIndicatorNode->GetPattern<IndicatorPattern>();
+
+    auto oriApiVersion = mockIndicatorNode->apiVersion_;
+    mockIndicatorNode->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    auto focusHub = mockIndicatorNode->GetOrCreateFocusHub();
+    focusHub->SetPaintColor(Color::RED);
+    indicatorPattern->OnThemeScopeUpdate(0);
+    EXPECT_NE(focusHub->GetPaintColor(), Color::RED);
+
+    mockIndicatorNode->apiVersion_ = oriApiVersion;
+    focusHub->SetPaintColor(Color::RED);
+    indicatorPattern->OnThemeScopeUpdate(0);
+    EXPECT_EQ(focusHub->GetPaintColor(), Color::RED);
+}
 } // namespace OHOS::Ace::NG
