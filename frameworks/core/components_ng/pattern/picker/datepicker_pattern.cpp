@@ -3507,7 +3507,8 @@ bool DatePickerPattern::ValidateDateParameters(const std::unique_ptr<JsonValue>&
         year = yearValue->GetInt();
         month = monthValue->GetInt();
         day = dayValue->GetInt();
-        if (year < MIN_YEAR || month < MIN_MONTH || month > MAX_MONTH || day < MIN_DAY ||
+        if (year < MIN_YEAR || month < static_cast<int32_t>(MIN_MONTH) ||
+            month > static_cast<int32_t>(MAX_MONTH) || day < static_cast<int32_t>(MIN_DAY) ||
             day > static_cast<int32_t>(PickerDate::GetMaxDay(year, month))) {
             return false;
         }
