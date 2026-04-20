@@ -83,6 +83,7 @@ private:
         const std::vector<ButtonInfo>& buttonInfos, std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
     static bool NeedAdaptForAging(bool skipOptimizeFlag = false);
+    static bool IsEnableFallbackLineSpacingStyleOptimize();
     static std::function<void()> CreateAndSetTimePickerSwitchEvent(const RefPtr<FrameNode>& buttonTitleNode,
         const RefPtr<FrameNode>& timePicker, const RefPtr<FrameNode>& buttonCancelNode,
         const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<FrameNode>& cancelNextDividerNode,

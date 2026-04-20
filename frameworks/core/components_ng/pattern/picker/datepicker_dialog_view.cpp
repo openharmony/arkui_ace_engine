@@ -906,12 +906,7 @@ void DatePickerDialogView::UpdateConfirmButtonTextLayoutProperty(
         ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize(), 0.0_vp, false, true));
     textLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
 
-    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto fontManager = pipeline->GetFontManager();
-    CHECK_NULL_VOID(fontManager);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
-        fontManager->GetFallbackLineSpacingStyleOptimizeFlag()) {
+    if (IsEnableFallbackLineSpacingStyleOptimize()) {
         textLayoutProperty->UpdateIncludeFontPadding(true);
         textLayoutProperty->UpdateFallbackLineSpacing(true);
     }
@@ -930,12 +925,7 @@ void DatePickerDialogView::UpdateCancelButtonTextLayoutProperty(
         ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize(), 0.0_vp, false, true));
     textCancelLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
 
-    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto fontManager = pipeline->GetFontManager();
-    CHECK_NULL_VOID(fontManager);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
-        fontManager->GetFallbackLineSpacingStyleOptimizeFlag()) {
+    if (IsEnableFallbackLineSpacingStyleOptimize()) {
         textCancelLayoutProperty->UpdateIncludeFontPadding(true);
         textCancelLayoutProperty->UpdateFallbackLineSpacing(true);
     }
@@ -2107,9 +2097,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateNextPrevButtonNode(std::function<v
         ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize(), 0.0_vp, false, true));
     textLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
 
-    auto fontManager = pipeline->GetFontManager();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) && fontManager &&
-        fontManager->GetFallbackLineSpacingStyleOptimizeFlag()) {
+    if (IsEnableFallbackLineSpacingStyleOptimize()) {
         textLayoutProperty->UpdateIncludeFontPadding(true);
         textLayoutProperty->UpdateFallbackLineSpacing(true);
     }
@@ -2229,13 +2217,21 @@ bool DatePickerDialogView::GetIsUserSetTextProperties(const PickerTextProperties
     return false;
 }
 
-bool DatePickerDialogView::NeedAdaptForAging(bool skipOptimizeFlag)
+bool DatePickerDialogView::IsEnableFallbackLineSpacingStyleOptimize()
 {
     auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     auto fontManager = pipeline->GetFontManager();
-    if (!skipOptimizeFlag && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)
-        && fontManager && fontManager->GetFallbackLineSpacingStyleOptimizeFlag()) {
+    CHECK_NULL_RETURN(fontManager, false);
+    return Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
+        fontManager->GetFallbackLineSpacingStyleOptimizeFlag();
+}
+
+bool DatePickerDialogView::NeedAdaptForAging(bool skipOptimizeFlag)
+{
+    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, false);
+    if (!skipOptimizeFlag && IsEnableFallbackLineSpacingStyleOptimize()) {
         return false;
     }
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
@@ -2281,9 +2277,7 @@ const Dimension DatePickerDialogView::ConvertFontScaleValue(
         fontSizeScale = std::min(fontSizeScale, maxAppFontScale);
     }
 
-    auto fontManager = pipeline->GetFontManager();
-    if (!skipOptimizeFlag && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
-        fontManager && fontManager->GetFallbackLineSpacingStyleOptimizeFlag()) {
+    if (!skipOptimizeFlag && IsEnableFallbackLineSpacingStyleOptimize()) {
         if (NearZero(fontSizeScale) || (fontSizeValue.Unit() == DimensionUnit::VP)) {
             return fontSizeValue;
         }

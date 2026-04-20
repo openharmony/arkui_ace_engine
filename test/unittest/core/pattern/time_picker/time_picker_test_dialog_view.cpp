@@ -529,4 +529,164 @@ HWTEST_F(TimePickerDialogViewTestNg, TimePickerDialogViewShow044, TestSize.Level
     ASSERT_NE(timePickerRowPattern, nullptr);
     EXPECT_TRUE(timePickerRowPattern->isEnableHaptic_);
 }
+
+namespace {
+constexpr float TEST_FONT_SCALE_VALUE = 1.5f;
+constexpr float TEST_MAX_APP_FONT_SCALE = 3.2f;
+constexpr Dimension TEST_FONT_SIZE_NORMAL = Dimension(10.0_vp);
+constexpr Dimension TEST_FONT_SIZE_ZERO = Dimension(0.0_vp);
+constexpr float TEST_NEAR_ZERO_SCALE = 0.001f;
+}
+
+/**
+ * @tc.name: ConvertFontScaleValueSkipOptimizeFlag001
+ * @tc.desc: Test ConvertFontScaleValue with skipOptimizeFlag=true to skip optimize logic
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerDialogViewTestNg, ConvertFontScaleValueSkipOptimizeFlag001, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    pipeline->SetFollowSystem(true);
+    pipeline->SetMaxAppFontScale(TEST_MAX_APP_FONT_SCALE);
+    pipeline->SetFontScale(TEST_FONT_SCALE_VALUE);
+
+    auto result = TimePickerDialogView::ConvertFontScaleValue(
+        TEST_FONT_SIZE_NORMAL, TEST_FONT_SIZE_ZERO, false, true);
+    EXPECT_NE(result, TEST_FONT_SIZE_NORMAL / TEST_FONT_SCALE_VALUE);
+}
+
+/**
+ * @tc.name: ConvertFontScaleValueSkipOptimizeFlag002
+ * @tc.desc: Test ConvertFontScaleValue with skipOptimizeFlag=false, mock returns false for optimize flag
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerDialogViewTestNg, ConvertFontScaleValueSkipOptimizeFlag002, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    pipeline->SetFollowSystem(true);
+    pipeline->SetMaxAppFontScale(TEST_MAX_APP_FONT_SCALE);
+    pipeline->SetFontScale(TEST_FONT_SCALE_VALUE);
+
+    auto result = TimePickerDialogView::ConvertFontScaleValue(
+        TEST_FONT_SIZE_NORMAL, TEST_FONT_SIZE_ZERO, false, false);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    ASSERT_NE(pickerTheme, nullptr);
+    EXPECT_NE(result, TEST_FONT_SIZE_NORMAL / TEST_FONT_SCALE_VALUE);
+}
+
+/**
+ * @tc.name: ConvertFontScaleValueSkipOptimizeFlag003
+ * @tc.desc: Test ConvertFontScaleValue with NearZero fontSizeScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerDialogViewTestNg, ConvertFontScaleValueSkipOptimizeFlag003, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    pipeline->SetFollowSystem(true);
+    pipeline->SetFontScale(TEST_NEAR_ZERO_SCALE);
+
+    auto result = TimePickerDialogView::ConvertFontScaleValue(
+        TEST_FONT_SIZE_NORMAL, TEST_FONT_SIZE_ZERO, false, false);
+    EXPECT_EQ(result, TEST_FONT_SIZE_NORMAL);
+}
+
+/**
+ * @tc.name: ConvertFontScaleValueSkipOptimizeFlag004
+ * @tc.desc: Test ConvertFontScaleValue with VP unit fontSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerDialogViewTestNg, ConvertFontScaleValueSkipOptimizeFlag004, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    pipeline->SetFollowSystem(true);
+    pipeline->SetFontScale(TEST_FONT_SCALE_VALUE);
+
+    auto result = TimePickerDialogView::ConvertFontScaleValue(
+        Dimension(10.0, DimensionUnit::VP), TEST_FONT_SIZE_ZERO, false, false);
+    EXPECT_EQ(result, Dimension(10.0, DimensionUnit::VP));
+}
+
+/**
+ * @tc.name: NeedAdaptForAgingSkipOptimizeFlag001
+ * @tc.desc: Test NeedAdaptForAging with skipOptimizeFlag=true when aging conditions are met
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerDialogViewTestNg, NeedAdaptForAgingSkipOptimizeFlag001, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    pipeline->SetFollowSystem(true);
+    pipeline->SetMaxAppFontScale(5.0f);
+    pipeline->SetFontScale(5.0f);
+    pipeline->rootHeight_ = 1000;
+
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    ASSERT_NE(pickerTheme, nullptr);
+    pickerTheme->pickerDialogMaxOneFontScale_ = 5.0f;
+
+    auto result = TimePickerDialogView::NeedAdaptForAging(true);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: NeedAdaptForAgingSkipOptimizeFlag002
+ * @tc.desc: Test NeedAdaptForAging with skipOptimizeFlag=false, mock returns false for optimize flag
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerDialogViewTestNg, NeedAdaptForAgingSkipOptimizeFlag002, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    pipeline->SetFollowSystem(true);
+    pipeline->SetMaxAppFontScale(5.0f);
+    pipeline->SetFontScale(5.0f);
+    pipeline->rootHeight_ = 1000;
+
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    ASSERT_NE(pickerTheme, nullptr);
+    pickerTheme->pickerDialogMaxOneFontScale_ = 5.0f;
+
+    auto result = TimePickerDialogView::NeedAdaptForAging(false);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: NeedAdaptForAgingSkipOptimizeFlag003
+ * @tc.desc: Test NeedAdaptForAging when aging conditions are not met
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerDialogViewTestNg, NeedAdaptForAgingSkipOptimizeFlag003, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    pipeline->SetFollowSystem(true);
+    pipeline->SetMaxAppFontScale(1.0f);
+    pipeline->SetFontScale(1.0f);
+    pipeline->rootHeight_ = 500;
+
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    ASSERT_NE(pickerTheme, nullptr);
+    pickerTheme->pickerDialogMaxOneFontScale_ = 5.0f;
+
+    auto result = TimePickerDialogView::NeedAdaptForAging(false);
+    EXPECT_FALSE(result);
+}
 } // namespace OHOS::Ace::NG
