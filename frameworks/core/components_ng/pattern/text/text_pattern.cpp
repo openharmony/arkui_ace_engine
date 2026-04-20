@@ -6037,7 +6037,7 @@ void TextPattern::SetResponseRegion(const SizeF& frameSize, const SizeF& boundsS
     CHECK_NULL_VOID(host);
     auto gestureHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    if (isUserSetResponseRegion_) {
+    if (isUserSetResponseRegion_ || host->GetTag() == V2::SYMBOL_ETS_TAG) {
         return;
     }
     std::vector<DimensionRect> hotZoneRegions;

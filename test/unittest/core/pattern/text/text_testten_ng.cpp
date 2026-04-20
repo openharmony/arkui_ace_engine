@@ -917,6 +917,30 @@ HWTEST_F(TextFieldTenPatternNg, SetResponseRegion001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetResponseRegion002
+ * @tc.desc: test SetResponseRegion with symbol tag
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, SetResponseRegion002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: create symbol frame node and call SetResponseRegion.
+     * @tc.expected: gestureHub response region remains empty.
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SYMBOL_ETS_TAG, 0, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    SizeF frameSize(10.0f, 20.0f);
+    SizeF boundsSize(30.0f, 40.0f);
+
+    pattern->SetResponseRegion(frameSize, boundsSize);
+
+    EXPECT_TRUE(gestureHub->GetResponseRegion().empty());
+}
+
+/**
  * @tc.name: GetStartAndEnd001
  * @tc.desc: test TextPattern GetStartAndEnd
  * @tc.type: FUNC
