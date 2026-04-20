@@ -196,7 +196,6 @@ public:
             auto textColor = counterTheme->GetTextStyle().GetTextColor();
             UpdateButtonTextColor(host, subId_, textColor);
             UpdateButtonTextColor(host, addId_, textColor);
-            counterRenderContext->UpdateForegroundColor(textColor);
             return true;
         }
         return false;
