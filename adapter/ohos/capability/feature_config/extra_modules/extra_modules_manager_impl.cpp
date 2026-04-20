@@ -27,6 +27,29 @@
 namespace OHOS::Ace {
 const std::string CONFIG_FILE_PATH = "/etc/arkui/extra_modules_feature_config.json";
 
+namespace {
+bool IsValidLibraryPath(const std::string& libraryPath)
+{
+#if defined(__aarch64__) || defined(__x86_64__)
+    constexpr char trustedPrefix[] = "/system/lib64/";
+#else
+    constexpr char trustedPrefix[] = "/system/lib/";
+#endif
+    if (libraryPath.empty()) {
+        return false;
+    }
+    if (libraryPath.rfind(trustedPrefix, 0) != 0) {
+        return false;
+    }
+    auto modulePath = libraryPath.substr(sizeof(trustedPrefix) - 1);
+    if (modulePath.empty() || modulePath.front() == '/' || modulePath.find('\\') != std::string::npos ||
+        modulePath.find("..") != std::string::npos) {
+        return false;
+    }
+    return true;
+}
+} // namespace
+
 const char* ErrCodeToString(ErrCode code)
 {
     switch (code) {
@@ -205,6 +228,10 @@ ErrCode ExtraModulesManagerImpl::Destroy()
 ErrCode ExtraModulesManagerImpl::LoadModule(ModuleHolder& holder)
 {
     std::string libraryPath = BuildLibraryPath(holder.moduleName);
+    if (!IsValidLibraryPath(libraryPath)) {
+        LOGE("Invalid library path: %{public}s", libraryPath.c_str());
+        return ErrCode::INVALID_STATE;
+    }
 
     void* handle = dlopen(libraryPath.c_str(), RTLD_LAZY);
     if (handle == nullptr) {
