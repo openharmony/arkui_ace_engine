@@ -900,8 +900,14 @@ HWTEST_F(MarqueeTestUpdateStrategyNg, MarqueeTestUpdateStrategy0011, TestSize.Le
     paintProperty->UpdateLoop(loop);
     pattern->loop_ = false;
     pattern->direction_ = MarqueeDirection::RIGHT;
+    /*
+     * @tc.steps: step1. update delay
+     */
+    marqueeLayoutProperty->UpdateMarqueeDelay(100);
+    EXPECT_TRUE(pattern->AnimationParamChange());
     EXPECT_FALSE(pattern->OnlyPlayStatusChange());
     pattern->loop_ = true;
+    pattern->delay_ = 100;
     EXPECT_FALSE(pattern->OnlyPlayStatusChange());
     pattern->direction_ = MarqueeDirection::LEFT;
     EXPECT_FALSE(pattern->OnlyPlayStatusChange());
@@ -909,6 +915,7 @@ HWTEST_F(MarqueeTestUpdateStrategyNg, MarqueeTestUpdateStrategy0011, TestSize.Le
     EXPECT_TRUE(pattern->OnlyPlayStatusChange());
     pattern->StoreProperties();
     EXPECT_EQ(pattern->direction_, MarqueeDirection::LEFT);
+    EXPECT_EQ(pattern->delay_, 100);
     pattern->OnModifyDone();
     EXPECT_TRUE(CheckMeasureFlag(marqueeLayoutProperty->GetPropertyChangeFlag()));
     EXPECT_TRUE(CheckMeasureFlag(textLayoutProperty->GetPropertyChangeFlag()));
