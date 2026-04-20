@@ -1033,11 +1033,28 @@ void OverlayManager::ShowPopupAnimation(const RefPtr<FrameNode>& popupNode)
     BlurLowerNode(popupNode);
     auto levelOrder = GetLevelOrder(popupNode);
     auto isNeedFocus = IsTopOrder(levelOrder);
+
+    // Fire onWillAppear callback
+    auto popupParam = popupPattern->GetPopupParam();
+    if (popupParam) {
+        popupParam->FireOnWillAppear();
+    }
+
     auto onFinish = [popupNodeWk = WeakPtr<FrameNode>(popupNode), weak = WeakClaim(this), isNeedFocus]() {
         auto overlayManager = weak.Upgrade();
         auto popupNode = popupNodeWk.Upgrade();
         CHECK_NULL_VOID(overlayManager && popupNode);
         ACE_UINODE_TRACE(popupNode);
+
+        // Fire onDidAppear callback
+        auto popupPattern = popupNode->GetPattern<BubblePattern>();
+        if (popupPattern) {
+            auto popupParam = popupPattern->GetPopupParam();
+            if (popupParam) {
+                popupParam->FireOnDidAppear();
+            }
+        }
+
         if (isNeedFocus) {
             overlayManager->FocusOverlayNode(popupNode);
         }
@@ -1053,10 +1070,29 @@ void OverlayManager::ShowPopupAnimationNG(const RefPtr<FrameNode>& popupNode)
 {
     auto popupPattern = popupNode->GetPattern<BubblePattern>();
     CHECK_NULL_VOID(popupPattern);
+
+    // Fire onWillAppear callback
+    auto popupParam = popupPattern->GetPopupParam();
+    if (popupParam) {
+        popupParam->FireOnWillAppear();
+    }
+
+    // Create onFinish callback to fire onDidAppear
+    auto onFinish = [popupNodeWk = WeakPtr<FrameNode>(popupNode)]() {
+        auto popupNode = popupNodeWk.Upgrade();
+        CHECK_NULL_VOID(popupNode);
+        auto popupPattern = popupNode->GetPattern<BubblePattern>();
+        CHECK_NULL_VOID(popupPattern);
+        auto popupParam = popupPattern->GetPopupParam();
+        if (popupParam) {
+            popupParam->FireOnDidAppear();
+        }
+    };
+
     if (popupPattern->GetHasTransition()) {
-        popupPattern->StartEnteringTransitionEffects(popupNode, nullptr);
+        popupPattern->StartEnteringTransitionEffects(popupNode, onFinish);
     } else {
-        popupPattern->StartEnteringAnimation(nullptr);
+        popupPattern->StartEnteringAnimation(onFinish);
     }
 }
 
@@ -1563,6 +1599,13 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo, boo
     CheckReturnFocus(popupNode);
     // detach popupNode after exiting animation
     popupMap_[targetId].isCurrentOnShow = false;
+
+    // Fire onWillDisappear callback
+    auto popupParam = popupPattern->GetPopupParam();
+    if (popupParam) {
+        popupParam->FireOnWillDisappear();
+    }
+
     auto onFinish = [isShowInSubWindow, isTypeWithOption, isUseCustom, focusable,
         targetId, popupNodeWk = WeakPtr<FrameNode>(popupNode),
         rootNodeWk = WeakPtr<UINode>(rootNode), weak = WeakClaim(this)]() {
@@ -1571,6 +1614,16 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo, boo
         auto overlayManager = weak.Upgrade();
         CHECK_NULL_VOID(rootNode && popupNode && overlayManager);
         ACE_UINODE_TRACE(popupNode);
+
+        // Fire onDidDisappear callback
+        auto popupPattern = popupNode->GetPattern<BubblePattern>();
+        if (popupPattern) {
+            auto popupParam = popupPattern->GetPopupParam();
+            if (popupParam) {
+                popupParam->FireOnDidDisappear();
+            }
+        }
+
         auto popupInfoIter = overlayManager->popupMap_.find(targetId);
         auto targetIsInMap = popupInfoIter != overlayManager->popupMap_.end();
         bool popupNodeIsInMap = false;
@@ -1580,7 +1633,6 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo, boo
                 return;
             }
         }
-        auto popupPattern = popupNode->GetPattern<BubblePattern>();
         CHECK_NULL_VOID(popupPattern);
         popupPattern->SetTransitionStatus(TransitionStatus::INVISIABLE);
         auto popupEventHub = popupNode->GetEventHub<BubbleEventHub>();

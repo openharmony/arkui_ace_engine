@@ -2021,4 +2021,184 @@ HWTEST_F(OverlayManagerPopupTestNg, ErasePopupTest001, TestSize.Level1)
     EXPECT_EQ(number, 0);
     EXPECT_TRUE(overlayManager->popupMap_.empty());
 }
+
+/**
+ * @tc.name: PopupLifecycleCallbackTest001
+ * @tc.desc: Test Popup lifecycle callbacks (onWillAppear, onDidAppear)
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, PopupLifecycleCallbackTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    auto targetNode = CreateTargetNode();
+    ASSERT_NE(targetNode, nullptr);
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupNode = FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId,
+                        AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    PopupInfo popupInfo;
+    popupInfo.popupId = popupId;
+    popupInfo.popupNode = popupNode;
+    popupInfo.target = targetNode;
+    popupInfo.markNeedUpdate = true;
+    popupInfo.isBlockEvent = false;
+
+    /**
+     * @tc.steps: step2. set lifecycle callbacks on popupParam.
+     */
+    auto popupPattern = popupNode->GetPattern<BubblePattern>();
+    ASSERT_NE(popupPattern, nullptr);
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    ASSERT_NE(popupParam, nullptr);
+
+    bool onWillAppearCalled = false;
+    bool onDidAppearCalled = false;
+    bool onWillDisappearCalled = false;
+    bool onDidDisappearCalled = false;
+
+    popupParam->SetOnWillAppear([&onWillAppearCalled]() {
+        onWillAppearCalled = true;
+    });
+    popupParam->SetOnDidAppear([&onDidAppearCalled]() {
+        onDidAppearCalled = true;
+    });
+    popupParam->SetOnWillDisappear([&onWillDisappearCalled]() {
+        onWillDisappearCalled = false;
+    });
+    popupParam->SetOnDidDisappear([&onDidDisappearCalled]() {
+        onDidDisappearCalled = true;
+    });
+    popupPattern->SetPopupParam(popupParam);
+
+    /**
+     * @tc.steps: step3. create overlayManager and call ShowPopup.
+     * @tc.expected: onWillAppear callback should be set
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    rootNode->isLayoutComplete_ = true;
+    auto pipeline = rootNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetInstallationFree(0);
+
+    overlayManager->ShowPopup(targetId, popupInfo, nullptr);
+    EXPECT_TRUE(overlayManager->popupMap_[targetId].isCurrentOnShow);
+
+    /**
+     * @tc.steps: step4. verify popupParam has lifecycle callbacks.
+     * @tc.expected: callbacks are correctly set
+     */
+    auto rootUINode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootUINode, nullptr);
+    auto overlay = AceType::DynamicCast<NG::FrameNode>(rootUINode->GetLastChild());
+    ASSERT_NE(overlay, nullptr);
+    auto pattern = overlay->GetPattern<BubblePattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto param = pattern->GetPopupParam();
+    ASSERT_NE(param, nullptr);
+    EXPECT_TRUE(param->GetOnWillAppear());
+    EXPECT_TRUE(param->GetOnDidAppear());
+    EXPECT_TRUE(param->GetOnWillDisappear());
+    EXPECT_TRUE(param->GetOnDidDisappear());
+}
+
+/**
+ * @tc.name: PopupLifecycleCallbackTest002
+ * @tc.desc: Test PopupParam FireOnWillAppear and FireOnDidAppear
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, PopupLifecycleCallbackTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create popupParam and set callbacks.
+     */
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    ASSERT_NE(popupParam, nullptr);
+
+    bool onWillAppearCalled = false;
+    bool onDidAppearCalled = false;
+
+    popupParam->SetOnWillAppear([&onWillAppearCalled]() {
+        onWillAppearCalled = true;
+    });
+    popupParam->SetOnDidAppear([&onDidAppearCalled]() {
+        onDidAppearCalled = true;
+    });
+
+    /**
+     * @tc.steps: step2. call FireOnWillAppear and FireOnDidAppear.
+     * @tc.expected: callbacks are invoked
+     */
+    EXPECT_FALSE(onWillAppearCalled);
+    popupParam->FireOnWillAppear();
+    EXPECT_TRUE(onWillAppearCalled);
+
+    EXPECT_FALSE(onDidAppearCalled);
+    popupParam->FireOnDidAppear();
+    EXPECT_TRUE(onDidAppearCalled);
+}
+
+/**
+ * @tc.name: PopupLifecycleCallbackTest003
+ * @tc.desc: Test PopupParam FireOnWillDisappear and FireOnDidDisappear
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, PopupLifecycleCallbackTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create popupParam and set callbacks.
+     */
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    ASSERT_NE(popupParam, nullptr);
+
+    bool onWillDisappearCalled = false;
+    bool onDidDisappearCalled = false;
+
+    popupParam->SetOnWillDisappear([&onWillDisappearCalled]() {
+        onWillDisappearCalled = true;
+    });
+    popupParam->SetOnDidDisappear([&onDidDisappearCalled]() {
+        onDidDisappearCalled = true;
+    });
+
+    /**
+     * @tc.steps: step2. call FireOnWillDisappear and FireOnDidDisappear.
+     * @tc.expected: callbacks are invoked
+     */
+    EXPECT_FALSE(onWillDisappearCalled);
+    popupParam->FireOnWillDisappear();
+    EXPECT_TRUE(onWillDisappearCalled);
+
+    EXPECT_FALSE(onDidDisappearCalled);
+    popupParam->FireOnDidDisappear();
+    EXPECT_TRUE(onDidDisappearCalled);
+}
+
+/**
+ * @tc.name: PopupLifecycleCallbackTest004
+ * @tc.desc: Test PopupParam lifecycle callbacks with null callbacks
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerPopupTestNg, PopupLifecycleCallbackTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create popupParam without setting callbacks.
+     */
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    ASSERT_NE(popupParam, nullptr);
+
+    /**
+     * @tc.steps: step2. call Fire methods without callbacks set.
+     * @tc.expected: no crash occurs
+     */
+    popupParam->FireOnWillAppear();
+    popupParam->FireOnDidAppear();
+    popupParam->FireOnWillDisappear();
+    popupParam->FireOnDidDisappear();
+    // If we reach here, the test passes (no crash)
+    EXPECT_TRUE(true);
+}
 } // namespace OHOS::Ace::NG
