@@ -23,6 +23,7 @@
 #include "core/components/theme/shadow_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components/dialog/dialog_theme.h"
+#include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "base/utils/string_utils.h"
 #include "core/common/container.h"
 
@@ -228,7 +229,12 @@ void ShowDialogInner(DialogProperties& dialogProperties, std::function<void(int3
             CHECK_NULL_VOID(dialog);
         }
     };
-    MainWindowOverlay(std::move(task), "ArkUIShowDialogInner");
+    if (dialogProperties.dialogLevelMode == LevelMode::EMBEDDED) {
+        NG::DialogManager::ShowInEmbeddedOverlay(
+            std::move(task), "ArkUIOverlayShowDialog", dialogProperties.dialogLevelUniqueId);
+    } else {
+        MainWindowOverlay(std::move(task), "ArkUIShowDialogInner");
+    }
 }
 
 void ShowActionMenuInner(DialogProperties& dialogProperties, const std::vector<ButtonInfo>& button,
@@ -249,6 +255,12 @@ void ShowActionMenuInner(DialogProperties& dialogProperties, const std::vector<B
     };
     dialogProperties.onSuccess = std::move(callback);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
+    if (dialogProperties.dialogLevelMode == LevelMode::EMBEDDED) {
+        auto embeddedOverlay = NG::DialogManager::GetEmbeddedOverlay(dialogProperties.dialogLevelUniqueId, context);
+        if (embeddedOverlay) {
+            overlayManager = embeddedOverlay;
+        }
+    }
     curExecutor->PostTask(
         [dialogProperties, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
@@ -274,9 +286,9 @@ void ShowActionMenuInner(DialogProperties& dialogProperties, const std::vector<B
         TaskExecutor::TaskType::UI, "CJFrontendShowActionMenuInner");
 }
 
-void SetBorder(DialogProperties& dialogProperties, const NativeCustomDialogOptions& options)
+template<typename T>
+void SetBorderT(DialogProperties& dialogProperties, const T& options)
 {
-    // border
     NG::BorderStyleProperty borderStyle = { .styleLeft = BorderStyle(options.borderEdgeStyle.left),
         .styleRight = BorderStyle(options.borderEdgeStyle.right),
         .styleTop = BorderStyle(options.borderEdgeStyle.top),
@@ -345,13 +357,51 @@ void SetShape(DialogProperties& dialogProperties, const NativeCustomDialogOption
     dialogProperties.height = height;
 }
 
-void SetFunc(DialogProperties& dialogProperties, const NativeCustomDialogOptions& options)
+void SetShapeV2(DialogProperties& dialogProperties, const NativeCustomDialogOptionsV2& options)
+{
+    auto alignment = DIALOG_ALIGNMENT[options.alignment];
+
+    // parse maskRect
+    Dimension xDimen = Dimension(options.maskRect.x, static_cast<DimensionUnit>(options.maskRect.xUnit));
+    Dimension yDimen = Dimension(options.maskRect.y, static_cast<DimensionUnit>(options.maskRect.yUnit));
+    Dimension widthDimen = Dimension(options.maskRect.width, static_cast<DimensionUnit>(options.maskRect.widthUnit));
+    Dimension heightDimen = Dimension(options.maskRect.height, static_cast<DimensionUnit>(options.maskRect.heightUnit));
+    DimensionOffset offsetDimen(xDimen, yDimen);
+    auto maskRect = DimensionRect(widthDimen, heightDimen, offsetDimen);
+
+    // parse offset
+    double dxVal = options.offset.dx.value;
+    int32_t dxType = options.offset.dx.unitType;
+    CalcDimension dx = CalcDimension(dxVal, static_cast<DimensionUnit>(dxType));
+    double dyVal = options.offset.dy.value;
+    int32_t dyType = options.offset.dy.unitType;
+    CalcDimension dy = CalcDimension(dyVal, static_cast<DimensionUnit>(dyType));
+    auto offset = DimensionOffset(dx, dy);
+
+    // parse width height
+    if (options.hasHeight) {
+        double heightVal = options.heightValue;
+        int32_t heightType = options.heightUnit;
+        CalcDimension height = CalcDimension(heightVal, static_cast<DimensionUnit>(heightType));
+        dialogProperties.height = height;
+    }
+
+    double widthVal = options.widthValue;
+    int32_t widthType = options.widthUnit;
+    CalcDimension width = CalcDimension(widthVal, static_cast<DimensionUnit>(widthType));
+    dialogProperties.maskRect = maskRect;
+    dialogProperties.alignment = alignment;
+    dialogProperties.offset = offset;
+    dialogProperties.width = width;
+}
+
+template<typename T>
+void SetFuncT(DialogProperties& dialogProperties, const T& options)
 {
     auto builderFunc = [func = CJLambda::Create(options.builder)]() { func(); };
 
     std::function<void(const int32_t& info, const int32_t& instanceId)> onWillDismiss = nullptr;
 
-    // Parse action
     auto onDidAppear = [lambda = CJLambda::Create(options.onDidAppear)]() { lambda(); };
     auto onDidDisappear = [lambda = CJLambda::Create(options.onDidAppear)]() { lambda(); };
     auto onWillAppear = [lambda = CJLambda::Create(options.onDidAppear)]() { lambda(); };
@@ -364,16 +414,9 @@ void SetFunc(DialogProperties& dialogProperties, const NativeCustomDialogOptions
     dialogProperties.onWillDismiss = std::move(onWillDismiss);
 }
 
-DialogProperties GetDialogProperties(const NativeCustomDialogOptions& options)
+template<typename T>
+Shadow CreateDialogShadow(const T& options)
 {
-    // transition
-    RefPtr<NG::ChainedTransitionEffect> chainedEffect = nullptr;
-    auto nativeTransitionEffect = OHOS::FFI::FFIData::GetData<NativeTransitionEffect>(options.transition);
-    if (nativeTransitionEffect != nullptr) {
-        chainedEffect = nativeTransitionEffect->effect;
-    }
-
-    // shadow
     Shadow shadow;
     if (options.shadowOption.radius == SHADOW_OPTION_NONE
         && Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
@@ -389,7 +432,43 @@ DialogProperties GetDialogProperties(const NativeCustomDialogOptions& options)
         shadow.SetOffsetX(options.shadowOption.offsetX);
         shadow.SetOffsetY(options.shadowOption.offsetY);
         shadow.SetIsFilled(options.shadowOption.fill);
-    };
+    }
+    return shadow;
+}
+
+template<typename T>
+RefPtr<NG::ChainedTransitionEffect> GetTransitionEffect(const T& options);
+
+template<>
+RefPtr<NG::ChainedTransitionEffect> GetTransitionEffect<NativeCustomDialogOptions>(
+    const NativeCustomDialogOptions& options)
+{
+    auto nativeTransitionEffect = OHOS::FFI::FFIData::GetData<NativeTransitionEffect>(options.transition);
+    if (nativeTransitionEffect != nullptr) {
+        return nativeTransitionEffect->effect;
+    }
+    return nullptr;
+}
+
+template<>
+RefPtr<NG::ChainedTransitionEffect> GetTransitionEffect<NativeCustomDialogOptionsV2>(
+    const NativeCustomDialogOptionsV2& options)
+{
+    if (options.hasTransition) {
+        auto nativeTransitionEffect = OHOS::FFI::FFIData::GetData<NativeTransitionEffect>(options.transition);
+        if (nativeTransitionEffect != nullptr) {
+            return nativeTransitionEffect->effect;
+        }
+    }
+    return nullptr;
+}
+
+template<typename T>
+DialogProperties CreateDialogPropertiesBase(const T& options)
+{
+    auto chainedEffect = GetTransitionEffect<T>(options);
+    Shadow shadow = CreateDialogShadow<T>(options);
+
     DialogProperties dialogProperties = {
         .autoCancel = options.autoCancel,
         .maskColor = Color(ColorAlphaAdapt(options.maskColor)),
@@ -400,15 +479,32 @@ DialogProperties GetDialogProperties(const NativeCustomDialogOptions& options)
         .isSysBlurStyle = false,
         .shadow = shadow,
         .hoverModeArea = HoverModeAreaType(options.hoverModeArea),
-        .transitionEffect = chainedEffect
+        .transitionEffect = chainedEffect,
     };
-    SetBorder(dialogProperties, options);
-    SetShape(dialogProperties, options);
-    SetFunc(dialogProperties, options);
     return dialogProperties;
 }
 
-void SetShowDialog(DialogProperties& dialogProperties, const NativeShowDialogOptions& options)
+DialogProperties GetDialogProperties(const NativeCustomDialogOptions& options)
+{
+    DialogProperties dialogProperties = CreateDialogPropertiesBase(options);
+    SetBorderT(dialogProperties, options);
+    SetShape(dialogProperties, options);
+    SetFuncT(dialogProperties, options);
+    return dialogProperties;
+}
+
+DialogProperties GetDialogPropertiesV2(const NativeCustomDialogOptionsV2& options)
+{
+    DialogProperties dialogProperties = CreateDialogPropertiesBase(options);
+    dialogProperties.dialogLevelMode = static_cast<LevelMode>(options.levelMode);
+    SetBorderT(dialogProperties, options);
+    SetShapeV2(dialogProperties, options);
+    SetFuncT(dialogProperties, options);
+    return dialogProperties;
+}
+
+template<typename T>
+void SetShowDialogT(DialogProperties& dialogProperties, const T& options)
 {
     auto alignment = DIALOG_ALIGNMENT[options.alignment];
 
@@ -430,22 +526,7 @@ void SetShowDialog(DialogProperties& dialogProperties, const NativeShowDialogOpt
     auto offset = DimensionOffset(dx, dy);
 
     // shadow
-    Shadow shadow;
-    if (options.shadowOption.radius == SHADOW_OPTION_NONE
-        && Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
-        if (options.shadowStyle == SHADOW_STYLE_NONE) {
-            shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultMD);
-        } else {
-            shadow = Shadow::CreateShadow(OHOS::Ace::ShadowStyle(options.shadowStyle));
-        }
-    } else {
-        shadow.SetBlurRadius(options.shadowOption.radius);
-        shadow.SetShadowType(ShadowType(options.shadowOption.shadowType));
-        shadow.SetColor(Color(options.shadowOption.color));
-        shadow.SetOffsetX(options.shadowOption.offsetX);
-        shadow.SetOffsetY(options.shadowOption.offsetY);
-        shadow.SetIsFilled(options.shadowOption.fill);
-    };
+    Shadow shadow = CreateDialogShadow<T>(options);
     dialogProperties.alignment = alignment;
     dialogProperties.offset = offset;
     dialogProperties.maskRect = maskRect;
@@ -611,6 +692,43 @@ void FfiPromptOpenCustomDialogWithOption(NativeCustomDialogOptions options, void
     return;
 }
 
+void FfiPromptOpenCustomDialogWithOptionV2(NativeCustomDialogOptionsV2 options, void (*callback)(int32_t))
+{
+    auto callbackFunc = [func = CJLambda::Create(callback)](int32_t customId) { func(customId); };
+    DialogProperties dialogProperties = GetDialogPropertiesV2(options);
+#if defined(PREVIEW)
+    if (dialogProperties.isShowInSubWindow) {
+        LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
+             "emulator or a real device instead.");
+        dialogProperties.isShowInSubWindow = false;
+    }
+#endif
+    dialogProperties.isSysBlurStyle = true;
+    dialogProperties.backgroundBlurStyle = options.backgroundBlurStyle;
+    if (!Container::IsCurrentUseNewPipeline()) {
+        LOGW("not support old pipeline");
+        return;
+    }
+    auto task = [dialogProperties, callbackFunc](const RefPtr<NG::OverlayManager>& overlayManager) mutable {
+        CHECK_NULL_VOID(overlayManager);
+        if (dialogProperties.isShowInSubWindow) {
+            SubwindowManager::GetInstance()->OpenCustomDialogNG(dialogProperties, std::move(callbackFunc));
+            if (dialogProperties.isModal) {
+                LOGW("temporary not support isShowInSubWindow and isModal");
+            }
+        } else {
+            overlayManager->OpenCustomDialog(dialogProperties, std::move(callbackFunc));
+        }
+    };
+    if (dialogProperties.dialogLevelMode == LevelMode::EMBEDDED) {
+        NG::DialogManager::ShowInEmbeddedOverlay(
+            std::move(task), "ArkUIOverlayShowDialog", dialogProperties.dialogLevelUniqueId);
+    } else {
+        MainWindowOverlay(std::move(task), "ArkUIOpenCustomDialog");
+    }
+    return;
+}
+
 void FfiPromptShowToastWithOption(NativeShowToastOptions options)
 {
     int32_t durationTime = std::clamp(options.duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
@@ -723,7 +841,42 @@ void FfiPromptShowDialogWithOption(NativeShowDialogOptions options, ShowDialogCa
         .enableHoverMode = options.enableHoverMode,
         .backgroundBlurStyle = options.backgroundBlurStyle,
         .hoverModeArea = HoverModeAreaType(options.hoverModeArea) };
-    SetShowDialog(dialogProperties, options);
+    SetShowDialogT(dialogProperties, options);
+#if defined(PREVIEW)
+    if (dialogProperties.isShowInSubWindow) {
+        LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
+             "emulator or a real device instead.");
+        dialogProperties.isShowInSubWindow = false;
+    }
+#endif
+
+    ShowDialogInner(dialogProperties, std::move(callback), callbacks);
+}
+
+void FfiPromptShowDialogWithOptionV2(NativeShowDialogOptionsV2 options, ShowDialogCallBack callbackRef)
+{
+    std::vector<ButtonInfo> buttons =
+        CreateButtonInfoVector(options.buttons, options.buttonsSize, SHOW_DIALOG_BUTTON_NUM_MAX);
+    std::set<std::string> callbacks;
+    callbacks.emplace("success");
+    callbacks.emplace("cancel");
+
+    auto callback = [ffiOnClick = CJLambda::Create(callbackRef)](
+                        int32_t callbackType, int32_t successType) { ffiOnClick(callbackType, successType); };
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show dialog enter with attr");
+    DialogProperties dialogProperties = { .type = DialogType::ALERT_DIALOG,
+        .title = options.title,
+        .content = options.message,
+        .buttons = buttons,
+        .backgroundColor = Color(options.backgroundColor),
+        .isShowInSubWindow = options.showInSubWindow,
+        .isModal = options.isModal,
+        .enableHoverMode = options.enableHoverMode,
+        .backgroundBlurStyle = options.backgroundBlurStyle,
+        .hoverModeArea = HoverModeAreaType(options.hoverModeArea),
+        .dialogLevelMode = static_cast<LevelMode>(options.levelMode),
+    };
+    SetShowDialogT(dialogProperties, options);
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {
         LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
@@ -748,6 +901,24 @@ void FfiPromptShowActionMenuWithOption(NativeActionMenuOptions options, ShowActi
         .buttons = buttons,
         .isShowInSubWindow = options.showInSubWindow,
         .isModal = options.isModal,
+    };
+    ShowActionMenuInner(dialogProperties, buttons, std::move(callback));
+}
+
+void FfiPromptShowActionMenuWithOptionV2(NativeActionMenuOptionsV2 options, ShowActionMenuCallBack callbackRef)
+{
+    std::vector<ButtonInfo> buttons =
+        CreateButtonInfoVector(options.buttons, options.buttonsSize, SHOW_ACTION_MENU_BUTTON_NUM_MAX);
+    auto callback = [ffiOnClick = CJLambda::Create(callbackRef)](
+                        int32_t callbackType, int32_t successType) { ffiOnClick(callbackType, successType); };
+    DialogProperties dialogProperties = {
+        .title = options.title,
+        .autoCancel = true,
+        .isMenu = true,
+        .buttons = buttons,
+        .isShowInSubWindow = options.showInSubWindow,
+        .isModal = options.isModal,
+        .dialogLevelMode = static_cast<LevelMode>(options.levelMode),
     };
     ShowActionMenuInner(dialogProperties, buttons, std::move(callback));
 }
