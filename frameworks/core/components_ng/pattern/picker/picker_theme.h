@@ -21,7 +21,6 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/pattern/picker/picker_data.h"

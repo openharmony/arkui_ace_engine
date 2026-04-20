@@ -22,7 +22,6 @@
 
 #include "core/common/ace_application_info.h"
 #include "core/components/form/resource/form_request_data.h"
-#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/form/accessibility_session_adapter_form.h"
 #include "core/components_ng/pattern/form/form_event_hub.h"
 #include "core/components_ng/pattern/form/form_layout_property.h"

@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_INDEXER_INDEXER_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_INDEXER_INDEXER_MODEL_NG_H
 
-#include "core/components/common/properties/decoration.h"
+#include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/indexer/indexer_model.h"
 
 namespace OHOS::Ace::NG {

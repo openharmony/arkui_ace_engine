@@ -22,7 +22,7 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
-#include "frameworks/core/components/common/properties/decoration.h"
+#include "core/components/common/properties/decoration.h"
 
 // avoid windows build error about macro defined in wincon.h
 #ifdef DOUBLE_CLICK

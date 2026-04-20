@@ -36,7 +36,6 @@
 #include "core/common/resource/resource_object.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/common/resource/resource_wrapper.h"
-#include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/pattern/text/text_model.h"

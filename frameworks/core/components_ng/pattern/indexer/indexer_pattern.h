@@ -22,7 +22,6 @@
 #include "base/memory/referenced.h"
 #include "core/animation/animator.h"
 #include "core/components/indexer/indexer_theme.h"
-#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/indexer/indexer_accessibility_property.h"
 #include "core/components_ng/pattern/indexer/indexer_event_hub.h"
