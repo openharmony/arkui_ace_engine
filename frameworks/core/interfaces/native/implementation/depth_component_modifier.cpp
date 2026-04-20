@@ -27,7 +27,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 } // DepthComponentModifier
 namespace DepthComponentInterfaceModifier {
 void SetDepthComponentOptionsImpl(Ark_NativePointer node,
-                                  const Ark_ResourceStr* background,
+                                  const Ark_Union_ResourceStr_image_PixelMap* background,
                                   const Opt_DepthComponentOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
