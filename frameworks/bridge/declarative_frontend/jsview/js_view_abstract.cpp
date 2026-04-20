@@ -86,6 +86,7 @@
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_wrapper.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components/common/properties/depth_option.h"
 #include "core/components_ng/base/extension_handler.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
@@ -3908,6 +3909,70 @@ void JSViewAbstract::JsLightUpEffect(const JSCallbackInfo& info)
         radio = info[0]->ToNumber<double>();
     }
     ViewAbstractModel::GetInstance()->SetLightUpEffect(std::clamp(radio, 0.0, 1.0));
+}
+
+void JSViewAbstract::JsSpatialEffect(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || info[0]->IsUndefined() || info[0]->IsNull()) {
+        ViewAbstractModel::GetInstance()->SetSpatialEffect(std::nullopt);
+        return;
+    }
+
+    if (!info[0]->IsObject()) {
+        return;
+    }
+
+    SpatialEffectParams params;
+    auto jsObject = JSRef<JSObject>::Cast(info[0]);
+    auto positionValue = jsObject->GetProperty("position");
+    if (positionValue->IsObject()) {
+        DepthPosition position;
+        auto positionObject = JSRef<JSObject>::Cast(positionValue);
+        auto leftTopValue = positionObject->GetProperty("leftTop");
+        if (leftTopValue->IsObject()) {
+            position.leftTop = ParseDepthVector3(leftTopValue);
+        }
+        auto rightTopValue = positionObject->GetProperty("rightTop");
+        if (rightTopValue->IsObject()) {
+            position.rightTop = ParseDepthVector3(rightTopValue);
+        }
+        auto leftBottomValue = positionObject->GetProperty("leftBottom");
+        if (leftBottomValue->IsObject()) {
+            position.leftBottom = ParseDepthVector3(leftBottomValue);
+        }
+        auto rightBottomValue = positionObject->GetProperty("rightBottom");
+        if (rightBottomValue->IsObject()) {
+            position.rightBottom = ParseDepthVector3(rightBottomValue);
+        }
+        params.position = position;
+    }
+
+    auto occlusionWeightValue = jsObject->GetProperty("occlusionWeight");
+    if (occlusionWeightValue->IsNumber()) {
+        params.occlusionWeight = occlusionWeightValue->ToNumber<float>();
+    }
+    ViewAbstractModel::GetInstance()->SetSpatialEffect(params);
+}
+
+DepthVector3 JSViewAbstract::ParseDepthVector3(const JSRef<JSVal>& vectorValue)
+{
+    auto vectorObj = JSRef<JSObject>::Cast(vectorValue);
+    DepthVector3 vector;
+    auto xValue = vectorObj->GetProperty("x");
+    if (xValue->IsNumber()) {
+        vector.x = xValue->ToNumber<float>();
+    }
+
+    auto yValue = vectorObj->GetProperty("y");
+    if (yValue->IsNumber()) {
+        vector.y = yValue->ToNumber<float>();
+    }
+
+    auto zValue = vectorObj->GetProperty("z");
+    if (zValue->IsNumber()) {
+        vector.z = zValue->ToNumber<float>();
+    }
+    return vector;
 }
 
 void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
@@ -9940,6 +10005,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("lightUpEffect", &JSViewAbstract::JsLightUpEffect);
     JSClass<JSViewAbstract>::StaticMethod("sphericalEffect", &JSViewAbstract::JsSphericalEffect);
     JSClass<JSViewAbstract>::StaticMethod("pixelStretchEffect", &JSViewAbstract::JsPixelStretchEffect);
+    JSClass<JSViewAbstract>::StaticMethod("spatialEffect", &JSViewAbstract::JsSpatialEffect);
     JSClass<JSViewAbstract>::StaticMethod("outline", &JSViewAbstract::JsOutline);
     JSClass<JSViewAbstract>::StaticMethod("outlineWidth", &JSViewAbstract::JsOutlineWidth);
     JSClass<JSViewAbstract>::StaticMethod("outlineStyle", &JSViewAbstract::JsOutlineStyle);

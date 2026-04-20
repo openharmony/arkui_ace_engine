@@ -4935,6 +4935,32 @@ void SetLightUpEffectImpl(Ark_NativePointer node,
     Validator::ValidateByRange(convValue, LIGHTUPEFFECT_MIN, LIGHTUPEFFECT_MAX);
     ViewAbstractModelStatic::SetLightUpEffect(frameNode, convValue);
 }
+void SetSpatialEffectImpl(Ark_NativePointer node,
+                          const Opt_SpatialEffectParams* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    if (value->tag == INTEROP_TAG_UNDEFINED) {
+        ViewAbstractModelStatic::SetSpatialEffect(frameNode, std::nullopt);
+        return;
+    }
+    const auto& src = value->value;
+    auto toVec3 = [](const Ark_DepthVector3& v) -> DepthVector3 {
+        return { static_cast<float>(v.x), static_cast<float>(v.y), static_cast<float>(v.z) };
+    };
+    SpatialEffectParams effectParams;
+    effectParams.position = DepthPosition {
+        .leftTop = toVec3(src.position.leftTop),
+        .rightTop = toVec3(src.position.rightTop),
+        .leftBottom = toVec3(src.position.leftBottom),
+        .rightBottom = toVec3(src.position.rightBottom),
+    };
+    if (src.occlusionWeight.tag != INTEROP_TAG_UNDEFINED) {
+        effectParams.occlusionWeight = static_cast<float>(src.occlusionWeight.value);
+    }
+    ViewAbstractModelStatic::SetSpatialEffect(frameNode, effectParams);
+}
 void SetPixelStretchEffectImpl(Ark_NativePointer node,
                                const Opt_PixelStretchEffectOptions* value)
 {
@@ -6973,6 +6999,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetRestoreIdImpl,
         CommonMethodModifier::SetSphericalEffectImpl,
         CommonMethodModifier::SetLightUpEffectImpl,
+        CommonMethodModifier::SetSpatialEffectImpl,
         CommonMethodModifier::SetPixelStretchEffectImpl,
         CommonMethodModifier::SetAccessibilityNextFocusIdImpl,
         CommonMethodModifier::SetAccessibilityDefaultFocusImpl,
