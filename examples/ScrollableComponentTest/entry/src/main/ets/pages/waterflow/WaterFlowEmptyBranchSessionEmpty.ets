@@ -14,7 +14,7 @@
  */
 
 import { MyDataSource } from './BasicDataSource'
-import { WaterFlowModifier } from "@ohos.arkui.modifier";
+import { WaterFlowModifier } from '@ohos.arkui.modifier';
 
 @Entry
 @Component
@@ -98,7 +98,7 @@ struct WaterFlowDemo {
           .onClick(() => {
             // 在第一个分组中增加4个FlowItem
             // 重要：必须保证数据源和分组itemsCount同步更新
-            const sections: Array<SectionOptions> = this.sections.values();
+            const sections: SectionOptions[] = this.sections.values();
             let newSection: SectionOptions = sections[0];
 
             // 先在数据源中添加4个新数据
@@ -119,7 +119,7 @@ struct WaterFlowDemo {
           .onClick(() => {
             // 在第一个分组中减少4个FlowItem
             // 重要：必须保证数据源和分组itemsCount同步更新
-            const sections: Array<SectionOptions> = this.sections.values();
+            const sections: SectionOptions[] = this.sections.values();
             let newSection: SectionOptions = sections[0];
 
             // 检查是否有足够的item可以删除
@@ -142,9 +142,9 @@ struct WaterFlowDemo {
         Button('values')
           .height('5%')
           .onClick(() => {
-            const sections: Array<SectionOptions> = this.sections.values();
+            const sections: SectionOptions[] = this.sections.values();
             for (const value of sections) {
-              console.info("values:" + JSON.stringify(value));
+              console.info('values:' + JSON.stringify(value));
             }
             console.info('count:' + this.sections.length());
           })
@@ -162,7 +162,7 @@ struct WaterFlowDemo {
             .width('100%')
             .backgroundColor(this.colors[item % this.colors.length])
           }
-        }, (item: number) => item + "")
+        }, (item: number) => item + '')
       }
       .columnsTemplate('1fr 1fr')
       .columnsGap(10)

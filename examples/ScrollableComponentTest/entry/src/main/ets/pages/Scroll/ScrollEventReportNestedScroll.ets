@@ -14,19 +14,19 @@
  */
 
 import { curves } from '@kit.ArkUI';
-import { NodeIdUtils } from './getID';
+import {NodeIdUtils} from  '../grid/GetID';
 
 @Entry
 @Component
-struct ScrollExample_nestedScroll2 {
+struct ScrollExample_nestedScroll {
   scroller: Scroller = new Scroller();
   @State arr2: number[] = []
   @State edgeEffectArr: number[] = [EdgeEffect.None, EdgeEffect.Spring, EdgeEffect.Fade]
-  @State edgeEffectNameArr: string[] = ["None", "Spring", "Fade"]
+  @State edgeEffectNameArr: string[] = ['None', 'Spring', 'Fade']
   @State edgeEffectArrIndex: number = 0
   @State scrollDirectionArr: number[] =
     [ScrollDirection.Vertical, ScrollDirection.Horizontal, ScrollDirection.None, ScrollDirection.FREE]
-  @State scrollDirectionNameArr: string[] = ["Vertical", "Horizontal", "None", "FREE"]
+  @State scrollDirectionNameArr: string[] = ['Vertical', 'Horizontal', 'None', 'FREE']
   @State scrollDirectionArrIndex: number = 0
   @State zoomScaleArr: number[] = [1, 0.5, 2]
   @State zoomScaleArrIndex: number = 0
@@ -39,7 +39,7 @@ struct ScrollExample_nestedScroll2 {
 
   build() {
     Stack({ alignContent: Alignment.TopStart }) {
-      Scroll() {
+      Scroll(this.scroller) {
         Column() {
           Text('Scroll Area')
             .width('100%')
@@ -48,7 +48,7 @@ struct ScrollExample_nestedScroll2 {
             .textAlign(TextAlign.Center)
           Tabs({ barPosition: BarPosition.Start }) {
             TabContent() {
-              List({ space: 10, scroller: this.scroller }) {
+              List({ space: 10 }) {
                 ForEach(this.arr2, (item: number) => {
                   ListItem() {
                     Text('item' + item)
@@ -59,7 +59,7 @@ struct ScrollExample_nestedScroll2 {
                 }, (item: number) => item.toString())
               }
               .width('100%')
-              .id("List")
+              .id('List')
               .cachedCount(1000, true)
               .edgeEffect(EdgeEffect.Spring)
               .nestedScroll({
@@ -75,7 +75,6 @@ struct ScrollExample_nestedScroll2 {
                 console.info('laoxu list scroll stop');
               })
             }.tabBar('Tab1')
-
           }
           .vertical(false)
           .height('100%')
@@ -104,21 +103,28 @@ struct ScrollExample_nestedScroll2 {
         console.info('laoxu scroll stop');
       })
 
-      Button('scrollToIndex 25')
+      Button('scrollBy -150')
         .height('5%')
         .onClick(() => { // 点击后下滑指定距离150.0vp
-          this.scroller.scrollToIndex(25, true, ScrollAlign.START);
+          this.scroller.scrollBy(0, -150);
         })
         .margin({ top: 10, left: 20 })
-      Button('scrollTo 100')
+      Button('scrollTo 500')
         .height('5%')
         .onClick(() => { // 点击后滑动到指定位置，即下滑100.0vp的距离
           const yOffset: number = this.scroller.currentOffset().yOffset;
-          this.scroller.scrollTo({ xOffset: 0, yOffset: yOffset + 100, animation: true });
+          this.scroller.scrollTo({ xOffset: 0, yOffset: yOffset + 500 });
         })
         .margin({ top: 60, left: 20 })
-
-      Button('scrollEdge')
+      Button('scrollTo 500 with animation')
+        .height('5%')
+        .onClick(() => { // 点击后滑动到指定位置，即下滑100.0vp的距离，滑动过程配置有动画
+          let curve = curves.interpolatingSpring(10, 1, 228, 30); //创建一个弹簧曲线
+          const yOffset: number = this.scroller.currentOffset().yOffset;
+          this.scroller.scrollTo({ xOffset: 0, yOffset: yOffset + 500, animation: { duration: 1000, curve: curve } });
+        })
+        .margin({ top: 110, left: 20 })
+      Button('scrollEdge to Top')
         .height('5%')
         .onClick(() => { // 点击后回到顶部
           this.scroller.scrollEdge(Edge.Top);
@@ -130,14 +136,36 @@ struct ScrollExample_nestedScroll2 {
           this.scroller.scrollPage({ next: true, animation: true });
         })
         .margin({ top: 210, left: 20 })
+      Button('fling -3000')
+        .height('5%')
+        .onClick(() => { // 点击后触发初始速度为-3000vp/s的惯性滚动
+          this.scroller.fling(-3000);
+        })
+        .margin({ top: 260, left: 20 })
+      Button('scroll to bottom 700')
+        .height('5%')
+        .onClick(() => { // 点击后滑到下边缘，速度值是700vp/s
+          this.scroller.scrollEdge(Edge.Bottom, { velocity: 700 });
+        })
+        .margin({ top: 310, left: 20 })
 
       Button('id')
         .height('5%')
         .onClick(() => { //
 
-          NodeIdUtils.getNodeInternalId(this.getUIContext(), "List", "text", 100)
+          NodeIdUtils.getNodeInternalId(this.getUIContext(), 'List', 'text', 100)
         })
         .margin({ top: 360, left: 20 })
+
+      Button('edgeEffect' + this.edgeEffectNameArr[this.edgeEffectArrIndex])
+        .height('5%')
+        .onClick(() => {
+          this.edgeEffectArrIndex++;
+          if (this.edgeEffectArrIndex >= this.edgeEffectArr.length) {
+            this.edgeEffectArrIndex %= this.edgeEffectArr.length
+          }
+        })
+        .margin({ top: 410, left: 20 })
     }.width('100%').height('100%').backgroundColor(0xDCDCDC)
   }
 }

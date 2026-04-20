@@ -13,8 +13,7 @@
  * limitations under the License.
  */
 
-// xxx.ets
-import { MyDataSource } from './BasicDataSource'
+import { MyDataSource } from '../waterflow/BasicDataSource'
 
 @Entry
 @Component
@@ -27,67 +26,53 @@ struct GridItemExample {
   @State rGap: boolean = true
   @State clips: boolean = true
   @State iShow: boolean = true
+  @State isAtEnd: boolean = true
   @State dexNum: number = 0
   @State dateInfo: number[] = [0, 5, 29, -1, 18]
 
-  @Styles
-  selectStyles(): void{
-    .backgroundColor("#ED6F21")
-    .borderWidth(2)
-  }
-
-  @Styles
-  normalStyles(): void{
-    .backgroundColor(Color.Brown)
-    .borderWidth(0)
-  }
-
   build() {
     Column() {
-      Row() {
-        Button('index:' + `${this.dateInfo[this.dexNum%5]}`).onClick((event: ClickEvent) => {
+      Row(undefined) {
+        Button('index:' + `${this.dateInfo[this.dexNum%5]}`).onClick((p1: ClickEvent) => {
           this.dexNum++
         })
       }
 
-      Row() {
-        Button('Template').onClick((event: ClickEvent) => {
+      Row(undefined) {
+        Button('Template').onClick((p1: ClickEvent) => {
           this.temp = !this.temp
         })
-        Button('columnsGap').onClick((event: ClickEvent) => {
+        Button('columnsGap').onClick((p1: ClickEvent) => {
           this.cGap = !this.cGap
         })
-        Button('rowsGap').onClick((event: ClickEvent) => {
+        Button('rowsGap').onClick((p1: ClickEvent) => {
           this.rGap = !this.rGap
         })
       }
 
-      Row() {
-        Button("true").onClick(() => {
+      Row(undefined) {
+        Button('true').onClick(() => {
           this.enable = true
         })
-        Button("false").onClick(() => {
+        Button('false').onClick(() => {
           this.enable = false
         })
-        Button("undefined").onClick(() => {
+        Button('undefined').onClick(() => {
           this.enable = undefined
         })
       }
 
-      Row() {
-        Button('isAtEnd').onClick(() => {
-          this.scroller.isAtEnd()
+      Row(undefined) {
+        Button('isAtEnd' + this.isAtEnd).onClick(() => {
+          this.isAtEnd = this.scroller.isAtEnd()
           console.info(this.scroller.isAtEnd() + '')
-        })
-        Button('dataReload').onClick((event: ClickEvent) => {
-          this.arr.dataReload()
         })
         Button('pushData').onClick((event: ClickEvent) => {
           this.arr.pushData(this.arr.totalCount() + 1)
         })
       }
 
-      Row() {
+      Row(undefined) {
         Button('delete 5').onClick((event: ClickEvent) => {
           this.arr.deleteIndex(5)
         })
@@ -99,50 +84,39 @@ struct GridItemExample {
         })
       }
 
-      Row() {
-        Button('clip:' + this.clips).onClick((event: ClickEvent) => {
+      Row(undefined) {
+        Button('clip:' + this.clips).onClick((p1: ClickEvent) => {
           this.clips = !this.clips
         })
-        Button('show:' + this.iShow).onClick((event: ClickEvent) => {
+        Button('show:' + this.iShow).onClick((p1: ClickEvent) => {
           this.iShow = !this.iShow
         })
       }
 
-      Grid(this.scroller) {
+      List({ space: 20, initialIndex: 0 }) {
         LazyForEach(this.arr, (item: number, index: number) => {
           if (index == this.dateInfo[this.dexNum%5]) {
 
           } else {
-            GridItem({ style: GridItemStyle.PLAIN }) {
-              Text('' + index)
-                .width('100%')
+            ListItem() {
+              Text('' + item)
                 .height(60)
                 .fontSize(16)
                 .focusable(true)
                 .textAlign(TextAlign.Center)
                 .borderRadius(10)
             }
-            .selectable(true)
-            .stateStyles({
-              selected: this.selectStyles,
-              normal: this.normalStyles
-            })
-
           }
-        }, (item: string) => item.toString())
+        }, (item: number) => item.toString())
       }
       .width('90%')
       .height('50%')
-      .multiSelectable(true)
-      .columnsTemplate(this.temp ? '1fr' : '1fr 1fr 1fr')
+      .lanes(3)
       .scrollBar(BarState.On)
       .borderWidth(1)
-      // .syncLoad(true)
       .cachedCount(3, this.iShow)
       .clip(this.clips)
       .edgeEffect(EdgeEffect.Spring)
-      .columnsGap(this.cGap ? 10 : -1)
-      .rowsGap(this.rGap ? 10 : -1)
       .supportEmptyBranchInLazyLoading(this.enable)
       .onScrollIndex((first: number, last: number) => {
         console.info('first：' + first + ' last：' + last)
@@ -151,6 +125,7 @@ struct GridItemExample {
   }
 
   aboutToAppear(): void {
+    this.arr.clear();
     for (let i = 0; i < 30; i++) {
       this.arr.pushData(i);
     }

@@ -14,7 +14,7 @@
  */
 
 import { MyDataSource } from './BasicDataSource'
-import { WaterFlowModifier } from "@ohos.arkui.modifier";
+import { WaterFlowModifier } from '@ohos.arkui.modifier';
 
 class CustomMyModifier implements AttributeModifier<WaterFlowModifier> {
   public enable: boolean | undefined = true
@@ -50,13 +50,13 @@ struct GridItemExample7 {
       }
 
       Row(undefined) {
-        Button("true").onClick(() => {
+        Button('true').onClick(() => {
           this.modifier.enable = true
         })
-        Button("false").onClick(() => {
+        Button('false').onClick(() => {
           this.modifier.enable = false
         })
-        Button("undefined").onClick(() => {
+        Button('undefined').onClick(() => {
           this.modifier.enable = undefined
         })
       }

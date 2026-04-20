@@ -17,7 +17,7 @@ import { MyDataSource } from './BasicDataSource'
 
 @Entry
 @Component
-struct GridItemExample {
+struct WaterFlow6 {
   private arr: MyDataSource<number> = new MyDataSource<number>()
   @State enable: boolean | undefined = true
   scroller: Scroller = new Scroller()
@@ -51,13 +51,13 @@ struct GridItemExample {
       }
 
       Row(undefined) {
-        Button("true").onClick(() => {
+        Button('true').onClick(() => {
           this.enable = true
         })
-        Button("false").onClick(() => {
+        Button('false').onClick(() => {
           this.enable = false
         })
-        Button("undefined").onClick(() => {
+        Button('undefined').onClick(() => {
           this.enable = undefined
         })
       }
@@ -66,6 +66,9 @@ struct GridItemExample {
         Button('isAtEnd' + this.isAtEnd).onClick(() => {
           this.isAtEnd = this.scroller.isAtEnd()
           console.info(this.scroller.isAtEnd() + '')
+        })
+        Button('dataReload').onClick((event: ClickEvent) => {
+          this.arr.dataReload()
         })
         Button('pushData').onClick((event: ClickEvent) => {
           this.arr.pushData(this.arr.totalCount() + 1)
@@ -93,30 +96,33 @@ struct GridItemExample {
         })
       }
 
-      List({ space: 20, initialIndex: 0 }) {
-        LazyForEach(this.arr, (item: number, index: number) => {
-          if (index == this.dateInfo[this.dexNum%5]) {
+      WaterFlow({ scroller: this.scroller } as WaterFlowOptions) {
+        Repeat<number>(this.arr.dataArray)
+          .each((ri: RepeatItem<number>) => {
+            if (ri.index == this.dateInfo[this.dexNum%5]) {
 
-          } else {
-            ListItem() {
-              Text('' + item)
-                .height(60)
-                .fontSize(16)
-                .focusable(true)
-                .textAlign(TextAlign.Center)
-                .borderRadius(10)
+            } else {
+              FlowItem() {
+                Text('' + ri.index)
+                  .height(60)
+                  .fontSize(16)
+                  .focusable(true)
+                  .textAlign(TextAlign.Center)
+                  .borderRadius(10)
+              }
             }
-          }
-        }, (item: number) => item.toString())
+          })
       }
       .width('90%')
       .height('50%')
-      .lanes(3)
+      .columnsTemplate(this.temp ? '1fr' : '1fr 1fr 1fr')
       .scrollBar(BarState.On)
       .borderWidth(1)
       .cachedCount(3, this.iShow)
       .clip(this.clips)
       .edgeEffect(EdgeEffect.Spring)
+      .columnsGap(this.cGap ? 10 : -1)
+      .rowsGap(this.rGap ? 10 : -1)
       .supportEmptyBranchInLazyLoading(this.enable)
       .onScrollIndex((first: number, last: number) => {
         console.info('first：' + first + ' last：' + last)

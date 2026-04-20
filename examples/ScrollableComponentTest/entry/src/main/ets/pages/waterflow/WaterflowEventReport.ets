@@ -14,7 +14,7 @@
  */
 
 import { WaterFlowDataSource } from './WaterFlowDataSource';
-import { NodeIdUtils } from './getID';
+import {NodeIdUtils} from  '../grid/GetID';
 
 enum FooterState {
   Loading = 0,
@@ -109,7 +109,7 @@ struct WaterFlowDemo {
           }, (item: string, index?: number) => item)
 
         }
-        .id("WaterFlow")
+        .id('WaterFlow')
         .rowsTemplate('1fr ')
         .cachedCount(1000, true)
         .columnsTemplate('1fr') // 设置2列等宽布局
@@ -195,7 +195,7 @@ struct WaterFlowDemo {
           .height('5%')
           .onClick(() => { //
 
-            NodeIdUtils.getNodeInternalId(this.getUIContext(), "WaterFlow", "text", 100)
+            NodeIdUtils.getNodeInternalId(this.getUIContext(), 'WaterFlow', 'text', 100)
           })
           .margin({ top: 360, left: 20 })
       }
