@@ -14,11 +14,11 @@
  */
 
 import { GridDataSource } from './GridDataSource';
-import { NodeIdUtils } from './getID';
+import { NodeIdUtils } from './GetID';
 
 @Entry
 @Component
-struct GridExample_nestedScroll {
+struct GridExample {
   numbers: GridDataSource = new GridDataSource([]);
   scroller: Scroller = new Scroller();
   @State gridPosition: number = 0; // 0代表滚动到grid顶部，1代表中间值，2代表滚动到grid底部。
@@ -42,62 +42,54 @@ struct GridExample_nestedScroll {
     Column({ space: 5 }) {
       Stack({ alignContent: Alignment.TopStart }) {
 
-        Scroll() {
-          Column() {
-            Text('Scroll Area')
-              .width('100%')
-              .height('40%')
-              .backgroundColor('#0080DC')
-              .textAlign(TextAlign.Center)
-            Grid(this.scroller) {
-              ForEach(this.arr2, (item: number, index?: number) => {
-                GridItem() {
-                  Text('' + item)
-                    .fontSize(16)
-                    .backgroundColor(0xF9CF93)
-                    .width('100%')
-                    .height('100%')
-                    .textAlign(TextAlign.Center)
-                    .id('text' + item.toString())
-                }
+        Grid(this.scroller) {
+          ForEach(this.arr2, (item: number, index?: number) => {
+            GridItem() {
+              Text('' + item)
+                .fontSize(16)
+                .backgroundColor(0xF9CF93)
                 .width('100%')
-                .height(40)
-                .shadow({
-                  radius: 10,
-                  color: '#909399',
-                  offsetX: 1,
-                  offsetY: 1
-                })
-                .borderRadius(10)
-                .translate({ x: 0, y: 0 })
-              }, (item: string) => item)
+                .height('100%')
+                .textAlign(TextAlign.Center)
+                .id('text' + item.toString())
             }
-            .id("Grid")
-            .nestedScroll({
-              scrollForward: NestedScrollMode.PARENT_FIRST,
-              scrollBackward: NestedScrollMode.SELF_FIRST
-            })
-            .columnsTemplate('1fr ')
-            .friction(0.3)
-            .columnsGap(15)
-            .rowsGap(10)
-            .scrollBar(BarState.Off)
             .width('100%')
-            .height('100%')
-            .layoutDirection(GridDirection.Column)
-            .cachedCount(1000, true)
-
-            .onScrollStart(() => {
-              // 开始滚动时触发
-              console.info('laoxu scroll start');
+            .height(40)
+            .shadow({
+              radius: 10,
+              color: '#909399',
+              offsetX: 1,
+              offsetY: 1
             })
-            .onScrollStop(() => {
-              // 停止滚动时触发
-              console.info('laoxu scroll stop');
-            })
-          }
+            .borderRadius(10)
+            .translate({ x: 0, y: 0 })
+          }, (item: string) => item)
         }
+        .id('Grid')
+        .columnsTemplate('1fr ')
+        .friction(0.3)
+        .columnsGap(15)
+        .rowsGap(10)
+        .scrollBar(BarState.Off)
+        .width('100%')
+        .height('100%')
+        .layoutDirection(GridDirection.Column)
+        .cachedCount(1000, true)
+        .onScrollStart(() => {
+          // 开始滚动时触发
+          console.info('laoxu scroll start');
+        })
+        .onScrollStop(() => {
+          // 停止滚动时触发
+          console.info('laoxu scroll stop');
+        })
 
+        Button('scrollBy 150')
+          .height('5%')
+          .onClick(() => { // 点击后下滑指定距离150.0vp
+            this.scroller.scrollBy(0, 150);
+          })
+          .margin({ top: 10, left: 20 })
         Button('scrollToIndex 25')
           .height('5%')
           .onClick(() => { // 点击后下滑指定距离150.0vp
@@ -129,7 +121,7 @@ struct GridExample_nestedScroll {
           .height('5%')
           .onClick(() => {
 
-            NodeIdUtils.getNodeInternalId(this.getUIContext(), "Grid", "text", 100)
+            NodeIdUtils.getNodeInternalId(this.getUIContext(), 'Grid', 'text', 100)
           })
           .margin({ top: 360, left: 20 })
       }

@@ -13,20 +13,20 @@
  * limitations under the License.
  */
 
-import { curves } from '@kit.ArkUI';
-import { NodeIdUtils } from './getID';
+import { curves, UIInspector } from '@kit.ArkUI';
+import {NodeIdUtils} from  '../grid/GetID';
 
 @Entry
 @Component
-struct ScrollExample_nestedScroll {
+struct ScrollExample {
   scroller: Scroller = new Scroller();
   @State arr2: number[] = []
   @State edgeEffectArr: number[] = [EdgeEffect.None, EdgeEffect.Spring, EdgeEffect.Fade]
-  @State edgeEffectNameArr: string[] = ["None", "Spring", "Fade"]
+  @State edgeEffectNameArr: string[] = ['None', 'Spring', 'Fade']
   @State edgeEffectArrIndex: number = 0
   @State scrollDirectionArr: number[] =
     [ScrollDirection.Vertical, ScrollDirection.Horizontal, ScrollDirection.None, ScrollDirection.FREE]
-  @State scrollDirectionNameArr: string[] = ["Vertical", "Horizontal", "None", "FREE"]
+  @State scrollDirectionNameArr: string[] = ['Vertical', 'Horizontal', 'None', 'FREE']
   @State scrollDirectionArrIndex: number = 0
   @State zoomScaleArr: number[] = [1, 0.5, 2]
   @State zoomScaleArrIndex: number = 0
@@ -41,45 +41,21 @@ struct ScrollExample_nestedScroll {
     Stack({ alignContent: Alignment.TopStart }) {
       Scroll(this.scroller) {
         Column() {
-          Text('Scroll Area')
-            .width('100%')
-            .height('40%')
-            .backgroundColor('#0080DC')
-            .textAlign(TextAlign.Center)
-          Tabs({ barPosition: BarPosition.Start }) {
-            TabContent() {
-              List({ space: 10 }) {
-                ForEach(this.arr2, (item: number) => {
-                  ListItem() {
-                    Text('item' + item)
-                      .fontSize(16)
-                      .margin({ left: 200 })
-                      .id('text' + item.toString())
-                  }
-                }, (item: number) => item.toString())
-              }
-              .width('100%')
-              .id("List")
-              .cachedCount(1000, true)
-              .edgeEffect(EdgeEffect.Spring)
-              .nestedScroll({
-                scrollForward: NestedScrollMode.PARENT_FIRST,
-                scrollBackward: NestedScrollMode.SELF_FIRST
-              })
-              .onScrollStart(() => {
-                // 开始滚动时触发
-                console.info('laoxu list scroll start');
-              })
-              .onScrollStop(() => {
-                // 停止滚动时触发
-                console.info('laoxu list scroll stop');
-              })
-            }.tabBar('Tab1')
-          }
-          .vertical(false)
-          .height('100%')
+          ForEach(this.arr2, (item: number) => {
+            Text(item.toString())
+              .width('90%')
+              .height(150)
+              .backgroundColor(0xFFFFFF)
+              .borderRadius(15)
+              .fontSize(16)
+              .textAlign(TextAlign.Center)
+              .margin({ top: 10 })
+              .id('text' + item.toString())
+          }, (item: number) => item.toString())
         }.width('100%')
       }
+      .id('scroll')
+      .key('my_scroll')
       .scrollable(ScrollDirection.Vertical) // 滚动方向纵向
       .scrollable(this.scrollDirectionArr[this.scrollDirectionArrIndex])
       .edgeEffect(this.edgeEffectArr[this.edgeEffectArrIndex])
@@ -153,11 +129,11 @@ struct ScrollExample_nestedScroll {
         .height('5%')
         .onClick(() => { //
 
-          NodeIdUtils.getNodeInternalId(this.getUIContext(), "List", "text", 100)
+          NodeIdUtils.getNodeInternalId(this.getUIContext(), 'scroll', 'text', 100)
         })
         .margin({ top: 360, left: 20 })
 
-      Button("edgeEffect" + this.edgeEffectNameArr[this.edgeEffectArrIndex])
+      Button('edgeEffect' + this.edgeEffectNameArr[this.edgeEffectArrIndex])
         .height('5%')
         .onClick(() => {
           this.edgeEffectArrIndex++;
@@ -166,6 +142,7 @@ struct ScrollExample_nestedScroll {
           }
         })
         .margin({ top: 410, left: 20 })
+
     }.width('100%').height('100%').backgroundColor(0xDCDCDC)
   }
 }

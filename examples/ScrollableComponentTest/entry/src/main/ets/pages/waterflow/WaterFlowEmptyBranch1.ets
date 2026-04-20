@@ -51,13 +51,13 @@ struct GridItemExample {
       }
 
       Row(undefined) {
-        Button("true").onClick(() => {
+        Button('true').onClick(() => {
           this.enable = true
         })
-        Button("false").onClick(() => {
+        Button('false').onClick(() => {
           this.enable = false
         })
-        Button("undefined").onClick(() => {
+        Button('undefined').onClick(() => {
           this.enable = undefined
         })
       }

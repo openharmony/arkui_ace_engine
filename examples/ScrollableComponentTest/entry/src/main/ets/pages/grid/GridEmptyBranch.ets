@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-import { MyDataSource } from './BasicDataSource'
+// xxx.ets
+import { MyDataSource } from '../waterflow/BasicDataSource'
 
 @Entry
 @Component
-struct WaterFlow6 {
+struct GridItemExample {
   private arr: MyDataSource<number> = new MyDataSource<number>()
   @State enable: boolean | undefined = true
   scroller: Scroller = new Scroller()
@@ -26,45 +27,56 @@ struct WaterFlow6 {
   @State rGap: boolean = true
   @State clips: boolean = true
   @State iShow: boolean = true
-  @State isAtEnd: boolean = true
   @State dexNum: number = 0
   @State dateInfo: number[] = [0, 5, 29, -1, 18]
 
+  @Styles
+  selectStyles(): void{
+    .backgroundColor('#ED6F21')
+    .borderWidth(2)
+  }
+
+  @Styles
+  normalStyles(): void{
+    .backgroundColor(Color.Brown)
+    .borderWidth(0)
+  }
+
   build() {
     Column() {
-      Row(undefined) {
-        Button('index:' + `${this.dateInfo[this.dexNum%5]}`).onClick((p1: ClickEvent) => {
+      Row() {
+        Button('index:' + `${this.dateInfo[this.dexNum%5]}`).onClick((event: ClickEvent) => {
           this.dexNum++
         })
       }
 
-      Row(undefined) {
-        Button('Template').onClick((p1: ClickEvent) => {
+      Row() {
+        Button('Template').onClick((event: ClickEvent) => {
           this.temp = !this.temp
         })
-        Button('columnsGap').onClick((p1: ClickEvent) => {
+        Button('columnsGap').onClick((event: ClickEvent) => {
           this.cGap = !this.cGap
         })
-        Button('rowsGap').onClick((p1: ClickEvent) => {
+        Button('rowsGap').onClick((event: ClickEvent) => {
           this.rGap = !this.rGap
         })
       }
 
-      Row(undefined) {
-        Button("true").onClick(() => {
+      Row() {
+        Button('true').onClick(() => {
           this.enable = true
         })
-        Button("false").onClick(() => {
+        Button('false').onClick(() => {
           this.enable = false
         })
-        Button("undefined").onClick(() => {
+        Button('undefined').onClick(() => {
           this.enable = undefined
         })
       }
 
-      Row(undefined) {
-        Button('isAtEnd' + this.isAtEnd).onClick(() => {
-          this.isAtEnd = this.scroller.isAtEnd()
+      Row() {
+        Button('isAtEnd').onClick(() => {
+          this.scroller.isAtEnd()
           console.info(this.scroller.isAtEnd() + '')
         })
         Button('dataReload').onClick((event: ClickEvent) => {
@@ -75,7 +87,7 @@ struct WaterFlow6 {
         })
       }
 
-      Row(undefined) {
+      Row() {
         Button('delete 5').onClick((event: ClickEvent) => {
           this.arr.deleteIndex(5)
         })
@@ -87,37 +99,45 @@ struct WaterFlow6 {
         })
       }
 
-      Row(undefined) {
-        Button('clip:' + this.clips).onClick((p1: ClickEvent) => {
+      Row() {
+        Button('clip:' + this.clips).onClick((event: ClickEvent) => {
           this.clips = !this.clips
         })
-        Button('show:' + this.iShow).onClick((p1: ClickEvent) => {
+        Button('show:' + this.iShow).onClick((event: ClickEvent) => {
           this.iShow = !this.iShow
         })
       }
 
-      WaterFlow({ scroller: this.scroller } as WaterFlowOptions) {
-        Repeat<number>(this.arr.dataArray)
-          .each((ri: RepeatItem<number>) => {
-            if (ri.index == this.dateInfo[this.dexNum%5]) {
+      Grid(this.scroller) {
+        LazyForEach(this.arr, (item: number, index: number) => {
+          if (index == this.dateInfo[this.dexNum%5]) {
 
-            } else {
-              FlowItem() {
-                Text('' + ri.index)
-                  .height(60)
-                  .fontSize(16)
-                  .focusable(true)
-                  .textAlign(TextAlign.Center)
-                  .borderRadius(10)
-              }
+          } else {
+            GridItem({ style: GridItemStyle.PLAIN }) {
+              Text('' + index)
+                .width('100%')
+                .height(60)
+                .fontSize(16)
+                .focusable(true)
+                .textAlign(TextAlign.Center)
+                .borderRadius(10)
             }
-          })
+            .selectable(true)
+            .stateStyles({
+              selected: this.selectStyles,
+              normal: this.normalStyles
+            })
+
+          }
+        }, (item: string) => item.toString())
       }
       .width('90%')
       .height('50%')
+      .multiSelectable(true)
       .columnsTemplate(this.temp ? '1fr' : '1fr 1fr 1fr')
       .scrollBar(BarState.On)
       .borderWidth(1)
+      // .syncLoad(true)
       .cachedCount(3, this.iShow)
       .clip(this.clips)
       .edgeEffect(EdgeEffect.Spring)
@@ -131,7 +151,6 @@ struct WaterFlow6 {
   }
 
   aboutToAppear(): void {
-    this.arr.clear();
     for (let i = 0; i < 30; i++) {
       this.arr.pushData(i);
     }

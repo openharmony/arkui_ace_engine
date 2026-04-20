@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-import { ListDataSource } from './ListDataSource';
-import {NodeIdUtils} from  './getID';
+import { ListDataSource } from './ListDataSource/ListDataSource';
+import {NodeIdUtils} from '../grid/GetID';
 @Entry
 @Component
 struct ListExample {
   private arr: ListDataSource = new ListDataSource([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
   @State arr2: number[] = []
   @State edgeEffectArr: number[] = [EdgeEffect.None,EdgeEffect.Spring,EdgeEffect.Fade]
-  @State edgeEffectNameArr: string[] = ["None","Spring","Fade"]
+  @State edgeEffectNameArr: string[] = ['None','Spring','Fade']
   @State edgeEffectArrIndex: number = 0
 
   scroller: Scroller = new Scroller();
@@ -53,7 +53,7 @@ struct ListExample {
             }
           }, (item: string, index?: number) => item)
         }
-        .id("List")
+        .id('List')
         .listDirection(Axis.Vertical) // 排列方向
         .scrollBar(BarState.Off)
         .friction(0.6)
@@ -116,7 +116,7 @@ struct ListExample {
             this.scroller.scrollPage({ next: true ,animation: true });
           })
           .margin({ top: 160, left: 20 })
-        Button("edgeEffect" + this.edgeEffectNameArr[this.edgeEffectArrIndex])
+        Button('edgeEffect' + this.edgeEffectNameArr[this.edgeEffectArrIndex])
           .height('5%')
           .onClick(() => {
             this.edgeEffectArrIndex++;
@@ -130,7 +130,7 @@ struct ListExample {
           .height('5%')
           .onClick(() => { //
 
-            NodeIdUtils.getNodeInternalId(this.getUIContext(),"List","text",100)
+            NodeIdUtils.getNodeInternalId(this.getUIContext(),'List','text',100)
           })
           .margin({ top: 360, left: 20 })
       }

@@ -27,13 +27,13 @@ export class NodeIdUtils {
 
     if (frameNode) {
       const internalId = frameNode.getUniqueId?.() ?? -1;
-      console.info("through uiSa " + firstNode + "节点的内部数值ID是:" + `${internalId}`);
+      console.info('through uiSa ' + firstNode + '节点的内部数值ID是:' + `${internalId}`);
     }
     for (let i = 0; i < childSize; i++) {
       const textNode = uiContext.getFrameNodeById(child + i.toString());
       if (textNode) {
         const internalId = textNode.getUniqueId?.() ?? -1;
-        console.info("through uiSa textNode" + i.toString() + "节点的内部数值ID是:" + `${internalId}`);
+        console.info('through uiSa textNode' + i.toString() + '节点的内部数值ID是:' + `${internalId}`);
       }
     }
   }
