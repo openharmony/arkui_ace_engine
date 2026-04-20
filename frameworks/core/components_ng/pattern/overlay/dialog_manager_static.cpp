@@ -19,9 +19,13 @@
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "frameworks/core/components_ng/base/view_abstract.h"
+#include "frameworks/core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/dialog_manager_static.h"
 #include "core/components_ng/pattern/overlay/sheet_manager.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_ng/pattern/overlay/overlay_options.h"
+#include "core/components_ng/pattern/overlay/level_order.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
 namespace OHOS::Ace {
@@ -396,5 +400,37 @@ void DialogManagerStatic::RemoveCustomDialog(int32_t instanceId)
     TAG_LOGI(AceLogTag::ACE_DIALOG, "Dismiss custom dialog, instanceId: %{public}d", instanceId);
     ContainerScope scope(instanceId);
     NG::ViewAbstract::DismissDialog();
+}
+
+void DialogManagerStatic::OpenOrderOverlayStatic(const WeakPtr<NG::UINode>& node,
+    const NG::OrderOverlayOptions& options, const int32_t containerId, std::function<void(int32_t)>&& callback)
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "OpenOrderOverlayStatic enter.");
+    auto currentId = containerId;
+    if (containerId < 0) {
+        currentId = Container::CurrentId();
+    }
+
+    NG::OrderOverlayOptions processedOptions = options;
+    if (!processedOptions.levelOrder.has_value()) {
+        processedOptions.levelOrder = std::make_optional(NG::LevelOrder::ORDER_DEFAULT);
+    }
+
+    auto task = [node, processedOptions, currentId, callback](const RefPtr<NG::OverlayManager>& overlayManager) {
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "Begin to open order overlay static.");
+        CHECK_NULL_VOID(overlayManager);
+        auto nodePtr = node.Upgrade();
+        CHECK_NULL_VOID(nodePtr);
+        auto frameNode = AceType::DynamicCast<FrameNode>(nodePtr);
+        CHECK_NULL_VOID(frameNode);
+        ContainerScope scope(currentId);
+        overlayManager->OpenOrderOverlay(frameNode, processedOptions, std::move(callback));
+    };
+
+    if (processedOptions.levelMode == LevelMode::EMBEDDED) {
+        ShowInEmbeddedOverlay(std::move(task), "ArkUIOpenOrderOverlay", processedOptions.levelUniqueId);
+    } else {
+        MainWindowOverlayStatic(std::move(task), "ArkUIOpenOrderOverlay", nullptr, currentId);
+    }
 }
 } // namespace OHOS::Ace::NG

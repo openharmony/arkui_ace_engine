@@ -44,6 +44,7 @@
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 #include "interfaces/inner_api/ace/modal_ui_extension_config.h"
+#include "core/components_ng/pattern/overlay/overlay_options.h"
 
 namespace OHOS::Ace::NG {
 struct CalendarSettingData;
@@ -656,6 +657,9 @@ public:
     void AddFrameNodeToOverlay(const RefPtr<NG::FrameNode>& node, std::optional<int32_t> index = std::nullopt);
     RefPtr<FrameNode> CreateOverlayNodeWithOrder(std::optional<double> levelOrder);
     void AddFrameNodeWithOrder(const RefPtr<FrameNode>& node, std::optional<double> levelOrder);
+    bool TopNodeIsModelUEC();
+    void OpenOrderOverlay(const RefPtr<FrameNode>& node, const OrderOverlayOptions& options,
+        const std::function<void(int32_t)>&& callback);
     void RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node);
     void RemoveFrameNodeWithOrder(const RefPtr<NG::FrameNode>& node);
     void ShowNodeOnOverlay(const RefPtr<NG::FrameNode>& node);

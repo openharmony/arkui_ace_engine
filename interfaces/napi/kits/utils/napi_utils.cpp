@@ -44,6 +44,8 @@ static const std::unordered_map<int32_t, std::string> ERROR_CODE_TO_MSG {
     { ERROR_CODE_DIALOG_CONTENT_ERROR, "Dialog content error. " },
     { ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST, "Dialog content already exist. " },
     { ERROR_CODE_DIALOG_CONTENT_NOT_FOUND, "Dialog content not found. " },
+    { ERROR_CODE_OVERLAY_CANNOT_OPEN_DUE_TO_SYSTEM_WINDOW,
+        "The overlay cannot be opened due to the system pop-up window." },
     { ERROR_CODE_TOAST_NOT_FOUND, "Toast not found. " }
 };
 

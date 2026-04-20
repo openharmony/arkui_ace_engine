@@ -49,7 +49,7 @@ import inspector from '@ohos/arkui/inspector';
 import router from '@ohos/router';
 import { ComponentContent, ComponentContentBase } from 'arkui/ComponentContent';
 import overlayManager from '@ohos/overlayManager';
-import promptAction, { LevelOrder } from '@ohos/promptAction';
+import promptAction, { LevelOrder, LevelMode } from '@ohos/promptAction';
 import { LocalStorage } from 'arkui/stateManagement/storage/localStorage';
 import { CustomBuilder, CustomBuilderT, DragItemInfo, Callback } from 'arkui/framework';
 import { Router as RouterExt, AsyncCallback } from 'arkui/base';
@@ -392,6 +392,12 @@ class OverlayManagerOptionsInner implements OverlayManagerOptions {
     enableBackPressedEvent?: boolean = false;
 }
 
+export interface OrderOverlayOptions {
+    levelOrder?: LevelOrder;
+    levelMode?: LevelMode;
+    levelUniqueId?: int32;
+}
+
 export class ContextMenuController {
     public close(): void {
         throw Error("close not implemented in ContextMenuController!")
@@ -433,6 +439,10 @@ export class OverlayManager {
 
     hideAllComponentContents(): void {
         throw Error("hideAllComponentContents not implemented in OverlayManager!")
+    }
+
+    openOrderOverlay(content: ComponentContent<Object>, options?: OrderOverlayOptions): Promise<void> {
+        throw Error("openOrderOverlay not implemented in OverlayManager!")
     }
 }
 
