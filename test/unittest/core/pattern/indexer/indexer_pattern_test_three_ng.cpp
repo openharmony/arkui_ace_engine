@@ -1657,4 +1657,35 @@ HWTEST_F(IndexerPatternTestThreeNg, UpdateBubbleBackgroundViewTest003, TestSize.
     AceApplicationInfo::GetInstance().apiVersion_ = originalApiVersion;
     Container::Current()->SetApiTargetVersion(originalTargetVersion);
 }
+
+/**
+ * @tc.name: UpdateBubbleBackgroundViewTest004
+ * @tc.desc: Test UpdateBubbleBackgroundView with API = VERSION_TWENTY_SIX and material disabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestThreeNg, UpdateBubbleBackgroundViewTest004, TestSize.Level1)
+{
+    IndexerModelNG model = CreateIndexer(GetMidArrayValue(), 0);
+    model.SetUsingPopup(true);
+    CreateDone();
+
+    int32_t originalTargetVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    AceApplicationInfo::GetInstance().SetUIMaterialState("disable");
+    EXPECT_TRUE(MaterialUtils::IsMaterialDisabled());
+
+    pattern_->popupNode_ = pattern_->CreatePopupNode();
+    ASSERT_NE(pattern_->popupNode_, nullptr);
+
+    pattern_->UpdateBubbleBackgroundView();
+
+    auto bubbleRenderContext = pattern_->popupNode_->GetRenderContext();
+    ASSERT_NE(bubbleRenderContext, nullptr);
+
+    EXPECT_TRUE(bubbleRenderContext->GetBackBlurStyle().has_value());
+    EXPECT_EQ(bubbleRenderContext->GetBackBlurStyle()->blurStyle, BlurStyle::COMPONENT_REGULAR);
+    EXPECT_EQ(bubbleRenderContext->GetBackgroundColor(), indexerTheme_->GetPopupBackgroundColor());
+
+    Container::Current()->SetApiTargetVersion(originalTargetVersion);
+}
 } // namespace OHOS::Ace::NG
