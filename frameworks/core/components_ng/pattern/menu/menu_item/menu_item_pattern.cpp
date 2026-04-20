@@ -3695,14 +3695,20 @@ void MenuItemPattern::UpdateFontByThemeColor(RefPtr<MenuLayoutProperty>& menuPro
     auto fontNode = isLabel ? label_ : content_;
     CHECK_NULL_VOID(fontNode);
     CHECK_NULL_VOID(itemProperty);
-    CHECK_NULL_VOID(menuProperty);
-
-    auto fontColor = isLabel ? itemProperty->GetLabelFontColor() : itemProperty->GetFontColor();
-    auto textProperty = fontNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textProperty);
-    if (!fontColor.has_value() && !menuProperty->GetFontColor().has_value()) {
-        fontNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto fontColor = itemProperty->GetLabelFontColor();
+    if (isLabel && (!fontColor.has_value() || !itemProperty->GetLabelFontColorSetByUser().value_or(false))) {
+        CHECK_NULL_VOID(menuProperty);
+        auto textProperty = fontNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textProperty);
+        if (menuProperty->GetFontColorSetByUser().value_or(false) && menuProperty->GetFontColor().has_value()) {
+            textProperty->UpdateTextColor(menuProperty->GetFontColor().value());
+            itemProperty->UpdateLabelFontColor(menuProperty->GetFontColor().value());
+        } else {
+            textProperty->UpdateTextColor(menuTheme->GetMenuFontColor());
+            itemProperty->UpdateLabelFontColor(menuTheme->GetMenuFontColor());
+        }
     }
+    fontNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 bool MenuItemPattern::OnThemeScopeUpdate(int32_t themeScopeId)
@@ -3720,6 +3726,7 @@ bool MenuItemPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     CHECK_NULL_RETURN(itemProperty, false);
     auto menuProperty = menu->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_RETURN(menuProperty, false);
+    host->MarkModifyDone();
     UpdateFontByThemeColor(menuProperty, itemProperty, menuTheme, true);
     UpdateFontByThemeColor(menuProperty, itemProperty, menuTheme, false);
     UpdateStartIconByThemeColor(menuTheme);
@@ -3727,7 +3734,6 @@ bool MenuItemPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     UpdateexpandIconByThemeColor(menuTheme);
     UpdateSelectIconByThemeColor(menuTheme);
     UpdateCheckMarkIconByThemeColor(menuTheme);
-    host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     return true;
 }

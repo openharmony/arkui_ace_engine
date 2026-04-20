@@ -1129,6 +1129,7 @@ HWTEST_F(MenuItemGroupTestNg, UpdateMenuBackgroundStyle004, TestSize.Level1)
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
     PipelineBase::GetCurrentContext()->SetMinPlatformVersion(
         static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
 
     MenuParam menuParam;
     BlurStyleOption blurStyleOption;
@@ -1151,6 +1152,43 @@ HWTEST_F(MenuItemGroupTestNg, UpdateMenuBackgroundStyle004, TestSize.Level1)
     EXPECT_EQ(renderContext->GetBackgroundEffect()->saturation, effectOption.saturation);
 
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: UpdateMenuBackgroundStyle005
+ * @tc.desc: MenuView UpdateMenuBackgroundStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemGroupTestNg, UpdateMenuBackgroundStyle005, TestSize.Level1)
+{
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(setApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+ 
+    MenuParam menuParam;
+    BlurStyleOption blurStyleOption;
+    EffectOption effectOption;
+    blurStyleOption.colorMode = ThemeColorMode::SYSTEM;
+    effectOption.saturation = 6.0f;
+    menuParam.blurStyleOption = blurStyleOption;
+    menuParam.effectOption = effectOption;
+    
+    auto menuWrapperNode = GetPreviewMenuWrapper();
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(mockRenderContext, nullptr);
+    mockRenderContext->isUniRenderEnabled_ = true;
+    menuNode->renderContext_ = mockRenderContext;
+ 
+    MenuView::UpdateMenuBackgroundStyle(menuNode, menuParam);
+    EXPECT_EQ(mockRenderContext->GetBackBlurStyle()->colorMode, ThemeColorMode::SYSTEM);
+ 
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(rollbackApiVersion);
 }
 
 /**
