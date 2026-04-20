@@ -79,6 +79,7 @@ class DragDropRelatedConfigurations;
 class ExtensionHandler;
 class PaintWrapper;
 class SamplerManager;
+class SmartGestureProperty;
 class AccessibilityProperty;
 
 struct CacheVisibleRectResult {
@@ -350,6 +351,10 @@ public:
     {
         return DynamicCast<T>(const_cast<FrameNode*>(this)->GetOrCreateAccessibilityProperty());
     }
+
+    RefPtr<SmartGestureProperty> GetOrCreateSmartGestureProperty();
+
+    RefPtr<SmartGestureProperty> GetSmartGestureProperty() const;
 
     template<typename T>
     T* GetLayoutPropertyPtr() const
@@ -1530,6 +1535,7 @@ private:
 
     bool IsMeasureBoundary();
     bool IsRenderBoundary();
+    void UpdateSmartGestureSelectedState();
 
     bool OnRemoveFromParent(bool allowTransition) override;
     bool RemoveImmediately() const override;
@@ -1691,6 +1697,7 @@ private:
     std::function<void(int32_t)> ndkColorModeUpdateCallback_;
     std::function<void(float, float)> ndkFontUpdateCallback_;
     RefPtr<AccessibilityProperty> accessibilityProperty_;
+    RefPtr<SmartGestureProperty> smartGestureProperty_;
     bool hasAccessibilityVirtualNode_ = false;
     RefPtr<LayoutProperty> layoutProperty_;
     RefPtr<PaintProperty> paintProperty_;

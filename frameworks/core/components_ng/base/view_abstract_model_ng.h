@@ -65,6 +65,7 @@ constexpr int32_t MAT4_TWELVE = 12;
 constexpr int32_t MAT4_THIRTEEN = 13;
 constexpr int32_t MAT4_FOURTEEN = 14;
 constexpr int32_t MAT4_FIFTEEN = 15;
+struct SmartGestureShortcutConfig;
 
 class ACE_FORCE_EXPORT ViewAbstractModelNG : public ViewAbstractModel {
 public:
@@ -1489,6 +1490,16 @@ public:
         ViewAbstract::SetMouseResponseRegion(responseRegion);
     }
 
+    void SetSmartGestureShortcut(int32_t action, bool enabled, bool selectable) override
+    {
+        ViewAbstract::SetSmartGestureShortcut(action, enabled, selectable);
+    }
+
+    void ResetSmartGestureShortcut() override
+    {
+        ViewAbstract::ResetSmartGestureShortcut();
+    }
+
     void SetEnabled(bool enabled) override
     {
         ViewAbstract::SetEnabled(enabled);
@@ -2013,6 +2024,8 @@ public:
     static void SetAccessibilityGroupOptions(FrameNode* frameNode, AccessibilityGroupOptions groupOptions);
     static void SetAccessibilityActionOptions(FrameNode* frameNode, AccessibilityActionOptions actionOptions);
     static void ResetAccessibilityActionOptions(FrameNode* frameNode);
+    static void SetSmartGestureShortcut(FrameNode* frameNode, SmartGestureShortcutConfig config);
+    static void ResetSmartGestureShortcut(FrameNode* frameNode);
     static void SetAccessibilityRole(FrameNode* frameNode, const std::string& role, bool resetValue);
     static void SetOnAccessibilityFocus(
         FrameNode* frameNode, NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl);

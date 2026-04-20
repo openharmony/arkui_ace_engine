@@ -262,6 +262,8 @@ public:
         const std::unordered_map<NG::ResponseRegionSupportedTool, std::vector<CalcDimensionRect>>& responseRegionMap)
         override {};
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
+    void SetSmartGestureShortcut(int32_t action, bool enabled, bool selectable) override {}
+    void ResetSmartGestureShortcut() override {}
     void SetEnabled(bool enabled) override;
     void SetTouchable(bool touchable) override;
     void SetFocusable(bool focusable) override;

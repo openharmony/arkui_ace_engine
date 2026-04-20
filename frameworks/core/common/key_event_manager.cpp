@@ -14,10 +14,14 @@
  */
 #include "key_event_manager.h"
 
+#include <optional>
+
 #include "base/input_manager/input_manager.h"
 #include "base/ressched/ressched_report.h"
 #include "core/common/container.h"
+#include "core/common/event_manager.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/common/reporter/reporter.h"
@@ -59,6 +63,54 @@ RefPtr<DragDropManager> GetDragDropManager(int32_t instanceId)
     auto pipeline = GetPipelineContext(instanceId);
     CHECK_NULL_RETURN(pipeline, nullptr);
     return pipeline->GetDragDropManager();
+}
+
+std::optional<SmartGestureTrigger> ResolveSmartGestureTrigger(
+    const KeyEvent& event, const RefPtr<SmartGestureManager>& manager)
+{
+    CHECK_NULL_RETURN(manager, std::nullopt);
+    if (event.action != KeyAction::DOWN || event.isPreIme || event.isRedispatch) {
+        return std::nullopt;
+    }
+    if (event.IsCombinationKey()) {
+        return std::nullopt;
+    }
+    manager->RefreshProductGestureEnabled();
+    if (!manager->IsProductGestureEnabled()) {
+        return std::nullopt;
+    }
+    if (manager->IsSmartTapAndSlideGesturesEnabled()) {
+        if (event.code == KeyCode::KEY_ENTER) {
+            return SmartGestureTrigger::TAP;
+        }
+        if (event.code == KeyCode::KEY_TAB) {
+            return SmartGestureTrigger::SLIDE_FORWARD;
+        }
+    }
+    if (event.code == KeyCode::KEY_WRIST_TURN) {
+        return SmartGestureTrigger::WRIST_BACK;
+    }
+    return std::nullopt;
+}
+
+bool DispatchSmartGesture(const KeyEvent& event, int32_t instanceId, std::optional<SmartGestureTrigger> trigger)
+{
+    auto pipeline = GetPipelineContext(instanceId);
+    CHECK_NULL_RETURN(pipeline, false);
+    auto eventManager = pipeline->GetEventManager();
+    CHECK_NULL_RETURN(eventManager, false);
+    auto manager = eventManager->GetOrCreateSmartGestureManager();
+    CHECK_NULL_RETURN(manager, false);
+    if (!trigger.has_value()) {
+        return false;
+    }
+    if (!manager->HandleTrigger(trigger.value(), event)) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD,
+            "smart gesture recognized but not handled, return unconsumed result. code=%{public}d trigger=%{public}d",
+            static_cast<int32_t>(event.code), static_cast<int32_t>(trigger.value()));
+        return false;
+    }
+    return true;
 }
 } // namespace
 
@@ -527,6 +579,15 @@ bool KeyEventManager::OnKeyEvent(const KeyEvent& event)
 {
     ACE_BENCH_MARK_TRACE("OnKeyEvent_start type:%d", event.action);
     SetPressedKeyCodes(event.pressedCodes);
+
+    // If the current key is identified as a smart gesture trigger, dispatch it through the smart-gesture
+    // pipeline and return its consumed result directly without entering the legacy key chain here.
+    auto eventManager = AceType::DynamicCast<EventManager>(Claim(this));
+    auto smartGestureManager = eventManager ? eventManager->GetOrCreateSmartGestureManager() : nullptr;
+    auto trigger = ResolveSmartGestureTrigger(event, smartGestureManager);
+    if (trigger.has_value()) {
+        return DispatchSmartGesture(event, GetInstanceId(), trigger);
+    }
 
     // onKeyPreIme
     if (event.isPreIme) {
