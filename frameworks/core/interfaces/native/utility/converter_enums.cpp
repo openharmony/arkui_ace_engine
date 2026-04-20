@@ -1092,6 +1092,21 @@ void AssignCast(std::optional<V2::ListItemGroupStyle>& dst, const Ark_ListItemGr
 }
 
 template<>
+void AssignCast(std::optional<V2::ListItemGroupHeaderFooterStyle>& dst, const Ark_ListItemGroupHeaderFooterStyle& src)
+{
+    switch (src) {
+        case ARK_LIST_ITEM_GROUP_HEADER_FOOTER_STYLE_NONE:
+            dst = V2::ListItemGroupHeaderFooterStyle::NONE;
+            break;
+        case ARK_LIST_ITEM_GROUP_HEADER_FOOTER_STYLE_FLOATING:
+            dst = V2::ListItemGroupHeaderFooterStyle::FLOATING;
+            break;
+        default:
+            LOGE("Unexpected enum value in Ark_ListItemGroupHeaderFooterStyle: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<ListItemSwipeActionDirection>& dst, const Ark_ListItemSwipeActionDirection& src)
 {
     switch (src) {

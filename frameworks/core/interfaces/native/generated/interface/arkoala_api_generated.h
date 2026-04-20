@@ -5722,6 +5722,14 @@ typedef struct Opt_ListItemGroupArea {
     Ark_Tag tag;
     Ark_ListItemGroupArea value;
 } Opt_ListItemGroupArea;
+typedef enum Ark_ListItemGroupHeaderFooterStyle {
+    ARK_LIST_ITEM_GROUP_HEADER_FOOTER_STYLE_NONE = 0,
+    ARK_LIST_ITEM_GROUP_HEADER_FOOTER_STYLE_FLOATING = 1,
+} Ark_ListItemGroupHeaderFooterStyle;
+typedef struct Opt_ListItemGroupHeaderFooterStyle {
+    Ark_Tag tag;
+    Ark_ListItemGroupHeaderFooterStyle value;
+} Opt_ListItemGroupHeaderFooterStyle;
 typedef enum Ark_ListItemGroupStyle {
     ARK_LIST_ITEM_GROUP_STYLE_NONE = 0,
     ARK_LIST_ITEM_GROUP_STYLE_CARD = 1,
@@ -16558,6 +16566,8 @@ typedef struct Ark_ListItemGroupOptions {
     Opt_ComponentContentBase footerComponent;
     Opt_Union_F64_String space;
     Opt_ListItemGroupStyle style;
+    Opt_ListItemGroupHeaderFooterStyle headerStyle;
+    Opt_ListItemGroupHeaderFooterStyle footerStyle;
 } Ark_ListItemGroupOptions;
 typedef struct Opt_ListItemGroupOptions {
     Ark_Tag tag;
