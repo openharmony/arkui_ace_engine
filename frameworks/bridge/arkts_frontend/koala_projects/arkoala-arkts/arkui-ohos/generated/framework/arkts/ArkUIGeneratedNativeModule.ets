@@ -1373,9 +1373,7 @@ export class ArkUIGeneratedNativeModule {
     native static _NavDestinationAttribute_setEnableStatusBar(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _Navigation_construct(id: KInt, flags: KInt): KPointer
-    @ani.unsafe.Direct
     native static _NavigationInterface_setNavigationOptions0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
-    @ani.unsafe.Direct
     native static _NavigationInterface_setNavigationOptions1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _NavigationAttribute_setNavBarWidth(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
