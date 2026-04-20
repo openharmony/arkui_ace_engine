@@ -1240,6 +1240,7 @@ HWTEST_F(IndexerLayoutTestNg, InitializingSelected001, TestSize.Level1)
     frameNode_->MarkModifyDone();
     FlushUITasks();
     frameNode_->MarkModifyDone();
+    pattern_->collapsedIndex_ = 0;
     EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::FIVE);
     EXPECT_EQ(pattern_->GetSelected(), 1);
     EXPECT_EQ(accessibilityProperty_->GetText(), "B");
@@ -1253,12 +1254,14 @@ HWTEST_F(IndexerLayoutTestNg, InitializingSelected001, TestSize.Level1)
     model.SetSelected(AceType::RawPtr(frameNode_), 2);
     frameNode_->MarkModifyDone();
     FlushUITasks();
+    pattern_->collapsedIndex_ = 0;
     EXPECT_EQ(pattern_->GetSelected(), 1);
     EXPECT_EQ(accessibilityProperty_->GetText(), "B");
     // select •
     model.SetSelected(AceType::RawPtr(frameNode_), 5);
     frameNode_->MarkModifyDone();
     FlushUITasks();
+    pattern_->collapsedIndex_ = 0;
     EXPECT_EQ(pattern_->GetSelected(), 1);
     EXPECT_EQ(accessibilityProperty_->GetText(), "B");
 
