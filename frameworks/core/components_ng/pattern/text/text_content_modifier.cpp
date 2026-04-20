@@ -51,6 +51,16 @@ constexpr uint32_t POINT_COUNT = 4;
 constexpr uint32_t REPORTER_PRECISION = 3;
 constexpr uint32_t NODE_TYPE = 0;
 constexpr float OBSCURED_ALPHA = 0.2f;
+
+bool HasCrossColorSpace(const std::vector<Color>& colors, const LinearVector<LinearColor>& animatableColors)
+{
+    for (size_t i = 0; i < colors.size(); ++i) {
+        if (colors[i].GetColorSpace() != animatableColors[i].ToColorWithColorSpace().GetColorSpace()) {
+            return true;
+        }
+    }
+    return false;
+}
 } // namespace
 
 TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textStyle, const WeakPtr<Pattern>& pattern)
@@ -1259,7 +1269,11 @@ void TextContentModifier::SetSymbolColor(const std::vector<Color>& value, bool i
     }
     CHECK_NULL_VOID(animatableSymbolColor_);
     auto animatableColors = animatableSymbolColor_->Get();
-    if (colors.size() != animatableColors.size()) {
+    bool needWithoutAnimation = colors.size() != animatableColors.size();
+    if (!needWithoutAnimation) {
+        needWithoutAnimation = HasCrossColorSpace(value, animatableColors);
+    }
+    if (needWithoutAnimation) {
         AnimationUtils::ExecuteWithoutAnimation([weak = AceType::WeakClaim(this), colors]() {
             auto modifier = weak.Upgrade();
             CHECK_NULL_VOID(modifier);

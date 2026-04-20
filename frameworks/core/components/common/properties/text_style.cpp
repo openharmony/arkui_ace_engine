@@ -140,10 +140,10 @@ std::string SymbolColorListToStringWithHolder(const std::vector<Color>& colorLis
 {
     std::string symbolColorList = "";
     if (!colorList.empty()) {
-        symbolColorList = colorList[0].ColorToString();
+        symbolColorList = colorList[0].ColorWithHdrToString();
         symbolColorList += "|PH:" + std::to_string(static_cast<uint8_t>(colorList[0].GetPlaceholder()));
         for (uint32_t i = 1; i < colorList.size(); ++i) {
-            symbolColorList += ", " + colorList[i].ColorToString();
+            symbolColorList += ", " + colorList[i].ColorWithHdrToString();
             symbolColorList += "|PH:" + std::to_string(static_cast<uint8_t>(colorList[i].GetPlaceholder()));
         }
     }
@@ -460,5 +460,25 @@ void TextStyle::UpdateFontSizeOrColorChanged()
         return;
     }
     isFontSizeOrColorChanged_ &= (reLayoutTextStyleBitmap_ & allowedMask).any();
+}
+
+const SymbolColorInfo& TextStyle::GetAndUpdateSymbolColorInfo() const
+{
+    if (!symbolColorInfoDirty_) {
+        return symbolColorInfo_;
+    }
+    symbolColorInfo_ = {};
+    for (const auto& color : propRenderColors_) {
+        auto hdrColor = color.GetHeadRoomColor();
+        if (hdrColor.has_value()) {
+            symbolColorInfo_.hasHdr = true;
+            symbolColorInfo_.maxHeadRoom = std::max(symbolColorInfo_.maxHeadRoom, hdrColor->headRoom);
+        }
+        if (hdrColor.has_value() || color.GetColorSpace() != ColorSpace::SRGB) {
+            symbolColorInfo_.shouldUseUIColor = true;
+        }
+    }
+    symbolColorInfoDirty_ = false;
+    return symbolColorInfo_;
 }
 } // namespace OHOS::Ace
