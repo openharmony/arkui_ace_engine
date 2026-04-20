@@ -30,6 +30,7 @@
 #include "core/interfaces/native/implementation/letter_spacing_style_peer.h"
 #include "core/interfaces/native/implementation/layout_policy_peer_impl.h"
 #include "core/interfaces/native/implementation/line_height_style_peer.h"
+#include "core/interfaces/native/implementation/line_spacing_style_peer.h"
 #include "core/interfaces/native/implementation/paragraph_style_peer.h"
 #include "core/interfaces/native/implementation/styled_string.h"
 #include "core/interfaces/native/implementation/styled_string_peer.h"
@@ -93,6 +94,7 @@ void AssignCast(std::optional<Ace::SpanType>& dst, const Ark_StyledStringKey& sr
         case ARK_STYLED_STRING_KEY_LETTER_SPACING: dst = Ace::SpanType::LetterSpacing; break;
         case ARK_STYLED_STRING_KEY_TEXT_SHADOW: dst = Ace::SpanType::TextShadow; break;
         case ARK_STYLED_STRING_KEY_LINE_HEIGHT: dst = Ace::SpanType::LineHeight; break;
+        case ARK_STYLED_STRING_KEY_LINE_SPACING: dst = Ace::SpanType::LineSpacing; break;
         case ARK_STYLED_STRING_KEY_BACKGROUND_COLOR: dst = Ace::SpanType::BackgroundColor; break;
         case ARK_STYLED_STRING_KEY_URL: dst = Ace::SpanType::Url; break;
         case ARK_STYLED_STRING_KEY_GESTURE: dst = Ace::SpanType::Gesture; break;
@@ -151,6 +153,11 @@ RefPtr<SpanBase> Convert(const Ark_ParagraphStyle& src)
 }
 template<>
 RefPtr<SpanBase> Convert(const Ark_LineHeightStyle& src)
+{
+    return (src && src->span) ? src->span->GetSubSpan(0, 1) : nullptr;
+}
+template<>
+RefPtr<SpanBase> Convert(const Ark_LineSpacingStyle& src)
 {
     return (src && src->span) ? src->span->GetSubSpan(0, 1) : nullptr;
 }

@@ -297,7 +297,7 @@ private:
     void FillLineHeight(Ark_StyledStringValue& styledValue)
     {
         auto lineHeightPeer = CreateLengthMetricsPeer(std::get<1>(TEST_LINE_HEIGHT));
-        peerLineHeightStyle = GeneratedModifier::GetLineHeightStyleAccessor()->construct(&lineHeightPeer);
+        peerLineHeightStyle = GeneratedModifier::GetLineHeightStyleAccessor()->construct0(&lineHeightPeer);
         styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_LineHeightStyle>(peerLineHeightStyle);
     }
 

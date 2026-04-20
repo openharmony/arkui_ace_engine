@@ -298,6 +298,7 @@ const GENERATED_ArkUILevelOrderExtenderAccessor* GetLevelOrderExtenderAccessor()
 const GENERATED_ArkUILinearGradientAccessor* GetLinearGradientAccessor();
 const GENERATED_ArkUILinearGradientStyleAccessor* GetLinearGradientStyleAccessor();
 const GENERATED_ArkUILineHeightStyleAccessor* GetLineHeightStyleAccessor();
+const GENERATED_ArkUILineSpacingStyleAccessor* GetLineSpacingStyleAccessor();
 const GENERATED_ArkUIListItemSwipeActionManagerAccessor* GetListItemSwipeActionManagerAccessor();
 const GENERATED_ArkUIListScrollerAccessor* GetListScrollerAccessor();
 const GENERATED_ArkUILongPressGestureEventAccessor* GetLongPressGestureEventAccessor();
@@ -646,6 +647,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetLinearGradientAccessor,
         GetLinearGradientStyleAccessor,
         GetLineHeightStyleAccessor,
+        GetLineSpacingStyleAccessor,
         GetListItemSwipeActionManagerAccessor,
         GetListScrollerAccessor,
         GetLongPressGestureEventAccessor,

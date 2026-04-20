@@ -263,7 +263,17 @@ RefPtr<SpanBase> ParseLetterSpacingStyle(const ArkUISpanStyle& style, int32_t st
 RefPtr<SpanBase> ParseLineHeightStyle(const ArkUISpanStyle& style, int32_t start, int32_t length)
 {
     return AceType::MakeRefPtr<LineHeightSpan>(Dimension(style.lineHeightStyle.lineHeight, DimensionUnit::VP),
-        start, start + length);
+        style.lineHeightStyle.lineHeightMultiple, start, start + length);
+}
+
+RefPtr<SpanBase> ParseLineSpacingStyle(const ArkUISpanStyle& style, int32_t start, int32_t length)
+{
+    std::optional<LineSpacingOptions> options;
+    LineSpacingOptions optionObject;
+    optionObject.onlyBetweenLines = style.lineSpacingStyle.onlyBetweenLines;
+    options = optionObject;
+    return AceType::MakeRefPtr<LineSpacingSpan>(Dimension(style.lineSpacingStyle.lineSpacing, DimensionUnit::VP),
+        options, start, start + length);
 }
 
 RefPtr<SpanBase> ParseUrlStyle(const ArkUISpanStyle& style, int32_t start, int32_t length)
@@ -419,6 +429,7 @@ static const std::map<SpanType, SpanBaseParserFunc> spanBaseParserMap = {
     { SpanType::TextShadow, &ParseTextShadowStyle },
     { SpanType::Decoration, &ParseDecorationStyle },
     { SpanType::LineHeight, &ParseLineHeightStyle },
+    { SpanType::LineSpacing, &ParseLineSpacingStyle },
     { SpanType::ParagraphStyle, &ParseParagraphStyle },
     { SpanType::LetterSpacing, &ParseLetterSpacingStyle },
     { SpanType::BaselineOffset, &ParseBaselineOffsetStyle },
@@ -767,7 +778,23 @@ void ApplyLineHeightStyle(ArkUISpanStyle& style, const RefPtr<SpanBase>& span)
     CHECK_NULL_VOID(lineHeightSpan);
     ArkUILineHeightStyle lineHeightStyle;
     lineHeightStyle.lineHeight = lineHeightSpan->GetLineHeight().ConvertToVp();
+    lineHeightStyle.lineHeightMultiple = lineHeightSpan->GetLineHeightMultiple();
     style.lineHeightStyle = lineHeightStyle;
+}
+
+void ApplyLineSpacingStyle(ArkUISpanStyle& style, const RefPtr<SpanBase>& span)
+{
+    CHECK_NULL_VOID(span);
+    auto lineSpacingSpan = AceType::DynamicCast<LineSpacingSpan>(span);
+    CHECK_NULL_VOID(lineSpacingSpan);
+    ArkUILineSpacingStyle lineSpacingStyle;
+    lineSpacingStyle.lineSpacing = lineSpacingSpan->GetLineSpacing().ConvertToVp();
+    lineSpacingStyle.onlyBetweenLines = false;
+    auto options = lineSpacingSpan->GetLineSpacingOptions();
+    if (options.has_value()) {
+        lineSpacingStyle.onlyBetweenLines = options.value().onlyBetweenLines.value_or(false);
+    }
+    style.lineSpacingStyle = lineSpacingStyle;
 }
 
 void ApplyTextShadowStyle(ArkUISpanStyle& style, const RefPtr<SpanBase>& span)
@@ -894,6 +921,7 @@ static const std::map<SpanType, SpanStyleHandler> spanStyleHandlerMap = {
     { SpanType::Gesture, &ApplyGestureStyle },
     { SpanType::CustomSpan, &ApplyCustomSpan },
     { SpanType::LineHeight, &ApplyLineHeightStyle },
+    { SpanType::LineSpacing, &ApplyLineSpacingStyle },
     { SpanType::TextShadow, &ApplyTextShadowStyle },
     { SpanType::Decoration, &ApplyDecorationStyle },
     { SpanType::ParagraphStyle, &ApplyParagraphStyle },

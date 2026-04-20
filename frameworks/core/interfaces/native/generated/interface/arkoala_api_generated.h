@@ -623,6 +623,9 @@ typedef struct Opt_LinearGradientStyle Opt_LinearGradientStyle;
 typedef struct LineHeightStylePeer LineHeightStylePeer;
 typedef struct LineHeightStylePeer* Ark_LineHeightStyle;
 typedef struct Opt_LineHeightStyle Opt_LineHeightStyle;
+typedef struct LineSpacingStylePeer LineSpacingStylePeer;
+typedef struct LineSpacingStylePeer* Ark_LineSpacingStyle;
+typedef struct Opt_LineSpacingStyle Opt_LineSpacingStyle;
 typedef struct ListItemSwipeActionManagerPeer ListItemSwipeActionManagerPeer;
 typedef struct ListItemSwipeActionManagerPeer* Ark_ListItemSwipeActionManager;
 typedef struct Opt_ListItemSwipeActionManager Opt_ListItemSwipeActionManager;
@@ -6994,6 +6997,7 @@ typedef enum Ark_StyledStringKey {
     ARK_STYLED_STRING_KEY_LINE_HEIGHT = 5,
     ARK_STYLED_STRING_KEY_BACKGROUND_COLOR = 6,
     ARK_STYLED_STRING_KEY_URL = 7,
+    ARK_STYLED_STRING_KEY_LINE_SPACING = 8,
     ARK_STYLED_STRING_KEY_GESTURE = 100,
     ARK_STYLED_STRING_KEY_PARAGRAPH_STYLE = 200,
     ARK_STYLED_STRING_KEY_IMAGE = 300,
@@ -8675,6 +8679,10 @@ typedef struct Opt_LineHeightStyle {
     Ark_Tag tag;
     Ark_LineHeightStyle value;
 } Opt_LineHeightStyle;
+typedef struct Opt_LineSpacingStyle {
+    Ark_Tag tag;
+    Ark_LineSpacingStyle value;
+} Opt_LineSpacingStyle;
 typedef struct Opt_ListItemSwipeActionManager {
     Ark_Tag tag;
     Ark_ListItemSwipeActionManager value;
@@ -17707,6 +17715,7 @@ typedef struct Ark_StyledStringValue {
         Ark_CustomSpanWrapper value10;
         Ark_UserDataSpan value11;
         Ark_BackgroundColorStyle value12;
+        Ark_LineSpacingStyle value13;
     };
 } Ark_StyledStringValue;
 typedef struct Opt_StyledStringValue {
@@ -29968,10 +29977,22 @@ typedef struct GENERATED_ArkUILinearGradientStyleAccessor {
 
 typedef struct GENERATED_ArkUILineHeightStyleAccessor {
     void (*destroyPeer)(Ark_LineHeightStyle peer);
-    Ark_LineHeightStyle (*construct)(const Ark_LengthMetrics* lineHeight);
+    Ark_LineHeightStyle (*construct0)(const Ark_LengthMetrics* lineHeight);
+    Ark_LineHeightStyle (*construct1)(const Ark_LengthMetrics* lineHeight,
+                                      Ark_Float64 lineHeightMultiple);
     Ark_NativePointer (*getFinalizer)();
     Ark_Float64 (*getLineHeight)(Ark_LineHeightStyle peer);
+    Opt_Float64 (*getLineHeightMultiple)(Ark_LineHeightStyle peer);
 } GENERATED_ArkUILineHeightStyleAccessor;
+
+typedef struct GENERATED_ArkUILineSpacingStyleAccessor {
+    void (*destroyPeer)(Ark_LineSpacingStyle peer);
+    Ark_LineSpacingStyle (*construct)(const Ark_LengthMetrics* lineSpacing,
+                                      const Opt_LineSpacingOptions* options);
+    Ark_NativePointer (*getFinalizer)();
+    Ark_Float64 (*getLineSpacing)(Ark_LineSpacingStyle peer);
+    Opt_LineSpacingOptions (*getOptions)(Ark_LineSpacingStyle peer);
+} GENERATED_ArkUILineSpacingStyleAccessor;
 
 typedef struct GENERATED_ArkUIListItemSwipeActionManagerAccessor {
     void (*destroyPeer)(Ark_ListItemSwipeActionManager peer);
@@ -32277,6 +32298,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUILinearGradientAccessor* (*getLinearGradientAccessor)();
     const GENERATED_ArkUILinearGradientStyleAccessor* (*getLinearGradientStyleAccessor)();
     const GENERATED_ArkUILineHeightStyleAccessor* (*getLineHeightStyleAccessor)();
+    const GENERATED_ArkUILineSpacingStyleAccessor* (*getLineSpacingStyleAccessor)();
     const GENERATED_ArkUIListItemSwipeActionManagerAccessor* (*getListItemSwipeActionManagerAccessor)();
     const GENERATED_ArkUIListScrollerAccessor* (*getListScrollerAccessor)();
     const GENERATED_ArkUILongPressGestureEventAccessor* (*getLongPressGestureEventAccessor)();

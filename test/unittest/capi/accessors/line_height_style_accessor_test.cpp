@@ -35,7 +35,7 @@ public:
     void* CreatePeerInstance() override
     {
         auto metrics = Converter::ArkValue<Ark_LengthMetrics>(Dimension(TEST_HEIGHT));
-        return accessor_->construct(&metrics);
+        return accessor_->construct0(&metrics);
     }
 };
 
