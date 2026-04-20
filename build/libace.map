@@ -1640,6 +1640,7 @@
       "OHOS::Ace::NG::RecognizerGroup::AddChildren(std::__h::list<OHOS::Ace::RefPtr<OHOS::Ace::NG::NGGestureRecognizer>, std::__h::allocator<OHOS::Ace::RefPtr<OHOS::Ace::NG::NGGestureRecognizer>>> const&)";
       "OHOS::Ace::NG::RenderContext::GetHost() const";
       "OHOS::Ace::NG::RichEditorDragPattern::CreateDragNode(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&, std::__h::list<OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>, std::__h::allocator<OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>>>&, OHOS::Ace::NG::TextDragInfo const&)";
+      "OHOS::Ace::NG::RosenRenderContext::SetHDRColorHeadRoom(float)";
       "OHOS::Ace::NG::SafeAreaManager::GetKeyboardOffset(bool) const";
       "OHOS::Ace::NG::SafeAreaManager::GetSafeAreaWithoutProcess() const";
       "OHOS::Ace::NG::SafeAreaManager::GetSystemSafeArea() const";
