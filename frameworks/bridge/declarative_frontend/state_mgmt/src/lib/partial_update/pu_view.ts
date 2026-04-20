@@ -354,6 +354,13 @@ abstract class ViewPU extends PUV2ViewBase
     this.localStoragebackStore_ = undefined;
     PUV2ViewBase.prebuildFuncQueues.delete(this.id__());
     PUV2ViewBase.propertyChangedFuncQueues.delete(this.id__());
+
+    if (this.__anonymousEnvMonitorFuncMap__Internal) {
+      this.__anonymousEnvMonitorFuncMap__Internal.forEach((entry, key) => {
+        ObserveV2.getObserve().clearMonitorPath(entry.envValue, simpleEnvMetaMap[key].prop, entry.anonymousMonitorFunc);
+      });
+      this.__anonymousEnvMonitorFuncMap__Internal.clear();
+    }
     // if memory watch register the callback func, then report such information to memory watch
     // when custom node destroyed
     if (ArkUIObjectFinalizationRegisterProxy.callbackFunc_) {

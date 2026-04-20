@@ -28,6 +28,10 @@
 
 type ExtraInfo = { page: string, line: number, col: number };
 type ProfileRecursionCounter = { total: number };
+type AnonymousEnvMonitorEntry<K extends SimpleTypeEnvKey = SimpleTypeEnvKey> = {
+  anonymousMonitorFunc: (mon: IMonitor) => void;
+  envValue: IEnvironmentValue<EnvTypeMap[K]>;
+};
 enum PrebuildPhase {
   None = 0,
   BuildPrebuildCmd = 1,
@@ -194,6 +198,23 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     preRenderedChild.isPreRendered = false;
     PUV2ViewBase.createRecycle(preRenderedChild, false, reuseId, () => {});
     return true;
+  }
+
+  protected __anonymousEnvMonitorFuncMap__Internal?: Map<SimpleTypeEnvKey, AnonymousEnvMonitorEntry<SimpleTypeEnvKey>>;
+
+  __setAnonymousEnvMonitorFunc__Internal<K extends SimpleTypeEnvKey>(key: K, anonymousMonitorFunc: (mon: IMonitor) => void,
+    envValue: IEnvironmentValue<EnvTypeMap[K]>): void {
+    if (!this.__anonymousEnvMonitorFuncMap__Internal) {
+      this.__anonymousEnvMonitorFuncMap__Internal = new Map<SimpleTypeEnvKey, AnonymousEnvMonitorEntry<SimpleTypeEnvKey>>();
+    }
+    this.__anonymousEnvMonitorFuncMap__Internal.set(key, {
+      anonymousMonitorFunc,
+      envValue,
+    } as AnonymousEnvMonitorEntry<SimpleTypeEnvKey>);
+  }
+
+  __getAnonymousEnvMonitorFuncBySpeficKey__Internal<K extends SimpleTypeEnvKey>(key: K): AnonymousEnvMonitorEntry<K> | undefined {
+    return this.__anonymousEnvMonitorFuncMap__Internal?.get(key) as AnonymousEnvMonitorEntry<K> | undefined;
   }
 
   public __triggerLifecycle__Internal(eventId: LifeCycleEvent): boolean {

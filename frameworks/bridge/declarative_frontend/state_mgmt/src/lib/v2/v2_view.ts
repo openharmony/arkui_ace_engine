@@ -428,6 +428,13 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
             this.parent_.removeChild(this);
         }
         ViewBuildNodeBase.arkThemeScopeManager?.onViewPUDelete(this);
+
+        if (this.__anonymousEnvMonitorFuncMap__Internal) {
+          this.__anonymousEnvMonitorFuncMap__Internal.forEach((entry, key) => {
+            ObserveV2.getObserve().clearMonitorPath(entry.envValue, simpleEnvMetaMap[key].prop, entry.anonymousMonitorFunc);
+          });
+          this.__anonymousEnvMonitorFuncMap__Internal.clear();
+        }
         // if memory watch register the callback func, then report such information to memory watch
         // when custom node destroyed
         if (ArkUIObjectFinalizationRegisterProxy.callbackFunc_) {
