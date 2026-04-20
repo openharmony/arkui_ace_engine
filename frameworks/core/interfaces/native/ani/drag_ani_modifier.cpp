@@ -19,6 +19,7 @@
 
 #include "base/log/log.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/gestures/gesture_info.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/common/interaction/interaction_interface.h"
 #include "core/common/udmf/udmf_client.h"

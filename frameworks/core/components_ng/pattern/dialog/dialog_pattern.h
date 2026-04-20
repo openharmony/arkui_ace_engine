@@ -37,6 +37,7 @@
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 class TextLayoutProperty;
+class OverlayManager;
 
 enum class DialogContentNode {
     TITLE = 0,

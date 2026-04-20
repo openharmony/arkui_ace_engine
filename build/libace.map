@@ -3489,6 +3489,16 @@
       OHOS::Ace::NG::FlexLayoutAlgorithm::*;
       OHOS::Ace::NG::FocusHub::*;
       OHOS::Ace::NG::FrameNode::*;
+      "OHOS::Ace::RefPtr<OHOS::Ace::NG::AccessibilityProperty> OHOS::Ace::NG::FrameNode::GetAccessibilityProperty<OHOS::Ace::NG::AccessibilityProperty>() const";
+      "OHOS::Ace::RefPtr<OHOS::Ace::NG::BubbleAccessibilityProperty> OHOS::Ace::NG::FrameNode::GetAccessibilityProperty<OHOS::Ace::NG::BubbleAccessibilityProperty>() const";
+      "OHOS::Ace::RefPtr<OHOS::Ace::NG::DialogAccessibilityProperty> OHOS::Ace::NG::FrameNode::GetAccessibilityProperty<OHOS::Ace::NG::DialogAccessibilityProperty>() const";
+      "OHOS::Ace::RefPtr<OHOS::Ace::NG::GridAccessibilityProperty> OHOS::Ace::NG::FrameNode::GetAccessibilityProperty<OHOS::Ace::NG::GridAccessibilityProperty>() const";
+      "OHOS::Ace::RefPtr<OHOS::Ace::NG::ListItemGroupAccessibilityProperty> OHOS::Ace::NG::FrameNode::GetAccessibilityProperty<OHOS::Ace::NG::ListItemGroupAccessibilityProperty>() const";
+      "OHOS::Ace::RefPtr<OHOS::Ace::NG::MenuAccessibilityProperty> OHOS::Ace::NG::FrameNode::GetAccessibilityProperty<OHOS::Ace::NG::MenuAccessibilityProperty>() const";
+      "OHOS::Ace::RefPtr<OHOS::Ace::NG::RefreshAccessibilityProperty> OHOS::Ace::NG::FrameNode::GetAccessibilityProperty<OHOS::Ace::NG::RefreshAccessibilityProperty>() const";
+      "OHOS::Ace::RefPtr<OHOS::Ace::NG::SwiperAccessibilityProperty> OHOS::Ace::NG::FrameNode::GetAccessibilityProperty<OHOS::Ace::NG::SwiperAccessibilityProperty>() const";
+      "OHOS::Ace::RefPtr<OHOS::Ace::NG::TextAccessibilityProperty> OHOS::Ace::NG::FrameNode::GetAccessibilityProperty<OHOS::Ace::NG::TextAccessibilityProperty>() const";
+      "OHOS::Ace::RefPtr<OHOS::Ace::NG::TextFieldAccessibilityProperty> OHOS::Ace::NG::FrameNode::GetAccessibilityProperty<OHOS::Ace::NG::TextFieldAccessibilityProperty>() const";
       OHOS::Ace::NG::GestureEventHub::*;
       OHOS::Ace::NG::Gradient::*;
       OHOS::Ace::NG::ImageLoadingContext::*;

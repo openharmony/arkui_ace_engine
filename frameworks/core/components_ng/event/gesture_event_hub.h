@@ -29,6 +29,7 @@
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/event/drag_drop_event.h"
 #include "core/components_ng/event/event_constants.h"
+#include "core/components_ng/event/gesture_event_hub_types.h"
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/event/pan_event.h"
 #include "core/components_ng/event/scrollable_event.h"
@@ -61,19 +62,6 @@ using TouchTestDoneCallback = std::function<void(
 using OnGestureCollectInterceptFunc = std::function<GestureCollectIntervention(
     const std::vector<RefPtr<NGGestureRecognizer>>&,
     const std::vector<RefPtr<TouchEventTarget>>&)>;
-
-struct TouchTestInfo {
-    PointF windowPoint;
-    PointF currentCmpPoint;
-    PointF subCmpPoint;
-    RectF subRect;
-    std::string id;
-};
-
-struct TouchResult {
-    TouchTestStrategy strategy;
-    std::string id;
-};
 
 struct GestureCollectInterventionContext {
     TouchTestResult& newComingTargets;
@@ -160,19 +148,7 @@ struct DragframeNodeInfo {
 
 using OnDragStartFunc = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
 using OnDragDropFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
-using OnChildTouchTestFunc = std::function<TouchResult(const std::vector<TouchTestInfo>& touchInfo)>;
 using OnReponseRegionFunc = std::function<void(const std::vector<DimensionRect>&)>;
-struct DragDropInfo {
-    RefPtr<UINode> customNode;
-    RefPtr<PixelMap> pixelMap;
-    std::string extraInfo;
-    // The inspectorId acts as a preview surrogate identifier which is used
-    // to retrieve a preview image for the item being dragged.
-    std::string inspectorId;
-    std::function<RefPtr<UINode>()> buildFunc;
-    bool onlyForLifting = false;
-    bool delayCreating = false;
-};
 
 using DragNotifyMsgCore = OHOS::Ace::DragNotifyMsg;
 using OnDragCallbackCore = std::function<void(const DragNotifyMsgCore&)>;
