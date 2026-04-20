@@ -6,6 +6,7 @@
 #include <algorithm>
 
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -16,6 +17,26 @@ bool NeedSkipCutoutUpdate(const SafeAreaInsets& safeArea)
     const bool hasNonZeroEnd =
         safeArea.left_.end != 0 || safeArea.top_.end != 0 || safeArea.right_.end != 0 || safeArea.bottom_.end != 0;
     return allStartsZero && hasNonZeroEnd;
+}
+
+SafeAreaInsets GenerateEdgeSafeAreaWithRoot(const SafeAreaInsets& safeArea, OptionalSize<uint32_t> rootSize)
+{
+    auto edgeArea = safeArea;
+    if (edgeArea.top_.IsValid()) {
+        edgeArea.top_.start = 0;
+    }
+    if (edgeArea.bottom_.IsValid()) {
+        edgeArea.bottom_.end =
+            rootSize.Height().has_value() ? rootSize.Height().value() : PipelineContext::GetCurrentRootHeight();
+    }
+    if (edgeArea.left_.IsValid()) {
+        edgeArea.left_.start = 0;
+    }
+    if (edgeArea.right_.IsValid()) {
+        edgeArea.right_.end =
+            rootSize.Width().has_value() ? rootSize.Width().value() : PipelineContext::GetCurrentRootWidth();
+    }
+    return edgeArea;
 }
 } // namespace
 
@@ -104,17 +125,13 @@ bool SafeAreaManager::UpdateNavSafeArea(const SafeAreaInsets& safeArea)
     return true;
 }
 
-bool SafeAreaManager::CheckFloatNavSafeArea(const SafeAreaInsets& safeArea)
+bool SafeAreaManager::UpdateFloatNavSafeArea(const SafeAreaInsets& safeArea, OptionalSize<uint32_t> rootSize)
 {
-    return floatNavSafeArea_ != safeArea;
-}
-
-bool SafeAreaManager::UpdateFloatNavSafeArea(const SafeAreaInsets& safeArea)
-{
-    if (floatNavSafeArea_ == safeArea) {
+    auto safeAreaWithRoot = GenerateEdgeSafeAreaWithRoot(safeArea, rootSize);
+    if (floatNavSafeArea_ == safeAreaWithRoot) {
         return false;
     }
-    floatNavSafeArea_ = safeArea;
+    floatNavSafeArea_ = safeAreaWithRoot;
     return true;
 }
 

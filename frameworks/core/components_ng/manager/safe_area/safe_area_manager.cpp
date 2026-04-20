@@ -18,26 +18,26 @@
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 
 namespace OHOS::Ace::NG {
-SafeAreaInsets GenerateCutOutAreaWithRoot(const SafeAreaInsets& safeArea, NG::OptionalSize<uint32_t> rootSize)
+SafeAreaInsets GenerateEdgeSafeAreaWithRoot(const SafeAreaInsets& safeArea, NG::OptionalSize<uint32_t> rootSize)
 {
-    // cutout regions adjacent to edges.
-    auto cutoutArea = safeArea;
+    // avoidArea regions adjacent to edges.
+    auto edgeArea = safeArea;
 
-    if (cutoutArea.top_.IsValid()) {
-        cutoutArea.top_.start = 0;
+    if (edgeArea.top_.IsValid()) {
+        edgeArea.top_.start = 0;
     }
-    if (cutoutArea.bottom_.IsValid()) {
-        cutoutArea.bottom_.end = rootSize.Height().has_value() ? rootSize.Height().value()
-                                                               : PipelineContext::GetCurrentRootHeight();
+    if (edgeArea.bottom_.IsValid()) {
+        edgeArea.bottom_.end = rootSize.Height().has_value() ? rootSize.Height().value()
+                                                             : PipelineContext::GetCurrentRootHeight();
     }
-    if (cutoutArea.left_.IsValid()) {
-        cutoutArea.left_.start = 0;
+    if (edgeArea.left_.IsValid()) {
+        edgeArea.left_.start = 0;
     }
-    if (cutoutArea.right_.IsValid()) {
-        cutoutArea.right_.end = rootSize.Width().has_value() ? rootSize.Width().value()
-                                                             : PipelineContext::GetCurrentRootWidth();
+    if (edgeArea.right_.IsValid()) {
+        edgeArea.right_.end = rootSize.Width().has_value() ? rootSize.Width().value()
+                                                           : PipelineContext::GetCurrentRootWidth();
     }
-    return cutoutArea;
+    return edgeArea;
 }
 
 bool SafeAreaManager::IsModeResize()
@@ -54,12 +54,12 @@ bool SafeAreaManager::IsModeOffset()
 
 bool SafeAreaManager::CheckCutoutSafeArea(const SafeAreaInsets& safeArea, NG::OptionalSize<uint32_t> rootSize)
 {
-    return cutoutSafeArea_ != GenerateCutOutAreaWithRoot(safeArea, rootSize);
+    return cutoutSafeArea_ != GenerateEdgeSafeAreaWithRoot(safeArea, rootSize);
 }
 
 bool SafeAreaManager::UpdateCutoutSafeArea(const SafeAreaInsets& safeArea, NG::OptionalSize<uint32_t> rootSize)
 {
-    auto safeAreaWithRoot = GenerateCutOutAreaWithRoot(safeArea, rootSize);
+    auto safeAreaWithRoot = GenerateEdgeSafeAreaWithRoot(safeArea, rootSize);
     if (cutoutSafeArea_ == safeAreaWithRoot) {
         return false;
     }
@@ -98,18 +98,19 @@ bool SafeAreaManager::UpdateNavSafeArea(const SafeAreaInsets& safeArea)
     return true;
 }
 
-bool SafeAreaManager::CheckFloatNavSafeArea(const SafeAreaInsets& safeArea)
+bool SafeAreaManager::CheckFloatNavSafeArea(const SafeAreaInsets& safeArea, NG::OptionalSize<uint32_t> rootSize)
 {
-    return floatNavSafeArea_ != safeArea;
+    return floatNavSafeArea_ != GenerateEdgeSafeAreaWithRoot(safeArea, rootSize);
 }
 
-bool SafeAreaManager::UpdateFloatNavSafeArea(const SafeAreaInsets& safeArea)
+bool SafeAreaManager::UpdateFloatNavSafeArea(const SafeAreaInsets& safeArea, NG::OptionalSize<uint32_t> rootSize)
 {
-    if (floatNavSafeArea_ == safeArea) {
+    auto safeAreaWithRoot = GenerateEdgeSafeAreaWithRoot(safeArea, rootSize);
+    if (floatNavSafeArea_ == safeAreaWithRoot) {
         return false;
     }
-    ACE_SCOPED_TRACE("SafeAreaManager::UpdateFloatNavSafeArea %s", safeArea.ToString().c_str());
-    floatNavSafeArea_ = safeArea;
+    ACE_SCOPED_TRACE("SafeAreaManager::UpdateFloatNavSafeArea %s", safeAreaWithRoot.ToString().c_str());
+    floatNavSafeArea_ = safeAreaWithRoot;
     return true;
 }
 
@@ -185,7 +186,7 @@ bool SafeAreaManager::UpdateScbSystemSafeArea(const SafeAreaInsets& safeArea)
 
 bool SafeAreaManager::UpdateScbCutoutSafeArea(const SafeAreaInsets& safeArea, NG::OptionalSize<uint32_t> rootSize)
 {
-    auto safeAreaWithRoot = GenerateCutOutAreaWithRoot(safeArea, rootSize);
+    auto safeAreaWithRoot = GenerateEdgeSafeAreaWithRoot(safeArea, rootSize);
     if (scbCutoutSafeArea_.has_value() && scbCutoutSafeArea_.value() == safeAreaWithRoot) {
         return false;
     }

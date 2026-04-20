@@ -521,7 +521,8 @@ bool ParseAvoidAreasUpdate(const RefPtr<NG::PipelineContext>& context,
         } else if (avoidArea.first == OHOS::Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
             safeAreaUpdated |= safeAreaManager->UpdateNavSafeArea(ConvertAvoidArea(avoidArea.second));
         } else if (avoidArea.first == OHOS::Rosen::AvoidAreaType::TYPE_FLOAT_NAVIGATION) {
-            safeAreaUpdated |= safeAreaManager->UpdateFloatNavSafeArea(ConvertAvoidArea(avoidArea.second));
+            safeAreaUpdated |= safeAreaManager->UpdateFloatNavSafeArea(
+                ConvertAvoidArea(avoidArea.second), NG::OptionalSize<uint32_t>(config.Width(), config.Height()));
         } else if (avoidArea.first == OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT) {
             safeAreaUpdated |= safeAreaManager->UpdateCutoutSafeArea(ConvertAvoidArea(avoidArea.second),
                 NG::OptionalSize<uint32_t>(config.Width(), config.Height()));

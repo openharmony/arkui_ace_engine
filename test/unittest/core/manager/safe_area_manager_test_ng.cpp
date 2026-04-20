@@ -164,6 +164,31 @@ HWTEST_F(SafeAreaManagerTest, NavSafeAreaTest, TestSize.Level0)
 }
 
 /**
+ * @tc.name: FloatNavSafeAreaTest
+ * @tc.desc: Float navigation safe area should be expanded to the corresponding window edge before storing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SafeAreaManagerTest, FloatNavSafeAreaTest, TestSize.Level0)
+{
+    constexpr uint32_t FLOAT_NAV_TOP_START = 20;
+    constexpr uint32_t FLOAT_NAV_TOP_END = 80;
+    auto floatNavArea = NG::SafeAreaInsets({}, { FLOAT_NAV_TOP_START, FLOAT_NAV_TOP_END }, {}, {});
+    auto floatNavAreaWithRoot = NG::SafeAreaInsets({}, { 0, FLOAT_NAV_TOP_END }, {}, {});
+
+    safeAreaManager_->SetUseCutout(false);
+    safeAreaManager_->SetIsFullScreen(true);
+
+    auto ret = safeAreaManager_->UpdateFloatNavSafeArea(floatNavArea);
+    EXPECT_EQ(ret, true);
+    ret = safeAreaManager_->UpdateFloatNavSafeArea(floatNavArea);
+    EXPECT_EQ(ret, false);
+
+    EXPECT_EQ(safeAreaManager_->GetFloatNavSafeArea(), floatNavAreaWithRoot);
+    EXPECT_EQ(safeAreaManager_->GetFloatNavSafeAreaWithoutProcess(), floatNavAreaWithRoot);
+    EXPECT_EQ(safeAreaManager_->GetSafeArea(), floatNavAreaWithRoot);
+}
+
+/**
  * @tc.name: UpdateKeyboardSafeAreaTest
  * @tc.desc: Use UpdateKeyboardSafeArea and test.
  * @tc.type: FUNC
