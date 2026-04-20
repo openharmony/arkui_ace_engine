@@ -1777,8 +1777,22 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundColor(ArkUIRuntimeCallInfo *ru
         GetArkUINodeModifiers()->getCommonModifier()->resetBackgroundColor(nativeNode);
     } else {
         auto bgColorRawPtr = AceType::RawPtr(backgroundColorResObj);
-        GetArkUINodeModifiers()->getCommonModifier()->setBackgroundColorWithColorSpace(
-            nativeNode, color.GetValue(), color.GetColorSpace(), bgColorRawPtr);
+        auto headRoomOptional = color.GetHeadRoomColor();
+        if (headRoomOptional.has_value()) {
+            auto colorWithHeadRoom = headRoomOptional.value();
+            ArkUI_Float32 hdrValues[5] = {
+                static_cast<ArkUI_Float32>(colorWithHeadRoom.red),
+                static_cast<ArkUI_Float32>(colorWithHeadRoom.green),
+                static_cast<ArkUI_Float32>(colorWithHeadRoom.blue),
+                static_cast<ArkUI_Float32>(colorWithHeadRoom.alpha),
+                static_cast<ArkUI_Float32>(colorWithHeadRoom.headRoom)
+            };
+            GetArkUINodeModifiers()->getCommonModifier()->setBackgroundColorForHDR(
+                nativeNode, color.GetColorSpace(), hdrValues, bgColorRawPtr);
+        } else {
+            GetArkUINodeModifiers()->getCommonModifier()->setBackgroundColorWithColorSpace(
+                nativeNode, color.GetValue(), color.GetColorSpace(), bgColorRawPtr);
+        }
     }
     return panda::JSValueRef::Undefined(vm);
 }
