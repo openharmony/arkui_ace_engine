@@ -322,6 +322,15 @@ HWTEST_F(PluginPatternTestNg, GetPackagePathTestNg1, TestSize.Level1)
     EXPECT_EQ(packagePathStr, "/data/bundle/");
     EXPECT_EQ(pluginInfo.abilityName, "plugin");
     EXPECT_EQ(pluginInfo.source, "/index.js");
+
+    /**
+     * @tc.desc: Test GetPackagePath empty pluginName in Plugin Pattern.
+     */
+    pluginInfo.pluginName = "";
+    packagePathStr = pattern->GetPackagePath(AceType::WeakClaim(AceType::RawPtr(pattern)), pluginInfo);
+    EXPECT_TRUE(packagePathStr.empty());
+    EXPECT_EQ(pluginInfo.abilityName, "plugin");
+    EXPECT_EQ(pluginInfo.source, "/index.js");
 }
 
 /**
