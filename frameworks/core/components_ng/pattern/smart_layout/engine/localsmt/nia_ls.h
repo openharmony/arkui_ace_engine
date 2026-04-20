@@ -190,7 +190,6 @@ public:
     uint64_t unchangedVar1 = UINT32_MAX;
     uint64_t unchangedVar2 = UINT32_MAX;
     std::string basicComponentName;
-    size_t bWidthIdx = 0, bHightIdx = 0;
     std::vector<Variable> vars;
     std::vector<int> niaVarVec;
     std::vector<int> boolVarVec;
@@ -341,6 +340,8 @@ public:
     void ReduceDuplicatedLits(bool& modified); // return true if found duplicated lits
     bool litsBeenModified = true;              // whether these lits have modified since last removing duplicated lits
     void GcdForLit(Lit& l);
+    bool CompareLitByCoffVars(const Lit& x, const Lit& y);
+    bool CompareLit(const Lit& x, const Lit& y, bool isQuick);
     void ReduceClause(bool& modified);
     bool IsClauseTautology(const Clause& c);
     void ReduceDuplicatedLitsInClause(Clause& c, bool& modified);
@@ -428,6 +429,7 @@ public:
     bool PrintVarSolution(std::string& varName, RationNum& varValue);
     void RecordSoftVarSolution(std::vector<int>& softCInfo);
     std::vector<size_t> componentsIdx;
+    std::vector<size_t> componentsFeasibleIdx;
     std::vector<std::string> componentNames;
     std::vector<size_t> softComponentsIdx;
     void PrepareComponentsIdx();

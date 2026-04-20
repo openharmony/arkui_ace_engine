@@ -500,6 +500,8 @@ ohos_unittest("web_pattern_static_unit_test_ohos") {
     "$ace_root/frameworks/core/components_ng/pattern/slider/slider_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/slider/slider_pattern_multi_thread.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/slider/slider_tip_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/smart_layout/smart_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/smart_layout/smart_layout_engine_loader.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/stack/stack_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/stack/stack_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/stage/content_root_pattern.cpp",

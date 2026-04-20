@@ -220,9 +220,12 @@ void LsSolver::ReadFromFile(const std::string& fileName, const std::vector<std::
         }
     }
     DeleteRedundantClauses(originalVec);
-    basicComponentName = "BC";
-    bcWidthIdx = static_cast<int>(TransferNameToVar(".w", true));
-    bcHightIdx = static_cast<int>(TransferNameToVar("BC_hight", true));
+    bool hasBC = name2var.find("BC_width") != name2var.end();
+    basicComponentName = hasBC ? "BC" : "";
+    bcWidthIdx = hasBC ?
+        static_cast<int>(TransferNameToVar("BC_width", true)) : static_cast<int>(TransferNameToVar(".w", true));
+    bcHightIdx = hasBC ?
+        static_cast<int>(TransferNameToVar("BC_hight", true)) : static_cast<int>(TransferNameToVar(".h", true));
     PrepareComponentsIdx();
     PrepareSoftComponentsIdx(softCNames);
     numVars = vars.size();
@@ -286,6 +289,7 @@ void ParseMultiTerm(LsSolver& solver, Lit* l, const std::vector<std::string>& ve
             int coff = std::atoi(vec[idx].c_str());
             uint64_t vIdx = solver.TransferNameToVar(vec[++idx], true);
             l->coffVars.push_back(CoffVar(static_cast<int>(vIdx), RationNum(coff)));
+            idx++;
         } else {
             uint64_t vIdx = solver.TransferNameToVar(vec[idx], true);
             l->coffVars.push_back(CoffVar(static_cast<int>(vIdx), RationNum(K_DEFAULT_COFF)));
@@ -476,30 +480,38 @@ void LsSolver::ConvertInequalToEqual(bool& modified)
     std::vector<int> inequals;
     for (uint64_t litIdx = 0; litIdx < numLits; litIdx++) {
         if (inequalLitInClauses[litIdx].size() == 1) {
+            std::sort(lits[litIdx].coffVars.begin(), lits[litIdx].coffVars.end(), CmpCoffVar);
             inequals.push_back(static_cast<int>(litIdx));
         }
     }
 
-    for (size_t idx1 = 0; idx1 < inequals.size(); idx1++) {
-        const int preIdx = inequals[idx1];
-        if (lits[preIdx].litsIndex == 0) {
+    std::sort(inequals.begin(), inequals.end(), [this](int lIdx1, int lIdx2) {
+        return CompareLit(lits[lIdx1], lits[lIdx2], true);
+    });
+
+    if (inequals.empty()) {
+        return;
+    }
+
+    for (size_t currIdx = 0; currIdx < inequals.size() - 1; currIdx++) {
+        const int currLitIdx = inequals[currIdx];
+        const int nextLitIdx = inequals[currIdx + 1];
+
+        if (lits[currLitIdx].litsIndex == 0) {
             continue;
         }
-        for (size_t idx2 = idx1 + 1; idx2 < inequals.size(); idx2++) {
-            const int posIdx = inequals[idx2];
-            if (!IsNegLit(lits[preIdx], lits[posIdx])) {
-                continue;
-            }
-            const std::vector<int>& clausePreLits = clauses[inequalLitInClauses[preIdx][0]].literals;
-            const std::vector<int>& clausePosLits = clauses[inequalLitInClauses[posIdx][0]].literals;
-            if (!ClausesMatchExceptOppositeLits(clausePreLits, clausePosLits, preIdx, posIdx)) {
-                continue;
-            }
-            modified = true;
-            lits[preIdx].isEqual = true;
-            lits[posIdx].litsIndex = 0;
-            break;
+        
+        if (!IsNegLit(lits[currLitIdx], lits[nextLitIdx])) {
+            continue;
         }
+        const std::vector<int>& clauseCurrLits = clauses[inequalLitInClauses[currLitIdx][0]].literals;
+        const std::vector<int>& clauseNextLits = clauses[inequalLitInClauses[nextLitIdx][0]].literals;
+        if (!ClausesMatchExceptOppositeLits(clauseCurrLits, clauseNextLits, currLitIdx, nextLitIdx)) {
+            continue;
+        }
+        modified = true;
+        lits[currLitIdx].isEqual = true;
+        lits[nextLitIdx].litsIndex = 0;
     }
 }
 
@@ -1008,8 +1020,8 @@ void LsSolver::FindBound(bool& modified)
         } else if (newUpperBound < vars[varIdx].upperBound) {
             vars[varIdx].upperBound = newUpperBound;
         }
-        const RationNum epsilon(1, 1000); // 用于精度控制
-        if (vars[varIdx].lowBound > (vars[varIdx].upperBound + epsilon)) {
+        constexpr double epsilon = 0.001; // 用于精度控制
+        if (vars[varIdx].lowBound.ToDouble() > (vars[varIdx].upperBound.ToDouble() + epsilon)) {
             unsatInPreprocess = true;
             return;
         }
@@ -1121,6 +1133,7 @@ uint64_t LsSolver::HashLitsToNum(const std::vector<int>& litIndices)
     }
     return hash;
 }
+
 bool LsSolver::IsSameLits(std::vector<int>& lits1, std::vector<int>& lits2)
 {
     if (lits1.size() != lits2.size()) {
@@ -1416,27 +1429,105 @@ void LsSolver::DetermineLitAppear()
     }
 }
 
+bool LsSolver::CompareLitByCoffVars(const Lit& x, const Lit& y)
+{
+    if (x.coffVars.size() != y.coffVars.size()) {
+        return x.coffVars.size() < y.coffVars.size();
+    }
+
+    size_t coffVarSize = x.coffVars.size();
+    std::vector<bool> xSignEncode(coffVarSize + 1, false);
+    std::vector<bool> ySignEncode(coffVarSize + 1, false);
+    for (size_t idx = 0; idx < coffVarSize; idx++) {
+        RationNum absXCoff = x.coffVars[idx].coff.Abs();
+        RationNum absYCoff = y.coffVars[idx].coff.Abs();
+        if (absXCoff != absYCoff) {
+            return absXCoff < absYCoff;
+        }
+        xSignEncode[idx] = x.coffVars[idx].coff > 0;
+        ySignEncode[idx] = y.coffVars[idx].coff > 0;
+    }
+
+    RationNum absXKey = x.key.Abs();
+    RationNum absYKey = y.key.Abs();
+    if (absXKey != absYKey) {
+        return absXKey < absYKey;
+    }
+    
+    xSignEncode[coffVarSize] = x.key > 0;
+    ySignEncode[coffVarSize] = y.key > 0;
+    
+    std::vector<bool> xAdjustedSignEncode = xSignEncode;
+    std::vector<bool> yAdjustedSignEncode = ySignEncode;
+    if (x.key <= 0) {
+        xAdjustedSignEncode.flip();
+    }
+    if (y.key <= 0) {
+        yAdjustedSignEncode.flip();
+    }
+
+    if (xAdjustedSignEncode != yAdjustedSignEncode) {
+        return xAdjustedSignEncode < yAdjustedSignEncode;
+    } else {
+        return xSignEncode[coffVarSize] < ySignEncode[coffVarSize];
+    }
+}
+
+bool LsSolver::CompareLit(const Lit& x, const Lit& y, bool isQuick = false)
+{
+    if (x.isEqual != y.isEqual) {
+        return x.isEqual < y.isEqual;
+    }
+    if (x.isNiaLit != y.isNiaLit) {
+        return x.isNiaLit < y.isNiaLit;
+    }
+    if (x.coffVars.size() != y.coffVars.size()) {
+        return x.coffVars.size() < y.coffVars.size();
+    }
+    for (size_t i = 0; i < x.coffVars.size(); i++) {
+        if (x.coffVars[i].varIdx != y.coffVars[i].varIdx) {
+            return x.coffVars[i].varIdx < y.coffVars[i].varIdx;
+        }
+    }
+
+    if (isQuick) {
+        for (size_t i = 0; i < x.coffVars.size(); i++) {
+            if (x.coffVars[i].coff != y.coffVars[i].coff) {
+                return x.coffVars[i].coff < y.coffVars[i].coff;
+            }
+        }
+        return x.key < y.key;
+    } else {
+        return CompareLitByCoffVars(x, y);
+    }
+}
+
 void LsSolver::ReduceDuplicatedLits(bool& modified)
 {
     if (!litsBeenModified) {
         return;
     }
     std::vector<int> sameLit(numLits, 0); // sameLit[i] = j means lit i and j are the same lit
-    int litsInClsNum = litsInCls->GetSize();
-    for (int currIdx = 1; currIdx < litsInClsNum; currIdx++) {
-        int lIdxCurr = litsInCls->GetElementByIndex(currIdx);
+    
+    std::vector<int> sortedLitIndices(litsInCls->array.begin(), litsInCls->array.begin() + litsInCls->arraySize);
+    std::sort(sortedLitIndices.begin(), sortedLitIndices.end(), [this](int lIdx1, int lIdx2) {
+        return CompareLit(lits[lIdx1], lits[lIdx2], true);
+    });
+    for (int32_t idx = 0; idx < litsInCls->arraySize; ++idx) {
+        litsInCls->indexInArray[litsInCls->array[idx]] = idx;
+    }
+
+    int lIdxPrev = sortedLitIndices[0];
+    for (int currIdx = 1; currIdx < sortedLitIndices.size(); currIdx++) {
+        int lIdxCurr = sortedLitIndices[currIdx];
         if (!lits[lIdxCurr].isNiaLit) {
+            lIdxPrev = lIdxCurr;
             continue;
         }
-        for (int preIdx = 0; preIdx < currIdx; preIdx++) {
-            int lIdxPre = litsInCls->GetElementByIndex(preIdx);
-            if (sameLit[lIdxPre] != 0 || !lits[lIdxPre].isNiaLit) {
-                continue; // the pre lit is same to previous ones, no more consider it
-            }
-            if (IsSameLit(lits[lIdxCurr], lits[lIdxPre])) {
-                sameLit[lIdxCurr] = lIdxPre;
-                break;
-            } // find the first same lit
+        if (IsSameLit(lits[lIdxCurr], lits[lIdxPrev])) {
+            sameLit[lIdxCurr] = lIdxPrev;
+        } else {
+            lIdxPrev = lIdxCurr;
         }
     }
     // replace the lits in clauses
@@ -1683,8 +1774,6 @@ void LsSolver::PrepareClsLitIdxForVars()
     }
     PrepareCoffVar();
     PrepareUpValueVars();
-    bWidthIdx = name2var[basicComponentName + "_width"];
-    bHightIdx = name2var[basicComponentName + "_hight"];
 }
 
 void LsSolver::ClearPreparedClauseLitVarState()
@@ -1829,12 +1918,12 @@ void LsSolver::PrepareComponentsIdx()
     std::map<std::string, int> kidsNames2Fre;
     for (const auto& niaVIdx : niaVarVec) {
         vName = vars[niaVIdx].varName;
-        size_t pos = vName.find_last_of('.');
+        size_t pos = vName.find_last_of('_');
         if (pos != std::string::npos) {
             vEnd = vName.substr(pos + 1);
             vName = vName.substr(0, pos);
         }
-        if ((vEnd == "x" || vEnd == "y" || vEnd == "w" || vEnd == "h") && (vName != basicComponentName)) {
+        if ((vEnd == "x" || vEnd == "y" || vEnd == "width" || vEnd == "hight") && (vName != basicComponentName)) {
             if (kidsNames2Fre.find(vName) != kidsNames2Fre.end()) {
                 kidsNames2Fre[vName]++;
             } else {
@@ -1852,20 +1941,21 @@ void LsSolver::PrepareComponentsIdx()
 
 void LsSolver::AddComponent(const std::string& cName)
 {
-    componentsIdx.push_back(name2var[cName + ".w"]);
-    componentsIdx.push_back(name2var[cName + ".h"]);
-    componentsIdx.push_back(name2var[cName + ".x"]);
-    componentsIdx.push_back(name2var[cName + ".y"]);
+    componentsIdx.push_back(name2var[cName + "_width"]);
+    componentsIdx.push_back(name2var[cName + "_hight"]);
+    componentsIdx.push_back(name2var[cName + "_x"]);
+    componentsIdx.push_back(name2var[cName + "_y"]);
+    componentsFeasibleIdx.push_back(name2var[cName + "_feasible"]);
     componentNames.push_back(cName);
 }
 
 void LsSolver::PrepareSoftComponentsIdx(const std::vector<std::string>& softCNames)
 {
     for (const auto& softCName : softCNames) {
-        softComponentsIdx.push_back(name2var[softCName + ".w"]);
-        softComponentsIdx.push_back(name2var[softCName + ".h"]);
-        softComponentsIdx.push_back(name2var[softCName + ".x"]);
-        softComponentsIdx.push_back(name2var[softCName + ".y"]);
+        softComponentsIdx.push_back(name2var[softCName + "_width"]);
+        softComponentsIdx.push_back(name2var[softCName + "_hight"]);
+        softComponentsIdx.push_back(name2var[softCName + "_x"]);
+        softComponentsIdx.push_back(name2var[softCName + "_y"]);
     }
 }
 
