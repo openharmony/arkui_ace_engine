@@ -48,6 +48,17 @@ declare enum ModifierType {
     EXPOSE_MODIFIER = 3,
 }
 
+declare enum ScrollSource {
+  DRAG = 0,
+  FLING,
+  EDGE_EFFECT,
+  OTHER_USER_INPUT,
+  SCROLL_BAR,
+  SCROLL_BAR_FLING,
+  SCROLLER,
+  SCROLLER_ANIMATION,
+}
+
 interface CommonAttribute {}
 interface BlankAttribute extends CommonAttribute {}
 interface ColumnAttribute extends CommonAttribute {}
@@ -572,4 +583,9 @@ declare class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
     initialize(...args: unknown[]): void;
     applyModifierPatch(): void;
+}
+
+declare class ScrollResult {
+    get offsetRemain(): double;
+    set offsetRemain(offsetRemain: double);
 }
