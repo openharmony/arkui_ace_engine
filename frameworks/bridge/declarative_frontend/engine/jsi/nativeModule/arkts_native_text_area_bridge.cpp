@@ -3253,12 +3253,21 @@ ArkUINativeModuleValue TextAreaBridge::SetController(ArkUIRuntimeCallInfo* runti
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> nodeVal = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> controllerVal = runtimeCallInfo->GetCallArgRef(NUM_1);
     CHECK_NULL_RETURN(nodeVal->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeVal->ToNativePointer(vm)->Value());
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
-    SetControllerInternal(frameNode, controllerVal, vm);
+
+    auto controller = TextFieldModelNG::GetOrCreateController(frameNode);
+    auto node = AceType::Claim(reinterpret_cast<TextFieldController*>(OHOS::Ace::AceType::RawPtr(controller)));
+
+    OHOS::Ace::Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    OHOS::Ace::Framework::JSTextEditableController* jsController =
+        OHOS::Ace::Framework::JSRef<OHOS::Ace::Framework::JSObject>::Cast(info[NUM_1])->Unwrap<OHOS::Ace::Framework::
+        JSTextEditableController>();
+    if (jsController) {
+        jsController->SetController(node);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 

@@ -1817,7 +1817,7 @@ class typeNode {
         throw { message: 'Parameter error. Possible causes: 1. The component type of the node is incorrect. 2. The node is null or undefined. 3. The controller is null or undefined.', code: 100023 };
       }
     }
-    const needModifiableCheck = !['Scroll', 'List', 'Grid', 'WaterFlow'].includes(nodeType);
+    const needModifiableCheck = !['Scroll', 'List', 'Grid', 'WaterFlow', 'TextInput', 'TextArea'].includes(nodeType);
     if (needModifiableCheck && !node.checkIfCanCrossLanguageAttributeSetting()) {
       throw { message: 'The FrameNode is not modifiable.', code: 100021 };
     }

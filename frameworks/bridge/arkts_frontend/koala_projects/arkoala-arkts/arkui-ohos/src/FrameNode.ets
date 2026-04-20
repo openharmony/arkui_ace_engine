@@ -2209,16 +2209,13 @@ export namespace typeNode {
 
     // @ts-ignore
     export function bindTextAreaController(node: FrameNode, controller: TextAreaController): void {
-        if (node === null || node === undefined || controller === null || controller === undefined || node.getType() !== 'TextArea') {
+        if (node === null || node === undefined || controller === null || controller === undefined || node.getNodeType() !== 'TextArea') {
             const error = Error('Parameter error. Possible causes: 1. The component type of the node is incorrect. 2. The node is null or undefined. 3. The controller is null or undefined.');
             throw new BusinessError(100023, error);
         }
-        let textAreaNode = node as TextAreaFrameNode
-        if (!textAreaNode.isModifiable()) {
-            const error = Error('The FrameNode is not modifiable.');
-            throw new BusinessError(100021, error);
-        }
-        textAreaNode.initialize({controller: controller})
+        const retval = FrameNodeExtender.getFrameNodePtr(node);
+        const peer = new ArkTextAreaPeer(retval, node._nodeId.toInt(), "TextArea", 0);
+        peer.setTextAreaOptionsAttribute({controller: controller});
         return
     }
 
@@ -2247,16 +2244,13 @@ export namespace typeNode {
 
     // @ts-ignore
     export function bindTextInputController(node: FrameNode, controller: TextInputController): void {
-        if (node === null || node === undefined || controller === null || controller === undefined || node.getType() !== 'TextInput') {
+        if (node === null || node === undefined || controller === null || controller === undefined || node.getNodeType() !== 'TextInput') {
             const error = Error('Parameter error. Possible causes: 1. The component type of the node is incorrect. 2. The node is null or undefined. 3. The controller is null or undefined.');
             throw new BusinessError(100023, error);
         }
-        let textInputNode = node as TextInputFrameNode
-        if (!textInputNode.isModifiable()) {
-            const error = Error('The FrameNode is not modifiable.');
-            throw new BusinessError(100021, error);
-        }
-        textInputNode.initialize({controller: controller})
+        const retval = FrameNodeExtender.getFrameNodePtr(node);
+        const peer = new ArkTextInputPeer(retval, node._nodeId.toInt(), "TextInput", 0);
+        peer.setTextInputOptionsAttribute({controller: controller});
         return
     }
 
