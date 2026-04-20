@@ -43,6 +43,7 @@
 #include "ui_extension_context.h"
 #include "wm_common.h"
 #include "form_ashmem.h"
+#include "pointer_event.h"
 
 #include "base/log/event_report.h"
 #include "base/log/log_wrapper.h"
