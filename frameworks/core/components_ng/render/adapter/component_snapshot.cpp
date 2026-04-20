@@ -463,6 +463,7 @@ void TakeCaptureWithCallback(const RefPtr<FrameNode>& node, std::shared_ptr<Rose
 {
     if (rsNode == nullptr || rsNode->GetRSUIContext() == nullptr) {
         TAG_LOGE(AceLogTag::ACE_COMPONENT_SNAPSHOT, "rsNode or rsUIContext is nullptr");
+        callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
         return;
     }
     auto rsRenderInterface = rsNode->GetRSUIContext()->GetRSRenderInterface();
@@ -640,6 +641,7 @@ void ComponentSnapshot::GetNormalCapture(const RefPtr<FrameNode>& frameNode, Nor
     auto rsNode = GetRsNode(frameNode);
     if (rsNode == nullptr || rsNode->GetRSUIContext() == nullptr) {
         TAG_LOGE(AceLogTag::ACE_COMPONENT_SNAPSHOT, "rsNode or rsUIContext is nullptr");
+        callback(nullptr);
         return;
     }
     auto rsRenderInterface = rsNode->GetRSUIContext()->GetRSRenderInterface();
@@ -681,6 +683,7 @@ void ComponentSnapshot::BuilerTask(JsCallback&& callback, const RefPtr<FrameNode
     auto rsNode = GetRsNode(node);
     if (rsNode == nullptr || rsNode->GetRSUIContext() == nullptr) {
         TAG_LOGE(AceLogTag::ACE_COMPONENT_SNAPSHOT, "rsNode or rsUIContext is nullptr");
+        callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
         return;
     }
     auto rsRenderInterface = rsNode->GetRSUIContext()->GetRSRenderInterface();
@@ -771,7 +774,7 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> TakeCaptureBySync(const Ref
 {
     if (rsNode == nullptr || rsNode->GetRSUIContext() == nullptr) {
         TAG_LOGE(AceLogTag::ACE_COMPONENT_SNAPSHOT, "rsNode or rsUIContext is nullptr");
-        return { ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT, nullptr };
+        return { ERROR_CODE_INTERNAL_ERROR, nullptr };
     }
     auto rsRenderInterface = rsNode->GetRSUIContext()->GetRSRenderInterface();
     auto syncCallback = std::make_shared<SyncCustomizedCallback>();
