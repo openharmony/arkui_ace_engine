@@ -428,7 +428,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
     return getDeepCopyOfObjectRecursive(obj);
 
     function getDeepCopyOfObjectRecursive(obj: any): any {
-      if (!obj || typeof obj !== 'object') {
+      if (!obj || typeof obj !== 'object' || Reflect.get(obj, '__MATERIAL_REFERENCE__')) {
         return obj;
       }
 
