@@ -124,6 +124,40 @@ struct NativeCustomDialogOptions {
     int32_t backgroundBlurStyle;
 };
 
+// V2: add levelMode at end for ABI compatibility
+struct NativeCustomDialogOptionsV2 {
+    NativeRectangle maskRect;
+    int32_t alignment;
+    NativeOffset offset;
+    bool isModal;
+    bool showInSubWindow;
+    bool autoCancel;
+    uint32_t maskColor;
+    int64_t transition;
+    bool hasTransition;
+    void (*onDidAppear)();
+    void (*onDidDisappear)();
+    void (*onWillAppear)();
+    void (*onWillDisappear)();
+    int32_t keyboardAvoidMode;
+    bool enableHoverMode;
+    int32_t hoverModeArea;
+    void (*builder)();
+    uint32_t backgroundColor;
+    CBorderRadiuses cornerRadius;
+    CJEdge borderWidth;
+    NativeEdgeColor borderColor;
+    NativeEdgeStyles borderEdgeStyle;
+    double widthValue;
+    uint32_t widthUnit;
+    double heightValue;
+    uint32_t heightUnit;
+    bool hasHeight;
+    NativeShadowOptions shadowOption;
+    int32_t shadowStyle;
+    int32_t backgroundBlurStyle;
+    int32_t levelMode;
+};
 struct NativeShowToastOptions {
     const char* message;
     int32_t duration;
@@ -158,6 +192,25 @@ struct NativeShowDialogOptions {
     int32_t hoverModeArea;
 };
 
+// V2: add levelMode at end for ABI compatibility
+struct NativeShowDialogOptionsV2 {
+    const char* title;
+    const char* message;
+    CButtonInfo* buttons;
+    int32_t buttonsSize;
+    int32_t alignment;
+    NativeOffset offset;
+    NativeRectangle maskRect;
+    bool showInSubWindow;
+    bool isModal;
+    uint32_t backgroundColor;
+    int32_t backgroundBlurStyle;
+    NativeShadowOptions shadowOption;
+    int32_t shadowStyle;
+    bool enableHoverMode;
+    int32_t hoverModeArea;
+    int32_t levelMode;
+};
 struct NativeActionMenuOptions {
     const char* title;
     CButtonInfo* buttons;
@@ -166,6 +219,15 @@ struct NativeActionMenuOptions {
     bool isModal;
 };
 
+// V2: add levelMode at end for ABI compatibility
+struct NativeActionMenuOptionsV2 {
+    const char* title;
+    CButtonInfo* buttons;
+    int32_t buttonsSize;
+    bool showInSubWindow;
+    bool isModal;
+    int32_t levelMode;
+};
 using ShowDialogCallBack = void (*)(int32_t, int32_t);
 using ShowActionMenuCallBack = void (*)(int32_t, int32_t);
 
@@ -183,6 +245,11 @@ CJ_EXPORT void FfiPromptShowToastWithOptionV2(NativeShowToastOptions options);
 CJ_EXPORT void FfiPromptOpenCustomDialogWithOption(NativeCustomDialogOptions options, void (*callback)(int32_t));
 CJ_EXPORT void FfiPromptShowActionMenuWithOption(NativeActionMenuOptions options, ShowActionMenuCallBack callbackRef);
 CJ_EXPORT void FfiPromptShowDialogWithOption(NativeShowDialogOptions options, ShowDialogCallBack callbackRef);
+
+CJ_EXPORT void FfiPromptOpenCustomDialogWithOptionV2(NativeCustomDialogOptionsV2 options, void (*callback)(int32_t));
+CJ_EXPORT void FfiPromptShowActionMenuWithOptionV2(
+    NativeActionMenuOptionsV2 options, ShowActionMenuCallBack callbackRef);
+CJ_EXPORT void FfiPromptShowDialogWithOptionV2(NativeShowDialogOptionsV2 options, ShowDialogCallBack callbackRef);
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_PROMPT_FFI_H
