@@ -166,11 +166,13 @@ void ForEachNode::MappingChildWithId(std::unordered_set<std::string>& oldIdsSet,
         } else {
             auto iter = oldNodeByIdMap.find(newId);
             // the ID was used before, only need to update the child position.
-            if (iter != oldNodeByIdMap.end() && iter->second) {
+            if (iter != oldNodeByIdMap.end()) {
                 // foreach node use some swap magic to re add every child to children_ list,
                 // so we reset parent here to avoid the double add check in AddChild.
-                iter->second->SetAncestor(nullptr);
-                AddChild(iter->second, DEFAULT_NODE_SLOT, true);
+		        if (auto uiNode = iter->second) {
+                    uiNode->SetAncestor(nullptr);
+                    AddChild(uiNode, DEFAULT_NODE_SLOT, true);
+		        }
             }
         }
     }

@@ -1083,6 +1083,32 @@ HWTEST_F(RepeatVirtual2TestNg, ModelIsAllowAnimation002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ModelIsAllowAnimation003
+ * @tc.desc: Test model.IsAllowAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2TestNg, ModelIsAllowAnimation003, TestSize.Level1)
+{
+    auto swiperNode = CreateNode(V2::SWIPER_ETS_TAG);
+    auto repeatNode = CreateRepeatVirtualNode(10, 10);
+    auto repeatId = elmtId_;
+    swiperNode->AddChild(repeatNode);
+    RefPtr<UINode> uiNode = AceType::MakeRefPtr<FrameNode>("node", 2024, AceType::MakeRefPtr<Pattern>());
+    CacheItem cacheItem = RepeatVirtualScroll2CacheItem::MakeCacheItem(uiNode, true);
+    repeatNode->caches_.cacheItem4Rid_ = { { 1, cacheItem } };
+    repeatNode->caches_.l1Rid4Index_ = { { 0, 1} };
+    uiNode->onMainTree_ = true;
+
+    RepeatVirtualScroll2ModelNG repeatModel;
+    EXPECT_EQ(repeatModel.IsAllowAnimation(repeatId), false);
+    EXPECT_EQ(repeatModel.IsAllowAnimation(0), false);
+
+    ViewStackProcessor::GetInstance()->Push(repeatNode);
+    EXPECT_EQ(repeatModel.IsAllowAnimation(0), false);
+    ViewStackProcessor::GetInstance()->Finish();
+}
+
+/**
  * @tc.name: ModelIsImplicitAnimationOpen001
  * @tc.desc: Test model.IsImplicitAnimationOpen
  * @tc.type: FUNC
