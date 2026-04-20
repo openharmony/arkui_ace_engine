@@ -39,7 +39,7 @@ void GetVM(int32_t hostInstanceId, ani_vm **vm)
     *vm = frontend->GetVM();
 }
 
-void GetAniEnv(int32_t hostInstanceId, bool attachCurrentThread, ani_env **result)
+void GetAniEnv(int32_t hostInstanceId, bool attachCurrentThread, ani_env **result, bool& isNeedDetach)
 {
     ani_vm *vm = nullptr;
     GetVM(hostInstanceId, &vm);
@@ -58,6 +58,7 @@ void GetAniEnv(int32_t hostInstanceId, bool attachCurrentThread, ani_env **resul
     ani_option interopEnabled {"--interop=disable", nullptr};
     ani_options aniArgs {1, &interopEnabled};
     if ((status = vm->AttachCurrentThread(&aniArgs, ANI_VERSION_1, result)) == ANI_OK) {
+        isNeedDetach = true;
         return;
     }
 
@@ -177,7 +178,8 @@ void EaWorkerTaskWrapperImpl::Call(const TaskExecutor::Task& task,
     ani_env *callerAniEnv = nullptr;
     auto tid = pthread_self();
     bool attachCurrentThread = HasAttachCurrentThread(tid);
-    GetAniEnv(hostInstanceId_, attachCurrentThread, &callerAniEnv);
+    bool isNeedDetach = false;
+    GetAniEnv(hostInstanceId_, attachCurrentThread, &callerAniEnv, isNeedDetach);
     auto callerWorkerId = arkts::concurrency_helpers::GetWorkerId(callerAniEnv);
     if (callerAniEnv == nullptr) {
         TAG_LOGW(AceLogTag::ACE_DYNAMIC_COMPONENT, "EaWorkerTaskWrapperImpl callerAniEnv is nullptr, "
@@ -204,6 +206,13 @@ void EaWorkerTaskWrapperImpl::Call(const TaskExecutor::Task& task,
         }, reinterpret_cast<void *>(event), delayTime);
     if (status != arkts::concurrency_helpers::WorkStatus::OK) {
         TAG_LOGW(AceLogTag::ACE_DYNAMIC_COMPONENT, "SendEvent error");
+    }
+    if (isNeedDetach) {
+        ani_vm *vm = nullptr;
+        GetVM(hostInstanceId_, &vm);
+        CHECK_NULL_VOID(vm);
+        vm->DetachCurrentThread();
+        attachCurrentThreads_.erase(tid);
     }
 }
 
