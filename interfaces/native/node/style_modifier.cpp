@@ -14531,6 +14531,7 @@ void ProcessFontWeightConfigs(ArkUI_NodeHandle node, OH_ArkUI_FontWeightConfigs*
     if (configs->isEnableVariableFontWeightSet) {
         modifier->setSpanEnableVariableFontWeight(
             node->uiNodeHandle, configs->enableVariableFontWeight, nullptr);
+        modifier->setSpanVariableFontWeight(node->uiNodeHandle, fontWeight, nullptr);
     } else {
         modifier->setSpanEnableVariableFontWeight(node->uiNodeHandle, false, nullptr);
     }
