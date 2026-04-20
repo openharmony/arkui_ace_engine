@@ -252,7 +252,7 @@ void OverlayManagerTestNg::CreateSheetContentNode()
  * @tc.desc: Test OverlayManager::DeleteModal
  * @tc.type: FUNC
  */
-HWTEST_F(OverlayManagerTestNg, DeleteModal001, TestSize.Level1)
+HWTEST_F(OverlayManagerTestNg, DeleteModal001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create target node and toast node.
