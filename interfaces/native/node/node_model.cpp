@@ -1383,6 +1383,8 @@ int32_t CreateAnimationController(
     (*controller)->controller = getFunc(object, nodeId);
     if (!(*controller)->controller) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get real animated controller");
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID,
+            __FUNCTION__, "The current node is not bound to any animted drawableDescriptor");
         return ERROR_CODE_PARAM_INVALID;
     }
     void (*increase)(void* object) = nullptr;
@@ -1431,6 +1433,7 @@ int32_t StartAnimation(ArkUI_DrawableDescriptor_AnimationController* controller)
     }
     if (!controller) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get animated controller");
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "The controller input parameter is nullptr");
         return ERROR_CODE_PARAM_INVALID;
     }
     if (!controller->controller) {
@@ -1455,6 +1458,7 @@ int32_t StopAnimation(ArkUI_DrawableDescriptor_AnimationController* controller)
     }
     if (!controller) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get animated controller");
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "The controller input parameter is nullptr");
         return ERROR_CODE_PARAM_INVALID;
     }
     if (!controller->controller) {
@@ -1479,6 +1483,7 @@ int32_t ResumeAnimation(ArkUI_DrawableDescriptor_AnimationController* controller
     }
     if (!controller) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get animated controller");
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "The controller input parameter is nullptr");
         return ERROR_CODE_PARAM_INVALID;
     }
     if (!controller->controller) {
@@ -1503,6 +1508,7 @@ int32_t PauseAnimation(ArkUI_DrawableDescriptor_AnimationController* controller)
     }
     if (!controller) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get animated controller");
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "The controller input parameter is nullptr");
         return ERROR_CODE_PARAM_INVALID;
     }
     if (!controller->controller) {
@@ -1529,6 +1535,7 @@ int32_t GetAnimationStatus(
     }
     if (!controller) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get animated controller");
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "The controller input parameter is nullptr");
         return ERROR_CODE_PARAM_INVALID;
     }
     if (!controller->controller) {
