@@ -65,6 +65,12 @@ const char INSPECTOR_ID[] = "$ID";
 const char INSPECTOR_DEBUGLINE[] = "$debugLine";
 const char INSPECTOR_ATTRS[] = "$attrs";
 const char INSPECTOR_CHILDREN[] = "$children";
+const char INSPECTOR_OTHER_CONTENTS[] = "other_contents";
+const char STAGE_NODE_TAG[] = "stage";
+const char PAGE_NODE_TAG[] = "page";
+const char CHILD_NODE_TAG[] = "child";
+const char FREE_NODE_TAG[] = "free_node";
+const char MAIN_TREE_NODE_TAG[] = "main_tree_node";
 
 class InspectorTestNode : public UINode {
     DECLARE_ACE_TYPE(InspectorTestNode, UINode);
@@ -872,6 +878,66 @@ HWTEST_F(InspectorTestNg, InspectorTestNg032, TestSize.Level1)
         ASSERT_NE(typeValue, nullptr);
         EXPECT_STREQ(typeValue->GetString().c_str(), "root");
     }
+}
+
+/**
+ * @tc.name: InspectorTestNg033
+ * @tc.desc: Test that main-tree nodes are filtered in free-nodes inspector.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorTestNg033, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    auto stageNode = FrameNode::CreateFrameNode(
+        STAGE_NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    context->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+    context->rootNode_ = stageNode;
+
+    auto pageNode = FrameNode::CreateFrameNode(
+        PAGE_NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    stageNode->AddChild(pageNode);
+    auto childNode = FrameNode::CreateFrameNode(
+        CHILD_NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    pageNode->AddChild(childNode);
+
+    auto freeNode = FrameNode::CreateFrameNode(
+        FREE_NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    freeNode->onMainTree_ = false;
+    auto freeNodeId = freeNode->GetId();
+
+    auto mainTreeNode = FrameNode::CreateFrameNode(
+        MAIN_TREE_NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    mainTreeNode->onMainTree_ = true;
+    auto mainTreeNodeId = mainTreeNode->GetId();
+
+    auto result = Inspector::GetFreeNodesInspector();
+    auto jsonValue = JsonUtil::ParseJsonString(result);
+    ASSERT_NE(jsonValue, nullptr);
+
+    auto otherContents = jsonValue->GetValue(INSPECTOR_OTHER_CONTENTS);
+    ASSERT_NE(otherContents, nullptr);
+    ASSERT_TRUE(otherContents->IsArray());
+
+    bool foundFreeNode = false;
+    bool foundMainTreeNode = false;
+    for (int32_t i = 0; i < otherContents->GetArraySize(); ++i) {
+        auto node = otherContents->GetArrayItem(i);
+        auto idValue = node->GetValue(INSPECTOR_ID);
+        ASSERT_NE(idValue, nullptr);
+        if (idValue->GetInt() == freeNodeId) {
+            foundFreeNode = true;
+        }
+        if (idValue->GetInt() == mainTreeNodeId) {
+            foundMainTreeNode = true;
+        }
+    }
+
+    EXPECT_TRUE(foundFreeNode);
+    EXPECT_FALSE(foundMainTreeNode);
+    context->stageManager_ = nullptr;
+    context->rootNode_ = nullptr;
 }
 
 
