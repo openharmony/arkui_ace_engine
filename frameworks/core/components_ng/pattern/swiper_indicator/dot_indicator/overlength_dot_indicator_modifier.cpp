@@ -111,6 +111,7 @@ void OverlengthDotIndicatorModifier::PaintBackground(
     auto radius = axis_ == Axis::HORIZONTAL ? rectHeight : rectWidth;
     backgroundStart_ = axis_ == Axis::HORIZONTAL ? rectLeft : rectTop;
     backgroundEnd_ = axis_ == Axis::HORIZONTAL ? rectRight : rectBottom;
+    isDrawbackground_ = true;
     canvas.DrawRoundRect({ { rectLeft, rectTop, rectRight, rectBottom }, radius, radius });
     canvas.DetachBrush();
 }
@@ -188,7 +189,7 @@ void OverlengthDotIndicatorModifier::PaintBlackPoint(DrawingContext& context, Co
             // new point color
             paintColor = paintColor.BlendOpacity(contentProperty.newPointOpacity / FULL_ALPHA);
         }
-        if (isDrawbackground_ || (center.GetX() - width * HALF_FLOAT > backgroundStart_ &&
+        if (!isDrawbackground_ || (center.GetX() - width * HALF_FLOAT > backgroundStart_ &&
                                      center.GetX() + width * HALF_FLOAT < backgroundEnd_)) {
             PaintUnselectedIndicator(canvas, center, width, height, LinearColor(paintColor));
         }
