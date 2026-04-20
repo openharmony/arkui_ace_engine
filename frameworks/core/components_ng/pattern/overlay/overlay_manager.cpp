@@ -1682,7 +1682,8 @@ void OverlayManager::RemoveIndexerPopup()
     }
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
-    for (const auto& popup : customPopupMap_) {
+    auto customPopupMap = customPopupMap_;
+    for (const auto& popup : customPopupMap) {
         auto popupNode = popup.second;
         ACE_UINODE_TRACE(popupNode);
         RemoveChildWithService(rootNode, popupNode);
@@ -3798,7 +3799,8 @@ bool OverlayManager::RemovePopupInSubwindow(const RefPtr<Pattern>& pattern, cons
         currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
     }
     ContainerScope scope(currentId);
-    for (const auto& popup : popupMap_) {
+    auto popupMap = popupMap_;
+    for (const auto& popup : popupMap) {
         auto targetId = popup.first;
         auto popupInfo = popup.second;
         if (overlay == popupInfo.popupNode) {
