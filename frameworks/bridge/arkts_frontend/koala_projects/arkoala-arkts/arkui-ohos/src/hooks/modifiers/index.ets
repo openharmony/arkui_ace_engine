@@ -200,6 +200,8 @@ import { ArkTextClockComponent, TextClockAttribute } from "./../../component/tex
 import { TextClockModifier } from "./../../TextClockModifier"
 import { ArkTextInputComponent, TextInputAttribute } from "./../../component/textInput"
 import { TextInputModifier } from "./../../TextInputModifier"
+import { int32 } from '@koalaui/common'
+import { Font as arkui_component_units_Font, FontSettingOptions, FontWeight, ResourceColor, CaretStyle } from '#generated'
 import { ArkTextPickerComponent, TextPickerAttribute, TextPickerOptions, ArkTextPickerPeer } from "./../../component/textPicker"
 import { TextPickerModifier } from "./../../TextPickerModifier"
 import { ArkTextTimerComponent, TextTimerAttribute } from "./../../component/textTimer"
@@ -1949,6 +1951,37 @@ export function hookTextAttributeModifier(component: ArkTextComponent, modifier:
     applyAttributeModifierBase(modifier as Object as AttributeModifier<TextAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
 }
 
+export function hookTextModifierFont(modifier: TextModifier, fontValue: arkui_component_units_Font | undefined,
+    options: FontSettingOptions | undefined, index: int32): void {
+    if (((modifier._Text_flagArray[index]) == (0)) || (true) || (true)) {
+        modifier._Text_flagArray[index] = 1
+        modifier._Text_font_0_0value = fontValue
+        modifier._Text_font_0_1value = options
+        if (modifier._Text_font_0_0value != undefined) {
+            modifier._Text_fontWeight_0_0value = modifier._Text_font_0_0value!.weight
+        }
+        modifier._state.fireChange()
+    } else {
+        modifier._Text_flagArray[index] = 3
+    }
+}
+
+export function hookTextModifierFontWeight(modifier: TextModifier,
+    weight: int32 | FontWeight | ResourceStr | undefined, options: FontSettingOptions | undefined, index: int32): void {
+    if (((modifier._Text_flagArray[index]) == (0)) || (true) || (true)) {
+        modifier._Text_flagArray[index] = 1
+        modifier._Text_fontWeight_0_0value = weight
+        modifier._Text_fontWeight_0_1value = options
+        if (modifier._Text_font_0_0value != undefined && !(modifier._Text_fontWeight_0_0value instanceof(Resource))) {
+            modifier._Text_font_0_0value!.weight =
+                modifier._Text_fontWeight_0_0value as (undefined | FontWeight | int32 | String)
+        }
+        modifier._state.fireChange()
+    } else {
+        modifier._Text_flagArray[index] = 3
+    }
+}
+
 export function hookBlankAttributeModifier(component: ArkBlankComponent,
     modifier: AttributeModifier<BlankAttribute> | AttributeModifier<CommonMethod> | undefined): void {
     if (modifier === undefined) {
@@ -3042,6 +3075,35 @@ export function hookTextInputAttributeModifier(component: ArkTextInputComponent,
         return componentNew;
     };
     applyAttributeModifierBase(modifier as Object as AttributeModifier<TextInputAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+
+export function hookTextInputModifierCaretColor(modifier: TextInputModifier, value: ResourceColor | undefined,
+    index: int32): void {
+    if (((modifier._TextInput_flagArray[index]) == (0)) || (true)) {
+        modifier._TextInput_flagArray[index] = 1
+        modifier._TextInput_caretColor_0_0value = value
+        if (modifier._TextInput_caretStyle_0_0value !== undefined) {
+
+            modifier._TextInput_caretStyle_0_0value!.color = modifier._TextInput_caretColor_0_0value
+        }
+        modifier._state.fireChange()
+    } else {
+        modifier._TextInput_flagArray[index] = 3
+    }
+}
+
+export function hookTextInputModifierCaretStyle(modifier: TextInputModifier, value: CaretStyle | undefined,
+    index: int32): void {
+    if (((modifier._TextInput_flagArray[index]) == (0)) || (true)) {
+        modifier._TextInput_flagArray[index] = 1
+        modifier._TextInput_caretStyle_0_0value = value
+        if (modifier._TextInput_caretStyle_0_0value !== undefined) {
+            modifier._TextInput_caretColor_0_0value = modifier._TextInput_caretStyle_0_0value!.color
+        }
+        modifier._state.fireChange()
+    } else {
+        modifier._TextInput_flagArray[index] = 3
+    }
 }
 
 export function hookTextAreaAttributeModifier(component: ArkTextAreaComponent,
