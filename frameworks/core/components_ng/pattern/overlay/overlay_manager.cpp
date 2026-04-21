@@ -41,6 +41,7 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/common/ime/input_method_manager.h"
 #include "core/common/interaction/interaction_interface.h"
 #include "core/common/modal_ui_extension.h"
@@ -1838,6 +1839,7 @@ void OverlayManager::HideAllPopupsWithoutAnimation()
 
 void OverlayManager::HideAllMenusWithoutAnimation(bool showInSubwindow)
 {
+    CHECK_EQUAL_VOID(DynamicModuleHelper::GetInstance().IsDynamicModuleLoaded("Menu"), false);
     if (!CheckMenuManager()) {
         return;
     }
@@ -1980,6 +1982,7 @@ void OverlayManager::HideMenu(
 
 void OverlayManager::HideAllMenus()
 {
+    CHECK_EQUAL_VOID(DynamicModuleHelper::GetInstance().IsDynamicModuleLoaded("Menu"), false);
     if (!CheckMenuManager()) {
         return;
     }
