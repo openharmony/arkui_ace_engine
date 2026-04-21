@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/event/touch_event.h"
+#include "core/components/theme/icon_theme.h"
 
 namespace OHOS::Ace::NG {
 
