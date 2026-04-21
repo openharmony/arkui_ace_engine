@@ -4,6 +4,7 @@
  */
 
 #include "core/common/key_event_manager.h"
+#include "core/event/key_event.h"
 
 namespace OHOS::Ace::NG {
 void KeyEventManager::AddKeyboardShortcutNode(const WeakPtr<FrameNode>& node)

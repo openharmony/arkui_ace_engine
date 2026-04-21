@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_ON_MOUSE_EVENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_ON_MOUSE_EVENT_H
 
+#include "core/event/axis_event.h"
 #include "core/event/mouse_event.h"
 
 namespace OHOS::Ace::NG {

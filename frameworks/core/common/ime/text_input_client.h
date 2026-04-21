@@ -23,10 +23,11 @@
 #include "base/utils/utf_helper.h"
 #include "core/common/ime/text_editing_value.h"
 #include "core/common/ime/text_input_action.h"
-#include "core/event/key_event.h"
+#include "core/event/key_code.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 
 namespace OHOS::Ace {
+struct KeyEvent;
 
 constexpr uint32_t KEY_NULL = 0;
 constexpr uint32_t KEY_ALT = 1 << 0;

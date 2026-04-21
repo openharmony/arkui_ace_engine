@@ -17,6 +17,7 @@
 #include "core/accessibility/accessibility_manager.h"
 
 #include "bridge/cj_frontend/frontend/cj_page_router.h"
+#include "core/event/key_event.h"
 
 namespace OHOS::Ace::Framework {
 void CJFrontend::InternalInitialize()

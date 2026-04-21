@@ -20,7 +20,7 @@
 #include "base/geometry/offset.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/memory/ace_type.h"
-#include "core/event/key_event.h"
+#include "core/event/key_code.h"
 #include "core/event/touch_event.h"
 #include "core/event/mouse_constants.h"
 

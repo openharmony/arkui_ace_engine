@@ -18,6 +18,7 @@
 #include "compatible/components/list/list_element.h"
 #include "compatible/components/list/list_item_group_component.h"
 #include "core/components/proxy/render_item_proxy.h"
+#include "core/event/key_event.h"
 
 namespace OHOS::Ace {
 

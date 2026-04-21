@@ -17,6 +17,7 @@
 #include "core/accessibility/accessibility_manager.h"
 
 #include "compatible/components/picker/render_picker_column.h"
+#include "core/event/key_event.h"
 
 namespace OHOS::Ace {
 
