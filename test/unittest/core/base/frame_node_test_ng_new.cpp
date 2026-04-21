@@ -3601,18 +3601,22 @@ HWTEST_F(FrameNodeTestNg, FrameNodeIsJsCustomPropertyUpdated001, TestSize.Level1
 
     /**
      * @tc.steps: step2. frameNode has one customProperty and flag 1.
-     * @tc.expected: expect result true.
+     * @tc.expected: expect result false.
      */
     frameNode->AddCustomProperty("key", "value");
     result = frameNode->IsJsCustomPropertyUpdated();
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
 
     /**
      * @tc.steps: step3. frameNode has another customProperty and flag 0.
-     * @tc.expected: expect result false.
+     * @tc.expected: expect result true.
      */
     frameNode->AddCustomProperty("key1", "value1");
     frameNode->SetCustomPropertyMapFlagByKey("key1");
+    result = frameNode->IsJsCustomPropertyUpdated();
+    EXPECT_TRUE(result);
+    
+    frameNode->AddCustomProperty("key1", "value2");
     result = frameNode->IsJsCustomPropertyUpdated();
     EXPECT_FALSE(result);
 }
