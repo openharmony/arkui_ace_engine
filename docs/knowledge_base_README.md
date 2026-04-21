@@ -19,17 +19,17 @@
 - 用户询问"滚动容器" → 搜索别名 → 定位到 `Scroll_Knowledge_Base.md`
 - 用户询问"文本选择器" → 按分类查找 selector → 定位到 `Text_Picker_Knowledge_Base.md`
 
-**统计数据**（截至 2026-02-26）：
+**统计数据**（截至 2026-04-18）：
 
-- 总知识库文档: 41 个
-- 组件知识库: 27 个
+- 总知识库文档: 42 个
+- 组件知识库: 28 个
 - SDK API 知识库: 2 个
 - 系统功能知识库: 5 个（含 Layout 模块 3 个专题）
 - CJ Frontend 知识库: 1 个
 - Syntax 模块知识库: 7 个（1 架构总览 + 4 循环组件独立文档 + 2 专题文档）
 - 架构文档: 1 个
-- 覆盖组件: 26 个
-- 检索关键词: 260+ 个
+- 覆盖组件: 27 个
+- 检索关键词: 280+ 个
 
 ---
 
@@ -90,6 +90,8 @@ knowledge_base/
 │   │   └── LazyGrid_Knowledge_Base.md          # LazyGrid 组件知识库
 │   ├── text/
 │   │   └── Text_Knowledge_Base_CN.md            # Text 组件知识库
+│   ├── rich_editor/
+│   │   └── RichEditor_Knowledge_Base_CN.md      # RichEditor 富文本编辑器知识库
 │   ├── text_clock/
 │   │   └── TextClock_Knowledge_Base_CN.md       # TextClock 组件知识库
 │   ├── text_picker/
@@ -552,6 +554,42 @@ knowledge_base/
 - 测试覆盖和常见问题
 
 **适用场景**：QRCode 组件开发、测试、问题排查时参考
+
+---
+
+### RichEditor Component Knowledge Base
+
+**位置**: `pattern/rich_editor/RichEditor_Knowledge_Base_CN.md`
+
+**完整指南** - RichEditor 富文本编辑器组件的开发、测试和调试参考文档
+
+**包含内容**：
+
+- **概述**: RichEditor 组件定位、核心功能、技术架构、代码规模
+- **目录结构**: 完整的源码文件组织结构
+- **核心类继承关系**: RichEditorPattern、Controller、布局算法继承体系
+- **Pattern层详解**: 核心成员变量、核心方法、生命周期方法详解
+- **Model层详解**: RichEditorModelNG、Controller 类层次结构
+- **布局系统**: 布局生命周期、段落缓存机制、Span与段落关系
+- **内容管理**: 内容管理模式、Span类型、内容操作API
+- **功能模块**: 光标管理、选择管理、撤销/重做、IME输入、滚动管理
+- **回调函数系统**: 回调函数分类、可拦截回调规律、回调注册链路
+- **完整API清单**: ArkTS 组件 API、Controller API（老框架模式、属性字符串模式）
+- **关键实现细节**: AddTextSpan 调用链路、参数解析核心原则
+- **使用示例**: 老框架模式示例、属性字符串模式示例
+- **编码规范**: 通用规范、宏的使用、内容锁定、事件时机
+- **最佳实践**: 性能优化、常见陷阱
+- **调试指南**: 布局问题定位、内容问题定位、光标问题定位
+- **常见问题**: 文本不显示、样式未生效、撤销/重做不工作、IME输入异常
+- **相关资源**: 重要说明、相关组件、参考文档
+
+**代码规模**：
+
+- 核心文件: 约 50 个文件
+- 核心代码: 约 20,000+ 行 C++ 代码
+- 支持两种模式: 老框架模式、属性字符串模式
+
+**适用场景**：RichEditor 组件开发、富文本编辑功能实现、撤销/重做机制、IME输入处理时参考
 
 ---
 

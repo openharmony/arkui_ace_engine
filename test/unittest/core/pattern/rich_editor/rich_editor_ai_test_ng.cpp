@@ -511,10 +511,16 @@ HWTEST_F(RichEditorAITestOneNg, StartAITask001, TestSize.Level2)
  */
 HWTEST_F(RichEditorAITestOneNg, NeedShowAIDetect001, TestSize.Level2)
 {
+    /**
+     * @tc.steps: step1. get richEditor controller
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     AddSpan(INIT_VALUE_1);
+    /**
+     * @tc.steps: step2. add aiSpan
+     */
     std::map<int32_t, AISpan> aiSpanMap;
     AISpan aiSpan0;
     aiSpanMap[0] = aiSpan0;
