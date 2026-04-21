@@ -24,6 +24,7 @@
 #include "core/common/event_manager.h"
 #include "test/unittest/core/pattern/scrollable/mock_scrollable.h"
 
+#include "core/animation/scroll_motion.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/grid/grid_paint_method.h"

@@ -18,6 +18,7 @@
 
 #include <optional>
 #include "base/geometry/axis.h"
+#include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_info.h"
