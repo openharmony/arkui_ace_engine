@@ -23,13 +23,29 @@ namespace Ace {
 // Initialize static constants
 const char* const WebCommandWrapper::EVENT_TYPE_KEY = "event_type";
 const char* const WebCommandWrapper::XPATH_KEY = "XPath";
+const char* const WebCommandWrapper::VALUE_KEY = "value";
+const char* const WebCommandWrapper::INDEX_KEY = "index";
 const char* const WebCommandWrapper::DURATION_KEY = "duration";
 const char* const WebCommandWrapper::ALIGN_KEY = "align";
 const char* const WebCommandWrapper::OFFSET_KEY = "offset";
 
-bool WebCommandWrapper::IsValidEventType(const std::string& eventTypeStr)
+WebCommandEventType WebCommandWrapper::ParseEventType(const std::string& eventTypeStr)
 {
-    return eventTypeStr == "click" || eventTypeStr == "scroll";
+    static const std::unordered_map<std::string, WebCommandEventType> eventTypeMap = {
+        {"click", WebCommandEventType::CLICK},
+        {"scroll", WebCommandEventType::SCROLL},
+        {"input-date", WebCommandEventType::INPUT_DATE},
+        {"input-datetime-local", WebCommandEventType::INPUT_DATETIME_LOCAL},
+        {"input-month", WebCommandEventType::INPUT_MONTH},
+        {"input-time", WebCommandEventType::INPUT_TIME},
+        {"input-week", WebCommandEventType::INPUT_WEEK},
+        {"select", WebCommandEventType::SELECT},
+    };
+    auto it = eventTypeMap.find(eventTypeStr);
+    if (it != eventTypeMap.end()) {
+        return it->second;
+    }
+    return WebCommandEventType::UNKNOWN;
 }
 
 bool WebCommandWrapper::IsValidAlign(const std::string& alignStr)
@@ -37,11 +53,76 @@ bool WebCommandWrapper::IsValidAlign(const std::string& alignStr)
     return alignStr == "top" || alignStr == "mid" || alignStr == "bottom";
 }
 
+int WebCommandWrapper::BuildInputActionInfo(
+    const std::unique_ptr<JsonValue>& comJson,
+    const std::string& eventTypeStr,
+    std::shared_ptr<OHOS::NWeb::NWebCommandActionInfo>& outActionInfo)
+{
+    auto xpathValue = comJson->GetValue(XPATH_KEY);
+    if (!xpathValue || !xpathValue->IsString() || xpathValue->GetString().empty()) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "[WebCommandAction] BuildInputActionInfo: xpath is invalid");
+        return static_cast<int>(WebCommandResult::JSON_INVALID_INPUT_XPATH);
+    }
+
+    auto valueValue = comJson->GetValue(VALUE_KEY);
+    if (!valueValue || !valueValue->IsString() || valueValue->GetString().empty()) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "[WebCommandAction] BuildInputActionInfo: value is invalid");
+        return static_cast<int>(WebCommandResult::JSON_INVALID_INPUT_VALUE);
+    }
+
+    outActionInfo = NWebCommandActionInfoImpl::CreateInputInfo(
+        eventTypeStr, valueValue->GetString(), xpathValue->GetString());
+    return WEB_COMMAND_BUILD_SUCCESS;
+}
+
+int WebCommandWrapper::BuildSelectActionInfo(
+    const std::unique_ptr<JsonValue>& comJson,
+    const std::string& eventTypeStr,
+    std::shared_ptr<OHOS::NWeb::NWebCommandActionInfo>& outActionInfo)
+{
+    auto xpathValue = comJson->GetValue(XPATH_KEY);
+    if (!xpathValue || !xpathValue->IsString() || xpathValue->GetString().empty()) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "[WebCommandAction] BuildSelectActionInfo: xpath is invalid");
+        return static_cast<int>(WebCommandResult::JSON_INVALID_SELECT_XPATH);
+    }
+    std::string xpath = xpathValue->GetString();
+
+    std::vector<std::string> values;
+    auto valueValue = comJson->GetValue(VALUE_KEY);
+    if (valueValue && valueValue->IsArray()) {
+        for (int32_t i = 0; i < valueValue->GetArraySize(); ++i) {
+            auto item = valueValue->GetArrayItem(i);
+            if (item && item->IsString()) {
+                values.push_back(item->GetString());
+            }
+        }
+    }
+
+    std::vector<int32_t> indexes;
+    auto indexValue = comJson->GetValue(INDEX_KEY);
+    if (indexValue && indexValue->IsArray()) {
+        for (int32_t i = 0; i < indexValue->GetArraySize(); ++i) {
+            auto item = indexValue->GetArrayItem(i);
+            if (item && item->IsNumber()) {
+                indexes.push_back(static_cast<int32_t>(item->GetInt()));
+            }
+        }
+    }
+
+    if (values.empty() && indexes.empty()) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "[WebCommandAction] BuildSelectActionInfo: values and indexes are both empty");
+        return static_cast<int>(WebCommandResult::JSON_INVALID_SELECT_OPTIONS);
+    }
+
+    outActionInfo = NWebCommandActionInfoImpl::CreateSelectInfo(
+        eventTypeStr, values, xpath, indexes);
+    return WEB_COMMAND_BUILD_SUCCESS;
+}
+
 int WebCommandWrapper::ValidateClickParameters(
     const std::unique_ptr<JsonValue>& comJson,
     std::string& outXPath)
 {
-    // Validate XPath (required for click)
     auto xpathValue = comJson->GetValue(XPATH_KEY);
     if (!xpathValue || !xpathValue->IsString()) {
         TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: XPath is missing or not string type");
@@ -59,7 +140,6 @@ int WebCommandWrapper::ValidateScrollParameters(
     int32_t& outOffset,
     std::string& outXPath)
 {
-    // Validate XPath (required for scroll)
     auto xpathValue = comJson->GetValue(XPATH_KEY);
     if (!xpathValue || !xpathValue->IsString()) {
         TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: XPath is missing or not string type");
@@ -100,32 +180,17 @@ int WebCommandWrapper::ValidateScrollParameters(
     return WEB_COMMAND_BUILD_SUCCESS;
 }
 
-int WebCommandWrapper::BuildCommandFromJson(
+int WebCommandWrapper::BuildClickScrollAction(
     const std::unique_ptr<JsonValue>& comJson,
+    const std::string& eventTypeStr,
     std::shared_ptr<NWebCommandActionImpl>& outCommandAction)
 {
-    // Validate event_type
-    auto eventTypeValue = comJson->GetValue(EVENT_TYPE_KEY);
-    if (!eventTypeValue || !eventTypeValue->IsString()) {
-        TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: event_type is missing or not string type");
-        return static_cast<int>(!eventTypeValue ? WebCommandResult::JSON_MISSING_EVENT_TYPE :
-                                                 WebCommandResult::JSON_INVALID_EVENT_TYPE);
-    }
-    std::string eventTypeStr = eventTypeValue->GetString();
-    if (!IsValidEventType(eventTypeStr)) {
-        TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: event_type must be 'click' or 'scroll', but got %{public}s",
-            eventTypeStr.c_str());
-        return static_cast<int>(WebCommandResult::JSON_VALUE_ERROR_EVENT_TYPE);
-    }
-
-    // Initialize parameters with default values
-    std::string xpathStr = "";
-    std::string alignStr = "";
+    std::string xpathStr;
+    std::string alignStr;
     int32_t durationInt = 0;
     int32_t offsetInt = 0;
     int validationResult = WEB_COMMAND_BUILD_SUCCESS;
 
-    // Use switch to validate event-type-specific parameters
     if (eventTypeStr == "click") {
         validationResult = ValidateClickParameters(comJson, xpathStr);
     } else if (eventTypeStr == "scroll") {
@@ -141,7 +206,6 @@ int WebCommandWrapper::BuildCommandFromJson(
         "%{public}s,offsetInt = %{public}d",
         eventTypeStr.c_str(), xpathStr.c_str(), durationInt, alignStr.c_str(), offsetInt);
 
-    // Create the command action object
     outCommandAction = std::make_shared<NWebCommandActionImpl>(
         eventTypeStr, xpathStr, durationInt, alignStr, offsetInt);
 

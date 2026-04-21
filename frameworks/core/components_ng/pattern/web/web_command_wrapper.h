@@ -18,8 +18,11 @@
 
 #include <memory>
 #include <string>
+#include <unordered_map>
+#include <vector>
 
 #include "core/components/web/resource/web_delegate.h"
+#include "nweb_command_action_info.h"
 
 namespace OHOS {
 namespace Ace {
@@ -30,56 +33,83 @@ class JsonValue;
 const int WEB_COMMAND_BUILD_SUCCESS = 0;
 
 /**
+ * @brief Enum for parsed event types used in command routing.
+ */
+enum class WebCommandEventType {
+    UNKNOWN = 0,
+    CLICK,
+    SCROLL,
+    INPUT_DATE,
+    INPUT_DATETIME_LOCAL,
+    INPUT_MONTH,
+    INPUT_TIME,
+    INPUT_WEEK,
+    SELECT,
+};
+
+/**
+ * @brief Check if a WebCommandEventType is any input subtype.
+ */
+inline bool IsInputEventType(WebCommandEventType type)
+{
+    return type == WebCommandEventType::INPUT_DATE ||
+           type == WebCommandEventType::INPUT_DATETIME_LOCAL ||
+           type == WebCommandEventType::INPUT_MONTH ||
+           type == WebCommandEventType::INPUT_TIME ||
+           type == WebCommandEventType::INPUT_WEEK;
+}
+
+/**
  * @class WebCommandWrapper
  * @brief Wrapper class for building and executing web commands
  *
- * This class encapsulates the logic for creating NWebCommandActionImpl objects
+ * This class encapsulates the logic for creating command action objects
  * from JSON input, validating parameters, and supporting extensible command types.
  */
 class WebCommandWrapper {
 public:
     /**
-     * @brief Build a command action from JSON input
+     * @brief Parse event type string to WebCommandEventType enum
+     * @param eventTypeStr The event type string (e.g., "click", "input-date", "select")
+     * @return WebCommandEventType enum value
+     */
+    static WebCommandEventType ParseEventType(const std::string& eventTypeStr);
+
+    /**
+     * @brief Build input action info from JSON for input-* event types
      * @param comJson The JSON object containing command parameters
+     * @param eventTypeStr The event type string (e.g., "input-date")
+     * @param outActionInfo Output parameter for the created NWebCommandActionInfo
+     * @return int Result code (0 for success, error code otherwise)
+     */
+    static int BuildInputActionInfo(
+        const std::unique_ptr<JsonValue>& comJson,
+        const std::string& eventTypeStr,
+        std::shared_ptr<OHOS::NWeb::NWebCommandActionInfo>& outActionInfo);
+
+    /**
+     * @brief Build select action info from JSON for select event type
+     * @param comJson The JSON object containing command parameters
+     * @param eventTypeStr The event type string ("select")
+     * @param outActionInfo Output parameter for the created NWebCommandActionInfo
+     * @return int Result code (0 for success, error code otherwise)
+     */
+    static int BuildSelectActionInfo(
+        const std::unique_ptr<JsonValue>& comJson,
+        const std::string& eventTypeStr,
+        std::shared_ptr<OHOS::NWeb::NWebCommandActionInfo>& outActionInfo);
+
+    /**
+     * @brief Build click/scroll command action from JSON
+     * @param comJson The JSON object containing command parameters
+     * @param eventTypeStr The event type string ("click" or "scroll")
      * @param outCommandAction Output parameter for the created command action
      * @return int Result code (0 for success, error code otherwise)
      */
-    static int BuildCommandFromJson(
+    static int BuildClickScrollAction(
         const std::unique_ptr<JsonValue>& comJson,
+        const std::string& eventTypeStr,
         std::shared_ptr<NWebCommandActionImpl>& outCommandAction);
-
-    /**
-     * @brief Validate event type parameter
-     * @param eventTypeStr The event type string to validate
-     * @return true if valid, false otherwise
-     */
-    static bool IsValidEventType(const std::string& eventTypeStr);
-
-    /**
-     * @brief Validate click-specific parameters
-     * @param comJson The JSON object containing command parameters
-     * @param outXPath Output parameter for XPath value
-     * @return int Result code (0 for success, error code otherwise)
-     */
-    static int ValidateClickParameters(
-        const std::unique_ptr<JsonValue>& comJson,
-        std::string& outXPath);
-
-    /**
-     * @brief Validate scroll-specific parameters
-     * @param comJson The JSON object containing command parameters
-     * @param outDuration Output parameter for duration value
-     * @param outAlign Output parameter for align string
-     * @param outOffset Output parameter for offset value
-     * @param outXPath Output parameter for XPath value
-     * @return int Result code (0 for success, error code otherwise)
-     */
-    static int ValidateScrollParameters(
-        const std::unique_ptr<JsonValue>& comJson,
-        int32_t& outDuration,
-        std::string& outAlign,
-        int32_t& outOffset,
-        std::string& outXPath);
 
     /**
      * @brief Validate align parameter value
@@ -91,9 +121,22 @@ public:
 private:
     static const char* const EVENT_TYPE_KEY;
     static const char* const XPATH_KEY;
+    static const char* const VALUE_KEY;
+    static const char* const INDEX_KEY;
     static const char* const DURATION_KEY;
     static const char* const ALIGN_KEY;
     static const char* const OFFSET_KEY;
+
+    static int ValidateClickParameters(
+        const std::unique_ptr<JsonValue>& comJson,
+        std::string& outXPath);
+
+    static int ValidateScrollParameters(
+        const std::unique_ptr<JsonValue>& comJson,
+        int32_t& outDuration,
+        std::string& outAlign,
+        int32_t& outOffset,
+        std::string& outXPath);
 };
 
 } // namespace Ace

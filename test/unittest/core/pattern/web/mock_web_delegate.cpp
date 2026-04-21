@@ -1515,4 +1515,9 @@ void WebDelegate::OnSwitchFreeMultiWindow(bool enable) {}
 void WebDelegate::RegisterFreeMultiWindowListener() {}
 void WebDelegate::UnregisterFreeMultiWindowListener() {}
 void WebDelegate::RequestWebDomJsonString(const std::function<void(const std::string)>&& callback) {}
+
+std::shared_ptr<OHOS::NWeb::NWebCommandActionManager> WebDelegate::GetNWebCommandActionManager()
+{
+    return nullptr;
+}
 } // namespace OHOS::Ace

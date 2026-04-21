@@ -975,6 +975,23 @@ enum class WebCommandResult : int32_t {
     WEB_EXECUTE_TIMEOUT = 130,
     ELEMENT_NOT_FOUND = 131,
     WEB_NWEB_NULL = 132,
+    // common execution error (160-199)
+    PAGE_NOT_READY = 160,
+    ELEMENT_TYPE_MISMATCH = 161,
+    // input command error (200-249)
+    JSON_INVALID_INPUT_XPATH = 200,
+    JSON_INVALID_INPUT_VALUE = 201,
+    INPUT_TYPE_INVALID = 202,
+    INPUT_VALUE_FORMAT_INVALID = 203,
+    INPUT_EVENT_TYPE_MISMATCH = 204,
+    // select command error (250-299)
+    JSON_INVALID_SELECT_XPATH = 250,
+    JSON_INVALID_SELECT_OPTIONS = 251,
+    SELECT_INDEX_OUT_OF_RANGE = 252,
+    SELECT_VALUE_NOT_FOUND = 253,
+    SELECT_NOT_MULTIPLE = 254,
+    SELECT_OPTION_DISABLED = 255,
+    SELECT_EMPTY_OPTIONS = 256,
 };
 class NWebCommandActionImpl : public OHOS::NWeb::NWebCommandAction {
 public:
@@ -1014,6 +1031,55 @@ private:
     int32_t duration = 0;
     std::string align = "";
     int32_t offset = 0;
+};
+
+class NWebCommandActionInfoImpl : public OHOS::NWeb::NWebCommandActionInfo {
+public:
+    static std::shared_ptr<NWebCommandActionInfoImpl> CreateInputInfo(
+        const std::string& event_type,
+        const std::string& value,
+        const std::string& xpath)
+    {
+        return std::shared_ptr<NWebCommandActionInfoImpl>(
+            new NWebCommandActionInfoImpl(event_type, value, xpath));
+    }
+
+    static std::shared_ptr<NWebCommandActionInfoImpl> CreateSelectInfo(
+        const std::string& event_type,
+        const std::vector<std::string>& values,
+        const std::string& xpath,
+        const std::vector<int32_t>& indexes)
+    {
+        return std::shared_ptr<NWebCommandActionInfoImpl>(
+            new NWebCommandActionInfoImpl(event_type, values, xpath, indexes));
+    }
+
+    ~NWebCommandActionInfoImpl() override = default;
+
+    std::string GetEventType() const override { return event_type_; }
+    std::string GetXPath() const override { return xpath_; }
+    std::string GetInputValue() const override { return input_value_; }
+    std::vector<std::string> GetOptionValues() const override { return option_values_; }
+    std::vector<int32_t> GetOptionIndexes() const override { return indexes_; }
+
+private:
+    NWebCommandActionInfoImpl(const std::string& event_type,
+                              const std::string& value,
+                              const std::string& xpath)
+        : event_type_(event_type), input_value_(value), xpath_(xpath) {}
+
+    NWebCommandActionInfoImpl(const std::string& event_type,
+                              const std::vector<std::string>& values,
+                              const std::string& xpath,
+                              const std::vector<int32_t>& indexes)
+        : event_type_(event_type), xpath_(xpath),
+          option_values_(values), indexes_(indexes) {}
+
+    std::string event_type_ = "";
+    std::string input_value_ = "";
+    std::string xpath_ = "";
+    std::vector<std::string> option_values_;
+    std::vector<int32_t> indexes_;
 };
 
 class WebDelegate : public WebResource {
@@ -1599,6 +1665,7 @@ public:
     void OnMediaCastEnter();
     void SetImeShow(bool visible);
     int SendCommandActionToNWeb(const std::shared_ptr<OHOS::NWeb::NWebCommandAction>& simulatedAction);
+    std::shared_ptr<OHOS::NWeb::NWebCommandActionManager> GetNWebCommandActionManager();
     void OnRequestAutofill(int32_t menuType);
 
     bool HasOnNativeEmbedGestureEventV2()
