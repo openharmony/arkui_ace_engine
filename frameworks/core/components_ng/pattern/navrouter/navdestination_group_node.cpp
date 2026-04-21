@@ -309,6 +309,13 @@ void NavDestinationGroupNode::SetNavDestinationMode(NavDestinationMode mode)
     context->SetMode(mode);
 }
 
+std::optional<bool> NavDestinationGroupNode::GetUserSetFullScreenOverlay() const
+{
+    auto layoutProperty = GetLayoutProperty<NavDestinationLayoutPropertyBase>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->GetFullScreenOverlay();
+}
+
 void NavDestinationGroupNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     FrameNode::ToJsonValue(json, filter);
@@ -335,6 +342,7 @@ void NavDestinationGroupNode::ToJsonValue(std::unique_ptr<JsonValue>& json, cons
         ? "NavDestinationMode::DIALOG"
         : "NavDestinationMode::STANDARD", filter);
     json->PutExtAttr("systemTransition", TransitionTypeToString(systemTransitionType_), filter);
+    json->PutExtAttr("fullScreenOverlay", isFullScreenOverlay_, filter);
 }
 
 void NavDestinationGroupNode::SystemTransitionPushStart(bool transitionIn)
@@ -956,6 +964,11 @@ int32_t NavDestinationGroupNode::DoTransition(NavigationOperation operation, boo
 int32_t NavDestinationGroupNode::DoSystemTransition(NavigationOperation operation, bool isEnter)
 {
     auto noneSystemTransition = NavigationSystemTransitionType::NONE;
+    // fullscreen-overlay standard pages reuse the page-style horizontal slide even when the
+    // destination keeps the DEFAULT transition type, matching Navigation's overlay UX spec.
+    if (isFullScreenOverlay_ && systemTransitionType_ == NavigationSystemTransitionType::DEFAULT) {
+        return DoSystemSlideTransition(operation, isEnter);
+    }
     if ((systemTransitionType_ & NavigationSystemTransitionType::FADE) != noneSystemTransition) {
         return DoSystemFadeTransition(isEnter);
     }
@@ -999,6 +1012,12 @@ int32_t NavDestinationGroupNode::DoSystemSlideTransition(NavigationOperation ope
         // translate animation
         bool isRight = (systemTransitionType_ & NavigationSystemTransitionType::SLIDE_RIGHT)
             != NavigationSystemTransitionType::NONE;
+        // Overlay standard pages always use a horizontal slide so entering/leaving fullscreen
+        // coverage feels like page navigation rather than dialog presentation.
+        if (isFullScreenOverlay_ && mode_ == NavDestinationMode::STANDARD &&
+            systemTransitionType_ == NavigationSystemTransitionType::DEFAULT) {
+            isRight = true;
+        }
         std::function<void()> translateEvent = [weak = WeakClaim(this), isEnter, isRight, operation]() {
             auto navDestination = weak.Upgrade();
             CHECK_NULL_VOID(navDestination);
@@ -1267,6 +1286,10 @@ std::function<void()> NavDestinationGroupNode::BuildTransitionFinishCallback(
             } else if (navDestination->HasStandardBefore()) {
                 navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
                 navDestination->SetJSViewActive(false);
+            }
+            auto navigation = AceType::DynamicCast<NavigationGroupNode>(destinationPattern->GetNavigationNode());
+            if (navigation) {
+                navigation->UpdateVisibilityAfterOverlayTransition(navDestination);
             }
             navDestination->SetIsOnAnimation(false);
             if (needReport) {

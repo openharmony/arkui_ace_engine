@@ -148,6 +148,7 @@ ACE_EXPORT extern const char NAVIGATION_VIEW_ETS_TAG[];
 ACE_EXPORT extern const char BAR_ITEM_ETS_TAG[];
 ACE_EXPORT extern const char TITLE_BAR_ETS_TAG[];
 ACE_EXPORT extern const char NAVIGATION_CONTENT_ETS_TAG[];
+ACE_EXPORT extern const char NAVIGATION_FULL_SCREEN_OVERLAY_ETS_TAG[];
 ACE_EXPORT extern const char TOOL_BAR_ETS_TAG[];
 ACE_EXPORT extern const char NAVIGATION_MENU_ETS_TAG[];
 ACE_EXPORT extern const char BACK_BUTTON_ETS_TAG[];

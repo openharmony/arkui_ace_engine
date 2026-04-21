@@ -58,6 +58,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t DEFAULT_NAV_BAR_WIDTH_VALUE = 240;
+constexpr int32_t NAVIGATION_OVERLAY_ZINDEX = 2;
 
 RefPtr<FrameNode> CreateBarItemTextNode(const std::string& text)
 {
@@ -2856,6 +2857,13 @@ RefPtr<FrameNode> NavigationModelNG::CreateFrameNode(int32_t nodeId)
             HitTestMode::HTMTRANSPARENT_SELF);
         navigationGroupNode->AddChild(contentNode);
         navigationGroupNode->SetContentNode(contentNode);
+    }
+
+    auto overlayNode = AceType::DynamicCast<FrameNode>(navigationGroupNode->GetOverlayNode());
+    if (overlayNode) {
+        auto overlayRenderContext = overlayNode->GetRenderContext();
+        CHECK_NULL_RETURN(overlayRenderContext, nullptr);
+        overlayRenderContext->UpdateZIndex(NAVIGATION_OVERLAY_ZINDEX);
     }
 
     // divider node

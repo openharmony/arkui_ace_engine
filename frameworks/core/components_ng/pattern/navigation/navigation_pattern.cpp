@@ -2623,6 +2623,9 @@ void NavigationPattern::TransitionWithOutAnimation(RefPtr<NavDestinationGroupNod
     auto replaceVal = navigationStack_->GetReplaceValue();
     if (replaceVal != 0) {
         ReplaceTransition(preTopNavDestination, newTopNavDestination, false);
+        if (preTopNavDestination && preTopNavDestination->IsFullScreenOverlay()) {
+            navigationNode->UpdateVisibilityInOverlayPop(newTopNavDestination);
+        }
         return;
     }
 
@@ -2649,6 +2652,9 @@ void NavigationPattern::TransitionWithOutAnimation(RefPtr<NavDestinationGroupNod
             CHECK_NULL_VOID(parent);
             parent->RemoveChild(preTopNavDestination, true);
             parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            if (preTopNavDestination->IsFullScreenOverlay()) {
+                navigationNode->UpdateVisibilityInOverlayPop(newTopNavDestination);
+            }
         } else {
             preTopNavDestination->GetRenderContext()->RemoveClipWithRRect();
             preTopNavDestination->SetTransitionType(PageTransitionType::EXIT_PUSH);
@@ -2665,6 +2671,9 @@ void NavigationPattern::TransitionWithOutAnimation(RefPtr<NavDestinationGroupNod
                 CHECK_NULL_VOID(parent);
                 parent->RemoveChild(preTopNavDestination, true);
                 parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+                if (preTopNavDestination->IsFullScreenOverlay()) {
+                    navigationNode->UpdateVisibilityInOverlayPop(newTopNavDestination);
+                }
             }
         }
         navigationNode->RemoveDialogDestination();
@@ -2707,6 +2716,9 @@ void NavigationPattern::TransitionWithOutAnimation(RefPtr<NavDestinationGroupNod
             navBarOrHomeDestNode->SetTransitionType(PageTransitionType::ENTER_POP);
         }
         parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        if (preTopNavDestination->IsFullScreenOverlay()) {
+            navigationNode->UpdateVisibilityInOverlayPop(newTopNavDestination);
+        }
     }
     navigationNode->RemoveDialogDestination();
     auto id = navigationNode->GetTopDestination() ? navigationNode->GetTopDestination()->GetAccessibilityId() : -1;
@@ -2840,7 +2852,11 @@ void NavigationPattern::StartDefaultAnimation(const RefPtr<NavDestinationGroupNo
     }
     // navBar or HomeDestination push navDestination in split mode
     if (newTopNavDestination && !preTopNavDestination && (navigationMode_ == NavigationMode::SPLIT)) {
-        ContentChangeReport(newTopNavDestination);
+        if (newTopNavDestination->IsFullScreenOverlay()) {
+            navigationNode->TransitionWithPush(navBarOrHomeDestNode, newTopNavDestination, true);
+        } else {
+            ContentChangeReport(newTopNavDestination);
+        }
     }
 }
 
@@ -3576,6 +3592,13 @@ bool NavigationPattern::TriggerCustomAnimation(RefPtr<NavDestinationGroupNode> p
         // pop animation with top navDestination, recover navBar visible tag
         hostNode->SetNeedSetInvisible(false);
     }
+    if (isPopPage && preTopNavDestination && preTopNavDestination->IsFullScreenOverlay()) {
+        RefPtr<FrameNode> curNodeForOverlayPop = newTopNavDestination;
+        if (!curNodeForOverlayPop) {
+            curNodeForOverlayPop = AceType::DynamicCast<FrameNode>(hostNode->GetNavBarOrHomeDestinationNode());
+        }
+        hostNode->UpdateVisibilityInOverlayPop(curNodeForOverlayPop);
+    }
     auto proxy = AceType::MakeRefPtr<NavigationTransitionProxy>();
     auto homeDestination = AceType::DynamicCast<NavDestinationGroupNode>(hostNode->GetNavBarOrHomeDestinationNode());
     proxy->SetPreDestination(preTopNavDestination ? preTopNavDestination : homeDestination);
@@ -3697,6 +3720,18 @@ void NavigationPattern::OnCustomAnimationFinish(const RefPtr<NavDestinationGroup
     CHECK_NULL_VOID(hostNode);
     auto homeDest = AceType::DynamicCast<NavDestinationGroupNode>(hostNode->GetHomeDestinationNode());
     bool preIsHomeDest = homeDest && preTopNavDestination == homeDest;
+    auto updateOverlayVisibility = [weakHostNode = WeakPtr<NavigationGroupNode>(hostNode),
+                                    weakPreTopNavDestination = WeakPtr<NavDestinationGroupNode>(preTopNavDestination),
+                                    weakNewTopNavDestination = WeakPtr<NavDestinationGroupNode>(newTopNavDestination),
+                                    isPopPage]() {
+        auto hostNode = weakHostNode.Upgrade();
+        CHECK_NULL_VOID(hostNode);
+        auto preTopNavDestination = weakPreTopNavDestination.Upgrade();
+        auto newTopNavDestination = weakNewTopNavDestination.Upgrade();
+        if (!isPopPage && newTopNavDestination && newTopNavDestination->IsFullScreenOverlay()) {
+            hostNode->UpdateVisibilityAfterOverlayPush(newTopNavDestination);
+        }
+    };
     hostNode->SetIsOnAnimation(false);
     auto id = hostNode->GetTopDestination() ? hostNode->GetTopDestination()->GetAccessibilityId() : -1;
     hostNode->OnAccessibilityEvent(
@@ -3734,6 +3769,7 @@ void NavigationPattern::OnCustomAnimationFinish(const RefPtr<NavDestinationGroup
                 parent->RemoveChild(preTopNavDestination);
                 parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             }
+            updateOverlayVisibility();
             break;
         }
         if ((newTopNavDestination && preTopNavDestination && !isPopPage) ||
@@ -3770,9 +3806,11 @@ void NavigationPattern::OnCustomAnimationFinish(const RefPtr<NavDestinationGroup
             }
             bool isDialog = newTopNavDestination->GetNavDestinationMode() == NavDestinationMode::DIALOG;
             if (isDialog) {
+                updateOverlayVisibility();
                 return;
             }
             if (preIsHomeDest && navigationMode_ == NavigationMode::SPLIT) {
+                updateOverlayVisibility();
                 return;
             }
             auto property = node->GetLayoutProperty();
@@ -3781,6 +3819,7 @@ void NavigationPattern::OnCustomAnimationFinish(const RefPtr<NavDestinationGroup
             if (!preTopNavDestination) {
                 hostNode->NotifyPageHide();
             }
+            updateOverlayVisibility();
         }
     } while (0);
     hostNode->RemoveDialogDestination();
@@ -4427,6 +4466,13 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
     if (CheckIfNoNeedAnimationForForceSplit(preDestination, topDestination)) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "StartTransition don't need animation in forceSplit mode");
         isNotNeedAnimation = true;
+    }
+    if (preDestination && topDestination &&
+        (preDestination->IsFullScreenOverlay() ^ topDestination->IsFullScreenOverlay())) {
+        if ((isPopPage && topDestination->IsFullScreenOverlay()) ||
+            (!isPopPage && preDestination->IsFullScreenOverlay())) {
+            isNotNeedAnimation = true;
+        }
     }
     UpdateAdjustConstraintTypeForForceSplitAnimation(!isNotNeedAnimation);
 

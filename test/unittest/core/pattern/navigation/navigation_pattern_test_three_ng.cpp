@@ -646,7 +646,8 @@ HWTEST_F(NavigationPatternTestThreeNg, isNodeVisible, TestSize.Level1)
     navigationPattern->OnModifyDone();
     navigationPattern->MarkNeedSyncWithJsStack();
     navigationPattern->SyncWithJsStackIfNeeded();
-    navigationNode->UpdateLastStandardIndex();
+    bool hasFullScreenOverlay = false;
+    navigationNode->UpdateLastStandardIndex(hasFullScreenOverlay);
     
     auto navBarNode2 = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
     EXPECT_NE(navBarNode2, nullptr);
