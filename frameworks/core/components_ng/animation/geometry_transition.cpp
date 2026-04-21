@@ -404,12 +404,13 @@ void GeometryTransition::SyncGeometry(bool isNodeIn)
         AceAsyncTraceBeginCommercial(currentTraceTaskId, traceTag.c_str());
     };
     auto doRegisterSharedTransition = doRegisterSharedTransition_;
-    auto finishCallback = [currentTraceTaskId, nodeWeak = WeakClaim(RawPtr(self)), weak = WeakClaim(this)]() {
+    auto finishCallback = [currentTraceTaskId, nodeWeak = WeakClaim(RawPtr(self)), weak = WeakClaim(this),
+        doRegisterSharedTransition]() {
         auto node = nodeWeak.Upgrade();
         CHECK_NULL_VOID(node);
         auto renderContext = node->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
-        renderContext->SetSandBox(std::nullopt, !doRegisterSharedTransition_);
+        renderContext->SetSandBox(std::nullopt, !doRegisterSharedTransition);
         TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "node %{public}d animation completed", node->GetId());
         std::string traceTag = "ACE_GEOMETRY_TRANSITION, node " + std::to_string(node->GetId()) + " animation";
         AceAsyncTraceEndCommercial(currentTraceTaskId, traceTag.c_str());
@@ -578,7 +579,7 @@ void GeometryTransition::AnimateWithSandBox(const OffsetF& inNodeParentPos, bool
             }
         }
         propertyCallback();
-    }, [nodeWeak = WeakClaim(RawPtr(inNode))]() {
+    }, [nodeWeak = WeakClaim(RawPtr(inNode)), doRegisterSharedTransition]() {
         auto node = nodeWeak.Upgrade();
         CHECK_NULL_VOID(node);
         auto renderContext = node->GetRenderContext();

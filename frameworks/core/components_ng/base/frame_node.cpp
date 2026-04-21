@@ -5216,9 +5216,9 @@ bool FrameNode::MarkRemoving()
 
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
     if (geometryTransition != nullptr) {
+        const bool isOnShow = GetContext() ? GetContext()->GetOnShow() : true;
         TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "FrameNode::MarkRemoving, outNode: %{public}d, %{public}s,"
             " isOnForeground: %{public}d", GetId(), GetTag().c_str(), isOnShow);
-        const bool isOnShow = GetContext() ? GetContext()->GetOnShow() : true;
         if (isOnShow) {
             geometryTransition->Build(WeakClaim(this), false);
             pendingRemove = true;
