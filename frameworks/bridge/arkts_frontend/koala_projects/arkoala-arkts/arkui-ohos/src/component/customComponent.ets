@@ -233,10 +233,6 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         this.instance.__removeAllChild__Internal();
     }
 
-    __clearDelegate__Internal(): void {
-        this.instance.__clearDelegate__Internal();
-    }
-
     __addMeToParent__IExtendableComponent_Internal(): void {
         this.instance.__addMeToParent__Internal();
     }
