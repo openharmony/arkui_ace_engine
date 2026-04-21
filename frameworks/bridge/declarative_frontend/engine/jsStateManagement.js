@@ -216,6 +216,16 @@ const ComponentDisappear = __componentDisappear__Internal;
 const CustomComponentLifecycleState = __CustomComponentLifecycleState__Internal;
 
 /**
+ * The function decorated is invoked after a custom component becomes active.
+ */
+const ComponentActive = __componentActive__Internal;
+
+/**
+ * The function decorated is invoked after a custom component becomes inactive.
+ */
+const ComponentInactive = __componentInactive__Internal;
+
+/**
  * UIUtils is a state management tool class for operating the observed data.
  *
  * @syscap SystemCapability.ArkUI.ArkUI.Full
@@ -442,5 +452,7 @@ export default {
   ComponentReuse,
   ComponentRecycle,
   ComponentDisappear,
-  CustomComponentLifecycleState
+  CustomComponentLifecycleState,
+  ComponentActive,
+  ComponentInactive
 };

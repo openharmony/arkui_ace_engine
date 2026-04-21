@@ -434,11 +434,26 @@ abstract class ViewPU extends PUV2ViewBase
  */
   public setActiveInternal(active: boolean, isReuse = false): void {
     stateMgmtProfiler.begin('ViewPU.setActive');
-    if (this.isCompFreezeAllowed()) {
+    const isCompFreezeAllowed = this.isCompFreezeAllowed();
+    if (!isCompFreezeAllowed && this.__needToActiveOrInactiveLifecycle__Internal) {
+      // Non-freeze state: use __activeCountForNonFreeze__Internal
+      // Only execute when @Active/@Inactive decorator is used for performance
+      const oldCount = this.__activeCountForNonFreeze__Internal;
+      this.setActiveCountForNonFreeze(active);
+      this.executeActiveOrInactiveLifecycleByNonFreezeCount(oldCount);
+    }
+    if (isCompFreezeAllowed) {
+      const oldCount = this.activeCount_;
       this.setActiveCount(active);
       if (this.isViewActive()) {
+        if (oldCount === 0 && this.activeCount_ > 0 && this.__needToActiveOrInactiveLifecycle__Internal) {
+          this.__needToExecuteActive__Internal = true;
+        }
         this.onActiveInternal();
       } else {
+        if (oldCount > 0 && this.activeCount_ === 0 && this.__needToActiveOrInactiveLifecycle__Internal) {
+          this.__needToExecuteInactive__Internal = true;
+        }
         this.onInactiveInternal();
       }
     }
@@ -463,6 +478,10 @@ abstract class ViewPU extends PUV2ViewBase
     this.performDelayedUpdate();
     // Remove the active component from the Map for Dfx
     ViewPU.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
+    if (this.__needToExecuteActive__Internal && this.__needToActiveOrInactiveLifecycle__Internal) {
+      this.__customComponentExecuteActive__Internal();
+      this.__needToExecuteActive__Internal = false;
+    }
   }
 
 
@@ -474,6 +493,10 @@ abstract class ViewPU extends PUV2ViewBase
     stateMgmtConsole.debug(`${this.debugInfo__()}: onInactiveInternal`);
     for (const stateLinkProp of this.ownObservedPropertiesStore_) {
       stateLinkProp.enableDelayedNotification();
+    }
+    if (this.__needToExecuteInactive__Internal && this.__needToActiveOrInactiveLifecycle__Internal) {
+      this.__customComponentExecuteInactive__Internal();
+      this.__needToExecuteInactive__Internal = false;
     }
     // Add the inactive Components to Map for Dfx listing
     ViewPU.inactiveComponents_.add(`${this.constructor.name}[${this.id__()}]`);

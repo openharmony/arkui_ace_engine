@@ -277,6 +277,9 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
     // Freezes the component when it is moved to the recycle pool to prevent elementId updates
     private freezeRecycledComponent(): void {
         this.activeCount_--;
+        if (this.activeCount_ === 0 && this.__needToActiveOrInactiveLifecycle__Internal) {
+            this.__customComponentExecuteInactive__Internal();
+        }
         ViewV2.inactiveComponents_.add(`${this.constructor.name}[${this.id__()}]`);
     }
 
@@ -296,6 +299,9 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
             });
         }
         this.elmtIdsDelayedUpdate.clear();
+        if (this.activeCount_ === 1 && this.__needToActiveOrInactiveLifecycle__Internal) {
+            this.__customComponentExecuteActive__Internal();
+        }
         ViewV2.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
     }
 
@@ -824,15 +830,30 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
     // and `aboutToReuseInternal` for @ReusableV2 components.
     public setActiveInternal(active: boolean, isReuse: boolean = false): void {
         stateMgmtProfiler.begin('ViewV2.setActive');
-        stateMgmtConsole.debug(`${this.debugInfo__()}: isCompFreezeAllowed : ${this.isCompFreezeAllowed()}`);
-        if (this.isCompFreezeAllowed() && !isReuse) {
+        const isCompFreezeAllowed = this.isCompFreezeAllowed();
+        stateMgmtConsole.debug(`${this.debugInfo__()}: isCompFreezeAllowed : ${isCompFreezeAllowed}`);
+        if (!isCompFreezeAllowed && !isReuse && this.__needToActiveOrInactiveLifecycle__Internal) {
+            // Non-freeze state: use __activeCountForNonFreeze__Internal
+            // Only execute when @Active/@Inactive decorator is used for performance
+            const oldCount = this.__activeCountForNonFreeze__Internal;
+            this.setActiveCountForNonFreeze(active);
+            this.executeActiveOrInactiveLifecycleByNonFreezeCount(oldCount);
+        }
+        if (isCompFreezeAllowed && !isReuse) {
             stateMgmtConsole.debug(`${this.debugInfo__()}: ViewV2.setActive ${active ? ' inActive -> active' : 'active -> inActive'}`);
+            const oldCount = this.activeCount_;
             this.setActiveCount(active);
             if (this.isViewActive()) {
                 this.performDelayedUpdate();
                 ViewV2.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
+                if (oldCount === 0 && this.activeCount_ > 0 && this.__needToActiveOrInactiveLifecycle__Internal) {
+                    this.__customComponentExecuteActive__Internal();
+                }
             } else {
                 ViewV2.inactiveComponents_.add(`${this.constructor.name}[${this.id__()}]`);
+                if (oldCount > 0 && this.activeCount_ === 0 && this.__needToActiveOrInactiveLifecycle__Internal) {
+                    this.__customComponentExecuteInactive__Internal();
+                }
             }
         }
         // Propagate state to all child View
