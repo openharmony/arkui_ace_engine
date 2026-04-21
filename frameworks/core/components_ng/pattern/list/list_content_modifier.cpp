@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/list/list_content_modifier.h"
 
 #include "core/components_ng/render/divider_painter.h"
+#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
 ListContentModifier::ListContentModifier(const OffsetF& clipOffset, const SizeF& clipSize)

@@ -29,7 +29,6 @@
 #include "core/event/touch_event.h"
 #include "core/gestures/pan_recognizer.h"
 #include "core/gestures/raw_recognizer.h"
-#include "core/gestures/timeout_recognizer.h"
 #include "core/pipeline/base/related_node.h"
 #include "core/pipeline/base/render_node.h"
 

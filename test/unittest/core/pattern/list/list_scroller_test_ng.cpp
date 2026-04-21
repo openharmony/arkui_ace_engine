@@ -15,6 +15,7 @@
 
 #include "list_test_ng.h"
 #include "test/mock/frameworks/core/animation/mock_animation_manager.h"
+#include "core/animation/velocity_motion.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 
 #define private public

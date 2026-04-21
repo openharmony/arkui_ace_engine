@@ -17,9 +17,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SCROLL_SCROLL_CONTROLLER_H
 
 #include "core/components/scroll/scroll_controller_base.h"
-#include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
+
+class RenderNode;
 
 class ACE_EXPORT ScrollController : public ScrollControllerBase {
     DECLARE_ACE_TYPE(ScrollController, ScrollControllerBase);

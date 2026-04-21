@@ -17,6 +17,7 @@
 
 #include "core/components/common/layout/grid_column_info.h"
 #include "core/components/common/layout/grid_container_info.h"
+#include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_model.h"
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_algorithm.h"
