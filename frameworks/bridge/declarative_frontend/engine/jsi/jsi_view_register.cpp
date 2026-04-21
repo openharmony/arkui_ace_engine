@@ -58,6 +58,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_object_template.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_gesture_recognizer.h"
+#include "core/components/common/properties/placement.h"
 namespace OHOS::Ace::Framework {
 namespace {
 static constexpr uint32_t PARAM_SIZE_ONE   = 1;

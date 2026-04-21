@@ -90,6 +90,7 @@
 #include "base/ressched/ressched_report.h"
 
 #include "accessibility_config.h"
+#include "core/components/common/properties/placement.h"
 
 namespace OHOS::Ace::Platform {
 namespace {

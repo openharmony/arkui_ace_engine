@@ -45,6 +45,7 @@
 #include "frameworks/core/components_ng/event/event_constants.h"
 #include "frameworks/core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
 #include "frameworks/core/components_ng/property/smart_gesture_property.h"
+#include "core/components/common/properties/placement.h"
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t LONG_PRESS_DURATION = 800;

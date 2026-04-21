@@ -30,6 +30,7 @@
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/property/smart_gesture_property.h"
+#include "core/components_ng/animation/geometry_transition.h"
 
 
 namespace OHOS::Ace::NG {

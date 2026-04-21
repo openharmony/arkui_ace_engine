@@ -33,6 +33,7 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/components/common/properties/placement.h"
 
 namespace OHOS::Ace::NG {
 namespace {
