@@ -176,6 +176,7 @@ export interface LabelTheme {
   localizedSmallMargin: LocalizedMargin;
   defaultFontSize: Dimension;
   fontWeight: Resource;
+  adaptiveItemFontSize: Dimension;
 }
 
 export interface ChipNodeOpacity {
@@ -342,18 +343,18 @@ export function Chip(options: ChipOptions) {
   })
 }
 
-export class EnvironmentCallbackEntry implements EnvironmentCallback {
-  private chipComponent: ChipComponent;
-
-  constructor(chipComponent: ChipComponent) {
-    this.chipComponent = chipComponent;
+export class EnvironmentCallbackEntry implements EnvironmentCallback { 
+  private chipComponent: ChipComponent; 
+  
+  constructor(chipComponent: ChipComponent) { 
+    this.chipComponent = chipComponent; 
   }
 
-  onConfigurationUpdated(config: Configuration) {
-    this.chipComponent.updateLanguageLineHeight();
+  onConfigurationUpdated(config: Configuration) { 
+    this.chipComponent.updateLanguageLineHeight(); 
   }
 
-  onMemoryLevel(level: AbilityConstant.MemoryLevel) {}
+  onMemoryLevel(level: AbilityConstant.MemoryLevel) {} 
 }
 
 @Component
@@ -376,6 +377,7 @@ export struct ChipComponent {
     label: {
       normalFontSize: $r('sys.float.chip_normal_font_size'),
       smallFontSize: $r('sys.float.chip_small_font_size'),
+      adaptiveItemFontSize: $r('sys.float.Caption_M'),
       focusFontColor: $r('sys.color.chip_focus_text'),
       focusActiveFontColor: $r('sys.color.chip_activated_focus_font_color'),
       fontColor: $r('sys.color.chip_font_color'),
@@ -516,7 +518,7 @@ export struct ChipComponent {
   @State chipNodeInFocus: boolean = false;
   private symbolEffect: SymbolEffect = new SymbolEffect();
   private environmentCallbackID?: int;
- 	private environmentCallback: EnvironmentCallbackEntry = new EnvironmentCallbackEntry(this);
+  private environmentCallback: EnvironmentCallbackEntry = new EnvironmentCallbackEntry(this);
 
   updateLanguageLineHeight(): void {
     const resourceManager = this.getUIContext().getHostContext()?.resourceManager;
@@ -1146,9 +1148,9 @@ export struct ChipComponent {
       return this.chipFontSize!;
     }
     if (this.isSmallChipSize()) {
-      return this.theme.label.smallFontSize;
+      return this.useAdaptiveLineHeight ? this.theme.label.adaptiveItemFontSize : this.theme.label.smallFontSize;
     }
-    return this.theme.label.normalFontSize;
+    return this.useAdaptiveLineHeight ? this.theme.label.adaptiveItemFontSize : this.theme.label.normalFontSize;
   }
 
   private getChipText(): ResourceStr {

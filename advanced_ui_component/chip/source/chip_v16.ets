@@ -131,6 +131,7 @@ interface DefaultSymbolTheme {
 interface LabelTheme {
   normalFontSize: Dimension;
   smallFontSize: Dimension;
+  adaptiveItemFontSize: Dimension;
   focusFontColor: ResourceColor;
   focusActiveFontColor: ResourceColor;
   fontColor: ResourceColor;
@@ -331,6 +332,7 @@ export struct ChipComponent {
     label: {
       normalFontSize: $r('sys.float.chip_normal_font_size'),
       smallFontSize: $r('sys.float.chip_small_font_size'),
+      adaptiveItemFontSize: $r('sys.float.Caption_M'),
       focusFontColor: $r('sys.color.chip_focus_text'),
       focusActiveFontColor: $r('sys.color.chip_activated_focus_font_color'),
       fontColor: $r('sys.color.chip_font_color'),
@@ -1248,9 +1250,9 @@ export struct ChipComponent {
       return this.chipFontSize;
     }
     if (this.isSmallChipSize()) {
-      return this.theme.label.smallFontSize;
+      return this.useAdaptiveLineHeight ? this.theme.label.adaptiveItemFontSize : this.theme.label.smallFontSize;
     }
-    return this.theme.label.normalFontSize;
+    return this.useAdaptiveLineHeight ? this.theme.label.adaptiveItemFontSize : this.theme.label.normalFontSize;
   }
 
   getChipText(): ResourceStr {

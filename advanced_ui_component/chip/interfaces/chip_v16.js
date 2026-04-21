@@ -274,6 +274,13 @@ export class ChipComponent extends ViewPU {
           bundleName: '__harDefaultBundleName__',
           moduleName: '__harDefaultModuleName__',
         },
+        adaptiveItemFontSize: {
+          id: -1,
+          type: 10002,
+          params: ['sys.float.Caption_M'],
+          bundleName: '__harDefaultBundleName__',
+          moduleName: '__harDefaultModuleName__',
+        },
         focusFontColor: {
           id: -1,
           type: 10001,
@@ -1949,9 +1956,9 @@ export class ChipComponent extends ViewPU {
       return this.chipFontSize;
     }
     if (this.isSmallChipSize()) {
-      return this.theme.label.smallFontSize;
+      return this.useAdaptiveLineHeight ? this.theme.label.adaptiveItemFontSize : this.theme.label.smallFontSize;
     }
-    return this.theme.label.normalFontSize;
+    return this.useAdaptiveLineHeight ? this.theme.label.adaptiveItemFontSize : this.theme.label.normalFontSize;
   }
   getChipText() {
     return this.label?.text ?? '';
