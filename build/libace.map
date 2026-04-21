@@ -1728,7 +1728,6 @@
       "OHOS::Ace::NG::ScrollablePattern::GetEventDumpInfo(std::__h::unique_ptr<OHOS::Ace::JsonValue, std::__h::default_delete<OHOS::Ace::JsonValue>>&)";
       "OHOS::Ace::NG::ScrollablePattern::GetIsOverScroll() const";
       "OHOS::Ace::NG::ScrollablePattern::GetMainContentSize() const";
-      "OHOS::Ace::NG::ScrollablePattern::GetOffsetWithLimit(float) const";
       "OHOS::Ace::NG::ScrollablePattern::GetRepeatCountInfo(OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode>, int&, int&, int&)";
       "OHOS::Ace::NG::ScrollablePattern::GetScrollEdgeEffect() const";
       "OHOS::Ace::NG::ScrollablePattern::GetViewSizeMinusPadding() const";

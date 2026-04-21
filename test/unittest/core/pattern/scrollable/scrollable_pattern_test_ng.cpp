@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,15 +19,15 @@
 #include "test/unittest/core/pattern/test_ng.h"
 #include "test/mock/frameworks/core/components_ng/pattern/mock_nestable_scroll_container.h"
 
+#include "core/animation/bezier_variable_velocity_motion.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/arc_list/arc_list_pattern.h"
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scrollable/refresh_coordination.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
-#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
-#include "core/animation/bezier_variable_velocity_motion.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_method.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;
@@ -303,7 +303,7 @@ HWTEST_F(ScrollablePatternTestNg, UpdateFadeInfo001, TestSize.Level1)
  */
 HWTEST_F(ScrollablePatternTestNg, ToJsonValue001, TestSize.Level1)
 {
-    RefPtr<ScrollablePattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
     scrollablePattern->edgeEffect_ = EdgeEffect::FADE;
     InspectorFilter filter;
     filter.filterFixed = 0;
@@ -321,7 +321,7 @@ HWTEST_F(ScrollablePatternTestNg, ToJsonValue001, TestSize.Level1)
  */
 HWTEST_F(ScrollablePatternTestNg, ToJsonValue002, TestSize.Level1)
 {
-    RefPtr<ScrollablePattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
     scrollablePattern->effectEdge_ = EffectEdge::START;
     InspectorFilter filter;
     filter.filterFixed = 0;
@@ -339,7 +339,7 @@ HWTEST_F(ScrollablePatternTestNg, ToJsonValue002, TestSize.Level1)
  */
 HWTEST_F(ScrollablePatternTestNg, ToJsonValue003, TestSize.Level1)
 {
-    RefPtr<ScrollablePattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
     scrollablePattern->effectEdge_ = EffectEdge::END;
     InspectorFilter filter;
     filter.filterFixed = 0;
@@ -466,7 +466,7 @@ HWTEST_F(ScrollablePatternTestNg, NeedSplitScroll003, TestSize.Level1)
  */
 HWTEST_F(ScrollablePatternTestNg, UninitMouseEvent001, TestSize.Level1)
 {
-    RefPtr<ScrollablePattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
     scrollablePattern->boxSelectPanEvent_ = nullptr;
     scrollablePattern->isMouseEventInit_ = true;
     scrollablePattern->UninitMouseEvent();
@@ -480,7 +480,7 @@ HWTEST_F(ScrollablePatternTestNg, UninitMouseEvent001, TestSize.Level1)
  */
 HWTEST_F(ScrollablePatternTestNg, HandleDragUpdate001, TestSize.Level1)
 {
-    RefPtr<ScrollablePattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
     GestureEvent info;
     Offset rawGlobalLocation(2.0, 4.0);
     info.rawGlobalLocation_ = rawGlobalLocation;
