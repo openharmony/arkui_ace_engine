@@ -647,11 +647,13 @@ HWTEST_F(SafeAreaManagerTest, RemoveRestoreNodeTest, TestSize.Level1)
     safeAreaManager_->AddGeoRestoreNode(frameNode0);
     safeAreaManager_->AddGeoRestoreNode(frameNode1);
     EXPECT_EQ(safeAreaManager_->GetGeoRestoreNodes().size(), 2);
+
     /**
      * @tc.steps: step2 Remove one node and verify set size.
      */
     safeAreaManager_->RemoveRestoreNode(frameNode0);
     EXPECT_EQ(safeAreaManager_->GetGeoRestoreNodes().size(), 1);
+
     /**
      * @tc.steps: step3 Remove all nodes and verify set is empty.
      */
@@ -674,6 +676,7 @@ HWTEST_F(SafeAreaManagerTest, KeyboardHeightConsideringUIExtensionTest, TestSize
     uint32_t newHeight = 256;
     safeAreaManager_->SetkeyboardHeightConsideringUIExtension(newHeight);
     EXPECT_EQ(safeAreaManager_->GetkeyboardHeightConsideringUIExtension(), newHeight);
+
     /**
      * @tc.steps: step2 Set same height again and verify no callback triggered.
      */
@@ -698,11 +701,13 @@ HWTEST_F(SafeAreaManagerTest, KeyboardChangeCallbackConsideringUIExtTest, TestSi
     safeAreaManager_->AddKeyboardChangeCallbackConsideringUIExt(nodeId, callback);
     safeAreaManager_->SetkeyboardHeightConsideringUIExtension(256);
     EXPECT_EQ(callbackCount, 1);
+
     /**
      * @tc.steps: step2 Set same height again and verify callback not triggered.
      */
     safeAreaManager_->SetkeyboardHeightConsideringUIExtension(256);
     EXPECT_EQ(callbackCount, 1);
+
     /**
      * @tc.steps: step3 Remove callback and verify no more callbacks.
      */
@@ -753,6 +758,7 @@ HWTEST_F(SafeAreaManagerTest, GetCutoutSafeAreaWithoutProcessTest, TestSize.Leve
     safeAreaManager_->UpdateCutoutSafeArea(cutoutArea);
     auto cutoutSafeArea = safeAreaManager_->GetCutoutSafeAreaWithoutProcess();
     EXPECT_EQ(cutoutSafeArea, cutoutAreaWithRoot);
+
     /**
      * @tc.steps: step2 Set window type to SCB and update SCB cutout area.
      */
