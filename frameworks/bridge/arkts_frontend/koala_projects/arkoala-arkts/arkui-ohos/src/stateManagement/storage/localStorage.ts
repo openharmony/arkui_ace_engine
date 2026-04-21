@@ -289,6 +289,11 @@ export class LocalStorage {
         return this.store_.__makeStorageLink<T>(owner, propName, varName, decoratorName, defaultValue, watchFunc);
     }
 
+    public __makeStoragePropRef<T>(propName: string, decoratorName: string,
+        defaultValue: T): AbstractProperty<T> | undefined {
+        return this.store_.setAndRef<T>(propName, defaultValue, decoratorName);
+    }
+
     /**
      * Internal function to get the StorageProp for propName, no type verification
      * use for test code only
