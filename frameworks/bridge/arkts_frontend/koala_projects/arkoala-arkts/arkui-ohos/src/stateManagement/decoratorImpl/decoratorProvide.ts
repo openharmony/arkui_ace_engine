@@ -108,12 +108,12 @@ export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         // Update ObservedObjectRegistry registration
         this.updateObservedObjectRegistration(oldValue, value);
 
-        if (this.setProxyValue) {
-            this.setProxyValue!(value);
-        }
         this.unregisterWatchFromObservedObjectChanges(oldValue);
         this.registerWatchForObservedObjectChanges(this.backing_.get(false));
         this.execWatchFuncs();
+        if (this.setProxyValue) {
+            this.setProxyValue!(value);
+        }
     }
     // only set value
     public set(newValue: T, check: boolean): void {

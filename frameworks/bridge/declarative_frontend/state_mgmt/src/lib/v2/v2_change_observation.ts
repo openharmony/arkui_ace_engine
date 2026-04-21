@@ -1381,14 +1381,18 @@ class ObserveV2 {
   }
   public static autoProxyObject(target: Object, key: string | symbol): any {
     let val = target[key];
+
     if (InteropConfigureStateMgmt.needsInterop()) {
-      val = ObserveV2.setStaticCompatibleFuncInVal(target, val);
+      const interopVal = tryGetInteropObservedValue(target, key, val);
+      if (interopVal !== undefined) {
+        return interopVal;
+      }
     }
     // Not an object, not a collection, no proxy required
     if (!val || typeof (val) !== 'object' ||
       !(Array.isArray(val) || val instanceof Set || val instanceof Map || val instanceof Date)) {
       return val;
-    }
+    } 
 
     // Collections are the only type that require proxy observation. If they have already been observed, no further observation is needed.
     // Prevents double-proxying: checks if the object is already proxied by either V1 or V2 (to avoid conflicts).
@@ -1677,9 +1681,6 @@ const trackInternal = (
     },
     set(val) {
       // If the object has not been observed, you can directly assign a value to it. This improves performance.
-      if (InteropConfigureStateMgmt.needsInterop() && val && typeof val === 'object' && isStaticProxy(val)) {
-        val = InteropExtractorModule.getV2InteropObservedObject(val, this, propertyKey, '__localStaticWatch_');
-      }
       if (val !== this[storeProp]) {
         this[storeProp] = val;
 
