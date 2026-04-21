@@ -15,15 +15,11 @@
 
 import { int32 } from "@koalaui/compat";
 import { KPointer } from "@koalaui/interop"
-import { OverlayManagerOptions, OrderOverlayOptions } from "@ohos/arkui/UIContext"
+import { OverlayManagerOptions } from "@ohos/arkui/UIContext"
 import { LevelOrder } from "@ohos/promptAction"
 
 export default declare namespace overlayManager {
     loadLibrary("overlayManager_ani");
-
-    export interface OrderOverlayOptionsInternal {
-        levelOrder?: number;
-    }
 
     export function setOverlayManagerOptions(options: OverlayManagerOptions): boolean;
 
@@ -42,7 +38,4 @@ export default declare namespace overlayManager {
     export function showAllComponentContents(): void;
 
     export function hideAllComponentContents(): void;
-
-    export function openOrderOverlay(contentNode: KPointer, options?: OrderOverlayOptions,
-        optionsInternal?: OrderOverlayOptionsInternal): Promise<void>;
 }

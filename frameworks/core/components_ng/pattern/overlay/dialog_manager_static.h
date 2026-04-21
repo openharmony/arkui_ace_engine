@@ -18,8 +18,6 @@
 
 #include "base/utils/singleton.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
-#include "core/components_ng/pattern/overlay/overlay_options.h"
-#include "core/components_ng/pattern/overlay/overlay_manager.h"
 
 namespace OHOS::Ace::NG {
 class ACE_FORCE_EXPORT DialogManagerStatic : public Singleton<DialogManagerStatic> {
@@ -52,8 +50,6 @@ public:
     static void CloseCustomDialogStatic(const int32_t dialogId, const int32_t containerId);
     static void CloseCustomDialogStatic(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)> &&callback);
     static void RemoveCustomDialog(int32_t instanceId);
-    static void OpenOrderOverlayStatic(const WeakPtr<NG::UINode>& node, const NG::OrderOverlayOptions& options,
-        const int32_t containerId, std::function<void(int32_t)>&& callback);
 
     void SetDismissDialogInfo(int32_t id, const std::string& name)
     {

@@ -19,7 +19,6 @@
 #include "core/common/ace_engine.h"
 #include "core/common/container_scope.h"
 #include "core/components_ng/pattern/overlay/level_order.h"
-#include "core/components_ng/pattern/overlay/overlay_options.h"
 
 namespace OHOS::Ace::Napi {
 static NG::FrameNode* ParseFrameNode(napi_env env, napi_callback_info info)
@@ -116,124 +115,6 @@ static napi_value JSAddFrameNodeWithOrder(napi_env env, napi_callback_info info)
 
     delegate->AddFrameNodeWithOrder(AceType::Claim(frameNode), levelOrder);
     return nullptr;
-}
-
-struct OverlayAsyncContext {
-    napi_env env = nullptr;
-    int32_t instanceId = -1;
-    napi_deferred deferred = nullptr;
-};
-
-static NG::OrderOverlayOptions ParseOrderOverlayOptions(napi_env env, napi_value optionsObj)
-{
-    NG::OrderOverlayOptions options;
-    if (optionsObj == nullptr) {
-        return options;
-    }
-
-    napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, optionsObj, &valueType);
-    if (valueType != napi_object) {
-        return options;
-    }
-
-    napi_value levelOrderObj = nullptr;
-    napi_get_named_property(env, optionsObj, "levelOrder", &levelOrderObj);
-    if (levelOrderObj != nullptr) {
-        options.levelOrder = ParseLevelOrder(env, levelOrderObj);
-    }
-
-    napi_value levelModeObj = nullptr;
-    napi_get_named_property(env, optionsObj, "levelMode", &levelModeObj);
-    if (levelModeObj != nullptr) {
-        int32_t mode = 0;
-        napi_get_value_int32(env, levelModeObj, &mode);
-        options.levelMode = static_cast<LevelMode>(mode);
-    }
-
-    napi_value levelUniqueIdObj = nullptr;
-    napi_get_named_property(env, optionsObj, "levelUniqueId", &levelUniqueIdObj);
-    if (levelUniqueIdObj != nullptr) {
-        int32_t uniqueId = -1;
-        napi_get_value_int32(env, levelUniqueIdObj, &uniqueId);
-        options.levelUniqueId = uniqueId;
-    }
-    return options;
-}
-
-void CreateOverlayCallback(std::shared_ptr<OverlayAsyncContext>& asyncContext, std::function<void(int32_t)>& callback)
-{
-    callback = [asyncContext](int32_t errorCode) mutable {
-        CHECK_NULL_VOID(asyncContext);
-        auto container = AceEngine::Get().GetContainer(asyncContext->instanceId);
-        CHECK_NULL_VOID(container);
-        auto taskExecutor = container->GetTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        auto task = [asyncContext, errorCode]() {
-            CHECK_NULL_VOID(asyncContext);
-            CHECK_NULL_VOID(asyncContext->deferred);
-            napi_handle_scope scope = nullptr;
-            auto status = napi_open_handle_scope(asyncContext->env, &scope);
-            if ((status != napi_ok) || (scope == nullptr)) {
-                TAG_LOGE(AceLogTag::ACE_OVERLAY, "CreateOverlayCallback failed to open the scope of the handle.");
-                return;
-            }
-
-            if (errorCode == ERROR_CODE_NO_ERROR) {
-                napi_value result = nullptr;
-                napi_get_undefined(asyncContext->env, &result);
-                napi_resolve_deferred(asyncContext->env, asyncContext->deferred, result);
-            } else {
-                std::string strCode = std::to_string(errorCode);
-                std::string strMsg = ErrorToMessage(errorCode);
-                napi_value code = nullptr;
-                napi_create_string_utf8(asyncContext->env, strCode.c_str(), strCode.length(), &code);
-                napi_value msg = nullptr;
-                napi_create_string_utf8(asyncContext->env, strMsg.c_str(), strMsg.length(), &msg);
-                napi_value error = nullptr;
-                napi_create_error(asyncContext->env, code, msg, &error);
-                napi_reject_deferred(asyncContext->env, asyncContext->deferred, error);
-            }
-            napi_close_handle_scope(asyncContext->env, scope);
-        };
-        taskExecutor->PostTask(task, TaskExecutor::TaskType::JS, "ArkUICreateOverlayCallback");
-        asyncContext = nullptr;
-    };
-}
-
-static napi_value JSOpenOrderOverlay(napi_env env, napi_callback_info info)
-{
-    NG::FrameNode* frameNode = ParseFrameNode(env, info);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-
-    auto reason = ContainerScope::CurrentIdWithReason().second;
-    auto instanceId = Container::CurrentIdSafely();
-    auto delegate = EngineHelper::GetCurrentDelegateSafely();
-    if (!delegate) {
-        std::string errorMessage =
-            "UI execution context not found." + AceEngine::GetEnhancedContextBNotFoundMessage(reason, instanceId);
-        NapiThrow(env, errorMessage, ERROR_CODE_INTERNAL_ERROR);
-        return nullptr;
-    }
-
-    size_t argc = 3;
-    napi_value argv[3] = { nullptr };
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
-
-    NG::OrderOverlayOptions options;
-    if (argc > 1) {
-        options = ParseOrderOverlayOptions(env, argv[1]);
-    }
-
-    auto asyncContext = std::make_shared<OverlayAsyncContext>();
-    asyncContext->env = env;
-    asyncContext->instanceId = Container::CurrentIdSafely();
-    napi_value promise = nullptr;
-    napi_create_promise(env, &asyncContext->deferred, &promise);
-    std::function<void(int32_t)> overlayCallback = nullptr;
-    CreateOverlayCallback(asyncContext, overlayCallback);
-    delegate->OpenOrderOverlay(AceType::Claim(frameNode), options, std::move(overlayCallback));
-    return promise;
 }
 
 static napi_value JSRemoveFrameNode(napi_env env, napi_callback_info info)
@@ -382,7 +263,6 @@ static napi_value OverlayManagerExport(napi_env env, napi_value exports)
     napi_property_descriptor overlayManagerDesc[] = {
         DECLARE_NAPI_FUNCTION("addFrameNode", JSAddFrameNode),
         DECLARE_NAPI_FUNCTION("addFrameNodeWithOrder", JSAddFrameNodeWithOrder),
-        DECLARE_NAPI_FUNCTION("openOrderOverlay", JSOpenOrderOverlay),
         DECLARE_NAPI_FUNCTION("removeFrameNode", JSRemoveFrameNode),
         DECLARE_NAPI_FUNCTION("showNode", JSShowNode),
         DECLARE_NAPI_FUNCTION("hideNode", JSHideNode),
