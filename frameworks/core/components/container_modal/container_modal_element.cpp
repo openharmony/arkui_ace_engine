@@ -347,6 +347,7 @@ void ContainerModalElement::Update()
             containerElement->controller_->ClearStopListeners();
             containerElement->controller_->AddStopListener([weak] {
                 auto container = weak.Upgrade();
+                CHECK_NULL_VOID(container);
                 container->SetTitleAccessibilityNodeOffset();
             });
             containerElement->controller_->Forward();
@@ -367,6 +368,7 @@ void ContainerModalElement::Update()
             containerElement->controller_->ClearStopListeners();
             containerElement->controller_->AddStopListener([weak] {
                 auto container = weak.Upgrade();
+                CHECK_NULL_VOID(container);
                 container->SetTitleAccessibilityNodeOffset();
             });
             containerElement->controller_->Forward();
