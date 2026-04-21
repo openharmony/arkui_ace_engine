@@ -39,6 +39,15 @@ void ListItemGroupModelNG::Create(const V2::ListItemGroupOptions& options)
         CHECK_NULL_VOID(layoutProperty);
         layoutProperty->ResetDividerColorSetByUser();
     }
+    if (options.style == V2::ListItemGroupStyle::CARD && frameNode) {
+        RefPtr<ListItemGroupPattern> pattern = frameNode->GetPattern<ListItemGroupPattern>();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->GetIsCardStyleInitialized()) {
+            return;
+        }
+        pattern->ApplyListItemGroupDefaultAttributes(frameNode);
+        pattern->SetIsCardStyleInitialized(true);
+    }
 }
 
 RefPtr<FrameNode> ListItemGroupModelNG::CreateFrameNode(int32_t nodeId)
