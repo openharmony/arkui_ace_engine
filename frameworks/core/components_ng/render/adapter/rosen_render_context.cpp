@@ -939,7 +939,7 @@ void RosenRenderContext::SyncAdditionalGeometryProperties(const RectF& paintRect
         PaintOverlayText();
     }
 
-    if (propEdgeLightParam_) {
+    if (HasEdgeLightParam()) {
         UpdateEdgeLightFilter(paintRect.GetSize());
         UpdateEdgeLightFilterWithLightMask(paintRect.GetSize());
     }

@@ -534,4 +534,35 @@ void BorderImageProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const In
         ->GetNeedFillCenter() ? "true" : "false");
     json->PutExtAttr("borderImage", jsonBorderImage->ToString().c_str(), filter);
 }
+
+void UnionEffectProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    json->PutExtAttr("useUnionEffect", propUseUnionEffect.value_or(false) ? "true" : "false", filter);
+    json->PutExtAttr("unionMode", static_cast<int32_t>(propUnionMode.value_or(UnionMode::SMOOTH_UNION)), filter);
+    if (propCenterGravityOptions.has_value()) {
+        auto jsonCenterGravity = JsonUtil::Create(true);
+        jsonCenterGravity->Put("gravityCenter", propCenterGravityOptions->gravityCenter ? "true" : "false");
+        jsonCenterGravity->Put("gravityIntensity", propCenterGravityOptions->gravityIntensity);
+        json->PutExtAttr("centerGravityOptions", jsonCenterGravity, filter);
+    }
+}
+
+void EdgeLightProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    if (propEdgeLightParam.has_value()) {
+        auto jsonEdgeLight = JsonUtil::Create(true);
+        jsonEdgeLight->Put("edgeLightPosition", static_cast<int32_t>(propEdgeLightParam->edgeLightPosition));
+        jsonEdgeLight->Put("length", propEdgeLightParam->length.ToString().c_str());
+        jsonEdgeLight->Put("intensity", propEdgeLightParam->intensity);
+        jsonEdgeLight->Put("thickness", propEdgeLightParam->thickness.ToString().c_str());
+        jsonEdgeLight->Put("color", propEdgeLightParam->color.ColorToString().c_str());
+        json->PutExtAttr("edgeLightParam", jsonEdgeLight, filter);
+    }
+}
 } // namespace OHOS::Ace::NG
