@@ -22,6 +22,7 @@ import { IBackingValue } from './iBackingValue';
 import { STATE_MGMT_FACTORY } from '../decorator';
 import { ObserveSingleton } from './observeSingleton';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
+import { IncrementalNode } from '@koalaui/runtime';
 
 export class DecoratorBackingValue<T> implements IBackingValue<T> {
     protected readonly propertyName_: string;
@@ -35,6 +36,9 @@ export class DecoratorBackingValue<T> implements IBackingValue<T> {
         this.propertyName_ = propertyName;
         this.value_ = initValue;
         this.metaDependency_ = STATE_MGMT_FACTORY.makeMutableStateMeta();
+    }
+    getDependentInfo(): Set<IncrementalNode> | undefined {
+        return this.metaDependency_.getDependentNodeInfo();
     }
 
     public get(shouldAddRef: boolean): T {

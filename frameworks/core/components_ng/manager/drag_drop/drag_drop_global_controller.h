@@ -45,6 +45,7 @@ public:
         const DragDropInitiatingStatus& dragStatus);
     void SetPrepareDragFrameNode(const WeakPtr<FrameNode>& prepareDragFrameNode);
     const WeakPtr<FrameNode> GetPrepareDragFrameNode() const;
+    int32_t GetPrepareDragFrameNodeId() const;
     void SetPreDragStatus(PreDragStatus preDragStatus);
     PreDragStatus GetPreDragStatus() const;
     void SetEnableDropDisallowedBadge(bool enableDisallowStatusShowing);
@@ -79,6 +80,9 @@ public:
     bool IsCurrentDrag(int32_t requestId) const;
     uint64_t GetStartDragVsyncTime() const;
     void SetStartDragVsyncTime(uint64_t startDragVsyncTime);
+    void ResetPrePendingStatus();
+    void SavePendingRequestIdentify(int32_t requestId);
+    void NotifyPendingFailed(int32_t requestId);
 
 private:
     DragDropGlobalController() = default;
@@ -90,6 +94,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(DragDropGlobalController);
     RefPtr<FrameNode> currentDragNode_ = nullptr;
     WeakPtr<FrameNode> prepareDragFrameNode_;
+    int32_t prepareDragFrameNodeId_ = -1;
     WeakPtr<FrameNode> menuLiftingTargetNode_;
     PreDragStatus preDragStatus_ = PreDragStatus::ACTION_DETECTING_STATUS;
 
@@ -112,6 +117,7 @@ private:
     std::function<void()> asyncDragCallback_;
     bool enableDropDisallowedBadge_ = false;
     uint64_t startDragVsyncTime_ = 0;
+    bool prePendingDone_ = false;
 };
 
 } // namespace OHOS::Ace::NG

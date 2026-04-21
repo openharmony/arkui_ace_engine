@@ -27,6 +27,7 @@
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/image_painter.h"
+#include "core/components_ng/render/paragraph.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_v2/inspector/utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -50,6 +51,16 @@ constexpr uint32_t POINT_COUNT = 4;
 constexpr uint32_t REPORTER_PRECISION = 3;
 constexpr uint32_t NODE_TYPE = 0;
 constexpr float OBSCURED_ALPHA = 0.2f;
+
+bool HasCrossColorSpace(const std::vector<Color>& colors, const LinearVector<LinearColor>& animatableColors)
+{
+    for (size_t i = 0; i < colors.size(); ++i) {
+        if (colors[i].GetColorSpace() != animatableColors[i].ToColorWithColorSpace().GetColorSpace()) {
+            return true;
+        }
+    }
+    return false;
+}
 } // namespace
 
 TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textStyle, const WeakPtr<Pattern>& pattern)
@@ -73,6 +84,7 @@ TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textSty
     AttachProperty(contentSize_);
     dragStatus_ = MakeRefPtr<PropertyBool>(false);
     AttachProperty(dragStatus_);
+
     if (textStyle.has_value()) {
         SetDefaultAnimatablePropertyValue(textStyle.value(), host);
     }
@@ -120,6 +132,7 @@ void TextContentModifier::SetDefaultAnimatablePropertyValue(
     SetDefaultTextDecoration(textStyle);
     SetDefaultBaselineOffset(textStyle);
     SetDefaultLineHeight(textStyle);
+    SetDefaultFontVariations(textStyle);
 }
 
 void TextContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
@@ -256,6 +269,18 @@ void TextContentModifier::SetDefaultLineHeight(const TextStyle& textStyle)
 
     lineHeightFloat_ = MakeRefPtr<AnimatablePropertyFloat>(lineHeight);
     AttachProperty(lineHeightFloat_);
+}
+
+void TextContentModifier::SetDefaultFontVariations(const TextStyle& textStyle)
+{
+    FONT_VARIATIONS_LIST fontVariations = textStyle.GetFontVariations();
+    for (const auto& fontVariation : fontVariations) {
+        double value = fontVariation.value;
+        auto valueProperty = MakeRefPtr<AnimatablePropertyFloat>(value);
+        AttachProperty(valueProperty);
+        fontVariations_[fontVariation.axis] = valueProperty;
+        fontVariationMeasureValues_[fontVariation.axis] = fontVariation.value;
+    }
 }
 
 void TextContentModifier::SetClip(bool clip)
@@ -561,13 +586,24 @@ bool TextContentModifier::HandleDrawCallback(
         auto paintOffsetY = paintOffset_.GetY();
         SetTextContentAlingOffsetY(paintOffsetY);
         auto contentRect = textPattern->GetTextContentRect();
-        float paintOffsetX = AdjustParagraphX(paragraphs.front(), contentRect);
+        ExternalDrawCallbackInfo callbackInfo;
+        callbackInfo.paintX = AdjustParagraphX(paragraphs.front(), contentRect);
+        callbackInfo.paintY = paintOffsetY;
         auto host = textPattern->GetHost();
         CHECK_NULL_RETURN(host, false);
         auto geometryNode = host->GetGeometryNode();
         CHECK_NULL_RETURN(geometryNode, false);
-        return drawCallback(
-            paintOffsetX, paintOffsetY, geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height());
+        auto textStyle = textPattern->GetTextStyle();
+        callbackInfo.width = geometryNode->GetFrameSize().Width();
+        callbackInfo.height = geometryNode->GetFrameSize().Height();
+        if (textPattern->IsMeasured()) {
+            callbackInfo.isFontChanged = textPattern->IsOnlyFontSizeOrColorChanged();
+            textPattern->MarkMeasured(false);
+        } else {
+            callbackInfo.isFontChanged = true;
+        }
+        callbackInfo.fontSize = textStyle.GetFontSize().Value();
+        return drawCallback(callbackInfo);
     }
     return false;
 }
@@ -684,15 +720,36 @@ void TextContentModifier::DrawTextRacing(DrawingContext& drawingContext, const F
 void TextContentModifier::ChangeParagraphColor(const RefPtr<Paragraph>& paragraph)
 {
     CHECK_NULL_VOID(paragraph);
-    if (onlyTextColorAnimation_ && animatableTextColor_) {
-        if (SystemProperties::GetTextTraceEnabled()) {
-            ACE_TEXT_SCOPED_TRACE("TextContentModifier::ChangeParagraphColor[animatableTextColor:%s]",
-                Color(animatableTextColor_->Get().GetValue()).ColorToString().c_str());
-        }
-        Color c { animatableTextColor_->Get().GetValue() };
-        c.SetPlaceholder(animatableTextColor_->Get().GetPlaceholder());
+    if (onlyTextColorAnimation_) {
         auto length = paragraph->GetParagraphText().length();
-        paragraph->UpdateColor(0, length, c);
+        if (animatableTextColor_) {
+            Color c { animatableTextColor_->Get().GetValue() };
+            if (textColor_.has_value()) {
+                c.SetPlaceholder(textColor_.value().GetPlaceholder());
+            } else {
+                c.SetPlaceholder(animatableTextColor_->Get().GetPlaceholder());
+            }
+            if (SystemProperties::GetTextTraceEnabled()) {
+                ACE_TEXT_SCOPED_TRACE("TextContentModifier::ChangeParagraphColor[animatableTextColor:%s][PH:%u]",
+                    c.ColorToString().c_str(), static_cast<uint8_t>(c.GetPlaceholder()));
+            }
+            paragraph->UpdateColor(0, length, c);
+        } else if (textColor_.has_value()) {
+            auto pattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+            CHECK_NULL_VOID(pattern);
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            TAG_LOGW(AceLogTag::ACE_TEXT, "onlyTextColorAnimation_ is true, !animatableTextColor_ [%{public}d]",
+                host->GetId());
+            paragraph->UpdateColor(0, length, textColor_.value());
+        } else {
+            auto pattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+            CHECK_NULL_VOID(pattern);
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            TAG_LOGW(AceLogTag::ACE_TEXT, "onlyTextColorAnimation_ is true, !textColor_.has_value() [%{public}d]",
+                host->GetId());
+        }
     }
 }
 
@@ -808,8 +865,9 @@ std::vector<Color> TextContentModifier::Convert2VectorColor(const LinearVector<L
 {
     std::vector<Color> colors;
     for (auto color : colorList) {
-        colors.emplace_back(Color(color.GetValue()));
-        colors.back().SetPlaceholder(color.GetPlaceholder());
+        auto convertedColor = color.ToColorWithColorSpace();
+        convertedColor.SetPlaceholder(color.GetPlaceholder());
+        colors.emplace_back(convertedColor);
     }
     return colors;
 }
@@ -866,6 +924,21 @@ void TextContentModifier::ModifyLineHeightInTextStyle(TextStyle& textStyle)
     }
 }
 
+void TextContentModifier::ModifyFontVariationsInTextStyle(TextStyle& textStyle)
+{
+    auto fontVariations = textStyle.GetFontVariations();
+    for (auto& item : fontVariations) {
+        auto iter = fontVariations_.find(item.axis);
+        if (iter == fontVariations_.end()) {
+            continue;
+        }
+        auto fontVariation = iter->second;
+        CHECK_NULL_VOID(fontVariation);
+        item.value = fontVariation->Get();
+    }
+    textStyle.SetFontVariations(fontVariations);
+}
+
 void TextContentModifier::ModifyTextStyle(TextStyle& textStyle, Color& textColor)
 {
     ModifyFontSizeInTextStyle(textStyle);
@@ -878,6 +951,7 @@ void TextContentModifier::ModifyTextStyle(TextStyle& textStyle, Color& textColor
     ModifyDecorationInTextStyle(textStyle);
     ModifyBaselineOffsetInTextStyle(textStyle);
     ModifyLineHeightInTextStyle(textStyle);
+    ModifyFontVariationsInTextStyle(textStyle);
 }
 
 bool TextContentModifier::CheckNeedMeasure(float finalValue, float lastValue, float currentValue)
@@ -964,6 +1038,7 @@ void TextContentModifier::UpdateSymbolColorMeasureFlag(PropertyChangeFlag& flag)
         return;
     }
     auto pattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(pattern);
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
@@ -975,14 +1050,34 @@ void TextContentModifier::UpdateSymbolColorMeasureFlag(PropertyChangeFlag& flag)
     }
     symbolColors_ = Convert2VectorLinearColor(symbolColors.value());
     if (symbolColors_.has_value() && animatableSymbolColor_ &&
-        (symbolColors_ != animatableSymbolColor_->Get() || lastSymbolColors_ != animatableSymbolColor_->Get())) {
+        (ColorsDifferExceptHolder(symbolColors_.value(), animatableSymbolColor_->Get()) ||
+            ColorsDifferExceptHolder(lastSymbolColors_, animatableSymbolColor_->Get()))) {
         flag |= PROPERTY_UPDATE_MEASURE_SELF;
         if (SystemProperties::GetTextTraceEnabled()) {
             ACE_TEXT_SCOPED_TRACE(
-                "TextContentModifier::UpdateSymbolColorMeasureFlag");
+                "TextContentModifier::UpdateSymbolColorMeasureFlag[symbolColors:%s][lastSymbolColors:%s]["
+                "animatableSymbolColor_:%s]",
+                StringUtils::SymbolColorListToStringWithHolder(Convert2VectorColor(symbolColors_.value())).c_str(),
+                StringUtils::SymbolColorListToStringWithHolder(Convert2VectorColor(lastSymbolColors_)).c_str(),
+                StringUtils::SymbolColorListToStringWithHolder(Convert2VectorColor(animatableSymbolColor_->Get()))
+                    .c_str());
         }
         lastSymbolColors_ = animatableSymbolColor_->Get();
     }
+}
+
+bool TextContentModifier::ColorsDifferExceptHolder(
+    const LinearVector<LinearColor>& colors1, const LinearVector<LinearColor>& colors2)
+{
+    if (colors1.size() != colors2.size()) {
+        return true;
+    }
+    for (size_t i = 0; i < colors1.size(); ++i) {
+        if (!colors1[i].CompareColorExceptHolder(colors2[i])) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void TextContentModifier::UpdateTextShadowMeasureFlag(PropertyChangeFlag& flag)
@@ -1053,6 +1148,25 @@ void TextContentModifier::UpdateLineHeightMeasureFlag(PropertyChangeFlag& flag)
     }
 }
 
+void TextContentModifier::UpdateFontVariationsMeasureFlag(PropertyChangeFlag& flag)
+{
+    for (const auto& item : fontVariations_) {
+        const auto& axis = item.first;
+        const auto& property = item.second;
+        CHECK_NULL_VOID(property);
+        auto valueIter = fontVariationMeasureValues_.find(axis);
+        if (valueIter == fontVariationMeasureValues_.end()) {
+            continue;
+        }
+        auto lastIter = lastFontVariationMeasureValues_.find(axis);
+        float lastValue = lastIter != lastFontVariationMeasureValues_.end() ? lastIter->second : 0.0f;
+        if (CheckNeedMeasure(valueIter->second, lastValue, property->Get())) {
+            flag |= PROPERTY_UPDATE_MEASURE;
+            lastFontVariationMeasureValues_[axis] = property->Get();
+        }
+    }
+}
+
 bool TextContentModifier::NeedMeasureUpdate(PropertyChangeFlag& flag)
 {
     flag = 0;
@@ -1064,6 +1178,7 @@ bool TextContentModifier::NeedMeasureUpdate(PropertyChangeFlag& flag)
     UpdateTextDecorationMeasureFlag(flag);
     UpdateBaselineOffsetMeasureFlag(flag);
     UpdateLineHeightMeasureFlag(flag);
+    UpdateFontVariationsMeasureFlag(flag);
     flag &= (PROPERTY_UPDATE_MEASURE | PROPERTY_UPDATE_MEASURE_SELF | PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     if (flag) {
         onlyTextColorAnimation_ = false;
@@ -1154,7 +1269,11 @@ void TextContentModifier::SetSymbolColor(const std::vector<Color>& value, bool i
     }
     CHECK_NULL_VOID(animatableSymbolColor_);
     auto animatableColors = animatableSymbolColor_->Get();
-    if (colors.size() != animatableColors.size()) {
+    bool needWithoutAnimation = colors.size() != animatableColors.size();
+    if (!needWithoutAnimation) {
+        needWithoutAnimation = HasCrossColorSpace(value, animatableColors);
+    }
+    if (needWithoutAnimation) {
         AnimationUtils::ExecuteWithoutAnimation([weak = AceType::WeakClaim(this), colors]() {
             auto modifier = weak.Upgrade();
             CHECK_NULL_VOID(modifier);
@@ -1251,6 +1370,25 @@ void TextContentModifier::SetLineHeight(const Dimension& value, const TextStyle&
     }
     CHECK_NULL_VOID(lineHeightFloat_);
     lineHeightFloat_->Set(lineHeightValue);
+}
+
+void TextContentModifier::SetFontVariations(const FONT_VARIATIONS_LIST& fontVariations, bool isReset)
+{
+    if (!isReset) {
+        for (const auto& item : fontVariations) {
+            auto iter = fontVariations_.find(item.axis);
+            if (iter == fontVariations_.end()) {
+                continue;
+            }
+            auto fontVariation = iter->second;
+            CHECK_NULL_VOID(fontVariation);
+            fontVariation->Set(item.value);
+            fontVariationMeasureValues_[item.axis] = item.value;
+        }
+    } else {
+        fontVariationMeasureValues_.clear();
+        lastFontVariationMeasureValues_.clear();
+    }
 }
 
 void TextContentModifier::SetContentOffset(OffsetF& value)
@@ -1479,9 +1617,7 @@ void TextContentModifier::AddDefaultShadow()
     auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
     if (textPattern) {
         auto frameNode = textPattern->GetHost();
-        if (frameNode) {
-            ACE_UINODE_TRACE(frameNode);
-        }
+        ACE_UINODE_TRACE(frameNode);
     }
     Shadow emptyShadow;
     auto blurRadius = MakeRefPtr<AnimatablePropertyFloat>(emptyShadow.GetBlurRadius());
@@ -1516,10 +1652,20 @@ void TextContentModifier::ContentModifierDump()
 {
     auto& dumpLog = DumpLog::GetInstance();
     if (animatableTextColor_) {
-        dumpLog.AddDesc(
-            std::string("animatableTextColor: ").append(Color(animatableTextColor_->Get().GetValue()).ColorToString()));
+        auto animatableTextColor = animatableTextColor_->Get();
+        dumpLog.AddDesc(std::string("animatableTextColor: ")
+                            .append(Color(animatableTextColor.GetValue()).ColorToString())
+                            .append("|PH:")
+                            .append(std::to_string(static_cast<uint8_t>(animatableTextColor.GetPlaceholder()))));
     }
-    dumpLog.AddDesc(std::string("onlyTextColorAnimation: ").append(std::to_string(onlyTextColorAnimation_)));
+    dumpLog.AddDesc(
+        std::string(" onlyTextColorAnimation: ")
+            .append(std::to_string(onlyTextColorAnimation_))
+            .append(" textColor_:")
+            .append(textColor_.has_value() ? textColor_.value().ToString() : "NA")
+            .append("|PH:")
+            .append(textColor_.has_value() ? std::to_string(static_cast<uint8_t>(textColor_.value().GetPlaceholder()))
+                                           : "NA"));
 }
 
 void TextContentModifier::SetIsFocused(const bool isFocused)
@@ -1588,9 +1734,7 @@ void TextContentModifier::ResumeTextRace(bool bounce)
     auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
     if (textPattern) {
         auto frameNode = textPattern->GetHost();
-        if (frameNode) {
-            ACE_UINODE_TRACE(frameNode);
-        }
+        ACE_UINODE_TRACE(frameNode);
     }
     if (!bounce) {
         marqueeCount_ = 0;

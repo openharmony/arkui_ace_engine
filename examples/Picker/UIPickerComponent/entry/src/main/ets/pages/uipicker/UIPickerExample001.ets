@@ -495,3 +495,172 @@ export struct UIPickerExample007 {
     .backgroundColor('#F5F5F5')
   }
 }
+
+/**
+ * UIPickerExample008: 不同指示器类型对比
+ */
+@Component
+export struct UIPickerExample008 {
+  private dataArray: string[] = []
+
+  aboutToAppear(): void {
+    for (let i = 1; i <= 10; i++) {
+      this.dataArray.push(i.toString())
+    }
+  }
+
+  build() {
+    Column() {
+      Text('不同指示器类型对比')
+        .fontSize(20)
+        .fontWeight(FontWeight.Bold)
+        .margin({ bottom: 20 })
+
+      Row() {
+        Column() {
+          Text('BACKGROUND')
+            .fontSize(12)
+            .margin({ bottom: 10 })
+
+          UIPickerComponent() {
+            ForEach(this.dataArray, (item: string) => {
+              Text(item).fontSize(14)
+            })
+          }
+          .width('45%')
+          .height(150)
+          .selectionIndicator({
+            type: PickerIndicatorType.BACKGROUND
+          })
+        }
+
+        Column() {
+          Text('DIVIDER')
+            .fontSize(12)
+            .margin({ bottom: 10 })
+
+          UIPickerComponent() {
+            ForEach(this.dataArray, (item: string) => {
+              Text(item).fontSize(14)
+            })
+          }
+          .width('45%')
+          .height(150)
+          .selectionIndicator({
+            type: PickerIndicatorType.DIVIDER
+          })
+        }
+      }
+      .width('70%')
+      .justifyContent(FlexAlign.SpaceBetween)
+
+      Text('提示: 对比不同指示器样式的效果')
+        .fontSize(14)
+        .fontColor('#999999')
+        .margin({ top: 20 })
+    }
+    .width('100%')
+    .padding(20)
+    .backgroundColor('#F5F5F5')
+  }
+}
+
+/**
+ * UIPickerExample009: 无限循环选择器
+ */
+@Component
+export struct UIPickerExample009 {
+  private weekDays: string[] = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+
+  build() {
+    Column() {
+      Text('无限循环选择器')
+        .fontSize(20)
+        .fontWeight(FontWeight.Bold)
+        .margin({ bottom: 20 })
+
+      UIPickerComponent() {
+        ForEach(this.weekDays, (day: string) => {
+          Text(day)
+            .fontSize(18)
+            .fontWeight(FontWeight.Medium)
+        })
+      }
+      .width('70%')
+      .height(200)
+      .canLoop(true)
+      .selectionIndicator({
+        type: PickerIndicatorType.DIVIDER
+      })
+      .onChange((selectedIndex: number) => {
+        console.info('Selected day: ' + this.weekDays[selectedIndex])
+      })
+
+      Text('提示: 循环滚动选择星期几')
+        .fontSize(14)
+        .fontColor('#999999')
+        .margin({ top: 20 })
+    }
+    .width('100%')
+    .padding(20)
+    .backgroundColor('#F5F5F5')
+  }
+}
+
+/**
+ * UIPickerExample010: 自定义字体和间距
+ */
+@Component
+export struct UIPickerExample010 {
+  private dataArray: string[] = []
+  @State itemSpacing: number = 8
+
+  aboutToAppear(): void {
+    for (let i = 1; i <= 10; i++) {
+      this.dataArray.push('项目 ' + i)
+    }
+  }
+
+  build() {
+    Column() {
+      Text('自定义字体和间距')
+        .fontSize(20)
+        .fontWeight(FontWeight.Bold)
+        .margin({ bottom: 20 })
+
+      UIPickerComponent() {
+        ForEach(this.dataArray, (item: string) => {
+          Text(item)
+            .fontSize(16)
+            .fontColor('#333333')
+            .fontWeight(FontWeight.Normal)
+        })
+      }
+      .width('70%')
+      .height(200)
+      .selectionIndicator({
+        type: PickerIndicatorType.BACKGROUND,
+        backgroundColor: '#E3F2FD'
+      })
+
+      Text('项目间距: ' + this.itemSpacing)
+        .fontSize(14)
+        .margin({ top: 20 })
+
+      Slider({ value: this.itemSpacing, min: 4, max: 20, step: 1 })
+        .width('70%')
+        .blockColor('#007DFF')
+        .onChange((value: number) => {
+          this.itemSpacing = Math.round(value)
+        })
+
+      Text('提示: 调整字体样式和间距')
+        .fontSize(14)
+        .fontColor('#999999')
+        .margin({ top: 20 })
+    }
+    .width('100%')
+    .padding(20)
+    .backgroundColor('#F5F5F5')
+  }
+}

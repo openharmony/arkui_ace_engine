@@ -14,9 +14,11 @@
  */
 
 #include "gtest/gtest.h"
-#include "base/memory/ace_type.h"
+
 #define private public
 #define protected public
+
+#include "core/common/event_manager.h"
 #include "core/components_ng/pattern/ui_extension/isolated_component/isolated_pattern.h"
 #include "core/components_ng/pattern/ui_extension/security_ui_extension_component/security_ui_extension_pattern.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
@@ -26,15 +28,13 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_proxy.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
+#include "core/components_ng/property/accessibility_property.h"
 #include "core/event/ace_events.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
-#include "core/event/key_event.h"
 #include "core/event/pointer_event.h"
 
-#include "session/host/include/extension_session.h"
 #include "session/host/include/session.h"
 #include "ui/rs_surface_node.h"
 
@@ -48,12 +48,12 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 
 #include "core/components_ng/render/adapter/rosen_window.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/render/mock_rosen_render_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+
 #include "test/unittest/core/pattern/ui_extension/mock/mock_accessibility_child_tree_callback.h"
 
 using namespace testing;
@@ -70,6 +70,13 @@ namespace {
     constexpr double SHOW_START = 0.0;
     constexpr double SHOW_FULL = 1.0;
 } // namespace
+
+#ifdef WINDOW_SCENE_SUPPORTED
+const RefPtr<UIExtensionManager>& PipelineContext::GetUIExtensionManager()
+{
+    return uiExtensionManager_;
+}
+#endif
 
 class UIExtensionComponentTestNg : public testing::Test {
 public:
@@ -646,6 +653,57 @@ HWTEST_F(UIExtensionComponentTestNg, AccessibilityTest002, TestSize.Level1)
     EXPECT_EQ(params.size(), 0);
     pattern->accessibilityChildTreeCallback_ = std::make_shared<UIExtensionAccessibilityChildTreeCallback>(pattern, 1);
     pattern->InitializeAccessibility();
+#endif
+}
+
+/**
+ * @tc.name: UIExtensionUsageTest
+ * @tc.desc: Test pattern GetUIExtensionUsage
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, AccessibilityTest003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. prepare GeometryNode and EventManager
+     */
+    auto geometryNode = uiExtensionNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(720.0f, 1280.0f));
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto eventManager = pipeline->GetEventManager();
+    ASSERT_NE(eventManager, nullptr);
+    eventManager->lastMouseEvent_.x = 1000.0f;
+    eventManager->lastMouseEvent_.y = 200.0f;
+
+    /**
+     * @tc.steps: step3. get pattern and PointerEvent
+     */
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->AttachToFrameNode(uiExtensionNode);
+    pattern->OnModifyDone();
+    pattern->lastPointerEvent_ = std::make_shared<MMI::PointerEvent>(1);
+    EXPECT_EQ(pattern->lastPointerEvent_->GetPointerAction(), MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
+
+    /**
+     * @tc.steps: step4. Call callback func and verify PointerAction is changed.
+     */
+    eventManager->NotifyTouchpadInteraction();
+    EXPECT_EQ(pattern->lastPointerEvent_->GetPointerAction(), MMI::PointerEvent::POINTER_ACTION_UNKNOWN);
+    eventManager->lastMouseEvent_.x = 100.0f;
+    eventManager->NotifyTouchpadInteraction();
+    EXPECT_EQ(pattern->lastPointerEvent_->GetPointerAction(), MMI::PointerEvent::POINTER_ACTION_TOUCHPAD_ACTIVE);
 #endif
 }
 
@@ -1678,6 +1736,7 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest010, TestSize.Level
 
     pattern->contentNode_ = nullptr;
     pattern->OnExtensionDetachToDisplay();
+    SUCCEED();
 #endif
 }
 
@@ -1771,6 +1830,7 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest013, TestSize.Level
      * @tc.steps: step4. test RegisterVisibleAreaChange
      */
     pattern->RegisterVisibleAreaChange();
+    SUCCEED();
 }
 
 /**
@@ -1831,6 +1891,7 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest014, TestSize.Level
      * @tc.steps: step2. test OnDetachFromMainTree
      */
     pattern->OnDetachFromMainTree();
+    SUCCEED();
 #endif
 }
 
@@ -1892,6 +1953,7 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest016, TestSize.Level
      * @tc.steps: step3. test UnRegisterPipelineEvent.
      */
     pattern->UnRegisterPipelineEvent(instanceId);
+    SUCCEED();
 #endif
 }
 
@@ -2177,6 +2239,28 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentUpdateWMSUIExtPropertyT
     pattern->UpdateWMSUIExtProperty(code, data, id, options);
     pattern->state_ = UIExtensionPattern::AbilityState::FOREGROUND;
     pattern->UpdateWMSUIExtProperty(code, data, id);
+    SUCCEED();
 #endif
+}
+
+/**
+ * @tc.name: UIExtensionProxyTest001
+ * @tc.desc: Test UIExtensionProxy SendData
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, UIExtensionProxyTest001, TestSize.Level1)
+{
+    int32_t instanceId = 1;
+    auto pattern = AceType::MakeRefPtr<UIExtensionPattern>();
+    auto sessionWrapper = AceType::MakeRefPtr<SessionWrapperImpl>(pattern, instanceId,
+        1, SessionType::UI_EXTENSION_ABILITY);
+    auto proxy = AceType::MakeRefPtr<UIExtensionProxy>(sessionWrapper, pattern);
+    
+    AAFwk::WantParams wantParams;
+    proxy->SendData(wantParams);
+    
+    AAFwk::WantParams reWantParams;
+    EXPECT_EQ(proxy->SendDataSync(wantParams, reWantParams), 1);
+    EXPECT_NE(proxy->GetPattern(), nullptr);
 }
 } // namespace OHOS::Ace::NG

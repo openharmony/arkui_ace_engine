@@ -23,11 +23,13 @@
 
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "base/geometry/rect.h"
+#include "core/components/dialog/dialog_properties.h"
 #include "core/components/root/root_element.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
@@ -197,13 +199,31 @@ void SetSubWindowCutout(const RefPtr<PipelineBase> parentPipeline, int32_t child
     subSafeAreaManager->SetUseCutout(parentUseCutout);
 }
 
+bool IsDisplayInForceSplitMode(int32_t parentContainerId)
+{
+    auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId);
+    CHECK_NULL_RETURN(parentContainer, false);
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(parentContainer->GetPipelineContext());
+    CHECK_NULL_RETURN(pipeline, false);
+    return pipeline->IsDisplayInForceSplitMode();
+}
+
 Size GetSubWindowSize(int32_t parentContainerId, uint32_t displayId)
 {
     auto finalDisplayId = displayId;
+    auto needAdaptForceSplitMode = IsDisplayInForceSplitMode(parentContainerId);
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
-    CHECK_NULL_RETURN(defaultDisplay, Size());
-
-    auto size = Size(defaultDisplay->GetWidth(), defaultDisplay->GetHeight());
+    Size size;
+    if (needAdaptForceSplitMode) {
+        defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId, true);
+        CHECK_NULL_RETURN(defaultDisplay, Size());
+        auto info = defaultDisplay->GetDisplayInfoWithCache();
+        CHECK_NULL_RETURN(info, Size());
+        size = Size(info->GetWidth(), info->GetHeight());
+    } else {
+        CHECK_NULL_RETURN(defaultDisplay, Size());
+        size = Size(defaultDisplay->GetWidth(), defaultDisplay->GetHeight());
+    }
     if (!SystemProperties::IsSuperFoldDisplayDevice()) {
         TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "Not SuperFoldDisplayDevice");
         return size;
@@ -211,19 +231,8 @@ Size GetSubWindowSize(int32_t parentContainerId, uint32_t displayId)
 
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId);
     CHECK_NULL_RETURN(parentContainer, size);
-    auto foldStatus = parentContainer->GetCurrentFoldStatus();
-    auto displayInfo = defaultDisplay->GetDisplayInfo();
-    CHECK_NULL_RETURN(displayInfo, size);
-    auto sourceMode = displayInfo->GetDisplaySourceMode();
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "inputDisplayId: %{public}d, FoldStatus: %{public}d, sourceMode: %{public}d",
-        displayId, foldStatus, sourceMode);
-    if (foldStatus == FoldStatus::EXPAND || sourceMode == Rosen::DisplaySourceMode::EXTEND) {
-        return size;
-    }
-
-    auto isCrossWindow = parentContainer->IsCrossAxisWindow();
-    auto isSceneBoard = parentContainer->IsSceneBoardWindow();
-    if (isCrossWindow || isSceneBoard) {
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "inputDisplayId: %{public}d", displayId);
+    if (parentContainer->IsNeedModifySize()) {
         auto display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(DEFAULT_DISPLAY_ID);
         finalDisplayId = DEFAULT_DISPLAY_ID;
         if (!display) {
@@ -235,9 +244,8 @@ Size GetSubWindowSize(int32_t parentContainerId, uint32_t displayId)
 
     auto parentWindowId = parentContainer->GetWindowId();
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
-        "parentWindow windowId: %{public}d isSceneBoard: %{public}d isCrossWindow: %{public}d "
-        "finalDisplayId: %{public}d  displaySize: %{public}s",
-        parentWindowId, isSceneBoard, isCrossWindow, finalDisplayId, size.ToString().c_str());
+        "parentWindow windowId: %{public}d finalDisplayId: %{public}d  displaySize: %{public}s",
+        parentWindowId, finalDisplayId, size.ToString().c_str());
     return size;
 }
 
@@ -268,14 +276,6 @@ void SubwindowOhos::InitWindowRSUIDirector(const RefPtr<Platform::AceContainer>&
         if (!rsUiDirector->GetRSUIContext()) {
             rsUiDirector->Init(true, true);
         }
-        auto id = container->GetInstanceId();
-        rsUiDirector->SetUITaskRunner(
-            [taskExecutor = container->GetTaskExecutor(), id](
-                const std::function<void()>& task, uint32_t delay) {
-                ContainerScope scope(id);
-                taskExecutor->PostDelayedTask(
-                    task, TaskExecutor::TaskType::UI, delay, "ArkUIRenderServiceTask", PriorityType::HIGH);
-            }, 0, true);
         TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "UIContent Init Rosen Backend");
     }
 #endif
@@ -380,14 +380,27 @@ void SubwindowOhos::InitContainer()
             }
         }
         auto displayId = parentContainer->GetCurrentDisplayId();
+        auto needAdaptForceSplitMode = IsDisplayInForceSplitMode(parentContainerId_);
         auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
+        if (needAdaptForceSplitMode) {
+            defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId, true);
+        }
         if (!defaultDisplay) {
             TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "DisplayManager failed to getDisplay by id: %{public}u",
                 (uint32_t)displayId);
         }
         CHECK_NULL_VOID(defaultDisplay);
-        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Parent window displayId: %{public}u width: %{public}d height: %{public}d",
-            (uint32_t)displayId, defaultDisplay->GetWidth(), defaultDisplay->GetHeight());
+        if (needAdaptForceSplitMode) {
+            auto info = defaultDisplay->GetDisplayInfoWithCache();
+            CHECK_NULL_VOID(info);
+            TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
+                "Parent window displayId: %{public}u width: %{public}d height: %{public}d",
+                (uint32_t)displayId, info->GetWidth(), info->GetHeight());
+        } else {
+            TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
+                "Parent window displayId: %{public}u width: %{public}d height: %{public}d",
+                (uint32_t)displayId, defaultDisplay->GetWidth(), defaultDisplay->GetHeight());
+        }
         auto windowSize = GetSubWindowSize(parentContainerId_, displayId);
         windowOption->SetWindowRect({ 0, 0, windowSize.Width(), windowSize.Height() });
         windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
@@ -743,6 +756,7 @@ void SubwindowOhos::HidePopupNG(int32_t targetId)
     auto popupInfo = overlayManager->GetPopupInfo(targetId == -1 ? popupTargetId_ : targetId);
     popupInfo.markNeedUpdate = true;
     ContainerScope scope(childContainerId_);
+    NG::ScopedViewStackProcessor builderViewStackProcessor;
     overlayManager->HidePopup(targetId == -1 ? popupTargetId_ : targetId, popupInfo);
     context->FlushPipelineImmediately();
     HideEventColumn();
@@ -756,6 +770,7 @@ void SubwindowOhos::ShowTipsNG(int32_t targetId, const NG::PopupInfo& popupInfo,
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "show tips ng enter, subwindowId: %{public}d", window_->GetWindowId());
     auto popup = popupInfo.popupNode;
     CHECK_NULL_VOID(popup);
+    ACE_UINODE_TRACE(popup);
     auto pattern = popup->GetPattern<NG::BubblePattern>();
     CHECK_NULL_VOID(pattern);
     if (!pattern->IsTipsAppearing()) {
@@ -1074,6 +1089,7 @@ void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> customNode, const NG:
     auto overlay = GetOverlayManager();
     CHECK_NULL_VOID(overlay);
     auto menuNode = customNode;
+    ACE_UINODE_TRACE(menuNode);
     if (customNode->GetTag() != V2::MENU_WRAPPER_ETS_TAG) {
         const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
         CHECK_NULL_VOID(menuViewModifier);
@@ -1120,6 +1136,7 @@ void SubwindowOhos::ShowMenuNG(std::function<void()>&& buildFunc, std::function<
     auto menuNode = menuViewModifier->createWithCustomNode(
         customNode, targetNode->GetId(), targetNode->GetTag(), menuParam, true, previewCustomNode);
     CHECK_NULL_VOID(menuNode);
+    ACE_UINODE_TRACE(menuNode);
     auto menuWrapperPattern = menuNode->GetPattern<NG::MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     menuWrapperPattern->RegisterMenuCallback(menuNode, menuParam);
@@ -1358,15 +1375,21 @@ void SubwindowOhos::ShowBindSheetNG(bool isShow, std::function<void(const std::s
     CHECK_NULL_VOID(context);
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
-    ResizeWindow();
-    ShowWindow();
-    CHECK_NULL_VOID(window_);
-    window_->SetFullScreen(true);
     auto parentAceContainer = Platform::AceContainer::GetContainer(parentContainerId_);
     CHECK_NULL_VOID(parentAceContainer);
     if (parentAceContainer->IsUIExtensionWindow()) {
+        auto parentWindowRect = GetUIExtensionHostWindowRect();
+        // keep consistent with the size and position of the parent window in first frame.
+        CHECK_NULL_VOID(window_);
+        window_->MoveTo(parentWindowRect.GetOffset().GetX(), parentWindowRect.GetOffset().GetY());
+        ResizeWindow(parentWindowRect.Width(), parentWindowRect.Height());
         window_->SetFollowParentWindowLayoutEnabled(true);
+    } else {
+        ResizeWindow();
     }
+    ShowWindow();
+    CHECK_NULL_VOID(window_);
+    window_->SetFullScreen(true);
     window_->SetTouchable(true);
     ContainerScope scope(childContainerId_);
     overlay->OnBindSheet(isShow, std::move(callback), std::move(buildNodeFunc),
@@ -1649,17 +1672,29 @@ void SubwindowOhos::GetToastDialogWindowProperty(
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "get toast dialog window property enter");
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    auto needAdaptForceSplitMode = IsDisplayInForceSplitMode(parentContainerId_);
     if (dialogWindow_) {
         auto currentDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(dialogWindow_->GetDisplayId());
+        if (needAdaptForceSplitMode) {
+            currentDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(dialogWindow_->GetDisplayId(), true);
+        }
         defaultDisplay = currentDisplay ? currentDisplay : defaultDisplay;
     }
 
     if (defaultDisplay) {
         posX = 0;
         posY = 0;
-        width = defaultDisplay->GetWidth();
-        height = defaultDisplay->GetHeight();
-        density = defaultDisplay->GetVirtualPixelRatio();
+        if (needAdaptForceSplitMode) {
+            auto info = defaultDisplay->GetDisplayInfoWithCache();
+            CHECK_NULL_VOID(info);
+            width = info->GetWidth();
+            height = info->GetHeight();
+            density = info->GetVirtualPixelRatio();
+        } else {
+            width = defaultDisplay->GetWidth();
+            height = defaultDisplay->GetHeight();
+            density = defaultDisplay->GetVirtualPixelRatio();
+        }
     }
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
         "Toast posX: %{public}d, posY: %{public}d, width: %{public}d, height: %{public}d, density: %{public}f", posX,
@@ -1692,14 +1727,6 @@ void SubwindowOhos::InitDialogWindowRSUIDirector(const RefPtr<Platform::AceConta
         if (!rsUiDirector->GetRSUIContext()) {
             rsUiDirector->Init(true, true);
         }
-        auto id = container->GetInstanceId();
-        rsUiDirector->SetUITaskRunner(
-            [taskExecutor = container->GetTaskExecutor(), id](
-                const std::function<void()>& task, uint32_t delay) {
-                ContainerScope scope(id);
-                taskExecutor->PostDelayedTask(
-                    task, TaskExecutor::TaskType::UI, delay, "ArkUIRenderServiceTask", PriorityType::HIGH);
-            }, 0, true);
     }
 #endif
 }
@@ -1729,10 +1756,21 @@ bool SubwindowOhos::InitToastDialogWindow(int32_t& width, int32_t& height, int32
     CHECK_NULL_RETURN(dialogWindow_, false);
     dialogWindow_->SetLayoutFullScreen(true);
     auto focusWindowId = dialogWindow_->GetDisplayId();
+    auto needAdaptForceSplitMode = IsDisplayInForceSplitMode(parentContainerId_);
     auto focusDisplayInfo = Rosen::DisplayManager::GetInstance().GetDisplayById(focusWindowId);
-    CHECK_NULL_RETURN(focusDisplayInfo, false);
-    width = focusDisplayInfo->GetWidth();
-    height = focusDisplayInfo->GetHeight();
+    if (needAdaptForceSplitMode) {
+        focusDisplayInfo = Rosen::DisplayManager::GetInstance().GetDisplayById(focusWindowId, true);
+        CHECK_NULL_RETURN(focusDisplayInfo, false);
+        auto info = focusDisplayInfo->GetDisplayInfoWithCache();
+        CHECK_NULL_RETURN(info, false);
+        width = info->GetWidth();
+        height = info->GetHeight();
+    } else {
+        CHECK_NULL_RETURN(focusDisplayInfo, false);
+        width = focusDisplayInfo->GetWidth();
+        height = focusDisplayInfo->GetHeight();
+    }
+    
     dialogWindow_->SetSubWindowSource(Rosen::SubWindowSource::SUB_WINDOW_SOURCE_ARKUI);
     return true;
 }
@@ -2562,9 +2600,18 @@ void SubwindowOhos::InitializeSafeArea()
 
     std::optional<NG::RectF> windowRect;
     if (theme->GetExpandDisplay() || parentContainer->IsFreeMultiWindow()) {
+        auto needAdaptForceSplitMode = IsDisplayInForceSplitMode(parentContainerId_);
         auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(window_->GetDisplayId());
-        CHECK_NULL_VOID(defaultDisplay);
-        windowRect = { 0.0, 0.0, defaultDisplay->GetWidth(), defaultDisplay->GetHeight() };
+        if (needAdaptForceSplitMode) {
+            defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(window_->GetDisplayId(), true);
+            CHECK_NULL_VOID(defaultDisplay);
+            auto info = defaultDisplay->GetDisplayInfoWithCache();
+            CHECK_NULL_VOID(info);
+            windowRect = { 0.0, 0.0, info->GetWidth(), info->GetHeight() };
+        } else {
+            CHECK_NULL_VOID(defaultDisplay);
+            windowRect = { 0.0, 0.0, defaultDisplay->GetWidth(), defaultDisplay->GetHeight() };
+        }
     }
 
     auto systemSafeArea = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM, windowRect);

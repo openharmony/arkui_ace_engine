@@ -15,6 +15,8 @@
 
 #include "core/animation/spring_motion.h"
 
+#include "base/log/log_wrapper.h"
+
 namespace OHOS::Ace {
 namespace {
 

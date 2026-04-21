@@ -13,11 +13,14 @@
  * limitations under the License.
  */
 #include "test/unittest/core/base/view_abstract_test_ng.h"
+#include "core/common/event_manager.h"
 
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
-#include "test/mock/base/mock_system_properties.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -32,6 +35,7 @@ void ViewAbstractTestThreeNg::SetUpTestSuite()
     PipelineBase::GetCurrentContext()->SetThemeManager(themeManager);
     PipelineBase::GetCurrentContext()->SetEventManager(AceType::MakeRefPtr<EventManager>());
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
 }
 
 void ViewAbstractTestThreeNg::TearDownTestSuite()
@@ -414,6 +418,7 @@ HWTEST_F(ViewAbstractTestThreeNg, UpdateMenu001, TestSize.Level1)
     EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode, targetId), ERROR_CODE_NO_ERROR);
     auto overlayManager = ViewAbstract::GetCurOverlayManager(contentNode);
     ASSERT_NE(overlayManager, nullptr);
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->menuMap_[targetId];
@@ -468,6 +473,7 @@ HWTEST_F(ViewAbstractTestThreeNg, UpdateMenu002, TestSize.Level1)
     EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode, targetId), ERROR_CODE_NO_ERROR);
     auto overlayManager = ViewAbstract::GetCurOverlayManager(contentNode);
     ASSERT_NE(overlayManager, nullptr);
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->menuMap_[targetId];
@@ -518,6 +524,7 @@ HWTEST_F(ViewAbstractTestThreeNg, UpdateMenu003, TestSize.Level1)
     EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode, targetNode->GetId()), ERROR_CODE_NO_ERROR);
     auto overlayManager = ViewAbstract::GetCurOverlayManager(contentNode);
     ASSERT_NE(overlayManager, nullptr);
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->menuMap_[targetNode->GetId()];
@@ -585,6 +592,7 @@ HWTEST_F(ViewAbstractTestThreeNg, UpdateMenu004, TestSize.Level1)
     EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode, targetNode->GetId()), ERROR_CODE_NO_ERROR);
     auto overlayManager = ViewAbstract::GetCurOverlayManager(contentNode);
     ASSERT_NE(overlayManager, nullptr);
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->menuMap_[targetNode->GetId()];
@@ -651,6 +659,7 @@ HWTEST_F(ViewAbstractTestThreeNg, CloseMenu001, TestSize.Level1)
     EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode, targetId), ERROR_CODE_NO_ERROR);
     auto overlayManager = ViewAbstract::GetCurOverlayManager(contentNode);
     ASSERT_NE(overlayManager, nullptr);
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->menuMap_[targetId];
@@ -704,6 +713,7 @@ HWTEST_F(ViewAbstractTestThreeNg, CloseMenu002, TestSize.Level1)
     EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode, targetId), ERROR_CODE_NO_ERROR);
     auto overlayManager = ViewAbstract::GetCurOverlayManager(contentNode);
     ASSERT_NE(overlayManager, nullptr);
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->menuMap_[targetId];
@@ -1213,6 +1223,9 @@ HWTEST_F(ViewAbstractTestThreeNg, ViewAbstractTestNg0055, TestSize.Level1)
 
     g_isConfigChangePerform = true;
     ViewAbstract::CreateWithOpacityResourceObj(resObj);
+    double opacity = 0.0;
+    ViewAbstract::SetOpacity(frameNode, opacity, resObj);
+    pattern->AddResCache("viewAbstract.opacity", std::to_string(opacity));
     double result;
     ResourceParseUtils::ParseResDouble(resObj, result);
     opacityStr = pattern->GetResCacheMapByKey("viewAbstract.opacity");

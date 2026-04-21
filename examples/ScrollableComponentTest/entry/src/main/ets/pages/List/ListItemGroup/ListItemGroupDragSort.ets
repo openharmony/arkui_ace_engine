@@ -195,7 +195,7 @@ struct SortableGroup {
 
 @Entry
 @ComponentV2
-struct Index {
+struct ListItemGroupDragSortPage {
   private scroller: ListScroller = new ListScroller();
   @Local groupedData: GroupData[] = [
     new GroupData('A', ['A1', 'A2', 'A3', 'A4']),

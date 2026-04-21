@@ -46,7 +46,7 @@ HWTEST_F(KeyEventTest, OH_ArkUI_KeyEvent_SetConsumed002, TestSize.Level0)
         .inputType = ARKUI_UIINPUTEVENT_TYPE_KEY,
         .eventTypeId = C_KEY_EVENT_ID,
         .inputEvent = &keyEvent,
-        .isCloned = false,
+        .isCreatedByUser = false,
         .apiVersion = 0,
     };
 
@@ -66,7 +66,7 @@ HWTEST_F(KeyEventTest, OH_ArkUI_KeyEvent_SetConsumed003, TestSize.Level0)
         .inputType = ARKUI_UIINPUTEVENT_TYPE_KEY,
         .eventTypeId = AXIS_EVENT_ID,
         .inputEvent = &keyEvent,
-        .isCloned = false,
+        .isCreatedByUser = false,
         .apiVersion = 0,
     };
     OH_ArkUI_KeyEvent_SetConsumed(&event, true);

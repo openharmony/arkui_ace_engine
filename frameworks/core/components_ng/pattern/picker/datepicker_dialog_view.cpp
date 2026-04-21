@@ -12,8 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
 
+#include <cstdint>
+#include <string>
 #include <utility>
 
 #include "base/geometry/dimension.h"
@@ -21,22 +24,23 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
-#include "core/common/dynamic_module_helper.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
-#include "core/components_ng/pattern/calendar/calendar_paint_property.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_row_layout_property.h"
+#include "core/components_ng/pattern/picker/datepicker_pattern_fwd.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/pattern/time_picker/bridge/timepicker_util.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/picker/picker_type_define.h"
+#include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
+#include "core/components_ng/pattern/picker/picker_data.h"
+#include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/node_checkbox_modifier.h"
 #include "core/interfaces/native/node/node_timepicker_modifier.h"
 #include "core/pipeline/base/element_register.h"
@@ -71,6 +75,7 @@ constexpr int32_t FIRST_STACK  = 0;
 constexpr int32_t SECOND_STACK = 1;
 constexpr int32_t FIRST_PAGE  = 0;
 constexpr int32_t SECOND_PAGE = 1;
+constexpr Dimension TITLE_VERTICAL_SPACE = 7.0_vp;
 } // namespace
 bool DatePickerDialogView::switchFlag_ = false;
 bool DatePickerDialogView::switchTimePickerFlag_ = false;
@@ -119,6 +124,7 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
         dateNode->GetLayoutProperty()->UpdateLayoutDirection(TextDirection::LTR);
     }
     pickerPattern->SetIsShowInDialog(true);
+    pickerPattern->SetIsShowInSubwindow(dialogProperties.isShowInSubWindow);
     pickerPattern->SetShowLunarSwitch(settingData.lunarswitch);
     pickerPattern->SetTextProperties(settingData.properties);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
@@ -144,6 +150,10 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
         CHECK_NULL_RETURN(monthDaysNode, nullptr);
         auto timeNode = CreateAndMountTimeNode(settingData, monthDaysNode, pickerRow);
         CHECK_NULL_RETURN(timeNode, nullptr);
+        auto timePickerPattern = timeNode->GetPattern<TimePickerRowPattern>();
+        CHECK_NULL_RETURN(timePickerPattern, nullptr);
+        timePickerPattern->SetIsInDatePickerDialog(true);
+
         timePickerNode = timeNode;
         isShowTime_ = true;
         pickerRow->MountToParent(pickerStack);
@@ -205,11 +215,13 @@ RefPtr<FrameNode> DatePickerDialogView::CreateLunarSwitchTextNode()
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
     textLayoutProperty->UpdateContent(pickerTheme->GetLunarSwitchText());
-    textLayoutProperty->UpdateAdaptMaxFontSize(ConvertFontScaleValue(pickerTheme->GetLunarSwitchTextSize()));
-    textLayoutProperty->UpdateAdaptMinFontSize(ConvertFontScaleValue(LUNAR_SWITCH_MIN_FONT_SIZE));
+    textLayoutProperty->UpdateAdaptMaxFontSize(
+        ConvertFontScaleValue(pickerTheme->GetLunarSwitchTextSize(), 0.0_vp, false, true));
+    textLayoutProperty->UpdateAdaptMinFontSize(ConvertFontScaleValue(LUNAR_SWITCH_MIN_FONT_SIZE, 0.0_vp, false, true));
     textLayoutProperty->UpdateMaxLines(LUNAR_SWITCH_MAX_LINES);
     textLayoutProperty->UpdateLayoutWeight(RATIO_ONE);
-    textLayoutProperty->UpdateFontSize(ConvertFontScaleValue(pickerTheme->GetLunarSwitchTextSize()));
+    textLayoutProperty->UpdateFontSize(
+        ConvertFontScaleValue(pickerTheme->GetLunarSwitchTextSize(), 0.0_vp, false, true));
     textLayoutProperty->UpdateTextColor(pickerTheme->GetLunarSwitchTextColor());
     if (useButtonFocusArea_) {
         MarginProperty margin;
@@ -304,11 +316,40 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTitleButtonNode(const RefPtr<Frame
     textLayoutProperty->UpdateTextOverflow(pickerTheme->GetTitleStyle().GetTextOverflow());
     textLayoutProperty->UpdateMaxLines(pickerTheme->GetTitleStyle().GetMaxLines());
     textLayoutProperty->UpdateFlexShrink(1.0);
+
+    auto textPattern = textTitleNode->GetPattern<TextPattern>();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) && textPattern &&
+        textPattern->GetFallbackLineSpacingStyleOptimizeFlag()) {
+        textLayoutProperty->UpdateIncludeFontPadding(true);
+        textLayoutProperty->UpdateFallbackLineSpacing(true);
+    }
+
     auto buttonTitleRenderContext = buttonTitleNode->GetRenderContext();
     CHECK_NULL_RETURN(buttonTitleRenderContext, nullptr);
     buttonTitleRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    MarginProperty margin;
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+    auto buttonLayoutProperty = buttonTitleNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_RETURN(buttonLayoutProperty, nullptr);
+    buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        bool needAdaptForAging = false;
+        if (GreatOrEqual(pipeline->GetFontScale(), pickerTheme->GetMaxOneFontScale()) &&
+            Dimension(pipeline->GetRootHeight()).ConvertToVp() > pickerTheme->GetDeviceHeightLimit() &&
+            (pipeline->IsFollowSystem() &&
+            (GreatOrEqual(pipeline->GetMaxAppFontScale(), pickerTheme->GetMaxOneFontScale())))) {
+            needAdaptForAging = true;
+        }
+        if (!needAdaptForAging) {
+            MarginProperty textMargin;
+            textMargin.top = CalcLength(titleMarginTop_);
+            textMargin.bottom = CalcLength(titleMarginBottom_);
+            textLayoutProperty->UpdateMargin(textMargin);
+        }
+        buttonTitleNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(
+            CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), std::nullopt));
+        titleButtonRow->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(
+            CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), std::nullopt));
+    } else if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        MarginProperty margin;
         margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
         margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
         margin.top = CalcLength(dialogTheme->GetDividerHeight() / MARGIN_HALF);
@@ -810,18 +851,19 @@ RefPtr<FrameNode> DatePickerDialogView::CreateConfirmNode(const RefPtr<FrameNode
     CHECK_NULL_RETURN(textConfirmNode, nullptr);
     auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-    UpdateConfirmButtonTextLayoutProperty(textLayoutProperty, pickerTheme);
+    auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_RETURN(buttonConfirmLayoutProperty, nullptr);
+    UpdateConfirmButtonTextLayoutProperty(textLayoutProperty, pickerTheme, buttonConfirmLayoutProperty);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     auto buttonConfirmEventHub = buttonConfirmNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(buttonConfirmEventHub, nullptr);
     buttonConfirmEventHub->SetStateEffect(true);
 
-    auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_RETURN(buttonConfirmLayoutProperty, nullptr);
     UpdateButtonLayoutProperty(buttonConfirmLayoutProperty, pickerTheme);
     auto buttonConfirmRenderContext = buttonConfirmNode->GetRenderContext();
     buttonConfirmRenderContext->UpdateBackgroundColor(buttonColor_);
+    buttonConfirmLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     UpdateButtonStyles(buttonInfos, ACCEPT_BUTTON_INDEX, buttonConfirmLayoutProperty, buttonConfirmRenderContext);
     UpdateButtonDefaultFocus(buttonInfos, buttonConfirmNode, true);
     textConfirmNode->MountToParent(buttonConfirmNode);
@@ -844,42 +886,70 @@ RefPtr<FrameNode> DatePickerDialogView::CreateConfirmNode(const RefPtr<FrameNode
 }
 
 void UpdateButtonTextColor(const RefPtr<TextLayoutProperty>& textLayoutProperty, const RefPtr<PickerTheme>& pickerTheme,
-    bool useButtonFocusArea)
+    bool useButtonFocusArea, const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty)
 {
     CHECK_NULL_VOID(textLayoutProperty);
     CHECK_NULL_VOID(pickerTheme);
+    CHECK_NULL_VOID(buttonLayoutProperty);
     if (useButtonFocusArea) {
         textLayoutProperty->UpdateTextColor(pickerTheme->GetTitleStyle().GetTextColor());
+        buttonLayoutProperty->UpdateFontColor(pickerTheme->GetTitleStyle().GetTextColor());
     } else {
         textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+        buttonLayoutProperty->UpdateFontColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
     }
+    buttonLayoutProperty->UpdateFontColorFlagByUser(true);
 }
 
-void DatePickerDialogView::UpdateConfirmButtonTextLayoutProperty(
-    const RefPtr<TextLayoutProperty>& textLayoutProperty, const RefPtr<PickerTheme>& pickerTheme)
+void DatePickerDialogView::UpdateConfirmButtonTextLayoutProperty(const RefPtr<TextLayoutProperty>& textLayoutProperty,
+    const RefPtr<PickerTheme>& pickerTheme, const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty)
 {
     CHECK_NULL_VOID(textLayoutProperty);
+    CHECK_NULL_VOID(buttonLayoutProperty);
     textLayoutProperty->UpdateContent(GetDialogNormalButtonText(true));
-    UpdateButtonTextColor(textLayoutProperty, pickerTheme, useButtonFocusArea_);
+    UpdateButtonTextColor(textLayoutProperty, pickerTheme, useButtonFocusArea_, buttonLayoutProperty);
     if (!NeedAdaptForAging()) {
         textLayoutProperty->UpdateMaxFontScale(pickerTheme->GetNormalFontScale());
     }
     textLayoutProperty->UpdateFontSize(
-        ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize()));
+        ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize(), 0.0_vp, false, true));
     textLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
+
+    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto fontManager = pipeline->GetFontManager();
+    CHECK_NULL_VOID(fontManager);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
+        fontManager->GetFallbackLineSpacingStyleOptimizeFlag()) {
+        textLayoutProperty->UpdateIncludeFontPadding(true);
+        textLayoutProperty->UpdateFallbackLineSpacing(true);
+    }
 }
 
 void DatePickerDialogView::UpdateCancelButtonTextLayoutProperty(
-    const RefPtr<TextLayoutProperty>& textCancelLayoutProperty, const RefPtr<PickerTheme>& pickerTheme)
+    const RefPtr<TextLayoutProperty>& textCancelLayoutProperty, const RefPtr<PickerTheme>& pickerTheme,
+    const RefPtr<ButtonLayoutProperty>& buttonCancelLayoutProperty)
 {
     CHECK_NULL_VOID(textCancelLayoutProperty);
+    CHECK_NULL_VOID(buttonCancelLayoutProperty);
     textCancelLayoutProperty->UpdateContent(GetDialogNormalButtonText(false));
-    UpdateButtonTextColor(textCancelLayoutProperty, pickerTheme, useButtonFocusArea_);
+    UpdateButtonTextColor(textCancelLayoutProperty, pickerTheme, useButtonFocusArea_, buttonCancelLayoutProperty);
     if (!NeedAdaptForAging()) {
         textCancelLayoutProperty->UpdateMaxFontScale(pickerTheme->GetNormalFontScale());
     }
-    textCancelLayoutProperty->UpdateFontSize(pickerTheme->GetOptionStyle(false, false).GetFontSize());
+    textCancelLayoutProperty->UpdateFontSize(
+        ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize(), 0.0_vp, false, true));
     textCancelLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
+
+    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto fontManager = pipeline->GetFontManager();
+    CHECK_NULL_VOID(fontManager);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
+        fontManager->GetFallbackLineSpacingStyleOptimizeFlag()) {
+        textCancelLayoutProperty->UpdateIncludeFontPadding(true);
+        textCancelLayoutProperty->UpdateFallbackLineSpacing(true);
+    }
 }
 
 void DatePickerDialogView::UpdateButtonLayoutProperty(
@@ -900,7 +970,13 @@ void DatePickerDialogView::UpdateButtonLayoutProperty(
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
     UpdateConfirmButtonMargin(buttonConfirmLayoutProperty, dialogTheme);
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        buttonConfirmLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(pickerTheme->GetButtonWidth()), std::nullopt));
+        buttonConfirmLayoutProperty->UpdateMaxLines(1);
+        buttonConfirmLayoutProperty->UpdateFontSize(
+            ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize(), 0.0_vp, false, true));
+    } else if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         buttonConfirmLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(pickerTheme->GetButtonWidth()), CalcLength(pickerTheme->GetButtonHeight())));
     } else {
@@ -976,10 +1052,12 @@ void DatePickerDialogView::UpdateButtonStyles(const std::vector<ButtonInfo>& but
     }
     UpdateButtonStyleAndRole(buttonInfos, index, buttonLayoutProperty, buttonRenderContext, buttonTheme);
     if (buttonInfos[index].fontSize.has_value()) {
-        buttonLayoutProperty->UpdateFontSize(ConvertFontScaleValue(buttonInfos[index].fontSize.value()));
+        buttonLayoutProperty->UpdateFontSize(
+            ConvertFontScaleValue(buttonInfos[index].fontSize.value(), 0.0_vp, false, true));
     }
     if (buttonInfos[index].fontColor.has_value()) {
         buttonLayoutProperty->UpdateFontColor(buttonInfos[index].fontColor.value());
+        buttonLayoutProperty->UpdateFontColorFlagByUser(true);
     }
     if (buttonInfos[index].fontWeight.has_value()) {
         buttonLayoutProperty->UpdateFontWeight(buttonInfos[index].fontWeight.value());
@@ -995,6 +1073,7 @@ void DatePickerDialogView::UpdateButtonStyles(const std::vector<ButtonInfo>& but
     }
     if (buttonInfos[index].backgroundColor.has_value()) {
         buttonRenderContext->UpdateBackgroundColor(buttonInfos[index].backgroundColor.value());
+        buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     }
 }
 
@@ -1247,12 +1326,14 @@ RefPtr<FrameNode> DatePickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     CHECK_NULL_RETURN(buttonCancelNode, nullptr);
+    auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_RETURN(buttonCancelLayoutProperty, nullptr);
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_RETURN(textCancelNode, nullptr);
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textCancelLayoutProperty, nullptr);
-    UpdateCancelButtonTextLayoutProperty(textCancelLayoutProperty, pickerTheme);
+    UpdateCancelButtonTextLayoutProperty(textCancelLayoutProperty, pickerTheme, buttonCancelLayoutProperty);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
     datePickerPattern->SetCancelNode(buttonCancelNode);
     textCancelNode->MountToParent(buttonCancelNode);
@@ -1264,17 +1345,22 @@ RefPtr<FrameNode> DatePickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     CHECK_NULL_RETURN(buttonCancelEventHub, nullptr);
     buttonCancelEventHub->SetStateEffect(true);
 
-    auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
     buttonCancelLayoutProperty->UpdateLabel(GetDialogNormalButtonText(false));
     buttonCancelLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    if (buttonCancelNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         buttonCancelLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         buttonCancelLayoutProperty->UpdateType(ButtonType::CAPSULE);
     }
     buttonCancelLayoutProperty->UpdateFlexShrink(1.0);
     UpdateCancelButtonMargin(buttonCancelLayoutProperty, dialogTheme);
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        buttonCancelLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(pickerTheme->GetButtonWidth()), std::nullopt));
+        buttonCancelLayoutProperty->UpdateMaxLines(1);
+        buttonCancelLayoutProperty->UpdateFontSize(
+            ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize(), 0.0_vp, false, true));
+    } else if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         buttonCancelLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(pickerTheme->GetButtonWidth()), CalcLength(pickerTheme->GetButtonHeight())));
     } else {
@@ -1284,6 +1370,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
 
     auto buttonCancelRenderContext = buttonCancelNode->GetRenderContext();
     buttonCancelRenderContext->UpdateBackgroundColor(buttonColor_);
+    buttonCancelLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     UpdateButtonStyles(buttonInfos, CANCEL_BUTTON_INDEX, buttonCancelLayoutProperty, buttonCancelRenderContext);
     UpdateButtonDefaultFocus(buttonInfos, buttonCancelNode, false);
     buttonCancelNode->MarkModifyDone();
@@ -1605,9 +1692,18 @@ RefPtr<FrameNode> DatePickerDialogView::CreateAndMountButtonTitleNode(
     auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
     datePickerPattern->SetbuttonTitleNode(buttonTitleNode);
 
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        auto layoutProps = buttonTitleNode->GetLayoutProperty<LinearLayoutProperty>();
-        CHECK_NULL_RETURN(layoutProps, nullptr);
+    auto layoutProps = buttonTitleNode->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProps, nullptr);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        PaddingProperty adaptPadding;
+        adaptPadding.left = CalcLength(titlePaddingHorizontal_);
+        adaptPadding.right = CalcLength(titlePaddingHorizontal_);
+        adaptPadding.top = CalcLength(TITLE_VERTICAL_SPACE);
+        adaptPadding.bottom = CalcLength(TITLE_VERTICAL_SPACE);
+        layoutProps->UpdatePadding(adaptPadding);
+        layoutProps->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), std::nullopt));
+    } else if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         PaddingProperty padding;
         padding.left = CalcLength(titlePaddingHorizontal_);
         padding.right = CalcLength(titlePaddingHorizontal_);
@@ -2019,9 +2115,19 @@ RefPtr<FrameNode> DatePickerDialogView::CreateNextPrevButtonNode(std::function<v
     datePickerPattern->SetNextPrevButtonNode(nextPrevButtonNode);
     textLayoutProperty->UpdateContent(GetDialogAgingButtonText(true));
     textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+    if (!NeedAdaptForAging()) {
+        textLayoutProperty->UpdateMaxFontScale(pickerTheme->GetNormalFontScale());
+    }
     textLayoutProperty->UpdateFontSize(
-        ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize()));
+        ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize(), 0.0_vp, false, true));
     textLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
+
+    auto fontManager = pipeline->GetFontManager();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) && fontManager &&
+        fontManager->GetFallbackLineSpacingStyleOptimizeFlag()) {
+        textLayoutProperty->UpdateIncludeFontPadding(true);
+        textLayoutProperty->UpdateFallbackLineSpacing(true);
+    }
     textNextPrevNode->MountToParent(nextPrevButtonNode);
     auto nextPrevEventHub = nextPrevButtonNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(nextPrevEventHub, nullptr);
@@ -2029,14 +2135,20 @@ RefPtr<FrameNode> DatePickerDialogView::CreateNextPrevButtonNode(std::function<v
     auto buttonNextPrevLayoutProperty = nextPrevButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
     buttonNextPrevLayoutProperty->UpdateLabel(GetDialogAgingButtonText(true));
     buttonNextPrevLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    if (nextPrevButtonNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         buttonNextPrevLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         buttonNextPrevLayoutProperty->UpdateType(ButtonType::CAPSULE);
     }
     buttonNextPrevLayoutProperty->UpdateFlexShrink(1.0);
     UpdateConfirmButtonMargin(buttonNextPrevLayoutProperty, dialogTheme);
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        buttonNextPrevLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(pickerTheme->GetButtonWidth()), std::nullopt));
+        buttonNextPrevLayoutProperty->UpdateMaxLines(1);
+        buttonNextPrevLayoutProperty->UpdateFontSize(
+            ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize(), 0.0_vp, false, true));
+    } else if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         buttonNextPrevLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(pickerTheme->GetButtonWidth()), CalcLength(pickerTheme->GetButtonHeight())));
     } else {
@@ -2052,6 +2164,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateNextPrevButtonNode(std::function<v
     eventNextPrevmHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(onClickCallback));
     auto buttonNextPrevRenderContext = nextPrevButtonNode->GetRenderContext();
     buttonNextPrevRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    buttonNextPrevLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     UpdateButtonStyles(buttonInfos, CANCEL_BUTTON_INDEX, buttonNextPrevLayoutProperty, buttonNextPrevRenderContext);
     UpdateButtonDefaultFocus(buttonInfos, nextPrevButtonNode, false);
     nextPrevButtonNode->MarkModifyDone();
@@ -2132,10 +2245,15 @@ bool DatePickerDialogView::GetIsUserSetTextProperties(const PickerTextProperties
     return false;
 }
 
-bool DatePickerDialogView::NeedAdaptForAging()
+bool DatePickerDialogView::NeedAdaptForAging(bool skipOptimizeFlag)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
+    auto fontManager = pipeline->GetFontManager();
+    if (!skipOptimizeFlag && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)
+        && fontManager && fontManager->GetFallbackLineSpacingStyleOptimizeFlag()) {
+        return false;
+    }
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, false);
     auto maxAppFontScale = pipeline->GetMaxAppFontScale();
@@ -2161,7 +2279,7 @@ const Dimension DatePickerDialogView::AdjustFontSizeScale(const Dimension& fontS
 }
 
 const Dimension DatePickerDialogView::ConvertFontScaleValue(
-    const Dimension& fontSizeValue, const Dimension& fontSizeLimit, bool isUserSetFont)
+    const Dimension& fontSizeValue, const Dimension& fontSizeLimit, bool isUserSetFont, bool skipOptimizeFlag)
 {
     auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, fontSizeValue);
@@ -2178,7 +2296,23 @@ const Dimension DatePickerDialogView::ConvertFontScaleValue(
     if (pipeline->IsFollowSystem() && (!NearZero(maxAppFontScale))) {
         fontSizeScale = std::min(fontSizeScale, maxAppFontScale);
     }
-    if (NeedAdaptForAging()) {
+
+    auto fontManager = pipeline->GetFontManager();
+    if (!skipOptimizeFlag && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
+        fontManager && fontManager->GetFallbackLineSpacingStyleOptimizeFlag()) {
+        if (NearZero(fontSizeScale) || (fontSizeValue.Unit() == DimensionUnit::VP)) {
+            return fontSizeValue;
+        }
+        if (GreatOrEqualCustomPrecision(fontSizeScale, 1.0f) && pipeline->IsFollowSystem()) {
+            fontSizeScale = std::clamp(fontSizeScale, 0.0f, maxAppFontScale);
+            if (fontSizeScale != 0.0f) {
+                return Dimension(fontSizeValue / fontSizeScale);
+            }
+        }
+        return fontSizeValue;
+    }
+
+    if (NeedAdaptForAging(skipOptimizeFlag)) {
         if (isUserSetFont) {
             if (GreatOrEqualCustomPrecision(fontSizeValue.ConvertToPx() * fontSizeScale,
                 fontSizeLimit.ConvertToPx()) && (fontSizeScale != 0.0f)) {
@@ -2241,7 +2375,13 @@ const Dimension DatePickerDialogView::ConvertTitleFontScaleValue(const Dimension
     if (NearZero(fontScale)) {
         return fontSizeValue;
     }
-    if (NeedAdaptForAging()) {
+    bool needAdaptForAging = false;
+    if (GreatOrEqual(pipeline->GetFontScale(), pickerTheme->GetMaxOneFontScale()) &&
+        Dimension(pipeline->GetRootHeight()).ConvertToVp() > pickerTheme->GetDeviceHeightLimit() &&
+        (pipeline->IsFollowSystem() && (GreatOrEqual(maxAppFontScale, pickerTheme->GetMaxOneFontScale())))) {
+        needAdaptForAging = true;
+    }
+    if (needAdaptForAging) {
         if (fontSizeValue.Unit() == DimensionUnit::VP) {
             return (fontSizeValue * pickerTheme->GetTitleFontScaleLimit());
         } else {
@@ -2290,7 +2430,8 @@ DialogEvent DatePickerDialogView::GetDateChangeEvent(const RefPtr<FrameNode>& fr
     dateChangeEvent = [weak = WeakPtr<FrameNode>(frameNode), dateChangeEvent](const std::string& info) -> void {
         auto uiNode = weak.Upgrade();
         if (uiNode != nullptr) {
-            DatePickerPattern::ReportDateChangeEvent(uiNode->GetId(), "DatePickerDialog", "onDateChange", info);
+            DatePickerPattern::ReportDialogDateChangeEvent(uiNode->GetId(),
+                "DatePickerDialog", "onDateChange", info);
         }
         CHECK_NULL_VOID(dateChangeEvent);
         dateChangeEvent(info);

@@ -16,8 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RADIO_RADIO_MODIFIER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RADIO_RADIO_MODIFIER_H
 
-#include <vector>
-
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "core/common/container.h"

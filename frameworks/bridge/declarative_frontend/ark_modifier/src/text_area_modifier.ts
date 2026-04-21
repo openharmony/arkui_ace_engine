@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class TextAreaModifier extends ArkTextAreaComponent implements AttributeModifier<TextAreaAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {

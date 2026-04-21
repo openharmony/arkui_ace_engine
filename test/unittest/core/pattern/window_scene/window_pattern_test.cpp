@@ -18,12 +18,12 @@
 #define private public
 #define protected public
 
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_resource_register.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_rosen_render_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_resource_register.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+
 #include "test/unittest/core/common/asset/mock_asset.h"
 
 #include "common/include/window_session_property.h"
@@ -33,6 +33,7 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/window_scene/scene/mirror_window_scene.h"
 #include "core/components_ng/pattern/window_scene/scene/window_node.h"
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 #include "core/components_ng/pattern/window_scene/scene/window_scene.h"
@@ -62,6 +63,7 @@ public:
     sptr<Rosen::SceneSession> sceneSession_;
     RefPtr<FrameNode> frameNode_;
     RefPtr<WindowScene> windowScene_;
+    RefPtr<MirrorWindowScene> mirrorWindowScene_;
 
     void CreateWindowSceneWindowPatternTest();
 };
@@ -117,6 +119,9 @@ void WindowPatternTest::CreateWindowSceneWindowPatternTest()
         ElementRegister::GetInstance()->MakeUniqueId(), windowScene_);
     windowScene_->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode_));
     ASSERT_NE(windowScene_->GetHost(), nullptr);
+
+    mirrorWindowScene_ = AceType::MakeRefPtr<MirrorWindowScene>(sceneSession_);
+    ASSERT_NE(mirrorWindowScene_, nullptr);
 
     Rosen::RSSurfaceNodeConfig config = {
         .SurfaceNodeName = "SurfaceNode"
@@ -220,6 +225,61 @@ HWTEST_F(WindowPatternTest, DelayAddAppWindowForDmaResume, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CreateSnapshotWindow
+ * @tc.desc: CreateSnapshotWindow Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternTest, CreateSnapshotWindow, TestSize.Level0)
+{
+    ASSERT_NE(windowScene_, nullptr);
+    ASSERT_NE(windowScene_->GetHost(), nullptr);
+    windowScene_->isBlankForSnapshot_ = true;
+    windowScene_->CreateSnapshotWindow();
+    auto key = Rosen::defaultStatus;
+    sceneSession_->scenePersistence_->SetHasSnapshot(true, key);
+    sceneSession_->isPersistentImageFit_ = true;
+    sceneSession_->lastLayoutRect_ = {
+        .posX_ = 100,
+        .posY_ = 100,
+        .width_ = 100,
+        .height_ = 100,
+    };
+    sceneSession_->layoutRect_ = {
+        .posX_ = 100,
+        .posY_ = 100,
+        .width_ = 100,
+        .height_ = 100,
+    };
+    sceneSession_->enablePersistentScaledSnapshot_ = false;
+    windowScene_->CreateSnapshotWindow();
+    EXPECT_EQ(windowScene_->isBlankForSnapshot_, false);
+
+    sceneSession_->enablePersistentScaledSnapshot_ = true;
+    sceneSession_->SetShowRecent(false);
+    windowScene_->CreateSnapshotWindow();
+    EXPECT_EQ(windowScene_->isScaledSnapshot_, false);
+
+    sceneSession_->SetShowRecent(true);
+    windowScene_->CreateSnapshotWindow();
+    EXPECT_EQ(windowScene_->isScaledSnapshot_, true);
+    sceneSession_->SetShowRecent(false);
+
+    sceneSession_->layoutRect_ = {
+        .posX_ = 100,
+        .posY_ = 100,
+        .width_ = 200,
+        .height_ = 200,
+    };
+    windowScene_->CreateSnapshotWindow();
+
+    sceneSession_->scenePersistence_->isSavingSnapshot_ = true;
+    sceneSession_->freeMultiWindow_.store(true);
+    sceneSession_->isPersistentImageFit_ = false;
+    windowScene_->CreateSnapshotWindow();
+    EXPECT_EQ(windowScene_->isBlankForSnapshot_, true);
+}
+
+/**
  * @tc.name: OnAttachToFrameNode
  * @tc.desc: OnAttachToFrameNode Test
  * @tc.type: FUNC
@@ -231,15 +291,20 @@ HWTEST_F(WindowPatternTest, OnAttachToFrameNode, TestSize.Level0)
 
     sceneSession_->state_ = Rosen::SessionState::STATE_DISCONNECT;
     sceneSession_->SetShowRecent(true);
-    auto key = Rosen::defaultStatus;
     sceneSession_->scenePersistence_->isSavingSnapshot_ = true;
     windowScene_->WindowPattern::OnAttachToFrameNode();
     EXPECT_EQ(sceneSession_->GetShowRecent(), true);
 
     sceneSession_->state_ = Rosen::SessionState::STATE_BACKGROUND;
     sceneSession_->SetShowRecent(false);
+    sceneSession_->scenePersistence_->isSavingSnapshot_ = false;
+    windowScene_->WindowPattern::OnAttachToFrameNode();
+    EXPECT_EQ(windowScene_->attachToFrameNodeFlag_, true);
+
+    sceneSession_->state_ = Rosen::SessionState::STATE_BACKGROUND;
+    sceneSession_->SetShowRecent(false);
+    sceneSession_->scenePersistence_->isSavingSnapshot_ = true;
     sceneSession_->isAppLockControl_.store(false);
-    sceneSession_->scenePersistence_->hasSnapshot_[key] = true;
     windowScene_->WindowPattern::OnAttachToFrameNode();
     EXPECT_EQ(windowScene_->attachToFrameNodeFlag_, true);
 
@@ -270,6 +335,31 @@ HWTEST_F(WindowPatternTest, OnAttachToFrameNode, TestSize.Level0)
 }
 
 /**
+ * @tc.name: AddSnapshot
+ * @tc.desc: AddSnapshot Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternTest, AddSnapshot, TestSize.Level0)
+{
+    ASSERT_NE(windowScene_, nullptr);
+    ASSERT_NE(windowScene_->GetHost(), nullptr);
+
+    sceneSession_->state_ = Rosen::SessionState::STATE_DISCONNECT;
+    sceneSession_->SetShowRecent(true);
+    auto key = Rosen::defaultStatus;
+    sceneSession_->scenePersistence_->isSavingSnapshot_ = true;
+    mirrorWindowScene_->AddSnapshot();
+    EXPECT_EQ(sceneSession_->GetShowRecent(), true);
+
+    sceneSession_->state_ = Rosen::SessionState::STATE_BACKGROUND;
+    sceneSession_->SetShowRecent(false);
+    sceneSession_->isAppLockControl_.store(false);
+    sceneSession_->scenePersistence_->hasSnapshot_[key] = true;
+    mirrorWindowScene_->AddSnapshot();
+    EXPECT_EQ(windowScene_->attachToFrameNodeFlag_, false);
+}
+
+/**
  * @tc.name: CreateStartingWindow_StartWindowType_RetainAndInvisible
  * @tc.desc: Test CreateStartingWindow when startWindowType is RETAIN_AND_INVISIBLE
  * @tc.type: FUNC
@@ -284,7 +374,7 @@ HWTEST_F(WindowPatternTest, CreateStartingWindow_StartWindowType_RetainAndInvisi
     windowScene_->WindowPattern::CreateStartingWindow();
     EXPECT_EQ(sceneSession_->hidingStartWindow_, true);
 }
- 
+
 /**
  * @tc.name: CreateStartingWindow_StartWindowType_Default_NoPreloadData
  * @tc.desc: Test CreateStartingWindow when startWindowType is DEFAULT and no preload data is set
@@ -307,7 +397,7 @@ HWTEST_F(WindowPatternTest, CreateStartingWindow_StartWindowType_Default_NoPrelo
     EXPECT_EQ(bufferInfo.first, nullptr);
     EXPECT_EQ(bufferInfo.second, 0);
 }
- 
+
 /**
  * @tc.name: CreateStartingWindow_WithValidPreloadPixelMap
  * @tc.desc: Test CreateStartingWindow when valid preload PixelMap is set (PixelMap should be cleared after call)
@@ -335,7 +425,7 @@ HWTEST_F(WindowPatternTest, CreateStartingWindow_WithValidPreloadPixelMap, TestS
     EXPECT_EQ(bufferInfo.first, nullptr);
     EXPECT_EQ(bufferInfo.second, 0);
 }
- 
+
 /**
  * @tc.name: CreateStartingWindow_WithValidPreloadSvgBuffer
  * @tc.desc: Test CreateStartingWindow when valid preload SVG buffer is set (SVG buffer should be cleared after call)
@@ -365,7 +455,7 @@ HWTEST_F(WindowPatternTest, CreateStartingWindow_WithValidPreloadSvgBuffer, Test
     EXPECT_EQ(bufferInfo.first, nullptr);
     EXPECT_EQ(bufferInfo.second, 0);
 }
- 
+
 /**
  * @tc.name: CreateStartingWindow_PreloadingStartingWindow_True
  * @tc.desc: Test CreateStartingWindow when PreloadingStartingWindow is set to true

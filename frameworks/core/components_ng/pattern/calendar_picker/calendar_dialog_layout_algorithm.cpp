@@ -56,7 +56,7 @@ void CalendarDialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     float scrollHeight = 0.0f;
     auto pipelineContext = columnNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto calendarTheme = pipelineContext->GetTheme<CalendarTheme>();
+    auto calendarTheme = columnNode->GetTheme<CalendarTheme>(true);
     CHECK_NULL_VOID(calendarTheme);
     auto calendarMonthFrameNode = AceType::DynamicCast<NG::FrameNode>(calendarMonthNode);
     CHECK_NULL_VOID(calendarMonthFrameNode);

@@ -35,11 +35,11 @@ class AppearSymbolEffectAccessorTest : public AccessorTestCtorBase<GENERATED_Ark
 };
 
 /**
- * @tc.name: ctorDefaultTest
+ * @tc.name: constructTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(AppearSymbolEffectAccessorTest, ctorDefaultTest, TestSize.Level1)
+HWTEST_F(AppearSymbolEffectAccessorTest, constructTestDefaultValues, TestSize.Level1)
 {
     EXPECT_EQ(peer_->type, SymbolEffectType::APPEAR);
     EXPECT_EQ(peer_->scope, std::nullopt);
@@ -48,11 +48,11 @@ HWTEST_F(AppearSymbolEffectAccessorTest, ctorDefaultTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: ctorTest
+ * @tc.name: constructTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(AppearSymbolEffectAccessorTest, ctorTest, TestSize.Level1)
+HWTEST_F(AppearSymbolEffectAccessorTest, constructTest, TestSize.Level1)
 {
     Opt_EffectScope scope1 = Converter::ArkValue<Opt_EffectScope, Ark_EffectScope>(ARK_EFFECT_SCOPE_LAYER);
     Opt_EffectScope scope2 = Converter::ArkValue<Opt_EffectScope, Ark_EffectScope>(ARK_EFFECT_SCOPE_WHOLE);

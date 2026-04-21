@@ -31,19 +31,19 @@ enum class StateControllerType : int32_t {
 
 enum class ActionControllerType : int32_t {
     CONTROLLER_NONE = 0,
-    CONTROLLER_CLICK = 1
+    CONTROLLER_CLICK = 1,
 };
 
 class AccessibilityPropertyUtils {
 public:
-    static std::string GetContent(const RefPtr<AccessibilityProperty>& accessibilityProperty);
-    static std::string GetAccessibilityText(const RefPtr<AccessibilityProperty>& accessibilityProperty);
-    static std::string GetComponentType(
-        const RefPtr<FrameNode>& node, const RefPtr<AccessibilityProperty>& accessibilityProperty);
     static StateControllerType CheckAndGetStateController(
         const RefPtr<FrameNode>& node, RefPtr<FrameNode>& controllerNode);
     static ActionControllerType CheckAndGetActionController(
         const RefPtr<FrameNode>& node, RefPtr<FrameNode>& controllerNode);
+    static std::string GetContent(const RefPtr<AccessibilityProperty>& accessibilityProperty);
+    static std::string GetAccessibilityText(const RefPtr<AccessibilityProperty>& accessibilityProperty);
+    static std::string GetComponentType(
+        const RefPtr<FrameNode>& node, const RefPtr<AccessibilityProperty>& accessibilityProperty);
     static bool NeedRemoveControllerTextFromGroup(const RefPtr<FrameNode>& controllerNode);
 };
 } // namespace OHOS::Ace::NG

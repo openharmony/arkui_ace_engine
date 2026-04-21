@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text/base_text_select_overlay.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include "base/utils/system_properties.h"
 #include "core/common/ace_engine.h"
@@ -25,6 +26,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -355,7 +357,7 @@ RectF BaseTextSelectOverlay::GetVisibleContentRect(bool isGlobal)
     if (enableHandleLevel_ && handleLevelMode_ == HandleLevelMode::EMBED && !isGlobal) {
         return visibleContentRect;
     }
-    return GetVisibleRect(pattern->GetHost(), visibleContentRect);
+    return GetVisibleRect(host, visibleContentRect);
 }
 
 RectF BaseTextSelectOverlay::MergeSelectedBoxes(
@@ -476,7 +478,7 @@ RectF BaseTextSelectOverlay::GetVisibleContentRectWithTransform(float epsilon)
     visibleContentRect.SetWidth(width);
     visibleContentRect.SetHeight(height);
     GetGlobalRectWithTransform(visibleContentRect);
-    return GetVisibleRect(pattern->GetHost(), visibleContentRect);
+    return GetVisibleRect(host, visibleContentRect);
 }
 
 void BaseTextSelectOverlay::GetGlobalPointsWithTransform(std::vector<OffsetF>& points)

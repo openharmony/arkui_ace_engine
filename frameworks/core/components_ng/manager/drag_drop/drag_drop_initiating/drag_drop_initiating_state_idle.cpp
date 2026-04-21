@@ -16,6 +16,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_initiating/drag_drop_initiating_state_idle.h"
 
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
+#include "core/common/event_manager.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_initiating/drag_drop_initiating_state_machine.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/gestures/drag_event.h"
@@ -53,14 +54,18 @@ void DragDropInitiatingStateIdle::Init(int32_t currentState)
     UnRegisterDragListener();
     if (params.isNeedGather) {
         HideGatherNode();
-        DragDropFuncWrapper::ResetNode(frameNode);
+        // ResetNode has already been called in LIFTING state animation finish callback
+        // when transitioning from MOVING to IDLE, so skip it here to avoid duplicate call
+        if (currentState != static_cast<int32_t>(DragDropInitiatingStatus::MOVING)) {
+            DragDropFuncWrapper::ResetNode(frameNode);
+        }
     }
     if (currentState != static_cast<int32_t>(DragDropInitiatingStatus::READY)) {
         if (gestureHub->GetTextDraggable()) {
             params.preScaledPixelMap = nullptr;
             HideTextAnimation();
         } else {
-            HidePixelMap();
+            HidePixelMap(false, 0, 0, true, currentState);
         }
         HideEventColumn();
     }

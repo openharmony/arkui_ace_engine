@@ -1215,7 +1215,7 @@ void HandleFillColorResource(const RefPtr<ResourceObject>& resObj, const RefPtr<
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         Color color;
-        bool status = ResourceParseUtils::ParseResColor(resObj, color);
+        bool status = ResourceParseUtils::ParseResColor(resObj, color, true);
         if (!status) {
             if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_ELEVEN)) {
                 return;

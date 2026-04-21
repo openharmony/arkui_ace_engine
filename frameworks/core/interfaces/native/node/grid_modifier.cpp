@@ -17,6 +17,9 @@
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
+#include "core/components_ng/pattern/grid/grid_layout_property.h"
+#include "core/components_ng/pattern/grid/grid_pattern.h"
+#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/interfaces/native/node/node_adapter_impl.h"
 #include "interfaces/native/node/grid_layout_option.h"
@@ -195,7 +198,8 @@ void SetGridScrollBarColorPtr(ArkUINodeHandle node, ArkUI_Int32 color, void* col
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         if (!colorRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
         }
@@ -655,6 +659,28 @@ void ResetGridFadingEdge(ArkUINodeHandle node)
     NG::ScrollableModelNG::SetFadingEdge(frameNode, false, DEFAULT_FADING_EDGE_LENGTH);
 }
 
+void SetItemFillPolicy(ArkUINodeHandle node, int32_t policy)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    PresetFillType fileType = static_cast<PresetFillType>(policy);
+    GridModelNG::SetItemFillPolicy(frameNode, fileType);
+}
+
+void ResetItemFillPolicy(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridModelNG::ResetItemFillPolicy(frameNode);
+}
+
+ArkUI_Int32 GetItemFillPolicy(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<int32_t>(GridModelNG::GetItemFillPolicy(frameNode));
+}
+
 void SetGridEnableScrollInteraction(ArkUINodeHandle node, ArkUI_Bool value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -714,28 +740,6 @@ void ResetGridLayoutOptions(ArkUINodeHandle node)
     GridModelNG::ResetLayoutOptions(frameNode);
 }
 
-void SetItemFillPolicy(ArkUINodeHandle node, int32_t policy)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    PresetFillType fileType = static_cast<PresetFillType>(policy);
-    GridModelNG::SetItemFillPolicy(frameNode, fileType);
-}
-
-void ResetItemFillPolicy(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    GridModelNG::ResetItemFillPolicy(frameNode);
-}
-
-ArkUI_Int32 GetItemFillPolicy(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
-    return static_cast<int32_t>(GridModelNG::GetItemFillPolicy(frameNode));
-}
-
 void SetScrollToIndex(
     ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 animation, ArkUI_Int32 alignment, float options)
 {
@@ -757,6 +761,24 @@ ArkUI_Bool GetSupportLazyLoadingEmptyBranch(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, false);
     return GridModelNG::GetSupportLazyLoadingEmptyBranch(frameNode);
+}
+
+ArkUINodeHandle GetGridController(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto controller = GridModelNG::GetOrCreateController(frameNode);
+    return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(controller));
+}
+
+void SetGridScrollBarProxy(ArkUINodeHandle node, ArkUINodeHandle proxy)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto scrollProxy = AceType::Claim(reinterpret_cast<ScrollProxy*>(proxy));
+    pattern->SetScrollBarProxy(AceType::DynamicCast<NG::ScrollBarProxy>(scrollProxy));
 }
 
 namespace NodeModifier {
@@ -865,6 +887,8 @@ const ArkUIGridModifier* GetGridModifier()
         .setScrollToIndex = SetScrollToIndex,
         .setSupportLazyLoadingEmptyBranch = SetSupportLazyLoadingEmptyBranch,
         .getSupportLazyLoadingEmptyBranch = GetSupportLazyLoadingEmptyBranch,
+        .setScrollBarProxy = SetGridScrollBarProxy,
+        .getController = GetGridController,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

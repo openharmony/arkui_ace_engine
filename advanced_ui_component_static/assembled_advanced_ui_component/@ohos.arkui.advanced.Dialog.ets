@@ -25,7 +25,8 @@ import {
   LocalizedMargin, Margin, ClickEvent, ScrollState, OnCheckboxChangeCallback, $r, PopupStateChangeParam,
   ScrollOnScrollCallback, SizeChangeCallback, applyStyles, CustomDialog, ButtonOptions as ButtonParam, CustomLayout,
   WithTheme, RelativeContainer, BaseGestureEvent, GestureRecognizer, ScrollBar, GestureControl, VerticalAlign,
-  GestureJudgeResult, LocalizedAlignRuleOptions, HorizontalAlign, Visibility
+  GestureJudgeResult, LocalizedAlignRuleOptions, HorizontalAlign, Visibility, ButtonLabelStyle,
+  WordBreak, TextAttribute
 } from '@ohos.arkui.component';
 import { State, Link, Observed, PropRef } from '@ohos.arkui.stateManagement';
 import { BusinessError, Callback } from '@ohos.base';
@@ -48,6 +49,7 @@ export class ButtonOptions {
   public buttonStyle?: ButtonStyleMode;
   public role?: ButtonRole;
   public defaultFocus?: boolean;
+  public textAlign?: TextAlign;
 }
 
 class CustomThemeImpl implements CustomTheme {
@@ -57,6 +59,13 @@ class CustomThemeImpl implements CustomTheme {
   constructor(colors: CustomColors) {
     this.colors = colors;
   }
+}
+
+function textAttributeExtension(this: TextAttribute): TextAttribute {
+  this.fallbackLineSpacing(true);
+  this.wordBreak(WordBreak.HYPHENATION);
+  this.orphanCharOptimization(true);
+  return this;
 }
 
 const TITLE_MAX_LINES: int = 2;
@@ -279,6 +288,7 @@ export struct TipsDialog {
           .layoutWeight(1)
           .focusable(false)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
+          .textAttributeExtension()
       }
     }
     .accessibilityGroup(true)
@@ -330,7 +340,7 @@ export struct TipsDialog {
   textPart(): void {
     Scroll(this.contentScroller) {
       Column() {
-        if (this.title !== null) {
+        if (this.title !== null && this.title !== undefined) {
           Row() {
             Text(this.title)
               .fontSize(`${TITLE_S}fp`)
@@ -341,6 +351,7 @@ export struct TipsDialog {
               .maxLines(CONTENT_MAX_LINES)
               .textOverflow({ overflow: TextOverflow.Ellipsis })
               .width('100%')
+              .textAttributeExtension()
           }
           .padding({ bottom: $r('sys.float.padding_level8') } as Padding)
         }
@@ -363,6 +374,7 @@ export struct TipsDialog {
                 }
                 return false
               })
+              .textAttributeExtension()
           }
         }
       }
@@ -371,7 +383,7 @@ export struct TipsDialog {
     }
     .fadingEdge(IS_FADEOUT_ENABLE(), { fadingEdgeLength: LengthMetrics.vp(FADEOUT_GRADIENT_WIDTH) })
     .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
-    .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) } as LocalizedMargin)
+    .margin({ end: LengthMetrics.vp(0 - SCROLL_BAR_OFFSET) } as LocalizedMargin)
   }
 
   aboutToAppear() {
@@ -541,6 +553,7 @@ export struct SelectDialog {
               .fontWeight(FontWeight.Regular)
               .fontColor(this.fontColorWithTheme)
               .textOverflow({ overflow: TextOverflow.Ellipsis })
+              .textAttributeExtension()
           }.applyStyles(this.paddingContentStyle).width('100%')
         }
         List() {
@@ -555,6 +568,7 @@ export struct SelectDialog {
                       .fontColor(this.fontColorWithTheme)
                       .layoutWeight(1)
                       .direction(i18n.isRTL(i18n.System.getSystemLanguage()) ? Direction.Rtl : Direction.Ltr)
+                      .textAttributeExtension()
                     Radio({ value: 'item.title', group: 'radioGroup' })
                       .size({ width: CHECKBOX_CONTAINER_LENGTH, height: CHECKBOX_CONTAINER_LENGTH })
                       .checked(this.selectedIndex === index)
@@ -806,6 +820,7 @@ export struct ConfirmDialog {
               return false
             })
             .width('100%')
+            .textAttributeExtension()
         }
         .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) } as LocalizedMargin)
         .width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`)
@@ -813,8 +828,7 @@ export struct ConfirmDialog {
       .fadingEdge(IS_FADEOUT_ENABLE(), { fadingEdgeLength: LengthMetrics.vp(FADEOUT_GRADIENT_WIDTH) })
       .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
       .margin({
-        start: LengthMetrics.vp(SCROLL_BAR_OFFSET),
-        end: LengthMetrics.vp(SCROLL_BAR_OFFSET)
+        end: LengthMetrics.vp(0 - SCROLL_BAR_OFFSET)
       } as LocalizedMargin)
     }
   }
@@ -841,6 +855,7 @@ export struct ConfirmDialog {
         .focusable(false)
         .layoutWeight(1)
         .textOverflow({ overflow: TextOverflow.Ellipsis })
+        .textAttributeExtension()
     }
     .accessibilityGroup(true)
     .accessibilityText(getCheckTipsAccessibilityText(this.checkTips, this.isChecked))
@@ -976,7 +991,7 @@ export struct AlertDialog {
             strokeWidth: LengthMetrics.px(0)
           })
           .fontSize(`${BODY_L}fp`)
-          .fontWeight(this.getFontWeight() as int)
+          .fontWeight(this.getFontWeight().toInt())
           .fontColor(this.fontColorWithTheme)
           .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) } as LocalizedMargin)
           .width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`)
@@ -987,6 +1002,7 @@ export struct AlertDialog {
             }
             return false
           })
+          .textAttributeExtension()
       }
       .fadingEdge(IS_FADEOUT_ENABLE(), { fadingEdgeLength: LengthMetrics.vp(FADEOUT_GRADIENT_WIDTH) })
       .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
@@ -1403,6 +1419,7 @@ struct CustomDialogContentComponent {
           .heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .width('100%')
+          .textAttributeExtension()
       }
       .width('100%')
 
@@ -1423,6 +1440,7 @@ struct CustomDialogContentComponent {
           .heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .width('100%')
+          .textAttributeExtension()
       }
       .width('100%')
     }
@@ -1578,6 +1596,16 @@ struct CustomDialogContentComponent {
     } as Padding;
   }
 
+  private getButtonLabelStyle(buttonOptions: ButtonOptions): ButtonLabelStyle {
+    return {
+      maxLines: 1,
+      overflow: IS_FADEOUT_ENABLE() ? TextOverflow.MARQUEE : TextOverflow.Ellipsis,
+      maxFontSize: this.buttonMaxFontSize,
+      minFontSize: this.buttonMinFontSize,
+      textAlign: buttonOptions.textAlign ?? TextAlign.Start
+    } as ButtonLabelStyle;
+  }
+
   @Builder
   buildSingleButton(buttonOptions: ButtonOptions): void {
     if (this.isNewPropertiesHighPriority(buttonOptions)) {
@@ -1585,46 +1613,26 @@ struct CustomDialogContentComponent {
         .setButtonProperties(buttonOptions, this.isHasDefaultFocus, this.isAllFocusFalse, this.controller)
         .role(buttonOptions.role ?? ButtonRole.NORMAL)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
-        .labelStyle({
-          maxLines: 1,
-          overflow: IS_FADEOUT_ENABLE() ? TextOverflow.MARQUEE : TextOverflow.Ellipsis,
-          maxFontSize: this.buttonMaxFontSize,
-          minFontSize: this.buttonMinFontSize
-        })
+        .labelStyle(this.getButtonLabelStyle(buttonOptions))
     } else if (buttonOptions.background !== undefined && buttonOptions.fontColor !== undefined) {
       Button(buttonOptions.value)
         .setButtonProperties(buttonOptions, this.isHasDefaultFocus, this.isAllFocusFalse, this.controller)
         .backgroundColor(buttonOptions.background)
         .fontColor(buttonOptions.fontColor)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
-        .labelStyle({
-          maxLines: 1,
-          overflow: IS_FADEOUT_ENABLE() ? TextOverflow.MARQUEE : TextOverflow.Ellipsis,
-          maxFontSize: this.buttonMaxFontSize,
-          minFontSize: this.buttonMinFontSize
-        })
+        .labelStyle(this.getButtonLabelStyle(buttonOptions))
     } else if (buttonOptions.background !== undefined) {
       Button(buttonOptions.value)
         .setButtonProperties(buttonOptions, this.isHasDefaultFocus, this.isAllFocusFalse, this.controller)
         .backgroundColor(buttonOptions.background)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
-        .labelStyle({
-          maxLines: 1,
-          overflow: IS_FADEOUT_ENABLE() ? TextOverflow.MARQUEE : TextOverflow.Ellipsis,
-          maxFontSize: this.buttonMaxFontSize,
-          minFontSize: this.buttonMinFontSize
-        })
+        .labelStyle(this.getButtonLabelStyle(buttonOptions))
     } else {
       Button(buttonOptions.value)
         .setButtonProperties(buttonOptions, this.isHasDefaultFocus, this.isAllFocusFalse, this.controller)
         .fontColor(buttonOptions.fontColor)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
-        .labelStyle({
-          maxLines: 1,
-          overflow: IS_FADEOUT_ENABLE() ? TextOverflow.MARQUEE : TextOverflow.Ellipsis,
-          maxFontSize: this.buttonMaxFontSize,
-          minFontSize: this.buttonMinFontSize
-        })
+        .labelStyle(this.getButtonLabelStyle(buttonOptions))
     }
   }
 
@@ -2017,6 +2025,7 @@ export struct LoadingDialog {
             strokeWidth: LengthMetrics.px(0)
           })
           .textOverflow({ overflow: TextOverflow.Ellipsis })
+          .textAttributeExtension()
         LoadingProgress()
           .color(this.loadingProgressIconColorWithTheme)
           .width(LOADING_PROGRESS_WIDTH)

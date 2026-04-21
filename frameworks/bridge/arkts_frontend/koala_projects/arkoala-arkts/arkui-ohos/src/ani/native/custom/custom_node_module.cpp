@@ -21,7 +21,7 @@
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_param.h"
 #include "core/components_ng/pattern/custom/custom_node_static.h"
-#include "generated/arkoala_api_generated.h"
+#include "arkoala_api_generated.h"
 
 const OH_AnyAPI* GetAnyImpl(int kind, int version, std::string *result = nullptr);
 
@@ -61,6 +61,21 @@ ani_status NativeCustomComponent::BindNativeCustomComponent(ani_env *env)
             nullptr,
             reinterpret_cast<void*>(CustomNodeAddChild)
         },
+        ani_native_function {
+            "_CustomNode_CallDefaultMeasure",
+            nullptr,
+            reinterpret_cast<void*>(CustomNodeCallDefaultMeasure)
+        },
+        ani_native_function {
+            "_CustomNode_CallDefaultLayout",
+            nullptr,
+            reinterpret_cast<void*>(CustomNodeCallDefaultLayout)
+        },
+        ani_native_function {
+            "_CustomNode_EnvFunction",
+            nullptr,
+            reinterpret_cast<void*>(EnvBuildFunction)
+        },
     };
 
     if (ANI_OK != env->Class_BindStaticNativeMethods(cls, staticMethods.data(), staticMethods.size())) {
@@ -69,6 +84,28 @@ ani_status NativeCustomComponent::BindNativeCustomComponent(ani_env *env)
         return ANI_ERROR;
     };
     return ANI_OK;
+}
+
+ani_object NativeCustomComponent::CustomNodeCallDefaultMeasure(
+    ani_env *env, [[maybe_unused]] ani_object aniClass, ani_long ptr)
+{
+    auto uiNode = AceType::Claim(reinterpret_cast<NG::UINode *>(ptr));
+    CHECK_NULL_RETURN(uiNode, AniUtils::GetUndefined(env));
+    auto frameNode = AceType::DynamicCast<NG::CustomMeasureLayoutNode>(uiNode);
+    CHECK_NULL_RETURN(frameNode, AniUtils::GetUndefined(env));
+    auto frameSize = NG::CustomNodeStatic::DidDefaultMeasure(frameNode);
+    return AniMeasureLayoutParamNG::GenMeasureResult(env, frameSize);
+}
+
+void NativeCustomComponent::CustomNodeCallDefaultLayout(
+    ani_env *env, [[maybe_unused]] ani_object aniClass, ani_long ptr)
+{
+    auto uiNode = AceType::Claim(reinterpret_cast<NG::UINode *>(ptr));
+    CHECK_NULL_VOID(uiNode);
+    auto frameNode = AceType::DynamicCast<NG::CustomMeasureLayoutNode>(uiNode);
+    CHECK_NULL_VOID(frameNode);
+    NG::CustomNodeStatic::DidDefaultLayout(frameNode);
+    return;
 }
 
 void NativeCustomComponent::CustomNodeSetBuildFunction(
@@ -124,6 +161,56 @@ void NativeCustomComponent::CustomNodeSetBuildFunction(
     });
 }
 
+void NativeCustomComponent::EnvBuildFunction(
+    ani_env *env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_fn_object envFunc)
+{
+    ani_vm *vm = nullptr;
+    env->GetVM(&vm);
+
+    std::shared_ptr<ani_wref> weakRef(new ani_wref, [vm](ani_wref *wref) {
+        ani_env *env = nullptr;
+        if (ANI_OK == vm->GetEnv(ANI_VERSION_1, &env)) {
+            env->WeakReference_Delete(*wref);
+        }
+    });
+
+    if (ANI_OK != env->WeakReference_Create(envFunc, weakRef.get())) {
+        return;
+    }
+
+    auto node = AceType::Claim(reinterpret_cast<NG::UINode *>(ptr));
+    if (!node) {
+        return;
+    }
+    node->RegisterUpdateJSInstanceCallback([vm, weakRef](int32_t instanceId) -> void {
+        ACE_SCOPED_TRACE("Env Build Function");
+
+        ani_env *env = nullptr;
+        if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
+            return;
+        }
+        if (ANI_OK != env->CreateLocalScope(SPECIFIED_CAPACITY)) {
+            return;
+        }
+        ani_boolean released;
+        ani_ref localRef;
+        if (ANI_OK != env->WeakReference_GetReference(*weakRef, &released, &localRef) || released) {
+            env->DestroyLocalScope();
+            return;
+        }
+
+        ani_object valueObject = AniUtils::CreateInt32(env, instanceId);
+        ani_ref valueRef = static_cast<ani_ref>(valueObject);
+        ani_ref resRef;
+        if (ANI_OK != env->FunctionalObject_Call(static_cast<ani_fn_object>(localRef), 1, &valueRef, &resRef)) {
+            env->DestroyLocalScope();
+            return;
+        }
+
+        env->DestroyLocalScope();
+    });
+}
+
 ani_long NativeCustomComponent::ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
     ani_int id, ani_object obj)
 {
@@ -141,147 +228,141 @@ ani_long NativeCustomComponent::ConstructCustomNode(ani_env* env, [[maybe_unused
     ani_type type;
     env->Object_GetType(obj, &type);
 
-    ani_boolean isDefaultMeasureFunc;
-    ani_method getdefaultMeasureMethod;
-    if (ANI_OK != env->Class_FindMethod(static_cast<ani_class>(type), "isDefaultOnMeasureSize", ":z",
-        &getdefaultMeasureMethod)) {
-        return 0;
-    }
-    if (ANI_OK != env->Object_CallMethod_Boolean(static_cast<ani_object>(obj), getdefaultMeasureMethod,
-        &isDefaultMeasureFunc)) {
-        return 0;
-    }
- 
-    ani_boolean isDefaultPlaceFunc;
-    ani_method getdefaultPlaceMethod;
-    if (ANI_OK != env->Class_FindMethod(static_cast<ani_class>(type), "isDefaultOnPlaceChildren", ":z",
-        &getdefaultPlaceMethod)) {
-        return 0;
-    }
-    if (ANI_OK != env->Object_CallMethod_Boolean(static_cast<ani_object>(obj), getdefaultPlaceMethod,
-        &isDefaultPlaceFunc)) {
-        return 0;
-    }
-
     ani_method onMeasureSizeMethod;
     std::function<void(NG::LayoutWrapper* layoutWrapper)> onMeasureSize = nullptr;
-    if (!isDefaultMeasureFunc) {
-        if (ANI_OK != env->Class_FindMethod(static_cast<ani_class>(type), "onMeasureSize", nullptr,
-            &onMeasureSizeMethod)) {
-            return 0;
+
+    if (ANI_OK != env->Class_FindMethod(static_cast<ani_class>(type), "onMeasureSize", nullptr,
+        &onMeasureSizeMethod)) {
+        return 0;
+    }
+
+    onMeasureSize = [vm, weakRef, onMeasureSizeMethod](OHOS::Ace::NG::LayoutWrapper* layoutWrapper) {
+        ani_env* env = nullptr;
+        if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
+            return;
+        }
+        if (ANI_OK != env->CreateLocalScope(SPECIFIED_CAPACITY)) {
+            return;
+        }
+        if (layoutWrapper == nullptr) {
+            env->DestroyLocalScope();
+            return;
         }
 
-        onMeasureSize = [vm, weakRef, onMeasureSizeMethod](OHOS::Ace::NG::LayoutWrapper* layoutWrapper) {
-            ani_env* env = nullptr;
-            if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
-                return;
-            }
+        auto aniParam = AniMeasureLayoutParamNG::GetInstance(layoutWrapper, env);
+        if (!aniParam) {
+            layoutWrapper->GetGeometryNode()->SetFrameSize({ -1.0f, -1.0f });
+            TAG_LOGW(AceLogTag::ACE_LAYOUT, "GetInstance return val in onMeasureSize API is null");
+            env->DestroyLocalScope();
+            return;
+        }
+        auto selfLayoutInfo = aniParam->GetSelfLayoutInfo(env);
+        auto constraint = aniParam->GetConstraint(env);
+        auto childArray = aniParam->GetChildArray(env);
 
-            if (layoutWrapper == nullptr) {
-                return;
-            }
+        ani_boolean released;
+        ani_ref localRef;
 
-            auto aniParam = AniMeasureLayoutParamNG::GetInstance(layoutWrapper, env);
-            if (!aniParam) {
-                layoutWrapper->GetGeometryNode()->SetFrameSize({ -1.0f, -1.0f });
-                TAG_LOGW(AceLogTag::ACE_LAYOUT, "GetInstance return val in onMeasureSize API is null");
-                return;
-            }
-            auto selfLayoutInfo = aniParam->GetSelfLayoutInfo(env);
-            auto constraint = aniParam->GetConstraint(env);
-            auto childArray = aniParam->GetChildArray(env);
+        if (ANI_OK != env->WeakReference_GetReference(*weakRef, &released, &localRef)) {
+            env->DestroyLocalScope();
+            return;
+        }
+        ani_ref result_obj = nullptr;
 
-            ani_boolean released;
-            ani_ref localRef;
+        if (released) {
+            TAG_LOGW(AceLogTag::ACE_LAYOUT, "The wref is GC collected.");
+            env->DestroyLocalScope();
+            return;
+        }
+        if (ANI_OK != env->Object_CallMethod_Ref(static_cast<ani_object>(localRef), onMeasureSizeMethod,
+            &result_obj, selfLayoutInfo, childArray, constraint)) {
+            env->DestroyLocalScope();
+            return;
+        }
+        if (AniUtils::IsUndefined(env, static_cast<ani_object>(result_obj))||!result_obj) {
+            layoutWrapper->GetGeometryNode()->SetFrameSize({ -1.0f, -1.0f });
+            TAG_LOGW(AceLogTag::ACE_LAYOUT, "app return val of onMeasureSize API is empty or undefined");
+            env->DestroyLocalScope();
+            return;
+        }
 
-            if (ANI_OK != env->WeakReference_GetReference(*weakRef, &released, &localRef)) {
-                return;
-            }
-            ani_ref result_obj = nullptr;
+        CalcDimension measureWidth;
+        CalcDimension measureHeight;
 
-            if (released) {
-                TAG_LOGW(AceLogTag::ACE_LAYOUT, "The wref is GC collected.");
-                return;
-            }
-            if (ANI_OK != env->Object_CallMethod_Ref(static_cast<ani_object>(localRef), onMeasureSizeMethod,
-                &result_obj, selfLayoutInfo, childArray, constraint)) {
-                return;
-            }
-            if (AniUtils::IsUndefined(env, static_cast<ani_object>(result_obj))||!result_obj) {
-                layoutWrapper->GetGeometryNode()->SetFrameSize({ -1.0f, -1.0f });
-                TAG_LOGW(AceLogTag::ACE_LAYOUT, "app return val of onMeasureSize API is empty or undefined");
-                return;
-            }
+        ani_double widthValue = -1.0f;
+        if (ANI_OK != env->Object_GetPropertyByName_Double(static_cast<ani_object>(result_obj), "width",
+            &widthValue)) {
+            TAG_LOGW(AceLogTag::ACE_LAYOUT, "app return width val of onMeasureSize API is empty or undefined");
+        }
+        ani_object width_obj = AniUtils::CreateDouble(env, widthValue);
 
-            CalcDimension measureWidth;
-            CalcDimension measureHeight;
+        ani_double heightValue = -1.0f;
+        if (ANI_OK != env->Object_GetPropertyByName_Double(static_cast<ani_object>(result_obj), "height",
+            &heightValue)) {
+            TAG_LOGW(AceLogTag::ACE_LAYOUT, "app return height val of onMeasureSize API is empty or undefined");
+        }
+        ani_object height_obj = AniUtils::CreateDouble(env, heightValue);
 
-            ani_double widthValue = -1.0f;
-            if (ANI_OK != env->Object_GetPropertyByName_Double(static_cast<ani_object>(result_obj), "width",
-                &widthValue)) {
-                TAG_LOGW(AceLogTag::ACE_LAYOUT, "app return width val of onMeasureSize API is empty or undefined");
-            }
-            ani_object width_obj = AniUtils::CreateDouble(env, widthValue);
+        if (!OHOS::Ace::Ani::ParseAniDimensionVp(env, width_obj, measureWidth)) {
+            measureWidth = { -1.0f };
+        }
+        if (!OHOS::Ace::Ani::ParseAniDimensionVp(env, height_obj, measureHeight)) {
+            measureHeight = { -1.0f };
+        }
 
-            ani_double heightValue = -1.0f;
-            if (ANI_OK != env->Object_GetPropertyByName_Double(static_cast<ani_object>(result_obj), "height",
-                &heightValue)) {
-                TAG_LOGW(AceLogTag::ACE_LAYOUT, "app return height val of onMeasureSize API is empty or undefined");
-            }
-            ani_object height_obj = AniUtils::CreateDouble(env, heightValue);
-
-            if (!OHOS::Ace::Ani::ParseAniDimensionVp(env, width_obj, measureWidth)) {
-                measureWidth = { -1.0f };
-            }
-            if (!OHOS::Ace::Ani::ParseAniDimensionVp(env, height_obj, measureHeight)) {
-                measureHeight = { -1.0f };
-            }
-
-            NG::SizeF frameSize = { measureWidth.ConvertToPx(), measureHeight.ConvertToPx() };
-            layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
-        };
-    }
+        NG::SizeF frameSize = { measureWidth.ConvertToPx(), measureHeight.ConvertToPx() };
+        layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
+        env->DestroyLocalScope();
+    };
 
     ani_method onPlaceChildrenMethod;
     std::function<void(NG::LayoutWrapper* layoutWrapper)> onPlaceChildren = nullptr;
-    if (!isDefaultPlaceFunc) {
-        if (ANI_OK != env->Class_FindMethod(static_cast<ani_class>(type), "onPlaceChildren", nullptr,
-            &onPlaceChildrenMethod)) {
-            return 0;
+
+    if (ANI_OK != env->Class_FindMethod(static_cast<ani_class>(type), "onPlaceChildren", nullptr,
+        &onPlaceChildrenMethod)) {
+        return 0;
+    }
+
+    onPlaceChildren = [vm, weakRef, onPlaceChildrenMethod](OHOS::Ace::NG::LayoutWrapper* layoutWrapper) {
+        ani_env* env = nullptr;
+        if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
+            return;
+        }
+        if (ANI_OK != env->CreateLocalScope(SPECIFIED_CAPACITY)) {
+            return;
+        }
+        if (layoutWrapper == nullptr) {
+            env->DestroyLocalScope();
+            return;
         }
 
-        onPlaceChildren = [vm, weakRef, onPlaceChildrenMethod](OHOS::Ace::NG::LayoutWrapper* layoutWrapper) {
-            ani_env* env = nullptr;
-            if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
-                return;
-            }
+        auto aniParam = AniMeasureLayoutParamNG::GetInstance(layoutWrapper, env);
 
-            if (layoutWrapper == nullptr) {
-                return;
-            }
+        auto selfLayoutInfo = aniParam->GetSelfLayoutInfo(env);
+        auto constraint = aniParam->GetPlaceChildrenConstraint(env);
+        auto childArray = aniParam->GetChildArray(env);
 
-            auto aniParam = AniMeasureLayoutParamNG::GetInstance(layoutWrapper, env);
+        ani_boolean released;
+        ani_ref localRef;
 
-            auto selfLayoutInfo = aniParam->GetSelfLayoutInfo(env);
-            auto constraint = aniParam->GetPlaceChildrenConstraint(env);
-            auto childArray = aniParam->GetChildArray(env);
+        if (ANI_OK != env->WeakReference_GetReference(*weakRef, &released, &localRef)) {
+            env->DestroyLocalScope();
+            return;
+        }
 
-            ani_boolean released;
-            ani_ref localRef;
-
-            if (ANI_OK != env->WeakReference_GetReference(*weakRef, &released, &localRef)) {
-                return;
-            }
-
-            if (released) {
-                TAG_LOGW(AceLogTag::ACE_LAYOUT, "The wref is GC collected.");
-            }
-            if (ANI_OK != env->Object_CallMethod_Void(static_cast<ani_object>(localRef), onPlaceChildrenMethod,
-                selfLayoutInfo, childArray, constraint)) {
-                return;
-            }
-        };
-    }
+        if (released) {
+            TAG_LOGW(AceLogTag::ACE_LAYOUT, "The wref is GC collected.");
+            env->DestroyLocalScope();
+            return;
+        }
+        if (ANI_OK != env->Object_CallMethod_Void(static_cast<ani_object>(localRef), onPlaceChildrenMethod,
+            selfLayoutInfo, childArray, constraint)) {
+            env->DestroyLocalScope();
+            return;
+        }
+        env->DestroyLocalScope();
+    };
+    
     std::function<void(NG::LayoutWrapper* layoutWrapper)> updateParamFunc = nullptr;
     updateParamFunc = [vm](NG::LayoutWrapper* layoutWrapper) {
         ani_env* env = nullptr;

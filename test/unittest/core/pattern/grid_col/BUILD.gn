@@ -17,4 +17,11 @@ ace_unittest("grid_col_test_ng") {
   type = "new"
   module_name = "Layout-GridCol"
   sources = [ "grid_col_test_ng.cpp" ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "grid_col_test_core.cpp" ]
+  } else {
+    sources += [ "grid_col_test_core.cpp" ]
+  }
 }

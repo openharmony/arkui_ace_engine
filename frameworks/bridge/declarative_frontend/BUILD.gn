@@ -105,9 +105,10 @@ jsproxyclass_obj_path = base_output_path + "/js_proxy_class.o"
 jsproxyclass_obj_ark_breakpoint_path = base_output_path + "/js_proxy_class_ark_breakpoint.o"
 jsenumstyle_obj_path = base_output_path + "/js_enum_style.o"
 jsmocksystemplugin_obj_path = base_output_path + "/js_mock_system_plugin.o"
-ark_theme_obj_path = base_output_path + "/arkTheme.o"
 jsuicontext_obj_path = base_output_path + "/jsUIContext.o"
 arkcomponent_obj_path = base_output_path + "/arkComponent.o"
+arkcommon_obj_path = base_output_path + "/arkCommon.o"
+arkdynamiccomponent_obj_path = base_output_path + "/arkDynamicComponent.o"
 
 action("run_state_mgmt_build") {
   script = "state_mgmt/build.py"
@@ -179,12 +180,21 @@ gen_obj("js_enum_style") {
   snapshot_dep = []
 }
 
-gen_obj("ark_theme") {
-  input = "engine/arkTheme.js"
+gen_obj("ark_common") {
+  input = "engine/arkCommon.js"
   if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
-    ark_theme_obj_path = base_output_path + "/ark_theme.c"
+    arkcommon_obj_path = base_output_path + "/ark_common.c"
   }
-  output = ark_theme_obj_path
+  output = arkcommon_obj_path
+  snapshot_dep = []
+}
+
+gen_obj("ark_dynamiccomponent") {
+  input = "engine/arkDynamicComponent.js"
+  if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
+    arkdynamiccomponent_obj_path = base_output_path + "/ark_dynamiccomponent.c"
+  }
+  output = arkdynamiccomponent_obj_path
   snapshot_dep = []
 }
 
@@ -236,16 +246,18 @@ template("declarative_js_engine") {
     }
 
     deps = [
-      ":ark_modifier",
+      "ark_modifier:modifier",
       ":ark_theme_control",
+      ":gen_obj_src_ark_common",
+      ":gen_obj_src_ark_dynamiccomponent",
       ":gen_obj_src_ark_component",
-      ":gen_obj_src_ark_theme",
+      ":ark_theme",
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
       ":gen_obj_src_js_proxyclass_ark_breakpoint",
       "ark_layoutalgorithm:layoutalgorithm",
-      ":mock",
-      ":prefetcher",
+      "ark_mock:mock",
+      "ark_prefetcher:prefetcher",
       ":shape",
       ":statemanagement",
       ":windowsizelayoutbreakpoint",
@@ -282,7 +294,6 @@ template("declarative_js_engine") {
       "engine/functions/js_focus_function.cpp",
       "engine/functions/js_foreach_function.cpp",
       "engine/functions/js_function.cpp",
-      "engine/functions/js_gesture_function.cpp",
       "engine/functions/js_gesture_judge_function.cpp",
       "engine/functions/js_gesture_recognizer.cpp",
       "engine/functions/js_hover_function.cpp",
@@ -298,7 +309,6 @@ template("declarative_js_engine") {
       "engine/functions/js_swiper_function.cpp",
       "engine/functions/js_tabs_function.cpp",
       "engine/functions/js_touch_function.cpp",
-      "engine/functions/js_touch_intercept_function.cpp",
       "engine/functions/js_touch_test_done_function.cpp",
       "engine/functions/js_webview_function.cpp",
       "engine/functions/js_xcomponent_onload_function.cpp",
@@ -343,6 +353,7 @@ template("declarative_js_engine") {
       "jsview/js_container_span.cpp",
       "jsview/js_content_slot.cpp",
       "jsview/js_datepicker.cpp",
+      "jsview/js_distortion_component.cpp",
       "jsview/js_divider.cpp",
       "jsview/js_dump_log.cpp",
       "jsview/js_ellipse.cpp",
@@ -513,7 +524,6 @@ template("declarative_js_engine") {
       "jsview/models/sliding_panel_model_impl.cpp",
       "jsview/models/span_model_impl.cpp",
       "jsview/models/stack_model_impl.cpp",
-      "jsview/models/text_clock_model_impl.cpp",
       "jsview/models/text_model_impl.cpp",
       "jsview/models/text_timer_model_impl.cpp",
       "jsview/models/view_abstract_model_impl.cpp",
@@ -759,16 +769,18 @@ template("declarative_js_engine_ng") {
     }
 
     deps = [
-      ":ark_modifier",
+      "ark_modifier:modifier",
       ":ark_theme_control",
+      ":gen_obj_src_ark_common",
+      ":gen_obj_src_ark_dynamiccomponent",
       ":gen_obj_src_ark_component",
-      ":gen_obj_src_ark_theme",
+      ":ark_theme",
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
       ":gen_obj_src_js_proxyclass_ark_breakpoint",
       "ark_layoutalgorithm:layoutalgorithm",
-      ":mock",
-      ":prefetcher",
+      "ark_mock:mock",
+      "ark_prefetcher:prefetcher",
       ":shape",
       ":statemanagement",
       ":windowsizelayoutbreakpoint",
@@ -802,7 +814,6 @@ template("declarative_js_engine_ng") {
       "engine/functions/js_focus_function.cpp",
       "engine/functions/js_foreach_function.cpp",
       "engine/functions/js_function.cpp",
-      "engine/functions/js_gesture_function.cpp",
       "engine/functions/js_gesture_judge_function.cpp",
       "engine/functions/js_gesture_recognizer.cpp",
       "engine/functions/js_hover_function.cpp",
@@ -818,7 +829,6 @@ template("declarative_js_engine_ng") {
       "engine/functions/js_swiper_function.cpp",
       "engine/functions/js_tabs_function.cpp",
       "engine/functions/js_touch_function.cpp",
-      "engine/functions/js_touch_intercept_function.cpp",
       "engine/functions/js_touch_test_done_function.cpp",
       "engine/functions/js_webview_function.cpp",
       "engine/functions/js_xcomponent_onload_function.cpp",
@@ -1114,7 +1124,7 @@ template("declarative_js_engine_ng") {
       deps += [ "$ace_root/frameworks/bridge:framework_bridge_ng_$platform" ]
       defines += [ "BUILT_IN_JS_ENGINE" ]
     } else {
-      if (is_asan) {
+      if (is_asan || !ace_engine_feature_enable_libace) {
         deps += [ "$ace_root/build:libace_compatible" ]
       } else {
         deps += [ "$ace_root/build:libace" ]
@@ -1227,15 +1237,6 @@ ohos_abc("statemanagement") {
   part_name = ace_engine_part
 }
 
-ohos_abc("mock") {
-  sources = [ "engine/jsMock.js" ]
-  output_name = "mock"
-  install_images = [ "system" ]
-  module_install_dir = "etc/abc/arkui"
-  subsystem_name = ace_engine_subsystem
-  part_name = ace_engine_part
-}
-
 ohos_abc("windowsizelayoutbreakpoint") {
   sources = [ "$target_out_dir/WindowSizeLayoutBreakpoint.js" ]
   output_name = "windowsizelayoutbreakpoint"
@@ -1244,15 +1245,6 @@ ohos_abc("windowsizelayoutbreakpoint") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
   deps = [ ":run_ark_breakpoint_build" ]
-}
-
-ohos_abc("prefetcher") {
-  sources = [ "engine/jsPrefetcher.js" ]
-  output_name = "prefetcher"
-  install_images = [ "system" ]
-  module_install_dir = "etc/abc/arkui"
-  subsystem_name = ace_engine_subsystem
-  part_name = ace_engine_part
 }
 
 action("gen_uicontext_ohos") {
@@ -1286,18 +1278,18 @@ ohos_abc("ark_theme_control") {
   part_name = ace_engine_part
 }
 
-ohos_abc("ark_modifier") {
-  sources = [ "engine/arkModifier.js" ]
-  output_name = "modifier"
+ohos_abc("shape") {
+  sources = [ "engine/jsShape.js" ]
+  output_name = "shape"
   install_images = [ "system" ]
   module_install_dir = "etc/abc/arkui"
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
 }
 
-ohos_abc("shape") {
-  sources = [ "engine/jsShape.js" ]
-  output_name = "shape"
+ohos_abc("ark_theme") {
+  sources = [ "engine/arkTheme.js" ]
+  output_name = "arktheme"
   install_images = [ "system" ]
   module_install_dir = "etc/abc/arkui"
   subsystem_name = ace_engine_subsystem

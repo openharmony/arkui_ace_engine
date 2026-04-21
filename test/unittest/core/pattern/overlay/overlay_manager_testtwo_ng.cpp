@@ -17,12 +17,12 @@
 #define private public
 #define protected public
 
-#include "test/mock/base/mock_subwindow.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_rosen_render_context.h"
+#include "test/mock/frameworks/base/subwindow/mock_subwindow.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+
 #include "test/unittest/core/event/frame_node_on_tree.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
@@ -32,6 +32,7 @@
 #include "core/components/drag_bar/drag_bar_theme.h"
 #include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components/select/select_theme.h"
+#include "core/components/toast/toast_theme.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -60,6 +61,29 @@ const OffsetF MENU_OFFSET(10.0, 10.0);
 const std::string MESSAGE = "hello world";
 const std::string BOTTOMSTRING = "test";
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
+
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == DragBarTheme::TypeId()) {
+        return AceType::MakeRefPtr<DragBarTheme>();
+    } else if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == DialogTheme::TypeId()) {
+        return AceType::MakeRefPtr<DialogTheme>();
+    } else if (type == PickerTheme::TypeId()) {
+        return AceType::MakeRefPtr<PickerTheme>();
+    } else if (type == SelectTheme::TypeId()) {
+        return AceType::MakeRefPtr<SelectTheme>();
+    } else if (type == MenuTheme::TypeId()) {
+        return AceType::MakeRefPtr<MenuTheme>();
+    } else if (type == ToastTheme::TypeId()) {
+        return AceType::MakeRefPtr<ToastTheme>();
+    } else if (type == SheetTheme::TypeId()) {
+        return AceType::MakeRefPtr<SheetTheme>();
+    } else {
+        return nullptr;
+    }
+}
 } // namespace
 
 class OverlayManagerTwoTestNg : public TestNG {
@@ -76,6 +100,7 @@ protected:
     static RefPtr<FrameNode> CreateTargetNode();
     static void CreateSheetStyle(SheetStyle& sheetStyle);
     void CreateSheetBuilder();
+    static RefPtr<Theme> CreateTheme(ThemeType type);
     int32_t minPlatformVersion_ = 0;
 };
 
@@ -89,6 +114,29 @@ void OverlayManagerTwoTestNg::TearDown()
     PipelineBase::GetCurrentContext()->SetMinPlatformVersion(minPlatformVersion_);
 }
 
+RefPtr<Theme> OverlayManagerTwoTestNg::CreateTheme(ThemeType type)
+{
+    if (type == DragBarTheme::TypeId()) {
+        return AceType::MakeRefPtr<DragBarTheme>();
+    } else if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == DialogTheme::TypeId()) {
+        return AceType::MakeRefPtr<DialogTheme>();
+    } else if (type == PickerTheme::TypeId()) {
+        return AceType::MakeRefPtr<PickerTheme>();
+    } else if (type == SelectTheme::TypeId()) {
+        return AceType::MakeRefPtr<SelectTheme>();
+    } else if (type == MenuTheme::TypeId()) {
+        return AceType::MakeRefPtr<MenuTheme>();
+    } else if (type == ToastTheme::TypeId()) {
+        return AceType::MakeRefPtr<ToastTheme>();
+    } else if (type == SheetTheme::TypeId()) {
+        return AceType::MakeRefPtr<SheetTheme>();
+    } else {
+        return nullptr;
+    }
+}
+
 void OverlayManagerTwoTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
@@ -100,27 +148,14 @@ void OverlayManagerTwoTestNg::SetUpTestSuite()
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
     MockPipelineContext::GetCurrentContext()->SetMinPlatformVersion((int32_t)PlatformVersion::VERSION_ELEVEN);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-        if (type == DragBarTheme::TypeId()) {
-            return AceType::MakeRefPtr<DragBarTheme>();
-        } else if (type == IconTheme::TypeId()) {
-            return AceType::MakeRefPtr<IconTheme>();
-        } else if (type == DialogTheme::TypeId()) {
-            return AceType::MakeRefPtr<DialogTheme>();
-        } else if (type == PickerTheme::TypeId()) {
-            return AceType::MakeRefPtr<PickerTheme>();
-        } else if (type == SelectTheme::TypeId()) {
-            return AceType::MakeRefPtr<SelectTheme>();
-        } else if (type == MenuTheme::TypeId()) {
-            return AceType::MakeRefPtr<MenuTheme>();
-        } else if (type == ToastTheme::TypeId()) {
-            return AceType::MakeRefPtr<ToastTheme>();
-        } else if (type == SheetTheme::TypeId()) {
-            return AceType::MakeRefPtr<SheetTheme>();
-        } else {
-            return nullptr;
-        }
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly([](ThemeType type, int32_t) -> RefPtr<Theme> {
+        return CreateTheme(type);
     });
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        return GetTheme(type);
+    });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 void OverlayManagerTwoTestNg::TearDownTestSuite()
@@ -196,6 +231,7 @@ HWTEST_F(OverlayManagerTwoTestNg, UpdateContextMenuDisappearPosition, TestSize.L
     auto menuNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 2, AceType::MakeRefPtr<MenuWrapperPattern>(1));
     auto menuNodeFst =
         FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->menuMap_.emplace(1, AceType::RawPtr(menuNodeFst));
@@ -2109,6 +2145,7 @@ HWTEST_F(OverlayManagerTwoTestNg, ShowMenuAnimation, TestSize.Level1)
     EXPECT_EQ(wrapperPattern->GetPreviewMode(), MenuPreviewMode::CUSTOM);
     auto previewChild = wrapperPattern->GetPreview();
     EXPECT_EQ(previewChild, nullptr);
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->ShowMenuAnimation(menuNode, overlayManager);
@@ -2154,6 +2191,7 @@ HWTEST_F(OverlayManagerTwoTestNg, OnPopMenuAnimationFinished, TestSize.Level1)
     const WeakPtr<OverlayManager> weakManager_(overlayManager);
     EXPECT_NE(weakManager_.Upgrade(), nullptr);
     auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->OnPopMenuAnimationFinished(menuWK, rootWeak, weakManager_, MIN_SUBCONTAINER_ID);
@@ -2195,6 +2233,7 @@ HWTEST_F(OverlayManagerTwoTestNg, OnPopMenuAnimationFinished2, TestSize.Level1)
     EXPECT_NE(rootWeak.Upgrade(), nullptr);
     const WeakPtr<OverlayManager> weakManager_(overlayManager);
     EXPECT_NE(weakManager_.Upgrade(), nullptr);
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->OnPopMenuAnimationFinished(menuWK, rootWeak, weakManager_, MIN_SUBCONTAINER_ID);
@@ -2224,6 +2263,7 @@ HWTEST_F(OverlayManagerTwoTestNg, PopMenuAnimation, TestSize.Level1)
     mainMenu->MountToParent(menuNode);
     menuNode->MountToParent(rootNode_);
     rootNode_->MarkDirtyNode();
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->PopMenuAnimation(menuNode, overlayManager, true, true);
@@ -2274,6 +2314,7 @@ HWTEST_F(OverlayManagerTwoTestNg, ShowMenuClearAnimation, TestSize.Level1)
     dragFrameNode->SetDraggable(true);
     dragFrameNode->GetOrCreateFocusHub();
     AnimationOption option;
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->ShowMenuClearAnimation(menuNode, option, false, true);
@@ -2343,10 +2384,11 @@ HWTEST_F(OverlayManagerTwoTestNg, ResetDragMoveVector, TestSize.Level1)
     /**
      * @tc.steps: step3. ShowMenuAnimation
      */
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->ShowMenuAnimation(menuNode, overlayManager);
-    
+
     EXPECT_EQ(overlayManager->dragMoveVector_, OffsetF(0.0f, 0.0f));
     EXPECT_EQ(overlayManager->lastDragMoveVector_, OffsetF(0.0f, 0.0f));
 }

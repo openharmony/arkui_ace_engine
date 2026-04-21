@@ -18,7 +18,7 @@ import Want from "@ohos.app.ability.Want"
 import { RecordData } from "@ohos.base"
 import { RecordData } from "@ohos.base"
 import { ArkUIAniUiextensionLoadLibraryHelp } from "./ArkUIAniUiextensionLoadLibraryHelp"
-import { SecurityUIExtensionProxy } from "#generated"
+import { SecurityUIExtensionProxy } from "#handwritten"
 import { Finalizable, KPointer, MaterializedBase } from "@koalaui/interop"
 
 export type ResultCallback = (code: number, want: Want) => void;

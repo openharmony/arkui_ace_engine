@@ -36,7 +36,6 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_content_model.h"
-#include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/transition_property.h"
@@ -44,9 +43,15 @@
 
 namespace OHOS::Ace {
 class CalcDimensionRect;
+struct TextDetectConfig;
 }
 
 namespace OHOS::Ace::Framework {
+
+constexpr napi_type_tag ROSEN_JS_CANVAS_TYPE_TAG = {
+    .lower = 0x2710bc10cdee8db3,
+    .upper = 0xc5189f88510eadc1
+};
 
 constexpr int32_t DEFAULT_TAP_FINGERS = 1;
 constexpr int32_t DEFAULT_TAP_COUNTS = 1;
@@ -211,6 +216,7 @@ public:
     static bool InitPixStretchEffect(
         CalcDimension& left, CalcDimension& right, CalcDimension& top, CalcDimension bottom);
     static void JsLightUpEffect(const JSCallbackInfo& info);
+    static void JsSpatialEffect(const JSCallbackInfo& info);
     static void JsBackground(const JSCallbackInfo& info);
     static void JsBindMenu(const JSCallbackInfo& info);
     static void JsBindContextMenu(const JSCallbackInfo& info);
@@ -341,12 +347,10 @@ public:
     static void JsHoverEffect(const JSCallbackInfo& info);
     static void JsOnMouse(const JSCallbackInfo& info);
     static void JsOnAxisEvent(const JSCallbackInfo& info);
-    static void JsOnHover(const JSCallbackInfo& info);
-    static void JsOnHoverMove(const JSCallbackInfo& info);
     static void JsOnAccessibilityHover(const JSCallbackInfo& info);
-    static void JsOnClick(const JSCallbackInfo& info);
     static void JsOnGestureJudgeBegin(const JSCallbackInfo& args);
     static void JsOnTouchIntercept(const JSCallbackInfo& info);
+    static void JsOnGestureCollectIntercept(const JSCallbackInfo& info);
     static void JsShouldBuiltInRecognizerParallelWith(const JSCallbackInfo& info);
     static void JsOnGestureRecognizerJudgeBegin(const JSCallbackInfo& info);
     static void JsOnTouchTestDone(const JSCallbackInfo& info);
@@ -390,6 +394,8 @@ public:
     static void CompleteResourceObjectWithBundleName(JSRef<JSObject>& jsObj, std::string& bundleName,
         std::string& moduleName, int32_t& resId, JSRef<JSVal>& resIdJsValue);
     static void CompleteResourceObjectWithResIdType(JSRef<JSObject>& jsObj, int32_t& resId, int32_t& resType);
+    static void CompleteResourceObjectWithResIdTypeGetter(
+        JSRef<JSObject>& jsObj, int32_t& resId, int32_t& resType, bool& hasGetter);
     static bool ConvertResourceType(const std::string& typeName, ResourceType& resType);
     static bool ParseDollarResource(const JSRef<JSVal>& jsValue, std::string& targetModule, ResourceType& resType,
         std::string& resName, bool isParseType);
@@ -428,18 +434,24 @@ public:
         const JSRef<JSVal>& jsValue, CalcDimension& result, RefPtr<ResourceObject>& resObj);
     static bool ParseColorMetricsToColor(const JSRef<JSVal>& jsValue, Color& result);
     static bool ParseColorMetricsToColor(const JSRef<JSVal>& jsValue, Color& result, RefPtr<ResourceObject>& resObj);
+    static bool ParseHDRColorToColor(const JSRef<JSObject>& colorObj, Color& result);
     static bool ParseJsDouble(const JSRef<JSVal>& jsValue, double& result);
     static bool ParseJsDouble(const JSRef<JSVal>& jsValue, double& result, RefPtr<ResourceObject>& resObj);
     static bool ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result);
     static bool ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color& result, RefPtr<ResourceObject>& resObj);
-    static bool ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, Color& result,
-        RefPtr<ResourceObject>& resObj, int32_t& resIdNum, int32_t& type);
+    static bool ParseJsColorFromResourceForMaterial(
+        const JSRef<JSVal>& jsValue, Color& result, RefPtr<ResourceObject>& resObj);
+    static bool ParseJsObjColorFromResource(const JSRef<JSObject>& jsObj, Color& result, RefPtr<ResourceObject>& resObj,
+        int32_t& resIdNum, int32_t& type, bool& hasGetter);
+    static bool ParseJsObjColorFromResourceForMaterial(const JSRef<JSObject>& jsObj, Color& result,
+        RefPtr<ResourceObject>& resObj, int32_t& resIdNum, int32_t& type, bool& hasGetter);
     static bool ParseJsColor(const JSRef<JSVal>& jsValue, Color& result);
     static bool ParseJsColor(const JSRef<JSVal>& jsValue, Color& result,
         RefPtr<ResourceObject>& resObj);
     static bool ParseJsColor(const JSRef<JSVal>& jsValue, Color& result, const Color& defaultColor);
     static bool ParseJsColor(const JSRef<JSVal>& jsValue, Color& result,
         const Color& defaultColor, RefPtr<ResourceObject>& resObj);
+    static bool ParseJsColorForMaterial(const JSRef<JSVal>& jsValue, Color& result, RefPtr<ResourceObject>& resObj);
     static bool ParseJsColorStrategy(const JSRef<JSVal>& jsValue, ForegroundColorStrategy& strategy);
     static bool ParseJsShadowColorStrategy(const JSRef<JSVal>& jsValue, ShadowColorStrategy& strategy);
     static bool ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vector<std::string>& result);
@@ -598,6 +610,7 @@ public:
     static void JsOnKeyEvent(const JSCallbackInfo& args);
     static void JsDispatchKeyEvent(const JSCallbackInfo& args);
     static void JsOnFocus(const JSCallbackInfo& args);
+    static void JSOnNeedSoftkeyboard(const JSCallbackInfo& args);
     static void JsOnBlur(const JSCallbackInfo& args);
     static void JsTabIndex(const JSCallbackInfo& info);
     static void JsFocusOnTouch(const JSCallbackInfo& info);
@@ -771,13 +784,14 @@ public:
         int32_t resIdNum = -1;
         int32_t resType = -1;
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-        CompleteResourceObjectWithResIdType(jsObj, resIdNum, resType);
+        bool hasGetter = false;
+        CompleteResourceObjectWithResIdTypeGetter(jsObj, resIdNum, resType, hasGetter);
         if (resType == -1) {
             return false;
         }
 
-        resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
-            GetResourceObjectByBundleAndModule(jsObj);
+        resObj = SystemProperties::ConfigChangePerform() ? GetResourceObjectWithId(jsObj, hasGetter)
+                                                         : GetResourceObjectByBundleAndModule(jsObj);
         auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
         if (resIdNum == -1) {
             if (!IsGetResourceByName(jsObj)) {
@@ -896,14 +910,20 @@ public:
         const std::optional<Dimension>& radiusTopEnd, const std::optional<Dimension>& radiusBottomStart,
         const std::optional<Dimension>& radiusBottomEnd);
     static void ParseDetentSelection(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle);
+    /**
+     * @param adaptMaterial Indicates whether the new material is adapted to special resources for color inversion.
+     * Only the Color type has differences. If the value is true, the color resolved from special resources will carry
+     * a non-NONE placeholder.
+     */
     template<typename T>
-    static void RegisterResource(const std::string& key, const RefPtr<ResourceObject>& resObj, T value)
+    static void RegisterResource(
+        const std::string& key, const RefPtr<ResourceObject>& resObj, T value, bool adaptMaterial = false)
     {
         auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         CHECK_NULL_VOID(frameNode);
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
-        pattern->RegisterResource<T>(key, resObj, value);
+        pattern->RegisterResource<T>(key, resObj, value, adaptMaterial);
     }
     static void UnRegisterResource(const std::string& key);
     static void ParseDragSpringLoadingConfiguration(
@@ -918,6 +938,7 @@ public:
     static std ::string TryLocalizeNumberStr(const std::string& numStr, int32_t precision);
 
 private:
+    static DepthVector3 ParseDepthVector3(const JSRef<JSVal>& vectorValue);
     static bool ParseJsStrArrayInternal(const JSRef<JSArray>& jsArray, std::vector<std::string>& result,
         std::vector<RefPtr<ResourceObject>>& resObjArray);
     static bool ParseJsIntegerArrayInternal(const JSRef<JSArray>& jsArray, std::vector<uint32_t>& result,
@@ -945,7 +966,7 @@ private:
     static JSRef<JSArray> CreateJsOnMenuItemClick(const NG::MenuItemParam& menuItemParam);
     static JSRef<JSVal> CreateJsSystemMenuItems(const std::vector<NG::MenuItemParam>& systemMenuItems);
     static void CompleteResourceObjectInner(JSRef<JSObject>& jsObj, std::string& bundleName, std::string& moduleName,
-        int32_t& resIdValue, int32_t& resTypeValue, JSRef<JSVal>& resId);
+        int32_t& resIdValue, int32_t& resTypeValue, JSRef<JSVal>& resId, bool& hasGetter);
     static NG::LayoutSafeAreaEdge ParseJsLayoutSafeAreaEdgeArray(
         const JSRef<JSArray>& jsSafeAreaEdges, NG::LayoutSafeAreaEdge defaultVal);
     static bool ParseAllBorderRadiusesForOutLine(JSRef<JSObject>& object, NG::BorderRadiusProperty& borderRadius);

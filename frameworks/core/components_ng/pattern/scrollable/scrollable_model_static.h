@@ -16,15 +16,22 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_MODEL_STATIC_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_MODEL_STATIC_H
 
+#include "base/memory/referenced.h"
+#include "base/geometry/shape.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 #ifdef SUPPORT_DIGITAL_CROWN
 #include "core/event/crown_event.h"
 #endif
+
+namespace OHOS::Ace {
+class ShapeRect;
+}
+
 namespace OHOS::Ace::NG {
+class FrameNode;
 
 class ACE_FORCE_EXPORT ScrollableModelStatic {
 public:
@@ -65,6 +72,8 @@ public:
     static void SetOnDidStopDragging(FrameNode* frameNode, OnDidStopDraggingEvent&& event);
     static void SetOnWillStartFling(FrameNode* frameNode, OnWillStartFlingEvent&& event);
     static void SetOnDidStopFling(FrameNode* frameNode, OnDidStopFlingEvent&& event);
+    static void SetEnableScrollWithMouse(FrameNode* frameNode, bool enabled);
+    static void SetAutoAdjustScrollBarMargin(FrameNode* frameNode, std::optional<bool> autoAdjust);
 
 #ifdef SUPPORT_DIGITAL_CROWN
     static void SetDigitalCrownSensitivity(FrameNode* frameNode, const std::optional<CrownSensitivity>& sensitivity);

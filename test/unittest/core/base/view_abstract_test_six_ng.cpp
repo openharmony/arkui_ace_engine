@@ -18,7 +18,7 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/event/key_event.h"
-#include "test/mock/base/mock_system_properties.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -296,6 +296,37 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableOnAreaChangeByFrameNodeTest, Tes
      */
     ViewAbstract::DisableOnAreaChange(AceType::RawPtr(node));
     EXPECT_EQ(callback, nullptr);
+}
+
+/**
+ * @tc.name: ViewAbstractSetOnAreaChangedWithIntervalByFrameNodeTest
+ * @tc.desc: Test the operation of ViewAbstract::SetOnAreaChangedWithInterval.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractSetOnAreaChangedWithIntervalByFrameNodeTest, TestSize.Level1)
+{
+    constexpr int32_t DEFAULT_INTERVAL = 1000;
+    constexpr int32_t CUSTOM_INTERVAL = 3000;
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_CHILD);
+
+    auto topFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ASSERT_NE(topFrameNode, nullptr);
+    auto node = AceType::DynamicCast<NG::FrameNode>(topFrameNode);
+    ASSERT_NE(node, nullptr);
+
+    ViewAbstract::SetOnAreaChanged(AceType::RawPtr(node),
+        [](const RectF&, const OffsetF&, const RectF&, const OffsetF&) {});
+    EXPECT_EQ(node->onAreaChangeMinInterval_, 0);
+
+    ViewAbstract::SetOnAreaChangedWithInterval(AceType::RawPtr(node),
+        [](const RectF&, const OffsetF&, const RectF&, const OffsetF&) {}, CUSTOM_INTERVAL);
+    EXPECT_EQ(node->onAreaChangeMinInterval_, CUSTOM_INTERVAL);
+    EXPECT_TRUE(node->GetEventHub<EventHub>()->HasOnAreaChanged());
+
+    ViewAbstract::SetOnAreaChangedWithInterval(AceType::RawPtr(node),
+        [](const RectF&, const OffsetF&, const RectF&, const OffsetF&) {}, -1);
+    EXPECT_EQ(node->onAreaChangeMinInterval_, DEFAULT_INTERVAL);
 }
 
 /**

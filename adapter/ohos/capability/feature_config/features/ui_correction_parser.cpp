@@ -28,6 +28,8 @@ ParseErrCode UICorrectionParser::ParseFeatureParam(xmlNode& node)
     instance.SetUiCorrectionEnableParam(pageOverflowEnabled, dialogOverflowEnabled);
     auto rnOverflowEnabled = ExtractPropertyValue("RNPageOverflowEnabled", node) == "true";
     instance.SetUiCorrectionRnEnableParam(rnOverflowEnabled);
+    auto smartlayoutEnabled = ExtractPropertyValue("smartlayoutEnabled", node) == "true";
+    instance.SetSmartLayoutEnabled(smartlayoutEnabled);
     return PARSE_EXEC_SUCCESS;
 }
 

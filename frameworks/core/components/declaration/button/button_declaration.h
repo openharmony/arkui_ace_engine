@@ -18,6 +18,7 @@
 
 #include "frameworks/core/components/declaration/button/button_progress_controller.h"
 #include "frameworks/core/components/declaration/common/declaration.h"
+#include "frameworks/core/components/common/properties/text_style.h"
 #include "frameworks/bridge/common/dom/dom_type.h"
 
 namespace OHOS::Ace {

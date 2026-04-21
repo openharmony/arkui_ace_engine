@@ -23,7 +23,7 @@
 #include <string>
 
 #include "../manager/plugin_manager.h"
-#include "column_component.h"
+#include "components/column_component.h"
 namespace ArkUICApiDemo {
 auto CreateNodeWithSize(ArkUI_NativeNodeAPI_1* nodeAPI, ArkUI_NodeHandle node, float width, float height)
 {

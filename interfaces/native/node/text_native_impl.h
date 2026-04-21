@@ -51,7 +51,7 @@ struct ArkUI_TextEditMenuOptions {
 struct ArkUI_TextSelectionMenuOptions {
     ArkUI_TextSpanType textSpanType;
     ArkUI_TextResponseType textResponseType;
-    ArkUI_HapticFeedbackMode hapticFeedbackMode;
+    OH_ArkUI_HapticFeedbackMode hapticFeedbackMode;
     ArkUI_NodeHandle contentNode;
     void* onMenuShow;
     void* onMenuShowUserData;
@@ -73,6 +73,10 @@ struct ArkUI_TextMarqueeOptions {
 
 struct ArkUI_SelectedDragPreviewStyle {
     ArkUI_OptionalUint color;
+};
+
+struct OH_ArkUI_TextController {
+    ArkUI_NodeHandle node = nullptr;
 };
 
 #ifdef __cplusplus

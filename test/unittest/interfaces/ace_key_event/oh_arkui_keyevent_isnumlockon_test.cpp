@@ -43,7 +43,7 @@ HWTEST_F(KeyEventTest, KeyEvent_IsNumLockOn003, TestSize.Level0)
             .inputType = ARKUI_UIINPUTEVENT_TYPE_KEY,
             .eventTypeId = C_KEY_EVENT_ID,
             .inputEvent = &keyEvent,
-            .isCloned = false,
+            .isCreatedByUser = false,
             .apiVersion = 0,
         };
         bool resultState = !val;
@@ -60,7 +60,7 @@ HWTEST_F(KeyEventTest, KeyEvent_IsNumLockOn004, TestSize.Level0)
         .inputType = ARKUI_UIINPUTEVENT_TYPE_KEY,
         .eventTypeId = AXIS_EVENT_ID,
         .inputEvent = nullptr,
-        .isCloned = false,
+        .isCreatedByUser = false,
         .apiVersion = 0,
     };
     bool state = false;

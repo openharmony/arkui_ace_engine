@@ -16,11 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_GESTURE_EVENT_HUB_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_GESTURE_EVENT_HUB_H
 
+#include <functional>
 #include <list>
 #include <vector>
 #include "ui/base/referenced.h"
 
 #include "base/geometry/ng/point_t.h"
+#include "base/geometry/ng/rect_t.h"
 #include "base/memory/referenced.h"
 #include "core/common/interaction/interaction_data.h"
 #include "core/components/common/layout/constants.h"
@@ -46,6 +48,7 @@ struct KeyEvent;
 class UnifiedData;
 class Subwindow;
 class CalcDimensionRect;
+class DragEvent;
 }
 
 namespace OHOS::Ace::NG {
@@ -55,6 +58,9 @@ using ShouldBuiltInRecognizerParallelWithFunc = std::function<RefPtr<NGGestureRe
     const RefPtr<NGGestureRecognizer>&, const std::vector<RefPtr<NGGestureRecognizer>>&)>;
 using TouchTestDoneCallback = std::function<void(
     const std::shared_ptr<BaseGestureEvent>&, const std::list<WeakPtr<NGGestureRecognizer>>&)>;
+using OnGestureCollectInterceptFunc = std::function<GestureCollectIntervention(
+    const std::vector<RefPtr<NGGestureRecognizer>>&,
+    const std::vector<RefPtr<TouchEventTarget>>&)>;
 
 struct TouchTestInfo {
     PointF windowPoint;
@@ -69,6 +75,21 @@ struct TouchResult {
     std::string id;
 };
 
+struct GestureCollectInterventionContext {
+    TouchTestResult& newComingTargets;
+    ResponseLinkResult& responseLinkResult;
+    ResponseLinkResult& newComingResponseLinkTargets;
+    const TouchTestResult& childSnapshot;
+    size_t responseLinkSnapshotSize;
+    HitTestResult testResultBeforeSelf;
+    bool preventBubblingBeforeSelf;
+    bool blockHierarchyBeforeSelf;
+    bool& preventBubbling;
+    bool& blockHierarchy;
+    bool& consumed;
+    HitTestResult& testResult;
+};
+
 struct DragDropBaseInfo {
     RefPtr<AceType> node;
     RefPtr<PixelMap> pixelMap;
@@ -81,10 +102,7 @@ struct BindMenuStatus {
     bool isShow = false;
     MenuPreviewMode isShowPreviewMode = MenuPreviewMode::NONE;
     MenuPreviewMode longPressPreviewMode = MenuPreviewMode::NONE;
-    bool IsNotNeedShowPreview() const
-    {
-        return (isBindCustomMenu && isShow) || isBindLongPressMenu;
-    }
+    bool IsNotNeedShowPreview() const;
 };
 
 struct PreparedInfoForDrag {
@@ -136,6 +154,8 @@ struct PreparedAsyncCtxForAnimate {
 struct DragframeNodeInfo {
     WeakPtr<FrameNode> frameNode;
     std::vector<RefPtr<FrameNode>> gatherFrameNode;
+    std::vector<WeakPtr<FrameNode>> autoHideFrameNodes;
+    bool autoHideExecuted = false;
 };
 
 using OnDragStartFunc = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
@@ -166,7 +186,10 @@ constexpr float PIXELMAP_DRAG_DEFAULT_HEIGHT = -28.0f;
 constexpr float DEFAULT_PAN_ANGLE = 45.0f;
 
 class EventHub;
+class OverlayManager;
 class PipelineContext;
+class DragDropManager;
+struct DragStartContext;
 
 // The gesture event hub is mainly used to handle common gesture events.
 class ACE_FORCE_EXPORT GestureEventHub : public Referenced {
@@ -215,6 +238,14 @@ public:
     TouchInterceptFunc GetOnTouchIntercept() const;
     void SetShouldBuildinRecognizerParallelWithFunc(ShouldBuiltInRecognizerParallelWithFunc&& parallelGestureToFunc);
     ShouldBuiltInRecognizerParallelWithFunc GetParallelInnerGestureToFunc() const;
+    void TriggerShouldParallelInnerWith(
+        const ResponseLinkResult& currentRecognizers, const ResponseLinkResult& responseLinkRecognizers);
+    void SetOnGestureCollectInterceptFunc(OnGestureCollectInterceptFunc&& func);
+    OnGestureCollectInterceptFunc GetOnGestureCollectInterceptFunc() const;
+    GestureCollectIntervention TriggerOnGestureCollectIntercept(
+        const TouchTestResult& newComingTargets, const ResponseLinkResult& responseLinkResult);
+    void HandleGestureCollectIntervention(
+        GestureCollectIntervention intervention, GestureCollectInterventionContext& context);
     void SetOnGestureRecognizerJudgeBegin(GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc);
     GestureRecognizerJudgeFunc GetOnGestureRecognizerJudgeBegin() const;
     void SetOnGestureJudgeNativeBegin(GestureJudgeFunc&& gestureJudgeFunc);
@@ -245,14 +276,8 @@ public:
     bool ActLongClick();
     void SetLongPressEvent(const RefPtr<LongPressEvent>& event, bool isForDrag = false, bool isDisableMouseLeft = false,
         int32_t duration = 500);
-    void ReplaceLongPressEventActuator(RefPtr<LongPressEventActuator> longPressEventActuator)
-    {
-        longPressEventActuator_ = longPressEventActuator;
-    }
-    RefPtr<LongPressEventActuator> GetLongPressEventActuator()
-    {
-        return longPressEventActuator_;
-    }
+    void ReplaceLongPressEventActuator(RefPtr<LongPressEventActuator> longPressEventActuator);
+    RefPtr<LongPressEventActuator> GetLongPressEventActuator();
     // Set by user define, which will replace old one.
     void SetPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, Dimension distance);
     void SetPanEvent(
@@ -293,6 +318,14 @@ public:
         TouchTestResult& result, int32_t touchId, int32_t originalId);
     const std::vector<DimensionRect>& GetResponseRegion() const;
     const std::vector<DimensionRect>& GetMouseResponseRegion() const;
+    bool HasTouchResponseRegionConfig() const
+    {
+        return hasTouchResponseRegionConfig_;
+    }
+    void MarkTouchResponseRegionConfigured()
+    {
+        hasTouchResponseRegionConfig_ = true;
+    }
     std::vector<CalcDimensionRect> GetFingerResponseRegionFromMap();
     const std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>>& GetResponseRegionMap();
     void SetResponseRegionMap(
@@ -376,6 +409,11 @@ public:
         DragDropInfo& dragPreviewInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
     RefPtr<UnifiedData> GetUnifiedData(const std::string& frameTag, DragDropInfo& dragDropInfo,
         const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
+    std::vector<RefPtr<FrameNode>> ResolveAutoHideTargetsByUniqueId(
+        const RefPtr<OHOS::Ace::DragEvent>& dragEvent) const;
+    void HideAutoHideTargets(const std::vector<RefPtr<FrameNode>>& targets);
+    void ResetAutoHideDragInfo();
+    bool UpdateAutoHideTargetVisibility(const RefPtr<FrameNode>& frameNode) const;
     int32_t GetSelectItemSize();
     bool IsNeedSwitchToSubWindow(const PreparedInfoForDrag& dragInfoData) const;
     RefPtr<PixelMap> GetDragPreviewPixelMap();
@@ -386,9 +424,7 @@ public:
     void SetMouseDragMonitorState(bool state);
     bool ParsePixelMapAsync(DragDropInfo& dragDropInfo, const DragDropInfo& dragPreviewInfo,
         const GestureEvent& info);
-    void DoOnDragStartHandling(const GestureEvent& info, const RefPtr<FrameNode> frameNode,
-        DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& event,
-        DragDropInfo dragPreviewInfo, const RefPtr<PipelineContext>& pipeline);
+    void DoOnDragStartHandling(DragStartContext& ctx);
     void HideMenu();
     const GestureEvent GetGestureEventInfo();
     const ClickInfo GetClickInfo();
@@ -412,10 +448,7 @@ public:
     RefPtr<ParallelRecognizer> innerParallelRecognizer_;
 
     bool IsGestureEmpty() const;
-    bool IsGestureHierarchyEmpty() const
-    {
-        return gestureHierarchy_.empty();
-    }
+    bool IsGestureHierarchyEmpty() const;
 
     bool IsPanEventEmpty() const;
 
@@ -444,6 +477,42 @@ private:
 
     void OnDragStart(const GestureEvent& info, const RefPtr<PipelineBase>& context, const RefPtr<FrameNode> frameNode,
         DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
+    bool InitDragStartTargets(const GestureEvent& info, DragStartContext& ctx);
+    void InitDragStartRequestState(const DragStartContext& ctx);
+    bool BuildDragStartRequest(DragStartContext& ctx);
+    void DispatchDragStartByRequestState(const DragStartContext& ctx);
+    std::function<void(DragStartRequestStatus)> CreateAsyncDragEndCallback(const RefPtr<FrameNode>& frameNode);
+    std::function<void()> CreateDelayedDragStartCallback(const DragStartContext& ctx);
+    bool HandleResolvedDragPreview(DragStartContext& ctx);
+    void PrepareFallbackDragPreview(DragStartContext& ctx);
+    bool InitDragStartExecutionContext(DragStartContext& ctx, const RefPtr<PipelineBase>& context);
+    bool ResolveFrameworkLeaveWindowState(DragStartContext& ctx);
+    bool CheckDragStartResult(DragStartContext& ctx);
+    bool PrepareDragStartPixelMap(DragStartContext& ctx);
+    void UpdateDragStartPreviewState(DragStartContext& ctx);
+    void BuildPreparedDragInfo(DragStartContext& ctx);
+    bool PrepareDragStartSubWindowPreview(DragStartContext& ctx, const RefPtr<PipelineBase>& context);
+    void UpdateDragPreviewScale(DragStartContext& ctx);
+    bool PrepareDragStartData(DragStartContext& ctx);
+    std::unique_ptr<JsonValue> BuildArkExtraInfoJson(const DragStartContext& ctx);
+    void ResolveDragScreenPosition(const DragStartContext& ctx, float& screenX, float& screenY);
+    DragDataCore CreateDragData(const DragStartContext& ctx, const std::string& extraInfoJson, int32_t windowId,
+        float screenX, float screenY);
+    void ReportDragStartData(const DragStartContext& ctx, const DragDataCore& dragData);
+    bool TryStartSystemDrag(DragStartContext& ctx, int32_t windowId);
+    void HandleStartDragFailure(const DragStartContext& ctx);
+    void BeginSuccessfulDragStart(DragStartContext& ctx);
+    void CompleteSuccessfulDragStart(DragStartContext& ctx, const RefPtr<PipelineBase>& context);
+    void UpdateDragStartAnimation(DragStartContext& ctx, const RefPtr<PipelineBase>& context);
+    bool UpdateDragStartManagerState(const DragStartContext& ctx);
+    void ShowSceneBoardTouchDragWindow(DragStartContext& ctx);
+    void PostTouchDragWindowVisibleTask(const RefPtr<PipelineContext>& pipeline);
+    void ResetDragStartOverlay(const DragStartContext& ctx);
+    void TransferTouchDragWindowToFramework(DragStartContext& ctx);
+    void ShowMouseDragWindow(DragStartContext& ctx);
+    void UpdateDragWindowVisibility(DragStartContext& ctx);
+    void NotifyFrameworkDragStart(const DragStartContext& ctx);
+    bool ShouldPerformDragStartAnimation(DragStartContext& ctx, const RefPtr<PipelineBase>& context);
     void PrepareDragStartInfo(
         RefPtr<PipelineContext>& pipeline, PreparedInfoForDrag& data, const RefPtr<FrameNode> frameNode);
     void UpdateMenuNode(
@@ -508,6 +577,7 @@ private:
     bool recreateGesture_ = true;
     bool needRecollect_ = false;
     bool isResponseRegion_ = false;
+    bool hasTouchResponseRegionConfig_ = false;
     std::vector<DimensionRect> responseRegion_;
     std::vector<DimensionRect> mouseResponseRegion_;
     std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>> responseRegionMap_;
@@ -535,6 +605,7 @@ private:
     TouchInterceptFunc touchInterceptFunc_;
 
     ShouldBuiltInRecognizerParallelWithFunc shouldBuildinRecognizerParallelWithFunc_;
+    OnGestureCollectInterceptFunc onGestureCollectInterceptFunc_;
     GestureRecognizerJudgeFunc gestureRecognizerJudgeFunc_;
 
     MenuPreviewMode previewMode_ = MenuPreviewMode::NONE;

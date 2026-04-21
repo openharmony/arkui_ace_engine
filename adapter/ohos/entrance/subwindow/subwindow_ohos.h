@@ -31,7 +31,6 @@
 #include "base/thread/task_executor.h"
 #include "core/common/ace_view.h"
 #include "core/common/js_message_dispatcher.h"
-#include "core/components/dialog/dialog_properties.h"
 #include "core/components/select_popup/select_popup_component.h"
 #include "core/components/stack/stack_element.h"
 #include "core/components/tween/tween_component.h"
@@ -47,6 +46,9 @@ class RSUIDirector;
 } // namespace OHOS::Rosen
 
 namespace OHOS::Ace {
+struct DialogProperties;
+struct PromptDialogAttr;
+struct ButtonInfo;
 
 class SubwindowOhos : public Subwindow {
     DECLARE_ACE_TYPE(SubwindowOhos, Subwindow);

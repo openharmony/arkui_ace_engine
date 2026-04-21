@@ -18,7 +18,7 @@ import { IConsumerDecoratedVariable, IProviderDecoratedVariable, IVariableOwner 
 import { UIUtils } from '../utils';
 import { DecoratedV2VariableBase } from './decoratorBase';
 import { uiUtils } from '../base/uiUtilsImpl';
-import { StateMgmtDFX } from '../tools/stateMgmtDFX';
+import { StateMgmtDFX, ObservedObjectRegistry } from '../tools/stateMgmtDFX';
 export class ConsumerDecoratedVariable<T> extends DecoratedV2VariableBase<T> implements IConsumerDecoratedVariable<T> {
     provideAlias_: string;
     sourceProvider_: IProviderDecoratedVariable<T> | undefined;
@@ -29,18 +29,24 @@ export class ConsumerDecoratedVariable<T> extends DecoratedV2VariableBase<T> imp
         this.sourceProvider_ = owningView.__findProvider__Internal<T>(provideAlias);
         if (this.sourceProvider_ === undefined) {
             this.backing_ = FactoryInternal.mkDecoratorValue(varName, initValue);
+
+            // Register the relationship between this Consumer variable and the observed object it uses
+            // Only register when using local value (no provider found)
+            this.registerToObservedObject(initValue);
         }
     }
 
     get(): T {
         StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`Consumer ${this.getTraceInfo()}`);
         if (this.sourceProvider_) {
+            this.selfTrack();
             return this.sourceProvider_!.get();
         }
         const shouldAddRef = this.shouldAddRef()
         const value = this.backing_!.get(shouldAddRef);
         if (shouldAddRef) {
             uiUtils.builtinContainersAddRefLength(value);
+            this.selfTrack();
         }
         return value;
     }
@@ -59,7 +65,13 @@ export class ConsumerDecoratedVariable<T> extends DecoratedV2VariableBase<T> imp
         if (value === newValue) {
             return;
         }
-        this.backing_!.setNoCheck(uiUtils.autoProxyObject(newValue) as T);
+        const processedNewValue = uiUtils.autoProxyObject(newValue) as T;
+
+        // Update ObservedObjectRegistry registration before setting the new value
+        // Only update when using local value (no provider found)
+        this.updateObservedObjectRegistration(value, processedNewValue);
+
+        this.backing_!.setNoCheck(processedNewValue);
     }
 
     resetOnReuse(newValue: T): void {
@@ -70,6 +82,23 @@ export class ConsumerDecoratedVariable<T> extends DecoratedV2VariableBase<T> imp
         if (value === newValue) {
             return;
         }
-        this.backing_!.setNoCheck(uiUtils.autoProxyObject(newValue) as T);
+        const processedNewValue = uiUtils.autoProxyObject(newValue) as T;
+
+        // Update ObservedObjectRegistry registration before setting the new value
+        this.updateObservedObjectRegistration(value, processedNewValue);
+
+        this.backing_!.setNoCheck(processedNewValue);
+    }
+
+    public aboutToBeDeletedInternal(): void {
+        // Unregister from the observed object before deletion
+        // Only unregister when using local value (no provider found)
+        if (this.backing_) {
+            const currentValue = this.backing_!.get(false);
+            this.unregisterFromObservedObject(currentValue);
+        }
+
+        // Call parent's cleanup
+        super.aboutToBeDeletedInternal();
     }
 }

@@ -30,26 +30,10 @@ public:
     ~RichEditorContentModifier() override = default;
 
     void onDraw(DrawingContext& drawingContext) override;
-
-    void SetRichTextRectX(float value)
-    {
-        richTextRectX_->Set(value);
-    }
-
-    void SetRichTextRectY(float value)
-    {
-        richTextRectY_->Set(value);
-    }
-
-    void SetClipOffset(OffsetF offset)
-    {
-        clipOffset_->Set(offset);
-    }
-
-    void SetClipSize(SizeF size)
-    {
-        clipSize_->Set(size);
-    }
+    void SetRichTextRectX(float value);
+    void SetRichTextRectY(float value);
+    void SetClipOffset(OffsetF offset);
+    void SetClipSize(SizeF size);
 
 private:
     void PaintCustomSpan(DrawingContext& drawingContext);

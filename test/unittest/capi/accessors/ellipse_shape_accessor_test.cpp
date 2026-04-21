@@ -40,11 +40,11 @@ public:
 };
 
 /**
- * @tc.name: ctorTest
+ * @tc.name: constructTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(EllipseShapeAccessorTest, ctorTest, TestSize.Level1)
+HWTEST_F(EllipseShapeAccessorTest, constructTestDefaultValues, TestSize.Level1)
 {
     ASSERT_NE(peer_->shape, nullptr);
     EXPECT_EQ(peer_->shape->GetWidth(), CalcDimension(100.f, DimensionUnit::VP));

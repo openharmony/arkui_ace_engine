@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,8 +22,15 @@
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 #include "core/components_ng/pattern/grid/grid_adaptive/grid_adaptive_layout_algorithm.h"
+#include "core/components_ng/pattern/grid/grid_accessibility_property.h"
+#include "core/components_ng/pattern/grid/grid_content_modifier.h"
 #include "core/components_ng/pattern/grid/grid_custom/grid_custom_layout_algorithm.h"
+#include "core/components_ng/pattern/grid/grid_event_hub.h"
+#include "core/components_ng/pattern/grid/grid_item_event_hub.h"
+#include "core/components_ng/pattern/grid/grid_item_layout_property.h"
+#include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
+#include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_paint_method.h"
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_with_options_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
@@ -31,7 +38,6 @@
 #include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
-#include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
@@ -41,6 +47,15 @@ const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 
 const int32_t MAX_NUM_SIZE = 4;
 } // namespace
+
+GridPattern::GridPattern() = default;
+
+GridPattern::~GridPattern() = default;
+
+RefPtr<LayoutProperty> GridPattern::CreateLayoutProperty()
+{
+    return MakeRefPtr<GridLayoutProperty>();
+}
 
 RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
 {
@@ -114,6 +129,16 @@ RefPtr<PaintProperty> GridPattern::CreatePaintProperty()
     return property;
 }
 
+RefPtr<AccessibilityProperty> GridPattern::CreateAccessibilityProperty()
+{
+    return MakeRefPtr<GridAccessibilityProperty>();
+}
+
+RefPtr<EventHub> GridPattern::CreateEventHub()
+{
+    return MakeRefPtr<GridEventHub>();
+}
+
 RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
 {
     auto paint = MakeRefPtr<GridPaintMethod>(GetAxis() == Axis::HORIZONTAL, IsReverse(), GetScrollBar());
@@ -158,7 +183,10 @@ void GridPattern::OnModifyDone()
         SetDigitalCrownEvent();
 #endif
     }
-
+    auto scrollable = GetScrollable();
+    if (scrollable) {
+        scrollable->SetIsAllowMouse(GetIsAllowMouse());
+    }
     SetEdgeEffect();
 
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
@@ -180,6 +208,15 @@ void GridPattern::OnModifyDone()
     if (!overlayNode && paintProperty->GetFadingEdge().value_or(false)) {
         CreateAnalyzerOverlay(host);
     }
+}
+
+bool GridPattern::GetIsAllowMouse() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, isAllowMouse_);
+    auto gridEventHub = host->GetEventHub<GridEventHub>();
+    CHECK_NULL_RETURN(gridEventHub, isAllowMouse_);
+    return gridEventHub->GetOnItemDragStart() ? false : isAllowMouse_;
 }
 
 void GridPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
@@ -595,9 +632,10 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     ChangeCanStayOverScroll();
     info_.currentDelta_ = 0;
 
-    if (gridLayoutAlgorithm->MeasureInNextFrame()) {
+    prevMeasureBreak_ = gridLayoutAlgorithm->MeasureInNextFrame();
+    if (prevMeasureBreak_) {
         ACE_SCOPED_TRACE("Grid MeasureInNextFrame");
-        MarkDirtyNodeSelf();
+        PostAsyncLoadTask();
     } else {
         isInitialized_ = true;
     }
@@ -883,7 +921,7 @@ void GridPattern::ScrollTo(float position)
     if (!isConfigScrollable_) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_GRID, "ScrollTo:%{public}f", position);
+
     StopAnimate();
     SetAnimateCanOverScroll(GetCanStayOverScroll());
     UpdateCurrentOffset(GetTotalOffset() - position, SCROLL_FROM_JUMP);
@@ -1424,6 +1462,26 @@ void GridPattern::GetEventDumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("hasFrameNodeOnScrollIndex", onJSFrameNodeScrollIndex ? "true" : "false");
 }
 
+void GridPattern::DumpInfo()
+{
+    DumpLog::GetInstance().AddDesc(std::string("LayoutMode: ").append(GetLayoutMode()));
+    auto property = GetLayoutProperty<GridLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    DumpLog::GetInstance().AddDesc(std::string("RowsTemplate: ").append(property->GetRowsTemplate().value_or("")));
+    DumpLog::GetInstance().AddDesc(
+        std::string("ColumnsTemplate: ").append(property->GetColumnsTemplate().value_or("")));
+}
+
+void GridPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    DumpLog::GetInstance().AddDesc("---- Grid Component Layout Dump ----");
+    json->Put("LayoutMode", GetLayoutMode().c_str());
+    auto property = GetLayoutProperty<GridLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    json->Put("RowsTemplate", property->GetRowsTemplate().value_or("").c_str());
+    json->Put("ColumnsTemplate", property->GetColumnsTemplate().value_or("").c_str());
+}
+
 void GridPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
 {
     json->Put("isScrollable",
@@ -1496,6 +1554,11 @@ int32_t GridPattern::GetItemIndex(double x, double y) const
     return -1;
 }
 
+int32_t GridPattern::GetFirstIndex() const
+{
+    return startIndex_;
+}
+
 void GridPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset)
 {
     SetScrollSource(SCROLL_FROM_JUMP);
@@ -1515,7 +1578,7 @@ void GridPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, s
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         } else {
             UpdateStartIndex(index, align);
-            ContentChangeReport(host);
+            ContentChangeReport(host, ContentChangeManager::SCROLL_TO_INDEX);
         }
     }
     FireAndCleanScrollingListener();
@@ -1742,8 +1805,8 @@ void GridPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     json->Put("jumpIndex", info_.jumpIndex_);
     json->Put("crossCount", info_.crossCount_);
     json->Put("childrenCount", info_.childrenCount_);
-    json->Put("RowsTemplate", property->GetRowsTemplate()->c_str());
-    json->Put("ColumnsTemplate", property->GetColumnsTemplate()->c_str());
+    json->Put("RowsTemplate", property->GetRowsTemplate().value_or("").c_str());
+    json->Put("ColumnsTemplate", property->GetColumnsTemplate().value_or("").c_str());
     json->Put("CachedCount",
         property->GetCachedCount().has_value() ? std::to_string(property->GetCachedCount().value()).c_str() : "null");
     json->Put("ShowCache", std::to_string(property->GetShowCachedItemsValue(false)).c_str());
@@ -1882,8 +1945,50 @@ void GridPattern::ReportOnItemGridEvent(const std::string& event)
         ComponentEventType::COMPONENT_EVENT_SCROLL);
 }
 
+std::string GridPattern::GetLayoutMode() const
+{
+    if (userDefined_) {
+        return "custom";
+    }
+    if (irregular_) {
+        return "irregular";
+    }
+    auto gridLayoutProperty = GetLayoutProperty<GridLayoutProperty>();
+    if (!gridLayoutProperty) {
+        return "unknown";
+    }
+    auto columnsTemplate = gridLayoutProperty->GetColumnsTemplate();
+    auto itemFillPolicy = gridLayoutProperty->GetItemFillPolicy();
+    bool setColumns = itemFillPolicy.has_value() || columnsTemplate.has_value();
+    auto rowTemplate = gridLayoutProperty->GetRowsTemplate();
+    bool setRows = rowTemplate.has_value();
+    if (!setColumns && !setRows) {
+        return "adaptive";
+    }
+    if (setColumns && setRows) {
+        return "static";
+    }
+    auto hasOptions = gridLayoutProperty->GetLayoutOptions().has_value();
+    return hasOptions ? "scrollWithOptions" : "scroll";
+}
+
 int32_t GridPattern::OnInjectionEvent(const std::string& command)
 {
     return OnInjectionEventByRatio(command);
+}
+
+void GridPattern::PostAsyncLoadTask()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    context->AddAsyncLoadTask([weak = AceType::WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->prevMeasureBreak_) {
+            pattern->MarkDirtyNodeSelf();
+        }
+    });
 }
 } // namespace OHOS::Ace::NG

@@ -1379,6 +1379,7 @@ class ImageMenuItem extends ViewPU {
             Button.gestureModifier(ObservedObject.GetRawObject(this.buttonGestureModifier));
             Button.accessibilityLevel(this.getRightIconAccessibilityLevel());
             Button.accessibilityDescription(this.getAccessibilityDescription());
+            Button.defaultFocus(this.item.defaultFocus);
         }, Button);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
@@ -1395,7 +1396,6 @@ class ImageMenuItem extends ViewPU {
                         SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
                         SymbolGlyph.symbolEffect(new SymbolEffect(), false);
                         SymbolGlyph.fontSize(SYMBOL_SIZE);
-                        SymbolGlyph.defaultFocus(this.item.isEnabled ? this.item.defaultFocus : false);
                     }, SymbolGlyph);
                 });
             } else {
@@ -1412,7 +1412,6 @@ class ImageMenuItem extends ViewPU {
                                     SymbolGlyph.enabled(this.item.isEnabled);
                                     SymbolGlyph.draggable(false);
                                     SymbolGlyph.accessibilityText(this.getAccessibilityReadText());
-                                    SymbolGlyph.defaultFocus(this.item.isEnabled ? this.item.defaultFocus : false);
                                 }, SymbolGlyph);
                             });
                         } else {
@@ -1439,7 +1438,6 @@ class ImageMenuItem extends ViewPU {
                                     Image.enabled(this.item.isEnabled);
                                     Image.draggable(false);
                                     Image.accessibilityText(this.getAccessibilityReadText());
-                                    Image.defaultFocus(this.item.isEnabled ? this.item.defaultFocus : false);
                                 }, Image);
                             });
                         }
@@ -1580,7 +1578,7 @@ class ImageMenuItem extends ViewPU {
                 this.item.isEnabled && this.item.action && this.item.action();
             });
             Button.gestureModifier(ObservedObject.GetRawObject(this.buttonGestureModifier));
-            Button.defaultFocus(this.item.isEnabled ? this.item.defaultFocus : false);
+            Button.defaultFocus(this.item.defaultFocus);
         }, Button);
         Button.pop();
         Stack.pop();

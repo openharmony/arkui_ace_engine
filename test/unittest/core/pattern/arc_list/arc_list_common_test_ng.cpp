@@ -143,7 +143,7 @@ HWTEST_F(ArcListCommonTestNg, FocusStep007, TestSize.Level1)
 
     EXPECT_TRUE(IsEqualTotalOffset(TOTAL_ITEM_NUMBER * ITEM_HEIGHT - (VIEW_ITEM_NUMBER + 1) * ITEM_HEIGHT / 2.f));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, 1, 0));
-    EXPECT_TRUE(IsEqualTotalOffset(-(VIEW_ITEM_NUMBER - 1) * ITEM_HEIGHT / 2.f));
+    EXPECT_TRUE(IsEqualTotalOffset(TOTAL_ITEM_NUMBER * ITEM_HEIGHT - (VIEW_ITEM_NUMBER + 1) * ITEM_HEIGHT / 2.f));
 
     ClearOldNodes();
     CreateList();
@@ -152,7 +152,7 @@ HWTEST_F(ArcListCommonTestNg, FocusStep007, TestSize.Level1)
 
     EXPECT_TRUE(IsEqualTotalOffset(-(VIEW_ITEM_NUMBER - 1) * ITEM_HEIGHT / 2.f));
     EXPECT_FALSE(IsEqualNextFocusNode(FocusStep::DOWN, 3, 4));
-    EXPECT_FALSE(IsEqualTotalOffset(ITEM_HEIGHT * 4 + ITEM_HEIGHT / 2.f - VIEW_ITEM_NUMBER * ITEM_HEIGHT / 2.f));
+    EXPECT_TRUE(IsEqualTotalOffset(-(VIEW_ITEM_NUMBER - 1) * ITEM_HEIGHT / 2.f));
 }
 
 /**

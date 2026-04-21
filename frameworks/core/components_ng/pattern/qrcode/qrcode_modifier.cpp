@@ -77,13 +77,11 @@ RSBitmap QRCodeModifier::CreateBitMap(
 {
     RSBitmap bitMap;
     RSBitmapFormat colorType = { RSColorType::COLORTYPE_RGBA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
-    if (!bitMap.Build(width, width, colorType)) {
-        TAG_LOGW(AceLogTag::ACE_QRCODE, "rsBitmap build fail.");
-        return bitMap;
-    }
+    bitMap.Build(width, width, colorType);
 
     void* rawData = bitMap.GetPixels();
     auto* data = reinterpret_cast<uint32_t*>(rawData);
+    CHECK_NULL_RETURN(data, bitMap);
     int32_t blockWidth = width / qrCode.getSize();
     int32_t maxWidth = 0;
     int32_t maxHeight = 0;

@@ -20,5 +20,18 @@ ace_unittest("render_node_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/render_node/render_node_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/render_node/render_node_pattern.cpp",
     "render_node_test_ng.cpp",
+    "render_node_test_two_ng.cpp"
   ]
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "render_node_test_min.cpp",
+      "render_node_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "render_node_test_min.cpp",
+      "render_node_test_core.cpp",
+    ]
+  }
 }

@@ -20,5 +20,20 @@ namespace OHOS::Ace::NG {
 struct UnionEffectContainerOptions {
     float spacing = 0.0f;
 };
+
+enum class UnionMode {
+    SMOOTH_UNION = 0,
+    GRAVITY_UNION
+};
+
+struct CenterGravityOptions {
+    bool gravityCenter = false;
+    float gravityIntensity = 0.0f;
+
+    bool operator==(const CenterGravityOptions& param) const
+    {
+        return gravityCenter == param.gravityCenter && NearEqual(gravityIntensity, param.gravityIntensity);
+    }
+};
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_PROPERTIES_UNION_EFFECT_CONTAINER_OPTIONS_H

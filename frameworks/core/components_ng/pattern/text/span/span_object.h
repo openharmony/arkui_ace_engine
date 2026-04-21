@@ -24,13 +24,17 @@
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/text/span/tlv_util.h"
-#include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
-#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace {
+
+namespace NG {
+    struct SpanItem;
+    struct ImageSpanItem;
+    struct CustomSpanItem;
+}
 
 enum class SpanType {
     Font = 0,
@@ -41,6 +45,7 @@ enum class SpanType {
     LineHeight = 5,
     BackgroundColor = 6,
     Url = 7,
+    LineSpacing = 8,
     HalfLeading,
     Gesture = 100,
     ParagraphStyle = 200,
@@ -119,6 +124,9 @@ public:
     void UpdateEndIndex(int32_t endIndex);
     int32_t GetLength() const;
     std::optional<std::pair<int32_t, int32_t>> GetIntersectionInterval(std::pair<int32_t, int32_t> interval) const;
+    virtual void ClearSpecialData() {};
+    static void ParseColorWithVersion(
+        const RefPtr<ResourceObject>& resObj, Color& outColor, const RefPtr<NG::FrameNode>& frameNode);
 
 private:
     int32_t start_ = 0;
@@ -144,6 +152,7 @@ private:
     void AddSpanStyle(const RefPtr<NG::SpanItem>& spanItem) const;
     void AddColorResourceObj(const RefPtr<NG::SpanItem>& spanItem) const;
     static void RemoveSpanStyle(const RefPtr<NG::SpanItem>& spanItem);
+    void FontVariationsToString(std::stringstream& ss) const;
 
     Font font_;
 };
@@ -273,6 +282,21 @@ private:
     int32_t gestureSpanId_ = -1;
 };
 
+class NapiGestureSpan : public GestureSpan {
+    DECLARE_ACE_TYPE(NapiGestureSpan, GestureSpan);
+
+public:
+    NapiGestureSpan() = default;
+    explicit NapiGestureSpan(GestureStyle gestureInfo) : GestureSpan(gestureInfo) {};
+    NapiGestureSpan(GestureStyle gestureInfo, int32_t start, int32_t end) : GestureSpan(gestureInfo, start, end) {};
+    RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
+    bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
+    void ClearSpecialData() override;
+    void* onNapiClick_ = nullptr;
+    void* onNapiLongPress_ = nullptr;
+    void* onNapiTouch_ = nullptr;
+};
+
 class TextShadowSpan : public SpanBase {
     DECLARE_ACE_TYPE(TextShadowSpan, SpanBase);
 
@@ -362,6 +386,24 @@ private:
     std::optional<std::function<void(NG::DrawingContext&, CustomSpanOptions)>> onDraw_;
 };
 
+class NapiCustomSpan : public CustomSpan {
+    DECLARE_ACE_TYPE(NapiCustomSpan, CustomSpan);
+
+public:
+    NapiCustomSpan();
+    explicit NapiCustomSpan(std::optional<std::function<CustomSpanMetrics(CustomSpanMeasureInfo)>> onMeasure,
+        std::optional<std::function<void(NG::DrawingContext&, CustomSpanOptions)>> onDraw) : CustomSpan(onMeasure,
+            onDraw) {};
+
+    explicit NapiCustomSpan(std::optional<std::function<CustomSpanMetrics(CustomSpanMeasureInfo)>> onMeasure,
+        std::optional<std::function<void(NG::DrawingContext&, CustomSpanOptions)>> onDraw,
+        int32_t start, int32_t end) : CustomSpan(onMeasure, onDraw, start, end) {};
+    RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
+    void ClearSpecialData() override;
+    void* onNapiMeasure_ = nullptr;
+    void* onNapiDraw_ = nullptr;
+};
+
 class ParagraphStyleSpan : public SpanBase {
     DECLARE_ACE_TYPE(ParagraphStyleSpan, SpanBase);
 
@@ -388,14 +430,33 @@ private:
     SpanParagraphStyle paragraphStyle_;
 };
 
+class NapiParagraphStyleSpan : public ParagraphStyleSpan {
+    DECLARE_ACE_TYPE(NapiParagraphStyleSpan, ParagraphStyleSpan);
+public:
+    NapiParagraphStyleSpan() = default;
+    explicit NapiParagraphStyleSpan(SpanParagraphStyle paragraphStyle) : ParagraphStyleSpan(paragraphStyle) {};
+    NapiParagraphStyleSpan(SpanParagraphStyle paragraphStyle, int32_t start, int32_t end) : ParagraphStyleSpan(
+        paragraphStyle, start, end) {};
+    RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
+    bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
+    void ClearSpecialData() override;
+
+    void* onNapiDrawLeadingMargin_ = nullptr;
+    void* onNapiGetLeadingMargin_ = nullptr;
+};
+
 class LineHeightSpan : public SpanBase {
     DECLARE_ACE_TYPE(LineHeightSpan, SpanBase);
 
 public:
     LineHeightSpan() = default;
     explicit LineHeightSpan(Dimension lineHeight);
+    explicit LineHeightSpan(Dimension lineHeight, std::optional<double> lineHeightMultiple);
+    explicit LineHeightSpan(Dimension lineHeight, std::optional<double> lineHeightMultiple,
+        int32_t start, int32_t end);
     ACE_FORCE_EXPORT LineHeightSpan(Dimension lineHeight, int32_t start, int32_t end);
     Dimension GetLineHeight() const;
+    std::optional<double> GetLineHeightMultiple() const;
     RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
     bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
     SpanType GetSpanType() const override;
@@ -407,6 +468,33 @@ private:
     void RemoveLineHeightStyle(const RefPtr<NG::SpanItem>& spanItem) const;
 
     Dimension lineHeight_;
+    std::optional<double> lineHeightMultiple_;
+};
+
+class LineSpacingSpan : public SpanBase {
+    DECLARE_ACE_TYPE(LineSpacingSpan, SpanBase);
+
+public:
+    LineSpacingSpan() = default;
+    explicit LineSpacingSpan(Dimension lineSpacing);
+    explicit LineSpacingSpan(Dimension lineSpacing, std::optional<LineSpacingOptions> options);
+    ACE_FORCE_EXPORT LineSpacingSpan(Dimension lineSpacing, std::optional<LineSpacingOptions> options,
+        int32_t start, int32_t end);
+    Dimension GetLineSpacing() const;
+    std::optional<LineSpacingOptions> GetLineSpacingOptions() const;
+    void SetLineSpacingOptions(const LineSpacingOptions& options);
+    RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
+    bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
+    SpanType GetSpanType() const override;
+    std::string ToString() const override;
+    void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override;
+
+private:
+    void AddLineSpacingStyle(const RefPtr<NG::SpanItem>& spanItem) const;
+    void RemoveLineSpacingStyle(const RefPtr<NG::SpanItem>& spanItem) const;
+
+    Dimension lineSpacing_;
+    std::optional<LineSpacingOptions> options_;
 };
 
 class HalfLeadingSpan : public SpanBase {
@@ -436,11 +524,14 @@ class ExtSpan : public SpanBase {
 public:
     ExtSpan() = default;
     ExtSpan(int32_t start, int32_t end);
+    ExtSpan(void* userData, int32_t start, int32_t end);
     RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
     bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
     SpanType GetSpanType() const override;
     std::string ToString() const override;
     void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override {}
+    void ClearSpecialData() override;
+    void* userData_;
 };
 
 class UrlSpan : public SpanBase {

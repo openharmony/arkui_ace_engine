@@ -15,7 +15,7 @@
 
 import { FrameNode, LayoutConstraint } from '../FrameNode';
 import { KPointer } from '@koalaui/interop'
-import { UIContextImpl } from '../base/UIContextImpl';
+import { UIContext } from "@ohos/arkui/UIContext"
 import { int32 } from '@koalaui/compat';
 import { UIContextTransfer } from '../handwritten/transfer/UIContextTransfer'
 import { UIContext } from '@ohos.arkui.UIContext';
@@ -42,17 +42,18 @@ export class FrameNodeTransfer {
         if (nodeTypeESValue.isString()) {
             nodeType = nodeTypeESValue.toString();
         }
-        let uiContext = new UIContextImpl(instanceId as int32);
+        let uiContext = new UIContext(instanceId.toInt());
         let arkUINode = ESValue.load('@ohos.arkui.node').getProperty('default');
         let frameNodeTrans = arkUINode.getProperty('getFrameNodeRawPtr');
-        let point = frameNodeTrans.invoke(input! as Object);
+        let nodePtr = ESValue.wrap(input).getProperty('nodePtr_');
+        let point = frameNodeTrans.invoke(nodePtr! as Object);
         if (point.isUndefined()) {
             throw Error("The FrameNode point is undefined object convert fail.");
         }
         const pointStr = point.toNumber();
         // todo 
-        let frameNodePeerPont = FrameNodeExtender.createByRawPtr(pointStr as KPointer);
-        let node: FrameNode = new TransFrameNode(uiContext, nodeType, frameNodePeerPont);
+        let frameNodePeerPont = FrameNodeExtender.createByRawPtr(pointStr.toLong());
+        let node: FrameNode = new TransFrameNode(uiContext, nodeType!, frameNodePeerPont);
         return node;
     }
     static transferDynamic(input: Object): Any {
@@ -84,59 +85,59 @@ export class FrameNodeTransfer {
 
 export class TransFrameNode extends FrameNode {
     constructor(uiContext?: UIContext, type?: string, ptr?: KPointer) {
-        super(uiContext, type, ptr);
+        super(uiContext, undefined, type, ptr);
     }
     public isTransferred(): boolean {
         return true;
     }
     public getRenderNode(): RenderNode | null {
-        const error = Error('frameNode created by transferStatic not support getRenderNode');
-        throw new BusinessError(100021, error);
+        const error = Error('FrameNode created by transferStatic not support getRenderNode');
+        throw new BusinessError(100031, error);
     }
     public getCustomProperty(name: string): CustomProperty {
-        const error = Error('frameNode created by transferStatic not support getCustomProperty');
+        const error = Error('FrameNode created by transferStatic not support getCustomProperty');
 
-        throw new BusinessError(100021, error);
+        throw new BusinessError(100031, error);
     }
     get commonAttribute(): CommonMethod {
-        const error = Error('frameNode created by transferStatic not support commonAttribute');
-        throw new BusinessError(100021, error);
+        const error = Error('FrameNode created by transferStatic not support commonAttribute');
+        throw new BusinessError(100031, error);
     }
     get commonEvent(): UICommonEvent {
-        const error = Error('frameNode created by transferStatic not support commonEvent');
-        throw new BusinessError(100021, error);
+        const error = Error('FrameNode created by transferStatic not support commonEvent');
+        throw new BusinessError(100031, error);
     }
     get gestureEvent(): UIGestureEvent {
-        const error = Error('frameNode created by transferStatic not support gestureEvent');
-        throw new BusinessError(100021, error);
+        const error = Error('FrameNode created by transferStatic not support gestureEvent');
+        throw new BusinessError(100031, error);
     }
     public setMeasuredSize(size: Size): void {
-        const error = Error('frameNode created by transferStatic not support setMeasuredSize');
-        throw new BusinessError(100021, error);
+        const error = Error('FrameNode created by transferStatic not support setMeasuredSize');
+        throw new BusinessError(100031, error);
     }
     public setLayoutPosition(position: Position): void {
-        const error = Error('frameNode created by transferStatic not support setLayoutPosition');
-        throw new BusinessError(100021, error);
+        const error = Error('FrameNode created by transferStatic not support setLayoutPosition');
+        throw new BusinessError(100031, error);
     }
     public measure(constraint: LayoutConstraint): void {
-        const error = Error('frameNode created by transferStatic not support measure');
-        throw new BusinessError(100021, error);
+        const error = Error('FrameNode created by transferStatic not support measure');
+        throw new BusinessError(100031, error);
     }
     public layout(position: Position): void {
-        const error = Error('frameNode created by transferStatic not support layout');
-        throw new BusinessError(100021, error);
+        const error = Error('FrameNode created by transferStatic not support layout');
+        throw new BusinessError(100031, error);
     }
     public setNeedsLayout(): void {
-        const error = Error('frameNode created by transferStatic not support setNeedsLayout');
-        throw new BusinessError(100021, error);
+        const error = Error('FrameNode created by transferStatic not support setNeedsLayout');
+        throw new BusinessError(100031, error);
     }
     public invalidate(): void {
-        const error = Error('frameNode created by transferStatic not support invalidate');
-        throw new BusinessError(100021, error);
+        const error = Error('FrameNode created by transferStatic not support invalidate');
+        throw new BusinessError(100031, error);
     }
     public addComponentContent<T = undefined>(content: ComponentContent<T>) {
-        const error = Error('frameNode created by transferStatic not support addComponentContent');
-        throw new BusinessError(100021, error);
+        const error = Error('FrameNode created by transferStatic not support addComponentContent');
+        throw new BusinessError(100031, error);
     }
     final onDraw(context: DrawContext): void {}
     final onMeasure(constraint: LayoutConstraint): void {

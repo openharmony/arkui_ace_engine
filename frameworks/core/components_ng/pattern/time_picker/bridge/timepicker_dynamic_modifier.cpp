@@ -93,7 +93,8 @@ void GetColorResourceObject(FrameNode* frameNode, PickerTextStyle& textStyle)
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> colorResObj;
         Color result = textStyle.textColor.value();
-        ResourceParseUtils::CompleteResourceObjectFromColor(colorResObj, result, frameNode->GetTag());
+        ResourceParseUtils::CompleteResourceObjectFromColor(
+            colorResObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         if (colorResObj) {
             textStyle.textColor = result;
             textStyle.textColorResObj = colorResObj;

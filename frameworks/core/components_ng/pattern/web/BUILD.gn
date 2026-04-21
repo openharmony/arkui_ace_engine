@@ -35,8 +35,10 @@ build_component_ng("web_pattern_ng") {
       "web_accessibility_child_tree_callback.cpp",
       "web_accessibility_event_report.cpp",
       "web_agent_event_reporter.cpp",
+      "web_agent_utils.cpp",
       "web_accessibility_property.cpp",
       "web_accessibility_session_adapter.cpp",
+      "web_command_wrapper.cpp",
       "web_content_modifier.cpp",
       "web_context_select_overlay.cpp",
       "web_data_detector_adapter.cpp",
@@ -47,6 +49,8 @@ build_component_ng("web_pattern_ng") {
       "web_pattern.cpp",
       "web_select_overlay.cpp",
       "web_statusbar_click.cpp",
+      "web_util.cpp",
+      "web_context_menu_overlay.cpp",
     ]
     sources += [
       "ani/richtext_model_static.cpp",

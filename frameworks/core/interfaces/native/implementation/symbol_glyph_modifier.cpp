@@ -19,14 +19,21 @@
 #include "ui/base/utils/utils.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+#ifdef ARKUI_CAPI_UNITTEST
+const GENERATED_ArkUISymbolGlyphModifier* GetSymbolGlyphStaticModifier();
+#endif
 const GENERATED_ArkUISymbolGlyphModifier* GetSymbolGlyphModifier()
 {
     static const GENERATED_ArkUISymbolGlyphModifier* cachedModifier = nullptr;
 
     if (cachedModifier == nullptr) {
+#ifdef ARKUI_CAPI_UNITTEST
+        cachedModifier = GeneratedModifier::GetSymbolGlyphStaticModifier();
+#else
         auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("SymbolGlyph");
         CHECK_NULL_RETURN(module, nullptr);
         cachedModifier = reinterpret_cast<const GENERATED_ArkUISymbolGlyphModifier*>(module->GetStaticModifier());
+#endif
     }
 
     return cachedModifier;

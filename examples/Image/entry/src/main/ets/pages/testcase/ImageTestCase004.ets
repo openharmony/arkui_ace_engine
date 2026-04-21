@@ -18,7 +18,7 @@
  */
 @Entry
 @Component
-struct ImageExample {
+struct ImageExample004 {
   @State imageSource: ResourceStr | undefined = undefined;
   @State imageFits: ImageFit[] = [];
   @State imageFitIndex: number = 0;
@@ -91,7 +91,7 @@ struct ImageExample {
             console.log(`imageRepeatIndex: ${this.imageFitIndex}`);
           })
           // 加载png格式图片
-          Image($r('app.media.sky'))
+          Image($r('app.media.background'))
             .width(120)
             .height(140)
             .margin(17)
@@ -100,7 +100,7 @@ struct ImageExample {
             .objectFit(this.imageFits[this.imageFitIndex])
             .objectRepeat(this.imageRepeats[this.imageRepeatIndex])
           // 加载base64格式图片
-          Image($r('app.media.sky'))
+          Image($r('app.media.background'))
             .width(110)
             .height(110)
             .margin(15)

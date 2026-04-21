@@ -529,7 +529,7 @@ std::vector<KeyEvent> KeyEventRecognizer::GetKeyEvents(int32_t keyCode, int32_t 
     auto keyItems = getPressedKeys();
     event.keyIntention = keyItemsTransKeyIntention(keyItems);
     if ((keyCode != static_cast<int32_t>(KeyCode::KEY_UNKNOWN)) &&
-        (keyAction == static_cast<int32_t>(KeyAction::UP))) {
+        (keyAction == static_cast<int32_t>(KeyAction::UP) || (keyAction == static_cast<int32_t>(KeyAction::CANCEL)))) {
         removeReleasedKey(keyCode);
     }
     event.pressedCodes = getPressedKeys();
@@ -537,6 +537,13 @@ std::vector<KeyEvent> KeyEventRecognizer::GetKeyEvents(int32_t keyCode, int32_t 
     event.msg = msg;
 
     keyEvents.emplace_back(event);
+    RecognizeLongPressAndClickEvent(keyCode, keyAction, repeatTime, timeStamp, deviceId, keySource, keyEvents);
+    return keyEvents;
+}
+
+void KeyEventRecognizer::RecognizeLongPressAndClickEvent(int32_t keyCode, int32_t keyAction, int32_t repeatTime,
+    int64_t timeStamp, int64_t deviceId, int32_t keySource, std::vector<KeyEvent>& keyEvents)
+{
     auto result = keyMap_.try_emplace(keyCode, false);
     auto iter = result.first;
 
@@ -556,7 +563,9 @@ std::vector<KeyEvent> KeyEventRecognizer::GetKeyEvents(int32_t keyCode, int32_t 
                 deviceId, static_cast<SourceType>(keySource)));
         }
     }
-    return keyEvents;
+    if (keyAction == static_cast<int32_t>(KeyAction::CANCEL)) {
+        iter->second = false;
+    }
 }
 
 std::vector<KeyCode> KeyEventRecognizer::getPressedKeys() const

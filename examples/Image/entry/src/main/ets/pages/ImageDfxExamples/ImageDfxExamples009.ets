@@ -13,41 +13,49 @@
  * limitations under the License.
  */
 import { image } from '@kit.ImageKit'
+import { BusinessError } from '@kit.BasicServicesKit';
 
 @Entry
 @Component
 struct loadPixelmapDemo001 {
   // Image resource name (should exist in the app's media resources)
-  @State imageUrl: string = 'img_1'
+  @State imageUrl: string = 'img'
 
   // Current HDR brightness value (0 = no brightness boost, 1 = full boost)
   @State bright: number = 0
 
   aboutToAppear(): void {
     // Lifecycle hook: Called when the component is about to appear
+    try {
+      // Retrieve the media resource using the resource manager
+      let context = this.getUIContext().getHostContext();
+      if (!context) {
+        return;
+      }
+      let img = context.resourceManager.getMediaByNameSync(this.imageUrl)
 
-    // Retrieve the media resource using the resource manager
-    let img = getContext().resourceManager.getMediaByNameSync(this.imageUrl)
+      // Create an ImageSource instance from the media buffer
+      let imageSource = image.createImageSource(img.buffer.slice(0))
 
-    // Create an ImageSource instance from the media buffer
-    let imageSource = image.createImageSource(img.buffer.slice(0))
+      // Get image metadata to determine if it is HDR
+      let imageInfo = imageSource.getImageInfoSync()
 
-    // Get image metadata to determine if it is HDR
-    let imageInfo = imageSource.getImageInfoSync()
-
-    // Log whether the image supports HDR
-    if (imageInfo == undefined) {
-      console.error('Failed to obtain the image information')
-    } else {
-      console.info('imageInfo.isHdr: ' + imageInfo.isHdr)
+      // Log whether the image supports HDR
+      if (imageInfo == undefined) {
+        console.error('Failed to obtain the image information')
+      } else {
+        console.info('imageInfo.isHdr: ' + imageInfo.isHdr)
+      }
+      imageSource?.release()
+    } catch (error) {
+      console.error('aboutToAppear error: ' + (error as BusinessError).message)
     }
-    imageSource?.release()
   }
 
   build() {
     Column() {
       // Display the image and apply dynamic HDR brightness
-      Image($r('app.media.img_1'))
+      Image($r('app.media.startIcon'))
         .width('50%')           // Set image width to 50% of the screen
         .height('auto')         // Height adjusts automatically to maintain aspect ratio
         .margin({ top: 160 })   // Top margin spacing
@@ -56,10 +64,8 @@ struct loadPixelmapDemo001 {
       // Button to toggle brightness between 0 and 1
       Button('Toggle Brightness (0 <-> 1)')
         .onClick(() => {
-          // Animate the brightness transition
-          animateTo({}, () => {
-            this.bright = 1.0 - this.bright
-          })
+          // Toggle brightness without animation (animateTo is deprecated)
+          this.bright = 1.0 - this.bright
         })
     }
     .height('100%') // Ensure the column takes full screen height

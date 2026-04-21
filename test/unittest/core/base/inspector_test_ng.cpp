@@ -24,8 +24,8 @@
 
 #define protected public
 #define private public
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
@@ -41,9 +41,8 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "base/json/json_util.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/render/mock_rosen_render_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -52,11 +51,26 @@ namespace {
 std::string key = "key";
 const std::string TEXT_NODE_TYPE = "Text";
 const std::string TEST_TEXT = "SomeText";
+constexpr char INSPECTOR_MSG_NEED_FREE_NODES_TRUE[] =
+    "{\"method\":\"ArkUI.tree\", \"params\":{\"windowId\":\"10\", \"isNeedFreeNodes\":true}}";
+constexpr char INSPECTOR_MSG_NEED_FREE_NODES_FALSE[] =
+    "{\"method\":\"ArkUI.tree\", \"params\":{\"windowId\":\"10\", \"isNeedFreeNodes\":false}}";
+constexpr char INSPECTOR_MSG_NO_NEED_FREE_NODES_PARAM[] =
+    "{\"method\":\"ArkUI.tree\", \"params\":{\"windowId\":\"10\"}}";
+constexpr char INSPECTOR_MSG_INVALID[] = "invalid message";
+constexpr char INSPECTOR_MSG_INVALID_PARAMS[] =
+    "{\"method\":\"ArkUI.tree\", \"paramss\":{\"windowId\":\"10\", \"isNeedFreeNodes\":true}}";
 const char INSPECTOR_TYPE[] = "$type";
 const char INSPECTOR_ID[] = "$ID";
 const char INSPECTOR_DEBUGLINE[] = "$debugLine";
 const char INSPECTOR_ATTRS[] = "$attrs";
 const char INSPECTOR_CHILDREN[] = "$children";
+const char INSPECTOR_OTHER_CONTENTS[] = "other_contents";
+const char STAGE_NODE_TAG[] = "stage";
+const char PAGE_NODE_TAG[] = "page";
+const char CHILD_NODE_TAG[] = "child";
+const char FREE_NODE_TAG[] = "free_node";
+const char MAIN_TREE_NODE_TAG[] = "main_tree_node";
 
 class InspectorTestNode : public UINode {
     DECLARE_ACE_TYPE(InspectorTestNode, UINode);
@@ -629,7 +643,7 @@ HWTEST_F(InspectorTestNg, InspectorTestNg017, TestSize.Level1)
     rootNode->AddChild(frameNode);
     auto searchedNode = Inspector::GetFrameNodeByKey(inspectorId);
     EXPECT_EQ(frameNode, searchedNode);
-    
+
     // tc.steps:    add offScreencreenNode to off screencreen node with inspector id text1
     // tc.expected: expect the function GetFrameNodeByKey get the offScreencreenNode
     auto offScreencreenNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
@@ -638,12 +652,12 @@ HWTEST_F(InspectorTestNg, InspectorTestNg017, TestSize.Level1)
     Inspector::AddOffscreenNode(offScreencreenNode);
     searchedNode = Inspector::GetFrameNodeByKey(inspectorId);
     EXPECT_EQ(offScreencreenNode, searchedNode);
-    
+
     // tc.steps:    execute GetFrameNodeByKey when skipoffscreenNodes set true
     // tc.expected: expect the function GetFrameNodeByKey get the frameNode
     searchedNode = Inspector::GetFrameNodeByKey(inspectorId, false, true);
     EXPECT_EQ(frameNode, searchedNode);
-    
+
     // tc.steps:    execute GetFrameNodeByKey when remove offScreencreenNode
     // tc.expected: expect the function GetFrameNodeByKey get the frameNode
     Inspector::RemoveOffscreenNode(offScreencreenNode);
@@ -673,20 +687,20 @@ HWTEST_F(InspectorTestNg, InspectorTestNg018, TestSize.Level1)
     std::string searchedNodeStr = Inspector::GetInspectorNodeByKey(inspectorId);
     auto searchedNode = JsonUtil::ParseJsonString(searchedNodeStr);
     EXPECT_TRUE(searchedNode->IsValid());
-    
+
     std::string nodeType = searchedNode->GetString(INSPECTOR_TYPE);
     EXPECT_EQ(nodeType, TEXT_NODE_TYPE);
-    
+
     int32_t nodeId = searchedNode->GetInt(INSPECTOR_ID);
     EXPECT_EQ(textNodeId, nodeId);
-    
+
     std::string debugLine = searchedNode->GetString(INSPECTOR_DEBUGLINE);
     EXPECT_EQ(debugLine, "");
-    
+
     auto attrJson = searchedNode->GetObject(INSPECTOR_ATTRS);
     std::string accessibilityTextAttr = attrJson->GetString("accessibilityText");
     EXPECT_EQ(accessibilityTextAttr, "");
-    
+
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     accessibilityProperty->SetAccessibilityText(TEST_TEXT);
     searchedNodeStr = Inspector::GetInspectorNodeByKey(inspectorId);
@@ -764,6 +778,166 @@ HWTEST_F(InspectorTestNg, InspectorTestNg021, TestSize.Level1)
     result = Inspector::ParseWindowIdFromMsg(inspectorMsg);
     EXPECT_EQ(result.first, 10);
     EXPECT_EQ(result.second, 1);
+}
+
+/**
+ * @tc.name: InspectorTestNg029
+ * @tc.desc: Test the operation of ParseNeedFreeNodes with valid params
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorTestNg029, TestSize.Level1)
+{
+    std::string inspectorMsg = INSPECTOR_MSG_NEED_FREE_NODES_TRUE;
+    auto result = Inspector::ParseNeedFreeNodes(inspectorMsg);
+    EXPECT_EQ(result, true);
+
+    inspectorMsg = INSPECTOR_MSG_NEED_FREE_NODES_FALSE;
+    result = Inspector::ParseNeedFreeNodes(inspectorMsg);
+    EXPECT_EQ(result, false);
+
+    inspectorMsg = INSPECTOR_MSG_NO_NEED_FREE_NODES_PARAM;
+    result = Inspector::ParseNeedFreeNodes(inspectorMsg);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: InspectorTestNg030
+ * @tc.desc: Test the operation of ParseNeedFreeNodes with invalid message
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorTestNg030, TestSize.Level1)
+{
+    std::string inspectorMsg = "";
+    auto result = Inspector::ParseNeedFreeNodes(inspectorMsg);
+    EXPECT_EQ(result, false);
+
+    inspectorMsg = INSPECTOR_MSG_INVALID;
+    result = Inspector::ParseNeedFreeNodes(inspectorMsg);
+    EXPECT_EQ(result, false);
+
+    inspectorMsg = INSPECTOR_MSG_INVALID_PARAMS;
+    result = Inspector::ParseNeedFreeNodes(inspectorMsg);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: InspectorTestNg031
+ * @tc.desc: Test the operation of GetFreeNodesInspector in normal context
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorTestNg031, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto stageNode = FrameNode::CreateFrameNode(
+        "stage", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    context->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+    auto pageNode = FrameNode::CreateFrameNode(
+        "page", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    stageNode->AddChild(pageNode);
+    auto childNode = FrameNode::CreateFrameNode(
+        "child", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    pageNode->AddChild(childNode);
+
+    bool needThrow = false;
+    InspectorFilter filter;
+    filter.EnableFreeNodes();
+    auto expected = Inspector::GetInspector(true, filter, needThrow);
+    EXPECT_EQ(needThrow, false);
+
+    auto result = Inspector::GetFreeNodesInspector();
+    EXPECT_EQ(result, expected);
+    EXPECT_NE(result, "");
+    context->stageManager_ = nullptr;
+
+    auto jsonValue = JsonUtil::ParseJsonString(result);
+    EXPECT_NE(jsonValue, nullptr);
+    if (jsonValue != nullptr) {
+        auto typeValue = jsonValue->GetString("type");
+        EXPECT_EQ(typeValue, "root");
+    }
+}
+
+/**
+ * @tc.name: InspectorTestNg032
+ * @tc.desc: Test the operation of GetFreeNodesInspector when context is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorTestNg032, TestSize.Level1)
+{
+    RefPtr<MockPipelineContext> pipelineBak = MockPipelineContext::pipeline_;
+    MockPipelineContext::pipeline_ = nullptr;
+
+    auto result = Inspector::GetFreeNodesInspector();
+    MockPipelineContext::pipeline_ = pipelineBak;
+
+    auto jsonValue = JsonUtil::ParseJsonString(result);
+    EXPECT_NE(jsonValue, nullptr);
+    if (jsonValue != nullptr) {
+        auto typeValue = jsonValue->GetValue(INSPECTOR_TYPE);
+        ASSERT_NE(typeValue, nullptr);
+        EXPECT_STREQ(typeValue->GetString().c_str(), "root");
+    }
+}
+
+/**
+ * @tc.name: InspectorTestNg033
+ * @tc.desc: Test that main-tree nodes are filtered in free-nodes inspector.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorTestNg033, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    auto stageNode = FrameNode::CreateFrameNode(
+        STAGE_NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    context->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+    context->rootNode_ = stageNode;
+
+    auto pageNode = FrameNode::CreateFrameNode(
+        PAGE_NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    stageNode->AddChild(pageNode);
+    auto childNode = FrameNode::CreateFrameNode(
+        CHILD_NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    pageNode->AddChild(childNode);
+
+    auto freeNode = FrameNode::CreateFrameNode(
+        FREE_NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    freeNode->onMainTree_ = false;
+    auto freeNodeId = freeNode->GetId();
+
+    auto mainTreeNode = FrameNode::CreateFrameNode(
+        MAIN_TREE_NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    mainTreeNode->onMainTree_ = true;
+    auto mainTreeNodeId = mainTreeNode->GetId();
+
+    auto result = Inspector::GetFreeNodesInspector();
+    auto jsonValue = JsonUtil::ParseJsonString(result);
+    ASSERT_NE(jsonValue, nullptr);
+
+    auto otherContents = jsonValue->GetValue(INSPECTOR_OTHER_CONTENTS);
+    ASSERT_NE(otherContents, nullptr);
+    ASSERT_TRUE(otherContents->IsArray());
+
+    bool foundFreeNode = false;
+    bool foundMainTreeNode = false;
+    for (int32_t i = 0; i < otherContents->GetArraySize(); ++i) {
+        auto node = otherContents->GetArrayItem(i);
+        auto idValue = node->GetValue(INSPECTOR_ID);
+        ASSERT_NE(idValue, nullptr);
+        if (idValue->GetInt() == freeNodeId) {
+            foundFreeNode = true;
+        }
+        if (idValue->GetInt() == mainTreeNodeId) {
+            foundMainTreeNode = true;
+        }
+    }
+
+    EXPECT_TRUE(foundFreeNode);
+    EXPECT_FALSE(foundMainTreeNode);
+    context->stageManager_ = nullptr;
+    context->rootNode_ = nullptr;
 }
 
 
@@ -1528,7 +1702,7 @@ HWTEST_F(InspectorTestNg, InspectorFilterTest001, TestSize.Level1)
     auto filter = std::make_unique<InspectorFilter>();
     EXPECT_TRUE(filter->FilterEmpty());
 }
- 
+
 /**
 * @tc.name: InspectorFilterTest002
 * @tc.desc: Test the operation of FilterEmptyInitially
@@ -1574,7 +1748,7 @@ HWTEST_F(InspectorTestNg, InspectorFilterTest005, TestSize.Level1)
     auto filter = std::make_unique<InspectorFilter>();
     filter->AddFilterAttr("id");
     filter->AddFilterAttr("content");
-    
+
     EXPECT_TRUE(filter->CheckFixedAttr(FIXED_ATTR_ID));
     EXPECT_TRUE(filter->CheckFixedAttr(FIXED_ATTR_CONTENT));
     EXPECT_FALSE(filter->CheckFixedAttr(FIXED_ATTR_SRC));
@@ -1589,7 +1763,7 @@ HWTEST_F(InspectorTestNg, InspectorFilterTest006, TestSize.Level1)
 {
     auto filter = std::make_unique<InspectorFilter>();
     filter->AddFilterAttr("custom_attr");
-    
+
     EXPECT_TRUE(filter->CheckExtAttr("custom_attr"));
     EXPECT_FALSE(filter->CheckExtAttr("other_attr"));
 }
@@ -1603,7 +1777,7 @@ HWTEST_F(InspectorTestNg, InspectorFilterTest007, TestSize.Level1)
 {
     auto filter = std::make_unique<InspectorFilter>();
     filter->AddFilterAttr("id");
-    
+
     EXPECT_TRUE(filter->CheckFilterAttr(FIXED_ATTR_ID, nullptr));
     EXPECT_FALSE(filter->CheckFilterAttr(FIXED_ATTR_CONTENT, nullptr));
 }
@@ -1617,7 +1791,7 @@ HWTEST_F(InspectorTestNg, InspectorFilterTest008, TestSize.Level1)
 {
     auto filter = std::make_unique<InspectorFilter>();
     filter->AddFilterAttr("custom_attr");
-    
+
     EXPECT_TRUE(filter->CheckFilterAttr(FIXED_ATTR_ID, "custom_attr"));
     EXPECT_FALSE(filter->CheckFilterAttr(FIXED_ATTR_ID, "other_attr"));
 }
@@ -1632,7 +1806,7 @@ HWTEST_F(InspectorTestNg, InspectorFilterTest009, TestSize.Level1)
     auto filter = std::make_unique<InspectorFilter>();
     filter->AddFilterAttr("id");
     filter->AddFilterAttr("content");
-   
+
    EXPECT_TRUE(filter->IsFastFilter());
 }
 
@@ -1645,7 +1819,7 @@ HWTEST_F(InspectorTestNg, InspectorFilterTest010, TestSize.Level1)
 {
     auto filter = std::make_unique<InspectorFilter>();
     filter->AddFilterAttr("custom_attr");
-   
+
     EXPECT_FALSE(filter->IsFastFilter());
 }
 
@@ -1659,7 +1833,7 @@ HWTEST_F(InspectorTestNg, InspectorFilterTest011, TestSize.Level1)
     auto filter = std::make_unique<InspectorFilter>();
     std::string id = "test_id";
     filter->SetFilterID(id);
-   
+
     EXPECT_EQ(id, filter->GetFilterID());
 }
 
@@ -1714,7 +1888,7 @@ HWTEST_F(InspectorTestNg, InspectorTestNg027, TestSize.Level1)
         AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
     stageNode->AddChild(pageA);
     auto id3 = ElementRegister::GetInstance()->MakeUniqueId();
-    
+
     auto button = FrameNode::CreateFrameNode("button", id3, AceType::MakeRefPtr<Pattern>(), true);
     pageA->AddChild(button);
 
@@ -1726,7 +1900,7 @@ HWTEST_F(InspectorTestNg, InspectorTestNg027, TestSize.Level1)
     std::string tree = Inspector::GetInspector();
     auto jsonRoot  = JsonUtil::ParseJsonString(tree);
     ASSERT_NE(jsonRoot, nullptr);
-    
+
     auto children = jsonRoot->GetValue("$children");
     ASSERT_TRUE(children->IsArray());
     auto hasInternalIds = HasInternalIds(children);
@@ -1736,7 +1910,7 @@ HWTEST_F(InspectorTestNg, InspectorTestNg027, TestSize.Level1)
     tree = Inspector::GetInspector();
     jsonRoot  = JsonUtil::ParseJsonString(tree);
     ASSERT_NE(jsonRoot, nullptr);
-    
+
     children = jsonRoot->GetValue("$children");
     ASSERT_TRUE(children->IsArray());
     hasInternalIds = HasInternalIds(children);

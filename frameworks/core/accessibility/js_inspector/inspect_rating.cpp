@@ -14,6 +14,7 @@
  */
 
 #include "inspect_rating.h"
+#include "base/utils/system_properties.h"
 
 namespace OHOS::Ace::Framework {
 InspectRating::InspectRating(NodeId nodeId, const std::string& nodeName) : InspectNode(nodeId, nodeName) {

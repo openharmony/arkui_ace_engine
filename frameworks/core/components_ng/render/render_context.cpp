@@ -17,10 +17,15 @@
 
 #include "base/utils/multi_thread.h"
 #include "core/components/common/layout/layout_constants_string_utils.h"
+#include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/ui_material.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+
+RenderContext::RenderContext() = default;
+RenderContext::~RenderContext() = default;
+
 namespace {
 std::string RenderFitToString(RenderFit renderFit)
 {
@@ -62,25 +67,6 @@ void RenderContext::RequestNextFrame(bool isOffScreenNode) const
     FREE_NODE_CHECK(node, RequestNextFrame, isOffScreenNode);
     if (requestFrame_) {
         requestFrame_(isOffScreenNode);
-        CHECK_NULL_VOID(node);
-        auto eventHub = node->GetEventHub<NG::EventHub>();
-        if (node->GetInspectorId().has_value() || (eventHub && eventHub->HasNDKDrawCompletedCallback())) {
-            auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
-            CHECK_NULL_VOID(pipeline);
-            pipeline->SetNeedRenderNode(WeakPtr<FrameNode>(node));
-        }
-        {
-            auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
-            CHECK_NULL_VOID(pipeline);
-            pipeline->SetNeedRenderNodeByUniqueId(WeakPtr<FrameNode>(node));
-        }
-        if (node->IsObservedByDrawChildren()) {
-            auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
-            CHECK_NULL_VOID(pipeline);
-
-            auto frameNode = AceType::DynamicCast<FrameNode>(node->GetObserverParentForDrawChildren());
-            pipeline->SetNeedRenderForDrawChildrenNode(WeakPtr<FrameNode>(frameNode));
-        }
     }
 }
 
@@ -202,9 +188,10 @@ void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
 
 void RenderContext::ToJsonValuePart1(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    if (uiMaterial_) {
+    if (uiMaterial_ && uiMaterial_->material) {
+        auto& material = uiMaterial_->material;
         auto optJsonValue = JsonUtil::Create(true);
-        optJsonValue->Put("type", MaterialTypeToString(uiMaterial_->GetType()).c_str());
+        optJsonValue->Put("type", MaterialTypeToString(material->GetType()).c_str());
         auto materialJsonValue = JsonUtil::Create(true);
         materialJsonValue->Put("material", optJsonValue);
         json->PutExtAttr("systemMaterial", materialJsonValue, filter);
@@ -247,11 +234,116 @@ void RenderContext::FromJson(const std::unique_ptr<JsonValue>& json)
 
 void RenderContext::SetSystemMaterial(const RefPtr<UiMaterial>& material)
 {
-    uiMaterial_ = material;
+    if (!uiMaterial_) {
+        uiMaterial_ = std::make_shared<UiMaterialInfo>(UiMaterialInfo{.material = material});
+        return;
+    }
+    uiMaterial_->material = material;
 }
 
 RefPtr<UiMaterial> RenderContext::GetSystemMaterial() const
 {
-    return uiMaterial_;
+    return uiMaterial_ ? uiMaterial_->material : nullptr;
+}
+
+void RenderContext::SetImmersiveMaterialConfig(const std::optional<ImmersiveMaterialConfig>& config)
+{
+    if (!uiMaterial_) {
+        uiMaterial_ = std::make_shared<UiMaterialInfo>(UiMaterialInfo{.immersiveConfig = config});
+        return;
+    }
+    uiMaterial_->immersiveConfig = config;
+}
+
+std::optional<ImmersiveMaterialConfig> RenderContext::GetImmersiveMaterialConfig() const
+{
+    return uiMaterial_ ? uiMaterial_->immersiveConfig : std::nullopt;
+}
+
+std::optional<int32_t> RenderContext::GetTransparencyCallbackId() const
+{
+    return uiMaterial_ ? uiMaterial_->transparencyCallbackId : std::nullopt;
+}
+
+void RenderContext::SetTransparencyCallbackId(const std::optional<int32_t>& id)
+{
+    if (!uiMaterial_) {
+        uiMaterial_ = std::make_shared<UiMaterialInfo>(UiMaterialInfo{.transparencyCallbackId = id});
+        return;
+    }
+    uiMaterial_->transparencyCallbackId = id;
+}
+
+const std::unique_ptr<BorderImageProperty>& RenderContext::GetOrCreateBdImage()
+{
+    if (!propBdImage_) {
+        propBdImage_ = std::make_unique<BorderImageProperty>();
+    }
+    return propBdImage_;
+}
+
+const std::unique_ptr<BorderImageProperty>& RenderContext::GetBdImage() const
+{
+    return propBdImage_;
+}
+
+std::unique_ptr<BorderImageProperty> RenderContext::CloneBdImage() const
+{
+    if (propBdImage_) {
+        return std::make_unique<BorderImageProperty>(*propBdImage_);
+    }
+    return nullptr;
+}
+
+void RenderContext::ResetBdImage()
+{
+    propBdImage_.reset();
+}
+
+std::optional<RefPtr<BorderImage>> RenderContext::GetBorderImage() const
+{
+    auto& groupProperty = GetBdImage();
+    if (groupProperty) {
+        return groupProperty->GetBorderImage();
+    }
+    return std::nullopt;
+}
+
+bool RenderContext::HasBorderImage() const
+{
+    auto& groupProperty = GetBdImage();
+    if (groupProperty) {
+        return groupProperty->HasBorderImage();
+    }
+    return false;
+}
+
+RefPtr<BorderImage> RenderContext::GetBorderImageValue(const RefPtr<BorderImage>& defaultValue) const
+{
+    auto& groupProperty = GetBdImage();
+    if (groupProperty) {
+        if (groupProperty->HasBorderImage()) {
+            return groupProperty->GetBorderImageValue();
+        }
+    }
+    return defaultValue;
+}
+
+void RenderContext::ResetBorderImage()
+{
+    auto& groupProperty = GetBdImage();
+    if (groupProperty) {
+        groupProperty->ResetBorderImage();
+    }
+}
+
+void RenderContext::UpdateBorderImage(const RefPtr<BorderImage>& value)
+{
+    auto& groupProperty = GetOrCreateBdImage();
+    if (groupProperty->CheckBorderImage(value)) {
+        return;
+    }
+    groupProperty->UpdateBorderImage(value);
+    OnBorderImageUpdate(value);
 }
 } // namespace OHOS::Ace::NG

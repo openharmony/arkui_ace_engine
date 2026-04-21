@@ -35,11 +35,10 @@ public:
     ACE_DISALLOW_COPY_AND_MOVE(FormScopedRSTransaction);
 
 private:
-    std::shared_ptr<Rosen::RSTransaction> OpenSyncTransaction(int32_t scopeId);
+    void OpenSyncTransaction(int32_t scopeId);
     void CloseSyncTransaction();
 
     std::shared_ptr<Rosen::RSSyncTransactionHandler> transactionHandler_;
-    std::shared_ptr<Rosen::RSTransaction> rsTransaction_;
     bool needCloseSync_ = false;
     bool isMultiInstanceEnabled_ = false;
 };

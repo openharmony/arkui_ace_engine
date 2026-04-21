@@ -1,5 +1,24 @@
 {
   "src": [
-    "pages/Index"
+    "pages/Index",
+    "pages/test",
+    "pages/ImageVisibleTest",
+    "pages/RepeatAnimatedDrawableDescriptor",
+    "pages/ArkUIDrawableDescriptorTest",
+    "pages/AnimatedDrawableDescriptorTestCapi",
+    "pages/AnimatedDrawableDescriptorTestScroll",
+    "pages/AnimatedDrawableDescriptorTestControl",
+    "pages/AnimatedDrawableDescriptorTestDiffType",
+    "pages/AnimatedDrawableDescriptorTestLoader",
+    "pages/AnimatedDrawableDescriptorTestResource",
+    "pages/AnimatedDrawableDescriptorTestLayout",
+    "pages/AnimatedDrawableDescriptorTestFrameDurations",
+    "pages/DrawableDescriptorLoadTest",
+    "pages/DrawableDescriptorBoundaryTest",
+    "pages/AnimationOptionsAdvancedTest",
+    "pages/LayeredDrawableDescriptorGetMaskClipPath",
+    "pages/LayeredDrawableDescriptorSetBlendMode",
+    "pages/AnimationStopModeTest",
+    "pages/AnimatedDrawableDescriptorTestBase64"
   ]
 }

@@ -128,6 +128,8 @@ private:
 
     void GetFullTitleWidth(bool isCustom, float& occupiedWidth);
 
+    bool PrasePaddingEnd(const RefPtr<TitleBarNode>& titleBarNode, float& avoidWidth);
+
     Dimension maxPaddingStart_;
     Dimension maxPaddingEnd_;
     Dimension defaultPaddingStart_;

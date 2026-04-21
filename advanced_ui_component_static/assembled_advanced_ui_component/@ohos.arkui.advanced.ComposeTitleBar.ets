@@ -69,7 +69,7 @@ class Util {
   }
 }
 
-class ButtonGestureModifier implements GestureModifier {
+export class ButtonGestureModifier implements GestureModifier {
   public static readonly longPressTime: number = 500;
   public static readonly minFontSize: number = 1.75;
   public fontSize: number = 1;
@@ -82,7 +82,7 @@ class ButtonGestureModifier implements GestureModifier {
   applyGesture(event: UIGestureEvent): void {
     if (this.fontSize >= ButtonGestureModifier.minFontSize) {
       event.addGesture(
-        new LongPressGestureHandler({ repeat: false, duration: ButtonGestureModifier.longPressTime as int})
+        new LongPressGestureHandler({ repeat: false, duration: ButtonGestureModifier.longPressTime.toInt()})
           .onAction(() => {
             if (event) {
               this.controller?.open();

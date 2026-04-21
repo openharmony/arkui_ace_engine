@@ -32,6 +32,7 @@
 #include "base/utils/macros.h"
 #include "core/common/resource/resource_configuration.h"
 #include "core/common/window_animation_config.h"
+#include "core/components/theme/theme.h"
 #include "core/components_ng/export_texture_info/export_texture_info.h"
 #include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/property/layout_constraint.h"
@@ -78,6 +79,15 @@ enum class RootNodeType : int32_t {
     PAGE_ETS_TAG = 0,
     NAVDESTINATION_VIEW_ETS_TAG = 1,
     WINDOW_SCENE_ETS_TAG = 2
+};
+
+enum class TreeOperatingStatus : int32_t {
+    // Tree operating status for cross-language attribute setting
+    // Values must match ArkUITreeOperatingStatus and OH_ArkUI_CrossLanguageOperatingStatus
+    // UNDEFINED=0, ENABLE=1, DISABLE=2
+    UNDEFINED = 0,
+    ENABLE = 1,
+    DISABLE = 2
 };
 
 struct InteractionEventBindingInfo  {
@@ -173,6 +183,9 @@ public:
     {
         return isStaticNode_;
     }
+
+    void NeedSetInActiveAfterTransitionOut(bool needSetInActive);
+    void SetInActiveAfterTransitionOut();
 
     // Only for the currently loaded children, do not expand.
     void GetCurrentChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
@@ -309,6 +322,15 @@ public:
     PipelineContext* GetContextWithCheck();
 
     RefPtr<PipelineContext> GetContextRefPtr() const;
+
+    int32_t GetThemeScopeIdForTheme(bool useApiVersionIsolation) const;
+    RefPtr<Theme> GetThemeByType(ThemeType type, bool useApiVersionIsolation = false) const;
+
+    template<typename T>
+    RefPtr<T> GetTheme(bool useApiVersionIsolation = false) const
+    {
+        return AceType::DynamicCast<T>(GetThemeByType(T::TypeId(), useApiVersionIsolation));
+    }
 
     // When FrameNode creates a layout task, the corresponding LayoutWrapper tree is created, and UINode needs to update
     // the corresponding LayoutWrapper tree node at this time like add self wrapper to wrapper tree.
@@ -794,6 +816,10 @@ public:
 
     virtual void PaintDebugBoundaryTreeAll(bool flag);
     static void DFSAllChild(const RefPtr<UINode>& root, std::vector<RefPtr<UINode>>& res);
+    static RefPtr<UINode> BfsFindUINode(
+        const RefPtr<UINode>& root, const std::function<bool(const RefPtr<UINode>&)>& matcher);
+    RefPtr<FrameNode> GetFrameNodeByIdInSubTree(const std::string& id);
+    RefPtr<FrameNode> GetFrameNodeByUniqueIdInSubTree(int32_t uniqueId);
     static void GetBestBreakPoint(RefPtr<UINode>& breakPointChild, RefPtr<UINode>& breakPointParent);
 
     virtual bool HasVirtualNodeAccessibilityProperty()
@@ -1045,6 +1071,16 @@ public:
         isCrossLanguageAttributeSetting_ = isCrossLanguageAttributeSetting;
     }
 
+    TreeOperatingStatus GetTreeOperatingStatus() const
+    {
+        return treeOperatingStatus_;
+    }
+
+    void SetTreeOperatingStatus(TreeOperatingStatus treeOperatingStatus)
+    {
+        treeOperatingStatus_ = treeOperatingStatus;
+    }
+
     /**
      * flag used by Repeat virtual scroll
      * to mark a child UINode of RepeatVirtualScroll as either allowing or not allowing
@@ -1055,10 +1091,6 @@ public:
     bool IsAllowReusableV2Descendant() const;
 
     bool HasSkipNode();
-    virtual void OnDestroyingStateChange(bool isDestroying, bool cleanStatus)
-    {
-        isDestroyingState_ = isDestroying;
-    }
     virtual void SetDestroying(bool isDestroying = true, bool cleanStatus = true);
 
     /**
@@ -1229,7 +1261,8 @@ public:
     {
         return subtreeIgnoreCount_ != 0;
     }
-    void GetNodeListByComponentName(int32_t depth, std::vector<int32_t>& foundNodeId, const std::string& name);
+    void GetNodeListByComponentName(
+        int32_t depth, std::vector<int32_t>& foundNodeId, const std::string& name, bool onlyVisible);
 
     virtual void DumpSimplifyInfoWithParamConfig(std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig());
     void UpdateDrawLayoutChildObserver(bool isClearLayoutObserver, bool isClearDrawObserver);
@@ -1437,12 +1470,14 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
     bool isMoving_ = false;
     bool isCrossLanguageAttributeSetting_ = false;
+    TreeOperatingStatus treeOperatingStatus_ = TreeOperatingStatus::UNDEFINED;
     std::optional<bool> userFreeze_;
     WeakPtr<UINode> drawChildrenParent_;
     bool isObservedByDrawChildren_ = false;
     WeakPtr<UINode> layoutChildrenParent_;
     bool isObservedByLayoutChildren_ = false;
     static std::atomic_int32_t count_;
+    bool needSetInActiveAfterTransitionOut_ = false;
 
     bool isStaticNode_ = false;
     bool uiNodeGcEnable_ = false;

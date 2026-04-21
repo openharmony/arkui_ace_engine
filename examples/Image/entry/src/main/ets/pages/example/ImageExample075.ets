@@ -22,11 +22,11 @@ struct ImageExample075 {
   @State currentIndex: number = 0
   private swiperController: SwiperController = new SwiperController()
   private images: Resource[] = [
-    $r('app.media.png'),
-    $r('app.media.jpg'),
-    $r('app.media.gif'),
+    $r('app.media.startIcon'),
+    $r('app.media.startIcon'),
+    $r('app.media.startIcon'),
     $r('app.media.svg'),
-    $r('app.media.app_icon')
+    $r('app.media.startIcon')
   ]
 
   build() {

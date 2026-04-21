@@ -95,16 +95,16 @@ public:
 HWTEST_F(ProgressModifierTest, DISABLED_setProgressOptionsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_VALUE_DEFAULT_VALUE) << "Default value for attribute 'options.value'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_VALUE_DEFAULT_VALUE)) << "Default value for attribute 'options.value'";
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TOTAL_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TOTAL_DEFAULT_VALUE) << "Default value for attribute 'options.total'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_TOTAL_DEFAULT_VALUE)) << "Default value for attribute 'options.total'";
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TYPE_DEFAULT_VALUE) << "Default value for attribute 'options.type'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_TYPE_DEFAULT_VALUE)) << "Default value for attribute 'options.type'";
 }
 
 /*
@@ -132,7 +132,7 @@ HWTEST_F(ProgressModifierTest, setProgressOptionsTestOptionsValueValidValues, Te
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setProgressOptions, attribute: options.value";
     };
 
@@ -165,7 +165,7 @@ HWTEST_F(ProgressModifierTest, setProgressOptionsTestOptionsValueInvalidValues, 
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_VALUE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_VALUE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setProgressOptions, attribute: options.value";
     };
 
@@ -199,7 +199,7 @@ HWTEST_F(ProgressModifierTest, setProgressOptionsTestOptionsTotalValidValues, Te
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TOTAL_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setProgressOptions, attribute: options.total";
     };
 
@@ -232,7 +232,7 @@ HWTEST_F(ProgressModifierTest, setProgressOptionsTestOptionsTotalInvalidValues, 
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TOTAL_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_TOTAL_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_TOTAL_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setProgressOptions, attribute: options.total";
     };
 
@@ -268,7 +268,7 @@ HWTEST_F(ProgressModifierTest, setProgressOptionsTestOptionsTypeValidValues, Tes
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setProgressOptions, attribute: options.type";
     };
 
@@ -301,7 +301,7 @@ HWTEST_F(ProgressModifierTest, setProgressOptionsTestOptionsTypeInvalidValues, T
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_TYPE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_TYPE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setProgressOptions, attribute: options.type";
     };
 
@@ -320,10 +320,10 @@ HWTEST_F(ProgressModifierTest, setProgressOptionsTestOptionsTypeInvalidValues, T
 HWTEST_F(ProgressModifierTest, setValueTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_VALUE_DEFAULT_VALUE) << "Default value for attribute 'value'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_VALUE_DEFAULT_VALUE)) << "Default value for attribute 'value'";
 }
 
 /*
@@ -346,7 +346,8 @@ HWTEST_F(ProgressModifierTest, setValueTestValueValidValues, TestSize.Level1)
         modifier_->setValue(node_, &inputValueValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setValue, attribute: value";
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
+            "Input value is: " << input << ", method: setValue, attribute: value";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureNumberFloatNonNegValidValues) {
@@ -374,7 +375,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setValueTestValueInvalidValues, TestSize
         modifier_->setValue(node_, &inputValueValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_VALUE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_VALUE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setValue, attribute: value";
     };
 
@@ -393,10 +394,10 @@ HWTEST_F(ProgressModifierTest, DISABLED_setValueTestValueInvalidValues, TestSize
 HWTEST_F(ProgressModifierTest, DISABLED_setColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_COLOR_DEFAULT_VALUE) << "Default value for attribute 'color'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_COLOR_DEFAULT_VALUE)) << "Default value for attribute 'color'";
 }
 
 /*
@@ -420,7 +421,8 @@ HWTEST_F(ProgressModifierTest, DISABLED_setColorTestColorValidValues, TestSize.L
         modifier_->setColor(node_, &inputValueColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setColor, attribute: color";
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
+            "Input value is: " << input << ", method: setColor, attribute: color";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
@@ -467,7 +469,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setColorTestColorInvalidValues, TestSize
         modifier_->setColor(node_, &inputValueColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLOR_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_COLOR_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_COLOR_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setColor, attribute: color";
     };
 
@@ -511,9 +513,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleLinearStyleOptionsStrok
         WriteToUnion<Ark_LinearStyleOptions>(WriteTo(inputValueStyle)).strokeWidth = value;
         modifier_->setStyle(node_, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
+        auto resultStyle = GetAttrObject(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_STROKE_WIDTH_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setStyle, attribute: style.LinearStyleOptions.strokeWidth";
     };
 
@@ -552,9 +554,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleLinearStyleOptionsStrok
         WriteToUnion<Ark_LinearStyleOptions>(WriteTo(inputValueStyle)).strokeWidth = value;
         modifier_->setStyle(node_, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
+        auto resultStyle = GetAttrObject(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_STROKE_WIDTH_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_STROKE_WIDTH_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_STYLE_I_STROKE_WIDTH_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setStyle, attribute: style.LinearStyleOptions.strokeWidth";
     };
 
@@ -597,9 +599,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleLinearStyleOptionsStrok
         WriteToUnion<Ark_LinearStyleOptions>(WriteTo(inputValueStyle)).strokeRadius = value;
         modifier_->setStyle(node_, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
+        auto resultStyle = GetAttrObject(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_STROKE_RADIUS_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_STROKE_RADIUS_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_STYLE_I_STROKE_RADIUS_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setStyle, attribute: style.LinearStyleOptions.strokeRadius";
     };
 
@@ -635,9 +637,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleRingStyleOptionsStrokeW
         WriteToUnion<Ark_RingStyleOptions>(WriteTo(inputValueStyle)).strokeWidth = value;
         modifier_->setStyle(node_, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
+        auto resultStyle = GetAttrObject(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_STROKE_WIDTH_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setStyle, attribute: style.RingStyleOptions.strokeWidth";
     };
 
@@ -677,9 +679,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleRingStyleOptionsStrokeW
         WriteToUnion<Ark_RingStyleOptions>(WriteTo(inputValueStyle)).strokeWidth = value;
         modifier_->setStyle(node_, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
+        auto resultStyle = GetAttrObject(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_STROKE_WIDTH_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_STROKE_WIDTH_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_STYLE_I_STROKE_WIDTH_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setStyle, attribute: style.RingStyleOptions.strokeWidth";
     };
 
@@ -723,9 +725,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleRingStyleOptionsShadowV
         WriteToUnion<Ark_RingStyleOptions>(WriteTo(inputValueStyle)).shadow = value;
         modifier_->setStyle(node_, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
+        auto resultStyle = GetAttrObject(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_SHADOW_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setStyle, attribute: style.RingStyleOptions.shadow";
     };
 
@@ -759,9 +761,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleRingStyleOptionsShadowI
         WriteToUnion<Ark_RingStyleOptions>(WriteTo(inputValueStyle)).shadow = value;
         modifier_->setStyle(node_, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
+        auto resultStyle = GetAttrObject(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_SHADOW_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_SHADOW_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_STYLE_I_SHADOW_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setStyle, attribute: style.RingStyleOptions.shadow";
     };
 
@@ -794,9 +796,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleRingStyleOptionsStatusV
         WriteToUnion<Ark_RingStyleOptions>(WriteTo(inputValueStyle)).status = value;
         modifier_->setStyle(node_, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
+        auto resultStyle = GetAttrObject(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_STATUS_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setStyle, attribute: style.RingStyleOptions.status";
     };
 
@@ -830,9 +832,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleRingStyleOptionsStatusI
         WriteToUnion<Ark_RingStyleOptions>(WriteTo(inputValueStyle)).status = value;
         modifier_->setStyle(node_, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
+        auto resultStyle = GetAttrObject(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_STATUS_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_STATUS_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_STYLE_I_STATUS_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setStyle, attribute: style.RingStyleOptions.status";
     };
 
@@ -877,9 +879,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsBord
         WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(inputValueStyle)).borderColor = value;
         modifier_->setStyle(node_, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
+        auto resultStyle = GetAttrObject(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_BORDER_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.borderColor";
     };
 
@@ -933,9 +935,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsBord
         WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(inputValueStyle)).borderColor = value;
         modifier_->setStyle(node_, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
+        auto resultStyle = GetAttrObject(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_BORDER_COLOR_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_BORDER_COLOR_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_STYLE_I_BORDER_COLOR_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.borderColor";
     };
 
@@ -987,9 +989,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsBord
         WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(inputValueStyle)).borderWidth = value;
         modifier_->setStyle(node_, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
+        auto resultStyle = GetAttrObject(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_BORDER_WIDTH_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.borderWidth";
     };
 
@@ -1040,9 +1042,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsBord
         WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(inputValueStyle)).borderWidth = value;
         modifier_->setStyle(node_, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
+        auto resultStyle = GetAttrObject(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_BORDER_WIDTH_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_BORDER_WIDTH_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_STYLE_I_BORDER_WIDTH_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.borderWidth";
     };
 
@@ -1097,10 +1099,10 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
         WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(inputValueStyle)).font).size = value;
         modifier_->setStyle(node_, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
-        auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(resultStyle, ATTRIBUTE_STYLE_I_FONT_NAME);
+        auto resultStyle = GetAttrObject(jsonValue, ATTRIBUTE_STYLE_NAME);
+        auto resultFont = GetAttrObject(resultStyle, ATTRIBUTE_STYLE_I_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_STYLE_I_FONT_I_SIZE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.font.size";
     };
 
@@ -1151,10 +1153,10 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
         WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(inputValueStyle)).font).size = value;
         modifier_->setStyle(node_, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
-        auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(resultStyle, ATTRIBUTE_STYLE_I_FONT_NAME);
+        auto resultStyle = GetAttrObject(jsonValue, ATTRIBUTE_STYLE_NAME);
+        auto resultFont = GetAttrObject(resultStyle, ATTRIBUTE_STYLE_I_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_STYLE_I_FONT_I_SIZE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_FONT_I_SIZE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_STYLE_I_FONT_I_SIZE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.font.size";
     };
 
@@ -1209,10 +1211,10 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
         WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(inputValueStyle)).font).weight = value;
         modifier_->setStyle(node_, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
-        auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(resultStyle, ATTRIBUTE_STYLE_I_FONT_NAME);
+        auto resultStyle = GetAttrObject(jsonValue, ATTRIBUTE_STYLE_NAME);
+        auto resultFont = GetAttrObject(resultStyle, ATTRIBUTE_STYLE_I_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_STYLE_I_FONT_I_WEIGHT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.font.weight";
     };
 
@@ -1264,10 +1266,10 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
         WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(inputValueStyle)).font).weight = value;
         modifier_->setStyle(node_, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
-        auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(resultStyle, ATTRIBUTE_STYLE_I_FONT_NAME);
+        auto resultStyle = GetAttrObject(jsonValue, ATTRIBUTE_STYLE_NAME);
+        auto resultFont = GetAttrObject(resultStyle, ATTRIBUTE_STYLE_I_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_STYLE_I_FONT_I_WEIGHT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_FONT_I_WEIGHT_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_STYLE_I_FONT_I_WEIGHT_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.font.weight";
     };
 
@@ -1316,10 +1318,10 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
         WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(inputValueStyle)).font).family = value;
         modifier_->setStyle(node_, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
-        auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(resultStyle, ATTRIBUTE_STYLE_I_FONT_NAME);
+        auto resultStyle = GetAttrObject(jsonValue, ATTRIBUTE_STYLE_NAME);
+        auto resultFont = GetAttrObject(resultStyle, ATTRIBUTE_STYLE_I_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_STYLE_I_FONT_I_FAMILY_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.font.family";
     };
 
@@ -1365,10 +1367,10 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
         WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(inputValueStyle)).font).family = value;
         modifier_->setStyle(node_, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
-        auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(resultStyle, ATTRIBUTE_STYLE_I_FONT_NAME);
+        auto resultStyle = GetAttrObject(jsonValue, ATTRIBUTE_STYLE_NAME);
+        auto resultFont = GetAttrObject(resultStyle, ATTRIBUTE_STYLE_I_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_STYLE_I_FONT_I_FAMILY_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_FONT_I_FAMILY_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_STYLE_I_FONT_I_FAMILY_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.font.family";
     };
 
@@ -1415,10 +1417,10 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
         WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(inputValueStyle)).font).style = value;
         modifier_->setStyle(node_, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
-        auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(resultStyle, ATTRIBUTE_STYLE_I_FONT_NAME);
+        auto resultStyle = GetAttrObject(jsonValue, ATTRIBUTE_STYLE_NAME);
+        auto resultFont = GetAttrObject(resultStyle, ATTRIBUTE_STYLE_I_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_STYLE_I_FONT_I_STYLE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.font.style";
     };
 
@@ -1463,10 +1465,10 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
         WriteTo(WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(inputValueStyle)).font).style = value;
         modifier_->setStyle(node_, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
-        auto resultFont = GetAttrValue<std::unique_ptr<JsonValue>>(resultStyle, ATTRIBUTE_STYLE_I_FONT_NAME);
+        auto resultStyle = GetAttrObject(jsonValue, ATTRIBUTE_STYLE_NAME);
+        auto resultFont = GetAttrObject(resultStyle, ATTRIBUTE_STYLE_I_FONT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultFont, ATTRIBUTE_STYLE_I_FONT_I_STYLE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_FONT_I_STYLE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_STYLE_I_FONT_I_STYLE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.font.style";
     };
 
@@ -1511,9 +1513,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
         WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(inputValueStyle)).fontColor = value;
         modifier_->setStyle(node_, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
+        auto resultStyle = GetAttrObject(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_FONT_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.fontColor";
     };
 
@@ -1567,9 +1569,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsFont
         WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(inputValueStyle)).fontColor = value;
         modifier_->setStyle(node_, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
+        auto resultStyle = GetAttrObject(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_FONT_COLOR_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_FONT_COLOR_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_STYLE_I_FONT_COLOR_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setStyle, attribute: style.CapsuleStyleOptions.fontColor";
     };
 
@@ -1622,9 +1624,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsShow
         WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(inputValueStyle)).showDefaultPercentage = value;
         modifier_->setStyle(node_, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
+        auto resultStyle = GetAttrObject(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_SHOW_DEFAULT_PERCENTAGE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input
             << ", method: setStyle, attribute: style.CapsuleStyleOptions.showDefaultPercentage";
     };
@@ -1671,9 +1673,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleCapsuleStyleOptionsShow
         WriteToUnion<Ark_CapsuleStyleOptions>(WriteTo(inputValueStyle)).showDefaultPercentage = value;
         modifier_->setStyle(node_, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
+        auto resultStyle = GetAttrObject(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_SHOW_DEFAULT_PERCENTAGE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_SHOW_DEFAULT_PERCENTAGE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_STYLE_I_SHOW_DEFAULT_PERCENTAGE_DEFAULT_VALUE)) <<
             "Input value is: " << input
             << ", method: setStyle, attribute: style.CapsuleStyleOptions.showDefaultPercentage";
     };
@@ -1707,9 +1709,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleProgressStyleOptionsStr
         WriteToUnion<Ark_ProgressStyleOptions>(WriteTo(inputValueStyle)).strokeWidth = value;
         modifier_->setStyle(node_, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
+        auto resultStyle = GetAttrObject(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_STROKE_WIDTH_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setStyle, attribute: style.ProgressStyleOptions.strokeWidth";
     };
 
@@ -1749,9 +1751,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleProgressStyleOptionsStr
         WriteToUnion<Ark_ProgressStyleOptions>(WriteTo(inputValueStyle)).strokeWidth = value;
         modifier_->setStyle(node_, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
+        auto resultStyle = GetAttrObject(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_STROKE_WIDTH_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_STROKE_WIDTH_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_STYLE_I_STROKE_WIDTH_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setStyle, attribute: style.ProgressStyleOptions.strokeWidth";
     };
 
@@ -1795,9 +1797,9 @@ HWTEST_F(ProgressModifierTest, setStyleTestStyleProgressStyleOptionsScaleCountVa
         WriteToUnion<Ark_ProgressStyleOptions>(WriteTo(inputValueStyle)).scaleCount = value;
         modifier_->setStyle(node_, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
+        auto resultStyle = GetAttrObject(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_SCALE_COUNT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setStyle, attribute: style.ProgressStyleOptions.scaleCount";
     };
 
@@ -1831,9 +1833,9 @@ HWTEST_F(ProgressModifierTest, setStyleTestStyleProgressStyleOptionsScaleCountIn
         WriteToUnion<Ark_ProgressStyleOptions>(WriteTo(inputValueStyle)).scaleCount = value;
         modifier_->setStyle(node_, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
+        auto resultStyle = GetAttrObject(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_SCALE_COUNT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_SCALE_COUNT_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_STYLE_I_SCALE_COUNT_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setStyle, attribute: style.ProgressStyleOptions.scaleCount";
     };
 
@@ -1869,9 +1871,9 @@ HWTEST_F(ProgressModifierTest, DISABLED_setStyleTestStyleProgressStyleOptionsSca
         WriteToUnion<Ark_ProgressStyleOptions>(WriteTo(inputValueStyle)).scaleWidth = value;
         modifier_->setStyle(node_, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
+        auto resultStyle = GetAttrObject(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_SCALE_WIDTH_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setStyle, attribute: style.ProgressStyleOptions.scaleWidth";
     };
 
@@ -1911,9 +1913,9 @@ HWTEST_F(ProgressModifierTest, setStyleTestStyleProgressStyleOptionsScaleWidthIn
         WriteToUnion<Ark_ProgressStyleOptions>(WriteTo(inputValueStyle)).scaleWidth = value;
         modifier_->setStyle(node_, &inputValueStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STYLE_NAME);
+        auto resultStyle = GetAttrObject(jsonValue, ATTRIBUTE_STYLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStyle, ATTRIBUTE_STYLE_I_SCALE_WIDTH_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_I_SCALE_WIDTH_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_STYLE_I_SCALE_WIDTH_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setStyle, attribute: style.ProgressStyleOptions.scaleWidth";
     };
 
@@ -1940,10 +1942,11 @@ HWTEST_F(ProgressModifierTest, setStyleTestStyleProgressStyleOptionsScaleWidthIn
 HWTEST_F(ProgressModifierTest, setPrivacySensitiveTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PRIVACY_SENSITIVE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_PRIVACY_SENSITIVE_DEFAULT_VALUE) << "Default value for attribute 'privacySensitive'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_PRIVACY_SENSITIVE_DEFAULT_VALUE)) <<
+        "Default value for attribute 'privacySensitive'";
 }
 
 /*
@@ -1966,7 +1969,7 @@ HWTEST_F(ProgressModifierTest, DISABLED_setPrivacySensitiveTestPrivacySensitiveV
         modifier_->setPrivacySensitive(node_, &inputValuePrivacySensitive);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PRIVACY_SENSITIVE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setPrivacySensitive, attribute: privacySensitive";
     };
 
@@ -1995,7 +1998,7 @@ HWTEST_F(ProgressModifierTest, setPrivacySensitiveTestPrivacySensitiveInvalidVal
         modifier_->setPrivacySensitive(node_, &inputValuePrivacySensitive);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PRIVACY_SENSITIVE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_PRIVACY_SENSITIVE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_PRIVACY_SENSITIVE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setPrivacySensitive, attribute: privacySensitive";
     };
 

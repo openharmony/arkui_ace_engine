@@ -20,6 +20,7 @@ interface LayoutConstraint {
 
 interface CrossLanguageOptions {
   attributeSetting?: boolean;
+  treeOperating?: boolean;
 }
 
 interface InteractionEventBindingInfo {
@@ -31,6 +32,8 @@ interface InteractionEventBindingInfo {
 
 interface ArkComponentCreator {
   createSearchComponent?:(node: NodePtr, type: ModifierType) => ArkSearchComponent;
+  createMarqueeComponent?: (node: NodePtr, type: ModifierType) => ArkMarqueeComponent;
+  createSymbolGlyphComponent?: (node: NodePtr, type: ModifierType) => ArkSymbolGlyphComponent;
 }
 
 const __componentCreator__ : ArkComponentCreator = {};
@@ -70,8 +73,8 @@ errorMap_.set(ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN, "The parameter 'child'
 declare type UIStatesChangeHandler = (node: FrameNode, currentUIStates: number) => void;
 declare type UIStatesChangeHandlerCallback = (currentUIStates: number) => void;
 
-function getFrameNodeRawPtr(frameNode: FrameNode): number {
-  return getUINativeModule().frameNode.getFrameNodeRawPtr(frameNode.nodePtr_);
+function getFrameNodeRawPtr(nodePtr: NodePtr): number {
+  return getUINativeModule().frameNode.getFrameNodeRawPtr(nodePtr);
 }
 
 class FrameNode {
@@ -110,10 +113,12 @@ class FrameNode {
     this._childList = new Map();
     if (type === 'BuilderRootFrameNode') {
       this.renderNode_ = new RenderNode(type);
-      this.renderNode_.setFrameNode(new WeakRef(this));
-      return;
+      if (nativePointer === null || nativePointer === undefined) {
+        this.renderNode_.setFrameNode(new WeakRef(this));
+        return;
+      }
     }
-    if (type === 'ProxyFrameNode') {
+    if (type === 'ProxyFrameNode' || type === 'InternalBatchFrameNode') {
       return;
     }
     let result;
@@ -255,6 +260,67 @@ class FrameNode {
     FrameNode.disposeTreeRecursively(this);
   }
 
+  static createFrameNodes(uiContext: UIContext, count: number): FrameNode[] {
+    if (uiContext === undefined) {
+      throw new BusinessError(401, 'Node constructor error, param uiContext error');
+    }
+    if (!(typeof uiContext === 'object') || !("instanceId_" in uiContext)) {
+      throw new BusinessError(401, 'Node constructor error, param uiContext is invalid');
+    }
+    if (!Number.isInteger(count)) {
+      throw new BusinessError(401, "The parameter 'count' is invalid.");
+    }
+    if (count === 0 || count < 0) {
+      return [];
+    }
+    __JSScopeUtil__.syncInstanceId(uiContext.instanceId_);
+    const result = getUINativeModule().frameNode.createFrameNodes(count);
+    __JSScopeUtil__.restoreInstanceId();
+    if (!Array.isArray(result) || result.length === 0) {
+      return [];
+    }
+
+    const frameNodes: FrameNode[] = [];
+    result.forEach((item: any) => {
+      if (item === undefined || item === null || item.nodeId === undefined || item.nativeStrongRef === undefined) {
+        return;
+      }
+      const frameNode = new FrameNode(uiContext, 'InternalBatchFrameNode');
+      frameNode.type_ = undefined;
+      frameNode.rawPtr_ = item.rawPtr_;
+      frameNode._nativeRef = item.nativeStrongRef;
+      frameNode._nodeId = item.nodeId;
+      frameNode.nodePtr_ = frameNode._nativeRef?.getNativeHandle();
+      frameNode.renderNode_ = new RenderNode('CustomFrameNode');
+      frameNode.renderNode_?.setNodePtr(item.nativeStrongRef);
+      frameNode.renderNode_?.setFrameNode(new WeakRef(frameNode));
+      if (frameNode._nodeId !== -1) {
+        FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(frameNode._nodeId, new WeakRef(frameNode));
+        FrameNodeFinalizationRegisterProxy.register(frameNode, frameNode._nodeId);
+      }
+      frameNodes.push(frameNode);
+    });
+    return frameNodes;
+  }
+
+  getFrameNodeById(id: string): FrameNode | null {
+    const result = getUINativeModule().frameNode.getFrameNodeById(this.getNodePtr(), id);
+    const nodeId = result?.nodeId;
+    if (nodeId === undefined || nodeId === -1) {
+      return null;
+    }
+    return this.convertToFrameNode(result.nodePtr, result.nodeId);
+  }
+
+  getFrameNodeByUniqueId(id: number): FrameNode | null {
+    const result = getUINativeModule().frameNode.getFrameNodeByUniqueId(this.getNodePtr(), id);
+    const nodeId = result?.nodeId;
+    if (nodeId === undefined || nodeId === -1) {
+      return null;
+    }
+    return this.convertToFrameNode(result.nodePtr, result.nodeId);
+  }
+
   checkType(): void {
     if (!this.isModifiable()) {
       throw { message: 'The FrameNode is not modifiable.', code: 100021 };
@@ -298,7 +364,8 @@ class FrameNode {
     if (node === undefined || node === null) {
       return;
     }
-    if (node.getType() === 'ProxyFrameNode' || !this.checkValid(node)) {
+    if ((node.getType() === 'ProxyFrameNode' &&
+      (!getUINativeModule().frameNode.checkIfCanCrossLanguageTreeOperating(node.nodePtr_))) || !this.checkValid(node)) {
       throw { message: 'The FrameNode is not modifiable.', code: 100021 };
     }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
@@ -347,7 +414,8 @@ class FrameNode {
     if (child === undefined || child === null) {
       return;
     }
-    if (child.getType() === 'ProxyFrameNode' || !this.checkValid(child)) {
+    if ((child.getType() === 'ProxyFrameNode' &&
+      !(getUINativeModule().frameNode.checkIfCanCrossLanguageTreeOperating(child.nodePtr_))) || !this.checkValid(child)) {
       throw { message: 'The FrameNode is not modifiable.', code: 100021 };
     }
     let flag = 0;
@@ -620,7 +688,14 @@ class FrameNode {
     if (key === undefined) {
       return undefined;
     }
-    let value = __getCustomProperty__(this._nodeId, key);
+    let nodeId = this._nodeId;
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    const commonViewParentId = getUINativeModule().frameNode.getCommonViewParentId(this.getNodePtr());
+    __JSScopeUtil__.restoreInstanceId();
+    if (commonViewParentId !== -1 && commonViewParentId !== undefined) {
+      nodeId = commonViewParentId;
+    }
+    let value = __getCustomProperty__(nodeId, key);
     if (value === undefined) {
       const valueStr = getUINativeModule().frameNode.getCustomPropertyCapiByKey(this.getNodePtr(), key);
       value = valueStr === undefined ? undefined : valueStr;
@@ -662,7 +737,7 @@ class FrameNode {
       throw { message: 'The FrameNode cannot be set whether to support cross-language common attribute setting.', code: 100022 };
     }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    const result = getUINativeModule().frameNode.setCrossLanguageOptions(this.getNodePtr(), options.attributeSetting ?? false);
+    const result = getUINativeModule().frameNode.setCrossLanguageOptions(this.getNodePtr(), options.attributeSetting ?? false, options.treeOperating);
     __JSScopeUtil__.restoreInstanceId();
     if (result !== 0) {
       throw { message: 'The FrameNode cannot be set whether to support cross-language common attribute setting.', code: 100022 };
@@ -672,8 +747,9 @@ class FrameNode {
   getCrossLanguageOptions(): CrossLanguageOptions {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     const attributeSetting = getUINativeModule().frameNode.getCrossLanguageOptions(this.getNodePtr());
+    const treeOperating = getUINativeModule().frameNode.getCrossLanguageTreeOperating(this.getNodePtr());
     __JSScopeUtil__.restoreInstanceId();
-    return { attributeSetting: attributeSetting ?? false };
+    return { attributeSetting: attributeSetting ?? false, treeOperating: treeOperating ?? false };
   }
 
   checkIfCanCrossLanguageAttributeSetting(): boolean {
@@ -931,15 +1007,27 @@ class ImmutableFrameNode extends FrameNode {
     return;
   }
   appendChild(node: FrameNode): void {
+    if (getUINativeModule().frameNode.checkIfCanCrossLanguageTreeOperating(this.getNodePtr())) {
+      return super.appendChild(node);
+    }
     throw { message: 'The FrameNode is not modifiable.', code: 100021 };
   }
   insertChildAfter(child: FrameNode, sibling: FrameNode): void {
+    if (getUINativeModule().frameNode.checkIfCanCrossLanguageTreeOperating(this.getNodePtr())) {
+      return super.insertChildAfter(child, sibling);
+    }
     throw { message: 'The FrameNode is not modifiable.', code: 100021 };
   }
   removeChild(node: FrameNode): void {
+    if (getUINativeModule().frameNode.checkIfCanCrossLanguageTreeOperating(this.getNodePtr())) {
+      return super.removeChild(node);
+    }
     throw { message: 'The FrameNode is not modifiable.', code: 100021 };
   }
   clearChildren(): void {
+    if (getUINativeModule().frameNode.checkIfCanCrossLanguageTreeOperating(this.getNodePtr())) {
+      return super.clearChildren();
+    }
     throw { message: 'The FrameNode is not modifiable.', code: 100021 };
   }
   get commonAttribute(): ArkComponent {
@@ -960,8 +1048,8 @@ class ImmutableFrameNode extends FrameNode {
 }
 
 class BuilderRootFrameNode extends ImmutableFrameNode {
-  constructor(uiContext: UIContext, type: string = 'BuilderRootFrameNode') {
-    super(uiContext, type);
+  constructor(uiContext: UIContext, type: string = 'BuilderRootFrameNode', ptr?: number) {
+    super(uiContext, type, undefined, ptr);
   }
   getType(): string {
     return 'BuilderRootFrameNode';
@@ -1215,10 +1303,13 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['SymbolGlyph', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'SymbolGlyph', (node: NodePtr, type: ModifierType): ArkSymbolGlyphComponent => {
-        getUINativeModule().loadNativeModule('SymbolGlyph');
-        let module = globalThis.requireNapi('arkui.components.arksymbolglyph');
-        return module.createComponent(node, type);
-    })
+        if (__componentCreator__.createSymbolGlyphComponent === undefined) {
+          getUINativeModule().loadNativeModule('SymbolGlyph');
+          let module = globalThis.requireNapi('arkui.components.arksymbolglyph');
+          __componentCreator__.createSymbolGlyphComponent = module.createComponent;
+        }
+        return __componentCreator__.createSymbolGlyphComponent!(node, type);
+      })
     }],
     ['FlowItem', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'FlowItem', (node: NodePtr, type: ModifierType): ArkFlowItemComponent => {
@@ -1250,8 +1341,10 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
       })
     }],
     ['TextClock', (context: UIContext): FrameNode => {
-      return new TypedFrameNode(context, 'TextClock', (node: NodePtr, type: ModifierType): ArkTextClockComponent => {
-        return new ArkTextClockComponent(node, type);
+      return new TypedFrameNode(context, 'TextClock', (node: NodePtr, type: ModifierType): ArkQRCodeComponent => {
+        getUINativeModule().loadNativeModule('TextClock');
+        let module = globalThis.requireNapi('arkui.components.arktextclock');
+        return module.createComponent(node, type);
       })
     }],
     ['TextTimer', (context: UIContext): FrameNode => {
@@ -1261,9 +1354,12 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['Marquee', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Marquee', (node: NodePtr, type: ModifierType): ArkMarqueeComponent => {
-        getUINativeModule().loadNativeModule('Marquee');
-        let module = globalThis.requireNapi('arkui.components.arkmarquee');
-        return module.createComponent(node, type);
+        if (__componentCreator__.createMarqueeComponent === undefined) {
+          getUINativeModule().loadNativeModule('Marquee');
+          let module = globalThis.requireNapi('arkui.components.arkmarquee');
+          __componentCreator__.createMarqueeComponent = module.createComponent;
+        }
+        return __componentCreator__.createMarqueeComponent!(node, type);
       })
     }],
     ['TextArea', (context: UIContext): FrameNode => {
@@ -1658,13 +1754,13 @@ const __bindControllerCallbackMap__ = new Map<string, (node: FrameNode, controll
       getUINativeModule().scroll.setScrollInitialize(node.getNodePtr(), controller);
     }],
     ['List', (node: FrameNode, controller: Scroller) => {
-      getUINativeModule().list.setInitialScroller(node.getNodePtr(), controller);
+      getUINativeModule().list.setInitialScroller(node.getNodePtr(), controller, true);
     }],
     ['WaterFlow', (node: FrameNode, controller: Scroller) => {
       getUINativeModule().waterFlow.setWaterFlowScroller(node.getNodePtr(), controller);
     }],
     ['Grid', (node: FrameNode, controller: Scroller) => {
-      getUINativeModule().grid.setGridScroller(node.getNodePtr(), controller);
+      getUINativeModule().grid.setGridScroller(node.getNodePtr(), controller, true);
     }],
     ['Text', (node: FrameNode, controller: TextController) => {
       getUINativeModule().text.setTextController(node.getNodePtr(), { controller: controller });
@@ -1721,7 +1817,8 @@ class typeNode {
         throw { message: 'Parameter error. Possible causes: 1. The component type of the node is incorrect. 2. The node is null or undefined. 3. The controller is null or undefined.', code: 100023 };
       }
     }
-    if (!node.checkIfCanCrossLanguageAttributeSetting()) {
+    const needModifiableCheck = !['Scroll', 'List', 'Grid', 'WaterFlow'].includes(nodeType);
+    if (needModifiableCheck && !node.checkIfCanCrossLanguageAttributeSetting()) {
       throw { message: 'The FrameNode is not modifiable.', code: 100021 };
     }
     let callback = __bindControllerCallbackMap__.get(nodeType);

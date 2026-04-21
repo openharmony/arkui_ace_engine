@@ -16,15 +16,13 @@
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_model_ng.h"
 
 #include "base/utils/utils.h"
-#include "core/common/container.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
-#include "core/components_ng/syntax/syntax_item.h"
 
 namespace OHOS::Ace::NG {
 
 void RepeatVirtualScroll2ModelNG::Create(uint32_t arrLen, uint32_t totalCount,
-    const std::function<std::pair<uint32_t, uint32_t>(int32_t)>& onGetRid4Index,
+    const std::function<std::pair<uint32_t, uint32_t>(int32_t, bool)>& onGetRid4Index,
     const std::function<void(int32_t, int32_t)>& onRecycleItems,
     const std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)>& onActiveRange,
     const std::function<void(int32_t, int32_t)>& onMoveFromTo, const std::function<void()>& onPurge,
@@ -129,6 +127,44 @@ void RepeatVirtualScroll2ModelNG::SetCreateByTemplate(bool isCreatedByTemplate)
     if (childOfRepeat) {
         childOfRepeat->SetAllowReusableV2Descendant(!isCreatedByTemplate);
     }
+}
+
+bool RepeatVirtualScroll2ModelNG::IsAllowAnimation(int32_t repeatElmtId)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto repeatNode = AceType::DynamicCast<RepeatVirtualScroll2Node>(stack->GetMainElementNode());
+    if (repeatNode == nullptr) {
+        repeatNode = ElementRegister::GetInstance()->GetSpecificItemById<RepeatVirtualScroll2Node>(repeatElmtId);
+    }
+    CHECK_NULL_RETURN(repeatNode, false);
+    return repeatNode->IsAllowAnimation();
+}
+
+bool RepeatVirtualScroll2ModelNG::IsImplicitAnimationOpen()
+{
+    return AnimationUtils::IsImplicitAnimationOpen();
+}
+
+bool RepeatVirtualScroll2ModelNG::IsChildInAnimation(int32_t repeatElmtId, uint32_t rid)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto repeatNode = AceType::DynamicCast<RepeatVirtualScroll2Node>(stack->GetMainElementNode());
+    if (repeatNode == nullptr) {
+        repeatNode = ElementRegister::GetInstance()->GetSpecificItemById<RepeatVirtualScroll2Node>(repeatElmtId);
+    }
+    CHECK_NULL_RETURN(repeatNode, false);
+    return repeatNode->IsChildInAnimation(rid);
+}
+
+bool RepeatVirtualScroll2ModelNG::IsChildOnMainTree(int32_t repeatElmtId, uint32_t rid)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto repeatNode = AceType::DynamicCast<RepeatVirtualScroll2Node>(stack->GetMainElementNode());
+    if (repeatNode == nullptr) {
+        repeatNode = ElementRegister::GetInstance()->GetSpecificItemById<RepeatVirtualScroll2Node>(repeatElmtId);
+    }
+    CHECK_NULL_RETURN(repeatNode, false);
+    return repeatNode->IsChildOnMainTree(rid);
 }
 
 } // namespace OHOS::Ace::NG

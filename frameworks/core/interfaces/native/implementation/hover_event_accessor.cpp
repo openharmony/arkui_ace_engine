@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/hover_event_peer.h"
@@ -212,6 +210,7 @@ const GENERATED_ArkUIHoverEventAccessor* GetHoverEventAccessor()
         HoverEventAccessor::DestroyPeerImpl,
         HoverEventAccessor::ConstructImpl,
         HoverEventAccessor::GetFinalizerImpl,
+        HoverEventAccessor::StopPropagationImpl,
         HoverEventAccessor::GetXImpl,
         HoverEventAccessor::SetXImpl,
         HoverEventAccessor::GetYImpl,
@@ -224,7 +223,6 @@ const GENERATED_ArkUIHoverEventAccessor* GetHoverEventAccessor()
         HoverEventAccessor::SetDisplayXImpl,
         HoverEventAccessor::GetDisplayYImpl,
         HoverEventAccessor::SetDisplayYImpl,
-        HoverEventAccessor::StopPropagationImpl,
         HoverEventAccessor::GetGlobalDisplayXImpl,
         HoverEventAccessor::SetGlobalDisplayXImpl,
         HoverEventAccessor::GetGlobalDisplayYImpl,

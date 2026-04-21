@@ -19,6 +19,9 @@
 #include <string>
 #include <utility>
 
+#include "interfaces/inner_api/ace/constants.h"
+
+#include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "base/utils/resource_configuration.h"
@@ -26,7 +29,6 @@
 #include "core/common/js_message_dispatcher.h"
 #include "core/common/router_recover_record.h"
 #include "core/event/ace_event_handler.h"
-#include "interfaces/inner_api/ace/constants.h"
 
 using FrontendDialogCallback = std::function<void(const std::string& event, const std::string& param)>;
 
@@ -319,7 +321,7 @@ public:
 
     virtual void OnLayoutCompleted(const std::string& componentId) = 0;
     virtual void OnDrawCompleted(const std::string& componentId) = 0;
-    virtual void OnDrawChildrenCompleted(const std::string& componentId) = 0;
+    virtual void OnDrawChildrenCompleted(const std::string& componentId, const std::vector<int32_t>& childIds) = 0;
     virtual void OnLayoutChildrenCompleted(const std::string& componentId) {};
     virtual bool IsDrawChildrenCallbackFuncExist(const std::string& componentId)
     {

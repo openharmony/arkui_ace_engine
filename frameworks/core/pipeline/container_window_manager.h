@@ -57,6 +57,7 @@ using IsPcOrPadFreeMultiWindowModeCallback = std::function<bool(void)>;
 using GetHeightBreakpoint = std::function<HeightBreakpoint(void)>;
 using GetWidthBreakpoint = std::function<WidthBreakpoint(void)>;
 using ForceFullScreenChangeCallback = std::function<void(bool)>;
+using UpdateForceSplitRatioCallback = std::function<void(float)>;
 
 struct DecorButtonStyle {
     int32_t colorMode;
@@ -469,6 +470,17 @@ public:
         }
     }
 
+    void SetUpdateForceSplitRatioCallback(UpdateForceSplitRatioCallback&& callback)
+    {
+        updateForceSplitRatioCallback_ = std::move(callback);
+    }
+    void UpdateForceSplitRatio(float ratio)
+    {
+        if (updateForceSplitRatioCallback_) {
+            updateForceSplitRatioCallback_(ratio);
+        }
+    }
+
 private:
     int32_t appLabelId_ = 0;
     int32_t appIconId_ = 0;
@@ -503,6 +515,7 @@ private:
     GetHeightBreakpoint getHeightBreakpointCallback_;
     GetWidthBreakpoint getWidthBreakpointCallback_;
     ForceFullScreenChangeCallback forceFullScreenChangeCallback_;
+    UpdateForceSplitRatioCallback updateForceSplitRatioCallback_;
 };
 
 } // namespace OHOS::Ace

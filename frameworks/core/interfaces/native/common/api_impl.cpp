@@ -16,6 +16,8 @@
 #include <sstream>
 #include <vector>
 
+#include "api_impl.h"
+
 // SORTED_SECTION
 #include "base/error/error_code.h"
 #include "core/common/card_scope.h"
@@ -466,6 +468,20 @@ Ark_Int32 GetAlignment(Ark_NodeHandle node)
     auto* companion = GetCompanion(node);
     CHECK_NULL_RETURN(companion, 0);
     return companion->GetAlignmentValue();
+}
+
+void SetContentNode(void *node, const RefPtr<FrameNode>& value)
+{
+    auto* companion = GetCompanion(reinterpret_cast<Ark_NodeHandle>(node));
+    CHECK_NULL_VOID(companion);
+    companion->SetContentNode(value);
+}
+
+RefPtr<FrameNode> GetContentNode(void *node)
+{
+    auto* companion = GetCompanion(reinterpret_cast<Ark_NodeHandle>(node));
+    CHECK_NULL_RETURN(companion, nullptr);
+    return companion->GetContentNode();
 }
 
 void GetLayoutConstraint(Ark_NodeHandle node, Ark_Int32* value)

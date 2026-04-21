@@ -197,7 +197,7 @@ export class ImageGeneratorDialog extends ViewV2 {
     }
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Navigation.create(this.stack, { moduleName: "image_generator_dialog", pagePath: "", isUserCreateStack: true });
+            Navigation.create(this.stack, { moduleName: "__harDefaultModuleName__", pagePath: "", isUserCreateStack: true });
             Navigation.navDestination({ builder: this.pageMap.bind(this) });
             Navigation.hideNavBar(true);
             Navigation.height(this.height_);

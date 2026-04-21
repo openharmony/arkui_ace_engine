@@ -71,9 +71,7 @@ void ResetPopupItemFont(ArkUINodeHandle node)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    auto indexerTheme = frameNode->GetTheme<IndexerTheme>(true);
     CHECK_NULL_VOID(indexerTheme);
     auto fontSize = indexerTheme->GetPopupTextSize();
     IndexerModelNG::SetFontSize(frameNode, fontSize);
@@ -103,9 +101,7 @@ void ResetSelectedFont(ArkUINodeHandle node)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    auto indexerTheme = frameNode->GetTheme<IndexerTheme>(true);
     CHECK_NULL_VOID(indexerTheme);
     TextStyle selectTextStyle = indexerTheme->GetSelectTextStyle();
     std::optional<Dimension> fontSize = selectTextStyle.GetFontSize();
@@ -137,9 +133,7 @@ void ResetPopupFont(ArkUINodeHandle node)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    auto indexerTheme = frameNode->GetTheme<IndexerTheme>(true);
     CHECK_NULL_VOID(indexerTheme);
     TextStyle popupTextStyle = indexerTheme->GetPopupTextStyle();
     std::optional<Dimension> fontSize = popupTextStyle.GetFontSize();
@@ -171,9 +165,7 @@ void ResetAlphabetIndexerFont(ArkUINodeHandle node)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    auto indexerTheme = frameNode->GetTheme<IndexerTheme>(true);
     CHECK_NULL_VOID(indexerTheme);
     TextStyle defaultTextStyle = indexerTheme->GetDefaultTextStyle();
     std::optional<Dimension> fontSize = defaultTextStyle.GetFontSize();
@@ -198,9 +190,7 @@ void ResetPopupItemBackgroundColor(ArkUINodeHandle node)
     if (SystemProperties::ConfigChangePerform()) {
         IndexerModelNG::RemovePopupItemBackground(frameNode);
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    auto indexerTheme = frameNode->GetTheme<IndexerTheme>(true);
     CHECK_NULL_VOID(indexerTheme);
     Color color = indexerTheme->GetPopupUnclickedBgAreaColor();
     IndexerModelNG::SetPopupItemBackground(frameNode, color);
@@ -222,9 +212,7 @@ void ResetAlphabetIndexerColor(ArkUINodeHandle node)
     if (SystemProperties::ConfigChangePerform()) {
         IndexerModelNG::RemoveColor(frameNode);
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    auto indexerTheme = frameNode->GetTheme<IndexerTheme>(true);
     CHECK_NULL_VOID(indexerTheme);
     Color color = indexerTheme->GetDefaultTextColor();
     IndexerModelNG::SetColor(frameNode, color);
@@ -246,9 +234,7 @@ void ResetPopupColor(ArkUINodeHandle node)
     if (SystemProperties::ConfigChangePerform()) {
         IndexerModelNG::RemovePopupColor(frameNode);
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    auto indexerTheme = frameNode->GetTheme<IndexerTheme>(true);
     CHECK_NULL_VOID(indexerTheme);
     Color color = indexerTheme->GetPopupTextColor();
     IndexerModelNG::SetPopupColor(frameNode, color);
@@ -270,9 +256,7 @@ void ResetAlphabetIndexerSelectedColor(ArkUINodeHandle node)
     if (SystemProperties::ConfigChangePerform()) {
         IndexerModelNG::RemoveSelectedColor(frameNode);
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    auto indexerTheme = frameNode->GetTheme<IndexerTheme>(true);
     CHECK_NULL_VOID(indexerTheme);
     Color color = indexerTheme->GetSelectedTextColor();
     IndexerModelNG::SetSelectedColor(frameNode, color);
@@ -294,9 +278,7 @@ void ResetPopupBackground(ArkUINodeHandle node)
     if (SystemProperties::ConfigChangePerform()) {
         IndexerModelNG::RemovePopupBackground(frameNode);
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    auto indexerTheme = frameNode->GetTheme<IndexerTheme>(true);
     CHECK_NULL_VOID(indexerTheme);
     Color color = indexerTheme->GetPopupBackgroundColor();
     IndexerModelNG::SetPopupBackground(frameNode, color);
@@ -318,9 +300,7 @@ void ResetSelectedBackgroundColor(ArkUINodeHandle node)
     if (SystemProperties::ConfigChangePerform()) {
         IndexerModelNG::RemoveSelectedBackgroundColor(frameNode);
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    auto indexerTheme = frameNode->GetTheme<IndexerTheme>(true);
     CHECK_NULL_VOID(indexerTheme);
     Color color = indexerTheme->GetSelectedBackgroundColor();
     IndexerModelNG::SetSelectedBackgroundColor(frameNode, color);
@@ -342,9 +322,7 @@ void ResetPopupUnselectedColor(ArkUINodeHandle node)
     if (SystemProperties::ConfigChangePerform()) {
         IndexerModelNG::RemovePopupUnselectedColor(frameNode);
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    auto indexerTheme = frameNode->GetTheme<IndexerTheme>(true);
     CHECK_NULL_VOID(indexerTheme);
     Color color = indexerTheme->GetPopupUnselectedTextColor();
     IndexerModelNG::SetPopupUnselectedColor(frameNode, color);
@@ -421,9 +399,7 @@ void ResetPopupSelectedColor(ArkUINodeHandle node)
     if (SystemProperties::ConfigChangePerform()) {
         IndexerModelNG::RemovePopupSelectedColor(frameNode);
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    auto indexerTheme = frameNode->GetTheme<IndexerTheme>(true);
     CHECK_NULL_VOID(indexerTheme);
     Color color = indexerTheme->GetPopupSelectedTextColor();
     IndexerModelNG::SetPopupSelectedColor(frameNode, color);
@@ -516,6 +492,7 @@ void SetPopupBackgroundBlurStyle(ArkUINodeHandle node, ArkUI_Uint32 value)
         styleOption.blurStyle = static_cast<BlurStyle>(value);
     }
     IndexerModelNG::SetPopupBackgroundBlurStyle(frameNode, styleOption);
+    IndexerModelNG::SetPopupBackgroundBlurStyleByUser(frameNode, true);
 }
 void ResetPopupBackgroundBlurStyle(ArkUINodeHandle node)
 {
@@ -524,6 +501,7 @@ void ResetPopupBackgroundBlurStyle(ArkUINodeHandle node)
     BlurStyleOption styleOption;
     styleOption.blurStyle = BlurStyle::COMPONENT_REGULAR;
     IndexerModelNG::SetPopupBackgroundBlurStyle(frameNode, styleOption);
+    IndexerModelNG::SetPopupBackgroundBlurStyleByUser(frameNode, false);
 }
 void SetPopupTitleBackground(ArkUINodeHandle node, ArkUI_Uint32 color)
 {
@@ -539,9 +517,7 @@ void ResetPopupTitleBackground(ArkUINodeHandle node)
     if (SystemProperties::ConfigChangePerform()) {
         IndexerModelNG::RemovePopupTitleBackground(frameNode);
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    auto indexerTheme = frameNode->GetTheme<IndexerTheme>(true);
     CHECK_NULL_VOID(indexerTheme);
     Color color = indexerTheme->GetPopupTitleBackground();
     IndexerModelNG::SetPopupTitleBackground(frameNode, color);
@@ -806,7 +782,6 @@ void* GetAsyncEventHandlers(uint32_t kind)
         SetIndexerChangeEvent,
         SetIndexerCreatChangeEvent,
     };
-    kind = sizeof(alphabetIndexerNodeAsyncEventHandlers) / sizeof(ComponentAsyncEventHandler);
     if (kind >= sizeof(alphabetIndexerNodeAsyncEventHandlers) / sizeof(ComponentAsyncEventHandler)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
         return nullptr;

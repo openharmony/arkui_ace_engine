@@ -33,6 +33,17 @@ void RecognizerGroup::OnBeginGestureReferee(int32_t touchId, int32_t originalId,
     }
 }
 
+void RecognizerGroup::UpdateGestureReferee(const WeakPtr<GestureReferee>& gestureReferee)
+{
+    for (const auto& child : recognizers_) {
+        if (child) {
+            child->UpdateGestureReferee(gestureReferee);
+        }
+    }
+    referee_ = gestureReferee;
+}
+
+
 RefPtr<Gesture> RecognizerGroup::CreateGestureFromRecognizer() const
 {
     GestureMode mode = GetGestureMode();
@@ -57,6 +68,15 @@ void RecognizerGroup::OnFinishGestureReferee(int32_t touchId, bool isBlocked)
         }
     }
     MultiFingersRecognizer::OnFinishGestureReferee(touchId, isBlocked);
+}
+
+void RecognizerGroup::AttachFrameNode(const WeakPtr<NG::FrameNode>& node)
+{
+    TouchEventTarget::AttachFrameNode(node);
+    auto recognizers = GetGroupRecognizer();
+    for (const auto& recognizer : recognizers) {
+        recognizer->AttachFrameNode(node);
+    }
 }
 
 const std::list<RefPtr<NGGestureRecognizer>>& RecognizerGroup::GetGroupRecognizer()

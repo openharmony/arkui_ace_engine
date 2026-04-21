@@ -110,6 +110,7 @@ private:
     WeakPtr<Pattern> pattern_;
     WeakPtr<ScrollBar> scrollBar_;
     WeakPtr<ScrollEdgeEffect> edgeEffect_;
+    Color setCursorColor_;
     RefPtr<AnimatablePropertyColor> cursorColor_;
     RefPtr<AnimatablePropertyFloat> cursorWidth_;
     RefPtr<AnimatablePropertyColor> selectedColor_;

@@ -23,11 +23,12 @@
 #define private public
 #define protected public
 
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
@@ -79,6 +80,7 @@ namespace OHOS::Ace::NG {
 namespace {
 const InspectorFilter filter;
 constexpr Dimension TEST_SETTING_RADIUS = Dimension(10.0, DimensionUnit::VP);
+constexpr int32_t TEST_NON_DEFAULT_THEME_SCOPE_ID = 9;
 } // namespace
 class CalendarDialogPatternTestNg : public testing::Test {
 public:
@@ -96,7 +98,7 @@ void CalendarDialogPatternTestNg::SetUpTestCase()
     MockPipelineContext::SetUp();
     MockContainer::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+    auto getThemeByType = [](ThemeType type) -> RefPtr<Theme> {
         if (type == CalendarTheme::TypeId()) {
             return AceType::MakeRefPtr<CalendarTheme>();
         } else if (type == IconTheme::TypeId()) {
@@ -106,7 +108,13 @@ void CalendarDialogPatternTestNg::SetUpTestCase()
         } else {
             return AceType::MakeRefPtr<PickerTheme>();
         }
-    });
+    };
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Invoke(getThemeByType));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([getThemeByType](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            (void)themeScopeId;
+            return getThemeByType(type);
+        });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
@@ -1381,6 +1389,492 @@ HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogPatternTest028, TestSize.Lev
 }
 
 /**
+ * @tc.name: CalendarDialogPatternTest029
+ * @tc.desc: Test infinite loop protection with all dates disabled - KEY_DPAD_LEFT
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogPatternTest029, TestSize.Level1)
+{
+    CreateCalendarPicker();
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarPattern>(); });
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    CalendarSettingData settingData;
+    DialogProperties properties;
+    properties.alignment = DialogAlignment::BOTTOM;
+    properties.customStyle = false;
+    properties.offset = DimensionOffset(Offset(0, -1.0f));
+    auto selectedDate = PickerDate(2000, 1, 1);
+    settingData.selectedDate = selectedDate;
+    settingData.dayRadius = TEST_SETTING_RADIUS;
+
+    auto entryNode = AceType::DynamicCast<FrameNode>(element);
+    settingData.entryNode = entryNode;
+
+    PickerDate startDate(2000, 1, 1);
+    PickerDate endDate(2000, 1, 31);
+    settingData.startDate = startDate;
+    settingData.endDate = endDate;
+
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = CalendarDialogView::Show(properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+
+    auto contentWrapper = dialogNode->GetChildAtIndex(0);
+    ASSERT_NE(contentWrapper, nullptr);
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    ASSERT_NE(calendarDialogNode, nullptr);
+
+    auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+
+    dialogPattern->focusedDay_.day = 15;
+    dialogPattern->focusedDay_.month.year = 2000;
+    dialogPattern->focusedDay_.month.month = 1;
+
+    KeyEvent keyEventLeft(KeyCode::KEY_DPAD_LEFT, KeyAction::DOWN);
+    auto result = dialogPattern->HandleCalendarNodeKeyEvent(keyEventLeft);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: CalendarDialogPatternTest030
+ * @tc.desc: Test infinite loop protection with all dates disabled - KEY_DPAD_RIGHT
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogPatternTest030, TestSize.Level1)
+{
+    CreateCalendarPicker();
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarPattern>(); });
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    CalendarSettingData settingData;
+    DialogProperties properties;
+    properties.alignment = DialogAlignment::BOTTOM;
+    properties.customStyle = false;
+    properties.offset = DimensionOffset(Offset(0, -1.0f));
+    auto selectedDate = PickerDate(2000, 1, 1);
+    settingData.selectedDate = selectedDate;
+    settingData.dayRadius = TEST_SETTING_RADIUS;
+
+    auto entryNode = AceType::DynamicCast<FrameNode>(element);
+    settingData.entryNode = entryNode;
+
+    PickerDate startDate(2000, 1, 1);
+    PickerDate endDate(2000, 1, 31);
+    settingData.startDate = startDate;
+    settingData.endDate = endDate;
+
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = CalendarDialogView::Show(properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+
+    auto contentWrapper = dialogNode->GetChildAtIndex(0);
+    ASSERT_NE(contentWrapper, nullptr);
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    ASSERT_NE(calendarDialogNode, nullptr);
+
+    auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+
+    dialogPattern->focusedDay_.day = 15;
+    dialogPattern->focusedDay_.month.year = 2000;
+    dialogPattern->focusedDay_.month.month = 1;
+
+    KeyEvent keyEventRight(KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN);
+    auto result = dialogPattern->HandleCalendarNodeKeyEvent(keyEventRight);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: CalendarDialogPatternTest031
+ * @tc.desc: Test infinite loop protection with all dates disabled - KEY_DPAD_UP
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogPatternTest031, TestSize.Level1)
+{
+    CreateCalendarPicker();
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarPattern>(); });
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    CalendarSettingData settingData;
+    DialogProperties properties;
+    properties.alignment = DialogAlignment::BOTTOM;
+    properties.customStyle = false;
+    properties.offset = DimensionOffset(Offset(0, -1.0f));
+    auto selectedDate = PickerDate(2000, 1, 1);
+    settingData.selectedDate = selectedDate;
+    settingData.dayRadius = TEST_SETTING_RADIUS;
+
+    auto entryNode = AceType::DynamicCast<FrameNode>(element);
+    settingData.entryNode = entryNode;
+
+    PickerDate startDate(2000, 1, 1);
+    PickerDate endDate(2000, 1, 31);
+    settingData.startDate = startDate;
+    settingData.endDate = endDate;
+
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = CalendarDialogView::Show(properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+
+    auto contentWrapper = dialogNode->GetChildAtIndex(0);
+    ASSERT_NE(contentWrapper, nullptr);
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    ASSERT_NE(calendarDialogNode, nullptr);
+
+    auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+
+    dialogPattern->focusedDay_.day = 15;
+    dialogPattern->focusedDay_.month.year = 2000;
+    dialogPattern->focusedDay_.month.month = 1;
+
+    KeyEvent keyEventUp(KeyCode::KEY_DPAD_UP, KeyAction::DOWN);
+    auto result = dialogPattern->HandleCalendarNodeKeyEvent(keyEventUp);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: CalendarDialogPatternTest032
+ * @tc.desc: Test infinite loop protection with all dates disabled - KEY_DPAD_DOWN
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogPatternTest032, TestSize.Level1)
+{
+    CreateCalendarPicker();
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarPattern>(); });
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    CalendarSettingData settingData;
+    DialogProperties properties;
+    properties.alignment = DialogAlignment::BOTTOM;
+    properties.customStyle = false;
+    properties.offset = DimensionOffset(Offset(0, -1.0f));
+    auto selectedDate = PickerDate(2000, 1, 1);
+    settingData.selectedDate = selectedDate;
+    settingData.dayRadius = TEST_SETTING_RADIUS;
+
+    auto entryNode = AceType::DynamicCast<FrameNode>(element);
+    settingData.entryNode = entryNode;
+
+    PickerDate startDate(2000, 1, 1);
+    PickerDate endDate(2000, 1, 31);
+    settingData.startDate = startDate;
+    settingData.endDate = endDate;
+
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = CalendarDialogView::Show(properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+
+    auto contentWrapper = dialogNode->GetChildAtIndex(0);
+    ASSERT_NE(contentWrapper, nullptr);
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    ASSERT_NE(calendarDialogNode, nullptr);
+
+    auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+
+    dialogPattern->focusedDay_.day = 15;
+    dialogPattern->focusedDay_.month.year = 2000;
+    dialogPattern->focusedDay_.month.month = 1;
+
+    KeyEvent keyEventDown(KeyCode::KEY_DPAD_DOWN, KeyAction::DOWN);
+    auto result = dialogPattern->HandleCalendarNodeKeyEvent(keyEventDown);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: CalendarDialogPatternTest033
+ * @tc.desc: OnInjectionEvent Function Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogPatternTest033, TestSize.Level1)
+{
+    CreateCalendarPicker();
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
+    EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
+
+    auto contentWrapper = dialogNode->GetChildAtIndex(0);
+    ASSERT_NE(contentWrapper, nullptr);
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    ASSERT_NE(calendarDialogNode, nullptr);
+
+    auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+
+    std::string invalidCommand = "invalid json";
+    int32_t result = dialogPattern->OnInjectionEvent(invalidCommand);
+    EXPECT_NE(result, 0);
+
+    std::string validCommand = std::string("{\"cmd\":\"setCalendarPickerDialogTime\",") +
+        "\"params\":{\"year\":2026,\"month\":3,\"day\":19}}";
+    result = dialogPattern->OnInjectionEvent(validCommand);
+    EXPECT_EQ(result, RET_SUCCESS);
+
+    std::string missingParamsCommand = "{\"cmd\":\"setCalendarPickerDialogTime\"}";
+    result = dialogPattern->OnInjectionEvent(missingParamsCommand);
+    EXPECT_EQ(result, RET_FAILED);
+
+    std::string wrongCommand = "{\"cmd\":\"wrongCommand\",\"params\":{\"year\":2026,\"month\":3,\"day\":19}}";
+    result = dialogPattern->OnInjectionEvent(wrongCommand);
+    EXPECT_EQ(result, RET_FAILED);
+}
+
+/**
+ * @tc.name: CalendarDialogPatternTest034
+ * @tc.desc: Test ReportCommandResultEvent Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogPatternTest034, TestSize.Level1)
+{
+    CreateCalendarPicker();
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
+    EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
+
+    auto contentWrapper = dialogNode->GetChildAtIndex(0);
+    ASSERT_NE(contentWrapper, nullptr);
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    ASSERT_NE(calendarDialogNode, nullptr);
+
+    auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+
+    int32_t nodeId = 1;
+    bool result = dialogPattern->ReportCommandResultEvent(nodeId, "setCalendarPickerDialogTime", true, "");
+    EXPECT_TRUE(result);
+
+    result = dialogPattern->ReportCommandResultEvent(nodeId, "setCalendarPickerDialogTime", false, "invalidParams");
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: CalendarDialogPatternTest035
+ * @tc.desc: Test ReportChangeEvent Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogPatternTest035, TestSize.Level1)
+{
+    CreateCalendarPicker();
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
+    EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
+
+    auto contentWrapper = dialogNode->GetChildAtIndex(0);
+    ASSERT_NE(contentWrapper, nullptr);
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    ASSERT_NE(calendarDialogNode, nullptr);
+
+    auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+
+    bool result = dialogPattern->ReportChangeEvent("CalendarPickerDialog", "onChange", "2026-3-19");
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CalendarDialogPatternTest036
+ * @tc.desc: Test CheckCalendarParamDate Function with valid and missing params
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogPatternTest036, TestSize.Level1)
+{
+    CreateCalendarPicker();
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
+    EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
+
+    auto contentWrapper = dialogNode->GetChildAtIndex(0);
+    ASSERT_NE(contentWrapper, nullptr);
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    ASSERT_NE(calendarDialogNode, nullptr);
+
+    auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+
+    std::string validCommand = std::string("{\"cmd\":\"setCalendarPickerDialogTime\",") +
+        "\"params\":{\"year\":2026,\"month\":3,\"day\":19}}";
+    auto json = JsonUtil::ParseJsonString(validCommand);
+    ASSERT_NE(json, nullptr);
+    auto paramJson = json->GetValue("params");
+    ASSERT_NE(paramJson, nullptr);
+    bool checkResult = dialogPattern->CheckCalendarParamDate(paramJson, validCommand);
+    EXPECT_TRUE(checkResult);
+
+    std::string missingYearCommand = "{\"cmd\":\"setCalendarPickerDialogTime\",\"params\":{\"month\":3,\"day\":19}}";
+    json = JsonUtil::ParseJsonString(missingYearCommand);
+    paramJson = json->GetValue("params");
+    checkResult = dialogPattern->CheckCalendarParamDate(paramJson, missingYearCommand);
+    EXPECT_FALSE(checkResult);
+
+    std::string missingMonthCommand = std::string("{\"cmd\":\"setCalendarPickerDialogTime\",") +
+        "\"params\":{\"year\":2026,\"day\":19}}";
+    json = JsonUtil::ParseJsonString(missingMonthCommand);
+    paramJson = json->GetValue("params");
+    checkResult = dialogPattern->CheckCalendarParamDate(paramJson, missingMonthCommand);
+    EXPECT_FALSE(checkResult);
+
+    std::string missingDayCommand = std::string("{\"cmd\":\"setCalendarPickerDialogTime\",") +
+        "\"params\":{\"year\":2026,\"month\":3}}";
+    json = JsonUtil::ParseJsonString(missingDayCommand);
+    paramJson = json->GetValue("params");
+    checkResult = dialogPattern->CheckCalendarParamDate(paramJson, missingDayCommand);
+    EXPECT_FALSE(checkResult);
+}
+
+/**
+ * @tc.name: CalendarDialogPatternTest037
+ * @tc.desc: Test CheckCalendarParamDate Function with invalid date values
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogPatternTest037, TestSize.Level1)
+{
+    CreateCalendarPicker();
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
+    EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
+
+    auto contentWrapper = dialogNode->GetChildAtIndex(0);
+    ASSERT_NE(contentWrapper, nullptr);
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    ASSERT_NE(calendarDialogNode, nullptr);
+
+    auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+
+    std::string invalidYearCommand = std::string("{\"cmd\":\"setCalendarPickerDialogTime\",") +
+        "\"params\":{\"year\":0,\"month\":3,\"day\":19}}";
+    auto json = JsonUtil::ParseJsonString(invalidYearCommand);
+    auto paramJson = json->GetValue("params");
+    bool checkResult = dialogPattern->CheckCalendarParamDate(paramJson, invalidYearCommand);
+    EXPECT_FALSE(checkResult);
+
+    std::string invalidMonthCommand = std::string("{\"cmd\":\"setCalendarPickerDialogTime\",") +
+        "\"params\":{\"year\":2026,\"month\":13,\"day\":19}}";
+    json = JsonUtil::ParseJsonString(invalidMonthCommand);
+    paramJson = json->GetValue("params");
+    checkResult = dialogPattern->CheckCalendarParamDate(paramJson, invalidMonthCommand);
+    EXPECT_FALSE(checkResult);
+
+    std::string invalidDayCommand = std::string("{\"cmd\":\"setCalendarPickerDialogTime\",") +
+        "\"params\":{\"year\":2026,\"month\":3,\"day\":32}}";
+    json = JsonUtil::ParseJsonString(invalidDayCommand);
+    paramJson = json->GetValue("params");
+    checkResult = dialogPattern->CheckCalendarParamDate(paramJson, invalidDayCommand);
+    EXPECT_FALSE(checkResult);
+}
+
+/**
+ * @tc.name: CalendarDialogPatternTest038
+ * @tc.desc: Test CheckCalendarParamDate Function with invalid JSON
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogPatternTest038, TestSize.Level1)
+{
+    CreateCalendarPicker();
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
+    EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
+
+    auto contentWrapper = dialogNode->GetChildAtIndex(0);
+    ASSERT_NE(contentWrapper, nullptr);
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    ASSERT_NE(calendarDialogNode, nullptr);
+
+    auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+
+    std::string invalidJsonCommand = "invalid json";
+    auto json = JsonUtil::ParseJsonString(invalidJsonCommand);
+    ASSERT_NE(json, nullptr);
+    auto paramJson = json->GetValue("params");
+    bool checkResult = dialogPattern->CheckCalendarParamDate(paramJson, invalidJsonCommand);
+    EXPECT_FALSE(checkResult);
+
+    std::string missingParamsCommand = "{\"cmd\":\"setCalendarPickerDialogTime\"}";
+    json = JsonUtil::ParseJsonString(missingParamsCommand);
+    paramJson = json->GetValue("params");
+    checkResult = dialogPattern->CheckCalendarParamDate(paramJson, missingParamsCommand);
+    EXPECT_FALSE(checkResult);
+
+    std::string notNumberCommand = std::string("{\"cmd\":\"setCalendarPickerDialogTime\",") +
+        "\"params\":{\"year\":\"2026\",\"month\":\"3\",\"day\":\"19\"}}";
+    json = JsonUtil::ParseJsonString(notNumberCommand);
+    paramJson = json->GetValue("params");
+    checkResult = dialogPattern->CheckCalendarParamDate(paramJson, notNumberCommand);
+    EXPECT_FALSE(checkResult);
+}
+
+/**
+ * @tc.name: CalendarDialogPatternTest039
+ * @tc.desc: OnInjectionEvent injection month error Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogPatternTest039, TestSize.Level1)
+{
+    CreateCalendarPicker();
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
+    EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
+
+    auto contentWrapper = dialogNode->GetChildAtIndex(0);
+    ASSERT_NE(contentWrapper, nullptr);
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    ASSERT_NE(calendarDialogNode, nullptr);
+
+    auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+
+    std::string errorParamCommand = std::string("{\"cmd\":\"setCalendarPickerDialogTime\",") +
+        "\"params\":{\"year\":2026,\"month\":13,\"day\":19}}";
+    int32_t result = dialogPattern->OnInjectionEvent(errorParamCommand);
+    EXPECT_EQ(result, RET_FAILED);
+}
+
+/**
  * @tc.name: CalendarDialogViewTest0050
  * @tc.desc: Show Function Test
  * @tc.type: FUNC
@@ -1393,6 +1887,12 @@ HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogViewTest0050, TestSize.Level
     auto calendarTheme = AceType::MakeRefPtr<CalendarTheme>();
     ASSERT_NE(calendarTheme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(calendarTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([calendarTheme](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            (void)type;
+            (void)themeScopeId;
+            return calendarTheme;
+        });
     CalendarDialogView calendarDialogView;
     CalendarSettingData settingData;
     DialogProperties properties;
@@ -1419,5 +1919,91 @@ HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogViewTest0050, TestSize.Level
     calendarDialogView.OperationsToPattern(contentColumn, settingData, properties, buttonInfos);
     auto pattern = contentColumn->GetPattern<CalendarDialogPattern>();
     ASSERT_NE(pattern->entryNode_.Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: CalendarDialogPattern_OnColorConfig_ThemedScopeApi26_001
+ * @tc.desc: API 26+ with non-zero title theme scope skips title color refresh on configuration update.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogPattern_OnColorConfig_ThemedScopeApi26_001,
+    TestSize.Level1)
+{
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    const int32_t backupContainerApi = container->GetApiTargetVersion();
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    const int32_t backupPipelineApi = pipeline->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    pipeline->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+
+    auto calendarDialogNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<CalendarDialogPattern>());
+    ASSERT_NE(calendarDialogNode, nullptr);
+    auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+    auto textTitle = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textTitle, nullptr);
+    dialogPattern->SetTitleNode(textTitle);
+    textTitle->SetThemeScopeId(TEST_NON_DEFAULT_THEME_SCOPE_ID);
+
+    auto textLayoutProperty = textTitle->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    const Color lockedTitleColor = Color::FromRGB(0x2A, 0x3B, 0x4C);
+    textLayoutProperty->UpdateTextColor(lockedTitleColor);
+
+    g_isConfigChangePerform = false;
+    dialogPattern->OnColorConfigurationUpdate();
+
+    EXPECT_EQ(textLayoutProperty->GetTextColor().value_or(Color::TRANSPARENT), lockedTitleColor);
+
+    container->SetApiTargetVersion(backupContainerApi);
+    pipeline->SetApiTargetVersion(backupPipelineApi);
+}
+
+/**
+ * @tc.name: CalendarDialogPattern_OnColorConfig_DefaultScopeApi26_001
+ * @tc.desc: API 26+ with default title theme scope still applies calendar title font color on configuration update.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogPattern_OnColorConfig_DefaultScopeApi26_001,
+    TestSize.Level1)
+{
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    const int32_t backupContainerApi = container->GetApiTargetVersion();
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    const int32_t backupPipelineApi = pipeline->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    pipeline->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+
+    auto calendarDialogNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<CalendarDialogPattern>());
+    ASSERT_NE(calendarDialogNode, nullptr);
+    auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+    auto textTitle = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textTitle, nullptr);
+    dialogPattern->SetTitleNode(textTitle);
+    textTitle->SetThemeScopeId(0);
+
+    auto textLayoutProperty = textTitle->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto calTheme = textTitle->GetTheme<CalendarTheme>(true);
+    ASSERT_NE(calTheme, nullptr);
+    const Color expectedTitleColor = calTheme->GetCalendarTitleFontColor();
+    textLayoutProperty->UpdateTextColor(Color::FromRGB(0x5D, 0x6E, 0x7F));
+
+    g_isConfigChangePerform = false;
+    dialogPattern->OnColorConfigurationUpdate();
+
+    EXPECT_EQ(textLayoutProperty->GetTextColor().value_or(Color::TRANSPARENT), expectedTitleColor);
+
+    container->SetApiTargetVersion(backupContainerApi);
+    pipeline->SetApiTargetVersion(backupPipelineApi);
 }
 } // namespace OHOS::Ace::NG

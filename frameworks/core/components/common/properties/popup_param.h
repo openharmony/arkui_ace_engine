@@ -26,7 +26,8 @@
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/placement.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
+#include "core/components/common/properties/tips_anchor_type.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/pattern/select/select_model.h"
@@ -52,6 +53,11 @@ struct PopupGradientColor {
     RefPtr<ResourceObject> gradientColorObj;
 };
 
+enum class AnchoredColorMode {
+    FOLLOW_SYSTEM = 0,
+    FOLLOW_TARGET = 1
+};
+
 struct PopupLinearGradientProperties {
     GradientDirection popupDirection = GradientDirection::BOTTOM;
     std::vector<PopupGradientColor> gradientColors;
@@ -60,11 +66,6 @@ struct PopupLinearGradientProperties {
 enum class PopupKeyboardAvoidMode {
     DEFAULT,
     NONE
-};
-
-enum class TipsAnchorType {
-    TARGET = 0, // anchor to target node
-    CURSOR = 1  // anchor to cursor position
 };
 
 using StateChangeFunc = std::function<void(const std::string&)>;
@@ -563,6 +564,77 @@ public:
         return hasTransition_;
     }
 
+    // Lifecycle callbacks
+    using LifecycleCallback = std::function<void()>;
+
+    void SetOnWillAppear(LifecycleCallback&& callback)
+    {
+        onWillAppear_ = std::move(callback);
+    }
+
+    const LifecycleCallback& GetOnWillAppear() const
+    {
+        return onWillAppear_;
+    }
+
+    void SetOnDidAppear(LifecycleCallback&& callback)
+    {
+        onDidAppear_ = std::move(callback);
+    }
+
+    const LifecycleCallback& GetOnDidAppear() const
+    {
+        return onDidAppear_;
+    }
+
+    void SetOnWillDisappear(LifecycleCallback&& callback)
+    {
+        onWillDisappear_ = std::move(callback);
+    }
+
+    const LifecycleCallback& GetOnWillDisappear() const
+    {
+        return onWillDisappear_;
+    }
+
+    void SetOnDidDisappear(LifecycleCallback&& callback)
+    {
+        onDidDisappear_ = std::move(callback);
+    }
+
+    const LifecycleCallback& GetOnDidDisappear() const
+    {
+        return onDidDisappear_;
+    }
+
+    void FireOnWillAppear()
+    {
+        if (onWillAppear_) {
+            onWillAppear_();
+        }
+    }
+
+    void FireOnDidAppear()
+    {
+        if (onDidAppear_) {
+            onDidAppear_();
+        }
+    }
+
+    void FireOnWillDisappear()
+    {
+        if (onWillDisappear_) {
+            onWillDisappear_();
+        }
+    }
+
+    void FireOnDidDisappear()
+    {
+        if (onDidDisappear_) {
+            onDidDisappear_();
+        }
+    }
+
     void SetTransitionEffects(const RefPtr<NG::ChainedTransitionEffect>& transitionEffects)
     {
         transitionEffects_ = transitionEffects;
@@ -803,6 +875,26 @@ public:
         return isWithTheme_;
     }
 
+    void SetColorMode(bool colorMode)
+    {
+        isColorModeFollowTarget_ = colorMode;
+    }
+
+    bool GetColorMode()
+    {
+        return isColorModeFollowTarget_;
+    }
+
+    void SetSystemMaterial(RefPtr<UiMaterial> systemMaterial)
+    {
+        systemMaterial_ = systemMaterial;
+    }
+
+    RefPtr<UiMaterial> GetSystemMaterial()
+    {
+        return systemMaterial_;
+    }
+
 private:
     bool isShow_ = true;
     bool hasAction_ = false;
@@ -823,6 +915,7 @@ private:
     bool followTransformOfTarget_ = false;
     bool isTips_ = false;
     bool isWithTheme_ = false;
+    bool isColorModeFollowTarget_ = true;
     bool isShadowStyle_ = false;
     TipsAnchorType anchorType_ = TipsAnchorType::TARGET;
     int32_t appearingTime_ = 700;
@@ -855,11 +948,16 @@ private:
     std::optional<Dimension> arrowHeight_;
     std::optional<Dimension> radius_;
     std::optional<Shadow> shadow_;
+    RefPtr<UiMaterial> systemMaterial_ = nullptr;
     // Used in NG mode
     StateChangeFunc onStateChange_;
     ButtonProperties primaryButtonProperties_;   // first button.
     ButtonProperties secondaryButtonProperties_; // second button.
     OnWillDismiss onWillDismiss_;
+    LifecycleCallback onWillAppear_;
+    LifecycleCallback onDidAppear_;
+    LifecycleCallback onWillDisappear_;
+    LifecycleCallback onDidDisappear_;
     bool hasTransition_ = false;
     RefPtr<NG::ChainedTransitionEffect> transitionEffects_ = nullptr;
     StateChangeFunc doubleBindCallback_;

@@ -20,4 +20,9 @@ uint32_t IPCSkeleton::GetCallingTokenID()
 {
     return 0;
 }
+
+uint32_t IPCSkeleton::GetCallingRealPid()
+{
+    return 0;
+}
 }

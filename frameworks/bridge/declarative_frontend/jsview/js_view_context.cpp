@@ -34,6 +34,7 @@
 #include "bridge/declarative_frontend/jsview/models/view_context_model_impl.h"
 #include "core/animation/animation_pub.h"
 #include "core/common/ace_engine.h"
+#include "core/image/image_cache.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components_ng/base/view_stack_model.h"
@@ -77,6 +78,7 @@ namespace OHOS::Ace::Framework {
 namespace {
 
 constexpr uint32_t DEFAULT_DURATION = 1000; // ms
+constexpr uint32_t FORM_MAX_DURATION = 2000; // ms
 constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 constexpr int32_t INVALID_ID = -1;
 constexpr int32_t INDEX_ONE = 1;
@@ -185,10 +187,14 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, const An
         if (context->GetInstanceId() == triggerId) {
             return;
         }
-        context->PrepareCloseImplicitAnimation();
         auto tokenIn = AnimationUtils::GetRSUIContextToken(context);
-        if (multiInstanceEnabled && (tokenOut != tokenIn)) {
-            AnimationUtils::CloseImplicitAnimation(context);
+        if (multiInstanceEnabled) {
+            if (tokenOut != tokenIn) {
+                context->PrepareCloseImplicitAnimation();
+                AnimationUtils::CloseImplicitAnimation(context);
+            }
+        } else {
+            context->PrepareCloseImplicitAnimation();
         }
     });
     pipelineContext->CloseImplicitAnimation();
@@ -249,10 +255,14 @@ void StartAnimationForStageMode(const RefPtr<PipelineBase>& pipelineContext, con
         if (context->GetInstanceId() == triggerId) {
             return;
         }
-        context->PrepareOpenImplicitAnimation();
         auto tokenIn = AnimationUtils::GetRSUIContextToken(context);
-        if (multiInstanceEnabled && (tokenOut != tokenIn)) {
-            AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), nullptr, context);
+        if (multiInstanceEnabled) {
+            if (tokenOut != tokenIn) {
+                context->PrepareOpenImplicitAnimation();
+                AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), nullptr, context);
+            }
+        } else {
+            context->PrepareOpenImplicitAnimation();
         }
     });
     pipelineContext->PrepareOpenImplicitAnimation();
@@ -313,8 +323,11 @@ int64_t GetFormAnimationTimeInterval(const RefPtr<PipelineBase>& pipelineContext
 bool CheckIfSetFormAnimationDuration(const RefPtr<PipelineBase>& pipelineContext, const AnimationOption& option)
 {
     CHECK_NULL_RETURN(pipelineContext, false);
+    auto formMaxDuration = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)
+                               ? FORM_MAX_DURATION
+                               : DEFAULT_DURATION;
     return pipelineContext->IsFormAnimationFinishCallback() && pipelineContext->IsFormRenderExceptDynamicComponent() &&
-        option.GetDuration() > (DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContext));
+        option.GetDuration() > (formMaxDuration - GetFormAnimationTimeInterval(pipelineContext));
 }
 
 std::function<float(float)> ParseCallBackFunction(
@@ -559,8 +572,11 @@ const AnimationOption JSViewContext::CreateAnimation(
 
     // limit animation for ArkTS Form
     if (isForm) {
-        if (duration > static_cast<int32_t>(DEFAULT_DURATION)) {
-            duration = static_cast<int32_t>(DEFAULT_DURATION);
+        auto formMaxDuration = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)
+                                   ? FORM_MAX_DURATION
+                                   : DEFAULT_DURATION;
+        if (duration > static_cast<int32_t>(formMaxDuration)) {
+            duration = static_cast<int32_t>(formMaxDuration);
         }
         if (delay != 0) {
             delay = 0;
@@ -615,11 +631,15 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
     CHECK_NULL_VOID(container);
     auto pipelineContextBase = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContextBase);
+    auto formMaxDuration = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)
+                               ? FORM_MAX_DURATION
+                               : DEFAULT_DURATION;
     if (pipelineContextBase->IsFormAnimationFinishCallback() &&
         pipelineContextBase->IsFormRenderExceptDynamicComponent() &&
-        GetFormAnimationTimeInterval(pipelineContextBase) > DEFAULT_DURATION) {
-        TAG_LOGW(
-            AceLogTag::ACE_FORM, "[Form animation] Form finish callback triggered animation cannot exceed 1000ms.");
+        GetFormAnimationTimeInterval(pipelineContextBase) > formMaxDuration) {
+        TAG_LOGW(AceLogTag::ACE_FORM,
+            "[Form animation] Form finish callback triggered animation cannot exceed %{public}u ms.",
+            formMaxDuration);
         return;
     }
     if (info[0]->IsNull() || !info[0]->IsObject()) {
@@ -649,10 +669,10 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
         CreateAnimation(info.GetExecutionContext(), obj, pipelineContextBase->IsFormRenderExceptDynamicComponent());
     if (pipelineContextBase->IsFormAnimationFinishCallback() &&
         pipelineContextBase->IsFormRenderExceptDynamicComponent() &&
-        option.GetDuration() > (DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContextBase))) {
-        option.SetDuration(DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContextBase));
+        option.GetDuration() > (formMaxDuration - GetFormAnimationTimeInterval(pipelineContextBase))) {
+        option.SetDuration(formMaxDuration - GetFormAnimationTimeInterval(pipelineContextBase));
         TAG_LOGW(AceLogTag::ACE_FORM, "[Form animation]  Form animation SetDuration: %{public}lld ms",
-            static_cast<long long>(DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContextBase)));
+            static_cast<long long>(formMaxDuration - GetFormAnimationTimeInterval(pipelineContextBase)));
     }
 
     option.SetOnFinishEvent(onFinishEvent);
@@ -739,10 +759,14 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
     }
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
+    auto formMaxDuration = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)
+                               ? FORM_MAX_DURATION
+                               : DEFAULT_DURATION;
     if (pipelineContext->IsFormAnimationFinishCallback() && pipelineContext->IsFormRenderExceptDynamicComponent() &&
-        GetFormAnimationTimeInterval(pipelineContext) > DEFAULT_DURATION) {
-        TAG_LOGW(
-            AceLogTag::ACE_FORM, "[Form animation] Form finish callback triggered animation cannot exceed 1000ms.");
+        GetFormAnimationTimeInterval(pipelineContext) > formMaxDuration) {
+        TAG_LOGW(AceLogTag::ACE_FORM,
+            "[Form animation] Form finish callback triggered animation cannot exceed %{public}u ms.",
+            formMaxDuration);
         return;
     }
 
@@ -798,9 +822,9 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
                     << ",curve:" << (option.GetCurve() ? option.GetCurve()->ToString().c_str() : "");
     AceAsyncTraceBegin(0, traceStreamPtr->str().c_str(), true);
     if (CheckIfSetFormAnimationDuration(pipelineContext, option)) {
-        option.SetDuration(DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContext));
+        option.SetDuration(formMaxDuration - GetFormAnimationTimeInterval(pipelineContext));
         TAG_LOGW(AceLogTag::ACE_FORM, "[Form animation]  Form animation SetDuration: %{public}lld ms",
-            static_cast<long long>(DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContext)));
+            static_cast<long long>(formMaxDuration - GetFormAnimationTimeInterval(pipelineContext)));
     }
     if (SystemProperties::GetRosenBackendEnabled()) {
         bool usingSharedRuntime = container->GetSettings().usingSharedRuntime;
@@ -1058,7 +1082,7 @@ int32_t ParseTargetInfo(const JSRef<JSObject>& obj, int32_t& targetId)
                 targetId = targetComponentIdNode->GetId();
                 return ERROR_CODE_NO_ERROR;
             }
-            auto targetNode = NG::FrameNode::FindChildByName(targetComponentIdNode, targetIdString);
+            auto targetNode = NG::FrameNode::FindChildByNameUINode(targetComponentIdNode, targetIdString);
             CHECK_NULL_RETURN(targetNode, ERROR_CODE_TARGET_INFO_NOT_EXIST);
             targetId = targetNode->GetId();
         } else {
@@ -1479,6 +1503,17 @@ void JSViewContext::JSSetCustomKeyboardContinueFeature(const JSCallbackInfo& inf
     textFieldManager->SetCustomKeyboardContinueFeature(value);
 }
 
+void JSViewContext::JSIsEasySplit(const JSCallbackInfo& info)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    if (!context) {
+        info.SetReturnValue(JSRef<JSVal>::Make(JSVal(ToJSValue(false))));
+        return;
+    }
+    auto result = context->IsDisplayInForceSplitMode();
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
+}
+
 void JSViewContext::JSBind(BindingTarget globalObj)
 {
     JSClass<JSViewContext>::Declare("Context");
@@ -1509,6 +1544,7 @@ void JSViewContext::JSBind(BindingTarget globalObj)
     JSClass<JSViewContext>::StaticMethod("setImageRawDataCacheSize",  JSViewContext::JSSetImageRawDataCacheSize);
     JSClass<JSViewContext>::StaticMethod(
         "setCustomKeyboardContinueFeature",  JSViewContext::JSSetCustomKeyboardContinueFeature);
+    JSClass<JSViewContext>::StaticMethod("isEasySplit", JSViewContext::JSIsEasySplit);
     JSClass<JSViewContext>::Bind<>(globalObj);
 }
 

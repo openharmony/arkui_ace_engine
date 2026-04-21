@@ -63,6 +63,8 @@ public:
     static float GetUserDefHeight(const RefPtr<WaterFlowSections>& sections, int32_t seg, int32_t idx);
     static void UpdateItemIdealSize(const RefPtr<LayoutWrapper>& item, Axis axis, float userHeight);
     static AdjustOffset GetAdjustOffset(const RefPtr<LayoutWrapper>& item);
+    static RefPtr<LayoutWrapper> GetWaterFlowItem(LayoutWrapper* layoutWrapper, int32_t index,
+        bool addToRenderTree = true, bool isCache = false);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_LAYOUT_UTILS_H

@@ -18,20 +18,21 @@
 
 #include <optional>
 
-#include "base/memory/referenced.h"
 #include "base/utils/utils.h"
-#include "core/components/button/button_theme.h"
-#include "core/components_ng/event/event_hub.h"
-#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/button/button_layout_algorithm.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
+
+namespace OHOS::Ace {
+class ButtonTheme;
+} // namespace OHOS::Ace
+
 namespace OHOS::Ace::NG {
 struct InspectorConfig;
 class InspectorFilter;
+class TextLayoutProperty;
 enum class ComponentButtonType { POPUP, BUTTON, STEPPER, NAVIGATION };
 class ACE_FORCE_EXPORT ButtonPattern : public Pattern {
     DECLARE_ACE_TYPE(ButtonPattern, Pattern);
@@ -155,6 +156,8 @@ public:
 
     void OnColorConfigurationUpdate() override;
 
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+
     void SetSkipColorConfigurationUpdate()
     {
         isColorUpdateFlag_ = true;
@@ -188,6 +191,10 @@ public:
     FocusPattern GetFocusPattern() const override;
 
     bool IsNeedAdjustByAspectRatio() override;
+
+    bool IsDefaultResponseRegionExpandingNeeded(SourceType sourceType) const override;
+
+    RectF ExpandDefaultResponseRegion(RectF& rect) override;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
@@ -228,6 +235,10 @@ public:
     void SetNavigationFocusBlendBgColor(const Color& navigationFocusBgColor);
 
     void SetNavMenuItemNeedFocus(bool navMenuItemNeedFocus);
+
+    int32_t OnInjectionEvent(const std::string& command) override;
+
+    void ReportButtonClickResult();
 
 protected:
     void OnModifyDone() override;

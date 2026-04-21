@@ -33,11 +33,11 @@
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -943,6 +943,9 @@ HWTEST_F(CheckBoxTwoTestNG, UpdateComponentColor, TestSize.Level1)
     checkBoxModelNG.UpdateComponentColor(frameNode, CheckBoxColorType::UN_SELECTED_COLOR, Color::RED);
     ret = paintProperty->GetCheckBoxUnSelectedColor();
     EXPECT_EQ(ret.value_or(Color::BLACK), Color::RED);
+    checkBoxModelNG.UpdateComponentColor(frameNode, CheckBoxColorType::STROKE_COLOR, Color::RED);
+    ret = paintProperty->GetCheckBoxCheckMarkColor();
+    EXPECT_EQ(ret.value_or(Color::BLACK), Color::RED);
 }
 
 /**
@@ -982,6 +985,9 @@ HWTEST_F(CheckBoxTwoTestNG, ResetComponentColor, TestSize.Level1)
     checkBoxModelNG.ResetComponentColor(frameNode, CheckBoxColorType::UN_SELECTED_COLOR);
     ret = paintProperty->GetCheckBoxUnSelectedColor();
     EXPECT_EQ(ret.value_or(Color::BLACK), theme->GetInactiveColor());
+    checkBoxModelNG.ResetComponentColor(frameNode, CheckBoxColorType::STROKE_COLOR);
+    ret = paintProperty->GetCheckBoxCheckMarkColor();
+    EXPECT_EQ(ret.value_or(Color::BLACK), theme->GetPointColor());
 }
 
 /**

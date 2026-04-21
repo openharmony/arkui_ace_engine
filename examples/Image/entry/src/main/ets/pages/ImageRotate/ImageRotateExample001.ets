@@ -41,12 +41,12 @@ struct Test01 {
   @State orientation: ImageRotateOrientation = ImageRotateOrientation.UP
   @State autoResize: boolean = false
   @State pixmap: image.PixelMap | undefined = undefined
-  @State resource: Resource = $r('app.media.UP')
-  @State gif: Resource = $r('app.media.leaf')
+  @State resource: Resource = $r('app.media.startIcon')
+  @State gif: Resource = $r('app.media.background')
   @State onTree: boolean = true
   @State rotateDegree: number = 0
   @State fit: ImageFit = ImageFit.Cover
-  res: Resource = $r('app.media.UP')
+  res: Resource = $r('app.media.startIcon')
   idx: number = 0
   idx2: number = 0
   orientations: Array<ImageRotateOrientation> = [
@@ -91,7 +91,7 @@ struct Test01 {
   build() {
     Column() {
       if (this.onTree) {
-        Image($r('app.media.bmp'))
+        Image($r('app.media.startIcon'))
           .autoResize(this.autoResize)
           .height(150)
           .width(150)

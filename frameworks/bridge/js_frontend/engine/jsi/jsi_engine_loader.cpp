@@ -54,6 +54,7 @@ RefPtr<BaseCanvasBridge> JsiEngineLoader::CreateCanvasBridge() const
 {
     CanvasBridgeParams params = { .pipeline = nullptr, .width = 0, .height = 0, .isOffscreen = false };
     const auto* modifier = GetCanvasInnerModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
     void* bridgePtr = modifier->createCanvasBridge(params);
     return AceType::Claim(reinterpret_cast<BaseCanvasBridge*>(bridgePtr));
 }

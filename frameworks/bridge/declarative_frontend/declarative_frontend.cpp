@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -184,7 +184,8 @@ bool DeclarativeFrontend::Initialize(FrontendType type, const RefPtr<TaskExecuto
 {
     type_ = type;
     taskExecutor_ = taskExecutor;
-    ACE_DCHECK(type_ == FrontendType::DECLARATIVE_JS || type_ == FrontendType::STATIC_HYBRID_DYNAMIC);
+    ACE_DCHECK(type_ == FrontendType::DECLARATIVE_JS || type_ == FrontendType::STATIC_HYBRID_DYNAMIC ||
+               type_ == FrontendType::DYNAMIC_HYBRID_STATIC);
     InitializeFrontendDelegate(taskExecutor);
 
     bool needPostJsTask = true;
@@ -433,12 +434,13 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
     };
 
     const auto& drawChildrenInspectorCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
-                                                    const std::string& componentId) {
+                                                    const std::string& componentId,
+                                                    const std::vector<int32_t>& childIds) {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
             return;
         }
-        jsEngine->DrawChildrenInspectorCallback(componentId);
+        jsEngine->DrawChildrenInspectorCallback(componentId, childIds);
     };
 
     const auto& layoutChildrenInspectorCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
@@ -1223,10 +1225,10 @@ void DeclarativeFrontend::OnDrawCompleted(const std::string& componentId)
     }
 }
 
-void DeclarativeFrontend::OnDrawChildrenCompleted(const std::string& componentId)
+void DeclarativeFrontend::OnDrawChildrenCompleted(const std::string& componentId, const std::vector<int32_t>& childIds)
 {
     if (delegate_) {
-        delegate_->OnDrawChildrenCompleted(componentId);
+        delegate_->OnDrawChildrenCompleted(componentId, childIds);
     }
 }
 

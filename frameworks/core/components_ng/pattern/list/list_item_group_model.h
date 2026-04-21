@@ -35,11 +35,13 @@ public:
     static ListItemGroupModel* GetInstance();
     virtual ~ListItemGroupModel() = default;
 
-    virtual void Create(V2::ListItemGroupStyle listItemGroupStyle) = 0;
+    virtual void Create(const V2::ListItemGroupOptions& options) = 0;
     virtual void SetSpace(const Dimension& space) = 0;
     virtual void SetDivider(const V2::ItemDivider& divider) = 0;
     virtual void SetHeader(std::function<void()>&& header) = 0;
     virtual void SetFooter(std::function<void()>&& footer) = 0;
+    virtual void SetHeaderStyle(V2::ListItemGroupHeaderFooterStyle style) {};
+    virtual void SetFooterStyle(V2::ListItemGroupHeaderFooterStyle style) {};
     virtual RefPtr<NG::ListChildrenMainSize> GetOrCreateListChildrenMainSize(NG::FrameNode* node = nullptr)
     {
         return nullptr;

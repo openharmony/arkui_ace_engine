@@ -124,6 +124,8 @@ public:
     void JsSetDirection(const JSCallbackInfo& info);
     void JsReset(const JSCallbackInfo& info);
     void JsSetLetterSpacing(const JSCallbackInfo& info);
+    void JsGetAntialias(const JSCallbackInfo& info);
+    void JsSetAntialias(const JSCallbackInfo& info);
 
     template<StatisticEventType T>
     void JSGetEmpty(const JSCallbackInfo& info)
@@ -185,6 +187,11 @@ public:
     void SetInstanceId(int32_t id) override
     {
         instanceId_ = id;
+    }
+
+    int32_t GetInstanceId() override
+    {
+        return instanceId_;
     }
 
     void SetTransform(unsigned int id, const TransformParam&);

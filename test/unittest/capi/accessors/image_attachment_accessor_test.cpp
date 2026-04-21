@@ -157,11 +157,11 @@ MATCHER_P(CompareArkColorFilterType, expected, "Compare ColorFilter and DrawingC
 }
 } // namespace
 /**
- * @tc.name: ctorTestPixelMap
+ * @tc.name: constructTestPixelMap
  * @tc.desc: Check the functionality of construct
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAttachmentAccessorTest, ctorTestPixelMap, TestSize.Level1)
+HWTEST_F(ImageAttachmentAccessorTest, constructTestPixelMap, TestSize.Level1)
 {
     std::string imagesSrc = "test";
     RefPtr<PixelMap> pixelMap = CreatePixelMap(imagesSrc);
@@ -179,11 +179,11 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestPixelMap, TestSize.Level1)
 }
 
 /**
- * @tc.name: ctorTestSize
+ * @tc.name: constructTestSize
  * @tc.desc: Check the functionality of construct
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAttachmentAccessorTest, ctorTestSize, TestSize.Level1)
+HWTEST_F(ImageAttachmentAccessorTest, constructTestSize, TestSize.Level1)
 {
     for (auto& [input, test, expected] : testFixtureDimensionAnyValidValues) {
         Ark_SizeOptions size {
@@ -216,11 +216,11 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestSize, TestSize.Level1)
 }
 
 /**
- * @tc.name: ctorTestSizeResources
+ * @tc.name: constructTestSizeResources
  * @tc.desc: Check the functionality of construct
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAttachmentAccessorTest, ctorTestSizeResources, TestSize.Level1)
+HWTEST_F(ImageAttachmentAccessorTest, constructTestSizeResources, TestSize.Level1)
 {
     for (auto& [num_id, str_id, expected] : resourceInitTable) {
         auto expectPointer = std::get_if<Dimension>(&expected);
@@ -252,11 +252,11 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestSizeResources, TestSize.Level1)
 }
 
 /**
- * @tc.name: ctorTestVerticalAlignValidValues
+ * @tc.name: constructTestVerticalAlignValidValues
  * @tc.desc: Check the functionality of construct
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAttachmentAccessorTest, ctorTestVerticalAlignValidValues, TestSize.Level1)
+HWTEST_F(ImageAttachmentAccessorTest, constructTestVerticalAlignValidValues, TestSize.Level1)
 {
     for (auto& [input, test, expected] : testFixtureVerticalAlignValidValues) {
         Ark_ImageAttachmentInterface content {
@@ -273,11 +273,11 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestVerticalAlignValidValues, TestSize
 }
 
 /**
- * @tc.name: ctorTestVerticalAlignInvalidValues
+ * @tc.name: constructTestVerticalAlignInvalidValues
  * @tc.desc: Check the functionality of construct
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAttachmentAccessorTest, ctorTestVerticalAlignInvalidValues, TestSize.Level1)
+HWTEST_F(ImageAttachmentAccessorTest, constructTestVerticalAlignInvalidValues, TestSize.Level1)
 {
     for (auto& [input, test, expected] : testFixtureVerticalAlignInvalidValues) {
         Ark_ImageAttachmentInterface content {
@@ -293,11 +293,11 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestVerticalAlignInvalidValues, TestSi
 }
 
 /**
- * @tc.name: ctorTestObjectFitValidValues
+ * @tc.name: constructTestObjectFitValidValues
  * @tc.desc: Check the functionality of construct
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAttachmentAccessorTest, ctorTestObjectFitValidValues, TestSize.Level1)
+HWTEST_F(ImageAttachmentAccessorTest, constructTestObjectFitValidValues, TestSize.Level1)
 {
     for (auto& [input, test, expected] : testFixtureObjectFitValidValues) {
         Ark_ImageAttachmentInterface content {
@@ -314,11 +314,11 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestObjectFitValidValues, TestSize.Lev
 }
 
 /**
- * @tc.name: ctorTestObjectFitInvalidValues
+ * @tc.name: constructTestObjectFitInvalidValues
  * @tc.desc: Check the functionality of construct
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAttachmentAccessorTest, ctorTestObjectFitInvalidValues, TestSize.Level1)
+HWTEST_F(ImageAttachmentAccessorTest, constructTestObjectFitInvalidValues, TestSize.Level1)
 {
     for (auto& [input, test, expected] : testFixtureObjectFitInvalidValues) {
         Ark_ImageAttachmentInterface content {
@@ -334,11 +334,11 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestObjectFitInvalidValues, TestSize.L
 }
 
 /**
- * @tc.name: ctorTestImageStyleMargins
+ * @tc.name: constructTestImageStyleOptional
  * @tc.desc: Check the functionality of construct
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAttachmentAccessorTest, ctorTestImageStyleOptional, TestSize.Level1)
+HWTEST_F(ImageAttachmentAccessorTest, constructTestImageStyleOptional, TestSize.Level1)
 {
     const Ark_ImageAttachmentInterface content {
         .layoutStyle = getImageLayoutStyleOptional(),
@@ -347,18 +347,18 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestImageStyleOptional, TestSize.Level
         Ark_ImageAttachmentInterface>(content);
     auto peer = accessor_->construct(&inputValue);
     ASSERT_TRUE(peer->span->GetImageAttribute());
-    ASSERT_FALSE(peer->span->GetImageAttribute()->marginProp);
-    ASSERT_FALSE(peer->span->GetImageAttribute()->paddingProp);
-    ASSERT_FALSE(peer->span->GetImageAttribute()->borderRadius);
+    EXPECT_TRUE(peer->span->GetImageAttribute()->marginProp);
+    EXPECT_TRUE(peer->span->GetImageAttribute()->paddingProp);
+    EXPECT_TRUE(peer->span->GetImageAttribute()->borderRadius);
     accessor_->destroyPeer(peer);
 };
 
 /**
- * @tc.name: ctorTestImageStyleLengthMetrics
+ * @tc.name: constructTestImageStyleLengthMetrics
  * @tc.desc: Check the functionality of construct
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAttachmentAccessorTest, ctorTestImageStyleLengthMetrics, TestSize.Level1)
+HWTEST_F(ImageAttachmentAccessorTest, constructTestImageStyleLengthMetrics, TestSize.Level1)
 {
     Ark_ImageAttachmentInterface content {
         .layoutStyle = getImageLayoutStyleLengthMetrics(),
@@ -377,11 +377,11 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestImageStyleLengthMetrics, TestSize.
 };
 
 /**
- * @tc.name: ctorTestImageStyleMargins
+ * @tc.name: constructTestImageStyleFilled
  * @tc.desc: Check the functionality of construct
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAttachmentAccessorTest, ctorTestImageStyleFilled, TestSize.Level1)
+HWTEST_F(ImageAttachmentAccessorTest, constructTestImageStyleFilled, TestSize.Level1)
 {
     const Ark_ImageAttachmentInterface content {
         .layoutStyle = getImageLayoutStyleFilled(),
@@ -400,11 +400,11 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestImageStyleFilled, TestSize.Level1)
 };
 
 /**
- * @tc.name: ctorTestImageStyleMargins
+ * @tc.name: constructTestColorFilter
  * @tc.desc: Check the functionality of construct
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAttachmentAccessorTest, ctorTestColorFilter, TestSize.Level1)
+HWTEST_F(ImageAttachmentAccessorTest, constructTestColorFilter, TestSize.Level1)
 {
     auto accessor = GeneratedModifier::GetColorFilterAccessor();
     ASSERT_TRUE(accessor);
@@ -431,12 +431,13 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestColorFilter, TestSize.Level1)
 };
 
 /**
- * @tc.name: ctorTestImageStyleMargins
+ * @tc.name: constructTestDrawingColorFilter
  * @tc.desc: Check the functionality of construct
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAttachmentAccessorTest, DISABLED_ctorTestDrawingColorFilter, TestSize.Level1)
+HWTEST_F(ImageAttachmentAccessorTest, DISABLED_constructTestDrawingColorFilter, TestSize.Level1)
 {
+    ASSERT_NE(accessor_->construct, nullptr);
     FAIL() << "Test is not implemented yet";
 };
 
@@ -465,7 +466,7 @@ HWTEST_F(ImageAttachmentAccessorTest, getValueTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: ctorTestSize
+ * @tc.name: getSizeTest
  * @tc.desc: Check the functionality of construct
  * @tc.type: FUNC
  */
@@ -483,21 +484,23 @@ HWTEST_F(ImageAttachmentAccessorTest, getSizeTest, TestSize.Level1)
             Ark_ImageAttachmentInterface>(content);
         auto peer = accessor_->construct(&inputValue);
         if (expected.IsNonNegative()) {
-            EXPECT_THAT(accessor_->getSize(peer), CompareArkSize(size)) << "Passed value is: " << input;
-        } else {
-            Ark_SizeOptions emptySize {
-                .width = ArkValue<Opt_Length>(test),
-                .height = ArkValue<Opt_Length>(test),
+            ImageSpanSize expectedSize {
+                .width = expected,
+                .height = expected,
             };
-            EXPECT_THAT(accessor_->getSize(peer), CompareArkSize(emptySize)) << "Passed value is: " << input;
-            ;
+            EXPECT_THAT(Converter::OptConvert<ImageSpanSize>(accessor_->getSize(peer)), expectedSize) <<
+                "Passed value is: " << input;
+        } else {
+            ImageSpanSize emptySize;
+            EXPECT_THAT(Converter::OptConvert<ImageSpanSize>(accessor_->getSize(peer)), emptySize) <<
+                "Passed value is: " << input;
         }
         accessor_->destroyPeer(peer);
     }
 }
 
 /**
- * @tc.name: getVerticalAlignValidValues
+ * @tc.name: getVerticalAlignTestValidValues
  * @tc.desc: Check the functionality of getVerticalAlign
  * @tc.type: FUNC
  */
@@ -516,7 +519,7 @@ HWTEST_F(ImageAttachmentAccessorTest, getVerticalAlignTestValidValues, TestSize.
 }
 
 /**
- * @tc.name: getVerticalAlignInvalidValues
+ * @tc.name: getVerticalAlignTestInvalidValues
  * @tc.desc: Check the functionality of getVerticalAlign
  * @tc.type: FUNC
  */
@@ -554,7 +557,7 @@ HWTEST_F(ImageAttachmentAccessorTest, getObjectFitTestValidValues, TestSize.Leve
 }
 
 /**
- * @tc.name: getObjectFitInvalidValues
+ * @tc.name: getObjectFitTestInvalidValues
  * @tc.desc: Check the functionality of getObjectFit
  * @tc.type: FUNC
  */
@@ -573,7 +576,7 @@ HWTEST_F(ImageAttachmentAccessorTest, getObjectFitTestInvalidValues, TestSize.Le
 }
 
 /**
- * @tc.name: getObjectFitInvalidValues
+ * @tc.name: getLayoutStyleTestOptional
  * @tc.desc: Check the functionality of getObjectFit
  * @tc.type: FUNC
  */
@@ -590,14 +593,21 @@ HWTEST_F(ImageAttachmentAccessorTest, getLayoutStyleTestOptional, TestSize.Level
     ASSERT_TRUE(expected);
     ASSERT_TRUE(optGetValue);
     auto arkGetValue = *optGetValue;
-    EXPECT_THAT(arkGetValue.margin, CompareOptMarginsPaddings(expected->margin));
-    EXPECT_THAT(arkGetValue.padding, CompareOptMarginsPaddings(expected->padding));
-    EXPECT_THAT(arkGetValue.borderRadius, CompareOptBorderRadius(expected->borderRadius));
+    MarginProperty expectedMargin {
+        .left = CalcLength(0.0_vp),
+        .right = CalcLength(0.0_vp),
+        .top = CalcLength(0.0_vp),
+        .bottom = CalcLength(0.0_vp),
+    };
+    BorderRadiusProperty expectedRadius(0.0_vp);
+    EXPECT_EQ(Converter::OptConvert<MarginProperty>(arkGetValue.margin), expectedMargin);
+    EXPECT_EQ(Converter::OptConvert<MarginProperty>(arkGetValue.padding), expectedMargin);
+    EXPECT_EQ(Converter::OptConvert<BorderRadiusProperty>(arkGetValue.borderRadius), expectedRadius);
     accessor_->destroyPeer(peer);
 }
 
 /**
- * @tc.name: getObjectFitInvalidValues
+ * @tc.name: getLayoutStyleTestFilled
  * @tc.desc: Check the functionality of getObjectFit
  * @tc.type: FUNC
  */
@@ -614,9 +624,12 @@ HWTEST_F(ImageAttachmentAccessorTest, getLayoutStyleTestFilled, TestSize.Level1)
     ASSERT_TRUE(expected);
     ASSERT_TRUE(optGetValue);
     auto arkGetValue = *optGetValue;
-    EXPECT_THAT(arkGetValue.margin, CompareOptMarginsPaddings(expected->margin));
-    EXPECT_THAT(arkGetValue.padding, CompareOptMarginsPaddings(expected->padding));
-    EXPECT_THAT(arkGetValue.borderRadius, CompareOptBorderRadius(expected->borderRadius));
+    EXPECT_EQ(Converter::OptConvert<MarginProperty>(arkGetValue.margin),
+        Converter::OptConvert<MarginProperty>(expected->margin));
+    EXPECT_EQ(Converter::OptConvert<MarginProperty>(arkGetValue.padding),
+        Converter::OptConvert<MarginProperty>(expected->padding));
+    EXPECT_EQ(Converter::OptConvert<BorderRadiusProperty>(arkGetValue.borderRadius),
+        Converter::OptConvert<BorderRadiusProperty>(expected->borderRadius));
     accessor_->destroyPeer(peer);
 }
 
@@ -649,13 +662,15 @@ HWTEST_F(ImageAttachmentAccessorTest, getLayoutStyleTestPaddingConversion, TestS
     ASSERT_TRUE(optGetValue);
 
     auto arkGetValue = *optGetValue;
-    EXPECT_THAT(arkGetValue.margin, CompareOptMarginsPaddings(imageLayoutStyle.margin));
-    EXPECT_THAT(arkGetValue.padding, CompareOptMarginsPaddings(imageLayoutStyle.padding));
+    EXPECT_EQ(Converter::OptConvert<MarginProperty>(arkGetValue.margin),
+        Converter::OptConvert<MarginProperty>(imageLayoutStyle.margin));
+    EXPECT_EQ(Converter::OptConvert<MarginProperty>(arkGetValue.padding),
+        Converter::OptConvert<MarginProperty>(imageLayoutStyle.padding));
     accessor_->destroyPeer(peer);
 }
 
 /**
- * @tc.name: ctorTestImageStyleMargins
+ * @tc.name: getColorFilterTestColorFilter
  * @tc.desc: Check the functionality of construct
  * @tc.type: FUNC
  */
@@ -681,12 +696,13 @@ HWTEST_F(ImageAttachmentAccessorTest, getColorFilterTestColorFilter, TestSize.Le
 };
 
 /**
- * @tc.name: ctorTestImageStyleMargins
+ * @tc.name: getColorFilterTestDrawingColorFilter
  * @tc.desc: Check the functionality of construct
  * @tc.type: FUNC
  */
 HWTEST_F(ImageAttachmentAccessorTest, DISABLED_getColorFilterTestDrawingColorFilter, TestSize.Level1)
 {
+    ASSERT_NE(accessor_->getColorFilter, nullptr);
     FAIL() << "Test is not implemented yet";
 };
 } // namespace OHOS::Ace::NG

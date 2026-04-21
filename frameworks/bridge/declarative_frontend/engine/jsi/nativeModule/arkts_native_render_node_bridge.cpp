@@ -20,19 +20,19 @@
 #include "canvas_napi/js_canvas.h"
 #include "jsnapi_expo.h"
 
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/rect_t.h"
 #include "base/geometry/shape.h"
 #include "bridge/common/utils/engine_helper.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
-#include "core/components_ng/pattern/render_node/render_node_properties.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/components_ng/pattern/render_node/render_node_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 const uint32_t DEFAULT_COLOR = 0xFF000000;
+constexpr napi_type_tag ROSEN_JS_CANVAS_TYPE_TAG = {
+    .lower = 0x2710bc10cdee8db3,
+    .upper = 0xc5189f88510eadc1
+};
 
 ArkUINativeModuleValue SetRectShape(ArkUIRuntimeCallInfo* runtimeCallInfo, bool isClip)
 {
@@ -225,7 +225,7 @@ void RenderNodeBridge::FireDrawCallback(EcmaVM* vm, JsWeak<panda::CopyableGlobal
 
     auto jsCanvas = OHOS::Rosen::Drawing::JsCanvas::CreateJsCanvas(env, &context.canvas);
     OHOS::Rosen::Drawing::JsCanvas* unwrapCanvas = nullptr;
-    napi_unwrap(env, jsCanvas, reinterpret_cast<void**>(&unwrapCanvas));
+    napi_unwrap_s(env, jsCanvas, &ROSEN_JS_CANVAS_TYPE_TAG, reinterpret_cast<void**>(&unwrapCanvas));
     if (unwrapCanvas) {
         unwrapCanvas->SaveCanvas();
         unwrapCanvas->ClipCanvas(context.width, context.height);
@@ -238,8 +238,8 @@ void RenderNodeBridge::FireDrawCallback(EcmaVM* vm, JsWeak<panda::CopyableGlobal
     contextObj->SetNativePointerFieldCount(vm, 1);
     JSValueWrapper valueWrapper = contextObj;
     napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
-    napi_wrap(
-        env, nativeValue, &context.canvas, [](napi_env, void*, void*) {}, nullptr, nullptr);
+    napi_wrap_s(
+        env, nativeValue, &context.canvas, [](napi_env, void*, void*) {}, nullptr, &ROSEN_JS_CANVAS_TYPE_TAG, nullptr);
     panda::Local<panda::JSValueRef> params[1] = { contextObj };
     func->Call(vm, obj.ToLocal(), params, 1);
     if (unwrapCanvas) {
@@ -377,28 +377,23 @@ ArkUINativeModuleValue RenderNodeBridge::SetRotation(ArkUIRuntimeCallInfo* runti
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto* nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(2);
     Local<JSValueRef> fourthArg = runtimeCallInfo->GetCallArgRef(3);
-    Local<JSValueRef> fifthArg = runtimeCallInfo->GetCallArgRef(4);
-    double rotationX = 0.0;
-    double rotationY = 0.0;
-    double rotationZ = 0.0;
-    int32_t unit = 0;
+    ArkUI_Float32 rotationX = 0.0;
+    ArkUI_Float32 rotationY = 0.0;
+    ArkUI_Float32 rotationZ = 0.0;
     if (secondArg->IsNumber()) {
-        rotationX = secondArg->ToNumber(vm)->Value();
+        rotationX = static_cast<ArkUI_Float32>(secondArg->ToNumber(vm)->Value());
     }
     if (thirdArg->IsNumber()) {
-        rotationY = thirdArg->ToNumber(vm)->Value();
+        rotationY = static_cast<ArkUI_Float32>(thirdArg->ToNumber(vm)->Value());
     }
     if (fourthArg->IsNumber()) {
-        rotationZ = fourthArg->ToNumber(vm)->Value();
+        rotationZ = static_cast<ArkUI_Float32>(fourthArg->ToNumber(vm)->Value());
     }
-    if (fifthArg->IsNumber()) {
-        unit = fifthArg->Int32Value(vm);
-    }
-    GetArkUINodeModifiers()->getRenderNodeModifier()->setRotation(nativeNode, rotationX, rotationY, rotationZ, unit);
+    GetArkUINodeModifiers()->getRenderNodeModifier()->setRotation(nativeNode, rotationX, rotationY, rotationZ);
     return panda::JSValueRef::Undefined(vm);
 }
 

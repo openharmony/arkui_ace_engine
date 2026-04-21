@@ -14,12 +14,12 @@
  */
 
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include "base/log/jank_frame_report.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "core/components_ng/base/observer_handler.h"
-#include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "bridge/common/utils/engine_helper.h"
@@ -161,7 +161,6 @@ void PagePattern::TriggerPageTransition(const std::function<void()>& onFinish, P
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
             auto pipeline = pattern->GetContext();
             if (pipeline) {
-                pipeline->GetLoadCompleteManager()->StopCollect();
                 auto mgr = pipeline->GetContentChangeManager();
                 CHECK_NULL_VOID(mgr);
                 mgr->OnPageTransitionEnd(pattern->GetHost());
@@ -553,6 +552,9 @@ void PagePattern::FirePageTransitionStart()
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->SetTHPNotifyState(ThpNotifyState::ROUTER_TRANSITION);
+    auto mgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    mgr->OnTransitionAdded(host->GetId());
 }
 
 void PagePattern::FirePageTransitionFinish()
@@ -570,6 +572,9 @@ void PagePattern::FirePageTransitionFinish()
     CHECK_NULL_VOID(pipeline);
     pipeline->SetTHPNotifyState(ThpNotifyState::DEFAULT);
     pipeline->PostTaskResponseRegion(DEFAULT_DELAY_THP);
+    auto mgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    mgr->OnTransitionRemoved(host->GetId());
 }
 
 void PagePattern::StopPageTransition()
@@ -1048,24 +1053,37 @@ void PagePattern::TriggerDefaultTransition(const std::function<void()>& onFinish
     auto stageManager = pipelineContext->GetStageManager();
     CHECK_NULL_VOID(stageManager);
     isCustomTransition_ = onFinish ? false : true;
+    auto removeCallback = std::make_shared<std::function<void()>>();
+    auto wrappedOnFinish = option.GetOnFinishEvent();
+    auto finishWithRemove = [wrappedOnFinish, removeCallback]() {
+        if (*removeCallback) {
+            (*removeCallback)();
+        }
+        if (wrappedOnFinish) {
+            wrappedOnFinish();
+        }
+    };
     if (transitionIn) {
         InitTransitionIn(effect, type);
-        auto animation = AnimationUtils::StartAnimation(option, [weakPattern = WeakClaim(this), effect, type]() {
-            auto pattern = weakPattern.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->TransitionInFinish(effect, type);
-        }, option.GetOnFinishEvent());
-        stageManager->AddAnimation(animation, type == PageTransitionType::ENTER_PUSH);
+        auto animation = AnimationUtils::StartAnimation(option,
+            [weakPattern = WeakClaim(this), effect, type]() {
+                auto pattern = weakPattern.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->TransitionInFinish(effect, type);
+            }, finishWithRemove);
+        *removeCallback =
+            stageManager->AddAnimation(animation, type == PageTransitionType::ENTER_PUSH);
         MaskAnimation(effect->GetInitialBackgroundColor().value(), effect->GetBackgroundColor().value());
         return;
     }
     InitTransitionOut(effect, type);
-    auto animation = AnimationUtils::StartAnimation(option, [weakPattern = WeakClaim(this), effect, type]() {
-        auto pagePattern = weakPattern.Upgrade();
-        CHECK_NULL_VOID(pagePattern);
-        pagePattern->TransitionOutFinish(effect, type);
-    }, option.GetOnFinishEvent());
-    stageManager->AddAnimation(animation, type == PageTransitionType::ENTER_POP);
+    auto animation = AnimationUtils::StartAnimation(option,
+        [weakPattern = WeakClaim(this), effect, type]() {
+            auto pagePattern = weakPattern.Upgrade();
+            CHECK_NULL_VOID(pagePattern);
+            pagePattern->TransitionOutFinish(effect, type);
+        }, finishWithRemove);
+    *removeCallback = stageManager->AddAnimation(animation, type == PageTransitionType::ENTER_POP);
     MaskAnimation(effect->GetInitialBackgroundColor().value(), effect->GetBackgroundColor().value());
 }
 
@@ -1180,6 +1198,16 @@ ScopeFocusAlgorithm PagePattern::GetScopeFocusAlgorithm()
         return nextFocusNode.Upgrade() != currFocusNode.Upgrade();
     };
     return focusAlgorithm;
+}
+
+void PagePattern::ContentChangeByDetaching(PipelineContext* pipeline)
+{
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    mgr->OnTransitionRemoved(host->GetId());
 }
 
 } // namespace OHOS::Ace::NG

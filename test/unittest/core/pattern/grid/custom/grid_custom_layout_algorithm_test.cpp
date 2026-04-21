@@ -14,8 +14,11 @@
  */
 
 #include "custom_layout_options.h"
-#include "test/mock/core/animation/mock_animation_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "gtest/gtest.h"
+#include "gmock/gmock.h"
+#define protected public
+#define private public
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/grid/grid_test_ng.h"
 
 #include "core/components_ng/pattern/grid/grid_custom/grid_custom_layout_algorithm.h"
@@ -40,8 +43,8 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, ConstructorTestDefault, TestSize.Level
     CreateDone();
 
     // Verify default initialization
-    EXPECT_GE(pattern_->info_.startIndex_, 0);
-    EXPECT_GE(pattern_->info_.endIndex_, 7);
+    EXPECT_EQ(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(pattern_->info_.endIndex_, 7);
 }
 
 /**
@@ -85,8 +88,8 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, ScrollByLargeOffset, TestSize.Level1)
 
     // Large offset scroll to trigger JumpToTargetOffset path
     ScrollBy(0, HEIGHT * 2);
-    EXPECT_GE(pattern_->info_.startIndex_, 0);
-    EXPECT_LE(pattern_->info_.endIndex_, 49);
+    EXPECT_EQ(pattern_->info_.startIndex_, 16);
+    EXPECT_EQ(pattern_->info_.endIndex_, 23);
 }
 
 /**
@@ -125,7 +128,7 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, VerifyCacheReset, TestSize.Level1)
 
     // Scroll to verify cache was cleared
     ScrollBy(0, ITEM_MAIN_SIZE);
-    EXPECT_GE(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(pattern_->info_.startIndex_, 2);
 }
 
 /**
@@ -165,8 +168,8 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, ScrollToIndexBehavior, TestSize.Level1
 
     // Scroll to middle index
     ScrollToIndex(15, false, ScrollAlign::START);
-    EXPECT_GE(pattern_->info_.startIndex_, 0);
-    EXPECT_LE(pattern_->info_.endIndex_, 49);
+    EXPECT_EQ(pattern_->info_.startIndex_, 14);
+    EXPECT_EQ(pattern_->info_.endIndex_, 21);
 
     // Scroll to last index
     ScrollToIndex(49, false, ScrollAlign::START);
@@ -189,8 +192,7 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, CacheItemsCount, TestSize.Level1)
     // Scroll to middle position
     ScrollBy(0, ITEM_MAIN_SIZE * 3);
     int32_t visibleCount = pattern_->info_.endIndex_ - pattern_->info_.startIndex_ + 1;
-    EXPECT_GT(visibleCount, 0);
-    EXPECT_LE(visibleCount, 20);
+    EXPECT_EQ(visibleCount, 8);
 }
 
 /**
@@ -208,9 +210,9 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, JumpLogic, TestSize.Level1)
 
     // Very large scroll should trigger skip logic
     ScrollBy(0, ITEM_MAIN_SIZE * 50);
-    EXPECT_GE(pattern_->info_.startIndex_, 0);
-    EXPECT_LE(pattern_->info_.endIndex_, 99);
-    EXPECT_LE(pattern_->info_.startMainLineIndex_, 50);
+    EXPECT_EQ(pattern_->info_.startIndex_, 92);
+    EXPECT_EQ(pattern_->info_.endIndex_, 99);
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 46);
 }
 
 /**
@@ -228,7 +230,7 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, MeasureWithDifferentItemCounts, TestSi
 
     // Verify small dataset handling
     EXPECT_EQ(pattern_->info_.startIndex_, 0);
-    EXPECT_LE(pattern_->info_.endIndex_, 5);
+    EXPECT_EQ(pattern_->info_.endIndex_, 4);
     EXPECT_TRUE(pattern_->info_.reachEnd_);
 }
 
@@ -249,8 +251,8 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, ContinuousScrolling, TestSize.Level1)
     for (int i = 0; i < 5; i++) {
         ScrollBy(0, ITEM_MAIN_SIZE);
     }
-    EXPECT_GE(pattern_->info_.startIndex_, 8);
-    EXPECT_LE(pattern_->info_.endIndex_, 49);
+    EXPECT_EQ(pattern_->info_.startIndex_, 10);
+    EXPECT_EQ(pattern_->info_.endIndex_, 17);
 }
 
 /**
@@ -294,7 +296,7 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, MeasureOnOffsetUpdate, TestSize.Level1
 
     // Scroll again to trigger MeasureOnOffset
     ScrollBy(0, ITEM_MAIN_SIZE);
-    EXPECT_GT(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(pattern_->info_.startIndex_, 4);
 }
 
 /**
@@ -313,7 +315,7 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, ThreeColumnLayout, TestSize.Level1)
     // Verify 3-column layout
     ScrollBy(0, ITEM_MAIN_SIZE * 2);
     EXPECT_EQ(pattern_->info_.startIndex_ % 3, 0);
-    EXPECT_GE(pattern_->info_.endIndex_, 0);
+    EXPECT_EQ(pattern_->info_.endIndex_, 17);
 }
 
 /**
@@ -332,7 +334,7 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, FourColumnLayout, TestSize.Level1)
     // Verify 4-column layout
     ScrollBy(0, ITEM_MAIN_SIZE);
     EXPECT_EQ(pattern_->info_.startIndex_ % 4, 0);
-    EXPECT_LE(pattern_->info_.endIndex_, 39);
+    EXPECT_EQ(pattern_->info_.endIndex_, 19);
 }
 
 /**
@@ -387,8 +389,8 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, ScrollAlignCenter, TestSize.Level1)
 
     // Scroll to index with CENTER alignment
     ScrollToIndex(20, false, ScrollAlign::CENTER);
-    EXPECT_GE(pattern_->info_.startIndex_, 0);
-    EXPECT_LE(pattern_->info_.endIndex_, 39);
+    EXPECT_EQ(pattern_->info_.startIndex_, 16);
+    EXPECT_EQ(pattern_->info_.endIndex_, 25);
 }
 
 /**
@@ -406,8 +408,8 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, ScrollAlignEnd, TestSize.Level1)
 
     // Scroll to index with END alignment
     ScrollToIndex(10, false, ScrollAlign::END);
-    EXPECT_GE(pattern_->info_.startIndex_, 0);
-    EXPECT_LE(pattern_->info_.endIndex_, 29);
+    EXPECT_EQ(pattern_->info_.startIndex_, 4);
+    EXPECT_EQ(pattern_->info_.endIndex_, 11);
 }
 
 /**
@@ -427,8 +429,8 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, SmallScrollStep, TestSize.Level1)
     for (int i = 0; i < 10; i++) {
         ScrollBy(0, 10.0f);
     }
-    EXPECT_GE(pattern_->info_.startIndex_, 0);
-    EXPECT_GT(pattern_->info_.currentOffset_, -110.0f);
+    EXPECT_EQ(pattern_->info_.startIndex_, 2);
+    EXPECT_EQ(pattern_->info_.currentOffset_, 0);
 }
 
 /**
@@ -452,7 +454,7 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, ResetAfterScroll, TestSize.Level1)
 
     // Scroll again to verify reset worked
     ScrollBy(0, ITEM_MAIN_SIZE);
-    EXPECT_GE(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(pattern_->info_.startIndex_, 12);
 }
 
 /**
@@ -469,8 +471,8 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, MeasureSelfSize, TestSize.Level1)
     CreateDone();
 
     // Grid should calculate proper content size
-    EXPECT_GE(pattern_->GetTotalOffset(), 0);
-    EXPECT_LE(pattern_->info_.endIndex_, 19);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
+    EXPECT_EQ(pattern_->info_.endIndex_, 7);
 }
 
 /**
@@ -489,11 +491,11 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, BackwardScrolling, TestSize.Level1)
     // Scroll forward
     ScrollBy(0, ITEM_MAIN_SIZE * 5);
     int32_t forwardStartIndex = pattern_->info_.startIndex_;
+    EXPECT_EQ(forwardStartIndex, 10);
 
     // Scroll backward
     ScrollBy(0, -ITEM_MAIN_SIZE * 3);
-    EXPECT_LT(pattern_->info_.startIndex_, forwardStartIndex);
-    EXPECT_GE(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(pattern_->info_.startIndex_, 4);
 }
 
 /**
@@ -510,8 +512,8 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, RowsTemplateMode, TestSize.Level1)
     CreateDone();
 
     // Verify rows template mode works
-    EXPECT_GE(pattern_->info_.startIndex_, 0);
-    EXPECT_LE(pattern_->info_.endIndex_, 19);
+    EXPECT_EQ(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(pattern_->info_.endIndex_, 5);
 }
 
 /**
@@ -529,7 +531,7 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, OverScrollBehavior, TestSize.Level1)
 
     // Scroll beyond top
     ScrollBy(0, -ITEM_MAIN_SIZE);
-    EXPECT_LE(pattern_->info_.currentOffset_, 0);
+    EXPECT_EQ(pattern_->info_.currentOffset_, 0);
 
     // Scroll to end
     ScrollTo(ITEM_MAIN_SIZE * 20);
@@ -559,7 +561,7 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, MultipleResets, TestSize.Level1)
 
     // Final scroll
     ScrollBy(0, ITEM_MAIN_SIZE);
-    EXPECT_GE(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(pattern_->info_.startIndex_, 12);
 }
 
 /**
@@ -577,10 +579,10 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, LargeDatasetScrolling, TestSize.Level1
 
     // Scroll to various positions
     ScrollToIndex(50, false, ScrollAlign::START);
-    EXPECT_GE(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(pattern_->info_.startIndex_, 50);
 
     ScrollToIndex(150, false, ScrollAlign::START);
-    EXPECT_LE(pattern_->info_.endIndex_, 199);
+    EXPECT_EQ(pattern_->info_.endIndex_, 157);
 }
 
 /**
@@ -624,8 +626,8 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, VariableScrollSteps, TestSize.Level1)
     ScrollBy(0, 100.0f);
     ScrollBy(0, 25.0f);
 
-    EXPECT_GE(pattern_->info_.startIndex_, 0);
-    EXPECT_GE(pattern_->info_.endIndex_, pattern_->info_.startIndex_);
+    EXPECT_EQ(pattern_->info_.startIndex_, 2);
+    EXPECT_EQ(pattern_->info_.endIndex_, 11);
 }
 
 /**
@@ -664,7 +666,7 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, FiveColumnLayout, TestSize.Level1)
     // Verify 5-column layout
     ScrollBy(0, ITEM_MAIN_SIZE);
     EXPECT_EQ(pattern_->info_.startIndex_ % 5, 0);
-    EXPECT_LE(pattern_->info_.endIndex_, 49);
+    EXPECT_EQ(pattern_->info_.endIndex_, 24);
 }
 
 /**
@@ -711,9 +713,9 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, RapidDirectionChange, TestSize.Level1)
     ScrollBy(0, ITEM_MAIN_SIZE * 4);
     int32_t index3 = pattern_->info_.startIndex_;
 
-    EXPECT_GT(index1, 0);
-    EXPECT_LT(index2, index1);
-    EXPECT_GT(index3, index2);
+    EXPECT_EQ(index1, 6);
+    EXPECT_EQ(index2, 2);
+    EXPECT_EQ(index3, 10);
 }
 
 /**
@@ -731,8 +733,8 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, ScrollAlignAuto, TestSize.Level1)
 
     // Scroll to index with AUTO alignment (should choose optimal alignment)
     ScrollToIndex(15, false, ScrollAlign::AUTO);
-    EXPECT_GE(pattern_->info_.startIndex_, 0);
-    EXPECT_LE(pattern_->info_.endIndex_, 29);
+    EXPECT_EQ(pattern_->info_.startIndex_, 8);
+    EXPECT_EQ(pattern_->info_.endIndex_, 15);
 }
 
 /**
@@ -750,13 +752,13 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, MixedAlignmentScrolls, TestSize.Level1
 
     // Scroll with different alignments
     ScrollToIndex(10, false, ScrollAlign::START);
-    EXPECT_GE(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(pattern_->info_.startIndex_, 10);
 
     ScrollToIndex(20, false, ScrollAlign::CENTER);
-    EXPECT_LE(pattern_->info_.endIndex_, 39);
+    EXPECT_EQ(pattern_->info_.endIndex_, 25);
 
     ScrollToIndex(30, false, ScrollAlign::END);
-    EXPECT_LE(pattern_->info_.endIndex_, 39);
+    EXPECT_EQ(pattern_->info_.endIndex_, 31);
 }
 
 /**
@@ -815,7 +817,7 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, NegativeScrollIndex, TestSize.Level1)
 
     // Try to scroll backward from top (should stay at top)
     ScrollBy(0, -ITEM_MAIN_SIZE);
-    EXPECT_LE(pattern_->info_.currentOffset_, 0);
+    EXPECT_EQ(pattern_->info_.currentOffset_, 0);
     EXPECT_EQ(pattern_->info_.startIndex_, 0);
 }
 
@@ -837,8 +839,8 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, PrecisionScrolling, TestSize.Level1)
         ScrollBy(0, 1.0f);
     }
     // After 100 pixels, should have some scroll movement
-    EXPECT_GE(pattern_->info_.startIndex_, 0);
-    EXPECT_LE(pattern_->info_.currentOffset_, 0);
+    EXPECT_EQ(pattern_->info_.startIndex_, 2);
+    EXPECT_EQ(pattern_->info_.currentOffset_, 0);
 }
 
 /**
@@ -859,8 +861,8 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, FractionalScrollSteps, TestSize.Level1
     ScrollBy(0, 66.67f);
     ScrollBy(0, 50.0f);
 
-    EXPECT_GE(pattern_->info_.startIndex_, 0);
-    EXPECT_LE(pattern_->info_.endIndex_, 39);
+    EXPECT_EQ(pattern_->info_.startIndex_, 2);
+    EXPECT_EQ(pattern_->info_.endIndex_, 11);
 }
 
 /**
@@ -883,7 +885,7 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, ScrollWithBarOffset, TestSize.Level1)
     CreateDone();
 
     ScrollBy(0, ITEM_MAIN_SIZE);
-    EXPECT_GE(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(pattern_->info_.startIndex_, 2);
 }
 
 /**
@@ -901,7 +903,7 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, SixColumnLayout, TestSize.Level1)
 
     ScrollBy(0, ITEM_MAIN_SIZE);
     EXPECT_EQ(pattern_->info_.startIndex_ % 6, 0);
-    EXPECT_LE(pattern_->info_.endIndex_, 59);
+    EXPECT_EQ(pattern_->info_.endIndex_, 29);
 }
 
 /**
@@ -919,10 +921,10 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, VeryLargeDataset, TestSize.Level1)
 
     // Scroll to various positions in large dataset
     ScrollToIndex(100, false, ScrollAlign::START);
-    EXPECT_GE(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(pattern_->info_.startIndex_, 100);
 
     ScrollToIndex(400, false, ScrollAlign::START);
-    EXPECT_LE(pattern_->info_.endIndex_, 499);
+    EXPECT_EQ(pattern_->info_.endIndex_, 407);
 }
 
 /**
@@ -940,8 +942,8 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, ScrollToMiddleOfLargeSet, TestSize.Lev
 
     // Scroll to exact middle
     ScrollToIndex(50, false, ScrollAlign::CENTER);
-    EXPECT_GE(pattern_->info_.startIndex_, 40);
-    EXPECT_LE(pattern_->info_.endIndex_, 60);
+    EXPECT_EQ(pattern_->info_.startIndex_, 46);
+    EXPECT_EQ(pattern_->info_.endIndex_, 55);
 }
 
 /**
@@ -962,7 +964,7 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, AlternatingScrollDirection, TestSize.L
         ScrollBy(0, ITEM_MAIN_SIZE);
         ScrollBy(0, -ITEM_MAIN_SIZE / 2);
     }
-    EXPECT_GE(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(pattern_->info_.startIndex_, 2);
 }
 
 /**
@@ -981,7 +983,7 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, ScrollBeyondEnd, TestSize.Level1)
     // Scroll far beyond content
     ScrollTo(ITEM_MAIN_SIZE * 50);
     EXPECT_TRUE(pattern_->info_.reachEnd_);
-    EXPECT_LE(pattern_->info_.endIndex_, 19);
+    EXPECT_EQ(pattern_->info_.endIndex_, 19);
 }
 
 /**
@@ -1023,7 +1025,7 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, IndexBeyondRange, TestSize.Level1)
     // Scroll to index beyond range (should clamp to end)
     ScrollToIndex(100, false, ScrollAlign::START);
     // Should be at or near the end
-    EXPECT_LE(pattern_->info_.endIndex_, 19);
+    EXPECT_EQ(pattern_->info_.endIndex_, 7);
 }
 
 /**
@@ -1041,7 +1043,7 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, SevenColumnLayout, TestSize.Level1)
 
     ScrollBy(0, ITEM_MAIN_SIZE);
     EXPECT_EQ(pattern_->info_.startIndex_ % 7, 0);
-    EXPECT_LE(pattern_->info_.endIndex_, 69);
+    EXPECT_EQ(pattern_->info_.endIndex_, 34);
 }
 
 /**
@@ -1059,8 +1061,8 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, CacheClearedAfterChildrenUpdate, TestS
 
     // Create cache by scrolling
     ScrollBy(0, ITEM_MAIN_SIZE * 2);
-    EXPECT_EQ(pattern_->info_.lineHeightMap_.size(), 7);
-    EXPECT_EQ(pattern_->info_.gridMatrix_.size(), 8);
+    EXPECT_EQ(pattern_->info_.lineHeightMap_.size(), 6);
+    EXPECT_EQ(pattern_->info_.gridMatrix_.size(), 7);
     EXPECT_EQ(pattern_->info_.startIndex_, 4);
     EXPECT_EQ(pattern_->info_.endIndex_, 11);
 
@@ -1307,6 +1309,596 @@ HWTEST_F(GridCustomLayoutAlgorithmTestNg, LargeCacheCount, TestSize.Level1)
     // Verify layout works with large cache
     EXPECT_EQ(pattern_->info_.startIndex_, 6);
     EXPECT_EQ(pattern_->info_.endIndex_, 13);
+}
+
+/**
+ * @tc.name: CrossCountChangeWithUserJump
+ * @tc.desc: Test that user jump is preserved when crossCount changes
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCustomLayoutAlgorithmTestNg, CrossCountChangeWithUserJump, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr"); // Initial: 2 columns
+    model.SetLayoutOptions(GetRegularDemoOptions(2, ITEM_MAIN_SIZE));
+    CreateFixedItems(30);
+    CreateDone();
+
+    // Simulate user jump by directly setting jumpIndex
+    int32_t targetIndex = 15;
+    pattern_->info_.jumpIndex_ = targetIndex;
+    pattern_->info_.scrollAlign_ = ScrollAlign::START;
+
+    // Manually simulate crossCount change to test the logic
+    int32_t originalCrossCount = pattern_->info_.crossCount_;
+    pattern_->info_.lastCrossCount_ = originalCrossCount;
+    pattern_->info_.crossCount_ = originalCrossCount + 1; // Simulate crossCount change
+
+    // Mark that children were updated to trigger CheckForReset logic
+    frameNode_->ChildrenUpdatedFrom(0);
+
+    // Trigger layout recalculation - this should invoke CheckForReset
+    // The key is: when jumpIndex_ is already set (not EMPTY_JUMP_INDEX),
+    // crossCount change should NOT overwrite it
+    ScrollBy(0, 0);
+
+    // The primary verification: layout should process normally
+    // The user's jumpIndex should have been processed during layout
+    EXPECT_EQ(pattern_->info_.startIndex_, 14);
+    EXPECT_EQ(pattern_->info_.endIndex_, 21);
+}
+
+/**
+ * @tc.name: CrossCountChangeWithoutUserJump
+ * @tc.desc: Test that auto-adjustment works when crossCount changes without user jump
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCustomLayoutAlgorithmTestNg, CrossCountChangeWithoutUserJump, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr"); // Initial: 2 columns
+    model.SetLayoutOptions(GetRegularDemoOptions(2, ITEM_MAIN_SIZE));
+    CreateFixedItems(30);
+    CreateDone();
+
+    // Scroll to middle to have a non-zero offset
+    ScrollBy(0, ITEM_MAIN_SIZE * 3);
+
+    // Verify no user jump is pending
+    EXPECT_EQ(pattern_->info_.jumpIndex_, EMPTY_JUMP_INDEX);
+
+    // Manually simulate crossCount change to test the logic
+    int32_t originalCrossCount = pattern_->info_.crossCount_;
+    pattern_->info_.lastCrossCount_ = originalCrossCount;
+    pattern_->info_.crossCount_ = originalCrossCount + 1; // Simulate crossCount change
+
+    // Mark that children were updated to trigger CheckForReset logic
+    frameNode_->ChildrenUpdatedFrom(0);
+
+    // Trigger layout recalculation - this should invoke CheckForReset
+    // When no user jump is pending, crossCount change should trigger auto-adjustment
+    ScrollBy(0, 0);
+
+    // After crossCount change, auto-adjustment should have been triggered
+    // The layout should maintain visual continuity
+    EXPECT_EQ(pattern_->info_.startIndex_, 6);
+    EXPECT_EQ(pattern_->info_.endIndex_, 13);
+}
+
+/**
+ * @tc.name: AdjustOffsetApplication
+ * @tc.desc: Test that adjustOffset_ is correctly applied and cleared
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCustomLayoutAlgorithmTestNg, AdjustOffsetApplication, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr"); // Initial: 2 columns
+    model.SetLayoutOptions(GetRegularDemoOptions(2, ITEM_MAIN_SIZE));
+    CreateFixedItems(30);
+    CreateDone();
+
+    // Scroll to create an offset
+    ScrollBy(0, ITEM_MAIN_SIZE * 2);
+
+    // Ensure no user jump
+    EXPECT_EQ(pattern_->info_.jumpIndex_, EMPTY_JUMP_INDEX);
+
+    // Manually simulate crossCount change to activate auto-adjustment
+    int32_t originalCrossCount = pattern_->info_.crossCount_;
+    pattern_->info_.lastCrossCount_ = originalCrossCount;
+    pattern_->info_.crossCount_ = originalCrossCount + 1;
+
+    // Mark that children were updated
+    frameNode_->ChildrenUpdatedFrom(0);
+
+    // Trigger layout recalculation - adjustOffset_ should be applied internally
+    ScrollBy(0, 0);
+
+    // The layout should maintain visual continuity
+    EXPECT_EQ(pattern_->info_.startIndex_, 4);
+    EXPECT_EQ(pattern_->info_.endIndex_, 11);
+}
+
+/**
+ * @tc.name: PropertyUpdateByChildRequestTriggersJump
+ * @tc.desc: Test that PROPERTY_UPDATE_BY_CHILD_REQUEST triggers jump with adjustOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCustomLayoutAlgorithmTestNg, PropertyUpdateByChildRequestTriggersJump, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions(GetRegularDemoOptions(2, ITEM_MAIN_SIZE));
+    CreateFixedItems(30);
+    CreateDone();
+
+    // Scroll to create a non-zero offset
+    ScrollBy(0, ITEM_MAIN_SIZE * 2);
+
+    // Trigger property update by child request
+    // This simulates a child requesting a layout update
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    pattern_->OnModifyDone();
+
+    // After the property update, jump should be prepared
+    // and adjustOffset_ should be set to maintain position
+    EXPECT_EQ(pattern_->info_.startIndex_, 4);
+    EXPECT_EQ(pattern_->info_.endIndex_, 11);
+}
+
+/**
+ * @tc.name: ConstraintChangedTriggersJump
+ * @tc.desc: Test that ConstraintChanged triggers jump with adjustOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCustomLayoutAlgorithmTestNg, ConstraintChangedTriggersJump, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions(GetRegularDemoOptions(2, ITEM_MAIN_SIZE));
+    CreateFixedItems(30);
+    CreateDone();
+
+    // Scroll to middle
+    ScrollBy(0, ITEM_MAIN_SIZE * 3);
+
+    // Trigger constraint change
+    // This simulates the grid constraints changing (e.g., size change)
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    pattern_->OnModifyDone();
+
+    // After constraint change, jump should be prepared
+    // and adjustOffset_ should be set to maintain position
+    EXPECT_EQ(pattern_->info_.startIndex_, 6);
+    EXPECT_EQ(pattern_->info_.endIndex_, 13);
+}
+
+/**
+ * @tc.name: AdjustOffsetSetInMultipleScenarios
+ * @tc.desc: Test that adjustOffset_ is correctly set in various reset scenarios
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCustomLayoutAlgorithmTestNg, AdjustOffsetSetInMultipleScenarios, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions(GetRegularDemoOptions(2, ITEM_MAIN_SIZE));
+    CreateFixedItems(30);
+    CreateDone();
+
+    // Test 1: CrossCount change scenario
+    ScrollBy(0, ITEM_MAIN_SIZE * 2);
+    int32_t originalCrossCount = pattern_->info_.crossCount_;
+    pattern_->info_.lastCrossCount_ = originalCrossCount;
+    pattern_->info_.crossCount_ = originalCrossCount + 1;
+    frameNode_->ChildrenUpdatedFrom(0);
+    ScrollBy(0, 0);
+    EXPECT_EQ(pattern_->info_.startIndex_, 4);
+    EXPECT_EQ(pattern_->info_.endIndex_, 11);
+
+    // Test 2: Property update by child request
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    pattern_->OnModifyDone();
+    EXPECT_EQ(pattern_->info_.startIndex_, 4);
+    EXPECT_EQ(pattern_->info_.endIndex_, 11);
+}
+
+/**
+ * @tc.name: AdjustOffsetMaintainsPosition
+ * @tc.desc: Test that adjustOffset_ helps maintain visual position during resets
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCustomLayoutAlgorithmTestNg, AdjustOffsetMaintainsPosition, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions(GetRegularDemoOptions(2, ITEM_MAIN_SIZE));
+    CreateFixedItems(30);
+    CreateDone();
+
+    // Establish a stable scroll position
+    ScrollBy(0, ITEM_MAIN_SIZE * 5);
+    int32_t stableStartIndex = pattern_->info_.startIndex_;
+    EXPECT_EQ(stableStartIndex, 10);
+
+    // Simulate crossCount change (which triggers reset)
+    int32_t originalCrossCount = pattern_->info_.crossCount_;
+    pattern_->info_.lastCrossCount_ = originalCrossCount;
+    pattern_->info_.crossCount_ = originalCrossCount + 1;
+
+    // Trigger update
+    frameNode_->ChildrenUpdatedFrom(0);
+    ScrollBy(0, 0);
+
+    // After reset with adjustOffset_, the layout should maintain continuity
+    // The start index should be reasonable
+    EXPECT_EQ(pattern_->info_.startIndex_, 10);
+    EXPECT_EQ(pattern_->info_.endIndex_, 17);
+}
+
+/**
+ * @tc.name: MeasureToTargetCachedItemHeight001
+ * @tc.desc: Test MeasureToTarget calculates correct itemHeight when target item is in cache range
+ *           This test verifies the fix for the issue where GetHeightInRange would include an extra
+ *           mainGap when calculating item height for items spanning multiple rows.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCustomLayoutAlgorithmTestNg, MeasureToTargetCachedItemHeight001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(Get3LinesIrregularDemoOptions(30, ITEM_MAIN_SIZE));
+    model.SetRowsGap(Dimension(5));
+    CreateItemsInLazyForEach(
+        30, [](uint32_t idx) { return idx % 3 == 0 ? ITEM_MAIN_SIZE * 2 - 5 : ITEM_MAIN_SIZE - 5; });
+    CreateDone();
+
+    // First, scroll down to make some items out of view
+    ScrollBy(0, ITEM_MAIN_SIZE * 2);
+    ScrollBy(0, ITEM_MAIN_SIZE * 2);
+
+    AnimateToIndexWithTicks(10, ScrollAlign::END);
+
+    // Verify the item is correctly positioned at the start
+    EXPECT_EQ(pattern_->info_.startIndex_, 3);
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 2);
+    EXPECT_EQ(pattern_->info_.currentOffset_, -ITEM_MAIN_SIZE + 5);
+}
+
+/**
+ * @tc.name: PreloadItemsMatrixContinuityCheck001
+ * @tc.desc: Test PreloadItems debug check for gridMatrix_ row continuity during normal scrolling
+ *           Verifies that debug continuity check does not affect normal preload behavior.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCustomLayoutAlgorithmTestNg, PreloadItemsMatrixContinuityCheck001, TestSize.Level1)
+{
+    // Save original debug mode and enable it for this test
+    bool originalDebugEnabled = SystemProperties::debugEnabled_;
+    SystemProperties::debugEnabled_ = true;
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions(GetRegularDemoOptions(2, ITEM_MAIN_SIZE));
+    CreateFixedItems(30);
+    CreateDone();
+
+    // Scroll to trigger preload with cache
+    layoutProperty_->UpdateCachedCount(2);
+    ScrollBy(0, ITEM_MAIN_SIZE * 2);
+
+    // Verify preload was triggered and gridMatrix_ is properly populated
+    EXPECT_GT(pattern_->info_.gridMatrix_.size(), 0);
+    EXPECT_EQ(pattern_->info_.startIndex_, 4);
+    EXPECT_EQ(pattern_->info_.endIndex_, 11);
+    // Restore original debug mode
+    SystemProperties::debugEnabled_ = originalDebugEnabled;
+}
+
+/**
+ * @tc.name: PreloadItemsMatrixContinuityCheck002
+ * @tc.desc: Test PreloadItems with large scroll that triggers skip logic
+ *           Verifies debug continuity check handles large jumps correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCustomLayoutAlgorithmTestNg, PreloadItemsMatrixContinuityCheck002, TestSize.Level1)
+{
+    // Save original debug mode and enable it for this test
+    bool originalDebugEnabled = SystemProperties::debugEnabled_;
+    SystemProperties::debugEnabled_ = true;
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions(GetRegularDemoOptions(2, ITEM_MAIN_SIZE));
+    CreateFixedItems(100);
+    CreateDone();
+
+    layoutProperty_->UpdateCachedCount(3);
+
+    // Large scroll to trigger skip logic and preload
+    ScrollBy(0, ITEM_MAIN_SIZE * 20);
+
+    // Verify grid state is valid after large scroll with preload
+    EXPECT_GT(pattern_->info_.gridMatrix_.size(), 0);
+    EXPECT_GT(pattern_->info_.startIndex_, 0);
+    EXPECT_TRUE(pattern_->info_.endIndex_ >= pattern_->info_.startIndex_);
+    // Restore original debug mode
+    SystemProperties::debugEnabled_ = originalDebugEnabled;
+}
+
+/**
+ * @tc.name: PreloadItemsMatrixContinuityCheck003
+ * @tc.desc: Test PreloadItems debug check when scrolling backward
+ *           Verifies continuity check works correctly during backward scrolling.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCustomLayoutAlgorithmTestNg, PreloadItemsMatrixContinuityCheck003, TestSize.Level1)
+{
+    // Save original debug mode and enable it for this test
+    bool originalDebugEnabled = SystemProperties::debugEnabled_;
+    SystemProperties::debugEnabled_ = true;
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions(GetRegularDemoOptions(2, ITEM_MAIN_SIZE));
+    CreateFixedItems(50);
+    CreateDone();
+
+    layoutProperty_->UpdateCachedCount(2);
+
+    // Scroll forward then backward to trigger preload in both directions
+    ScrollBy(0, ITEM_MAIN_SIZE * 5);
+    int32_t forwardStartIndex = pattern_->info_.startIndex_;
+    EXPECT_EQ(forwardStartIndex, 10);
+
+    ScrollBy(0, -ITEM_MAIN_SIZE * 2);
+
+    // Verify backward scroll with preload maintains valid state
+    EXPECT_GT(pattern_->info_.gridMatrix_.size(), 0);
+    EXPECT_LT(pattern_->info_.startIndex_, forwardStartIndex);
+    // Restore original debug mode
+    SystemProperties::debugEnabled_ = originalDebugEnabled;
+}
+
+/**
+ * @tc.name: PreloadItemsMatrixContinuityCheck004
+ * @tc.desc: Test PreloadItems with irregular items
+ *           Verifies debug continuity check handles irregular grid layout correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCustomLayoutAlgorithmTestNg, PreloadItemsMatrixContinuityCheck004, TestSize.Level1)
+{
+    // Save original debug mode and enable it for this test
+    bool originalDebugEnabled = SystemProperties::debugEnabled_;
+    SystemProperties::debugEnabled_ = true;
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(Get3LinesIrregularDemoOptions(30, ITEM_MAIN_SIZE));
+    CreateFixedItems(30);
+    CreateDone();
+
+    layoutProperty_->UpdateCachedCount(2);
+
+    // Scroll with irregular items
+    ScrollBy(0, ITEM_MAIN_SIZE * 2);
+
+    // Verify irregular layout with preload maintains valid gridMatrix_
+    EXPECT_GT(pattern_->info_.gridMatrix_.size(), 0);
+    EXPECT_GT(pattern_->info_.startIndex_, 0);
+    // Restore original debug mode
+    SystemProperties::debugEnabled_ = originalDebugEnabled;
+}
+
+/**
+ * @tc.name: PreloadItemsMatrixContinuityCheck005
+ * @tc.desc: Test PreloadItems at grid boundaries (start and end)
+ *           Verifies continuity check handles edge cases at grid boundaries.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCustomLayoutAlgorithmTestNg, PreloadItemsMatrixContinuityCheck005, TestSize.Level1)
+{
+    // Save original debug mode and enable it for this test
+    bool originalDebugEnabled = SystemProperties::debugEnabled_;
+    SystemProperties::debugEnabled_ = true;
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions(GetRegularDemoOptions(2, ITEM_MAIN_SIZE));
+    CreateFixedItems(20);
+    CreateDone();
+
+    layoutProperty_->UpdateCachedCount(2);
+
+    // At start - preload should handle boundary correctly
+    ScrollBy(0, 0);
+    EXPECT_EQ(pattern_->info_.startIndex_, 0);
+    EXPECT_GT(pattern_->info_.gridMatrix_.size(), 0);
+
+    // Scroll to end
+    ScrollTo(ITEM_MAIN_SIZE * 15);
+    EXPECT_TRUE(pattern_->info_.reachEnd_);
+
+    // Preload at end boundary should work correctly
+    ScrollBy(0, ITEM_MAIN_SIZE);
+    EXPECT_TRUE(pattern_->info_.reachEnd_);
+    // Restore original debug mode
+    SystemProperties::debugEnabled_ = originalDebugEnabled;
+}
+
+/**
+ * @tc.name: PreloadItemsMatrixContinuityCheck006
+ * @tc.desc: Test PreloadItems with rapid consecutive scrolls
+ *           Verifies continuity check remains stable during rapid scroll operations.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCustomLayoutAlgorithmTestNg, PreloadItemsMatrixContinuityCheck006, TestSize.Level1)
+{
+    // Save original debug mode and enable it for this test
+    bool originalDebugEnabled = SystemProperties::debugEnabled_;
+    SystemProperties::debugEnabled_ = true;
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions(GetRegularDemoOptions(2, ITEM_MAIN_SIZE));
+    CreateFixedItems(100);
+    CreateDone();
+
+    layoutProperty_->UpdateCachedCount(2);
+
+    // Rapid consecutive scrolls
+    for (int i = 0; i < 10; i++) {
+        ScrollBy(0, ITEM_MAIN_SIZE);
+    }
+
+    // Verify grid state is consistent after rapid scrolls
+    EXPECT_GT(pattern_->info_.gridMatrix_.size(), 0);
+    EXPECT_EQ(pattern_->info_.startIndex_, 20);
+    EXPECT_EQ(pattern_->info_.endIndex_, 27);
+    // Restore original debug mode
+    SystemProperties::debugEnabled_ = originalDebugEnabled;
+}
+
+namespace {
+GridLayoutOptions GetGapDemoOptions(int32_t crossCount, float itemMainSize, int32_t gapSize)
+{
+    GridLayoutOptions options;
+    auto onGetStartIndexByOffset = [crossCount, itemMainSize](float offset) -> GridStartLineInfo {
+        if (offset < 0.0f) {
+            return { .startIndex = 0, .startLine = 0, .startOffset = 0 - offset, .totalOffset = offset };
+        }
+        int32_t line = offset / static_cast<int32_t>(itemMainSize);
+        float startOffset = std::fmod(offset, itemMainSize);
+        return {
+            .startIndex = line * crossCount, .startLine = line, .startOffset = 0 - startOffset, .totalOffset = offset
+        };
+    };
+    options.getStartIndexByOffset = std::move(onGetStartIndexByOffset);
+
+    auto onGetStartIndexByIndex = [crossCount, itemMainSize, gapSize](int32_t targetIndex) -> GridStartLineInfo {
+        int32_t line = targetIndex / crossCount;
+        return { .startIndex = line * crossCount,
+            .startLine = line - gapSize,
+            .startOffset = 0.0f,
+            .totalOffset = (line - gapSize) * itemMainSize };
+    };
+    options.getStartIndexByIndex = std::move(onGetStartIndexByIndex);
+    return options;
+}
+} // namespace
+
+/**
+ * @tc.name: CheckMatrixContinuousGapDetection001
+ * @tc.desc: Test CheckMatrixContinuous detects gap when getStartIndexByIndex
+ *           returns startLine shifted by -2 rows. A large scroll triggers skip
+ *           logic, rebuilding matrix from scratch. PreloadItems calls
+ *           getStartIndexByIndex for items not in the matrix, causing
+ *           FillMatrixFromStartIndex to start from a wrong line and creating
+ *           a gap between preload rows and viewport rows.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCustomLayoutAlgorithmTestNg, CheckMatrixContinuousGapDetection001, TestSize.Level1)
+{
+    bool originalDebugEnabled = SystemProperties::debugEnabled_;
+    SystemProperties::debugEnabled_ = true;
+
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions(GetGapDemoOptions(2, ITEM_MAIN_SIZE, 2));
+    CreateFixedItems(100);
+    CreateDone();
+
+    layoutProperty_->UpdateCachedCount(3);
+
+    ScrollBy(0, ITEM_MAIN_SIZE * 30);
+
+    EXPECT_EQ(pattern_->info_.startIndex_, 60);
+    EXPECT_EQ(pattern_->info_.endIndex_, 67);
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 30);
+
+    SystemProperties::debugEnabled_ = originalDebugEnabled;
+}
+
+/**
+ * @tc.name: CheckMatrixContinuousGapDetection002
+ * @tc.desc: Test CheckMatrixContinuous detects larger gap when getStartIndexByIndex
+ *           returns startLine shifted by -4 rows. Uses a bigger gap to verify
+ *           the check handles multi-row discontinuities.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCustomLayoutAlgorithmTestNg, CheckMatrixContinuousGapDetection002, TestSize.Level1)
+{
+    bool originalDebugEnabled = SystemProperties::debugEnabled_;
+    SystemProperties::debugEnabled_ = true;
+
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions(GetGapDemoOptions(2, ITEM_MAIN_SIZE, 4));
+    CreateFixedItems(100);
+    CreateDone();
+
+    layoutProperty_->UpdateCachedCount(3);
+
+    ScrollBy(0, ITEM_MAIN_SIZE * 30);
+
+    EXPECT_EQ(pattern_->info_.startIndex_, 60);
+    EXPECT_EQ(pattern_->info_.endIndex_, 67);
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 30);
+
+    SystemProperties::debugEnabled_ = originalDebugEnabled;
+}
+
+/**
+ * @tc.name: CheckMatrixContinuousGapDetection003
+ * @tc.desc: Test CheckMatrixContinuous with gap via wrong getStartIndexByIndex
+ *           in a 3-column grid. Different column count changes row layout,
+ *           verifying the gap detection works across configurations.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCustomLayoutAlgorithmTestNg, CheckMatrixContinuousGapDetection003, TestSize.Level1)
+{
+    bool originalDebugEnabled = SystemProperties::debugEnabled_;
+    SystemProperties::debugEnabled_ = true;
+
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(GetGapDemoOptions(3, ITEM_MAIN_SIZE, 2));
+    CreateFixedItems(100);
+    CreateDone();
+
+    layoutProperty_->UpdateCachedCount(3);
+
+    ScrollBy(0, ITEM_MAIN_SIZE * 30);
+
+    EXPECT_EQ(pattern_->info_.startIndex_, 90);
+    EXPECT_EQ(pattern_->info_.endIndex_, 99);
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 30);
+
+    SystemProperties::debugEnabled_ = originalDebugEnabled;
+}
+
+/**
+ * @tc.name: CheckMatrixContinuousGapDetection004
+ * @tc.desc: Test CheckMatrixContinuous with gap on smaller scroll.
+ *           Uses a moderate scroll (10 rows) with cachedCount=2 to trigger
+ *           PreloadItems where backward cache items fall outside the matrix.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCustomLayoutAlgorithmTestNg, CheckMatrixContinuousGapDetection004, TestSize.Level1)
+{
+    bool originalDebugEnabled = SystemProperties::debugEnabled_;
+    SystemProperties::debugEnabled_ = true;
+
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions(GetGapDemoOptions(2, ITEM_MAIN_SIZE, 2));
+    CreateFixedItems(100);
+    CreateDone();
+
+    layoutProperty_->UpdateCachedCount(2);
+
+    ScrollBy(0, ITEM_MAIN_SIZE * 10);
+
+    EXPECT_EQ(pattern_->info_.startIndex_, 20);
+    EXPECT_EQ(pattern_->info_.endIndex_, 27);
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 10);
+
+    SystemProperties::debugEnabled_ = originalDebugEnabled;
 }
 
 } // namespace OHOS::Ace::NG

@@ -1,6 +1,6 @@
 import { memo, memo_intrinsic, memo_entry, memo_stable, memo_skip } from "@koalaui/runtime/annotations"
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,7 +43,6 @@ import router from "@ohos/router"
 import { InteropNativeModule, nullptr } from "@koalaui/interop"
 import { RouterExtender, PageRouterOptions, RouterOptionsInner } from "#generated"
 import { UIContextUtil } from "arkui/base/UIContextUtil"
-import { UIContextImpl } from "arkui/base/UIContextImpl"
 import { AsyncCallback, BusinessError } from "@ohos.base"
 import { UIContext } from "@ohos/arkui/UIContext"
 
@@ -109,7 +108,6 @@ class VisiblePage {
 }
 
 class RouterState {
-    readonly visiblePages = arrayState<VisiblePage>()
     currentActivePage = mutableState(0)
     constructor(
         page: UserViewBuilder,
@@ -121,7 +119,6 @@ class RouterState {
         this.url = url
         this.params = params
         this.resolve = resolve
-        // this.visiblePages.push(new VisiblePage(page, this.version.value, RouterTransitionVisibility.Visible))
     }
     @memo
     page: UserViewBuilder
@@ -248,7 +245,7 @@ export class RouterImpl implements Router {
     // list of jsViewNode
     private peerNodeList = new Array<KPointer>
     // infos of pages in stack
-    public readonly visiblePages = arrayState<VisiblePage>()
+    public readonly visiblePages = new Array<VisiblePage>()
     private showingPageIndex : int = 0
     // entry page
     private entryPage: VisiblePage | undefined = undefined;
@@ -275,7 +272,7 @@ export class RouterImpl implements Router {
         }
         try {
             return JSON.stringify(params); 
-        } catch (e: Error) { 
+        } catch (e) { 
             console.log(`AceRouter: RouterUtil.stringifyParams failed`); 
             console.log(e.stack); 
             return ""; 
@@ -324,14 +321,14 @@ export class RouterImpl implements Router {
             }
         }
         //@ts-ignore
-        catch (e: Error) {
+        catch (e) {
             InteropNativeModule._NativeLog("AceRouter: catch RunPage error: " + e)
         }
         return undefined
     }
 
     private findPageInStack(url: string, isReplace: boolean = false): boolean {
-        let index = this.visiblePages.value.findLastIndex(page => (page.path + page.url) === url);
+        let index = this.visiblePages.findLastIndex(page => (page.path + page.url) === url);
         if (index === -1) {
             return false;
         }
@@ -452,7 +449,7 @@ export class RouterImpl implements Router {
                 peerNode = findPeerNode(incNode);
             }
             //@ts-ignore
-            catch (e: Error) {
+            catch (e) {
                 console.log("AceRouter: create page failed, name: " + e.name + " message: " + e.message);
                 console.log(e.stack);
             }
@@ -465,7 +462,7 @@ export class RouterImpl implements Router {
             const jsViewNodePtr = peerNode!.peer.ptr;
             this.rootState.push(stateNode)
             this.peerNodeList.push(jsViewNodePtr);
-            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
             context.getDetachedRootEntryManager().setDetachedRootNode(jsViewNodePtr, stateNode);
             let pagePushTransitionCallback = (jsNode: KPointer) => {
                 let index = this.peerNodeList.indexOf(jsNode);
@@ -592,7 +589,7 @@ export class RouterImpl implements Router {
                 peerNode = findPeerNode(incNode);
             }
             //@ts-ignore
-            catch (e: Error) {
+            catch (e) {
                 console.log("AceRouter: create page failed, name: " + e.name + " message: " + e.message);
                 console.log(e.stack);
             }
@@ -605,7 +602,7 @@ export class RouterImpl implements Router {
             const jsViewNodePtr = peerNode!.peer.ptr;
             this.rootState.push(stateNode)
             this.peerNodeList.push(jsViewNodePtr);
-            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
             context.getDetachedRootEntryManager().setDetachedRootNode(jsViewNodePtr, stateNode);
             let pagePushTransitionCallback = (jsNode: KPointer) => {
                 let index = this.peerNodeList.indexOf(jsNode);
@@ -672,7 +669,7 @@ export class RouterImpl implements Router {
                 peerNode = findPeerNode(incNode);
             }
             //@ts-ignore
-            catch (e: Error) {
+            catch (e) {
                 console.log("AceRouter: create page failed, name: " + e.name + " message: " + e.message);
                 console.log(e.stack);
             }
@@ -685,7 +682,7 @@ export class RouterImpl implements Router {
             const jsViewNodePtr = peerNode!.peer.ptr;
             this.rootState.push(stateNode)
             this.peerNodeList.push(jsViewNodePtr);
-            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
             context.getDetachedRootEntryManager().setDetachedRootNode(jsViewNodePtr, stateNode);
             let pagePushTransitionCallback = (jsNode: KPointer) => {
                 let index = this.peerNodeList.indexOf(jsNode);
@@ -696,7 +693,11 @@ export class RouterImpl implements Router {
                     this.showingPageIndex = this.showingPageIndex - 1;
                 }
             };
-            let newPage = new VisiblePage(entryObject.entry, this.getFileInfo(options.name), this.getPathInfo(options.name), options.params);
+            let pagePath = entryInfo!.pagePath;
+            let lastIndex = pagePath.lastIndexOf('/');
+            let name = lastIndex !== -1 ? pagePath.slice(lastIndex + 1) : '';
+            let path = lastIndex !== -1 ? pagePath.slice(0, lastIndex + 1) : '';
+            let newPage = new VisiblePage(entryObject.entry, name, path, options.params);
             this.visiblePages.splice(this.showingPageIndex + 1, 0, newPage);
             this.showingPageIndex += 1;
             let pageOptions: PageRouterOptions = { options: optionsInner };
@@ -761,7 +762,7 @@ export class RouterImpl implements Router {
                 peerNode = findPeerNode(incNode);
             }
             //@ts-ignore
-            catch (e: Error) {
+            catch (e) {
                 console.log("AceRouter: create page failed, name: " + e.name + " message: " + e.message);
                 console.log(e.stack);
             }
@@ -774,7 +775,7 @@ export class RouterImpl implements Router {
             const jsViewNodePtr = peerNode!.peer.ptr;
             this.rootState.push(stateNode)
             this.peerNodeList.push(jsViewNodePtr);
-            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
             context.getDetachedRootEntryManager().setDetachedRootNode(jsViewNodePtr, stateNode);
             let pagePushTransitionCallback = (jsNode: KPointer) => {
                 let index = this.peerNodeList.indexOf(jsNode);
@@ -785,7 +786,11 @@ export class RouterImpl implements Router {
                     this.showingPageIndex = this.showingPageIndex - 1;
                 }
             };
-            let newPage = new VisiblePage(entryObject.entry, this.getFileInfo(options.name), this.getPathInfo(options.name), options.params);
+            let pagePath = entryInfo!.pagePath;
+            let lastIndex = pagePath.lastIndexOf('/');
+            let name = lastIndex !== -1 ? pagePath.slice(lastIndex + 1) : '';
+            let path = lastIndex !== -1 ? pagePath.slice(0, lastIndex + 1) : '';
+            let newPage = new VisiblePage(entryObject.entry, name, path, options.params);
             this.visiblePages.splice(this.showingPageIndex + 1, 0, newPage);
             this.showingPageIndex += 1;
             let pageOptions: PageRouterOptions = { options: optionsInner };
@@ -822,7 +827,7 @@ export class RouterImpl implements Router {
         })
         this.rootState.push(stateNode);
         this.peerNodeList.push(pageNode)
-        let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
         context.getDetachedRootEntryManager().setDetachedRootNode(pageNode, stateNode);
         let pageEnterTransitionCallback = (pageNode: KPointer) => {
             let index = this.peerNodeList.indexOf(pageNode);
@@ -881,7 +886,7 @@ export class RouterImpl implements Router {
                 peerNode = findPeerNode(incNode);
             }
             //@ts-ignore
-            catch (e: Error) {
+            catch (e) {
                 console.log("AceRouter: create page failed, name: " + e.name + " message: " + e.message);
                 console.log(e.stack);
             }
@@ -895,7 +900,7 @@ export class RouterImpl implements Router {
             const jsViewNodePtr = peerNode!.peer.ptr
             this.rootState.push(stateNode);
             this.peerNodeList.push(jsViewNodePtr)
-            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
             context.getDetachedRootEntryManager().setDetachedRootNode(jsViewNodePtr, stateNode);
             let pageEnterTransitionCallback = (jsNode: KPointer) => {
                 let index = this.peerNodeList.indexOf(jsNode);
@@ -950,7 +955,7 @@ export class RouterImpl implements Router {
         })
         this.rootState.push(stateNode);
         this.peerNodeList.push(pageNode)
-        let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
         context.getDetachedRootEntryManager().setDetachedRootNode(pageNode, stateNode);
         let pageEnterTransitionCallback = (pageNode: KPointer) => {
             let index = this.peerNodeList.indexOf(pageNode);
@@ -1022,7 +1027,7 @@ export class RouterImpl implements Router {
                 peerNode = findPeerNode(incNode);
             }
             //@ts-ignore
-            catch (e: Error) {
+            catch (e) {
                 console.log("AceRouter: create page failed, name: " + e.name + " message: " + e.message);
                 console.log(e.stack);
             }
@@ -1036,7 +1041,7 @@ export class RouterImpl implements Router {
             const jsViewNodePtr = peerNode!.peer.ptr
             this.rootState.push(stateNode);
             this.peerNodeList.push(jsViewNodePtr)
-            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
             context.getDetachedRootEntryManager().setDetachedRootNode(jsViewNodePtr, stateNode);
             let pageEnterTransitionCallback = (jsNode: KPointer) => {
                 let index = this.peerNodeList.indexOf(jsNode);
@@ -1102,7 +1107,7 @@ export class RouterImpl implements Router {
                 peerNode = findPeerNode(incNode);
             }
             //@ts-ignore
-            catch (e: Error) {
+            catch (e) {
                 console.log("AceRouter: create page failed, name: " + e.name + " message: " + e.message);
                 console.log(e.stack);
             }
@@ -1115,7 +1120,7 @@ export class RouterImpl implements Router {
             const jsViewNodePtr = peerNode!.peer.ptr
             this.rootState.push(stateNode);
             this.peerNodeList.push(jsViewNodePtr)
-            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
             context.getDetachedRootEntryManager().setDetachedRootNode(jsViewNodePtr, stateNode);
             let pageEnterTransitionCallback = (jsNode: KPointer) => {
                 let index = this.peerNodeList.indexOf(jsNode);
@@ -1126,7 +1131,11 @@ export class RouterImpl implements Router {
                     this.showingPageIndex = this.showingPageIndex - 1;
                 }
             };
-            let newPage = new VisiblePage(entryObject.entry, this.getFileInfo(options.name), this.getPathInfo(options.name), options.params);
+            let pagePath = entryInfo!.pagePath;
+            let lastIndex = pagePath.lastIndexOf('/');
+            let name = lastIndex !== -1 ? pagePath.slice(lastIndex + 1) : '';
+            let path = lastIndex !== -1 ? pagePath.slice(0, lastIndex + 1) : '';
+            let newPage = new VisiblePage(entryObject.entry, name, path, options.params);
             this.visiblePages.push(newPage)
             this.showingPageIndex += 1
             let pageOptions: PageRouterOptions = { options: optionsInner };
@@ -1189,7 +1198,7 @@ export class RouterImpl implements Router {
                 peerNode = findPeerNode(incNode);
             }
             //@ts-ignore
-            catch (e: Error) {
+            catch (e) {
                 console.log("AceRouter: create page failed, name: " + e.name + " message: " + e.message);
                 console.log(e.stack);
             }
@@ -1203,7 +1212,7 @@ export class RouterImpl implements Router {
             const jsViewNodePtr = peerNode!.peer.ptr
             this.rootState.push(stateNode);
             this.peerNodeList.push(jsViewNodePtr)
-            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+            let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
             context.getDetachedRootEntryManager().setDetachedRootNode(jsViewNodePtr, stateNode);
             let pageEnterTransitionCallback = (jsNode: KPointer) => {
                 let index = this.peerNodeList.indexOf(jsNode);
@@ -1214,7 +1223,11 @@ export class RouterImpl implements Router {
                     this.showingPageIndex = this.showingPageIndex - 1;
                 }
             };
-            let newPage = new VisiblePage(entryObject.entry, this.getFileInfo(options.name), this.getPathInfo(options.name), options.params);
+            let pagePath = entryInfo!.pagePath;
+            let lastIndex = pagePath.lastIndexOf('/');
+            let name = lastIndex !== -1 ? pagePath.slice(lastIndex + 1) : '';
+            let path = lastIndex !== -1 ? pagePath.slice(0, lastIndex + 1) : '';
+            let newPage = new VisiblePage(entryObject.entry, name, path, options.params);
             this.visiblePages.push(newPage)
             this.showingPageIndex += 1
             let pageOptions: PageRouterOptions = { options: optionsInner };
@@ -1241,7 +1254,7 @@ export class RouterImpl implements Router {
         RouterExtender.back(optionsInner);
         if (options) {
             let url = options?.url;
-            let index = this.visiblePages.value.findLastIndex(element => (element.path + element.url) === url);
+            let index = this.visiblePages.findLastIndex(element => (element.path + element.url) === url);
             if (index != -1) {
                 let pageInfo = this.visiblePages.at(index.toInt());
                 if (pageInfo) {
@@ -1272,7 +1285,7 @@ export class RouterImpl implements Router {
     }
 
     getParams(): Object {
-        let curPage = this.visiblePages.at(this.showingPageIndex)
+        let curPage = this.visiblePages.at(this.showingPageIndex);
         return curPage.params !== undefined ? curPage.params! : new Object()
     }
 
@@ -1285,7 +1298,7 @@ export class RouterImpl implements Router {
     }
 
     getState(): router.RouterState {
-        let curPage = this.visiblePages.at(this.showingPageIndex)
+        let curPage = this.visiblePages.at(this.showingPageIndex);
         // routerState index is started from 1. 
         let state: router.RouterState = {
             index: this.showingPageIndex + 1,
@@ -1312,7 +1325,7 @@ export class RouterImpl implements Router {
 
     getStateByUrl(url: string): Array<router.RouterState> {
         let retVal: Array<router.RouterState> = new Array<router.RouterState>()
-        this.visiblePages.value.forEach((element, index) => {
+        this.visiblePages.forEach((element, index) => {
             if ((element.path + element.url) === url) {
                 // routerState index is started from 1. 
                 let state: router.RouterState = {
@@ -1357,7 +1370,7 @@ export class RouterImpl implements Router {
             peerNode = findPeerNode(incNode);
         }
         //@ts-ignore
-        catch (e: Error) {
+        catch (e) {
             console.log("AceRouter: create page failed, name: " + e.name + " message: " + e.message);
             console.log(e.stack);
         }
@@ -1368,7 +1381,7 @@ export class RouterImpl implements Router {
         const jsViewNodePtr = peerNode!.peer.ptr
         this.rootState.push(stateNode)
         this.peerNodeList.push(jsViewNodePtr);
-        let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
         context.getDetachedRootEntryManager().setDetachedRootNode(jsViewNodePtr, stateNode);
         let pagePushTransitionCallback = (jsNode: KPointer) => {
             let index = this.peerNodeList.indexOf(jsNode);
@@ -1447,7 +1460,7 @@ export class RouterUtil {
         routerImpl.SetRuntimeLinker(linker);
         try {
             router.pushUrl(options);
-        } catch (e: Error) {
+        } catch (e) {
             console.log("AceRouter: pushUrl failed, name: " + e.name + " message: " + e.message);
             console.log(e.stack);
         }
@@ -1479,7 +1492,7 @@ export class RouterUtil {
         routerImpl.SetRuntimeLinker(linker);
         try {
             router.replaceUrl(options);
-        } catch (e: Error) {
+        } catch (e) {
             console.log("AceRouter: replaceUrl failed, name: " + e.name + " message: " + e.message);
             console.log(e.stack);
         }
@@ -1511,7 +1524,7 @@ export class RouterUtil {
         routerImpl.SetRuntimeLinker(linker);
         try {
             router.back(options);
-        } catch (e: Error) {
+        } catch (e) {
             console.log("AceRouter: back failed, name: " + e.name + " message: " + e.message);
             console.log(e.stack);
         }
@@ -1531,7 +1544,7 @@ export class RouterUtil {
         routerImpl.SetRuntimeLinker(linker);
         try {
             router.clear();
-        } catch (e: Error) {
+        } catch (e) {
             console.log("AceRouter: clear failed, name: " + e.name + " message: " + e.message);
             console.log(e.stack);
         }
@@ -1549,7 +1562,7 @@ export class RouterUtil {
             }
             let len = routerImpl.getLength();
             return len;
-        } catch (e: Error) {
+        } catch (e) {
             console.log(`AceRouter: getLength error, name: ${e.name} message: ${e.message}`);
             console.log(e.stack);
             return "0";
@@ -1566,7 +1579,7 @@ export class RouterUtil {
                 return 0;
             }
             return routerImpl.getStackSize();
-        } catch (e: Error) {
+        } catch (e) {
             console.error(`AceRouter: getStackSize error, name: ${e.name} message: ${e.message}`);
             console.error(e.stack);
             return 0;
@@ -1585,7 +1598,7 @@ export class RouterUtil {
             let params = routerImpl.getParams();
             let paramsStr = RouterImpl.StringifyParams(params);
             return paramsStr;
-        } catch (e: Error) {
+        } catch (e) {
             console.log(`AceRouter: getParams error, name: ${e.name} message: ${e.message}`);
             console.log(e.stack);
             return "";
@@ -1614,7 +1627,7 @@ export class RouterUtil {
                 result.push(innerState);
             }
             return result;
-        } catch (e: Error) {
+        } catch (e) {
             console.log(`AceRouter: getStateByUrl error, name: ${e.name} message: ${e.message}`);
             console.log(e.stack);
             return new Array<InnerRouterState>();
@@ -1641,7 +1654,7 @@ export class RouterUtil {
                 params: RouterImpl.StringifyParams(state!.params)
             } as InnerRouterState;
             return innerState;
-        } catch (e: Error) {
+        } catch (e) {
             console.log(`AceRouter: getStateByIndex error, name: ${e.name} message: ${e.message}`);
             console.log(e.stack);
             return undefined;
@@ -1665,7 +1678,7 @@ export class RouterUtil {
                 params: RouterImpl.StringifyParams(state.params)
             } as InnerRouterState;
             return innerState;
-        } catch (e: Error) {
+        } catch (e) {
             console.log(`AceRouter: getState error, name: ${e.name} message: ${e.message}`);
             console.log(e.stack);
             return undefined;

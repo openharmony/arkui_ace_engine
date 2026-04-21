@@ -26,18 +26,19 @@
 
 #define private public
 #define protected public
-#include "test/mock/base/mock_subwindow.h"
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/subwindow/mock_subwindow.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/log/dump_log.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/select/select_theme.h"
+#include "core/components/button/button_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/action_sheet/action_sheet_model_ng.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -55,6 +56,11 @@
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "test/unittest/core/event/frame_node_on_tree.h"
+#include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/list/list_item_pattern.h"
+#include "core/common/ace_engine.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -76,6 +82,21 @@ class DialogPatternAdditionalTwoTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
+
+private:
+    RefPtr<FrameNode> CreateActionSheetList(RefPtr<DialogPattern> pattern);
+    RefPtr<FrameNode> CreateButton(const std::string& text);
+    RefPtr<FrameNode> CreateMenu(const std::vector<ButtonInfo>& buttons);
+
+    DialogProperties actionSheetProp_ = {
+        .type = DialogType::ACTION_SHEET, .title = TITLE,
+        .subtitle = SUBTITLE, .content = MESSAGE,
+        .isModal = false, .isShowInSubWindow = true,
+        .backgroundColor = Color::BLUE, .height = 50,
+        .isMenu = false, .sheetsInfo =  {{.title = "a"}, {.title = "b"}},
+        .buttonDirection = DialogButtonDirection::HORIZONTAL,
+        .buttons = {{ .text = "main button", .bgColor = Color::BLACK }},
+    };
 };
 
 void DialogPatternAdditionalTwoTestNg::SetUpTestCase()
@@ -93,10 +114,22 @@ void DialogPatternAdditionalTwoTestNg::SetUpTestCase()
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
         if (type == DialogTheme::TypeId()) {
             return AceType::MakeRefPtr<DialogTheme>();
+        } else if (type == ButtonTheme::TypeId()) {
+            return AceType::MakeRefPtr<ButtonTheme>();
+        } else if (type == TextTheme::TypeId()) {
+            return AceType::MakeRefPtr<TextTheme>();
         } else {
             return nullptr;
         }
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            if (type == DialogTheme::TypeId()) {
+                return AceType::MakeRefPtr<DialogTheme>();
+            } else {
+                return nullptr;
+            }
+        });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
@@ -105,6 +138,52 @@ void DialogPatternAdditionalTwoTestNg::TearDownTestCase()
     MockPipelineContext::GetCurrent()->themeManager_ = nullptr;
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
+}
+
+RefPtr<FrameNode> DialogPatternAdditionalTwoTestNg::CreateActionSheetList(RefPtr<DialogPattern> pattern)
+{
+    auto list = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ListPattern>());
+    for ([[maybe_unused]] auto&& item : pattern->dialogProperties_.sheetsInfo) {
+        auto itemNode = FrameNode::CreateFrameNode(V2::LIST_ITEM_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE));
+        auto itemRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<LinearLayoutPattern>(false));
+        itemRow->MountToParent(itemNode);
+        list->AddChild(itemNode);
+    }
+    return list;
+}
+
+RefPtr<FrameNode> DialogPatternAdditionalTwoTestNg::CreateButton(const std::string& text)
+{
+    auto buttonRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    auto buttonNode = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    textNode->GetOrCreateFocusHub()->SetFocusable(true);
+    auto textProps = textNode->GetLayoutProperty<TextLayoutProperty>();
+    textProps->UpdateContent(text);
+    textNode->MountToParent(buttonNode);
+    textNode->MarkModifyDone();
+    buttonNode->MountToParent(buttonRow);
+    return buttonRow;
+}
+
+RefPtr<FrameNode> DialogPatternAdditionalTwoTestNg::CreateMenu(const std::vector<ButtonInfo>& buttons)
+{
+    auto menu = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    for (size_t i = 0; i < buttons.size(); ++i) {
+        auto buttonRow = CreateButton(buttons[i].text);
+        buttonRow->MountToParent(menu);
+    }
+    auto buttonRow = CreateButton("");
+    buttonRow->MountToParent(menu);
+    return menu;
 }
 
 /**
@@ -264,6 +343,7 @@ HWTEST_F(DialogPatternAdditionalTwoTestNg, DialogModelTestNgShowActionSheet001, 
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     auto theme = AceType::MakeRefPtr<SelectTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
     pipeline->SetThemeManager(themeManager);
     ASSERT_NE(pipeline->GetTheme<SelectTheme>(), nullptr);
     theme->expandDisplay_ = true;
@@ -320,6 +400,7 @@ HWTEST_F(DialogPatternAdditionalTwoTestNg, DialogModelTestNgShowActionSheet002, 
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     auto theme = AceType::MakeRefPtr<SelectTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
     pipeline->SetThemeManager(themeManager);
     ASSERT_NE(pipeline->GetTheme<SelectTheme>(), nullptr);
     MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
@@ -416,6 +497,7 @@ HWTEST_F(DialogPatternAdditionalTwoTestNg, DialogModelTestNgShowActionSheet003, 
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     auto theme = AceType::MakeRefPtr<SelectTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
     pipeline->SetThemeManager(themeManager);
     ASSERT_NE(pipeline->GetTheme<SelectTheme>(), nullptr);
     MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
@@ -591,5 +673,476 @@ HWTEST_F(DialogPatternAdditionalTwoTestNg, OnWindowShow, TestSize.Level1)
     pattern->refreshOnWindowShow_ = false;
     pattern->OnWindowShow();
     EXPECT_FALSE(pattern->refreshOnWindowShow_);
+}
+
+/**
+ * @tc.name: OnInjectionEvent_AlertDialogBtnClick001
+ * @tc.desc: Test AlertDialogBtnClick
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTwoTestNg, OnInjectionEvent_AlertDialogBtnClick001, TestSize.Level1)
+{
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto ret = pattern->OnInjectionEvent(R"(null)");
+    EXPECT_EQ(ret, RET_FAILED);
+    ret = pattern->OnInjectionEvent(R"({"cmd11":"alertDialogButtonClick"})");
+    EXPECT_EQ(ret, RET_FAILED);
+    ret = pattern->OnInjectionEvent(R"({"cmd":"alertDialogButtonClick"})");
+    EXPECT_EQ(ret, RET_FAILED);
+    ret = pattern->OnInjectionEvent(R"({"cmd":"alertDialogButtonClick","params":{"buttonIndex":-1}})");
+    EXPECT_EQ(ret, RET_FAILED);
+    ret = pattern->OnInjectionEvent(R"({"cmd":"alertDialogButtonClick","params":{"buttonIndex":100}})");
+    EXPECT_EQ(ret, RET_FAILED);
+    ret = pattern->OnInjectionEvent(R"({"cmd":"alertDialogButtonClick","params":{"buttonIndex":0}})");
+    EXPECT_EQ(ret, RET_FAILED);
+    ret = pattern->OnInjectionEvent(R"({"cmd":"alertDialogButtonClick","params":{"buttonIndex":"abc"}})");
+    EXPECT_EQ(ret, RET_FAILED);
+    ret = pattern->OnInjectionEvent(R"({"cmd":"alertDialogButtonClick","params":{"buttonIndex":true}})");
+    EXPECT_EQ(ret, RET_FAILED);
+    std::unique_ptr<JsonValue> jsonObj = nullptr;
+    ret = pattern->HandleAlertDialogButtonClickCmd(jsonObj);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: OnInjectionEvent_AlertDialogBtnClick002
+ * @tc.desc: Test AlertDialogBtnClick
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTwoTestNg, OnInjectionEvent_AlertDialogBtnClick002, TestSize.Level1)
+{
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    DialogProperties props = {
+        .type = DialogType::ALERT_DIALOG, .title = "This is title",
+        .content = "Message", .isModal = false, .isShowInSubWindow = true,
+        .buttons = {{ .text = "main button", .bgColor = Color::BLACK },
+                    { .text = "second button", .bgColor = Color::BLUE},
+        },
+    };
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->dialogProperties_ = props;
+    pattern->buttonContainer_  = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    ASSERT_NE(pattern->buttonContainer_, nullptr);
+    auto firstNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    ASSERT_NE(firstNode, nullptr);
+    firstNode->MountToParent(pattern->buttonContainer_);
+    auto length = props.buttons.size();
+    for (size_t i = 0; i < length; ++i) {
+        auto buttonNode = FrameNode::CreateFrameNode(
+            V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+        ASSERT_NE(buttonNode, nullptr);
+        buttonNode->MountToParent(pattern->buttonContainer_);
+        std::string textColor;
+        std::optional<Color> bgColor;
+        pattern->ParseButtonFontColorAndBgColor(props.buttons[i], textColor, bgColor);
+        auto textNode = pattern->CreateButtonText(props.buttons[i].text, textColor);
+        ASSERT_NE(textNode, nullptr);
+        textNode->MountToParent(buttonNode);
+        buttonNode->MountToParent(pattern->buttonContainer_);
+    }
+    auto ret = pattern->OnInjectionEvent(R"({"cmd":"alertDialogButtonClick","params":{"buttonIndex":100}})");
+    EXPECT_EQ(ret, RET_FAILED);
+    ret = pattern->OnInjectionEvent(R"({"cmd":"alertDialogButtonClick","params":{"buttonIndex":0}})");
+    EXPECT_EQ(ret, RET_SUCCESS);
+    pattern->dialogProperties_.type = DialogType::ACTION_SHEET;
+    ret = pattern->OnInjectionEvent(R"({"cmd":"alertDialogButtonClick","params":{"buttonIndex":0}})");
+    EXPECT_EQ(ret, RET_FAILED);
+}
+
+/**
+ * @tc.name: OnInjectionEvent_ReportShow001
+ * @tc.desc: Test ReportShow
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTwoTestNg, OnInjectionEvent_ReportShow001, TestSize.Level1)
+{
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->dialogProperties_.type = DialogType::ALERT_DIALOG;
+    pattern->ReportShow();
+    pattern->dialogProperties_.type = DialogType::ACTION_SHEET;
+    pattern->ReportShow();
+    pattern->dialogProperties_.type = DialogType::COMMON;
+    pattern->dialogProperties_.isMenu = true;
+    pattern->ReportShow();
+    EXPECT_EQ(pattern->dialogProperties_.type, DialogType::COMMON);
+}
+
+/**
+ * @tc.name: OnInjectionEvent_ReportDestroy001
+ * @tc.desc: Test ReportDestroy
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTwoTestNg, OnInjectionEvent_ReportDestroy001, TestSize.Level1)
+{
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->dialogProperties_.type = DialogType::ALERT_DIALOG;
+    pattern->hasReportDestroy = true;
+    pattern->ReportDestroy(-1);
+    pattern->hasReportDestroy = false;
+    pattern->ReportDestroyAutoCancel();
+    pattern->dialogProperties_.type = DialogType::COMMON;
+    pattern->hasReportDestroy = false;
+    pattern->dialogProperties_.isMenu = true;
+    pattern->ReportDestroy(-1);
+    pattern->dialogProperties_.type = DialogType::ACTION_SHEET;
+    pattern->dialogProperties_.isMenu = false;
+    pattern->hasReportDestroy = false;
+    pattern->ReportDestroy(-2);
+    pattern->hasReportDestroy = false;
+    pattern->ReportDestroyAutoCancel();
+    ButtonInfo buttonInfo1 = { .text = TITLE };
+    pattern->dialogProperties_.buttons.emplace_back(buttonInfo1);
+    EXPECT_TRUE(pattern->dialogProperties_.buttons.size() == 1);
+    pattern->hasReportDestroy = false;
+    pattern->ReportDestroy(0);
+    pattern->hasReportDestroy = false;
+    pattern->ReportDestroy(1);
+    EXPECT_EQ(pattern->dialogProperties_.type, DialogType::ACTION_SHEET);
+}
+
+/**
+ * @tc.name: OnInjectionEvent_ActionSheet_001
+ * @tc.desc: Test OnInjectionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTwoTestNg, OnInjectionEvent_ActionSheet_001, TestSize.Level1)
+{
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto ret = pattern->OnInjectionEvent(R"({"cmd":"actionSheetClick","params": {"clickType": "sheet", "index": 1}})");
+    EXPECT_EQ(ret, RET_FAILED);
+
+    ret = pattern->OnInjectionEvent(R"({"cmd":"actionSheetClick","params": {"clickType": "sheet", "index": -1}})");
+    EXPECT_EQ(ret, RET_FAILED);
+
+    ret = pattern->OnInjectionEvent(R"({"cmd":"actionSheetClick","params": {"clickType": "sheet", "index": 4444}})");
+    EXPECT_EQ(ret, RET_FAILED);
+
+    ret = pattern->OnInjectionEvent(R"({"cmd":"actionSheet","params": {"clickType": "sheet", "index": 1}})");
+    EXPECT_EQ(ret, RET_FAILED);
+
+    ret = pattern->OnInjectionEvent(R"({"cmd":"actionSheetClick","params": {"clickType": "test1", "index": "1"}})");
+    EXPECT_EQ(ret, RET_FAILED);
+}
+
+/**
+ * @tc.name: OnInjectionEvent_ActionSheet_002
+ * @tc.desc: Test OnInjectionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTwoTestNg, OnInjectionEvent_ActionSheet_002, TestSize.Level1)
+{
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::string testCommand = "";
+    auto ret = pattern->OnInjectionEvent(testCommand);
+    EXPECT_EQ(ret, RET_FAILED);
+
+    ret = pattern->OnInjectionEvent(R"({"cmd":"actionSheetClick","params": {"clickType": "button", "index": 0}})");
+    EXPECT_EQ(ret, RET_FAILED);
+    ret = pattern->OnInjectionEvent(R"({"cmd":"actionSheetClick","params": {"clickType": "button", "index": -1}})");
+    EXPECT_EQ(ret, RET_FAILED);
+    ret = pattern->OnInjectionEvent(R"({"cmd":"actionSheetClick","params": 1})");
+    EXPECT_EQ(ret, RET_FAILED);
+    ret = pattern->OnInjectionEvent(R"({"cmd":"actionSheetClick","paramsAbc": {"clickType": "button", "index": 1}})");
+    EXPECT_EQ(ret, RET_FAILED);
+    ret = pattern->OnInjectionEvent(R"({"cmd":"actionSheetClick","params": {"clickType": "button", "index": 4444}})");
+    EXPECT_EQ(ret, RET_FAILED);
+    ret = pattern->OnInjectionEvent(R"({"cmd":"actionSheet","params": {"clickType": "button", "index": 1}})");
+    EXPECT_EQ(ret, RET_FAILED);
+    ret = pattern->OnInjectionEvent(R"({"cmd":"actionSheetClick","params": {"clickType": "button"}})");
+    EXPECT_EQ(ret, RET_FAILED);
+    ret = pattern->OnInjectionEvent(R"({"cmd":"actionSheetClick","params": {"clickType": "button", "index": "abc"}})");
+    EXPECT_EQ(ret, RET_FAILED);
+    std::unique_ptr<JsonValue> obj = nullptr;
+    ret = pattern->HandleActionSheetClickCmd(obj);
+    EXPECT_EQ(ret, RET_FAILED);
+}
+
+/**
+ * @tc.name: ReportActionSheetOnInjectionEvent001
+ * @tc.desc: Test ReportActionSheetOnInjectionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTwoTestNg, ReportActionSheetOnInjectionEvent001, TestSize.Level1)
+{
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> dialogNode = FrameNode::CreateFrameNode(V2::ACTION_SHEET_DIALOG_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(dialogNode, nullptr);
+    auto pattern = dialogNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->dialogProperties_ = actionSheetProp_;
+    pattern->buttonContainer_  = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    ASSERT_NE(pattern->buttonContainer_, nullptr);
+    auto firstNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    ASSERT_NE(firstNode, nullptr);
+    firstNode->MountToParent(pattern->buttonContainer_);
+    for (size_t i = 0; i < pattern->dialogProperties_.buttons.size(); ++i) {
+        auto buttonNode = FrameNode::CreateFrameNode(
+            V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+        ASSERT_NE(buttonNode, nullptr);
+        buttonNode->MountToParent(pattern->buttonContainer_);
+        std::string textColor;
+        std::optional<Color> bgColor;
+        pattern->ParseButtonFontColorAndBgColor(pattern->dialogProperties_.buttons[i], textColor, bgColor);
+        auto textNode = pattern->CreateButtonText(pattern->dialogProperties_.buttons[i].text, textColor);
+        ASSERT_NE(textNode, nullptr);
+        textNode->MountToParent(buttonNode);
+        buttonNode->MountToParent(pattern->buttonContainer_);
+    }
+    pattern->contentNodeMap_[DialogContentNode::SHEET] = CreateActionSheetList(pattern);
+    EXPECT_TRUE(pattern->contentNodeMap_.size() > 0);
+    pattern->ReportActionSheetOnInjectionEvent(true, "", -1, -1);
+    pattern->ReportActionSheetOnInjectionEvent(true, "", 0, -1);
+    pattern->ReportActionSheetOnInjectionEvent(true, "", 1, -1);
+
+    EXPECT_TRUE(pattern->dialogProperties_.buttons.size() > 0);
+    pattern->ReportActionSheetOnInjectionEvent(true, "", 1, 0);
+    pattern->ReportActionSheetOnInjectionEvent(true, "", 1, 1);
+    pattern->ReportActionSheetOnInjectionEvent(false, "testFail", -1, -1);
+
+    auto ret = pattern->OnInjectionEvent(R"({"cmd":"actionSheetClick","params": {"clickType": "sheet", "index": -1}})");
+    EXPECT_EQ(ret, RET_FAILED);
+    ret = pattern->OnInjectionEvent(R"({"cmd":"actionSheetClick","params": {"clickType": "sheet", "index": 0}})");
+    EXPECT_EQ(ret, RET_SUCCESS);
+    ret = pattern->OnInjectionEvent(R"({"cmd":"actionSheetClick","params": {"clickType": "button", "index": -1}})");
+    EXPECT_EQ(ret, RET_FAILED);
+    ret = pattern->OnInjectionEvent(R"({"cmd":"actionSheetClick","params": {"clickType": "button", "index": 0}})");
+    EXPECT_EQ(ret, RET_SUCCESS);
+}
+
+/**
+ * @tc.name: OnInjectionEvent_ActionMenu_001
+ * @tc.desc: Test OnInjectionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTwoTestNg, OnInjectionEvent_ActionMenu_001, TestSize.Level1)
+{
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto ret = pattern->OnInjectionEvent(R"({cmd11:"actionMenuClick"})");
+    EXPECT_EQ(ret, RET_FAILED);
+    ret = pattern->OnInjectionEvent(R"({"cmd11":"actionMenuClick"})");
+    EXPECT_EQ(ret, RET_FAILED);
+    ret = pattern->OnInjectionEvent(R"({"cmd":"actionMenuClick"})");
+    EXPECT_EQ(ret, RET_FAILED);
+    ret = pattern->OnInjectionEvent(R"({"cmd":"actionMenuClick","params":"-1"})");
+    EXPECT_EQ(ret, RET_FAILED);
+    ret = pattern->OnInjectionEvent(R"({"cmd":"actionMenuClick","params":{"buttonIndex":-1}})");
+    EXPECT_EQ(ret, RET_FAILED);
+    DialogProperties dialogProps {
+        .isMenu = true,
+    };
+    pattern->SetDialogProperties(dialogProps);
+    ret = pattern->OnInjectionEvent(R"({"cmd":"actionMenuClick","params":{"buttonIndex":-1}})");
+    EXPECT_EQ(ret, RET_FAILED);
+    ret = pattern->OnInjectionEvent(R"({"cmd":"actionMenuClick","params":{"buttonIndex":-2}})");
+    EXPECT_EQ(ret, RET_FAILED);
+    ret = pattern->OnInjectionEvent(R"({"cmd":"actionMenuClick","params":{"buttonIndex":100}})");
+    EXPECT_EQ(ret, RET_FAILED);
+    ret = pattern->OnInjectionEvent(R"({"cmd":"actionMenuClick","params":{"buttonIndex":0}})");
+    EXPECT_EQ(ret, RET_FAILED);
+}
+
+/**
+ * @tc.name: OnInjectionEvent_ActionMenu_002
+ * @tc.desc: Test OnInjectionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTwoTestNg, OnInjectionEvent_ActionMenu_002, TestSize.Level1)
+{
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    DialogProperties props = {
+        .type = DialogType::COMMON, .title = "This is title", .isMenu = true,
+        .content = "Message", .isModal = false, .isShowInSubWindow = true,
+        .buttons = {{ .text = "main button", .bgColor = Color::BLACK },
+                    { .text = "second button", .bgColor = Color::BLUE},
+        },
+    };
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto dialogPattern = frameNode->GetPattern<DialogPattern>();
+    EXPECT_TRUE(dialogPattern);
+    ASSERT_NE(dialogPattern, nullptr);
+    dialogPattern->SetDialogProperties(props);
+    dialogPattern->PopDialog(100);
+}
+
+/**
+ * @tc.name: OnInjectionEvent_ActionMenu_003
+ * @tc.desc: Test OnInjectionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTwoTestNg, OnInjectionEvent_ActionMenu_003, TestSize.Level1)
+{
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    DialogProperties props = {
+        .type = DialogType::COMMON, .title = "This is title", .isMenu = true,
+        .content = "Message", .isModal = false, .isShowInSubWindow = true,
+        .buttons = {{ .text = "main button", .bgColor = Color::BLACK },
+                    { .text = "second button", .bgColor = Color::BLUE},
+        },
+    };
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto dialogPattern = frameNode->GetPattern<DialogPattern>();
+    EXPECT_TRUE(dialogPattern);
+    ASSERT_NE(dialogPattern, nullptr);
+    dialogPattern->SetDialogProperties(props);
+    dialogPattern->PopDialog(-1);
+}
+
+/**
+ * @tc.name: OnInjectionEvent_ActionMenu_004
+ * @tc.desc: Test OnInjectionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTwoTestNg, OnInjectionEvent_ActionMenu_004, TestSize.Level1)
+{
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    DialogProperties props = {
+        .type = DialogType::COMMON, .title = "This is title", .isMenu = true,
+        .content = "Message", .isModal = false, .isShowInSubWindow = true,
+        .buttons = {{ .text = "main button", .bgColor = Color::BLACK },
+                    { .text = "second button", .bgColor = Color::BLUE},
+        },
+    };
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto dialogPattern = frameNode->GetPattern<DialogPattern>();
+    EXPECT_TRUE(dialogPattern);
+    ASSERT_NE(dialogPattern, nullptr);
+    dialogPattern->SetDialogProperties(props);
+    dialogPattern->PopDialog(0);
+}
+
+/**
+ * @tc.name: OnInjectionEvent_ActionMenu_005
+ * @tc.desc: Test DialogPattern ReportDestroyActionMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTwoTestNg, OnInjectionEvent_ActionMenu_005, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttons;
+    ButtonInfo buttonInfo1 = { .text = "main button", .bgColor = Color::BLACK };
+    ButtonInfo buttonInfo2 = { .text = "second button", .bgColor = Color::BLUE };
+    buttons.emplace_back(buttonInfo1);
+    buttons.emplace_back(buttonInfo2);
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> dialogNode = FrameNode::CreateFrameNode(V2::ACTION_SHEET_DIALOG_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(dialogNode, nullptr);
+    auto pattern = dialogNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->dialogProperties_.type = DialogType::COMMON;
+
+    pattern->isSuitableForElderly_ = true;
+    pattern->dialogProperties_.isMenu = true;
+    auto menu = CreateMenu(buttons);
+
+    ASSERT_NE(menu, nullptr);
+    pattern->menuNode_ = menu;
+    ASSERT_NE(pattern->menuNode_.Upgrade(), nullptr);
+
+    pattern->ReportDestroyActionMenu(-2);
+    pattern->ReportDestroyActionMenu(static_cast<int32_t>(buttons.size()));
+    pattern->ReportDestroyActionMenu(0);
+    pattern->ReportDestroyActionMenu(-1);
+}
+
+/**
+ * @tc.name: OnInjectionEvent_ActionMenu_006
+ * @tc.desc: Test HandleActionMenuButtonClickCmd for action menu injection event
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTwoTestNg, OnInjectionEvent_ActionMenu_006, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttons;
+    ButtonInfo buttonInfo1 = { .text = "main button", .bgColor = Color::BLACK };
+    ButtonInfo buttonInfo2 = { .text = "second button", .bgColor = Color::BLUE };
+    buttons.emplace_back(buttonInfo1);
+    buttons.emplace_back(buttonInfo2);
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> dialogNode = FrameNode::CreateFrameNode(V2::ACTION_SHEET_DIALOG_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(dialogNode, nullptr);
+    auto pattern = dialogNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto menu = CreateMenu(buttons);
+
+    ASSERT_NE(menu, nullptr);
+    pattern->menuNode_ = menu;
+    ASSERT_NE(pattern->menuNode_.Upgrade(), nullptr);
+    auto buildJson = [] (int32_t buttonIndex) {
+        auto json = JsonUtil::Create(true);
+        auto params = JsonUtil::Create(true);
+        params->Put("buttonIndex", buttonIndex);
+        json->Put("params", params);
+        return json;
+    };
+    auto notMenuJson = buildJson(0);
+    pattern->dialogProperties_.isMenu = false;
+    EXPECT_EQ(pattern->HandleActionMenuButtonClickCmd(notMenuJson), RET_FAILED);
+    pattern->dialogProperties_.isMenu = true;
+    auto outOfRangeJson = buildJson(99);
+    EXPECT_EQ(pattern->HandleActionMenuButtonClickCmd(outOfRangeJson), RET_FAILED);
+    auto validJson = buildJson(0);
+    EXPECT_EQ(pattern->HandleActionMenuButtonClickCmd(validJson), RET_SUCCESS);
+    auto cancelJson = buildJson(-1);
+    EXPECT_EQ(pattern->HandleActionMenuButtonClickCmd(cancelJson), RET_SUCCESS);
 }
 } // namespace OHOS::Ace::NG

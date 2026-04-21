@@ -179,6 +179,11 @@ public:
         return crossMatchChild_;
     }
 
+    void SetCrossMatchChild(bool crossMatchChild)
+    {
+        crossMatchChild_ = crossMatchChild;
+    }
+
     void SetUseCustomAnimation(bool useCustomAnimation)
     {
         useCustomAnimation_ = useCustomAnimation;
@@ -314,6 +319,11 @@ public:
         cachedShow_ = cachedShow;
     }
 
+    void SetCachedIndependent(bool cachedIndependent)
+    {
+        cachedIndependent_ = cachedIndependent;
+    }
+
     void SetIsFakeDragging(bool isFakeDragging)
     {
         isFakeDragging_ = isFakeDragging;
@@ -408,6 +418,7 @@ private:
     float mainSizeWithoutMargin_ = 0.0f;
     int32_t totalItemCount_ = 0;
     bool mainSizeIsDefined_ = false;
+    bool isPixelRoundAfterMeasure_ = false;
 
     float spaceWidth_ = 0.0f;
     bool overScrollFeature_ = false;
@@ -451,6 +462,7 @@ private:
     float targetStartPos_ = 0.0f;
     int32_t cachedCount_ = 0;
     bool cachedShow_ = false;
+    bool cachedIndependent_ = false;
     int32_t cachedStartIndex_ = 0;
     int32_t cachedEndIndex_ = 0;
     LayoutConstraintF childLayoutConstraint_;

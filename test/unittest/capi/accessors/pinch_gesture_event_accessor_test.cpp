@@ -42,11 +42,11 @@ namespace {
 }
 
 /**
- * @tc.name: GetScaleTest
+ * @tc.name: getScaleTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PinchGestureEventAccessorTest, GetScaleTest, TestSize.Level1)
+HWTEST_F(PinchGestureEventAccessorTest, getScaleTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureDoubleArkInt32Values) {
         auto event = peer_->GetEventInfo();
@@ -59,11 +59,11 @@ HWTEST_F(PinchGestureEventAccessorTest, GetScaleTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetScaleTest
+ * @tc.name: setScaleTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PinchGestureEventAccessorTest, SetScaleTest, TestSize.Level1)
+HWTEST_F(PinchGestureEventAccessorTest, setScaleTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumberValues) {
         accessor_->setScale(peer_, &value);
@@ -75,11 +75,11 @@ HWTEST_F(PinchGestureEventAccessorTest, SetScaleTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetPinchCenterXTest
+ * @tc.name: getPinchCenterXTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PinchGestureEventAccessorTest, GetPinchCenterXTest, TestSize.Level1)
+HWTEST_F(PinchGestureEventAccessorTest, getPinchCenterXTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureDoubleArkInt32_half_Values) {
         auto event = peer_->GetEventInfo();
@@ -92,11 +92,11 @@ HWTEST_F(PinchGestureEventAccessorTest, GetPinchCenterXTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetPinchCenterXTest
+ * @tc.name: setPinchCenterXTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PinchGestureEventAccessorTest, SetPinchCenterXTest, TestSize.Level1)
+HWTEST_F(PinchGestureEventAccessorTest, setPinchCenterXTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumber_2x_Values) {
         accessor_->setPinchCenterX(peer_, &value);
@@ -108,11 +108,11 @@ HWTEST_F(PinchGestureEventAccessorTest, SetPinchCenterXTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetPinchCenterYTest
+ * @tc.name: getPinchCenterYTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PinchGestureEventAccessorTest, GetPinchCenterYTest, TestSize.Level1)
+HWTEST_F(PinchGestureEventAccessorTest, getPinchCenterYTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureDoubleArkInt32_half_Values) {
         auto event = peer_->GetEventInfo();
@@ -125,11 +125,11 @@ HWTEST_F(PinchGestureEventAccessorTest, GetPinchCenterYTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetPinchCenterYTest
+ * @tc.name: setPinchCenterYTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PinchGestureEventAccessorTest, SetPinchCenterYTest, TestSize.Level1)
+HWTEST_F(PinchGestureEventAccessorTest, setPinchCenterYTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumber_2x_Values) {
         accessor_->setPinchCenterY(peer_, &value);

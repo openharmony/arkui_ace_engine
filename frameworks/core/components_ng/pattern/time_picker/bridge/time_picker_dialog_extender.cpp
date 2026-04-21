@@ -29,7 +29,7 @@
 
 namespace OHOS::Ace::NG {
 namespace TimePickerDialogExtender {
-std::optional<PickerTime> ProcessBindableTimeSelected(const Opt_Union_Date_Bindable& value)
+std::optional<PickerTime> ProcessBindableTimeSelected(const Opt_Union_Date_Bindable_Date& value)
 {
     std::optional<PickerTime> result;
     Converter::VisitUnion(
@@ -41,7 +41,7 @@ std::optional<PickerTime> ProcessBindableTimeSelected(const Opt_Union_Date_Binda
         [] {});
     return result;
 }
-std::optional<PickerDate> ProcessBindableDateSelected(const Opt_Union_Date_Bindable& value)
+std::optional<PickerDate> ProcessBindableDateSelected(const Opt_Union_Date_Bindable_Date& value)
 {
     std::optional<PickerDate> result;
     Converter::VisitUnion(
@@ -155,24 +155,24 @@ TimePickerSettingData BuildTimePickerSettingData(const Ark_TimePickerDialogOptio
 TimePickerDialogEvent BuildTimePickerDialogEvents(const Ark_TimePickerDialogOptions& options)
 {
     TimePickerDialogEvent dialogEvent;
-    auto didAppearCallbackOpt = Converter::OptConvert<Callback_Void>(options.onDidAppear);
+    auto didAppearCallbackOpt = Converter::OptConvert<VoidCallback>(options.onDidAppear);
     if (didAppearCallbackOpt) {
         auto onDidAppear = [arkCallback = CallbackHelper(*didAppearCallbackOpt)]() -> void { arkCallback.Invoke(); };
         dialogEvent.onDidAppear = onDidAppear;
     }
-    auto didDisappearCallbackOpt = Converter::OptConvert<Callback_Void>(options.onDidDisappear);
+    auto didDisappearCallbackOpt = Converter::OptConvert<VoidCallback>(options.onDidDisappear);
     if (didDisappearCallbackOpt) {
         auto onDidDisappear = [arkCallback = CallbackHelper(*didDisappearCallbackOpt)]() -> void {
             arkCallback.Invoke();
         };
         dialogEvent.onDidDisappear = onDidDisappear;
     }
-    auto willAppearCallbackOpt = Converter::OptConvert<Callback_Void>(options.onWillAppear);
+    auto willAppearCallbackOpt = Converter::OptConvert<VoidCallback>(options.onWillAppear);
     if (willAppearCallbackOpt) {
         auto onWillAppear = [arkCallback = CallbackHelper(*willAppearCallbackOpt)]() -> void { arkCallback.Invoke(); };
         dialogEvent.onWillAppear = onWillAppear;
     }
-    auto willDisappearCallbackOpt = Converter::OptConvert<Callback_Void>(options.onWillDisappear);
+    auto willDisappearCallbackOpt = Converter::OptConvert<VoidCallback>(options.onWillDisappear);
     if (willDisappearCallbackOpt) {
         auto onWillDisappear = [arkCallback = CallbackHelper(*willDisappearCallbackOpt)]() -> void {
             arkCallback.Invoke();
@@ -207,13 +207,13 @@ void Show(const Ark_TimePickerDialogOptions* options)
     dialogInfo.isUseMilitaryTime = settingData.isUseMilitaryTime;
     // onCancel
     std::function<void()> cancelEvent;
-    auto cancelCallbackOpt = Converter::OptConvert<Callback_Void>(options->onCancel);
+    auto cancelCallbackOpt = Converter::OptConvert<VoidCallback>(options->onCancel);
     if (cancelCallbackOpt) {
         cancelEvent = [arkCallback = CallbackHelper(*cancelCallbackOpt)]() -> void { arkCallback.Invoke(); };
     }
     // onAccept
     std::function<void(const std::string&)> acceptEvent;
-    auto acceptCallbackOpt = Converter::OptConvert<Callback_TimePickerResult_Void>(options->onAccept);
+    auto acceptCallbackOpt = Converter::OptConvert<synthetic_Callback_TimePickerResult_Void>(options->onAccept);
     if (acceptCallbackOpt) {
         acceptEvent = [arkCallback = CallbackHelper(*acceptCallbackOpt)](const std::string& info) -> void {
             auto result = Converter::ArkValue<Ark_TimePickerResult>(info);
@@ -222,7 +222,7 @@ void Show(const Ark_TimePickerDialogOptions* options)
     }
     // onChange
     std::function<void(const std::string&)> changeEvent;
-    auto changeCallbackOpt = Converter::OptConvert<Callback_TimePickerResult_Void>(options->onChange);
+    auto changeCallbackOpt = Converter::OptConvert<synthetic_Callback_TimePickerResult_Void>(options->onChange);
     if (changeCallbackOpt) {
         changeEvent = [arkCallback = CallbackHelper(*changeCallbackOpt)](const std::string& info) -> void {
             auto result = Converter::ArkValue<Ark_TimePickerResult>(info);

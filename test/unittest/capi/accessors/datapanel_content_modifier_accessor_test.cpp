@@ -42,11 +42,11 @@ static const std::vector<double> TEST_DEFAULT_VALUES = { 0 };
 static constexpr double TEST_MAX_VALUE = 100.0;
 
 /**
- * @tc.name: DataPanelContentModifierHelperAccessorTest
+ * @tc.name: contentModifierDataPanelTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelContentModifierHelperAccessor, dataPanelContentModifierHelperAccessorTest, TestSize.Level1)
+HWTEST_F(DataPanelContentModifierHelperAccessor, contentModifierDataPanelTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->contentModifierDataPanel, nullptr);
 

@@ -82,9 +82,9 @@ struct ImageAnimatorTest {
   @State linePositionX: number = 0 - this.imageWidth;
   @State linePositionY: number = 0;
   @State imgResource: Resource | undefined = undefined;
-  private imageOne: Resource = $r('app.media.no2');
-  private imageTwo: Resource = $r('app.media.A');
-  private imageThree: Resource = $r('app.media.no5');
+  private imageOne: Resource = $r('app.media.startIcon');
+  private imageTwo: Resource = $r('app.media.background');
+  private imageThree: Resource = $r('app.media.foreground');
   @State src: Resource = this.imageOne;
   @State src2: Resource = this.imageThree;
 
@@ -92,7 +92,7 @@ struct ImageAnimatorTest {
     this.moveImg.pop();
     this.moveImg.push('imageScanEffect');
     setTimeout(() => {
-      this.imgResource = $r('app.media.no5');
+      this.imgResource = $r('app.media.foreground');
     }, 3000);
     this.getUIContext()?.animateTo({
       duration: this.durationTime,

@@ -34,13 +34,12 @@ RefPtr<FocusHub> SearchTextFieldPattern::GetFocusHub() const
     return parentFrameNode->GetOrCreateFocusHub();
 }
 
-void SearchTextFieldPattern::PerformActionOperation(PerformActionInfo info)
+void SearchTextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyboard)
 {
     if (!HasFocus()) {
         TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "Not Trigger OnSubmit because field blur");
         return;
     }
-    auto forceCloseKeyboard = info.forceCloseKeyboard;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());

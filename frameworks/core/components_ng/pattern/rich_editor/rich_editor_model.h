@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,11 +21,8 @@
 #include <optional>
 #include <string>
 
-#include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
-#include "base/utils/device_config.h"
 #include "core/common/ime/text_input_action.h"
-#include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/view_abstract_model.h"
@@ -97,6 +94,8 @@ struct UpdateSpanStyle {
         updateImageFit.reset();
         marginProp.reset();
         borderRadius.reset();
+        useThemeFontColor = true;
+        useThemeDecorationColor = true;
         isInitDecoration = false;
         strokeColorFollowFontColor = false;
 
@@ -131,13 +130,14 @@ struct UpdateSpanStyle {
     std::optional<CalcDimension> updateImageHeight = std::nullopt;
     std::optional<VerticalAlign> updateImageVerticalAlign = std::nullopt;
     std::optional<ImageFit> updateImageFit = std::nullopt;
+
     std::optional<OHOS::Ace::NG::MarginProperty> marginProp = std::nullopt;
     std::optional<OHOS::Ace::NG::BorderRadiusProperty> borderRadius = std::nullopt;
     bool useThemeFontColor = true;
     bool useThemeDecorationColor = true;
     bool isInitDecoration = false;
     bool strokeColorFollowFontColor = false;
-    
+
     std::optional<std::vector<Color>> updateSymbolColor = std::nullopt;
     std::optional<CalcDimension> updateSymbolFontSize = std::nullopt;
     std::optional<FontWeight> updateSymbolFontWeight = std::nullopt;
@@ -346,6 +346,7 @@ public:
     virtual void SetTypingStyle(std::optional<struct UpdateSpanStyle> typingStyle,
         std::optional<TextStyle> textStyle) = 0;
     virtual void SetTypingParagraphStyle(std::optional<struct UpdateParagraphStyle> typingParagraphStyle) = 0;
+    virtual void SetPlaceholderStyledString(const RefPtr<SpanStringBase>& value) = 0;
     virtual std::optional<struct UpdateSpanStyle> GetTypingStyle() = 0;
     virtual void CloseSelectionMenu() = 0;
     virtual bool IsEditing() = 0;
@@ -355,8 +356,6 @@ public:
         const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) = 0;
     virtual WeakPtr<NG::LayoutInfoInterface> GetLayoutInfoInterface() = 0;
     virtual const PreviewTextInfo GetPreviewTextInfo() const = 0;
-    virtual ColorMode GetColorMode() = 0;
-    virtual RefPtr<NG::RichEditorTheme> GetTheme() = 0;
 };
 
 class ACE_EXPORT RichEditorControllerBase : virtual public RichEditorBaseControllerBase {
@@ -427,7 +426,6 @@ public:
     virtual void SetOnDidChange(std::function<void(const NG::RichEditorChangeValue&)>&& func) = 0;
     virtual void SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
     virtual void SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
-    virtual void SetOnShare(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
     virtual void SetOnWillAttachIME(IMEAttachCallback&& func) {};
     virtual void SetSelectionMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick,
@@ -441,6 +439,7 @@ public:
     virtual void ResetMaxLength() {}
     virtual void SetMaxLines(uint32_t value) {};
     virtual void SetEnableAutoSpacing(bool enabled) {};
+    virtual void SetOrphanCharOptimization(bool enabled) {};
     virtual void SetCompressLeadingPunctuation(bool enabled) {};
     virtual void SetStopBackPress(bool isStopBackPress) {};
     virtual void SetKeyboardAppearance(KeyboardAppearance value) {};

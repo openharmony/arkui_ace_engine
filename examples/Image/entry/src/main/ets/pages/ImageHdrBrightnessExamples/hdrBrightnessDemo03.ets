@@ -60,7 +60,7 @@ struct hdrBrightnessDemo03 {
         .fontColor(Color.Black)
 
       // Image that uses the dynamic brightness
-      Image($r('app.media.img_1'))
+      Image($r('app.media.startIcon'))
         .width('50%')
         .height('auto')
         .margin({ top: 20 })

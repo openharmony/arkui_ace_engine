@@ -36,6 +36,7 @@
 #include "adapter/ohos/entrance/distributed_ui_manager.h"
 #include "adapter/ohos/entrance/ace_viewport_config.h"
 #include "base/thread/task_executor.h"
+#include "base/utils/delay_task.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/asset_manager_impl.h"
 #include "core/common/update_config_manager.h"
@@ -98,6 +99,7 @@ public:
     void SetHostParams(const OHOS::AAFwk::WantParams& params) override;
     void UpdateFontScale(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
     static int32_t GetUIContentWindowID(int32_t instanceId);
+    OHOS::Rosen::Window* GetUIContentWindow() override;
     // UI content event process
     bool ProcessBackPressed() override;
     void UpdateDialogResourceConfiguration(RefPtr<Container>& container,
@@ -382,7 +384,7 @@ public:
 
     void SetFontScaleAndWeightScale(const RefPtr<Platform::AceContainer>& container, int32_t instanceId);
 
-    void SetForceSplitEnable(bool isForceSplit) override;
+    void SetForceSplitEnable(bool isForceSplit, ForceSplitMode mode, bool needUpdateViewport = false) override;
     void SetForceSplitConfig(const std::optional<SystemForceSplitConfig>& systemConfig,
                              const std::optional<AppForceSplitConfig>& appConfig) override;
 
@@ -425,6 +427,7 @@ public:
     void SetTopWindowBoundaryByID(const std::string& stringId) override;
     void SetupGetPixelMapCallback(const WeakPtr<TaskExecutor>& taskExecutor);
     void SaveGetHitTestInfoCallback(const WeakPtr<TaskExecutor>& taskExecutor);
+    void RelaxedCommandCallbackInner(const WeakPtr<TaskExecutor>& taskExecutor);
     void RegisterGetSpecifiedContentOffsetsCallback(const WeakPtr<TaskExecutor>& taskExecutor);
     void RegisterHighlightSpecifiedContentCallback(const WeakPtr<TaskExecutor>& taskExecutor);
     void RegisterSelectTextCallback(const WeakPtr<TaskExecutor>& taskExecutor);
@@ -531,6 +534,7 @@ protected:
     void CloseSyncTransaction(OHOS::Rosen::RSSyncTransactionController* transactionController,
         std::shared_ptr<Rosen::RSSyncTransactionHandler>& transactionHandler);
     const EcmaVM* GetEcmaVMOnJsThread() const;
+    void InitWindowMode(const RefPtr<Platform::AceContainer>& container);
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
     OHOS::Rosen::Window* window_ = nullptr;
@@ -581,7 +585,8 @@ protected:
     RefPtr<UpdateConfigManager<AceViewportConfig>> viewportConfigMgr_ =
         Referenced::MakeRefPtr<UpdateConfigManager<AceViewportConfig>>();
     std::unordered_map<void*, std::function<void()>> destructCallbacks_;
-
+    TaskTimeRecord taskTimeForComeIn_;
+    TaskTimeRecord taskTimeForExit_;
     SingleTaskExecutor::CancelableTask updateDecorVisibleTask_;
     std::mutex updateDecorVisibleMutex_;
     SingleTaskExecutor::CancelableTask setAppWindowIconTask_;
@@ -604,7 +609,7 @@ protected:
     VMType vmType_ = VMType::NORMAL;
 
 private:
-    void ProcessWindowSizeLayoutBreakPointChange();
+    void ProcessWindowSizeLayoutBreakPointChange(double density);
 };
 
 } // namespace OHOS::Ace

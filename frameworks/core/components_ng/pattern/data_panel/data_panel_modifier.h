@@ -81,6 +81,7 @@ public:
     ~DataPanelModifier() override = default;
     void onDraw(DrawingContext& context) override;
     void UpdateDate();
+    void InitControlProperties();
 
     void SetValues(std::vector<double> values)
     {

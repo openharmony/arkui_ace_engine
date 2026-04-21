@@ -149,6 +149,7 @@ public:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
     void OnColorConfigurationUpdate() override;
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
     // Event firing methods
     void FireChangeEvent();
@@ -185,6 +186,8 @@ public:
     }
     void ProcessScrollMotion(double position);
     void ProcessScrollMotionStart();
+    std::optional<RefPtr<UINode>> FindLazyForEachNode(RefPtr<UINode> baseNode, bool isSelfNode = true) const;
+    void SetLazyLoadIsLoop() const;
 
 protected:
     bool ChildPreMeasureHelperEnabled() override
@@ -213,7 +216,7 @@ protected:
         LayoutSafeAreaType ignoreType = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM) override;
 
     void FireAnimationEndEvent();
-
+    
 private:
     Axis GetAxis() const override
     {
@@ -287,6 +290,10 @@ private:
     void PostIdleTask(const RefPtr<FrameNode>& frameNode);
     double GetCurrentTime() const;
 
+    int32_t GetRealTotalItemCount() const;
+    void SetLazyForEachLongPredict(bool useLazyLoad) const;
+    
+
     bool IsEnableHaptic() const;
     void InitOrRefreshHapticController();
     void StopHapticController();
@@ -312,6 +319,7 @@ private:
 
     void InitDisabled();
     void InitAreaChangeEvent();
+    void SyncSelectionIndicatorWithTheme();
 
     RefPtr<PanEvent> panEvent_;
     PanDirection panDirection_;

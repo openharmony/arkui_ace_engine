@@ -20,10 +20,11 @@
 
 #define private public
 #define protected public
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
@@ -32,6 +33,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "base/window/foldable_window.h"
+#include "core/common/display_info.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/ui_material.h"
 #include "core/components/dialog/dialog_properties.h"
@@ -103,6 +105,32 @@ constexpr float PIXELMAP_WIDTH = 100.0;
 constexpr float PIXELMAP_HEIGHT = 100.0;
 constexpr float BORDER_VALUE = 10.0;
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
+
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == DragBarTheme::TypeId()) {
+        return AceType::MakeRefPtr<DragBarTheme>();
+    } else if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == DialogTheme::TypeId()) {
+        return AceType::MakeRefPtr<DialogTheme>();
+    } else if (type == PickerTheme::TypeId()) {
+        return AceType::MakeRefPtr<PickerTheme>();
+    } else if (type == SelectTheme::TypeId()) {
+        return AceType::MakeRefPtr<SelectTheme>();
+    } else if (type == MenuTheme::TypeId()) {
+        return AceType::MakeRefPtr<MenuTheme>();
+    } else if (type == ToastTheme::TypeId()) {
+        return AceType::MakeRefPtr<ToastTheme>();
+    } else if (type == SheetTheme::TypeId()) {
+        auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+        sheetTheme->closeIconButtonWidth_ = SHEET_CLOSE_ICON_WIDTH;
+        sheetTheme->centerDefaultWidth_ = SHEET_LANDSCAPE_WIDTH;
+        return sheetTheme;
+    } else {
+        return nullptr;
+    }
+}
 } // namespace
 
 class OverlayManagerTestNg : public testing::Test {
@@ -146,29 +174,10 @@ void OverlayManagerTestNg::SetUpTestCase()
     MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
     MockPipelineContext::GetCurrentContext()->SetMinPlatformVersion((int32_t)PlatformVersion::VERSION_ELEVEN);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-        if (type == DragBarTheme::TypeId()) {
-            return AceType::MakeRefPtr<DragBarTheme>();
-        } else if (type == IconTheme::TypeId()) {
-            return AceType::MakeRefPtr<IconTheme>();
-        } else if (type == DialogTheme::TypeId()) {
-            return AceType::MakeRefPtr<DialogTheme>();
-        } else if (type == PickerTheme::TypeId()) {
-            return AceType::MakeRefPtr<PickerTheme>();
-        } else if (type == SelectTheme::TypeId()) {
-            return AceType::MakeRefPtr<SelectTheme>();
-        } else if (type == MenuTheme::TypeId()) {
-            return AceType::MakeRefPtr<MenuTheme>();
-        } else if (type == ToastTheme::TypeId()) {
-            return AceType::MakeRefPtr<ToastTheme>();
-        } else if (type == SheetTheme::TypeId()) {
-            auto  sheetTheme = AceType::MakeRefPtr<SheetTheme>();
-            sheetTheme->closeIconButtonWidth_ = SHEET_CLOSE_ICON_WIDTH;
-            sheetTheme->centerDefaultWidth_ = SHEET_LANDSCAPE_WIDTH;
-            return sheetTheme;
-        } else {
-            return nullptr;
-        }
+        return GetTheme(type);
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 void OverlayManagerTestNg::TearDownTestCase()
@@ -243,7 +252,7 @@ void OverlayManagerTestNg::CreateSheetContentNode()
  * @tc.desc: Test OverlayManager::DeleteModal
  * @tc.type: FUNC
  */
-HWTEST_F(OverlayManagerTestNg, DeleteModal001, TestSize.Level1)
+HWTEST_F(OverlayManagerTestNg, DeleteModal001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create target node and toast node.
@@ -1305,6 +1314,8 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern1, TestSize.Level1)
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
     EXPECT_FALSE(topSheetNode == nullptr);
+    auto safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
+    MockPipelineContext::GetCurrent()->safeAreaManager_ = safeAreaManager;
     auto sheetNodeLayoutProperty = topSheetNode->GetLayoutProperty<SheetPresentationProperty>();
     auto style = sheetNodeLayoutProperty->GetSheetStyle();
     EXPECT_EQ(style->sheetHeight.sheetMode.value(), SheetMode::MEDIUM);
@@ -1549,6 +1560,39 @@ HWTEST_F(OverlayManagerTestNg, OnBindSheet006, TestSize.Level1)
      */
     overlayManager->PlayBubbleStyleSheetTransition(topSheetNode, true);
     EXPECT_EQ(topSheetPattern->height_, topSheetPattern->sheetHeightForTranslate_);
+}
+
+/**
+ * @tc.name: IsNeedAvoidFoldCrease001
+ * @tc.desc: Test IsNeedAvoidFoldCrease with EXTEND source mode in expand display
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, IsNeedAvoidFoldCrease001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode with pipeline context
+     */
+    auto frameNode = OverlayManagerTestNg::CreateTargetNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set DisplaySourceMode to EXTEND to trigger branch
+     */
+    auto mockContainer = MockContainer::Current();
+    ASSERT_NE(mockContainer, nullptr);
+
+    auto displayInfo = mockContainer->GetMockDisplayInfo();
+    ASSERT_NE(displayInfo, nullptr);
+    displayInfo->SetDisplaySourceMode(DisplaySourceMode::EXTEND);
+    mockContainer->SetDisplayInfo(displayInfo);
+
+    /**
+     * @tc.steps: step3. Call IsNeedAvoidFoldCrease with expandDisplay=true
+     * @tc.expected: Returns false because branch is taken:
+     *               if (expandDisplay && sourceMode == DisplaySourceMode::EXTEND)
+     */
+    bool result = OverlayManager::IsNeedAvoidFoldCrease(frameNode, false, true, std::nullopt);
+    EXPECT_FALSE(result);
 }
 
 /**

@@ -24,4 +24,17 @@ ace_unittest("canvas_test_ng") {
     "canvas_test_ng.cpp",
   ]
   defines = [ "ENABLE_ROSEN_BACKEND" ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "canvas_test_min.cpp",
+      "canvas_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "canvas_test_min.cpp",
+      "canvas_test_core.cpp",
+    ]
+  }
 }

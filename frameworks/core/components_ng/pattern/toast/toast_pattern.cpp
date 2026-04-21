@@ -13,16 +13,20 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/toast/toast_pattern.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/multi_thread.h"
 #include "core/animation/animation_util.h"
 #include "core/common/ace_engine.h"
+#include "core/components/common/layout/grid_column_info.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/dialog/dialog_theme.h"
+#include "core/components/toast/toast_theme.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 
 namespace OHOS::Ace::NG {
@@ -41,6 +45,7 @@ void ToastPattern::InitWrapperRect(LayoutWrapper* layoutWrapper, const RefPtr<To
     CHECK_NULL_VOID(layoutWrapper);
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto pipelineContext = IsDefaultToast() ? host->GetContextRefPtr() : DialogManager::GetMainPipelineContext(host);
     CHECK_NULL_VOID(pipelineContext);
     auto safeAreaInsets = OverlayManager::GetSafeAreaInsets(host);
@@ -52,6 +57,7 @@ void ToastPattern::InitWrapperRect(LayoutWrapper* layoutWrapper, const RefPtr<To
         auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
         CHECK_NULL_VOID(toastTheme);
         safeAreaTop += toastTheme->GetTop().ConvertToPx();
+        CalculateTitleBarHeightForTopAlignment(safeAreaTop, pipelineContext, toastProp);
     }
     const auto& safeArea = toastProps->GetSafeAreaInsets();
     limitPos_ = Dimension(GreatNotEqual(safeAreaTop, 0) ? safeAreaTop : LIMIT_SPACING.ConvertToPx());
@@ -79,6 +85,44 @@ void ToastPattern::InitWrapperRect(LayoutWrapper* layoutWrapper, const RefPtr<To
         auto safeAreaManager = pipelineContext->GetSafeAreaManager();
         CHECK_NULL_VOID(safeAreaManager);
         UpdateHoverModeRect(toastProps, safeAreaManager, safeAreaTop, safeAreaBottom);
+    }
+}
+
+void ToastPattern::CalculateTitleBarHeightForTopAlignment(float& safeAreaTop,
+    const RefPtr<PipelineContext>& pipelineContext, const RefPtr<ToastLayoutProperty>& toastProp)
+{
+    CHECK_NULL_VOID(pipelineContext);
+    CHECK_NULL_VOID(toastProp);
+    float titleBarHeightPx = 0.0f;
+    bool needAvoidTitleBar = false;
+    auto showMode = toastProp->GetShowModeValue(ToastShowMode::DEFAULT);
+    if (showMode == ToastShowMode::DEFAULT || showMode == ToastShowMode::TOP_MOST) {
+        needAvoidTitleBar = true;
+    } else if (showMode == ToastShowMode::SYSTEM_TOP_MOST) {
+        auto currentId = Container::CurrentId();
+        if (currentId < 0) {
+            auto container = Container::GetActive();
+            if (container) {
+                currentId = container->GetInstanceId();
+            }
+        }
+        auto parentContainerId = currentId >= MIN_SUBCONTAINER_ID ?
+            SubwindowManager::GetInstance()->GetParentContainerId(currentId) : currentId;
+        auto toastSubwindow = SubwindowManager::GetInstance()->GetSystemToastWindow(parentContainerId);
+        if (toastSubwindow) {
+            auto parentRect = toastSubwindow->GetParentWindowRect();
+            auto toastRect = toastSubwindow->GetWindowRect();
+            if (NearEqual(toastRect.Left(), parentRect.Left()) && NearEqual(toastRect.Top(), parentRect.Top())) {
+                needAvoidTitleBar = true;
+            }
+        }
+    }
+    if (needAvoidTitleBar && pipelineContext) {
+        titleBarHeightPx = static_cast<float>(pipelineContext->GetContainerModalTitleHeight());
+        if (LessOrEqual(titleBarHeightPx, 0.0f)) {
+            titleBarHeightPx = pipelineContext->GetCustomTitleHeight().ConvertToPx();
+        }
+        safeAreaTop += titleBarHeightPx;
     }
 }
 
@@ -146,6 +190,7 @@ void ToastPattern::FoldStatusChangedAnimation()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     AnimationOption option;
     auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.35f, 1.0f, 0.0f);
     option.SetCurve(curve);
@@ -162,10 +207,12 @@ bool ToastPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     CHECK_NULL_RETURN(dirty, false);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
+    ACE_UINODE_TRACE(host);
     auto context = IsDefaultToast() ? host->GetContextRefPtr() : DialogManager::GetMainPipelineContext(host);
     CHECK_NULL_RETURN(context, false);
     auto toastNode = dirty->GetHostNode();
     CHECK_NULL_RETURN(toastNode, false);
+    ACE_UINODE_TRACE(toastNode);
     auto toastContext = toastNode->GetRenderContext();
     CHECK_NULL_RETURN(toastContext, false);
     auto dialogTheme = context->GetTheme<DialogTheme>();
@@ -224,6 +271,7 @@ Dimension ToastPattern::GetOffsetX(const RefPtr<LayoutWrapper>& layoutWrapper)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, Dimension(0.0));
+    ACE_UINODE_TRACE(host);
     auto context = IsDefaultToast() ? host->GetContextRefPtr() : DialogManager::GetMainPipelineContext(host);
     CHECK_NULL_RETURN(context, Dimension(0.0));
     auto text = layoutWrapper->GetOrCreateChildByIndex(0);
@@ -269,6 +317,7 @@ void ToastPattern::AdjustOffsetForKeyboard(Dimension& offsetY, double toastBotto
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto context = IsDefaultToast() ? host->GetContextRefPtr() : DialogManager::GetMainPipelineContext(host);
     CHECK_NULL_VOID(context);
     auto safeAreaManager = context->GetSafeAreaManager();
@@ -348,6 +397,7 @@ double ToastPattern::GetBottomValue(const RefPtr<LayoutWrapper>& layoutWrapper)
     // Obtain the height relative to the main window
     auto host = GetHost();
     CHECK_NULL_RETURN(host, 0.0);
+    ACE_UINODE_TRACE(host);
     auto pipeline = IsDefaultToast() ? host->GetContextRefPtr() : DialogManager::GetMainPipelineContext(host);
     CHECK_NULL_RETURN(pipeline, 0.0);
     auto rootHeight = Dimension(wrapperRect_.Height());
@@ -369,6 +419,7 @@ void ToastPattern::BeforeCreateLayoutWrapper()
 {
     auto toastNode = GetHost();
     CHECK_NULL_VOID(toastNode);
+    ACE_UINODE_TRACE(toastNode);
     auto pipelineContext =
         IsDefaultToast() ? toastNode->GetContextRefPtr() : DialogManager::GetMainPipelineContext(toastNode);
     if (!pipelineContext) {
@@ -384,6 +435,7 @@ void ToastPattern::BeforeCreateLayoutWrapper()
 void ToastPattern::UpdateToastSize(const RefPtr<FrameNode>& toast)
 {
     CHECK_NULL_VOID(toast);
+    ACE_UINODE_TRACE(toast);
     auto toastProperty = toast->GetLayoutProperty<ToastLayoutProperty>();
     CHECK_NULL_VOID(toastProperty);
     auto rootWidth = Dimension(wrapperRect_.Width());
@@ -398,6 +450,7 @@ void ToastPattern::UpdateToastSize(const RefPtr<FrameNode>& toast)
 void ToastPattern::UpdateTextSizeConstraint(const RefPtr<FrameNode>& text)
 {
     CHECK_NULL_VOID(text);
+    ACE_UINODE_TRACE(text);
     auto context = text->GetContext();
     CHECK_NULL_VOID(context);
     auto gridColumnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::TOAST);
@@ -442,6 +495,7 @@ void ToastPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto textContext = host->GetRenderContext();
     CHECK_NULL_VOID(textContext);
     auto pipelineContext = host->GetContext();
@@ -471,6 +525,7 @@ void ToastPattern::OnAttachToFrameNodeImpl()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto containerId = Container::CurrentId();
     auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
     auto pipeline = parentContainerId < 0 || parentContainerId >= MIN_PA_SERVICE_ID
@@ -549,6 +604,7 @@ double ToastPattern::GetTextMaxHeight()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, 0.0);
+    ACE_UINODE_TRACE(host);
     auto pipelineContext = IsDefaultToast() ? host->GetContextRefPtr() : DialogManager::GetMainPipelineContext(host);
     CHECK_NULL_RETURN(pipelineContext, 0.0);
     double deviceHeight = 0.0;
@@ -583,6 +639,7 @@ double ToastPattern::GetTextMaxWidth()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, 0.0);
+    ACE_UINODE_TRACE(host);
     auto pipelineContext = IsDefaultToast() ? host->GetContextRefPtr() : DialogManager::GetMainPipelineContext(host);
     CHECK_NULL_RETURN(pipelineContext, 0.0);
     double deviceWidth = 0.0;
@@ -614,6 +671,7 @@ double ToastPattern::GetTextMaxWidth()
 
 int32_t ToastPattern::GetTextLineHeight(const RefPtr<FrameNode>& textNode)
 {
+    ACE_UINODE_TRACE(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, 0);
     auto layoutConstraint = textLayoutProperty->GetLayoutConstraint();

@@ -227,6 +227,10 @@ void WebDomDocument::CreateFromJsonString(const std::string &jsonString)
     snapshot_ = JsonUtil::ParseJsonString(jsonString);
     if (!snapshot_ || !snapshot_->IsValid()) {
         TAG_LOGE(AceLogTag::ACE_WEB, "CreateFromJsonString snapshot is not valid");
+        root_.reset();
+        idToNodeMap_.clear();
+        std::unique_lock<std::shared_mutex> lock(activeMutex_);
+        active_.reset();
         return;
     }
     if (snapshot_->Contains(WEB_JSON_ATTRS) && snapshot_->GetValue(WEB_JSON_ATTRS)->IsObject()) {
@@ -268,6 +272,10 @@ void WebDomDocument::UpdateScrollInfoFromJsonString(const std::string& jsonStrin
         TAG_LOGE(AceLogTag::ACE_WEB, "UpdateScrollInfoFromJsonString is not valid");
         return;
     }
+    if (!root_) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "UpdateScrollInfoFromJsonString document root is null");
+        return;
+    }
 
     int32_t id = update->GetInt(WEB_JSON_ID, WEB_ERROR_INT);
     double updateLeft = update->GetDouble(WEB_ATTR_SCROLL_LEFT, WEB_ERROR_DOUBLE);
@@ -306,6 +314,7 @@ void WebDomDocument::UpdateScrollInfoFromJsonString(const std::string& jsonStrin
 std::unique_ptr<JsonValue> WebDomDocument::ExportToJson()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebDomDocument::ExportToJson");
+    std::shared_lock<std::shared_mutex> lock(activeMutex_);
     std::unique_ptr<JsonValue> children = JsonUtil::CreateArray(true);
     if (IsValid()) {
         auto rootJson = active_->root.ToJson(*this);

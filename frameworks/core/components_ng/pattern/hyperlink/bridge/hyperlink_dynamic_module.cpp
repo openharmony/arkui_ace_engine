@@ -36,7 +36,7 @@ const ArkUIHyperlinkModifier* GetHyperlinkDynamicModifier();
 const CJUIHyperlinkModifier* GetCJUIHyperlinkModifier();
 #ifdef INCLUDE_GENERATED_SOURCES
 namespace GeneratedModifier {
-const GENERATED_ArkUIHyperlinkModifier* GetHyperlinkModifier();
+const GENERATED_ArkUIHyperlinkModifier* GetHyperlinkStaticModifier();
 } // namespace GeneratedModifier
 #endif
 } // namespace NG
@@ -54,7 +54,7 @@ const void* HyperlinkDynamicModule::GetDynamicModifier()
 const void* HyperlinkDynamicModule::GetStaticModifier()
 {
 #ifdef INCLUDE_GENERATED_SOURCES
-    return NG::GeneratedModifier::GetHyperlinkModifier();
+    return NG::GeneratedModifier::GetHyperlinkStaticModifier();
 #else
     return nullptr;
 #endif

@@ -47,7 +47,9 @@ RefPtr<T> GetTheme()
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto themeManager = pipelineContext->GetThemeManager();
     CHECK_NULL_RETURN(themeManager, nullptr);
-    return themeManager->GetTheme<T>();
+    auto node = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    return node ? node->GetTheme<T>(true)
+                : themeManager->GetTheme<T>();
 }
 
 PatternLockModel* PatternLockModel::GetInstance()

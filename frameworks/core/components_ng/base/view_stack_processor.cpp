@@ -15,11 +15,14 @@
 
 #include "core/components_ng/base/view_stack_processor.h"
 
+#include "base/memory/referenced.h"
+#include "core/components/common/properties/state_attributes.h"
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/base/view_stack_model_ng.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_ng/syntax/if_else_node.h"
+#include "core/gestures/gesture_processor.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -259,6 +262,19 @@ void ViewStackProcessor::PopKey()
     if (length > 0) {
         viewKey_.erase(viewKey_.length() - length);
     }
+}
+
+RefPtr<GestureProcessor> ViewStackProcessor::GetOrCreateGestureProcessor()
+{
+    if (!gestureStack_) {
+        gestureStack_ = AceType::MakeRefPtr<GestureProcessor>();
+    }
+    return gestureStack_;
+}
+
+void ViewStackProcessor::ResetGestureProcessor()
+{
+    gestureStack_.Reset();
 }
 
 std::string ViewStackProcessor::GetKey()

@@ -18,6 +18,7 @@
 
 #include "frameworks/bridge/common/utils/utils.h"
 #include "core/components/common/properties/color_factory.h"
+#include "core/components/progress/progress_component.h"
 
 namespace OHOS::Ace::Framework {
 const char DOM_CHART_TYPE[] = "type";

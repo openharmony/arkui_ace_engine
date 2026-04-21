@@ -20,6 +20,7 @@
 #include <optional>
 
 #include "base/memory/ace_type.h"
+#include "core/animation/curve_animation.h"
 #include "core/animation/curves.h"
 #include "core/animation/page_transition_common.h"
 

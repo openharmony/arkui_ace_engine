@@ -22,7 +22,7 @@ import { ObserveSingleton } from '../base/observeSingleton';
 import { LinkDecoratedVariable } from './decoratorLink';
 import { PropDecoratedVariable } from './decoratorProp';
 import { WatchFunc } from './decoratorWatch';
-import { StateMgmtConsole } from '../tools/stateMgmtDFX';
+import { StateMgmtConsole, ObservedObjectRegistry } from '../tools/stateMgmtDFX';
 import { NullableObject } from '../base/types';
 import { UIUtils } from '../utils';
 import { CompatibleStateChangeCallback, getObservedObject, isDynamicObject } from '#interop';
@@ -56,6 +56,9 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T> implem
         // if initial value is object, register so that property changes trigger
         // @Watch function exec
         this.registerWatchForObservedObjectChanges(initValue);
+
+        // Register the relationship between this State variable and the observed object it uses
+        this.registerToObservedObject(initValue);
     }
 
     public getInfo(): string {
@@ -67,8 +70,12 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T> implem
         const shouldAddRef = this.shouldAddRef();
         const value = this.backing_.get(shouldAddRef);
         if (shouldAddRef) {
-            ObserveSingleton.instance.setV1RenderId(value as NullableObject);
+            if (value instanceof Object) {
+                ObserveSingleton.instance.setV1RenderId(value as NullableObject);
+            }
             uiUtils.builtinContainersAddRefAnyKey(value);
+            this.selfTrack();
+            ObservedObjectRegistry.get(StateMgmtDFX.getObservedObjectFromValue(value))?.addV1InnerRef();
         }
         return value;
     }
@@ -83,7 +90,7 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T> implem
         let value: T = uiUtils.makeV1Observed(newValue);
         // for interop
         if (isDynamicObject(newValue)) {
-            const value = getObservedObject(newValue);
+            value = getObservedObject(newValue);
             this.backing_.setNoCheck(value);
         } else {
             this.backing_.setNoCheck(value);
@@ -97,6 +104,10 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T> implem
         // unregister if old value is an object
         this.unregisterWatchFromObservedObjectChanges(oldValue);
         this.registerWatchForObservedObjectChanges(this.backing_.get(false));
+
+        // Update ObservedObjectRegistry registration
+        this.updateObservedObjectRegistration(oldValue, this.backing_.get(false));
+
         this.execWatchFuncs();
     }
 
@@ -156,5 +167,14 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T> implem
 
     public fireChange(): void {
         this.backing_.fireChange();
+    }
+
+    public aboutToBeDeletedInternal(): void {
+        // Unregister from the observed object before deletion
+        const currentValue = this.backing_.get(false);
+        this.unregisterFromObservedObject(currentValue);
+
+        // Call parent's cleanup
+        super.aboutToBeDeletedInternal();
     }
 }

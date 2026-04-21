@@ -28,7 +28,7 @@ final class CONSTANT {
 export class WrappedArray<T> extends Array<T> implements IObservedObject, ObserveWrappedKeyedMeta, ISubscribedWatches {
     public store_: Array<T>;
     @JSONStringifyIgnore
-    private meta_: IMutableKeyedStateMeta;
+    meta_: IMutableKeyedStateMeta;
     // support for @Watch
     // each IObservedObject manages a set of @Wtch subscribers
     // when a object property changes need to call execureOnSubscribingWatches
@@ -37,17 +37,25 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
     private subscribedWatches: SubscribedWatches = new SubscribedWatches();
     // IObservedObject interface
     @JSONStringifyIgnore
-    private ____V1RenderId: RenderIdType = 0;
+    ____V1RenderId: RenderIdType = 0;
     @JSONStringifyIgnore
     private allowDeep_: boolean;
     private isAPI_: boolean;
+    @JSONStringifyIgnore
+    public isStaticArrayProxy_: boolean = true;
 
     constructor(src: Array<T>, allowDeep: boolean = false, isAPI: boolean = false) {
         super();
         this.store_ = src;
         this.allowDeep_ = allowDeep;
         this.isAPI_ = isAPI;
-        this.meta_ = FactoryInternal.mkMutableKeyedStateMeta('WrappedArray');
+        this.meta_ = FactoryInternal.mkMutableKeyedStateMeta(
+            (
+                this.allowDeep_ ? 
+                    this.isAPI_ ? '__metaBuiltInMakeObserved_'
+                        : '__metaBuiltInV2_'
+                    : '__metaBuiltInV1_'
+            ) +'WrappedArray', this);
     }
 
     public getRaw(): Object {
@@ -130,8 +138,8 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param arrayLength amount of elements.
      * @param initialValue initial value of elements.
      */
-    public static create<T>(arrayLength: int, initialValue: T): WrappedArray<T> {
-        let other = new Array<T>(arrayLength);
+    public static create<T>(arrayLength: number, initialValue: T): WrappedArray<T> {
+        let other = new Array<T>(arrayLength.toInt());
         other.fill(initialValue);
         return new WrappedArray<T>(other);
     }
@@ -372,7 +380,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
     /**
      * Returns an iterator over all indices
      */
-    public override keys(): IterableIterator<Number> {
+    public override keys(): IterableIterator<int> {
         this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         return this.store_.keys();
     }
@@ -437,9 +445,9 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param index Zero-based index of the array element to be returned.
      * Negative index counts back from the end of the array — if `index` < 0, index + `array.length()` is accessed.
      * @returns The element in the array matching the given index.
-     * Returns undefined if `index` < `-length()` or `index` >= `length()`.
+     * Throw range error if `index` < `-length()` or `index` >= `length()`.
      */
-    public override at(index: int): T | undefined {
+    public override at(index: int): T {
         if (this.shouldAddRef()) {
             this.meta_.addRef(CONSTANT.OB_LENGTH);
             this.meta_.addRef(String(index as Object | undefined | null));
@@ -760,33 +768,11 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param options
      * @returns string representation
      */
-    public override toLocaleString(locales: Object, options: Object): string {
+    public override toLocaleString(locales?: Intl.LocalesArgument, options?: object): string {
         if (this.shouldAddRef()) {
             this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         }
         return this.store_.toLocaleString(locales, options);
-    }
-
-    /**
-     * Returns a locale string representing the specified array and its elements.
-     *
-     * @param options
-     * @returns string representation
-     */
-    public override toLocaleString(locales: Object): string {
-        return this.toLocaleString(new Object(), new Object());
-    }
-
-    /**
-     * Returns a locale string representing the specified array and its elements.
-     *
-     * @returns string representation
-     */
-    public override toLocaleString(): string {
-        if (this.shouldAddRef()) {
-            this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
-        }
-        return this.store_.toLocaleString();
     }
 
     /**
@@ -943,7 +929,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
     /**
      * Returns an iterable of key, value pairs for every entry in the array
      */
-    public override entries(): IterableIterator<[number, T]> {
+    public override entries(): IterableIterator<[int, T]> {
         if (this.shouldAddRef()) {
             this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         }

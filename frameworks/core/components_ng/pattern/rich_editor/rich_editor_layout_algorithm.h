@@ -119,7 +119,7 @@ public:
     RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>> spans, RichEditorParagraphManager* paragraphs,
         LRUMap<uint64_t, RefPtr<Paragraph>>* paraMapPtr,
         std::unique_ptr<StyleManager>& styleManager, bool needShowPlaceholder,
-        const AISpanLayoutInfo& aiSpanLayoutInfo);
+        AISpanLayoutInfo aiSpanLayoutInfo);
     RichEditorLayoutAlgorithm(const RefPtr<RichEditorPattern>& pattern);
     ~RichEditorLayoutAlgorithm() override = default;
 
@@ -131,6 +131,8 @@ public:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
     void Measure(LayoutWrapper* layoutWrapper) override;
+    static std::vector<std::list<RefPtr<SpanItem>>> ConstructParagraphSpans(std::list<RefPtr<SpanItem>> spans,
+        bool isSingleLineMode);
 
     const std::optional<RectF>& GetTextRect()
     {
@@ -155,6 +157,8 @@ protected:
     void AddTextSpanToParagraph(const RefPtr<SpanItem>& child, int32_t& spanTextLength,
         const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph) override;
     ChildrenListWithGuard GetAllChildrenWithBuild(LayoutWrapper* layoutWrapper) override;
+    std::optional<float> GetCustomSpanMeasureMaxWidth(
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) const override;
 
 private:
     void UpdateFrameSizeWithLayoutPolicy(LayoutWrapper* layoutWrapper, SizeF& frameSize);
@@ -165,6 +169,7 @@ private:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     ParagraphStyle GetEditorParagraphStyle(
         const TextStyle& textStyle, const std::u16string& content, LayoutWrapper* layoutWrapper) const;
+    RefPtr<SpanItem> GetFirstTextSpanItem() const;
     float GetShadowOffset(const std::list<RefPtr<SpanItem>>& group) override;
     void UpdateRichTextRect(const SizeF& textSize, LayoutWrapper* layoutWrapper);
     RefPtr<RichEditorPattern> GetRichEditorPattern(LayoutWrapper* layoutWrapper);
@@ -181,8 +186,10 @@ private:
     void UpdateConstraintByLayoutPolicy(
         const SizeF& textSize, LayoutConstraintF& constraint, LayoutWrapper* layoutWrapper);
     void UpdateMaxSizeByLayoutPolicy(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper,
-        SizeF& maxSize);
-    void ReLayoutParagraphByLayoutPolicy(LayoutWrapper* layoutWrapper, float maxWidth);
+        SizeF& maxSize) const;
+    void ReLayoutParagraphByLayoutPolicy(LayoutWrapper* layoutWrapper, float maxWidth, float maxMeasureWidth);
+    bool IsWidthAdaptive(LayoutWrapper* layoutWrapper) const;
+    bool IsWidthFix(LayoutWrapper* layoutWrapper) const;
     void ReLayoutParagraphBySpan(LayoutWrapper* layoutWrapper, std::vector<TextStyle>& textStyles,
         std::list<RefPtr<SpanItem>>& group, bool& needReLayout, bool& needReLayoutParagraph,
         std::optional<TextStyle>& firstValidTextStyle);
@@ -193,7 +200,9 @@ private:
     void HandleAISpan(const std::list<RefPtr<SpanItem>>& spans, const AISpanLayoutInfo& aiSpanLayoutInfo);
     void HandleAISpan(const std::list<RefPtr<SpanItem>>& spans, const std::map<int32_t, AISpan>& aiSpanMap);
     void HandleTextSizeWhenEmpty(LayoutWrapper* layoutWrapper, SizeF& textSize);
-    std::vector<std::list<RefPtr<SpanItem>>> ConstructParagraphSpans(std::list<RefPtr<SpanItem>> spans);
+    static std::vector<std::list<RefPtr<SpanItem>>> ConstructParagraphSpansSingleLine(
+        std::list<RefPtr<SpanItem>> spans);
+    static std::vector<std::list<RefPtr<SpanItem>>> ConstructParagraphSpansMultiLine(std::list<RefPtr<SpanItem>> spans);
     std::string SpansToString();
 
     const std::list<RefPtr<SpanItem>>& GetSpans() const
@@ -205,6 +214,7 @@ private:
     RichEditorParagraphManager* pManager_;
     OffsetF parentGlobalOffset_;
     std::optional<RectF> richTextRect_;
+    std::optional<TextStyle> typingTextStyle_;
     LRUMap<uint64_t, RefPtr<Paragraph>>* const paraMapPtr_;
     std::unique_ptr<StyleManager>& styleManager_;
     bool needShowPlaceholder_ = false;

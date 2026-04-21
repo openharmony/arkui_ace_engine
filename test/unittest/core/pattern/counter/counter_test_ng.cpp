@@ -21,9 +21,9 @@
 
 #define protected public
 #define private public
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
 #include "base/geometry/dimension.h"
@@ -36,6 +36,7 @@
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "frameworks/core/components_ng/pattern/text/text_pattern.h"
 #include "frameworks/core/interfaces/arkoala/arkoala_api.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -386,7 +387,7 @@ HWTEST_F(CounterTestNg, CounterLayoutAlgorithmTestNg001, TestSize.Level0)
     CounterModelNG model;
     model.Create();
     GetInstance();
-    
+
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     auto counterPattern = AceType::DynamicCast<CounterPattern>(frameNode->GetPattern());
@@ -400,77 +401,6 @@ HWTEST_F(CounterTestNg, CounterLayoutAlgorithmTestNg001, TestSize.Level0)
     auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
     counterLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_NE(layoutDirection, TextDirection::RTL);
-}
-
-/**
- * @tc.name: CounterLayoutAlgorithmTest001
- * @tc.desc: Test counter UpdateTextColor function.
- * @tc.type: FUNC
- */
-HWTEST_F(CounterTestNg, CounterLayoutAlgorithmTest001, TestSize.Level0)
-{
-    CounterModelNG model;
-    model.Create();
-    GetInstance();
-    auto counterPattern = AceType::DynamicCast<CounterPattern>(frameNode_->GetPattern());
-    ASSERT_NE(counterPattern, nullptr);
-    int32_t contentId = counterPattern->GetAddId();
-    auto addNode =
-        AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(frameNode_->GetChildIndexById(contentId)));
-    ASSERT_NE(addNode, nullptr);
-    auto addTextNode = AceType::DynamicCast<FrameNode>(addNode->GetChildren().front());
-    ASSERT_NE(addTextNode, nullptr);
-    auto counterLayoutAlgorithm = AceType::DynamicCast<CounterLayoutAlgorithm>(counterPattern->CreateLayoutAlgorithm());
-    ASSERT_NE(counterLayoutAlgorithm, nullptr);
-    counterLayoutAlgorithm->UpdateTextColor(addTextNode, COLOR);
-    auto addRenderContext = addTextNode->GetRenderContext();
-    ASSERT_NE(addRenderContext, nullptr);
-    ASSERT_EQ(addRenderContext->GetForegroundColor(), COLOR);
-}
-
-/**
- * @tc.name: CounterLayoutPropertyTest001
- * @tc.desc: test CounterLayoutProperty.
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(CounterTestNg, CounterLayoutPropertyTest001, TestSize.Level0)
-{
-    CounterModelNG model;
-    model.Create();
-    GetInstance();
-    auto layoutProperty = pattern_->CreateLayoutProperty();
-    ASSERT_NE(layoutProperty, nullptr);
-    auto counterLayoutProperty = AceType::DynamicCast<CounterLayoutProperty>(layoutProperty);
-    ASSERT_NE(counterLayoutProperty, nullptr);
-    auto clone = counterLayoutProperty->Clone();
-    ASSERT_NE(clone, nullptr);
-    auto json = JsonUtil::Create(true);
-    ASSERT_NE(json, nullptr);
-    counterLayoutProperty->ToJsonValue(json, filter);
-    EXPECT_NE(json, nullptr);
-    counterLayoutProperty->Reset();
-    EXPECT_FALSE(counterLayoutProperty->isVertical_);
-}
-
-/**
- * @tc.name: CounterModelNGTest001
- * @tc.desc: test ResetBackgroundColor.
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(CounterTestNg, CounterModelNGTest001, TestSize.Level0)
-{
-    CounterModelNG model;
-    model.Create();
-    GetInstance();
-    auto renderContext = frameNode_->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    ASSERT_EQ(renderContext->GetBackgroundColor().has_value(), false);
-    renderContext->UpdateBackgroundColor(COLOR);
-    ASSERT_EQ(renderContext->GetBackgroundColor(), COLOR); //
-    model.ResetBackgroundColor(Referenced::RawPtr(frameNode_));
-    ASSERT_EQ(renderContext->GetBackgroundColor().has_value(), false);
 }
 
 /**
@@ -841,10 +771,71 @@ HWTEST_F(CounterTestNg, CounterModelNGUpdatesHeightForAllChildrenTest001, TestSi
     ASSERT_NE(addTextLayoutProperty, nullptr);
 
     int32_t contentId = counterPattern->GetContentId();
-    auto contentNode = AceType::DynamicCast<FrameNode>(
-        frameNode->GetChildAtIndex(frameNode->GetChildIndexById(contentId)));
+    auto contentNode =
+        AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(contentId)));
     ASSERT_NE(contentNode, nullptr);
     auto contentLayoutProperty = contentNode->GetLayoutProperty();
     ASSERT_NE(contentLayoutProperty, nullptr);
+}
+
+/**
+ * @tc.name: CounterModelNGOnInjectionEventTest001
+ * @tc.desc: Test OnInjectionEvent function
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterTestNg, CounterModelNGOnInjectionEventTest001, TestSize.Level1)
+{
+    CounterModelNG model;
+    model.Create();
+
+    auto jsResourceType = JsCounterResourceType::BackgroundColor;
+    auto resObj = AceType::MakeRefPtr<ResourceObject>();
+
+    model.CreateWithResourceObj(jsResourceType, resObj);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto counterPattern = frameNode->GetPattern<CounterPattern>();
+    ASSERT_NE(counterPattern, nullptr);
+    std::string jsonCommand = R"({"cmd":"setCounterOnInc"})";
+    int32_t result = counterPattern->OnInjectionEvent(jsonCommand);
+    EXPECT_EQ(result, RET_SUCCESS);
+
+    jsonCommand = R"({"cmd":"setCounterOnDec"})";
+    result = counterPattern->OnInjectionEvent(jsonCommand);
+    EXPECT_EQ(result, RET_SUCCESS);
+
+    jsonCommand = R"({"cmd":"setCounter"})";
+    result = counterPattern->OnInjectionEvent(jsonCommand);
+    EXPECT_EQ(result, RET_FAILED);
+
+    jsonCommand = R"({")";
+    result = counterPattern->OnInjectionEvent(jsonCommand);
+    EXPECT_EQ(result, RET_FAILED);
+
+    jsonCommand = "";
+    result = counterPattern->OnInjectionEvent(jsonCommand);
+    EXPECT_EQ(result, RET_FAILED);
+}
+
+/**
+ * @tc.name: CounterPatternUpdateTextColorTest001
+ * @tc.desc: Test UpdateTextColor function
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterTestNg, CounterPatternUpdateTextColorTest001, TestSize.Level1)
+{
+    CounterModelNG model;
+    model.Create();
+    GetInstance();
+    auto textNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, textNodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    const Color testColor = Color::RED;
+    pattern_->UpdateTextColor(textNode, testColor);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_TRUE(textLayoutProperty->HasTextColor());
+    EXPECT_EQ(textLayoutProperty->GetTextColorValue(Color::BLACK), testColor);
 }
 } // namespace OHOS::Ace::NG

@@ -56,6 +56,21 @@ void CreateTextStyleUsingTheme(const RefPtr<TextLayoutProperty>& property, const
     UseSelfStyleWithTheme(property, textStyle, textTheme, isSymbol);
 }
 
+void UpdateFontSizeWithPxUnit(
+    const RefPtr<TextLayoutProperty>& property, TextStyle& textStyle, const RefPtr<TextTheme>& textTheme)
+{
+    auto& fontStyle = property->GetFontStyle();
+    Dimension fontSize;
+    if (fontStyle && fontStyle->HasFontSize()) {
+        fontSize = fontStyle->GetFontSizeValue();
+    } else {
+        fontSize = textTheme->GetTextStyle().GetFontSize();
+    }
+    auto fontSizePx = fontSize.ConvertToPxDistribute(
+        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    textStyle.SetFontSize(Dimension(fontSizePx, DimensionUnit::PX));
+}
+
 void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle& textStyle,
     const RefPtr<TextTheme>& textTheme, bool isSymbol)
 {
@@ -68,7 +83,12 @@ void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, MinFontScale, MinFontScale);
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, MaxFontScale, MaxFontScale);
 
-    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, FontSize, FontSize);
+    if (property->IsNewMaterial()) {
+        UpdateFontSizeWithPxUnit(property, textStyle, textTheme);
+    } else {
+        UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, FontSize, FontSize);
+    }
+
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, AdaptMinFontSize, AdaptMinFontSize);
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, AdaptMaxFontSize, AdaptMaxFontSize);
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, LetterSpacing, LetterSpacing);
@@ -77,6 +97,7 @@ void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, ItalicFontStyle, FontStyle);
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, FontWeight, FontWeight);
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, FontFeature, FontFeatures);
+    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, FontVariations, FontVariations);
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, TextDecoration, TextDecoration);
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, TextDecorationColor, TextDecorationColor);
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, TextDecorationStyle, TextDecorationStyle);
@@ -95,7 +116,14 @@ void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle
         textStyle.SetShaderStyle(property->GetShaderStyleValue(textTheme->GetTextStyle().GetShaderStyle()));
     }
 
+    UseSelfTextLineStyleWithTheme(textLineStyle, textStyle, textTheme);
+}
+
+void UseSelfTextLineStyleWithTheme(const std::unique_ptr<TextLineStyle>& textLineStyle, TextStyle& textStyle,
+    const RefPtr<TextTheme>& textTheme)
+{
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, LineHeight, LineHeight);
+    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, LineHeightMultiply, LineHeightMultiply);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, BaselineOffset, BaselineOffset);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, TextIndent, TextIndent);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, LineSpacing, LineSpacing);
@@ -110,6 +138,7 @@ void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, IsOnlyBetweenLines, IsOnlyBetweenLines);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, ParagraphSpacing, ParagraphSpacing);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, OptimizeTrailingSpace, OptimizeTrailingSpace);
+    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, OrphanCharOptimization, OrphanCharOptimization);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, CompressLeadingPunctuation, CompressLeadingPunctuation);
 }
 
@@ -124,6 +153,10 @@ void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique
         UPDATE_TEXT_STYLE(fontStyle, MaxFontScale, SetMaxFontScale);
 
         UPDATE_TEXT_STYLE(fontStyle, FontSize, SetFontSize);
+        if (fontStyle->propFontSizeScale.has_value()) {
+            auto currentSize = textStyle.GetFontSize();
+            textStyle.SetFontSize(currentSize * fontStyle->propFontSizeScale.value());
+        }
         UPDATE_TEXT_STYLE(fontStyle, AdaptMinFontSize, SetAdaptMinFontSize);
         UPDATE_TEXT_STYLE(fontStyle, AdaptMaxFontSize, SetAdaptMaxFontSize);
         UPDATE_TEXT_STYLE(fontStyle, LetterSpacing, SetLetterSpacing);
@@ -134,6 +167,7 @@ void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique
         UPDATE_TEXT_STYLE(fontStyle, FontWeight, SetFontWeight);
         UPDATE_TEXT_STYLE(fontStyle, FontFamily, SetFontFamilies);
         UPDATE_TEXT_STYLE(fontStyle, FontFeature, SetFontFeatures);
+        UPDATE_TEXT_STYLE(fontStyle, FontVariations, SetFontVariations);
         UPDATE_TEXT_STYLE(fontStyle, StrokeWidth, SetStrokeWidth);
         UPDATE_TEXT_STYLE(fontStyle, StrokeColor, SetStrokeColor);
         UPDATE_TEXT_STYLE(fontStyle, Superscript, SetSuperscript);
@@ -157,6 +191,7 @@ void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique
     }
     if (textLineStyle) {
         UPDATE_TEXT_STYLE(textLineStyle, LineHeight, SetLineHeight);
+        UPDATE_TEXT_STYLE(textLineStyle, LineHeightMultiply, SetLineHeightMultiply);
         UPDATE_TEXT_STYLE(textLineStyle, BaselineOffset, SetBaselineOffset);
         UPDATE_TEXT_STYLE(textLineStyle, TextIndent, SetTextIndent);
         UPDATE_TEXT_STYLE(textLineStyle, LineSpacing, SetLineSpacing);
@@ -173,6 +208,7 @@ void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique
         UPDATE_TEXT_STYLE(textLineStyle, IsOnlyBetweenLines, SetIsOnlyBetweenLines);
         UPDATE_TEXT_STYLE(textLineStyle, ParagraphSpacing, SetParagraphSpacing);
         UPDATE_TEXT_STYLE(textLineStyle, OptimizeTrailingSpace, SetOptimizeTrailingSpace);
+        UPDATE_TEXT_STYLE(textLineStyle, OrphanCharOptimization, SetOrphanCharOptimization);
         UPDATE_TEXT_STYLE(textLineStyle, CompressLeadingPunctuation, SetCompressLeadingPunctuation);
     }
 }

@@ -15,12 +15,13 @@
 
 #include <utility>
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
-#include "test/mock/core/render/mock_paragraph.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/render/mock_canvas_image.h"
-#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_canvas_image.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -333,6 +334,77 @@ HWTEST_F(RichEditorSpanAmendTestNg, SymbolTest001, TestSize.Level0)
     EXPECT_EQ(newSpan2->GetSymbolEffectStrategy(), EFFECT_STRATEGY_NONE);
 
     ClearSpan();
+}
+
+/**
+ * @tc.name: SetPlaceHolderStyledString
+ * @tc.desc: test SetPlaceHolderStyledString
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSpanAmendTestNg, SetPlaceHolderStyledString, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    auto spanString = AceType::MakeRefPtr<SpanString>(INIT_VALUE_1);
+    ASSERT_NE(spanString, nullptr);
+    richEditorController->SetPlaceholderStyledString(spanString);
+    EXPECT_NE(richEditorPattern->styledPlaceholder_, nullptr);
+    richEditorPattern->isShowPlaceholder_ = true;
+    richEditorPattern->richTextRect_ = RectF(50, 50, 100, 140);
+    richEditorPattern->contentRect_ = RectF(0, 0, 100, 100);
+    std::vector<std::list<RefPtr<SpanItem>>> spans;
+    richEditorPattern->SetPlaceholder(spans);
+    EXPECT_EQ(spans.size(), 1);
+    EXPECT_EQ(richEditorPattern->richTextRect_.GetOffset(), OffsetF(50.0f, 50.0f));
+    richEditorPattern->isShowPlaceholder_ = false;
+    richEditorPattern->SetPlaceholder(spans);
+    EXPECT_EQ(richEditorPattern->richTextRect_.GetOffset(), OffsetF(0, 0));
+}
+
+/**
+ * @tc.name: PlaceholderImageNode
+ * @tc.desc: test PlaceholderImageNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSpanAmendTestNg, PlaceholderImageNode, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    ImageSpanOptions options;
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    ASSERT_NE(pixelMap, nullptr);
+    options.imagePixelMap = pixelMap;
+    auto spanString = AceType::MakeRefPtr<SpanString>(options);
+    ASSERT_NE(spanString, nullptr);
+
+    // Set placeholder with image.
+    richEditorPattern->SetPlaceholderStyledString(spanString);
+    auto& placeholderSpanNodes = richEditorPattern->placeholderImageNodes_;
+    std::vector<std::list<RefPtr<SpanItem>>> spans;
+    richEditorPattern->SetPlaceholder(spans);
+    EXPECT_EQ(spans.size(), 1);
+    EXPECT_EQ(placeholderSpanNodes.size(), 1);
+
+    // Remove placeholder image nodes when a text span is added.
+    richEditorPattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);
+    EXPECT_TRUE(placeholderSpanNodes.empty());
+    richEditorPattern->spans_.clear();
+    richEditorPattern->SetPlaceholder(spans);
+    EXPECT_EQ(spans.size(), 1);
+    EXPECT_EQ(placeholderSpanNodes.size(), 1);
+
+    // Remove placeholder image nodes since real content exists.
+    richEditorPattern->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(placeholderSpanNodes.size(), 1);
+    richEditorPattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);
+    ASSERT_FALSE(richEditorPattern->spans_.empty());
+    richEditorPattern->BeforeCreateLayoutWrapper();
+    EXPECT_TRUE(placeholderSpanNodes.empty());
 }
 
 } // namespace OHOS::Ace::NG

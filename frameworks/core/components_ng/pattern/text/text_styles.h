@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_TEXT_STYLES_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_TEXT_STYLES_H
 
+#include "base/image/drawing_color_filter.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/symbol/symbol_effect_options.h"
@@ -23,11 +24,14 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_v2/inspector/utils.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
 
 struct CustomSpanMeasureInfo {
     float fontSize = 0.0f;
+    std::optional<float> maxWidth;
+    std::optional<LayoutCalPolicy> layoutPolicy;
 };
 
 struct CustomSpanOptions {
@@ -67,6 +71,26 @@ struct TextDecorationOptions {
     }
 
     bool operator!=(const TextDecorationOptions& other) const
+    {
+        return !IsEqual(other);
+    }
+};
+
+struct LineSpacingOptions {
+    std::optional<bool> onlyBetweenLines;
+ 
+    bool IsEqual(const LineSpacingOptions& other) const
+    {
+        return this->onlyBetweenLines.has_value() == other.onlyBetweenLines.has_value() &&
+            this->onlyBetweenLines.value_or(false) == other.onlyBetweenLines.value_or(false);
+    }
+
+    bool operator==(const LineSpacingOptions& other) const
+    {
+        return IsEqual(other);
+    }
+
+    bool operator!=(const LineSpacingOptions& other) const
     {
         return !IsEqual(other);
     }
@@ -203,6 +227,7 @@ class TextLayoutProperty;
 constexpr Dimension TEXT_DEFAULT_FONT_SIZE = 16.0_fp;
 constexpr Dimension TEXT_DEFAULT_STROKE_WIDTH = 0.0_fp;
 using FONT_FEATURES_LIST = std::list<std::pair<std::string, int32_t>>;
+using FONT_VARIATIONS_LIST = Ace::FONT_VARIATIONS_LIST;
 struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontSize, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextColor, Color);
@@ -215,6 +240,7 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(EnableDeviceFontWeightCategory, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontFamily, std::vector<std::string>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontFeature, FONT_FEATURES_LIST);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FontVariations, FONT_VARIATIONS_LIST);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecoration, std::vector<TextDecoration>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecorationColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(StrokeWidth, Dimension);
@@ -234,6 +260,7 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MaxFontScale, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolType, SymbolType);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LineThicknessScale, float);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FontSizeScale, double);
 
     TextDecoration GetTextDecorationFirst() const
     {
@@ -284,6 +311,7 @@ struct FontStyle {
 
 struct TextLineStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LineHeight, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(LineHeightMultiply, double);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextBaseline, TextBaseline);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BaselineOffset, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextOverflow, TextOverflow);
@@ -306,6 +334,7 @@ struct TextLineStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AllowScale, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ParagraphSpacing, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(OptimizeTrailingSpace, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(OrphanCharOptimization, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(CompressLeadingPunctuation, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextContentAlign, TextContentAlign);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDirection, TextDirection);
@@ -353,6 +382,8 @@ ACE_FORCE_EXPORT void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle,
 
 void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle& textStyle,
     const RefPtr<TextTheme>& textTheme, bool isSymbol = false);
+void UseSelfTextLineStyleWithTheme(const std::unique_ptr<TextLineStyle>& textLineStyle, TextStyle& textStyle,
+    const RefPtr<TextTheme>& textTheme);
 
 ACE_FORCE_EXPORT std::string GetFontFamilyInJson(const std::optional<std::vector<std::string>>& value);
 ACE_FORCE_EXPORT std::string GetFontStyleInJson(const std::optional<Ace::FontStyle>& value);

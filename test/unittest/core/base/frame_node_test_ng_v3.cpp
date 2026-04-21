@@ -630,6 +630,59 @@ HWTEST_F(FrameNodeTestNg, FindSameParentComponentTest, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FindSameParentComponentTest001
+ * @tc.desc: Test FindSameParentComponent returns the common parent for sibling nodes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FindSameParentComponentTest001, TestSize.Level1)
+{
+    auto parent = FrameNode::CreateFrameNode("parent", 10, AceType::MakeRefPtr<Pattern>(), true);
+    auto childA = FrameNode::CreateFrameNode("childA", 11, AceType::MakeRefPtr<Pattern>(), false);
+    auto childB = FrameNode::CreateFrameNode("childB", 12, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(parent, nullptr);
+    ASSERT_NE(childA, nullptr);
+    ASSERT_NE(childB, nullptr);
+    parent->SetActive(true);
+    childA->SetActive(true);
+    childB->SetActive(true);
+    parent->AddChild(childA);
+    parent->AddChild(childB);
+
+    auto result = FindSameParentComponent(childA, childB);
+
+    EXPECT_EQ(result, parent);
+}
+
+/**
+ * @tc.name: FindSameParentComponentTest002
+ * @tc.desc: Test FindSameParentComponent stops searching when top window boundaries are reached.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FindSameParentComponentTest002, TestSize.Level1)
+{
+    auto root = FrameNode::CreateFrameNode("root", 20, AceType::MakeRefPtr<Pattern>(), true);
+    auto windowA = FrameNode::CreateFrameNode("windowA", 21, AceType::MakeRefPtr<Pattern>(), false);
+    auto windowB = FrameNode::CreateFrameNode("windowB", 22, AceType::MakeRefPtr<Pattern>(), false);
+    auto childA = FrameNode::CreateFrameNode("childA", 23, AceType::MakeRefPtr<Pattern>(), false);
+    auto childB = FrameNode::CreateFrameNode("childB", 24, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(root, nullptr);
+    ASSERT_NE(windowA, nullptr);
+    ASSERT_NE(windowB, nullptr);
+    ASSERT_NE(childA, nullptr);
+    ASSERT_NE(childB, nullptr);
+    windowA->SetTopWindowBoundary(true);
+    windowB->SetTopWindowBoundary(true);
+    root->AddChild(windowA);
+    root->AddChild(windowB);
+    windowA->AddChild(childA);
+    windowB->AddChild(childB);
+
+    auto result = FindSameParentComponent(childA, childB);
+
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
  * @tc.name: FrameProxyChildrenTest001
  * @tc.desc: Test FrameProxy children handling when there are no children
  * @tc.type: FUNC

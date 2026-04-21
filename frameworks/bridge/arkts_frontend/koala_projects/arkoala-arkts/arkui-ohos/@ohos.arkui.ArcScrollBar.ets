@@ -20,8 +20,8 @@ import { DeserializerBase, KPointer, RuntimeType, SerializerBase } from "@koalau
 import { int32 } from "@koalaui/common"
 import { ComponentBase } from "arkui/ComponentBase"
 import { PeerNode } from "arkui/PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodComponent, ArkCommonMethodPeer, ArkCommonMethodStyle, AttributeModifier, CommonMethod } from "arkui/component/common"
+import { ArkUIGeneratedNativeModule } from "#components"
+import { ArkCommonMethodComponent, ArkCommonMethodPeer, AttributeModifier, CommonMethod } from "arkui/component/common"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ArcScrollBarExtender } from "arkui/component/idlize"
 import { Scroller, Scroller_serializer } from "arkui/component/scroll"
@@ -53,15 +53,6 @@ export interface ArcScrollBarAttribute extends CommonMethod {
     }
     attributeModifier(value: AttributeModifier<ArcScrollBarAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkArcScrollBarStyle extends ArkCommonMethodStyle implements ArcScrollBarAttribute {
-    attributeModifier_value?: AttributeModifier<ArcScrollBarAttribute> | AttributeModifier<CommonMethod> | undefined
-    setArcScrollBarOptions(options: ArcScrollBarOptions): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<ArcScrollBarAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
     }
 }
 export class ArkArcScrollBarComponent extends ArkCommonMethodComponent implements ArcScrollBarAttribute {

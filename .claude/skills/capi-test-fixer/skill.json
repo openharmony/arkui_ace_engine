@@ -1,0 +1,35 @@
+{
+  "name": "capi-test-fixer",
+  "version": "1.0.0",
+  "description": "Automatically diagnose and fix common C API unit test failures in OpenHarmony ACE Engine",
+  "trigger_keywords": [
+    "C API test failures",
+    "C API unit test issues",
+    "modifier tests failing",
+    "undefined symbol in C API tests",
+    "ARKUI_CAPI_UNITTEST compilation errors",
+    "Converter API issues in tests",
+    "test build configuration problems",
+    "fix C API interface test failures",
+    "capi test fix",
+    "modifier test fix"
+  ],
+  "author": "Claude Code",
+  "entry_point": "scripts/diagnose.py",
+  "dependencies": [
+    "openharmony-build",
+    "build-error-analyzer"
+  ],
+  "capabilities": [
+    "analyze_build_logs",
+    "diagnose_test_failures",
+    "generate_fixes",
+    "suggest_build_config_changes"
+  ],
+  "supported_patterns": [
+    "static_modifier_missing",
+    "converter_api_misuse",
+    "test_build_config_missing_files",
+    "nullptr_modifier_in_tests"
+  ]
+}

@@ -14,11 +14,12 @@
  */
 
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -283,6 +284,9 @@ HWTEST_F(RichEditorPlaceholderSpanTestNg, AddPlaceholderSpan005, TestSize.Level0
  */
 HWTEST_F(RichEditorPlaceholderSpanTestNg, InitPlaceholderSpansMap001, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. Get RichEditorPattern and verify it's not null
+     */
     auto richEditorPattern = GetRichEditorPattern();
     ASSERT_NE(richEditorPattern, nullptr);
     auto newSpanItem = AceType::MakeRefPtr<OHOS::Ace::NG::SpanItem>();
@@ -290,7 +294,15 @@ HWTEST_F(RichEditorPlaceholderSpanTestNg, InitPlaceholderSpansMap001, TestSize.L
     size_t index = 0;
     size_t placeholderGains = 0;
     spanItem->spanItemType = SpanItemType::CustomSpan;
+
+    /**
+     * @tc.steps: step2. Call InitPlaceholderSpansMap function
+     */
     richEditorPattern->InitPlaceholderSpansMap(newSpanItem, spanItem, index, placeholderGains);
+
+    /**
+     * @tc.steps: step3. Verify placeholder gains calculation
+     */
     EXPECT_EQ(placeholderGains, placeholderGains += PLACEHOLDER_LENGTH - CUSTOM_CONTENT_LENGTH);
 }
 

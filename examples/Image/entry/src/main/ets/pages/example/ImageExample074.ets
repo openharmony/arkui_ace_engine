@@ -20,11 +20,11 @@
 @Component
 struct ImageExample074 {
   @State images: Array<Resource> = [
-    $r('app.media.png'),
-    $r('app.media.jpg'),
-    $r('app.media.gif'),
+    $r('app.media.startIcon'),
+    $r('app.media.startIcon'),
+    $r('app.media.startIcon'),
     $r('app.media.svg'),
-    $r('app.media.app_icon')
+    $r('app.media.startIcon')
   ]
 
   build() {

@@ -21,22 +21,25 @@
 #define private public
 #define protected public
 
-#include "test/mock/base/mock_foldable_window.h"
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/window/mock_foldable_window.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
+#include "core/common/ace_engine.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_view.h"
+#include "frameworks/base/subwindow/subwindow_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -58,7 +61,8 @@ void SheetPresentationTestThreeNg::SetUpTestCase()
 {
     MockPipelineContext::SetUp();
     MockContainer::SetUp();
-
+    auto safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
+    MockPipelineContext::GetCurrent()->safeAreaManager_ = safeAreaManager;
     sheetTheme_ = AceType::MakeRefPtr<SheetTheme>();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
@@ -559,11 +563,24 @@ HWTEST_F(SheetPresentationTestThreeNg, GetWidthByScreenSizeType001, TestSize.Lev
         V2::TEXT_ETS_TAG, std::move(callback)));
     auto sheetLayoutAlgorithm = AceType::MakeRefPtr<SheetPresentationLayoutAlgorithm>();
     sheetLayoutAlgorithm->sheetType_ = SheetType::SHEET_BOTTOM;
-    // Make IsPhoneInLandScape return true
-    sheetTheme_->sheetType_ = "auto";
-    auto foldWindow = AceType::DynamicCast<MockFoldableWindow>(FoldableWindow::CreateFoldableWindow(0));
-    EXPECT_CALL(*foldWindow, IsFoldExpand()).WillRepeatedly(Return(false));
-    SystemProperties::orientation_ = DeviceOrientation::LANDSCAPE;
+    // Make IsBreakpointMatch return true
+
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto host = sheetPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto pipeline = host->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto windowManager = pipeline->GetWindowManager();
+    ASSERT_NE(windowManager, nullptr);
+    windowManager->SetHeightBreakpointCallback(
+        []() -> HeightBreakpoint {
+        return HeightBreakpoint::HEIGHT_SM;
+    });
+    windowManager->SetWidthBreakpointCallback(
+        []() -> WidthBreakpoint {
+        return WidthBreakpoint::WIDTH_MD;
+    });
 
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         sheetNode, sheetNode->GetGeometryNode(), sheetNode->GetLayoutProperty());

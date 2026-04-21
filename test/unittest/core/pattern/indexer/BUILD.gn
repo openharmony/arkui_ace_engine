@@ -16,6 +16,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("indexer_test_ng") {
   module_name = "TextSet-Search"
   type = "new"
+
   sources = [
     "arcindexer_pattern_test_ng.cpp",
     "arcindexer_pattern_test_two_ng.cpp",
@@ -27,4 +28,18 @@ ace_unittest("indexer_test_ng") {
     "indexer_select_test_ng.cpp",
     "indexer_test_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "indexer_test_min.cpp",
+      "indexer_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "indexer_test_min.cpp",
+      "indexer_test_core.cpp",
+    ]
+  }
+
 }

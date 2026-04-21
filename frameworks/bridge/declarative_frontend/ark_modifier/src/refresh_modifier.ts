@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class RefreshModifier extends ArkRefreshComponent implements AttributeModifier<RefreshAttribute> {
 
     constructor(nativePtr: KNode, classType: ModifierType) {

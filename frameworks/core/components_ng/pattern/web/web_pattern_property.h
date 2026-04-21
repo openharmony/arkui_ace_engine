@@ -86,6 +86,7 @@ struct WebPatternProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SelectionMenuOptions, WebMenuOptionsParam);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(OverlayScrollbarEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(KeyboardAvoidMode, WebKeyboardAvoidMode);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(KeyboardAppearanceMode, WebKeyboardAppearanceMode);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(EnabledHapticFeedback, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(OptimizeParserBudgetEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(WebMediaAVSessionEnabled, bool);
@@ -95,10 +96,13 @@ struct WebPatternProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BlankScreenDetectionConfig, BlankScreenDetectionConfig);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(EnableImageAnalyzer, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(EnableAutoFill, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(EnableDefaultContextMenu, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(GestureFocusMode, GestureFocusMode);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(RotateRenderEffect, WebRotateEffect);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ForceEnableZoom, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackToTop, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(EnableDrag, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ScrollbarLayoutPolicy, ScrollbarLayoutPolicy);
 };
 
 } // namespace OHOS::Ace::NG

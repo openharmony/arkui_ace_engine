@@ -14,11 +14,13 @@
  */
 
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
-#include "test/mock/core/render/mock_paragraph.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "core/common/clipboard/clipboard_proxy.h"
+#include "core/common/event_manager.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_undo_manager.h"
 
@@ -223,10 +225,10 @@ HWTEST_F(RichEditorMouseTest, OnHover001, TestSize.Level0)
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     HoverInfo hoverInfo;
-    richEditorPattern->OnHover(true, hoverInfo);
+    richEditorPattern->OnHover(true);
     auto mouseStyleManager = pipeline->eventManager_->GetMouseStyleManager();
     EXPECT_EQ(mouseStyleManager->mouseStyleNodeId_.value(), id);
-    richEditorPattern->OnHover(false, hoverInfo);
+    richEditorPattern->OnHover(false);
     EXPECT_FALSE(mouseStyleManager->mouseStyleNodeId_.has_value());
 }
 
@@ -1392,4 +1394,76 @@ HWTEST_F(RichEditorMouseTest, HandleImageHoverEvent001, TestSize.Level0)
     richEditorPattern->HandleImageHoverEvent(mouseInfo);
 }
 
+/**
+ * @tc.name: HandleImageHoverEventTest002
+ * @tc.desc: test HandleImageHoverEvent when imageRect.IsInRegion returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorMouseTest, HandleImageHoverEvent002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    MouseInfo mouseInfo;
+    mouseInfo.SetAction(MouseAction::MOVE);
+    mouseInfo.SetLocalLocation({ 20.0f, 20.0f });
+    richEditorPattern->isMousePressed_ = false;
+    OffsetF frameOffset { 0.0f, 0.0f };
+    SizeF frameSize { 5.0f, 5.0f };
+
+    auto imageSpanNode = AceType::MakeRefPtr<ImageSpanNode>(V2::IMAGE_ETS_TAG, 0);
+    imageSpanNode->GetSpanItem()->onHover_ = [](bool inHover, HoverInfo& info) {};
+    imageSpanNode->GetGeometryNode()->SetFrameOffset(frameOffset);
+    imageSpanNode->GetGeometryNode()->SetFrameSize(frameSize);
+    WeakPtr<ImageSpanNode> hoverableNode = imageSpanNode;
+
+    richEditorPattern->hoverableNodes.clear();
+    richEditorPattern->hoverableNodes.push_back(hoverableNode);
+    richEditorPattern->lastHoverSpanItem_ = nullptr;
+    richEditorPattern->HandleImageHoverEvent(mouseInfo);
+
+    EXPECT_EQ(richEditorPattern->lastHoverSpanItem_, nullptr);
+}
+
+/**
+ * @tc.name: HandleImageHoverEventTest003
+ * @tc.desc: test HandleImageHoverEvent to cover branches in the later part of the function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorMouseTest, HandleImageHoverEvent003, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    MouseInfo mouseInfo;
+    mouseInfo.SetAction(MouseAction::MOVE);
+    mouseInfo.SetLocalLocation({ 2.0f, 2.0f });
+    richEditorPattern->isMousePressed_ = false;
+    OffsetF frameOffset { 0.0f, 0.0f };
+    SizeF frameSize { 10.0f, 10.0f };
+
+    auto imageSpanNode1 = AceType::MakeRefPtr<ImageSpanNode>(V2::IMAGE_ETS_TAG, 0);
+    imageSpanNode1->GetSpanItem()->onHover_ = [](bool inHover, HoverInfo& info) {};
+    imageSpanNode1->GetGeometryNode()->SetFrameOffset(frameOffset);
+    imageSpanNode1->GetGeometryNode()->SetFrameSize(frameSize);
+    WeakPtr<ImageSpanNode> hoverableNode1 = imageSpanNode1;
+
+    auto imageSpanNode2 = AceType::MakeRefPtr<ImageSpanNode>(V2::IMAGE_ETS_TAG, 0);
+    imageSpanNode2->GetSpanItem()->onHover_ = [](bool inHover, HoverInfo& info) {};
+    imageSpanNode2->GetGeometryNode()->SetFrameOffset({ 15.0f, 15.0f });
+    imageSpanNode2->GetGeometryNode()->SetFrameSize(frameSize);
+    WeakPtr<ImageSpanNode> hoverableNode2 = imageSpanNode2;
+
+    richEditorPattern->hoverableNodes.clear();
+    richEditorPattern->hoverableNodes.push_back(hoverableNode1);
+    richEditorPattern->hoverableNodes.push_back(hoverableNode2);
+    richEditorPattern->lastHoverSpanItem_ = imageSpanNode1->GetSpanItem();
+    richEditorPattern->HandleImageHoverEvent(mouseInfo);
+    mouseInfo.SetLocalLocation({ 17.0f, 17.0f });
+    richEditorPattern->HandleImageHoverEvent(mouseInfo);
+
+    EXPECT_EQ(richEditorPattern->lastHoverSpanItem_, imageSpanNode2->GetSpanItem());
+}
 }

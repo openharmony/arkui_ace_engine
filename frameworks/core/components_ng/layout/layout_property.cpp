@@ -13,12 +13,15 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/layout/layout_property.h"
-
-#include "base/utils/string_expression.h"
 #include "core/components_ng/event/error_reporter/general_interaction_error_reporter.h"
+#include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/property/flex_property.h"
+
+#include "core/components/common/properties/border_image.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "base/utils/string_expression.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
+#include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/grid_property.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/position_property.h"
@@ -209,6 +212,7 @@ void LayoutProperty::Reset()
     propIsBindOverlay_.reset();
     backgroundIgnoresLayoutSafeAreaEdges_.reset();
     localizedBackgroundIgnoresLayoutSafeAreaEdges_.reset();
+    userDefinedHeightConfigured_ = false;
     CleanDirty();
 }
 
@@ -452,12 +456,16 @@ void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
     backgroundIgnoresLayoutSafeAreaEdges_ = layoutProperty->backgroundIgnoresLayoutSafeAreaEdges_;
     localizedBackgroundIgnoresLayoutSafeAreaEdges_ =
         layoutProperty->localizedBackgroundIgnoresLayoutSafeAreaEdges_;
+    isUserSetBackgroundColor_ = layoutProperty->isUserSetBackgroundColor_;
+    userDefinedHeightConfigured_ = layoutProperty->userDefinedHeightConfigured_;
 }
 
 void LayoutProperty::UpdateCalcLayoutProperty(const MeasureProperty& constraint)
 {
     if (!calcLayoutConstraint_) {
         calcLayoutConstraint_ = std::make_unique<MeasureProperty>(constraint);
+        userDefinedHeightConfigured_ = userDefinedHeightConfigured_ ||
+            (constraint.selfIdealSize.has_value() && constraint.selfIdealSize->Height().has_value());
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
         return;
     }
@@ -467,6 +475,8 @@ void LayoutProperty::UpdateCalcLayoutProperty(const MeasureProperty& constraint)
     calcLayoutConstraint_->selfIdealSize = constraint.selfIdealSize;
     calcLayoutConstraint_->maxSize = constraint.maxSize;
     calcLayoutConstraint_->minSize = constraint.minSize;
+    userDefinedHeightConfigured_ = userDefinedHeightConfigured_ ||
+        (constraint.selfIdealSize.has_value() && constraint.selfIdealSize->Height().has_value());
     propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
 }
 
@@ -1019,15 +1029,17 @@ PaddingPropertyF LayoutProperty::CreatePaddingAndBorderWithDefault(float padding
     auto pipeline = host ? host->GetContext() : nullptr;
     ScaleProperty scaleProperty = ScaleProperty::CreateScaleProperty(pipeline);
     if (layoutConstraint_.has_value()) {
-        auto padding = ConvertToPaddingPropertyF(padding_, scaleProperty, layoutConstraint_->percentReference.Width());
-        auto borderWidth =
-            ConvertToBorderWidthPropertyF(borderWidth_, scaleProperty, layoutConstraint_->percentReference.Width());
+        auto padding = ConvertToPaddingPropertyF(
+            padding_, scaleProperty, layoutConstraint_->percentReference.Width());
+        auto borderWidth = ConvertToBorderWidthPropertyF(
+            borderWidth_, scaleProperty, layoutConstraint_->percentReference.Width());
         return CombinePaddingsAndBorder(safeAreaPadding, padding, borderWidth, defaultParam);
     }
     auto rootWidth = pipeline ? pipeline->GetRootWidth() : PipelineContext::GetCurrentRootWidth();
-    auto padding = ConvertToPaddingPropertyF(padding_, scaleProperty, rootWidth);
-    auto borderWidth =
-        ConvertToBorderWidthPropertyF(borderWidth_, scaleProperty, rootWidth);
+    auto padding = ConvertToPaddingPropertyF(
+        padding_, scaleProperty, rootWidth);
+    auto borderWidth = ConvertToBorderWidthPropertyF(
+        borderWidth_, scaleProperty, rootWidth);
     return CombinePaddingsAndBorder(safeAreaPadding, padding, borderWidth, defaultParam);
 }
 
@@ -1106,6 +1118,7 @@ void LayoutProperty::OnVisibilityUpdate(VisibleType visible, bool allowTransitio
     CHECK_NULL_VOID(host);
     // store the previous visibility value.
     auto preVisibility = propVisibility_;
+    
     // update visibility value.
     propVisibility_ = visible;
 
@@ -1289,6 +1302,12 @@ void LayoutProperty::ResetGeometryTransition()
     UpdateGeometryTransition("");
 }
 
+void LayoutProperty::SetGeometryTransitionInfo(const std::string& id,
+    bool followWithoutTransition, bool doRegisterSharedTransition)
+{
+    geometryTransitionInfo_ = std::make_tuple(id, followWithoutTransition, doRegisterSharedTransition);
+}
+
 void LayoutProperty::UpdateLayoutDirection(TextDirection value)
 {
     if (layoutDirection_ == value) {
@@ -1436,6 +1455,9 @@ void LayoutProperty::UpdateUserDefinedIdealSize(const CalcSize& value)
 {
     if (!calcLayoutConstraint_) {
         calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    }
+    if (value.Height().has_value()) {
+        userDefinedHeightConfigured_ = true;
     }
     if (calcLayoutConstraint_->UpdateSelfIdealSizeWithCheck(value)) {
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;

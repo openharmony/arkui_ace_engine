@@ -18,15 +18,15 @@
 #include "core/gestures/drag_event.h"
 #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 
-struct DragController_SpringLoadingContextPeer {
-    virtual ~DragController_SpringLoadingContextPeer() = default;
+struct dragController_SpringLoadingContextPeer {
+    virtual ~dragController_SpringLoadingContextPeer() = default;
 
     OHOS::Ace::RefPtr<OHOS::Ace::DragSpringLoadingContext> context;
 
-    static DragController_SpringLoadingContextPeer* Create(
+    static dragController_SpringLoadingContextPeer* Create(
         const OHOS::Ace::RefPtr<OHOS::Ace::DragSpringLoadingContext>& src)
     {
-        auto peer = new DragController_SpringLoadingContextPeer;
+        auto peer = new dragController_SpringLoadingContextPeer;
         CHECK_NULL_RETURN(peer, nullptr);
         peer->context = src;
         return peer;

@@ -15,15 +15,17 @@
 
 #include "scrollable_test_ng.h"
 
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pattern/mock_nestable_scroll_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/components_ng/pattern/mock_nestable_scroll_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/scrollable/mock_scrollable.h"
 #define protected public
 #define private public
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
+#include "core/animation/bezier_variable_velocity_motion.h"
+#include "core/animation/select_motion.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/scrollable/axis/axis_animator.h"
@@ -1799,7 +1801,7 @@ HWTEST_F(ScrollableTestNg, OnTouchTestDone003, TestSize.Level1)
     EXPECT_NE(scrollable, nullptr);
     auto scrollableEvent = scrollablePattern->GetScrollableEvent();
     scrollableEvent->SetClickJudgeCallback([](const PointF&){ return true; });
-    
+
     /**
      * @tc.steps: step2. call OnTouchTestDone.
      * @tc.expected: isHitTestBlock_ is true, clickRecognizer and panRecognizer not prevent.
@@ -1882,7 +1884,7 @@ HWTEST_F(ScrollableTestNg, GetCrownRotatePx001, TestSize.Level1)
 
     CrownEvent event = {};
     event.degree = 1.f;
-    
+
     /**
      * @tc.steps: step2. Very slow rotation speed test.
      * @tc.expected: Rotating pixel points with specific row values.

@@ -18,6 +18,7 @@
 
 #include <list>
 
+#include "base/geometry/ng/point_t.h"
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/input_event.h"
@@ -27,7 +28,7 @@ namespace OHOS::Ace::NG {
 
 class EventHub;
 
-using TouchpadInteractionCallback = std::function<void()>;
+using TouchpadInteractionCallback = std::function<void(PointF)>;
 struct TouchpadInteractionListener {
     WeakPtr<FrameNode> frameNode;
     TouchpadInteractionCallback callback;

@@ -19,6 +19,7 @@
 #include "ui_sa_stub.h"
 #include "system_ability.h"
 #include "base/utils/macros.h"
+#include "event_handler.h"
 
 namespace OHOS::Ace {
 class IUiContentService;
@@ -52,7 +53,8 @@ public:
     void HandleGetWebViewCurrentLanguage(sptr<IUiContentService> service, std::vector<std::string> params);
     void HandleStartWebViewTranslate(sptr<IUiContentService> service, std::vector<std::string> params);
     void HandleGetStateMgmtInfo(sptr<IUiContentService> service, std::vector<std::string> params);
-
+    void HandleRegisterTextChangeEventCallback(sptr<IUiContentService> service, std::vector<std::string> params);
+    void HandleUnregisterTextChangeEventCallback(sptr<IUiContentService> service, std::vector<std::string> params);
 private:
     DECLEAR_SYSTEM_ABILITY(UiSaService);
 
@@ -63,6 +65,7 @@ private:
 
     std::mutex uiContentRemoteObjMapMtx_;
     std::map<int32_t, std::pair<sptr<IRemoteObject>, sptr<Ace::IUiContentService>>> uiContentRemoteObjMap_;
+    std::shared_ptr<AppExecFwk::EventHandler> eventHandler_ = nullptr;
 };
 } // namespace OHOS::Ace
 #endif // UI_SA_SERVICE_H

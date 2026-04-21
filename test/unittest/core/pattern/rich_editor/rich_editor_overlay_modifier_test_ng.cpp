@@ -15,11 +15,11 @@
 
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_content_modifier.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/render/mock_paragraph.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -89,8 +89,14 @@ HWTEST_F(RichEditorOverlayModifierTestNg, GetOverlayModifier001, TestSize.Level2
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    /**
+     * @tc.steps: step1. set nullptr
+     */
     richEditorPattern->overlayMod_ = nullptr;
     EXPECT_FALSE(static_cast<bool>(richEditorPattern->GetOverlayModifier()));
+    /**
+     * @tc.steps: step2. create overlay modifier
+     */
     richEditorPattern->CreateRichEditorOverlayModifier();
     EXPECT_TRUE(static_cast<bool>(richEditorPattern->GetOverlayModifier()));
 }

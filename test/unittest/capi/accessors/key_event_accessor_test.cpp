@@ -56,11 +56,11 @@ public:
 };
 
 /**
- * @tc.name: getModifierKeyStateValidTest
+ * @tc.name: getModifierKeyStateTestValid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, DISABLED_getModifierKeyStateValidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, DISABLED_getModifierKeyStateTestValid, TestSize.Level1)
 {
 #ifdef WRONG_TEST
     ASSERT_NE(accessor_->getModifierKeyState, nullptr);
@@ -85,11 +85,11 @@ HWTEST_F(KeyEventAccessorTest, DISABLED_getModifierKeyStateValidTest, TestSize.L
 }
 
 /**
- * @tc.name: getModifierKeyStateInvalidTest
+ * @tc.name: getModifierKeyStateTestInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, DISABLED_getModifierKeyStateInvalidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, DISABLED_getModifierKeyStateTestInvalid, TestSize.Level1)
 {
 #ifdef WRONG_TEST
     ASSERT_NE(accessor_->getModifierKeyState, nullptr);
@@ -111,11 +111,11 @@ HWTEST_F(KeyEventAccessorTest, DISABLED_getModifierKeyStateInvalidTest, TestSize
 }
 
 /**
- * @tc.name: getTypeValidTest
+ * @tc.name: getTypeTestValid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, getTypeValidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, getTypeTestValid, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getType, nullptr);
 
@@ -130,11 +130,11 @@ HWTEST_F(KeyEventAccessorTest, getTypeValidTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setTypeValidTest
+ * @tc.name: setTypeTestValid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, setTypeValidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, setTypeTestValid, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setType, nullptr);
 
@@ -147,11 +147,11 @@ HWTEST_F(KeyEventAccessorTest, setTypeValidTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setTypeInvalidTest
+ * @tc.name: setTypeTestInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, setTypeInvalidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, setTypeTestInvalid, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setType, nullptr);
     const auto type = eventInfo_->GetKeyType();
@@ -160,11 +160,11 @@ HWTEST_F(KeyEventAccessorTest, setTypeInvalidTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: getKeyCodeValidTest
+ * @tc.name: getKeyCodeTestValid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, getKeyCodeValidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, getKeyCodeTestValid, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getKeyCode, nullptr);
     const std::vector<KeyCode> TEST_PLAN {
@@ -180,33 +180,33 @@ HWTEST_F(KeyEventAccessorTest, getKeyCodeValidTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: getKeyCodeInvalidTest
+ * @tc.name: getKeyCodeTestInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, getKeyCodeInvalidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, getKeyCodeTestInvalid, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getKeyCode, nullptr);
     EXPECT_EQ(Converter::Convert<int32_t>(accessor_->getKeyCode(nullptr)), 0);
 }
 
 /**
- * @tc.name: setKeyCodeValidTest
+ * @tc.name: setKeyCodeTestValid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, setKeyCodeValidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, setKeyCodeTestValid, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setKeyCode, nullptr);
     // setKeyCode doesn't have sense.
 }
 
 /**
- * @tc.name: setKeyCodeInvalidTest
+ * @tc.name: setKeyCodeTestInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, setKeyCodeInvalidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, setKeyCodeTestInvalid, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setKeyCode, nullptr);
     const auto someCode = Converter::ArkValue<Ark_Number>(-1);
@@ -223,11 +223,11 @@ HWTEST_F(KeyEventAccessorTest, setKeyCodeInvalidTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: getKeyTextValidTest
+ * @tc.name: getKeyTextTestValid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, getKeyTextValidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, getKeyTextTestValid, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getKeyText, nullptr);
     const std::vector<std::string> TEST_PLAN {
@@ -243,33 +243,33 @@ HWTEST_F(KeyEventAccessorTest, getKeyTextValidTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: getKeyTextInvalidTest
+ * @tc.name: getKeyTextTestInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, getKeyTextInvalidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, getKeyTextTestInvalid, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getKeyText, nullptr);
     EXPECT_EQ(Converter::Convert<std::string>(accessor_->getKeyText(nullptr)), "");
 }
 
 /**
- * @tc.name: setKeyTextValidTest
+ * @tc.name: setKeyTextTestValid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, setKeyTextValidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, setKeyTextTestValid, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setKeyText, nullptr);
     // setKeyText doesn't have sense.
 }
 
 /**
- * @tc.name: setKeyTextInvalidTest
+ * @tc.name: setKeyTextTestInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, setKeyTextInvalidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, setKeyTextTestInvalid, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setKeyText, nullptr);
     const auto someText = Converter::ArkValue<Ark_String>("");
@@ -286,11 +286,11 @@ HWTEST_F(KeyEventAccessorTest, setKeyTextInvalidTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: getKeySourceValidTest
+ * @tc.name: getKeySourceTestValid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, getKeySourceValidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, getKeySourceTestValid, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getKeySource, nullptr);
 
@@ -305,22 +305,22 @@ HWTEST_F(KeyEventAccessorTest, getKeySourceValidTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setKeySourceValidTest
+ * @tc.name: setKeySourceTestValid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, setKeySourceValidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, setKeySourceTestValid, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setKeySource, nullptr);
     // setKeySource doesn't have sense.
 }
 
 /**
- * @tc.name: setKeySourceInvalidTest
+ * @tc.name: setKeySourceTestInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, setKeySourceInvalidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, setKeySourceTestInvalid, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setKeySource, nullptr);
     const auto currentSource = eventInfo_->GetKeySource();
@@ -329,11 +329,11 @@ HWTEST_F(KeyEventAccessorTest, setKeySourceInvalidTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: getDeviceIdValidTest
+ * @tc.name: getDeviceIdTestValid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, getDeviceIdValidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, getDeviceIdTestValid, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getDeviceId, nullptr);
     for (auto& [input, expected, value] : testFixtureInt32WithNegativeValues) {
@@ -345,22 +345,22 @@ HWTEST_F(KeyEventAccessorTest, getDeviceIdValidTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: getDeviceIdInvalidTest
+ * @tc.name: getDeviceIdTestInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, getDeviceIdInvalidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, getDeviceIdTestInvalid, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getDeviceId, nullptr);
     EXPECT_EQ(Converter::Convert<int32_t>(accessor_->getDeviceId(nullptr)), -1);
 }
 
 /**
- * @tc.name: setDeviceIdValidTest
+ * @tc.name: setDeviceIdTestValid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, setDeviceIdValidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, setDeviceIdTestValid, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setDeviceId, nullptr);
     for (auto& [input, value, expected] : testFixtureNumberInt32Values) {
@@ -372,11 +372,11 @@ HWTEST_F(KeyEventAccessorTest, setDeviceIdValidTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setDeviceIdInvalidTest
+ * @tc.name: setDeviceIdTestInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, setDeviceIdInvalidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, setDeviceIdTestInvalid, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setDeviceId, nullptr);
     const auto someId = Converter::ArkValue<Ark_Number>(-1);
@@ -393,11 +393,11 @@ HWTEST_F(KeyEventAccessorTest, setDeviceIdInvalidTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: getMetaKeyValidTest
+ * @tc.name: getMetaKeyTestValid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, getMetaKeyValidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, getMetaKeyTestValid, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getMetaKey, nullptr);
     for (auto& [input, expected, value] : testFixtureInt32WithNegativeValues) {
@@ -409,22 +409,22 @@ HWTEST_F(KeyEventAccessorTest, getMetaKeyValidTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: getMetaKeyInvalidTest
+ * @tc.name: getMetaKeyTestInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, getMetaKeyInvalidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, getMetaKeyTestInvalid, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getMetaKey, nullptr);
     EXPECT_EQ(Converter::Convert<int32_t>(accessor_->getMetaKey(nullptr)), 0);
 }
 
 /**
- * @tc.name: setMetaKeyValidTest
+ * @tc.name: setMetaKeyTestValid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, setMetaKeyValidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, setMetaKeyTestValid, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setMetaKey, nullptr);
     for (auto& [input, value, expected] : testFixtureNumberInt32Values) {
@@ -436,11 +436,11 @@ HWTEST_F(KeyEventAccessorTest, setMetaKeyValidTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setMetaKeyInvalidTest
+ * @tc.name: setMetaKeyTestInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, setMetaKeyInvalidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, setMetaKeyTestInvalid, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setMetaKey, nullptr);
     const auto someKey = Converter::ArkValue<Ark_Number>(-1);
@@ -457,11 +457,11 @@ HWTEST_F(KeyEventAccessorTest, setMetaKeyInvalidTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: getTimestampValidTest
+ * @tc.name: getTimestampTestValid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, DISABLED_getTimestampValidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, DISABLED_getTimestampTestValid, TestSize.Level1)
 {
     using TimeStamp = std::chrono::high_resolution_clock::time_point;
     using Duration = std::chrono::high_resolution_clock::duration;
@@ -482,22 +482,22 @@ HWTEST_F(KeyEventAccessorTest, DISABLED_getTimestampValidTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: getTimestampInvalidTest
+ * @tc.name: getTimestampTestInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, DISABLED_getTimestampInvalidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, DISABLED_getTimestampTestInvalid, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getTimestamp, nullptr);
     EXPECT_EQ(Converter::Convert<int64_t>(accessor_->getTimestamp(nullptr)), -1);
 }
 
 /**
- * @tc.name: setTimestampValidTest
+ * @tc.name: setTimestampTestValid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, DISABLED_setTimestampValidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, DISABLED_setTimestampTestValid, TestSize.Level1)
 {
     using TimeStamp = std::chrono::high_resolution_clock::time_point;
     using Duration = std::chrono::high_resolution_clock::duration;
@@ -517,11 +517,11 @@ HWTEST_F(KeyEventAccessorTest, DISABLED_setTimestampValidTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setTimestampInvalidTest
+ * @tc.name: setTimestampTestInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, DISABLED_setTimestampInvalidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, DISABLED_setTimestampTestInvalid, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setTimestamp, nullptr);
     const std::vector<std::tuple<KeyEventPeer*, Ark_Number>> TEST_PLAN {
@@ -535,22 +535,22 @@ HWTEST_F(KeyEventAccessorTest, DISABLED_setTimestampInvalidTest, TestSize.Level1
 }
 
 /**
- * @tc.name: setStopPropagationValidTest
+ * @tc.name: setStopPropagationTestValid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, setStopPropagationValidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, setStopPropagationTestValid, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setStopPropagation, nullptr);
     // setStopPropagation doesn't have sense.
 }
 
 /**
- * @tc.name: setStopPropagationInvalidTest
+ * @tc.name: setStopPropagationTestInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, setStopPropagationInvalidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, setStopPropagationTestInvalid, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setStopPropagation, nullptr);
     auto event = [](const Ark_Int32 resourceId) {
@@ -628,11 +628,11 @@ HWTEST_F(KeyEventAccessorTest, setIntentionCodeTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: getUnicodeValidTest
+ * @tc.name: getUnicodeTestValid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, getUnicodeValidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, getUnicodeTestValid, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getUnicode, nullptr);
     for (auto& [input, expected, value] : testFixtureInt32WithNegativeValues) {
@@ -646,33 +646,33 @@ HWTEST_F(KeyEventAccessorTest, getUnicodeValidTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: getUnicodeInvalidTest
+ * @tc.name: getUnicodeTestInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, getUnicodeInvalidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, getUnicodeTestInvalid, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getUnicode, nullptr);
     EXPECT_EQ(Converter::OptConvert<int32_t>(accessor_->getUnicode(nullptr)), std::nullopt);
 }
 
 /**
- * @tc.name: setUnicodeValidTest
+ * @tc.name: setUnicodeTestValid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, setUnicodeValidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, setUnicodeTestValid, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setUnicode, nullptr);
     // setUnicode doesn't have sense.
 }
 
 /**
- * @tc.name: setUnicodeInvalidTest
+ * @tc.name: setUnicodeTestInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, setUnicodeInvalidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, setUnicodeTestInvalid, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setUnicode, nullptr);
     const auto someUnicode = Converter::ArkValue<Opt_Number>(-1);
@@ -689,11 +689,11 @@ HWTEST_F(KeyEventAccessorTest, setUnicodeInvalidTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetStopPropagationTest
+ * @tc.name: getStopPropagationTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, GetStopPropagationTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, getStopPropagationTest, TestSize.Level1)
 {
     KeyEventInfo* eventInfo = peer_->GetEventInfo();
     ASSERT_NE(eventInfo, nullptr);

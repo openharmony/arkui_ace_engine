@@ -15,7 +15,16 @@
 
 #include "core/components_ng/pattern/waterflow/water_flow_paint_method.h"
 
+#include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
+#include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
+#include "core/components_ng/pattern/waterflow/water_flow_content_modifier.h"
+
 namespace OHOS::Ace::NG {
+RefPtr<Modifier> WaterFlowPaintMethod::GetContentModifier(PaintWrapper* paintWrapper)
+{
+    return contentModifier_;
+}
+
 void WaterFlowPaintMethod::PaintEdgeEffect(PaintWrapper* paintWrapper, RSCanvas& canvas)
 {
     auto edgeEffect = edgeEffect_.Upgrade();
@@ -57,6 +66,11 @@ void WaterFlowPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     contentModifier_->SetClipOffset(paddingOffset);
     contentModifier_->SetClipSize(frameSize);
     contentModifier_->SetClip(clip);
+}
+
+RefPtr<Modifier> WaterFlowPaintMethod::GetOverlayModifier(PaintWrapper* paintWrapper)
+{
+    return scrollBarOverlayModifier_.Upgrade();
 }
 
 void WaterFlowPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)

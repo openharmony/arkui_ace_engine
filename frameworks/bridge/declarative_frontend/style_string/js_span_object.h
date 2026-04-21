@@ -47,6 +47,7 @@ public:
     static void ParseJsStrokeColor(const JSRef<JSObject>& obj, Font& font);
     static void ParseJsSuperscript(const JSRef<JSObject>& obj, Font& font);
     static void ParseJsFontConfigs(const JSRef<JSObject>& obj, Font& font);
+    static void ParseJsFontVariations(const JSRef<JSObject>& obj, Font& font);
     static void ParseFontWeightConfigs(const JSRef<JSObject>& fontConfigsObj, Font& font);
     static void GetStrokeColorFallback(const JSRef<JSObject>& obj, const RefPtr<TextTheme>& theme, Color& color,
         RefPtr<ResourceObject>& resObj, JSRef<JSVal>& colorObj);
@@ -68,6 +69,8 @@ public:
     void SetSuperscript(const JSCallbackInfo& info);
     void GetFontConfigs(const JSCallbackInfo& info);
     void SetFontConfigs(const JSCallbackInfo& info);
+    void GetFontVariations(const JSCallbackInfo& info);
+    void SetFontVariations(const JSCallbackInfo& info);
 
     const RefPtr<FontSpan>& GetFontSpan();
     void SetFontSpan(const RefPtr<FontSpan>& fontSpan);
@@ -283,9 +286,11 @@ public:
     static void Constructor(const JSCallbackInfo& args);
     static void Destructor(JSLineHeightSpan* textShadowSpan);
     static void JSBind(BindingTarget globalObj);
-    static RefPtr<LineHeightSpan> ParseJSLineHeightSpan(const JSRef<JSObject>& obj);
+    static RefPtr<LineHeightSpan> ParseJSLineHeightSpan(const JSCallbackInfo& args);
     void GetLineHeight(const JSCallbackInfo& info);
     void SetLineHeight(const JSCallbackInfo& info);
+    void GetLineHeightMultiple(const JSCallbackInfo& info);
+    void SetLineHeightMultiple(const JSCallbackInfo& info);
 
     RefPtr<LineHeightSpan>& GetLineHeightSpan();
     void SetLineHeightSpan(const RefPtr<LineHeightSpan>& lineHeightSpan);
@@ -293,6 +298,30 @@ public:
 private:
     ACE_DISALLOW_COPY_AND_MOVE(JSLineHeightSpan);
     RefPtr<LineHeightSpan> lineHeightSpan_;
+};
+
+class JSLineSpacingSpan : public virtual AceType {
+    DECLARE_ACE_TYPE(JSLineSpacingSpan, AceType);
+
+public:
+    JSLineSpacingSpan() = default;
+    ~JSLineSpacingSpan() override = default;
+    static void Constructor(const JSCallbackInfo& args);
+    static void Destructor(JSLineSpacingSpan* lineSpacingSpan);
+    static void JSBind(BindingTarget globalObj);
+    static RefPtr<LineSpacingSpan> ParseJSLineSpacingSpan(const JSCallbackInfo& args);
+    static LineSpacingOptions ParseJsLineSpacingOptions(const JSRef<JSObject>& obj);
+    void GetLineSpacing(const JSCallbackInfo& info);
+    void SetLineSpacing(const JSCallbackInfo& info);
+    void GetLineSpacingOptions(const JSCallbackInfo& info);
+    void SetLineSpacingOptions(const JSCallbackInfo& info);
+
+    RefPtr<LineSpacingSpan>& GetLineSpacingSpan();
+    void SetLineSpacingSpan(const RefPtr<LineSpacingSpan>& lineSpacingSpan);
+
+private:
+    ACE_DISALLOW_COPY_AND_MOVE(JSLineSpacingSpan);
+    RefPtr<LineSpacingSpan> lineSpacingSpan_;
 };
 
 class JSImageAttachment : public virtual AceType {

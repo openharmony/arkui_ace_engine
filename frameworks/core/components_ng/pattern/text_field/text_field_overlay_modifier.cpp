@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/text_field/text_field_overlay_modifier.h"
 
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/text_field/text_field_free_scroller.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
@@ -268,15 +269,15 @@ void TextFieldOverlayModifier::PaintSelection(DrawingContext& context) const
         canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     }
     // for default style, selection height is equal to the content height
+    bool isNotAllowScrollX = isTextArea && !textFieldPattern->IsHorizontalScrollEnabled();
     for (const auto& textBox : textBoxes) {
-        canvas.DrawRect(RSRect(textBox.Left() + (isTextArea ? contentOffset_->Get().GetX() : textRect.GetX()),
-            defaultStyle
-                ? (textBox.Top() + (isTextArea ? textRect.GetY() : contentOffset_->Get().GetY()))
-                : 0.0f,
-            textBox.Right() + (isTextArea ? contentOffset_->Get().GetX() : textRect.GetX()),
-            defaultStyle
-                ? (textBox.Bottom() + (isTextArea ? textRect.GetY() : contentOffset_->Get().GetY()))
-                         : textFieldPattern->GetFrameRect().Height()));
+        auto left = textBox.Left() + (isNotAllowScrollX ? contentOffset_->Get().GetX() : textRect.GetX());
+        auto top =
+            defaultStyle ? (textBox.Top() + (isTextArea ? textRect.GetY() : contentOffset_->Get().GetY())) : 0.0f;
+        auto right = textBox.Right() + (isNotAllowScrollX ? contentOffset_->Get().GetX() : textRect.GetX());
+        auto bottom = defaultStyle ? (textBox.Bottom() + (isTextArea ? textRect.GetY() : contentOffset_->Get().GetY()))
+                                   : textFieldPattern->GetFrameRect().Height();
+        canvas.DrawRect(RSRect(left, top, right, bottom));
     }
     canvas.DetachBrush();
     canvas.Restore();
@@ -310,7 +311,9 @@ void TextFieldOverlayModifier::PaintCursor(DrawingContext& context) const
     if (showOriginCursor) {
         pen.SetColor(ToRSColor(LinearColor(textFieldPattern->GetOriginCursorColor())));
     } else {
-        pen.SetColor(ToRSColor(cursorColor_->Get()));
+        auto color = cursorColor_->Get().ToColor();
+        color.SetPlaceholder(setCursorColor_.GetPlaceholder());
+        pen.SetColor(ToRSColor(color));
     }
     canvas.AttachPen(pen);
     auto paintOffset = contentOffset_->Get();
@@ -421,7 +424,11 @@ void TextFieldOverlayModifier::PaintScrollBar(DrawingContext& context)
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
     if (textFieldPattern->GetScrollBarVisible() && textFieldPattern->IsTextArea()) {
-        ScrollBarOverlayModifier::onDraw(context);
+        if (textFieldPattern->IsFreeScrollEnabled()) {
+            textFieldPattern->GetFreeScroller()->OnDrawScrollBar(context);
+        } else {
+            ScrollBarOverlayModifier::onDraw(context);
+        }
     }
 }
 
@@ -485,6 +492,7 @@ void TextFieldOverlayModifier::PaintPreviewTextDecoration(DrawingContext& contex
 void TextFieldOverlayModifier::SetCursorColor(Color& value)
 {
     cursorColor_->Set(LinearColor(value));
+    setCursorColor_ = value;
 }
 
 void TextFieldOverlayModifier::SetCursorWidth(float value)

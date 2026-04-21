@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle,
-    TouchEvent } from './common';
-import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent,TouchEvent } from './common';
+import { ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
 import { int32, int64, float32 } from "@koalaui/common"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -46,11 +45,8 @@ export class ArkContentSlotPeer extends PeerNode {
             ArkUIAniModule._ContentSlotInterface_setContentSlotOptions(this.peer.ptr, nullptr)
         }
     }
-}
-
-export class ArkContentSlotStyle extends ArkCommonMethodStyle implements ContentSlotAttribute {
-    public setContentSlotOptions(content?: Content): this {
-        return this
+    setDebugLineAttribute(sourceLine: string, moduleName?: string): void {
+        return;
     }
 }
 
@@ -69,6 +65,10 @@ export class ArkContentSlotComponent extends ComponentBase implements ContentSlo
             }
             throw new Error("Can not select appropriate overload")
         }
+        return this
+    }
+    
+    public debugLine(sourceLine: string, moduleName?: string): this {
         return this
     }
 }

@@ -18,8 +18,8 @@ import { ImageModifier } from '@kit.ArkUI';
 @Entry
 @Component
 struct ImageExample3 {
-  private imageOne: Resource = $r('app.media.1');
-  private imageTwo: Resource = $r('app.media.2');
+  private imageOne: Resource = $r('app.media.startIcon');
+  private imageTwo: Resource = $r('app.media.background');
   @State src: Resource = this.imageOne;
   @State src2: Resource = this.imageTwo;
   private ColorFilterMatrix: number[] = [1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0];
@@ -50,7 +50,7 @@ struct ImageExample3 {
           this.drawingColorFilterSecond = new ColorFilter(this.ColorFilterMatrix);
         })
 
-      Image($r('app.media.svg6'))
+      Image($r('app.media.startIcon'))
         .width(110).height(110).margin(15)
         .colorFilter(this.drawingColorFilterThird)
         .onClick(()=>{

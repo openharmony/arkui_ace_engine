@@ -1,0 +1,70 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package arkui.component.idlize;
+import ohos.router.default as router;
+
+callback RouterFinishCallback = void (pointer value);
+
+interface RouterOptionsInner {
+  attribute String url;
+  [Optional]
+  attribute String params;
+  [Optional]
+  attribute boolean recoverable;
+};
+
+interface RouterStateInner {
+  attribute i32 index;
+  attribute String name;
+  attribute String path;
+  attribute String params;
+};
+
+interface PageRouterOptions {
+  attribute RouterOptionsInner options;
+  [Optional]
+  attribute router.RouterMode mode;
+};
+
+callback Router_BusinessError_Void = void (i32 code, String message);
+
+[Entity=Class]
+interface RouterExtender {
+  static Promise<void> push(pointer jsView, PageRouterOptions options, optional RouterFinishCallback finishCallback);
+  static void push(pointer jsView, PageRouterOptions options, optional RouterFinishCallback finishCallback, optional Router_BusinessError_Void callback_);
+  static Promise<void> replace(pointer jsView, PageRouterOptions options, optional RouterFinishCallback enterFinishCallback);
+  static void replace(pointer jsView, PageRouterOptions options, optional RouterFinishCallback finishCallback, optional Router_BusinessError_Void callback_);
+  static void back(optional RouterOptionsInner options);
+  static void back(i32 index, optional String params);
+  static void runPage(pointer jsView, PageRouterOptions options, optional RouterFinishCallback finishCallback);
+  static void clear();
+  static void showAlertBeforeBackPage(String message);
+  static void hideAlertBeforeBackPage();
+  static String getLength();
+  static RouterStateInner getState();
+  static (RouterStateInner or undefined) getStateByIndex(i32 index);
+  static sequence<RouterStateInner> getStateByUrl(String url);
+  static String getParams();
+  static Promise<void> pushNamedRoute(pointer jsView, PageRouterOptions options, optional RouterFinishCallback finishCallback);
+  static void pushNamedRoute(pointer jsView, PageRouterOptions options, optional RouterFinishCallback finishCallback, optional Router_BusinessError_Void callback_);
+  static Promise<void> replaceNamedRoute(pointer jsView, PageRouterOptions options, optional RouterFinishCallback enterFinishCallback);
+  static void replaceNamedRoute(pointer jsView, PageRouterOptions options, optional RouterFinishCallback finishCallback, optional Router_BusinessError_Void callback_);
+  static pointer createDynamic(RouterOptionsInner options);
+  static Promise<void> pushDynamic(pointer pageNode, PageRouterOptions options, optional RouterFinishCallback finishCallback);
+  static void pushDynamic(pointer pageNode, PageRouterOptions options, optional RouterFinishCallback finishCallback, optional Router_BusinessError_Void callback_);
+  static Promise<void> replaceDynamic(pointer pageNode, PageRouterOptions options, optional RouterFinishCallback enterFinishCallback);
+  static void replaceDynamic(pointer pageNode, PageRouterOptions options, optional RouterFinishCallback finishCallback, optional Router_BusinessError_Void callback_);
+};

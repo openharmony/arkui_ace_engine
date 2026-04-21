@@ -20,7 +20,7 @@ ace_unittest("container_modal_test_ng") {
 }
 
 ace_unittest("container_modal_pattern_enhance_test_ng") {
-  module_name = "PickerSet-TextPicker/TextPickerDialog"
+  module_name = "PickerSet-Picker"
   type = "new"
   sources = [ "container_modal_pattern_enhance_test_ng.cpp" ]
 }

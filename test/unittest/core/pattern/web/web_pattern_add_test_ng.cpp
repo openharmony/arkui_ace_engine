@@ -23,10 +23,10 @@
 
 #define private public
 #define protected public
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_interaction_interface.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_interaction_interface.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components_ng/pattern/web/web_accessibility_child_tree_callback.h"
@@ -35,7 +35,7 @@
 #include "core/event/touch_event.h"
 #undef protected
 #undef private
-#include "test/mock/core/common/mock_udmf.h"
+#include "test/mock/frameworks/core/common/mock_udmf.h"
 
 #include "nweb_date_time_chooser.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
@@ -78,7 +78,8 @@ public:
     explicit TaskExecutorImpl(bool delayRun) : delayRun_(delayRun) {}
 
     bool OnPostTask(Task&& task, TaskType type, uint32_t delayTime, const std::string& name,
-        Ace::PriorityType priorityType = Ace::PriorityType::LOW) const override
+        Ace::PriorityType priorityType = Ace::PriorityType::LOW,
+        Ace::VsyncBarrierOption barrierOption = Ace::VsyncBarrierOption::NO_BARRIER) const override
     {
         CHECK_NULL_RETURN(task, false);
         if (delayRun_) {
@@ -296,6 +297,13 @@ public:
         return DragOperationsMask::DRAG_ALLOW_EVERY;
     }
     void SetAllowedDragOperation(DragOperationsMask allowed_op) override {}
+
+    bool isDataCleared_ = false;
+
+    void ClearDragData() override
+    {
+        isDataCleared_ = true;
+    }
 };
 
 class NWebDragDataTrueDummy : public NWeb::NWebDragData {
@@ -1348,6 +1356,34 @@ HWTEST_F(WebPatternAddTestNg, HandleTouchUpResetDragState001, TestSize.Level1)
     EXPECT_CALL(
         *(AceType::DynamicCast<MockInteractionInterface>(MockInteractionInterface::GetInstance())), IsDragStart())
         .WillRepeatedly(testing::Return(false));
+#endif
+}
+
+/**
+ * @tc.name: ClearDragData_001
+ * @tc.desc: ClearDragData.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternAddTestNg, ClearDragData_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->delegate_->pixelMap_ = AccessibilityManager::MakeRefPtr<PixelMapImpl>();
+    auto mockNWebDragData = std::make_shared<NWebDragDataDummy>();
+    webPattern->delegate_->dragData_ = mockNWebDragData;
+    EXPECT_FALSE(mockNWebDragData->isDataCleared_);
+    webPattern->ClearDragData();
+    EXPECT_TRUE(mockNWebDragData->isDataCleared_);
 #endif
 }
 } // namespace OHOS::Ace::NG

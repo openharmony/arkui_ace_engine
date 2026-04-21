@@ -16,7 +16,9 @@
 #include "interaction_impl.h"
 
 #include "interaction_manager.h"
+
 #include "adapter/ohos/capability/interaction/start_drag_listener_impl.h"
+#include "base/log/log_wrapper.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
 
 using namespace OHOS::Msdp::DeviceStatus;
@@ -37,13 +39,12 @@ InteractionInterface* InteractionInterface::GetInstance()
 
 int32_t InteractionImpl::UpdateShadowPic(const OHOS::Ace::ShadowInfoCore& shadowInfo)
 {
-    auto pixelMap = shadowInfo.pixelMap;
-    if (!pixelMap) {
+    auto pixelSharedPtr = shadowInfo.GetPixelMapSharedPtr();
+    if (!pixelSharedPtr) {
         Msdp::DeviceStatus::ShadowInfo msdpShadowInfo { nullptr, shadowInfo.x, shadowInfo.y };
         return InteractionManager::GetInstance()->UpdateShadowPic(msdpShadowInfo);
     }
-    Msdp::DeviceStatus::ShadowInfo msdpShadowInfo { shadowInfo.pixelMap->GetPixelMapSharedPtr(), shadowInfo.x,
-        shadowInfo.y };
+    Msdp::DeviceStatus::ShadowInfo msdpShadowInfo { pixelSharedPtr, shadowInfo.x, shadowInfo.y };
     return InteractionManager::GetInstance()->UpdateShadowPic(msdpShadowInfo);
 }
 
@@ -74,12 +75,8 @@ int32_t InteractionImpl::StartDrag(const DragDataCore& dragData,
     dragData.hasCoordinateCorrected, dragData.summarys, dragData.isDragDelay, dragData.detailedSummarys,
     dragData.summaryFormat, dragData.version, dragData.totalSize, dragData.summaryTag, dragData.materialId };
     for (auto& shadowInfo: dragData.shadowInfos) {
-        if (shadowInfo.pixelMap) {
-            msdpDragData.shadowInfos.push_back({ shadowInfo.pixelMap->GetPixelMapSharedPtr(),
-                shadowInfo.x, shadowInfo.y });
-        } else {
-            msdpDragData.shadowInfos.push_back({ nullptr, shadowInfo.x, shadowInfo.y });
-        }
+        auto pixelSharedPtr = shadowInfo.GetPixelMapSharedPtr();
+        msdpDragData.shadowInfos.push_back({ pixelSharedPtr, shadowInfo.x, shadowInfo.y });
     }
     return InteractionManager::GetInstance()->StartDrag(msdpDragData,
         std::make_shared<StartDragListenerImpl>(callbackCore));

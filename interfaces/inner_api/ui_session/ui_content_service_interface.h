@@ -21,6 +21,7 @@
 #include "ui/base/macros.h"
 #include "param_config.h"
 #include "ui_content_proxy_error_code.h"
+#include "event_handler.h"
 
 namespace OHOS {
 namespace Media {
@@ -31,6 +32,9 @@ class ImageSource;
 namespace OHOS::Ace {
 using GetWebInfoByRequestCallback =
     std::function<void(int32_t, int32_t, const std::string&, const std::string&, WebRequestErrorCode)>;
+
+constexpr int32_t DEFAULT_INSPECTOR_TREE_CALLBACK_TIMEOUT_MS = 1500;
+
 class ACE_FORCE_EXPORT IUiContentService : public OHOS::IRemoteBroker {
 public:
     using EventCallback = std::function<void(std::string)>;
@@ -88,9 +92,9 @@ public:
      * @return: result number
      */
     virtual int32_t GetInspectorTree(const std::function<void(std::string, int32_t, bool)>& eventCallback,
-        ParamConfig config = ParamConfig()) = 0;
+        ParamConfig config = ParamConfig(), int32_t timeout = DEFAULT_INSPECTOR_TREE_CALLBACK_TIMEOUT_MS) = 0;
     virtual int32_t GetVisibleInspectorTree(const std::function<void(std::string, int32_t, bool)>& eventCallback,
-        ParamConfig config = ParamConfig()) = 0;
+        ParamConfig config = ParamConfig(), int32_t timeout = DEFAULT_INSPECTOR_TREE_CALLBACK_TIMEOUT_MS) = 0;
 
     /**
      * @description: define get the node info for touch test interface
@@ -104,7 +108,8 @@ public:
      * @description: define SA process and current process connect interface
      * @return: result number
      */
-    virtual int32_t Connect(const EventCallback& eventCallback) = 0;
+    virtual int32_t Connect(const EventCallback& eventCallback,
+        std::shared_ptr<AppExecFwk::EventHandler> eventHandler = nullptr) = 0;
 
     /**
      * @description: define register a callback on click event occur to execute interface
@@ -361,7 +366,8 @@ public:
      * @return: result number
      */
     virtual int32_t GetStateMgmtInfo(const std::string& componentName, const std::string& propertyName,
-        const std::string& jsonPath, const std::function<void(std::vector<std::string>)>& eventCallback) = 0;
+        const std::string& jsonPath, const std::function<void(std::vector<std::string>)>& eventCallback,
+        bool onlyVisible = false) = 0;
 
     virtual int32_t GetWebInfoByRequest(
         int32_t webId,

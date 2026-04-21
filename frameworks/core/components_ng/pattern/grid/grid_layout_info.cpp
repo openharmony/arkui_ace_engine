@@ -14,6 +14,8 @@
  */
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 
+#include "base/log/log_wrapper.h"
+#include "base/utils/system_properties.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace::NG {
@@ -326,6 +328,17 @@ float GridLayoutInfo::GetContentOffset(const GridLayoutOptions& options, float m
     if (options.getSizeByIndex) {
         return GetContentOffset(mainGap);
     }
+    if (startMainLineIndex_ > 0 && startMainLineIndex_ < MAX_CUMULATIVE_LINES) {
+        bool hasAllDataToStartMainLine = false;
+        auto firstLine = gridMatrix_.begin();
+        if (firstLine != gridMatrix_.end() && firstLine->first == 0 && !firstLine->second.empty()) {
+            auto firstItem = firstLine->second.begin();
+            hasAllDataToStartMainLine = firstItem->second == 0;
+        }
+        if (hasAllDataToStartMainLine) {
+            return GetStartLineOffset(mainGap);
+        }
+    }
     float prevHeight = GetContentHeight(options, startIndex_, mainGap) + mainGap;
     return prevHeight - currentOffset_;
 }
@@ -391,7 +404,6 @@ float GridLayoutInfo::GetContentHeight(const GridLayoutOptions& options, int32_t
     if (options.getSizeByIndex) {
         return GetContentHeight(mainGap);
     }
-
     float irregularHeight = -1.0f;
     float regularHeight = -1.0f;
     GetLineHeights(options, mainGap, regularHeight, irregularHeight);

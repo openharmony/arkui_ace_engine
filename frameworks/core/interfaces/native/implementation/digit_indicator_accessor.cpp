@@ -50,7 +50,7 @@ void SelectedFontColorImpl(Ark_DigitIndicator peer,
     peer->SetSelectedFontColor(optSelectedFontColor);
 }
 void DigitFontImpl(Ark_DigitIndicator peer,
-                   const Opt_Font* value)
+                   const Opt_arkui_component_units_Font* value)
 {
     CHECK_NULL_VOID(peer);
     std::optional<OHOS::Ace::Dimension> fontSize;
@@ -75,7 +75,7 @@ void DigitFontImpl(Ark_DigitIndicator peer,
     peer->SetFontWeight(fontWeight);
 }
 void SelectedDigitFontImpl(Ark_DigitIndicator peer,
-                           const Opt_Font* value)
+                           const Opt_arkui_component_units_Font* value)
 {
     CHECK_NULL_VOID(peer);
     std::optional<OHOS::Ace::Dimension> fontSize;

@@ -23,8 +23,8 @@
 
 #define protected public
 #define private public
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
 
 #include "core/components_ng/pattern/canvas/canvas_layout_algorithm.h"
 #include "core/components_ng/pattern/canvas/canvas_model.h"
@@ -194,6 +194,36 @@ HWTEST_F(CanvasCustomPaintMethodTestNg2, CanvasCustomPaintMethodTest041, TestSiz
     RSPoint endPoint = RSPoint(
         static_cast<RSScalar>(gradient.GetEndOffset().GetX()), static_cast<RSScalar>(gradient.GetEndOffset().GetY()));
     EXPECT_FALSE(gradient.GetInnerRadius() <= 0.0 && beginPoint == endPoint);
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTest042
+ * @tc.desc: Test UpdatePaintShader with HDR gradient colors.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg2, CanvasCustomPaintMethodTest042, TestSize.Level1)
+{
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    RSPen pen;
+    RSBrush brush(RSColor(0xffffffff));
+    Ace::Gradient gradient;
+    OHOS::Ace::GradientColor startColor(Color::FromFloat(0.8, 0.6, 0.4, 1.0, 2.0));
+    startColor.SetDimension(0.0);
+    OHOS::Ace::GradientColor endColor(Color::FromFloat(0.2, 0.4, 0.9, 1.0, 2.0));
+    endColor.SetDimension(1.0);
+    gradient.AddColor(startColor);
+    gradient.AddColor(endColor);
+
+    paintMethod->UpdatePaintShader(&pen, &brush, gradient);
+    EXPECT_EQ(gradient.GetType(), Ace::GradientType::LINEAR);
+
+    gradient.type_ = Ace::GradientType::CONIC;
+    gradient.GetConicGradient().centerX = 0.5_pct;
+    gradient.GetConicGradient().centerY = 0.5_pct;
+    gradient.GetConicGradient().startAngle = AnimatableDimension(0.0);
+    paintMethod->UpdatePaintShader(&pen, &brush, gradient);
+    EXPECT_EQ(gradient.GetType(), Ace::GradientType::CONIC);
 }
 
 /**

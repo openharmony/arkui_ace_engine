@@ -19,13 +19,21 @@
 #include "ui/base/utils/utils.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+#ifdef ARKUI_CAPI_UNITTEST
+const GENERATED_ArkUICounterModifier* GetCounterStaticModifier();
+#endif
 const GENERATED_ArkUICounterModifier* GetCounterModifier()
 {
     static const GENERATED_ArkUICounterModifier* cachedModifier = nullptr;
+
     if (cachedModifier == nullptr) {
+#ifdef ARKUI_CAPI_UNITTEST
+        cachedModifier = GeneratedModifier::GetCounterStaticModifier();
+#else
         auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Counter");
         CHECK_NULL_RETURN(module, nullptr);
         cachedModifier = reinterpret_cast<const GENERATED_ArkUICounterModifier*>(module->GetStaticModifier());
+#endif
     }
 
     return cachedModifier;

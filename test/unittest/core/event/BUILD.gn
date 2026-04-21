@@ -18,9 +18,8 @@ ace_unittest("event_manager_test_ng") {
   type = "new"
   sources = [
     "$ace_root/frameworks/core/event/resample_algo.cpp",
-    "$ace_root/frameworks/core/common/event_info_manager.cpp",
-    "$ace_root/test/mock/core/common/mock_watch_dog.cpp",
-    "$ace_root/test/mock/core/common/mock_window.cpp",
+    "$ace_root/test/mock/frameworks/core/common/mock_watch_dog.cpp",
+    "$ace_root/test/mock/frameworks/core/common/mock_window.cpp",
     "event_dump_test_ng.cpp",
     "event_manager_dispatch_mouse_hover_event_ng.cpp",
     "event_manager_pen_test_ng.cpp",
@@ -32,10 +31,32 @@ ace_unittest("event_manager_test_ng") {
     "event_manager_test_ng_two_issuse.cpp",
     "event_manager_test_three_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "event_test_min.cpp",
+      "event_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "event_test_min.cpp",
+      "event_test_core.cpp",
+    ]
+  }
+}
+
+ace_unittest("input_event_monitor_manager_test_ng") {
+  module_name = "CommonEvent-Input"
+  type = "new"
+  sources = [
+    "$ace_root/frameworks/core/common/input_event_monitor_manager.cpp",
+    "input_event_monitor_manager_test_ng.cpp",
+  ]
 }
 
 ace_unittest("click_event_test_ng") {
-  module_name = "PickerSet-DatePicker/DatePickerDialog"
+  module_name = "PickerSet-Picker"
   type = "new"
   sources = [ "click_event_test_ng.cpp" ]
 }
@@ -54,6 +75,19 @@ ace_unittest("drag_event_test_ng") {
     "drag_event_test_ng_property_config.cpp",
     "drag_event_test_ng_property_config_coverage.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "event_test_min.cpp",
+      "event_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "event_test_min.cpp",
+      "event_test_core.cpp",
+    ]
+  }
 }
 
 ace_unittest("drag_drop_event_test_ng") {
@@ -84,6 +118,16 @@ ace_unittest("focus_hub_test_ng") {
     "focus_core/focus_api_test.cpp",
     "focus_core/focus_area_test.cpp",
     "focus_core/focus_creatbox_test.cpp",
+    "focus_core/focus_hub_test_ng.cpp",
+    "focus_core/focus_hub_test_ng_branch_coverage.cpp",
+    "focus_core/focus_hub_test_ng_branch_coverage_two.cpp",
+    "focus_core/focus_hub_test_ng_for_property_config.cpp",
+    "focus_core/focus_hub_test_ng_for_property_config_two.cpp",
+    "focus_core/focus_hub_test_ng_new.cpp",
+    "focus_core/focus_hub_test_ng_new_three.cpp",
+    "focus_core/focus_hub_test_ng_new_two.cpp",
+    "focus_core/focus_hub_test_ng_three.cpp",
+    "focus_core/focus_hub_test_ng_two.cpp",
     "focus_core/focus_request_test.cpp",
     "focus_core/focus_test_base.cpp",
     "focus_core/focus_window_test.cpp",
@@ -92,18 +136,20 @@ ace_unittest("focus_hub_test_ng") {
     "focus_core/lost_focus_to_view_root_test.cpp",
     "focus_core/page_focus_switch_test.cpp",
     "focus_core/passive_last_focus_test.cpp",
-    "focus_hub_test_ng.cpp",
-    "focus_hub_test_ng_branch_coverage.cpp",
-    "focus_hub_test_ng_branch_coverage_two.cpp",
-    "focus_hub_test_ng_for_paint_focus_state.cpp",
-    "focus_hub_test_ng_for_property_config.cpp",
-    "focus_hub_test_ng_for_property_config_two.cpp",
-    "focus_hub_test_ng_new.cpp",
-    "focus_hub_test_ng_new_three.cpp",
-    "focus_hub_test_ng_new_two.cpp",
-    "focus_hub_test_ng_three.cpp",
-    "focus_hub_test_ng_two.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "event_test_min.cpp",
+      "event_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "event_test_min.cpp",
+      "event_test_core.cpp",
+    ]
+  }
 }
 
 ace_unittest("gesture_event_hub_test_ng") {
@@ -119,6 +165,19 @@ ace_unittest("gesture_event_hub_test_ng") {
     "gesture_event_hub_test_three_ng.cpp",
     "gesture_event_hub_test_two_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "event_test_min.cpp",
+      "event_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "event_test_min.cpp",
+      "event_test_core.cpp",
+    ]
+  }
 }
 
 ace_unittest("input_event_hub_test_ng") {
@@ -200,6 +259,12 @@ ace_unittest("focus_event_handler_test_ng") {
   sources = [ "focus_event_handler_test_ng.cpp" ]
 }
 
+ace_unittest("key_event_test_ng") {
+  module_name = "KeyEvent-UnitTest"
+  type = "new"
+  sources = [ "key_event_test_ng.cpp" ]
+}
+
 group("core_event_unittest") {
   testonly = true
   deps = [
@@ -209,13 +274,15 @@ group("core_event_unittest") {
     ":drag_drop_event_test_ng",
     ":drag_event_test_ng",
     ":event_hub_test_ng",
-    ":event_manager_test_ng",
+    # ":event_manager_test_ng",
     ":focus_box_test_ng",
     ":focus_event_handler_test_ng",
     ":focus_hub_test_ng",
     ":gesture_event_hub_test_ng",
     ":input_event_hub_test_ng",
+    ":input_event_monitor_manager_test_ng",
     ":input_event_test_ng",
+    ":key_event_test_ng",
     ":long_press_event_test_ng",
     ":mouse_style_manager_test_ng",
     ":pan_event_test_ng",

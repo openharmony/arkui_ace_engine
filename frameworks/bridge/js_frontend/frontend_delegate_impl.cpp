@@ -18,6 +18,7 @@
 #include "base/log/event_report.h"
 #include "base/resource/ace_res_config.h"
 #include "core/components/toast/toast_component.h"
+#include "core/image/image_provider.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::Framework {
@@ -48,7 +49,7 @@ struct DialogStrings {
 
 DialogStrings GetDialogStrings()
 {
-    DialogStrings strs = {"Cancel", "OK"};
+    DialogStrings strs = { "Cancel", "OK" };
     auto context = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, strs);
     auto dialogTheme = context->GetTheme<DialogTheme>();
@@ -83,18 +84,16 @@ void FrontendDelegateImpl::RecyclePageId(int32_t pageId)
 FrontendDelegateImpl::FrontendDelegateImpl(const FrontendDelegateImplBuilder& builder)
     : loadJs_(builder.loadCallback), dispatcherCallback_(builder.transferCallback),
       asyncEvent_(builder.asyncEventCallback), syncEvent_(builder.syncEventCallback),
-      externalEvent_(builder.externalEventCallback),
-      updatePage_(builder.updatePageCallback), resetStagingPage_(builder.resetStagingPageCallback),
-      destroyPage_(builder.destroyPageCallback), destroyApplication_(builder.destroyApplicationCallback),
+      externalEvent_(builder.externalEventCallback), updatePage_(builder.updatePageCallback),
+      resetStagingPage_(builder.resetStagingPageCallback), destroyPage_(builder.destroyPageCallback),
+      destroyApplication_(builder.destroyApplicationCallback),
       updateApplicationState_(builder.updateApplicationStateCallback),
       onStartContinuationCallBack_(builder.onStartContinuationCallBack),
       onCompleteContinuationCallBack_(builder.onCompleteContinuationCallBack),
-      onRemoteTerminatedCallBack_(builder.onRemoteTerminatedCallBack),
-      onSaveDataCallBack_(builder.onSaveDataCallBack),
-      onRestoreDataCallBack_(builder.onRestoreDataCallBack),
-      timer_(builder.timerCallback), mediaQueryCallback_(builder.mediaQueryCallback),
-      requestAnimationCallback_(builder.requestAnimationCallback), jsCallback_(builder.jsCallback),
-      manifestParser_(AceType::MakeRefPtr<ManifestParser>()),
+      onRemoteTerminatedCallBack_(builder.onRemoteTerminatedCallBack), onSaveDataCallBack_(builder.onSaveDataCallBack),
+      onRestoreDataCallBack_(builder.onRestoreDataCallBack), timer_(builder.timerCallback),
+      mediaQueryCallback_(builder.mediaQueryCallback), requestAnimationCallback_(builder.requestAnimationCallback),
+      jsCallback_(builder.jsCallback), manifestParser_(AceType::MakeRefPtr<ManifestParser>()),
       jsAccessibilityManager_(AccessibilityNodeManager::Create()),
       mediaQueryInfo_(AceType::MakeRefPtr<MediaQueryInfo>()), taskExecutor_(builder.taskExecutor),
       callNativeHandler_(builder.callNativeHandler), onCrownEventCallback_(builder.onCrownEventCallback)
@@ -515,8 +514,8 @@ void FrontendDelegateImpl::CallPopPage()
 
 void FrontendDelegateImpl::ResetStagingPage()
 {
-    taskExecutor_->PostTask([resetStagingPage = resetStagingPage_] { resetStagingPage(); },
-        TaskExecutor::TaskType::JS, "ArkUIResetStagingPage");
+    taskExecutor_->PostTask([resetStagingPage = resetStagingPage_] { resetStagingPage(); }, TaskExecutor::TaskType::JS,
+        "ArkUIResetStagingPage");
 }
 
 void FrontendDelegateImpl::OnApplicationDestroy(const std::string& packageName)
@@ -1063,8 +1062,8 @@ void FrontendDelegateImpl::ShowDialog(const PromptDialogAttr& dialogAttr, const 
     ShowDialog(dialogAttr.title, dialogAttr.message, buttons, dialogAttr.autoCancel, std::move(callback), callbacks);
 }
 
-void FrontendDelegateImpl::ShowActionMenu(const std::string& title,
-    const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
+void FrontendDelegateImpl::ShowActionMenu(
+    const std::string& title, const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
 {
     if (!taskExecutor_) {
         return;
@@ -1091,8 +1090,8 @@ void FrontendDelegateImpl::ShowActionMenu(const std::string& title,
     auto cancelEventMarker = BackEndEventManager<void()>::GetInstance().GetAvailableMarker();
     BackEndEventManager<void()>::GetInstance().BindBackendEvent(
         cancelEventMarker, [callback, taskExecutor = taskExecutor_] {
-            taskExecutor->PostTask([callback]() { callback(1, 0); },
-                TaskExecutor::TaskType::JS, "ArkUIShowActionMenuCancel");
+            taskExecutor->PostTask(
+                [callback]() { callback(1, 0); }, TaskExecutor::TaskType::JS, "ArkUIShowActionMenuCancel");
         });
     callbackMarkers.emplace(COMMON_CANCEL, cancelEventMarker);
 
@@ -1104,10 +1103,7 @@ void FrontendDelegateImpl::ShowActionMenu(const std::string& title,
         .buttons = button,
         .callbacks = std::move(callbackMarkers),
     };
-    ButtonInfo buttonInfo = {
-        .text = strs.cancel,
-        .textColor = "#000000"
-    };
+    ButtonInfo buttonInfo = { .text = strs.cancel, .textColor = "#000000" };
     dialogProperties.buttons.emplace_back(buttonInfo);
     WeakPtr<PipelineContext> weak = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
     taskExecutor_->PostTask(
@@ -1166,8 +1162,7 @@ void FrontendDelegateImpl::EnableAlertBeforeBackPage(
     currentPage.dialogProperties = {
         .content = message,
         .autoCancel = false,
-        .buttons = { { .text = strs.cancel, .textColor = "" },
-            { .text = strs.confirm, .textColor = "" } },
+        .buttons = { { .text = strs.cancel, .textColor = "" }, { .text = strs.confirm, .textColor = "" } },
         .callbacks = std::move(callbackMarkers),
     };
 }
@@ -1333,7 +1328,8 @@ void FrontendDelegateImpl::OnLayoutCompleted(const std::string& componentId) {}
 
 void FrontendDelegateImpl::OnDrawCompleted(const std::string& componentId) {}
 
-void FrontendDelegateImpl::OnDrawChildrenCompleted(const std::string& componentId) {}
+void FrontendDelegateImpl::OnDrawChildrenCompleted(const std::string& componentId,
+    const std::vector<int32_t>& childIds) {}
 
 bool FrontendDelegateImpl::IsDrawChildrenCallbackFuncExist(const std::string& componentId)
 {
@@ -1428,8 +1424,7 @@ void FrontendDelegateImpl::OnPageReady(const RefPtr<JsAcePage>& page, const std:
         TaskExecutor::TaskType::UI, "ArkUIPageReady");
 }
 
-void FrontendDelegateImpl::PushPageTransitionListener(
-    const TransitionEvent& event, const RefPtr<JsAcePage>& page)
+void FrontendDelegateImpl::PushPageTransitionListener(const TransitionEvent& event, const RefPtr<JsAcePage>& page)
 {
     if (event == TransitionEvent::PUSH_END) {
         OnPageShow();
@@ -1938,7 +1933,7 @@ void FrontendDelegateImpl::HandleImage(const std::string& src, std::function<voi
             [callback = std::move(jsCallback), success, width, height] { callback(success, width, height); },
             TaskExecutor::TaskType::JS, "ArkUIHandleImageCallback");
     };
-    pipelineContextHolder_.Get()->TryLoadImageInfo(src, std::move(loadCallback));
+    ImageProvider::TryLoadImageInfo(pipelineContextHolder_.Get(), src, std::move(loadCallback));
 }
 
 void FrontendDelegateImpl::RequestAnimationFrame(const std::string& callbackId)
@@ -1972,26 +1967,55 @@ void FrontendDelegateImpl::CancelAnimationFrame(const std::string& callbackId)
     }
 }
 
+bool FrontendDelegateImpl::OnMonitorForCrownEvents(const std::string& callbackId, const std::string& args)
+{
+    bool ret = false;
+    if (taskExecutor_) {
+        taskExecutor_->PostSyncTask(
+            [callbackId, call = onCrownEventCallback_, weak = AceType::WeakClaim(this), &ret, args] {
+                auto delegate = weak.Upgrade();
+                if (delegate && call) {
+                    ret = call(callbackId, args);
+                }
+            },
+            TaskExecutor::TaskType::JS, "ArkUIMonitorForCrownEventsCallback");
+    }
+    return ret;
+}
+
 void FrontendDelegateImpl::SetMonitorForCrownEvents(const std::string& callbackId)
 {
-    auto crownEventTask =
-        ([callbackId, call = onCrownEventCallback_, weak = AceType::WeakClaim(this)](const std::string& args) -> bool {
-            auto delegate = weak.Upgrade();
-            if (delegate && call) {
-                return call(callbackId, args);
-            }
-            return false;
-        });
+    auto crownEventTask = [callbackId, weak = AceType::WeakClaim(this)](const std::string& args) -> bool {
+        auto delegate = weak.Upgrade();
+        if (delegate) {
+            return delegate->OnMonitorForCrownEvents(callbackId, args);
+        }
+        return false;
+    };
     auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->RequestCrownEventMonitor(crownEventTask);
+    auto requestTask = [pipelineContext, crownEventTask = std::move(crownEventTask)]() mutable {
+        pipelineContext->RequestCrownEventMonitor(std::move(crownEventTask));
+    };
+    if (!taskExecutor_ || taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+        requestTask();
+        return;
+    }
+    taskExecutor_->PostTask(std::move(requestTask), TaskExecutor::TaskType::UI,
+        "ArkUIRequestCrownEventMonitor", PriorityType::VIP);
 }
 
 void FrontendDelegateImpl::ClearMonitorForCrownEvents()
 {
     auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->RequestCrownEventMonitor({});
+    auto requestTask = [pipelineContext]() { pipelineContext->RequestCrownEventMonitor({}); };
+    if (!taskExecutor_ || taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+        requestTask();
+        return;
+    }
+    taskExecutor_->PostTask(std::move(requestTask), TaskExecutor::TaskType::UI,
+        "ArkUIRequestCrownEventMonitor", PriorityType::VIP);
 }
 
 void FrontendDelegateImpl::FlushAnimationTasks()
@@ -2058,8 +2082,8 @@ void FrontendDelegateImpl::SetColorMode(ColorMode colorMode)
     OnMediaQueryUpdate();
 }
 
-void FrontendDelegateImpl::LoadResourceConfiguration(std::map<std::string, std::string>& mediaResourceFileMap,
-    std::unique_ptr<JsonValue>& currentResourceData)
+void FrontendDelegateImpl::LoadResourceConfiguration(
+    std::map<std::string, std::string>& mediaResourceFileMap, std::unique_ptr<JsonValue>& currentResourceData)
 {
     std::vector<std::string> files;
     if (assetManager_) {
@@ -2115,8 +2139,8 @@ void FrontendDelegateImpl::LoadResourceConfiguration(std::map<std::string, std::
     }
 }
 
-void FrontendDelegateImpl::PushJsCallbackToRenderNode(NodeId id, double ratio,
-    std::function<void(bool, double)>&& callback)
+void FrontendDelegateImpl::PushJsCallbackToRenderNode(
+    NodeId id, double ratio, std::function<void(bool, double)>&& callback)
 {
     auto visibleCallback = [jsCallback = std::move(callback), executor = taskExecutor_](bool visible, double ratio) {
         executor->PostTask(

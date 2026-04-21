@@ -22,6 +22,7 @@
 
 #include "base/utils/utils.h"
 #include "core/common/dynamic_module.h"
+#include "base/log/log.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -88,6 +89,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         {"Sidebar", "sidebar"},
         {"QRCode", "qrcode"},
         {"PatternLock", "patternlock"},
+        {"TextClock", "textclock"},
         {"Rating", "rating"},
         { "FlowItem", "waterflow" },
         { "WaterFlow", "waterflow" },
@@ -146,6 +148,16 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         moduleMap_.emplace(name, std::unique_ptr<DynamicModule>(module));
         return module;
     }
+}
+
+bool DynamicModuleHelper::IsDynamicModuleLoaded(const std::string& name)
+{
+    std::lock_guard<std::mutex> lock(moduleMapMutex_);
+    auto iter = moduleMap_.find(name);
+    if (iter != moduleMap_.end()) {
+        return true;
+    }
+    return false;
 }
 
 #ifdef ENABLE_PRELOAD_DYNAMIC_MODULE

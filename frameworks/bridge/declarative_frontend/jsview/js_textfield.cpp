@@ -20,23 +20,22 @@
 #include <string>
 #include <vector>
 #include "base/utils/utf_helper.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "base/geometry/dimension.h"
 #include "base/log/ace_scoring_log.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
-#include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_common_event_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_cited_event_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_event_function.h"
 #include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
-#include "bridge/declarative_frontend/jsview/js_container_base.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "bridge/declarative_frontend/jsview/js_text_editable_controller.h"
 #include "bridge/declarative_frontend/jsview/js_textarea.h"
 #include "bridge/declarative_frontend/jsview/js_textinput.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/common/container.h"
@@ -48,11 +47,11 @@
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/text_field/text_content_type.h"
+#include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/interfaces/native/node/search_modifier.h"
 #include "core/image/image_source_info.h"
-#include "core/text/text_emoji_processor.h"
 #ifdef ENABLE_STANDARD_INPUT
 #include "extra_config_napi.h"
 #include "js_native_api_types.h"
@@ -100,8 +99,8 @@ const char* TOP_END_PROPERTY = "topEnd";
 const char* BOTTOM_START_PROPERTY = "bottomStart";
 const char* BOTTOM_END_PROPERTY = "bottomEnd";
 constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyle::SOLID;
-const std::vector<TextOverflow> TEXT_OVERFLOWS_INPUT = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
-    TextOverflow::MARQUEE, TextOverflow::DEFAULT };
+const std::vector<TextOverflow> TEXT_OVERFLOWS_INPUT = {
+    TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS, TextOverflow::MARQUEE, TextOverflow::DEFAULT};
 
 bool ParseJsLengthMetrics(const JSRef<JSObject>& obj, CalcDimension& result)
 {
@@ -118,6 +117,7 @@ bool ParseJsLengthMetrics(const JSRef<JSObject>& obj, CalcDimension& result)
     result = dimension;
     return true;
 }
+
 } // namespace
 
 void ParseTextFieldTextObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -450,7 +450,7 @@ void JSTextField::SetTextDirection(const JSCallbackInfo& info)
         return;
     }
     int32_t index = args->ToNumber<int32_t>();
-    auto isNormalValue = index >= 0 && index < TEXT_DIRECTIONS.size();
+    auto isNormalValue = index >= 0 && index < static_cast<int32_t>(TEXT_DIRECTIONS.size());
     if (!isNormalValue) {
         TextFieldModel::GetInstance()->ResetTextDirection();
         return;
@@ -606,11 +606,18 @@ void JSTextField::SetSelectedBackgroundColor(const JSCallbackInfo& info)
     RefPtr<ResourceObject> resourceObject;
     UnRegisterResource("selectedBackgroundColor");
     if (!ParseJsColor(info[0], selectedColor, resourceObject)) {
-        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-        CHECK_NULL_VOID(pipeline);
-        auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
-        CHECK_NULL_VOID(theme);
-        selectedColor = theme->GetSelectedColor();
+        auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            TextFieldModel::GetInstance()->ResetSelectedBackgroundColor();
+            return;
+        } else {
+            auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+            CHECK_NULL_VOID(pipeline);
+            auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
+            CHECK_NULL_VOID(theme);
+            selectedColor = theme->GetSelectedColor();
+        }
     }
     if (SystemProperties::ConfigChangePerform() && resourceObject) {
         RegisterResource<Color>("selectedBackgroundColor", resourceObject, selectedColor);
@@ -1371,12 +1378,60 @@ void JSTextField::SetOnContentScroll(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetOnContentScroll(std::move(callback));
 }
 
+void JSTextField::SetOnWillCopy(const JSCallbackInfo& info)
+{
+    JSRef<JSVal> args = info[0];
+    CHECK_NULL_VOID(args->IsFunction());
+    auto jsTextFunc = AceType::MakeRefPtr<JsEventFunction<std::u16string, 1>>(
+        JSRef<JSFunc>::Cast(info[0]), CreateSimpleJsOnWillObj);
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc), node = targetNode](
+                        const std::u16string& value) -> bool {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, true);
+        ACE_SCORING_EVENT("onWillCopy");
+        PipelineContext::SetCallBackNode(node);
+        auto ret = func->ExecuteWithValue(value);
+        if (ret->IsBoolean()) {
+            return ret->ToBoolean();
+        }
+        return true;
+    };
+    TextFieldModel::GetInstance()->SetOnWillCopy(std::move(callback));
+}
+
+JSRef<JSVal> JSTextField::CreateSimpleJsOnWillObj(const std::u16string& value)
+{
+    JSRef<JSVal> stringValue = JSRef<JSVal>::Make(ToJSValue(value));
+    return stringValue;
+}
+
 void JSTextField::SetOnCopy(const JSCallbackInfo& info)
 {
     auto jsValue = info[0];
     CHECK_NULL_VOID(jsValue->IsFunction());
     JsEventCallback<void(const std::u16string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(jsValue));
     TextFieldModel::GetInstance()->SetOnCopy(std::move(callback));
+}
+
+void JSTextField::SetOnWillCut(const JSCallbackInfo& info)
+{
+    JSRef<JSVal> args = info[0];
+    CHECK_NULL_VOID(args->IsFunction());
+    auto jsTextFunc = AceType::MakeRefPtr<JsEventFunction<std::u16string, 1>>(
+        JSRef<JSFunc>::Cast(info[0]), CreateSimpleJsOnWillObj);
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc), node = targetNode](
+                        const std::u16string& value) -> bool {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, true);
+        ACE_SCORING_EVENT("onWillCut");
+        PipelineContext::SetCallBackNode(node);
+        auto ret = func->ExecuteWithValue(value);
+        if (ret->IsBoolean()) {
+            return ret->ToBoolean();
+        }
+        return true;
+    };
+    TextFieldModel::GetInstance()->SetOnWillCut(std::move(callback));
 }
 
 void JSTextField::SetOnCut(const JSCallbackInfo& info)
@@ -1829,6 +1884,7 @@ void JSTextField::SetCustomKeyboard(const JSCallbackInfo& info)
     }
 }
 
+
 void JSTextField::SetPasswordRules(const JSCallbackInfo& info)
 {
     auto jsValue = info[0];
@@ -2110,7 +2166,7 @@ void JSTextField::SetDecoration(const JSCallbackInfo& info)
         TextFieldModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
     }
 }
-
+ 
 void JSTextField::SetMinFontSize(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -2131,7 +2187,7 @@ void JSTextField::SetMinFontSize(const JSCallbackInfo& info)
     }
     TextFieldModel::GetInstance()->SetAdaptMinFontSize(minFontSize);
 }
-
+ 
 void JSTextField::SetMaxFontSize(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -2157,7 +2213,7 @@ void JSTextField::SetMaxFontSize(const JSCallbackInfo& info)
     }
     TextFieldModel::GetInstance()->SetAdaptMaxFontSize(maxFontSize);
 }
-
+ 
 void JSTextField::SetHeightAdaptivePolicy(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(HEIGHT_ADAPTIVE_POLICY.size())) {
@@ -2165,7 +2221,7 @@ void JSTextField::SetHeightAdaptivePolicy(int32_t value)
     }
     TextFieldModel::GetInstance()->SetHeightAdaptivePolicy(HEIGHT_ADAPTIVE_POLICY[value]);
 }
-
+ 
 void JSTextField::SetLetterSpacing(const JSCallbackInfo& info)
 {
     CalcDimension value;
@@ -2181,7 +2237,7 @@ void JSTextField::SetLetterSpacing(const JSCallbackInfo& info)
     }
     TextFieldModel::GetInstance()->SetLetterSpacing(value);
 }
-
+ 
 void JSTextField::SetLineHeight(const JSCallbackInfo& info)
 {
     CalcDimension value;
@@ -2461,6 +2517,18 @@ void JSTextField::SetEnableAutoSpacing(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetEnableAutoSpacing(enabled);
 }
 
+void JSTextField::SetOrphanCharOptimization(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    bool isOrphanChar = false;
+    if (info[0]->IsBoolean()) {
+        isOrphanChar = info[0]->ToBoolean();
+    }
+    TextFieldModel::GetInstance()->SetOrphanCharOptimization(isOrphanChar);
+}
+
 void JSTextField::SetCompressLeadingPunctuation(const JSCallbackInfo& info)
 {
     bool enabled = false;
@@ -2687,6 +2755,12 @@ void JSTextField::SetSelectedDragPreviewStyle(const JSCallbackInfo& info)
         RegisterResource<Color>("selectedDragPreviewStyleColor", resourceObject, color);
     }
     TextFieldModel::GetInstance()->SetSelectedDragPreviewStyle(color);
+}
+
+void JSTextField::SetAccessibilityText(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsAccessibilityText(info);
+    TextFieldModel::GetInstance()->SetUserAccessibilityText();
 }
 
 void JSTextField::SetSearchKeyboardAppearanceConfig(const JSCallbackInfo& info)

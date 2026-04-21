@@ -18,6 +18,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/app_bar/app_bar_theme.h"
+#include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
@@ -263,6 +264,26 @@ float TitleBarLayoutAlgorithm::GetTitleWidth(const RefPtr<TitleBarNode>& titleBa
     return titleBarSize.Width() < occupiedWidth ? 0.0f : titleBarSize.Width() - occupiedWidth;
 }
 
+bool TitleBarLayoutAlgorithm::PrasePaddingEnd(const RefPtr<TitleBarNode>& titleBarNode, float& avoidWidth)
+{
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(titleBarNode->GetParent());
+    CHECK_NULL_RETURN(navDestination, true);
+    auto isCustomTitle = navDestination->GetPrevTitleIsCustomValue(false);
+    auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_RETURN(titlePattern, true);
+    auto options = titlePattern->GetTitleBarOptions();
+    auto paddingEnd = options.brOptions.paddingEnd;
+    auto isSetPadding = paddingEnd.has_value();
+    if (!isSetPadding || (isCustomTitle && !options.enableCustomTitlePaddingCheck)) {
+        return true;
+    }
+    if (GreatOrEqual(paddingRightForMenu_, avoidWidth)) {
+        return false;
+    }
+    avoidWidth -= paddingRightForMenu_;
+    return true;
+}
+
 float TitleBarLayoutAlgorithm::WidthAfterAvoidMenuBarAndContainerModal(
     const RefPtr<TitleBarNode>& titleBarNode, float width)
 {
@@ -307,6 +328,8 @@ float TitleBarLayoutAlgorithm::WidthAfterAvoidMenuBarAndContainerModal(
     if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
         avoidWidth = avoidAreaOffset.GetX() + avoidAreaSize.Width() - titleBarOffset.GetX();
     }
+    bool isNeedAvoid = PrasePaddingEnd(titleBarNode, avoidWidth);
+    CHECK_EQUAL_RETURN(isNeedAvoid, false, afterAvoidWidth);
     auto avoidAreaBottom = avoidAreaOffset.GetY() + avoidAreaSize.Height();
     if (LessOrEqual(titleBarOffset.GetY(), avoidAreaBottom) && GreatOrEqual(avoidWidth, 0.0f)) {
         afterAvoidWidth = afterAvoidWidth - avoidWidth;
@@ -788,11 +811,14 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
             titleWrapper->Layout();
             return;
         }
-        MeasureContext context;
-        context.textContent = UtfUtils::Str16ToStr8(textLayoutProperty->GetContentValue());
-        context.fontSize = titleFontSize_;
-        minTitleHeight_ = static_cast<float>(MeasureUtil::MeasureTextSize(context).Height());
-        minTitleHeight_ = 0.0;
+        if (NavigationTitleUtil::CheckNeedFontPadding(titleBarNode)) {
+            MeasureContext context;
+            context.textContent = UtfUtils::Str16ToStr8(textLayoutProperty->GetContentValue());
+            context.fontSize = titleFontSize_;
+            minTitleHeight_ = static_cast<float>(MeasureUtil::MeasureTextSize(context).Height());
+        } else {
+            minTitleHeight_ = 0.0;
+        }
         initialTitleOffsetY_ = menuOccupiedHeight_ + offsetY;
         isInitialTitle_ = false;
         auto titleOffset = OffsetF(offsetX, initialTitleOffsetY_);

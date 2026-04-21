@@ -61,6 +61,7 @@ public:
     void SetRenderFit(RenderFit renderFit) override;
     void EnableSecure(bool isSecure) override;
     void HdrBrightness(float hdrBrightness) override;
+    void HdrBrightness(float hdrBrightness, HdrType hdrType) override;
     void EnableTransparentLayer(bool isTransparentLayer) override;
     void SetScreenId(uint64_t screenId) override;
 
@@ -88,6 +89,7 @@ public:
     static void EnableAnalyzer(FrameNode* frameNode, bool enable);
     static void EnableSecure(FrameNode* frameNode, bool enable);
     static void HdrBrightness(FrameNode* frameNode, float hdrBrightness);
+    static void HdrBrightness(FrameNode* frameNode, float hdrBrightness, HdrType hdrType);
     static void EnableTransparentLayer(FrameNode* frameNode, bool enable);
     static void SetRenderFit(FrameNode* frameNode, RenderFit renderFit);
     static RenderFit GetSurfaceRenderFit(FrameNode* frameNode);
@@ -107,6 +109,12 @@ public:
 
 private:
     static XComponentType GetTypeImpl(const RefPtr<FrameNode>& frameNode);
+
+    
+    static void InnerSetSurfaceRectV1(FrameNode* frameNode, float offsetX, float offsetY,
+        float surfaceWidth, float surfaceHeight);
+    static void InnerSetSurfaceRectV2(FrameNode* frameNode, float offsetX, float offsetY,
+        float surfaceWidth, float surfaceHeight);
 };
 
 } // namespace OHOS::Ace::NG

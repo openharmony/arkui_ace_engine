@@ -19,14 +19,14 @@
 
 #define private public
 #define protected public
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_media_player.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/render/mock_render_surface.h"
-#include "test/mock/core/common/mock_image_analyzer_manager.h"
-#include "test/mock/base/mock_pixel_map.h"
-#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_media_player.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_surface.h"
+#include "test/mock/frameworks/core/common/mock_image_analyzer_manager.h"
+#include "test/mock/frameworks/base/image/mock_pixel_map.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
@@ -954,6 +954,10 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest022, TestSize.Level1)
     EXPECT_EQ(movingphotoPattern->autoPlayPeriodStartTime_, oldAutoPlayPeriodStartTime_);
     EXPECT_EQ(movingphotoPattern->autoPlayPeriodEndTime_, oldAutoPlayPeriodEndTime_);
 
+    movingphotoPattern->AutoPlayPeriod(0, 0);
+    EXPECT_EQ(movingphotoPattern->autoPlayPeriodStartTime_, oldAutoPlayPeriodStartTime_);
+    EXPECT_EQ(movingphotoPattern->autoPlayPeriodEndTime_, oldAutoPlayPeriodEndTime_);
+
     movingphotoPattern->AutoPlayPeriod(100, 5000);
     EXPECT_EQ(movingphotoPattern->autoPlayPeriodStartTime_, 100);
     EXPECT_EQ(movingphotoPattern->autoPlayPeriodEndTime_, 5000);
@@ -965,6 +969,10 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest022, TestSize.Level1)
     movingphotoPattern->AutoPlayPeriod(0, 3000);
     EXPECT_EQ(movingphotoPattern->autoPlayPeriodStartTime_, 0);
     EXPECT_EQ(movingphotoPattern->autoPlayPeriodEndTime_, 3000);
+
+    movingphotoPattern->AutoPlayPeriod(0, 4000);
+    EXPECT_EQ(movingphotoPattern->autoPlayPeriodStartTime_, 0);
+    EXPECT_EQ(movingphotoPattern->autoPlayPeriodEndTime_, 4000);
 }
 
 /**

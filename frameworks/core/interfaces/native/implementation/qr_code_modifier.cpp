@@ -20,14 +20,21 @@
 
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+#ifdef ARKUI_CAPI_UNITTEST
+const GENERATED_ArkUIQRCodeModifier* GetQRCodeStaticModifier();
+#endif
 const GENERATED_ArkUIQRCodeModifier* GetQRCodeModifier()
 {
     static const GENERATED_ArkUIQRCodeModifier* cachedModifier = nullptr;
 
     if (cachedModifier == nullptr) {
+#ifdef ARKUI_CAPI_UNITTEST
+        cachedModifier = GetQRCodeStaticModifier();
+#else
         auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("QRCode");
         CHECK_NULL_RETURN(module, nullptr);
         cachedModifier = reinterpret_cast<const GENERATED_ArkUIQRCodeModifier*>(module->GetStaticModifier());
+#endif
     }
 
     return cachedModifier;

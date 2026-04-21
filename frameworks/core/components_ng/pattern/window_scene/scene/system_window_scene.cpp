@@ -21,6 +21,7 @@
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/components_ng/pattern/window_scene/scene/window_event_process.h"
+#include "core/components_ng/property/accessibility_property.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -242,21 +243,21 @@ void SystemWindowScene::RegisterEventCallback()
             }
             taskExecutor->PostTask([weakThis, PointerEvent]() {
                 auto self = weakThis.Upgrade();
-            if (!self) {
-                TAG_LOGE(AceLogTag::ACE_INPUTTRACKING,
-                    "weakThis Upgrade null,id:%{public}d", PointerEvent->GetId());
-                PointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_CANCEL);
-                WindowSceneHelper::InjectPointerEventForActionCancel(PointerEvent);
-                return;
-            }
+                if (!self) {
+                    TAG_LOGE(AceLogTag::ACE_INPUTTRACKING,
+                        "weakThis Upgrade null,id:%{public}d", PointerEvent->GetId());
+                    PointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_CANCEL);
+                    WindowSceneHelper::InjectPointerEventForActionCancel(PointerEvent);
+                    return;
+                }
                 auto host = self->GetHost();
-            if (!host) {
-                TAG_LOGE(AceLogTag::ACE_INPUTTRACKING,
-                    "GetHost null,id:%{public}d", PointerEvent->GetId());
-                PointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_CANCEL);
-                WindowSceneHelper::InjectPointerEventForActionCancel(PointerEvent);
-                return;
-            }
+                if (!host) {
+                    TAG_LOGE(AceLogTag::ACE_INPUTTRACKING,
+                        "GetHost null,id:%{public}d", PointerEvent->GetId());
+                    PointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_CANCEL);
+                    WindowSceneHelper::InjectPointerEventForActionCancel(PointerEvent);
+                    return;
+                }
                 WindowSceneHelper::InjectPointerEvent(host, PointerEvent);
             },
                 TaskExecutor::TaskType::UI, "ArkUIWindowInjectPointerEvent", PriorityType::VIP);

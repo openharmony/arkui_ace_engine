@@ -74,6 +74,10 @@ public:
      */
     bool UpdateNavSafeArea(const SafeAreaInsets& safeArea);
 
+    bool CheckFloatNavSafeArea(const SafeAreaInsets& safeArea);
+
+    bool UpdateFloatNavSafeArea(const SafeAreaInsets& safeArea);
+
     /**
      * @brief Retrieves the system safe area insets.
      *
@@ -87,6 +91,13 @@ public:
     SafeAreaInsets GetNavSafeArea() const
     {
         return navSafeArea_;
+    }
+
+    SafeAreaInsets GetFloatNavSafeArea() const;
+
+    SafeAreaInsets GetFloatNavSafeAreaWithoutProcess() const
+    {
+        return floatNavSafeArea_;
     }
 
     /**
@@ -126,7 +137,7 @@ public:
     /**
      * @brief Retrieves the safe area insets that account for any cutout areas on the screen.
      *
-     * @return The safe area insets that account for cutout areas on the screen without any judgement.
+     * @return The safe area insets that account for cutout areas without any judgement.
      */
     SafeAreaInsets GetCutoutSafeAreaWithoutProcess() const;
 
@@ -406,6 +417,7 @@ private:
     SafeAreaInsets systemSafeArea_;
     SafeAreaInsets cutoutSafeArea_;
     SafeAreaInsets navSafeArea_;
+    SafeAreaInsets floatNavSafeArea_;
     // keyboard is bottom direction only
     SafeAreaInsets::Inset keyboardInset_;
     SafeAreaInsets::Inset keyboardWebInset_;

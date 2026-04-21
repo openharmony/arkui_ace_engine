@@ -85,7 +85,7 @@ bool PatternResourceManager::Empty()
 }
 
 void PatternResourceManager::ParsePropertyValue(
-    const RefPtr<ResourceObject>& resObj, RefPtr<PropertyValueBase> valueBase)
+    const RefPtr<ResourceObject>& resObj, RefPtr<PropertyValueBase> valueBase, bool adaptMaterial)
 {
     if (valueBase->GetValueType() == ValueType::STRING) {
         std::string value;
@@ -102,7 +102,7 @@ void PatternResourceManager::ParsePropertyValue(
         valueBase->SetValue(value);
     } else if (valueBase->GetValueType() == ValueType::COLOR) {
         Color value;
-        ResourceParseUtils::ParseResColor(resObj, value);
+        ResourceParseUtils::ParseResColor(resObj, value, adaptMaterial);
         valueBase->SetValue(value);
     } else if (valueBase->GetValueType() == ValueType::DOUBLE) {
         double value;

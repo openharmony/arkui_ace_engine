@@ -16,8 +16,9 @@
 #define NATIVE_XCOMPONENT_PLUGIN_MANAGER_H
 
 #include <ace/xcomponent/native_interface_xcomponent.h>
-#include <js_native_api.h>
+#include "common.h"
 #include <js_native_api_types.h>
+#include <js_native_api.h>
 #include <string>
 #include <unordered_map>
 

@@ -40,8 +40,8 @@ const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::CLIP, TextOverflow::ELLIPSIS, TextOverflow::NONE };
 const std::function<void(std::u16string)> FormatCharFunction(void (*callback)(const char* value))
 {
-    const std::function<void(std::u16string)> result = [lambda = CJLambda::Create(callback)](
-                                                           const std::u16string& value) -> void {
+    const std::function<void(std::u16string)> result = [lambda = CJLambda::Create(callback)]
+        (const std::u16string& value) -> void {
         const std::string valueStr = UtfUtils::Str16DebugToStr8(value);
         lambda(valueStr.c_str());
     };
@@ -51,7 +51,6 @@ constexpr uint32_t MINI_VAILD_VALUE = 1;
 constexpr uint32_t MAX_VAILD_VALUE = 100;
 constexpr uint32_t ILLEGAL_VALUE = 0;
 constexpr uint32_t DEFAULTMAXLINES = 3;
-
 } // namespace
 
 extern "C" {
@@ -304,6 +303,23 @@ void FfiOHOSAceFrameworkTextFieldSetInputFilter(const char* value, void (*callba
 void FfiOHOSAceFrameworkTextFieldSetFontFeature(const char* value)
 {
     TextFieldModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(value));
+}
+
+void FfiOHOSAceFrameworkTextFieldSetWidth(double value, uint32_t unit)
+{
+    TextFieldModel::GetInstance()->SetWidthAuto(false);
+    Dimension width(value, static_cast<DimensionUnit>(unit));
+    if (width.Unit() == DimensionUnit::AUTO) {
+        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
+        TextFieldModel::GetInstance()->SetWidthAuto(true);
+        ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
+        return;
+    }
+
+    if (LessNotEqual(width.Value(), 0.0)) {
+        return;
+    }
+    ViewAbstractModel::GetInstance()->SetWidth(width);
 }
 
 void FfiOHOSAceFrameworkTextFieldSetLineHeight(double value, int32_t unit)
@@ -660,7 +676,8 @@ void FfiOHOSAceFrameworkTextFieldOnSubmit(void (*callback)(int32_t value))
 
 void FfiOHOSAceFrameworkTextFieldOnChange(void (*callback)(const char* value))
 {
-    auto onChange = [func = FormatCharFunction(callback)](const ChangeValueInfo& info) { func(info.value); };
+    auto onChange = [func = FormatCharFunction(callback)](
+        const ChangeValueInfo& info) { func(info.value); };
     TextFieldModel::GetInstance()->SetOnChange(onChange);
 }
 
@@ -677,7 +694,7 @@ void FfiOHOSAceFrameworkTextFieldOnCut(void (*callback)(const char* value))
 void FfiOHOSAceFrameworkTextFieldOnPaste(void (*callback)(const char* value))
 {
     auto onPaste = [func = FormatCharFunction(callback)](
-                       const std::u16string& val, NG::TextCommonEvent& info) { func(val); };
+        const std::u16string& val, NG::TextCommonEvent& info) { func(val); };
     TextFieldModel::GetInstance()->SetOnPasteWithEvent(std::move(onPaste));
 }
 

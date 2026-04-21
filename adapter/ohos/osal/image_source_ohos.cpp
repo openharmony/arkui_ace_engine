@@ -15,6 +15,7 @@
 
 #include "image_source_ohos.h"
 
+#include "base/log/log_wrapper.h"
 #include "media_errors.h"
 #include "pixel_map_ohos.h"
 
@@ -40,6 +41,7 @@ void InitDecodeOptions(
         options.photoDesiredPixelFormat = Media::PixelFormat::YCRCB_P010;
     }
     options.desiredPixelFormat = PixelMapOhos::ConvertToMediaPixelFormat(config.desiredDecodeFormat);
+    options.allocatorType = PixelMapOhos::ConvertToMediaAllocatorType(config.allocatorType);
     // Pass imageQuality to imageFramework
     options.resolutionQuality = static_cast<Media::ResolutionQuality>(config.imageQuality);
     if (size.first > 0 && size.second > 0) {

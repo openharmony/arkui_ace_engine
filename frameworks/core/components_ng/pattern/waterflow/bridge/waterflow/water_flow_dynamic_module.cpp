@@ -37,7 +37,6 @@ const CJUIWaterFlowModifier* GetCJUIWaterFlowModifier();
 const ArkUIAniWaterFlowModifier* GetArkUIAniWaterFlowModifier();
 namespace GeneratedModifier {
 const GENERATED_ArkUIWaterFlowModifier* GetWaterFlowStaticModifier();
-const GENERATED_ArkUIWaterFlowSectionsAccessor* GetWaterFlowSectionsStaticAccessor();
 const GENERATED_ArkUIUIWaterFlowEventAccessor* GetUIWaterFlowEventStaticAccessor();
 }
 #endif
@@ -86,9 +85,7 @@ void* WaterFlowDynamicModule::GetModel()
 const void* WaterFlowDynamicModule::GetCustomModifier(const std::string& name)
 {
 #ifdef INCLUDE_GENERATED_SOURCES
-    if (name == "WaterFlowSectionsAccessor") {
-        return NG::GeneratedModifier::GetWaterFlowSectionsStaticAccessor();
-    } else if (name == "UIWaterFlowEventAccessor") {
+    if (name == "UIWaterFlowEventAccessor") {
         return NG::GeneratedModifier::GetUIWaterFlowEventStaticAccessor();
     } else {
         return nullptr;

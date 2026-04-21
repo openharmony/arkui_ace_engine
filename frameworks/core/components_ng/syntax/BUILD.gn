@@ -29,6 +29,7 @@ build_component_ng("syntax_ng") {
     "if_else_node.cpp",
     "lazy_for_each_builder.cpp",
     "lazy_for_each_node.cpp",
+    "lazy_for_each_utils.cpp",
     "lazy_layout_wrapper_builder.cpp",
     "node_content.cpp",
     "repeat_model_ng.cpp",

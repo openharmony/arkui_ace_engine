@@ -20,6 +20,7 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "base/log/dump_log.h"
+#include "core/common/ace_engine.h"
 #include "core/common/container_scope.h"
 #include "core/common/window_animation_config.h"
 #include "core/components/common/properties/shadow_config.h"
@@ -28,8 +29,10 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/bubble/bubble_layout_property.h"
 #include "core/components_ng/pattern/bubble/bubble_render_property.h"
+#include "core/components_ng/pattern/bubble/bubble_view.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components/theme/shadow_theme.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -108,12 +111,14 @@ void BubblePattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     host->GetRenderContext()->SetClipToFrame(true);
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
     CHECK_NULL_VOID(targetNode);
     auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     hasOnAreaChange_ = pipelineContext->HasOnAreaChangeNode(targetNode->GetId());
+    RegisterAvoidInfoChangeListener(pipelineContext);
     auto eventHub = targetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     OnAreaChangedFunc onAreaChangedFunc = [popupNodeWk = WeakPtr<FrameNode>(host), weak = WeakClaim(this)](
@@ -121,9 +126,10 @@ void BubblePattern::OnAttachToFrameNode()
                                               const RectF& /* rect */, const OffsetF& /* origin */) {
         auto popupNode = popupNodeWk.Upgrade();
         CHECK_NULL_VOID(popupNode);
+        ACE_UINODE_TRACE(popupNode);
         popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         auto pattern = weak.Upgrade();
-        if (pattern) {
+        if (pattern && !pattern->isTips_) {
             pattern->PopBubble(true);
         }
     };
@@ -172,6 +178,7 @@ void BubblePattern::OnDetachFromFrameNodeImpl(FrameNode* frameNode)
         popupParam_->SetOnWillDismiss(nullptr);
         popupParam_->SetOnStateChange(nullptr);
     }
+    UnRegisterAvoidInfoChangeListener(frameNode);
 }
 
 void BubblePattern::OnAttachToMainTree()
@@ -192,6 +199,7 @@ void BubblePattern::InitTouchEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
@@ -225,6 +233,7 @@ void BubblePattern::HandleTouchDown(const Offset& clickPosition)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto bubbleRenderProp = host->GetPaintProperty<BubbleRenderProperty>();
     CHECK_NULL_VOID(bubbleRenderProp);
     if (touchRegion_.IsInRegion(PointF(clickPosition.GetX(), clickPosition.GetY()))) {
@@ -269,6 +278,7 @@ void BubblePattern::RegisterButtonOnHover()
     for (const auto& child : buttonRowNode->GetChildren()) {
         auto buttonNode = AceType::DynamicCast<FrameNode>(child);
         CHECK_NULL_VOID(buttonNode);
+        ACE_UINODE_TRACE(buttonNode);
         if (buttonNode->GetTag() != V2::BUTTON_ETS_TAG) {
             return;
         }
@@ -279,6 +289,7 @@ void BubblePattern::RegisterButtonOnHover()
             CHECK_NULL_VOID(pattern);
             auto buttonNode = buttonNodeWK.Upgrade();
             CHECK_NULL_VOID(buttonNode);
+            ACE_UINODE_TRACE(buttonNode);
             pattern->ButtonOnHover(isHover, buttonNode);
         };
         auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
@@ -326,6 +337,7 @@ void BubblePattern::RegisterButtonOnTouch()
     for (const auto& child : buttonRowNode->GetChildren()) {
         auto buttonNode = AceType::DynamicCast<FrameNode>(child);
         CHECK_NULL_VOID(buttonNode);
+        ACE_UINODE_TRACE(buttonNode);
         if (buttonNode->GetTag() != V2::BUTTON_ETS_TAG) {
             return;
         }
@@ -337,6 +349,7 @@ void BubblePattern::RegisterButtonOnTouch()
             CHECK_NULL_VOID(pattern);
             auto buttonNode = buttonNodeWK.Upgrade();
             CHECK_NULL_VOID(buttonNode);
+            ACE_UINODE_TRACE(buttonNode);
             pattern->ButtonOnPress(info, buttonNode);
         };
         auto touchEvent = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
@@ -352,6 +365,7 @@ void BubblePattern::ButtonOnPress(const TouchEventInfo& info, const RefPtr<NG::F
     }
     auto touchType = info.GetTouches().front().GetTouchType();
     CHECK_NULL_VOID(buttonNode);
+    ACE_UINODE_TRACE(buttonNode);
     auto renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto theme = GetPopupTheme();
@@ -407,6 +421,7 @@ void BubblePattern::PopBubble(bool tips)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto pipelineNg = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineNg);
     auto overlayManager = pipelineNg->GetOverlayManager();
@@ -437,15 +452,54 @@ void BubblePattern::PopBubble(bool tips)
     }
 }
 
+ThemeColorMode BubblePattern::GetStyleOptionColorMode()
+{
+    auto colorMode = ThemeColorMode::SYSTEM;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, colorMode);
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        if (isColorModeFollowTarget_) {
+            auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
+            CHECK_NULL_RETURN(targetNode, colorMode);
+            if (targetNode->GetLocalColorMode() == ColorMode::LIGHT) {
+                colorMode = ThemeColorMode::LIGHT;
+            }
+            if (targetNode->GetLocalColorMode() == ColorMode::DARK) {
+                colorMode = ThemeColorMode::DARK;
+            }
+        } else {
+            if (Container::CurrentColorMode() == ColorMode::LIGHT) {
+                colorMode = ThemeColorMode::LIGHT;
+            }
+            if (Container::CurrentColorMode() == ColorMode::DARK) {
+                colorMode = ThemeColorMode::DARK;
+            }
+        }
+    }
+    return colorMode;
+}
+
+void BubblePattern::UpdatePopupTheme(bool isColorModeFollowTarget)
+{
+    isColorModeFollowTarget_ = isColorModeFollowTarget;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
+        if (isColorModeFollowTarget_ && targetNode != nullptr) {
+            host->AllowUseParentTheme(false);
+            host->SetThemeScopeId(targetNode->GetThemeScopeIdForTheme(true));
+        }
+    }
+    popupTheme_ = host->GetTheme<PopupTheme>(true);
+}
+
 RefPtr<PopupTheme> BubblePattern::GetPopupTheme()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_RETURN(pipelineContext, nullptr);
-    auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
-    CHECK_NULL_RETURN(popupTheme, nullptr);
-    return popupTheme;
+    CHECK_NULL_RETURN(popupTheme_, host->GetTheme<PopupTheme>(true));
+    return popupTheme_;
 }
 
 void BubblePattern::Animation(
@@ -458,7 +512,15 @@ void BubblePattern::Animation(
     option.SetDuration(duration);
     option.SetFillMode(FillMode::FORWARDS);
     AnimationUtils::Animate(
-        option, [buttonContext = renderContext, color = endColor]() { buttonContext->UpdateBackgroundColor(color); },
+        option,
+        [buttonContext = renderContext, color = endColor]() {
+            buttonContext->UpdateBackgroundColor(color);
+            auto buttonNode = buttonContext->GetHost();
+            CHECK_NULL_VOID(buttonNode);
+            auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+            CHECK_NULL_VOID(buttonLayoutProperty);
+            buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+        },
         nullptr, nullptr, host->GetContextRefPtr());
 }
 
@@ -476,6 +538,7 @@ bool BubblePattern::PostTask(const TaskExecutor::Task& task, const std::string& 
 void BubblePattern::StartEnteringTransitionEffects(
     const RefPtr<FrameNode>& popupNode, const std::function<void()>& finish)
 {
+    ACE_UINODE_TRACE(popupNode);
     auto popupId = popupNode->GetId();
     auto pattern = popupNode->GetPattern<BubblePattern>();
     pattern->transitionStatus_ = TransitionStatus::ENTERING;
@@ -588,6 +651,7 @@ void BubblePattern::StartAlphaEnteringAnimation(std::function<void()> finish)
     optionAlpha.SetCurve(Curves::SHARP);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto popupId = host->GetId();
     auto layoutProp = host->GetLayoutProperty<BubbleLayoutProperty>();
     CHECK_NULL_VOID(layoutProp);
@@ -663,6 +727,7 @@ void BubblePattern::StartAlphaExitingAnimation(std::function<void()> finish)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     AnimationOption optionAlpha;
     optionAlpha.SetDuration(EXIT_ANIMATION_DURATION);
     optionAlpha.SetCurve(Curves::SHARP);
@@ -807,6 +872,7 @@ void BubblePattern::OnWindowHide()
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "Popup OnWindowHide start");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto pipelineNg = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineNg);
     auto overlayManager = pipelineNg->GetOverlayManager();
@@ -880,7 +946,7 @@ void BubblePattern::UpdateBubbleText()
     host->SetNeedCallChildrenUpdate(false);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-    auto popupTheme = context->GetTheme<PopupTheme>();
+    auto popupTheme = popupTheme_;
     CHECK_NULL_VOID(popupTheme);
     UpdateText(host, popupTheme);
     host->MarkDirtyNode();
@@ -890,6 +956,7 @@ void BubblePattern::UpdateStyleOption(BlurStyle blurStyle, bool needUpdateShadow
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto popupTheme = GetPopupTheme();
     CHECK_NULL_VOID(popupTheme);
     auto childNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
@@ -903,10 +970,14 @@ void BubblePattern::UpdateStyleOption(BlurStyle blurStyle, bool needUpdateShadow
     renderContext->UpdateBackgroundColor(backgroundColor);
     BlurStyleOption styleOption;
     styleOption.blurStyle = blurStyle;
-    styleOption.colorMode = static_cast<ThemeColorMode>(popupTheme->GetBgThemeColorMode());
+    styleOption.colorMode = GetStyleOptionColorMode();
     renderContext->UpdateBackBlurStyle(styleOption);
     if (needUpdateShadow) {
-        auto shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultSM);
+        auto pipelineContext = host->GetContextRefPtr();
+        CHECK_NULL_VOID(pipelineContext);
+        auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+        CHECK_NULL_VOID(shadowTheme);
+        Shadow shadow = shadowTheme->GetShadow(ShadowStyle::OuterDefaultSM, Container::CurrentColorMode());
         renderContext->UpdateBackShadow(shadow);
     }
 }
@@ -939,6 +1010,9 @@ void BubblePattern::UpdateShadow()
 
 void BubblePattern::OnColorConfigurationUpdate()
 {
+    if (popupParam_) {
+        UpdatePopupTheme(popupParam_->GetColorMode());
+    }
     // Tips: Color mode changes are already adapted, so ConfigChangePerform() control is not required.
     if (isTips_) {
         UpdateStyleOption(BlurStyle::COMPONENT_REGULAR, true);
@@ -948,6 +1022,20 @@ void BubblePattern::OnColorConfigurationUpdate()
         }
         UpdateShadow();
     }
+#if defined(ENABLE_ROSEN_BACKEND)
+    // Update SDF material when color configuration changes
+    if (isUserSetMaterial_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto childNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
+        CHECK_NULL_VOID(childNode);
+
+        // Reapply system material to update with new color configuration
+        if (popupParam_) {
+            BubbleView::SetBubbleSystemMaterial(childNode, popupParam_);
+        }
+    }
+#endif
     if (isCustomPopup_) {
         return;
     }
@@ -1079,5 +1167,64 @@ void BubblePattern::UpdateRadius(const CalcDimension& dimension)
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
+NG::RectF BubblePattern::GetWindowButtonRect(const RefPtr<FrameNode>& frameNode)
+{
+    NG::RectF buttonRect;
+    CHECK_NULL_RETURN(frameNode, buttonRect);
+    auto pipelineContext = frameNode->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipelineContext, buttonRect);
+    auto containerId = pipelineContext->GetInstanceId();
+    auto container = AceEngine::Get().GetContainer(containerId);
+    CHECK_NULL_RETURN(container, buttonRect);
+    if (container->IsSubContainer()) {
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(containerId, SubwindowType::TYPE_POPUP);
+        CHECK_NULL_RETURN(subwindow, buttonRect);
+        auto subwindowRect = subwindow->GetWindowRect();
+        auto parentWindowRect = subwindow->GetParentWindowRect();
+        if (!NearEqual(subwindowRect.Left(), parentWindowRect.Left()) ||
+            !NearEqual(subwindowRect.Top(), parentWindowRect.Top())) {
+            return buttonRect;
+        }
+        containerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
+        container = AceEngine::Get().GetContainer(containerId);
+        CHECK_NULL_RETURN(container, buttonRect);
+        pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+        CHECK_NULL_RETURN(pipelineContext, buttonRect);
+    }
+    auto avoidInfoMgr = pipelineContext->GetAvoidInfoManager();
+    CHECK_NULL_RETURN(avoidInfoMgr, buttonRect);
+    NG::RectF floatContainerModal;
+    if (avoidInfoMgr->NeedAvoidContainerModal() &&
+        avoidInfoMgr->GetContainerModalButtonsRect(floatContainerModal, buttonRect)) {
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "Popup buttonRect rect is %{public}s",
+            buttonRect.ToString().c_str());
+    }
+    return buttonRect;
+}
+
+void BubblePattern::OnAvoidInfoChange(const ContainerModalAvoidInfo& info)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void BubblePattern::RegisterAvoidInfoChangeListener(const RefPtr<PipelineContext>& pipeline)
+{
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetAvoidInfoManager();
+    CHECK_NULL_VOID(mgr);
+    mgr->AddAvoidInfoListener(WeakClaim(this));
+}
+
+void BubblePattern::UnRegisterAvoidInfoChangeListener(FrameNode* hostNode)
+{
+    CHECK_NULL_VOID(hostNode);
+    auto pipeline = hostNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetAvoidInfoManager();
+    CHECK_NULL_VOID(mgr);
+    mgr->RemoveAvoidInfoListener(WeakClaim(this));
+}
 
 } // namespace OHOS::Ace::NG

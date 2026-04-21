@@ -40,6 +40,7 @@ SwitchModifier::SwitchModifier(const SizeF& size, const OffsetF& offset, float p
     useContentModifier_ = AceType::MakeRefPtr<PropertyBool>(false);
     animatePointRadius_ = AceType::MakeRefPtr<PropertyFloat>(SWITCH_ERROR_RADIUS);
     animateTrackRadius_ = AceType::MakeRefPtr<PropertyFloat>(SWITCH_ERROR_RADIUS);
+    animatePointScale_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(1.0f);
 
     AttachProperty(animatableBoardColor_);
     AttachProperty(animateTouchHoverColor_);
@@ -54,6 +55,7 @@ SwitchModifier::SwitchModifier(const SizeF& size, const OffsetF& offset, float p
     AttachProperty(size_);
     AttachProperty(animatePointRadius_);
     AttachProperty(animateTrackRadius_);
+    AttachProperty(animatePointScale_);
 }
 
 void SwitchModifier::InitializeParam(int32_t themeScopeId)
@@ -175,6 +177,9 @@ void SwitchModifier::DrawRectCircle(RSCanvas& canvas, const OffsetF& contentOffs
         }
     }
     brush.SetAntiAlias(true);
+    if (hasSystemMaterial_) {
+        brush.SetAlphaF(pointAlpha_);
+    }
     canvas.AttachBrush(brush);
     RSPoint point;
     if (GreatOrEqual(contentSize.Width(), contentSize.Height())) {
@@ -183,7 +188,8 @@ void SwitchModifier::DrawRectCircle(RSCanvas& canvas, const OffsetF& contentOffs
         point.SetX(xOffset + pointOffset_->Get());
     }
     point.SetY(yOffset + height / NUM_TWO);
-    canvas.DrawCircle(point, pointRadius_);
+    float drawRadius = hasSystemMaterial_ ? (pointRadius_ * animatePointScale_->Get()) : pointRadius_;
+    canvas.DrawCircle(point, drawRadius);
     canvas.DetachBrush();
 }
 

@@ -67,7 +67,7 @@ bool ContainerIsScenceBoard()
 }
 } // OHOS::Ace::NG
 
-static void ShowToast(ani_env* env, ani_object options)
+static void ShowToast(ani_env* env, ani_object options, ani_object optionsInternal)
 {
     TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] showToast enter.");
     auto toastInfo = OHOS::Ace::NG::ToastInfo {
@@ -78,6 +78,7 @@ static void ShowToast(ani_env* env, ani_object options)
     if (!GetShowToastOptions(env, options, toastInfo)) {
         return;
     }
+    GetShowToastOptionsInternal(env, optionsInternal, toastInfo);
 
     std::function<void(int32_t)> toastCallback = nullptr;
     if ((OHOS::Ace::SystemProperties::GetExtSurfaceEnabled() || !OHOS::Ace::NG::ContainerIsService())
@@ -88,7 +89,7 @@ static void ShowToast(ani_env* env, ani_object options)
     }
 }
 
-static ani_object OpenToast(ani_env* env, ani_object options)
+static ani_object OpenToast(ani_env* env, ani_object options, ani_object optionsInternal)
 {
     TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] openToast enter.");
     auto toastInfo =
@@ -96,6 +97,7 @@ static ani_object OpenToast(ani_env* env, ani_object options)
     if (!GetShowToastOptions(env, options, toastInfo)) {
         return nullptr;
     }
+    GetShowToastOptionsInternal(env, optionsInternal, toastInfo);
 
     auto asyncContext = std::make_shared<PromptActionAsyncContext>();
     ani_status status = env->GetVM(&asyncContext->vm);
@@ -224,7 +226,8 @@ static ani_object ShowDialog(ani_env* env, ani_object options, ani_object option
     return result;
 }
 
-static void ShowActionMenuWithCallback(ani_env* env, ani_object options, ani_object callback)
+static void ShowActionMenuWithCallback(ani_env* env, ani_object options, ani_object callback,
+    ani_object optionsInternal)
 {
     TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] ShowActionMenuWithCallback enter.");
     OHOS::Ace::DialogProperties dialogProps;
@@ -233,6 +236,7 @@ static void ShowActionMenuWithCallback(ani_env* env, ani_object options, ani_obj
         OHOS::Ace::Ani::AniThrow(env, "The type of parameters is incorrect.", OHOS::Ace::ERROR_CODE_PARAM_INVALID);
         return;
     }
+    GetActionMenuOptionsInternal(env, optionsInternal, dialogProps);
     dialogProps.autoCancel = true;
     dialogProps.isMenu = true;
 
@@ -257,7 +261,7 @@ static void ShowActionMenuWithCallback(ani_env* env, ani_object options, ani_obj
     }
 }
 
-static ani_object ShowActionMenu(ani_env* env, ani_object options)
+static ani_object ShowActionMenu(ani_env* env, ani_object options, ani_object optionsInternal)
 {
     TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] ShowActionMenu enter.");
     OHOS::Ace::DialogProperties dialogProps;
@@ -266,6 +270,7 @@ static ani_object ShowActionMenu(ani_env* env, ani_object options)
         OHOS::Ace::Ani::AniThrow(env, "The type of parameters is incorrect.", OHOS::Ace::ERROR_CODE_PARAM_INVALID);
         return nullptr;
     }
+    GetActionMenuOptionsInternal(env, optionsInternal, dialogProps);
     dialogProps.autoCancel = true;
     dialogProps.isMenu = true;
 

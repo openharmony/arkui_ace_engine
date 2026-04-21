@@ -18,6 +18,7 @@
 #include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "bridge/js_frontend/engine/common/js_constants.h"
 #include "core/common/container.h"
+#include "core/image/image_cache.h"
 #include "core/image/image_file_cache.h"
 
 namespace OHOS::Ace::Framework {

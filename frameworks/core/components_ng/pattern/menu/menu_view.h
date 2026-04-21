@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,16 +18,22 @@
 
 #include <string>
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/pattern/menu/menu_pattern.h"
-#include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
-#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
-#include "core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "core/components_ng/property/menu_property.h"
 #include "core/components_ng/pattern/select/select_model.h"
-#include "core/components_ng/pattern/text/text_styles.h"
+
+namespace OHOS::Ace {
+class PipelineContext;
+}
 
 namespace OHOS::Ace::NG {
+class FrameNode;
+class MenuPreviewPattern;
+class MenuWrapperPattern;
+class RenderContext;
+class UINode;
+
+class TextLayoutProperty;
 
 enum class MenuHoverScaleStatus {
     DISABLE = 0,
@@ -73,6 +79,7 @@ public:
         const MenuParam& menuParam, const MenuType& type);
 
     static void CalcHoverScaleInfo(const RefPtr<FrameNode>& menuNode);
+    static void SetTextTruncationAndWrap(const RefPtr<TextLayoutProperty>& textProperty, bool autoWrapFlag);
     static RefPtr<FrameNode> CreateIcon(const std::string& icon, const RefPtr<FrameNode>& parent,
         const RefPtr<FrameNode>& child = nullptr);
     static RefPtr<FrameNode> CreateText(const std::string& value, const RefPtr<FrameNode>& parent,
@@ -102,6 +109,8 @@ public:
     static void RemoveMenuHoverScaleStatus(int32_t targetId);
     static MenuHoverScaleStatus GetMenuHoverScaleStatus(int32_t targetId);
     static void SetMenuSystemMaterial(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
+    static void UpdateStyleOptionColorMode(const OHOS::Ace::ColorMode colorMode, BlurStyleOption& styleOption,
+        bool isColorModeFollowTarget = true);
 
 private:
     static void UpdateMenuPaintProperty(
@@ -117,14 +126,15 @@ private:
         const RefPtr<FrameNode>& wrapperNode, const RefPtr<FrameNode>& previewNode);
     static RefPtr<FrameNode> Create(int32_t index);
     static RefPtr<FrameNode> CreateMenuOption(const OptionValueInfo& value,
-        const std::function<void()>& onClickFunc, int32_t index, const std::string& icon = "");
-    static RefPtr<FrameNode> CreateMenuOption(bool optionsHasIcon, std::vector<OptionParam>& params, int32_t index);
+        const std::function<void()>& onClickFunc, int32_t index,  int32_t themeScopeId, const std::string& icon = "");
+    static RefPtr<FrameNode> CreateMenuOption(bool optionsHasIcon, std::vector<OptionParam>& params, int32_t index,
+        int32_t themeScopeId);
     static void CreateOption(const OptionValueInfo& value, const std::string& icon,
         const RefPtr<FrameNode>& row, const RefPtr<FrameNode>& option, const std::function<void()>& onClickFunc);
     static void CreateOption(bool optionsHasIcon, std::vector<OptionParam>& params, int32_t index,
         const RefPtr<FrameNode>& row, const RefPtr<FrameNode>& option);
     static void MountOptionToColumn(std::vector<OptionParam>& params, const RefPtr<FrameNode>& menuNode,
-        const MenuParam& menuParam, RefPtr<FrameNode> column);
+        const MenuParam& menuParam, RefPtr<FrameNode> column, int32_t themeScopeId);
     static void UpdateMenuBackgroundStyleSub(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
     static void UpdateMenuNodeByAnimation(const RefPtr<FrameNode>& menuNode, const PreparedInfoForDrag& data);
     static void UpdateMenuPositionTop(MarginProperty& menuNodeMargin,
@@ -142,6 +152,11 @@ private:
     static void UpdateMenuOutlineWithArrow(
         const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& wrapperNode, const MenuParam& menuParam);
     static void ReloadMenuParam(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
+    static void UpdateMenuLayoutProperty(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
+    static void UpdateMenuScrollBarAndMaxHeight(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
+    static void UpdateMenuEffectOption(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
+    static int32_t UpdateNodeThemeScopeId(const RefPtr<FrameNode> &node, int32_t targetId,
+        const std::string& targetTag, bool isColorModeFollowTarget = true);
 };
 } // namespace OHOS::Ace::NG
 

@@ -30,6 +30,7 @@
 #include "core/image/image_object.h"
 #include "core/image/image_source_info.h"
 #endif
+#include "core/image/image_cache.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
@@ -111,6 +112,13 @@ public:
     void SetAntiAlias(bool isEnabled)
     {
         antiAlias_ = isEnabled;
+        settingsAntiAlias_ = isEnabled;
+    }
+
+    void SetAntialiasExt(std::optional<bool> isEnabled)
+    {
+        antiAlias_ = isEnabled.value_or(settingsAntiAlias_);
+        fontAntiAlias_ = isEnabled;
     }
 
     void SetFillColor(const Color& color)
@@ -374,6 +382,7 @@ protected:
 
     RSPath rsPath_;
     RSPath rsPath2d_;
+    std::vector<std::pair<bool, std::optional<bool>>> saveAntiAliasStates_;
     std::vector<PaintHolder> saveStates_;
     std::vector<std::shared_ptr<RSColorFilter>> saveColorFilter_;
     std::vector<std::shared_ptr<RSImageFilter>> saveBlurFilter_;
@@ -402,6 +411,8 @@ protected:
 
     bool smoothingEnabled_ = true;
     bool antiAlias_ = false;
+    bool settingsAntiAlias_ = false;
+    std::optional<bool> fontAntiAlias_;
     bool isPathChanged_ = true;
     bool isPath2dChanged_ = true;
 

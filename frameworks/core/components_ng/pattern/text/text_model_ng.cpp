@@ -18,7 +18,7 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/utf_helper.h"
 #include "core/components/common/properties/alignment.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -255,6 +255,17 @@ void TextModelNG::SetEnableVariableFontWeight(FrameNode* frameNode, bool value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, EnableVariableFontWeight, value, frameNode);
 }
 
+void TextModelNG::SetFontVariations(FrameNode* frameNode, const FONT_VARIATIONS_LIST& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontVariations, value, frameNode);
+}
+
+void TextModelNG::ResetFontVariations(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+        TextLayoutProperty, FontVariations, PROPERTY_UPDATE_MEASURE_SELF, frameNode);
+}
+
 void TextModelNG::SetMinFontScale(const float value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, MinFontScale, value);
@@ -278,6 +289,16 @@ void TextModelNG::SetVariableFontWeight(int32_t value)
 void TextModelNG::SetEnableVariableFontWeight(bool value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, EnableVariableFontWeight, value);
+}
+
+void TextModelNG::SetFontVariations(const FONT_VARIATIONS_LIST& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontVariations, value);
+}
+
+void TextModelNG::ResetFontVariations()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, FontVariations, PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void TextModelNG::SetFontFamily(const std::vector<std::string>& value)
@@ -638,6 +659,13 @@ void TextModelNG::SetRemoteMessage(std::function<void()>&& event) {}
 void TextModelNG::SetCopyOption(CopyOptions copyOption)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, CopyOption, copyOption);
+}
+
+void TextModelNG::SetOnWillCopy(std::function<bool(const std::u16string&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillCopy(std::move(func));
 }
 
 void TextModelNG::SetOnCopy(std::function<void(const std::u16string&)>&& func)
@@ -1419,6 +1447,13 @@ FONT_FEATURES_LIST TextModelNG::GetFontFeature(FrameNode* frameNode)
     return value;
 }
 
+FONT_VARIATIONS_LIST TextModelNG::GetFontVariations(FrameNode* frameNode)
+{
+    FONT_VARIATIONS_LIST value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, FontVariations, value, frameNode, value);
+    return value;
+}
+
 TextSelectableMode TextModelNG::GetTextSelectableMode(FrameNode* frameNode)
 {
     TextSelectableMode value = TextSelectableMode::SELECTABLE_UNFOCUSABLE;
@@ -1539,6 +1574,14 @@ void TextModelNG::SetTextDetectConfig(FrameNode* frameNode, const TextDetectConf
         textPattern->SetTextDetectConfig(textDetectConfig);
     };
     textPattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void TextModelNG::SetOnWillCopy(FrameNode* frameNode, std::function<bool(const std::u16string&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillCopy(std::move(func));
 }
 
 void TextModelNG::SetOnCopy(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func)
@@ -1703,6 +1746,32 @@ PositionWithAffinity TextModelNG::GetGlyphPositionAtCoordinate(FrameNode* frameN
     return textPattern->GetGlyphPositionAtCoordinate(dx, dy);
 }
 
+PositionWithAffinity TextModelNG::GetCharacterPositionAtCoordinate(FrameNode* frameNode, double dx, double dy)
+{
+    CHECK_NULL_RETURN(frameNode, PositionWithAffinity(0, TextAffinity::UPSTREAM));
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, PositionWithAffinity(0, TextAffinity::UPSTREAM));
+    return textPattern->GetCharacterPositionAtCoordinate(dx, dy);
+}
+
+std::pair<TextRange, TextRange> TextModelNG::GetGlyphRangeForCharacterRange(
+    FrameNode* frameNode, int32_t start, int32_t end)
+{
+    CHECK_NULL_RETURN(frameNode, (std::pair<TextRange, TextRange>()));
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, (std::pair<TextRange, TextRange>()));
+    return textPattern->GetGlyphRangeForCharacterRange(start, end);
+}
+
+std::pair<TextRange, TextRange> TextModelNG::GetCharacterRangeForGlyphRange(
+    FrameNode* frameNode, int32_t start, int32_t end)
+{
+    CHECK_NULL_RETURN(frameNode, (std::pair<TextRange, TextRange>()));
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, (std::pair<TextRange, TextRange>()));
+    return textPattern->GetCharacterRangeForGlyphRange(start, end);
+}
+
 TextLineMetrics TextModelNG::GetLineMetrics(FrameNode* frameNode, int32_t lineNumber)
 {
     CHECK_NULL_RETURN(frameNode, TextLineMetrics());
@@ -1727,6 +1796,26 @@ bool TextModelNG::GetOptimizeTrailingSpace(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, false);
     bool value = false;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, OptimizeTrailingSpace, value, frameNode, value);
+    return value;
+}
+
+void TextModelNG::SetOrphanCharOptimization(bool isOrphanChar)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, OrphanCharOptimization, isOrphanChar);
+}
+
+void TextModelNG::SetOrphanCharOptimization(FrameNode* frameNode, bool isOrphanChar)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, OrphanCharOptimization, isOrphanChar, frameNode);
+}
+
+bool TextModelNG::GetOrphanCharOptimization(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, OrphanCharOptimization,
+        value, frameNode, value);
     return value;
 }
 
@@ -1974,7 +2063,7 @@ void TextModelNG::ResetSelectedDragPreviewStyle(FrameNode* frameNode)
 }
 
 void TextModelNG::SetExternalDrawCallback(
-    FrameNode* frameNode, std::function<bool(float, float, float, float)>&& callback)
+    FrameNode* frameNode, std::function<bool(const ExternalDrawCallbackInfo&)>&& callback)
 {
     CHECK_NULL_VOID(frameNode);
     auto textPattern = frameNode->GetPattern<TextPattern>();
@@ -1989,5 +2078,18 @@ std::optional<void*> TextModelNG::GetInnerParagraph(FrameNode* frameNode)
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(textPattern, std::nullopt);
     return textPattern->GetDrawParagraph();
+}
+
+void TextModelNG::SetStyledString(FrameNode* frameNode, SpanString* value)
+{
+    CHECK_NULL_VOID(frameNode && value);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
+    value->SetFramNode(pattern->GetHost());
+    auto mutableSpanString = AceType::MakeRefPtr<MutableSpanString>(u"");
+    auto length = value->GetLength();
+    auto target = value->GetSubSpanString(0, length);
+    mutableSpanString->AppendSpanString(target);
+    pattern->SetStyledString(mutableSpanString, true, true);
 }
 } // namespace OHOS::Ace::NG

@@ -40,7 +40,7 @@ Ark_NativePointer GetFinalizerImpl()
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 
-void DismissSheetImpl([[maybe_unused]] Ark_DismissSheetAction peer)
+void DismissImpl([[maybe_unused]] Ark_DismissSheetAction peer)
 {
     ViewAbstractModelStatic::DismissSheetStatic();
 }
@@ -68,14 +68,11 @@ const GENERATED_ArkUIDismissSheetActionAccessor* GetDismissSheetActionAccessor()
         DismissSheetActionAccessor::DestroyPeerImpl,
         DismissSheetActionAccessor::ConstructImpl,
         DismissSheetActionAccessor::GetFinalizerImpl,
-        DismissSheetActionAccessor::DismissSheetImpl,
+        DismissSheetActionAccessor::DismissImpl,
         DismissSheetActionAccessor::GetReasonImpl,
         DismissSheetActionAccessor::SetReasonImpl,
     };
     return &DismissSheetActionAccessorImpl;
 }
 
-struct DismissSheetActionPeer {
-    virtual ~DismissSheetActionPeer() = default;
-};
 }

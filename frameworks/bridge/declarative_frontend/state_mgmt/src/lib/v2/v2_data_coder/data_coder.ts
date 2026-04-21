@@ -22,13 +22,19 @@ class DataCoder {
   // Tag to detect payload format
   public static readonly FORMAT_TAG = 'JSON2';
 
-  // Track visited objects to prevent recursion in restoreObject()
-  private static visited_ = new Set<string>();
+  // Track visited target objects to prevent recursion in restoreObject()
+  private static visitedTargets_ = new Set<string>();
+  // Track visited source objects to restore shared references
+  private static visitedSources_ = new Map<object, object>();
 
   /**
    * Serialize an object to a JSON2
    */
-  public static stringify<T>(value: T): string {
+  public static stringify<T>(value: T, forceLegacyFormat: boolean = false): string {
+    if (forceLegacyFormat) {
+      return JSONCoder.stringify(value);
+    }
+
     const origValue = ObserveV2.IsMakeObserved(value)
       ? UIUtilsImpl.instance().getTarget(value)
       : value;
@@ -75,15 +81,17 @@ class DataCoder {
 
     try {
       if (!nullOrUndef(source) && globalThis.isSendable(source)) {
+        this.throwIfNotSendable(origTarget);
         // The root is Sendable; only properties are restored
-        this.restoreObject(origTarget, source, {});
+        this.restoreObject(origTarget, source, { factory });
       } else {
         const dst = { root: origTarget };
         const src = { root: source };
         this.restorePropValue(dst, 'root', src, 'root', { factory });
       }
     } finally {
-      this.visited_.clear();
+      this.visitedTargets_.clear();
+      this.visitedSources_.clear();
     }
 
     // Regular or @ObservedV2 target, return as-is
@@ -140,26 +148,38 @@ class DataCoder {
         return value;
       }
 
+      if (this.visitedSources_.has(value)) {
+        return this.visitedSources_.get(value);
+      }
+
       if (opts?.factory === undefined) {
+        this.visitedSources_.set(value, value);
         return value;
       }
 
-      const type = opts.factory(value);
-      const newValue = type ? new type() : value;
+      const clazz = opts.factory(value);
+      const newValue = clazz ? new clazz() : value;
 
-      // don't allow collections as items of a collection
+      // we don't allow collections directly nested inside other collections
       this.throwIfCollection(newValue);
 
       this.restoreObject(newValue, value, opts);
       return newValue;
     };
 
-    // ignore already visited
+    // track visited targets (objects) to prevent recursion
     if (typeof target === 'object' && target != null) {
-      if (this.visited_.has(target)) {
+      if (this.visitedTargets_.has(target)) {
         return;
       }
-      this.visited_.add(target);
+      this.visitedTargets_.add(target);
+    }
+
+    // track visited sources (objects) to restore shared references
+    if (typeof source === 'object' && source != null) {
+      if (!this.visitedSources_.has(source)) {
+        this.visitedSources_.set(source, target);
+      }
     }
 
     if (source instanceof Array) {
@@ -239,6 +259,11 @@ class DataCoder {
       return;
     }
 
+    if (this.visitedSources_.get(srcVal)) {
+      target[targetProp] = this.visitedSources_.get(srcVal);
+      return;
+    }
+
     // try to restore the Date without replacing the existing instance
     if (srcVal instanceof Date && tgtVal instanceof Date) {
       target[targetProp].setTime(srcVal.getTime())
@@ -282,8 +307,8 @@ class DataCoder {
     }
 
     if (nullOrUndef(tgtVal) && opts.factory) {
-      const type = opts.factory(srcVal);
-      target[targetProp] = type ? new type() : {};
+      const clazz = opts.factory(srcVal);
+      target[targetProp] = clazz ? new clazz() : {};
       this.restoreObject(target[targetProp], srcVal, {});
       return;
     }
@@ -298,8 +323,8 @@ class DataCoder {
     }
 
     if (tgtVal.constructor !== srcVal.constructor && opts.factory !== undefined) {
-      const type = opts.factory(srcVal)
-      target[targetProp] = type ? new type() : {};
+      const clazz = opts.factory(srcVal)
+      target[targetProp] = clazz ? new clazz() : {};
       this.restoreObject(target[targetProp], srcVal, {});
       return;
     }
@@ -311,40 +336,45 @@ class DataCoder {
   private static throwIfNotInstanceOf(target: unknown, clazz: new (...args: unknown[]) => unknown): void {
     if (target instanceof clazz === false) {
       const type = target?.constructor?.name ?? typeof target;
-      throw new BusinessError(PERSISTENCE_V2_MISMATCH_BETWEEN_KEY_AND_TYPE, `The class of target (${type}) mismatches '${clazz.name}'`);
+      const msg = `The class of target (${type}) mismatches '${clazz.name}'`;
+      throw new BusinessError(PERSISTENCE_V2_MISMATCH_BETWEEN_KEY_AND_TYPE, msg);
     }
   }
 
   // Ensure target has given type
   private static throwIfNotTypeOf(target: unknown, type: string): void {
     if (typeof target !== type) {
-      throw new BusinessError(PERSISTENCE_V2_MISMATCH_BETWEEN_KEY_AND_TYPE, `The type of target ('${typeof target}') mismatches '${type}'`);
+      const msg = `The type of target ('${typeof target}') mismatches '${type}'`;
+      throw new BusinessError(PERSISTENCE_V2_MISMATCH_BETWEEN_KEY_AND_TYPE, msg);
     }
   }
 
   // Ensure target is Sendable
   private static throwIfNotSendable(target: unknown): void {
     if (target != null && globalThis.isSendable(target) === false) {
-      const type = target.constructor?.name ?? typeof target
-      // todo: why need to check twice
-      throw new BusinessError(PERSISTENCE_V2_APPSTORAGE_V2_UNSUPPORTED_TYPE, `Not supported type! The target (${type}) is not @Sendable`);
+      const type = target.constructor?.name ?? typeof target;
+      const msg = `Not supported type! The target (${type}) is not @Sendable`;
+      throw new BusinessError(PERSISTENCE_V2_APPSTORAGE_V2_UNSUPPORTED_TYPE, msg);
     }
   }
 
   // Ensure value is not collection
   private static throwIfCollection(value: unknown): void {
     if ([Array, Map, Set, SendableArray, SendableMap, SendableSet].some(clazz => value instanceof clazz)) {
-      throw new BusinessError(PERSISTENCE_V2_APPSTORAGE_V2_UNSUPPORTED_TYPE, `Not supported type! Array, Map, Set, or collections.Array/Map/Set cannot be used as collection items`);
+      const msg = `Not supported type! Array, Map, Set, or collections.Array/Map/Set cannot be used as collection items`;
+      throw new BusinessError(PERSISTENCE_V2_APPSTORAGE_V2_UNSUPPORTED_TYPE, msg);
     }
   }
 
   private static throwNoFactory<T>(targetProp: string): void {
-    throw new BusinessError(PERSISTENCE_V2_LACK_TYPE, `Miss @Type in object defined, the property name is ${targetProp}`);
+    const msg = `Miss @Type in object defined, the property name is ${targetProp}`;
+    throw new BusinessError(PERSISTENCE_V2_LACK_TYPE, msg);
   }
 
   // todo: need check error message
   private static throwInvalidSubCreatorResult(): never {
-    throw new BusinessError(PERSISTENCE_V2_APPSTORAGE_V2_INVALID_DEFAULT_CREATOR, `The defaultSubCreator returned invalid value`);
+    const msg = `The defaultSubCreator returned invalid value`;
+    throw new BusinessError(PERSISTENCE_V2_APPSTORAGE_V2_INVALID_DEFAULT_CREATOR, msg);
   }
 
 }

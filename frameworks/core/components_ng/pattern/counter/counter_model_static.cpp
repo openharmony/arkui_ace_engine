@@ -169,6 +169,7 @@ RefPtr<FrameNode> CounterModelStatic::CreateButtonChild(
     buttonNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(counterTheme->GetControlWidth()), CalcLength(counterTheme->GetHeight())));
     buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
+    buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateBackgroundColorFlagByUser(true);
     buttonNode->GetLayoutProperty()->UpdateBorderWidth(counterTheme->GetBorderWidth());
     buttonNode->GetRenderContext()->UpdateBorderStyle(counterTheme->GetBorderStyle());
     buttonNode->GetRenderContext()->UpdateBorderColor(counterTheme->GetBorderColor());

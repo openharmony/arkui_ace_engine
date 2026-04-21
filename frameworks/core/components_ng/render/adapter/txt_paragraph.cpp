@@ -21,6 +21,7 @@
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/txt_font_collection.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -103,6 +104,7 @@ void TxtParagraph::ConvertTypographyStyle(Rosen::TypographyStyle& style, const P
                 : static_cast<OHOS::Rosen::TextHeightBehavior>(TextHeightBehavior::DISABLE_LAST_ASCENT);
     }
     style.isTrailingSpaceOptimized = paraStyle.optimizeTrailingSpace;
+    style.orphanCharOptimization = paraStyle.orphanCharOptimization;
     style.compressHeadPunctuation = paraStyle.compressLeadingPunctuation;
 #if !defined(FLUTTER_2_5) && !defined(NEW_SKIA)
     // keep WordBreak define same with WordBreakType in minikin
@@ -416,6 +418,47 @@ PositionWithAffinity TxtParagraph::GetGlyphPositionAtCoordinate(const Offset& of
     finalResult.position_ = result.index;
     finalResult.affinity_ = static_cast<TextAffinity>(result.affinity);
     return finalResult;
+}
+
+PositionWithAffinity TxtParagraph::GetCharacterPositionAtCoordinate(const Offset& offset)
+{
+    PositionWithAffinity finalResult(0, TextAffinity::UPSTREAM);
+    auto paragrah = GetParagraph();
+    CHECK_NULL_RETURN(paragrah, finalResult);
+    auto result = paragrah->GetCharacterIndexByCoordinate(offset.GetX(), offset.GetY());
+    finalResult.position_ = result.index;
+    finalResult.affinity_ = static_cast<TextAffinity>(result.affinity);
+    return finalResult;
+}
+
+std::pair<TextRange, TextRange> TxtParagraph::GetGlyphRangeForCharacterRange(int32_t start, int32_t end)
+{
+    std::pair<TextRange, TextRange> range;
+    auto paragrah = GetParagraph();
+    CHECK_NULL_RETURN(paragrah, range);
+    OHOS::Rosen::Boundary boundary(0, 0);
+    auto result =
+        paragrah->GetGlyphRangeForCharacterRange(static_cast<size_t>(start), static_cast<size_t>(end), &boundary);
+    range.first.start = static_cast<int32_t>(result.leftIndex);
+    range.first.end = static_cast<int32_t>(result.rightIndex);
+    range.second.start = static_cast<int32_t>(boundary.leftIndex);
+    range.second.end = static_cast<int32_t>(boundary.rightIndex);
+    return range;
+}
+
+std::pair<TextRange, TextRange> TxtParagraph::GetCharacterRangeForGlyphRange(int32_t start, int32_t end)
+{
+    std::pair<TextRange, TextRange> range;
+    auto paragrah = GetParagraph();
+    CHECK_NULL_RETURN(paragrah, range);
+    OHOS::Rosen::Boundary boundary(0, 0);
+    auto result =
+        paragrah->GetCharacterRangeForGlyphRange(static_cast<size_t>(start), static_cast<size_t>(end), &boundary);
+    range.first.start = static_cast<int32_t>(result.leftIndex);
+    range.first.end = static_cast<int32_t>(result.rightIndex);
+    range.second.start = static_cast<int32_t>(boundary.leftIndex);
+    range.second.end = static_cast<int32_t>(boundary.rightIndex);
+    return range;
 }
 
 void TxtParagraph::AdjustIndexForward(const Offset& offset, bool compareOffset, int32_t& index)
@@ -1079,7 +1122,7 @@ void TxtParagraph::UpdateColor(size_t from, size_t to, const Color& color)
     CHECK_NULL_VOID(paragrah);
     if (SystemProperties::GetTextTraceEnabled()) {
         ACE_TEXT_SCOPED_TRACE("TxtParagraph::UpdateColor[id:%d][from:%d][to:%d][color:%s]", paraStyle_.textStyleUid,
-            static_cast<int32_t>(from), static_cast<int32_t>(to), color.ColorToString().c_str());
+            static_cast<int32_t>(from), static_cast<int32_t>(to), color.ToString().c_str());
     }
     auto* paragraphTxt = static_cast<OHOS::Rosen::Typography*>(paragrah);
     CHECK_NULL_VOID(paragraphTxt);

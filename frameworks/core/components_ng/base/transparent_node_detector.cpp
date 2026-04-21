@@ -34,6 +34,22 @@ TransparentNodeDetector& TransparentNodeDetector::GetInstance()
     return instance;
 }
 
+void CollectOverlayFrameNodes(const RefPtr<FrameNode>& node, std::vector<RefPtr<FrameNode>>& overlays)
+{
+    if (!node) {
+        return;
+    }
+    for (const auto& child : node->GetChildren()) {
+        auto frameNode = AceType::DynamicCast<FrameNode>(child);
+        if (!frameNode) {
+            continue;
+        }
+        if (OverlayManager::OVERLAY_TAGS.count(frameNode->GetTag()) > 0) {
+            overlays.emplace_back(frameNode);
+        }
+    }
+}
+
 bool TransparentNodeDetector::CheckWindowTransparent(const RefPtr<FrameNode>& root, int32_t currentId,
     bool isUECWindow, bool isSubWindow, bool isDialogWindow, bool isNavigation)
 {
@@ -72,6 +88,13 @@ bool TransparentNodeDetector::CheckWindowTransparent(const RefPtr<FrameNode>& ro
         auto rootNodeCurrentPage = jsView->GetChildAtIndex(0);
         if (rootNodeCurrentPage && !rootNodeCurrentPage->IsContextTransparent()) {
             return false;
+        }
+        std::vector<RefPtr<FrameNode>> overlayNodes;
+        CollectOverlayFrameNodes(root, overlayNodes);
+        for (const auto& overlay : overlayNodes) {
+            if (!overlay->IsContextTransparent()) {
+                return false;
+            }
         }
     }
     return true;

@@ -21,12 +21,12 @@
 #include "frameworks/base/memory/ace_type.h"
 #include "frameworks/base/window/drag_window.h"
 #include "frameworks/core/gestures/gesture_recognizer.h"
-#include "frameworks/core/common/clipboard/clipboard_proxy.h"
 
 namespace OHOS::Ace {
 
 class PipelineContext;
 class Component;
+class Clipboard;
 
 /**
  * @brief Used for drag event info.

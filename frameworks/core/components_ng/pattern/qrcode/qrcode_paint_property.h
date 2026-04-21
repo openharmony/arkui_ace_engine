@@ -61,14 +61,16 @@ public:
         }
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        RefPtr<QrcodeTheme> qrCodeTheme = pipeline->GetTheme<QrcodeTheme>();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        RefPtr<QrcodeTheme> qrCodeTheme = host->GetTheme<QrcodeTheme>(true);
         CHECK_NULL_VOID(qrCodeTheme);
         json->PutExtAttr("value", propValue_.value_or("").c_str(), filter);
         json->PutExtAttr("color",
             propColor_.value_or(qrCodeTheme->GetQrcodeColor()).ColorToString().c_str(), filter);
         json->PutExtAttr("backgroundColor",
             propBackgroundColor_.value_or(qrCodeTheme->GetBackgroundColor()).ColorToString().c_str(), filter);
-        json->PutExtAttr("opacity", propOpacity_.value_or(1.0f), filter);
+        json->PutExtAttr("contentOpacity", propOpacity_.value_or(1.0f), filter);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Value, std::string, PROPERTY_UPDATE_RENDER);

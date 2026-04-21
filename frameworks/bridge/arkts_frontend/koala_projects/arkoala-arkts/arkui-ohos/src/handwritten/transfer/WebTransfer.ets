@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-import { TypeChecker } from "#components"
 import { ArkUIAniModule } from "arkui.ani"
 import { registerNativeModuleLibraryName } from '@koalaui/interop'
 import { ScreenCaptureHandler, FileSelectorParam, JsGeolocation, JsResult, EventResult, FileSelectorResult, WebContextMenuParam, WebContextMenuResult, HttpAuthHandler, WebResourceResponse, WebResourceRequest, ConsoleMessage, DataResubmissionHandler, ClientAuthenticationHandler, SslErrorHandler, PermissionRequest, WebKeyboardController, ControllerHandler, MessageLevel } from '../../component/web'
@@ -35,7 +34,7 @@ export class ArkWebTransfer {
         return result as Object
     }
     public static transferScreenCaptureHandlerDynamic(value: Object): Any {
-        if (!TypeChecker.isScreenCaptureHandler(value)) {
+        if (!(value instanceof ScreenCaptureHandler)) {
             throw new Error('staticObject type mismatch')
         }
         const value_casted = value as ScreenCaptureHandler
@@ -51,7 +50,7 @@ export class ArkWebTransfer {
         return result as Object
     }
     public static transferFileSelectorParamDynamic(value: Object): Any {
-        if (!TypeChecker.isFileSelectorParam(value)) {
+        if (!(value instanceof FileSelectorParam)) {
             throw new Error('static object type mismatch')
         }
         const value_casted = value as FileSelectorParam
@@ -67,7 +66,7 @@ export class ArkWebTransfer {
         return result as Object
     }
     public static transferJsGeolocationDynamic(value: Object): Any {
-        if (!TypeChecker.isJsGeolocation(value)) {
+        if (!(value instanceof JsGeolocation)) {
             throw new Error('static object type mismatch')
         }
         const value_casted = value as JsGeolocation
@@ -83,7 +82,7 @@ export class ArkWebTransfer {
         return result as Object
     }
     public static transferJsResultDynamic(value: Object): Any {
-        if (!TypeChecker.isJsResult(value)) {
+        if (!(value instanceof JsResult)) {
             throw new Error('static object type mismatch')
         }
         const value_casted = value as JsResult
@@ -99,7 +98,7 @@ export class ArkWebTransfer {
         return result as Object
     }
     public static transferEventResultDynamic(value: Object): Any {
-        if (!TypeChecker.isEventResult(value)) {
+        if (!(value instanceof EventResult)) {
             throw new Error('static object type mismatch')
         }
         const value_casted = value as EventResult
@@ -115,7 +114,7 @@ export class ArkWebTransfer {
         return result as Object
     }
     public static transferFileSelectorResultDynamic(value: Object): Any {
-        if (!TypeChecker.isFileSelectorResult(value)) {
+        if (!(value instanceof FileSelectorResult)) {
             throw new Error('static object type mismatch')
         }
         const value_casted = value as FileSelectorResult
@@ -131,7 +130,7 @@ export class ArkWebTransfer {
         return result as Object
     }
     public static transferWebContextMenuParamDynamic(value: Object): Any {
-        if (!TypeChecker.isWebContextMenuParam(value)) {
+        if (!(value instanceof WebContextMenuParam)) {
             throw new Error('static object type mismatch')
         }
         const value_casted = value as WebContextMenuParam
@@ -147,7 +146,7 @@ export class ArkWebTransfer {
         return result as Object
     }
     public static transferWebContextMenuResultDynamic(value: Object): Any {
-        if (!TypeChecker.isWebContextMenuResult(value)) {
+        if (!(value instanceof WebContextMenuResult)) {
             throw new Error('static object type mismatch')
         }
         const value_casted = value as WebContextMenuResult
@@ -163,7 +162,7 @@ export class ArkWebTransfer {
         return result as Object
     }
     public static transferHttpAuthHandlerToDynamic(value: Object): Any {
-        if (!TypeChecker.isHttpAuthHandler(value)) {
+        if (!(value instanceof HttpAuthHandler)) {
             throw new Error('static object type mismatch')
         }
         const value_casted = value as HttpAuthHandler
@@ -179,7 +178,7 @@ export class ArkWebTransfer {
         return result as Object
     }
     public static transferWebResourceReponseToDynamic(value: Object): Any {
-        if (!TypeChecker.isWebResourceResponse(value)) {
+        if (!(value instanceof WebResourceResponse)) {
             throw new Error('static object type mismatch')
         }
         const value_casted = value as WebResourceResponse
@@ -195,7 +194,7 @@ export class ArkWebTransfer {
         return result as Object
     }
     public static transferWebResourceRequestToDynamic(value: Object): Any {
-        if (!TypeChecker.isWebResourceRequest(value)) {
+        if (!(value instanceof WebResourceRequest)) {
             throw new Error('static object type mismatch')
         }
         const value_casted = value as WebResourceRequest
@@ -211,7 +210,7 @@ export class ArkWebTransfer {
         return result as Object
     }
     public static transferConsoleMessageToDynamic(value: Object): Any {
-        if (!TypeChecker.isConsoleMessage(value)) {
+        if (!(value instanceof ConsoleMessage)) {
             throw new Error('static object type mismatch')
         }
         const value_casted = value as ConsoleMessage
@@ -227,7 +226,7 @@ export class ArkWebTransfer {
         return result as Object
     }
     public static transferDataResubmissionHandlerToDynamic(value: Object): Any {
-        if (!TypeChecker.isDataResubmissionHandler(value)) {
+        if (!(value instanceof DataResubmissionHandler)) {
             throw new Error('static object type mismatch')
         }
         const value_casted = value as DataResubmissionHandler
@@ -243,7 +242,7 @@ export class ArkWebTransfer {
         return result as Object
     }
     public static transferClientAuthenticationHandlerToDynamic(value: Object): Any {
-        if (!TypeChecker.isClientAuthenticationHandler(value)) {
+        if (!(value instanceof ClientAuthenticationHandler)) {
             throw new Error('static object type mismatch')
         }
         const value_casted = value as ClientAuthenticationHandler
@@ -259,7 +258,7 @@ export class ArkWebTransfer {
         return result as Object
     }
     public static transferSslErrorHandlerToDynamic(value: Object): Any {
-        if (!TypeChecker.isSslErrorHandler(value)) {
+        if (!(value instanceof SslErrorHandler)) {
             throw new Error('static object type mismatch')
         }
         const value_casted = value as SslErrorHandler
@@ -275,7 +274,7 @@ export class ArkWebTransfer {
     }
 
     public static transferPermissionRequestDynamic(value: Object): Any {
-        if (!TypeChecker.isPermissionRequest(value)) {
+        if (!(value instanceof PermissionRequest)) {
             throw new Error('static object type mismatch')
         }
         const value_casted = value as PermissionRequest
@@ -292,7 +291,7 @@ export class ArkWebTransfer {
     }
 
     public static transferWebKeyboardControllerDynamic(value: Object): Any {
-        if (!TypeChecker.isWebKeyboardController(value)) {
+        if (!(value instanceof WebKeyboardController)) {
             throw new Error('static object type mismatch')
         }
         const value_casted = value as WebKeyboardController
@@ -309,7 +308,7 @@ export class ArkWebTransfer {
     }
 
     public static transferControllerHandlerDynamic(value: Object): Any {
-        if (!TypeChecker.isControllerHandler(value)) {
+        if (!(value instanceof ControllerHandler)) {
             throw new Error('static object type mismatch')
         }
         const value_casted = value as ControllerHandler

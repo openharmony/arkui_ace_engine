@@ -55,7 +55,7 @@ void SetEnableNestedScrollImpl(Ark_NativePointer node,
     ScrollBarModelStatic::SetEnableNestedScroll(frameNode, convValue);
 }
 void SetScrollBarColorImpl(Ark_NativePointer node,
-                           const Opt_ColorMetrics* value)
+                           const Opt_ColorMetricsExt* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

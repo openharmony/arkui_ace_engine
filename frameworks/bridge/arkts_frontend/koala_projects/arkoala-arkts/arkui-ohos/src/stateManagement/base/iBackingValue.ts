@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import { IncrementalNode } from '@koalaui/runtime';
+
 /**
   skeleton of a class to support
   versioning of backing store values
@@ -24,4 +26,5 @@ export interface IBackingValue<T> {
     setSilently(newValue: T): void;
     setNoCheck(newValue: T): void;
     fireChange(): void;
+    getDependentInfo(): Set<IncrementalNode> | undefined
 }

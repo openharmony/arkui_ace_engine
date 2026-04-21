@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/swiper/arc_swiper_pattern.h"
-
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
+#include "core/components_ng/pattern/swiper/arc_swiper_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
+#include "core/common/vibrator/vibrator_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -130,7 +130,9 @@ void ArcSwiperPattern::SaveCircleDotIndicatorProperty(const RefPtr<FrameNode>& i
     CHECK_NULL_VOID(layoutProperty);
     auto paintProperty = indicatorNode->GetPaintProperty<CircleDotIndicatorPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto pipelineContext = GetHost()->GetContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID(swiperIndicatorTheme);

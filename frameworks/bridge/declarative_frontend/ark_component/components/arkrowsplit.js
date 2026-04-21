@@ -119,5 +119,5 @@ function exportComponent() {
 function exportView() {
   globalThis.RowSplit = JSRowSplit;
 }
-
-export default { ArkRowSplitComponent, createComponent, exportComponent, exportView };
+function loadComponent() {}
+export default { ArkRowSplitComponent, createComponent, exportComponent, exportView, loadComponent };

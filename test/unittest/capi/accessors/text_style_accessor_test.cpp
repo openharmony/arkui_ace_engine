@@ -17,7 +17,7 @@
 #include "core/interfaces/native/implementation/text_style_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "gmock/gmock.h"
 
 namespace OHOS::Ace::NG {
@@ -60,11 +60,11 @@ public:
 };
 
 /*
- * @tc.name: emptyOptionsTest
+ * @tc.name: getFontStyleTestEmptyOptions
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextStyleAccessorTest, emptyOptionsTest, TestSize.Level1)
+HWTEST_F(TextStyleAccessorTest, getFontStyleTestEmptyOptions, TestSize.Level1)
 {
     // finalize base peer
     finalyzer_(peer_);

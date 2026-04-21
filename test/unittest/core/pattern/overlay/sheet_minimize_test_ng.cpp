@@ -22,12 +22,12 @@
 #define private public
 #define protected public
 
-#include "test/mock/base/mock_foldable_window.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/frameworks/base/window/mock_foldable_window.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
@@ -898,7 +898,7 @@ HWTEST_F(SheetMinimizeTestNG, GetPanDirection001, TestSize.Level1)
      * @tc.expected: should return PanDirection::HORIZONTAL.
      */
     auto direction = object->GetPanDirection();
-    EXPECT_EQ(direction, PanDirection::HORIZONTAL);
+    EXPECT_EQ(direction, PanDirection::ALL);
 }
 
 /**

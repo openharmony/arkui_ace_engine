@@ -18,14 +18,14 @@
 
 #include "ui/base/referenced.h"
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/flex/flex_layout_property.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/menu_property.h"
 
 namespace OHOS::Ace::NG {
+class FrameNode;
+class ImageLayoutProperty;
+class TextLayoutProperty;
+class TextPattern;
+
 using AIPreviewMenuErrorCallback =
     std::function<void(int32_t code, const std::string& name, const std::string& message)>;
 class PreviewMenuController : public virtual AceType {
@@ -35,15 +35,8 @@ public:
     PreviewMenuController(const WeakPtr<TextPattern>& pattern);
     virtual ~PreviewMenuController() = default;
     void BindContextMenu(const RefPtr<FrameNode>& targetNode, bool isShow = true);
-    void ClosePreviewMenu()
-    {
-        isShow_ = false;
-    }
-
-    bool IsPreviewMenuShow()
-    {
-        return isShow_;
-    }
+    void ClosePreviewMenu();
+    bool IsPreviewMenuShow();
 
     static void CreatePreviewMenu(TextDataDetectType type, const std::string& content,
         std::function<void()> disappearCallback = nullptr, std::map<std::string, std::string> AIparams = {},

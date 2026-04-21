@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/custom/custom_node_layout_algorithm.h"
 
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
+#include "core/components_ng/pattern/custom/custom_node_base.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 
 namespace OHOS::Ace::NG {
@@ -28,6 +29,7 @@ void CustomNodeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         {
             ACE_SCOPED_TRACE("CustomNode:OnAppear");
             host->FireOnAppear();
+            host->CustomNodeBase::FireTriggerLifecycleFunc(CustomNodeBase::LifeCycleEvent::ON_APPEAR);
         }
         {
             ACE_SCOPED_TRACE("CustomNode:BuildItem");
@@ -47,7 +49,7 @@ void CustomNodeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 renderFunction_ = nullptr;
                 stack->Pop();
             }
-            CHECK_NULL_VOID(child);
+            
             auto layoutWrapperNode = DynamicCast<LayoutWrapperNode>(Claim(layoutWrapper));
             for (const auto& child : frameNode->GetChildren()) {
                 if (!child) {
@@ -62,6 +64,7 @@ void CustomNodeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 }
             }
         }
+        host->CustomNodeBase::FireTriggerLifecycleFunc(CustomNodeBase::LifeCycleEvent::ON_BUILD);
     }
     {
         auto customNode = DynamicCast<CustomNodeBase>(layoutWrapper->GetHostNode());

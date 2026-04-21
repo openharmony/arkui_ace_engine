@@ -18,10 +18,9 @@
 #include "interaction_manager.h"
 #include "adapter/ohos/capability/interaction/start_drag_listener_impl.h"
 #include "adapter/ohos/capability/udmf/udmf_impl.h"
+#include "core/common/udmf/data_load_params.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
-#include "core/common/resource/resource_manager.h"
-#include "core/common/resource/resource_wrapper.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_model.h"
@@ -37,6 +36,7 @@
 #include "frameworks/base/error/error_code.h"
 #include "frameworks/base/subwindow/subwindow.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 
 namespace OHOS::Ace::NG {
 using DragAction = OHOS::Ace::Ani::DragAction;
@@ -70,6 +70,8 @@ struct DragControllerAsyncCtx {
     ArkUINodeHandle customBuilderNode = nullptr;
     std::vector<ArkUINodeHandle> customBuilderNodeList;
     RefPtr<OHOS::Ace::UnifiedData> unifiedData = nullptr;
+    RefPtr<OHOS::Ace::DataLoadParams> dataLoadParams = nullptr;
+    std::vector<int32_t> autoHideComponentUniqueIds;
     std::string extraParams;
     int32_t instanceId = -1;
     int32_t errCode = -1;
@@ -435,6 +437,24 @@ void HandleOnDragStart(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
         TaskExecutor::TaskType::UI, "ArkUIDragHandleDragEventStart", PriorityType::VIP);
 }
 
+void ExecuteAutoHideComponentTargets(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
+{
+    CHECK_NULL_VOID(asyncCtx);
+    if (asyncCtx->autoHideComponentUniqueIds.empty()) {
+        return;
+    }
+    auto targets = DragDropFuncWrapper::ResolveAutoHideTargetsByUniqueId(asyncCtx->autoHideComponentUniqueIds);
+    size_t hiddenCount = 0;
+    for (const auto& target : targets) {
+        if (DragDropFuncWrapper::UpdateAutoHideTargetVisibility(target)) {
+            ++hiddenCount;
+        }
+    }
+    TAG_LOGI(AceLogTag::ACE_DRAG,
+        "Auto hide targets for dragController finished, config size %{public}zu, hidden size %{public}zu",
+        asyncCtx->autoHideComponentUniqueIds.size(), hiddenCount);
+}
+
 void ExecuteHandleOnDragStart(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
 {
     CHECK_NULL_VOID(asyncCtx);
@@ -474,18 +494,27 @@ int32_t SetUnifiedData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, std::st
 {
     int32_t dataSize = 1;
     CHECK_NULL_RETURN(asyncCtx, dataSize);
-    if (asyncCtx->unifiedData) {
-        int32_t ret =
-            UdmfClient::GetInstance()->SetData(asyncCtx->unifiedData, udKey);
+    int32_t ret = 1;
+    if (asyncCtx->dataLoadParams) {
+        ret = UdmfClient::GetInstance()->SetDelayInfo(asyncCtx->dataLoadParams, udKey);
+        if (ret != 0) {
+            LOGE("AceDrag, udmf set delayInfo failed, return value is %{public}d", ret);
+        }
+        auto recordCount = asyncCtx->dataLoadParams->GetRecordCount();
+        dataSize = (recordCount == 0 || recordCount > INT32_MAX) ? 1 : static_cast<int32_t>(recordCount);
+    }
+    if (!asyncCtx->dataLoadParams && asyncCtx->unifiedData) {
+        ret = UdmfClient::GetInstance()->SetData(asyncCtx->unifiedData, udKey);
         if (ret != 0) {
             LOGE("AceDrag, udmf set data failed, return value is %{public}d", ret);
-        } else {
-            ret = UdmfClient::GetInstance()->GetSummary(udKey, dragSummaryInfo);
-            if (ret != 0) {
-                LOGE("AceDrag, get summary failed, return value is %{public}d", ret);
-            }
         }
         dataSize = static_cast<int32_t>(asyncCtx->unifiedData->GetSize());
+    }
+    if (ret == 0) {
+        ret = UdmfClient::GetInstance()->GetSummary(udKey, dragSummaryInfo);
+        if (ret != 0) {
+            LOGE("AceDrag, get summary failed, return value is %{public}d", ret);
+        }
     }
     auto badgeNumber = asyncCtx->dragPreviewOption.GetCustomerBadgeNumber();
     if (badgeNumber.has_value()) {
@@ -518,10 +547,11 @@ bool EnvelopedDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     arkExtraInfoJson->Put("event_id", asyncCtx->dragPointerEvent.pointerEventId);
     DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, asyncCtx->dragPreviewOption);
     auto materialId = DragDropFuncWrapper::ParseUiMaterial(asyncCtx->dragPreviewOption);
+    auto isDragDelay = (asyncCtx->dataLoadParams != nullptr);
     dragData = { shadowInfos, {}, udKey, asyncCtx->extraParams, arkExtraInfoJson->ToString(),
         asyncCtx->dragPointerEvent.sourceType, recordSize, asyncCtx->dragPointerEvent.pointerId,
         asyncCtx->dragPointerEvent.displayX, asyncCtx->dragPointerEvent.displayY, asyncCtx->dragPointerEvent.displayId,
-        windowId, true, false, dragSummaryInfo.summary, false, dragSummaryInfo.detailedSummary,
+        windowId, true, false, dragSummaryInfo.summary, isDragDelay, dragSummaryInfo.detailedSummary,
         dragSummaryInfo.summaryFormat, dragSummaryInfo.version, dragSummaryInfo.totalSize, "", materialId };
     return true;
 }
@@ -580,10 +610,11 @@ bool StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
     DragDropFuncWrapper::SetExtraInfo(asyncCtx->instanceId, asyncCtx->extraParams);
     LogDragInfoInner(asyncCtx, dragData.value());
     auto result = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(
-        dragData.value(), std::make_shared<OHOS::Ace::StartDragListenerImpl>(callback));
+        dragData.value(), std::make_shared<OHOS::Ace::StartDragListenerImpl>(callback, asyncCtx->instanceId));
     if (result != 0) {
         return false;
     }
+    ExecuteAutoHideComponentTargets(asyncCtx);
     Msdp::DeviceStatus::InteractionManager::GetInstance()->UpdateDragStyle(
         Msdp::DeviceStatus::DragCursorStyle::MOVE, asyncCtx->dragPointerEvent.pointerEventId);
     if (DragControllerFuncWrapper::TryDoDragStartAnimation(subWindow, data, asyncCtxData)) {
@@ -742,10 +773,11 @@ bool PrepareDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, Msdp::Dev
     DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, asyncCtx->dragPreviewOption);
     auto windowId = container->GetWindowId();
     auto materialId = DragDropFuncWrapper::ParseUiMaterial(asyncCtx->dragPreviewOption);
+    auto isDragDelay = (asyncCtx->dataLoadParams != nullptr);
     dragData = { { shadowInfo }, {}, udKey, asyncCtx->extraParams, arkExtraInfoJson->ToString(),
         asyncCtx->dragPointerEvent.sourceType, dataSize, asyncCtx->dragPointerEvent.pointerId,
         asyncCtx->dragPointerEvent.displayX, asyncCtx->dragPointerEvent.displayY, asyncCtx->dragPointerEvent.displayId,
-        windowId, true, false, dragSummaryInfo.summary, false, dragSummaryInfo.detailedSummary,
+        windowId, true, false, dragSummaryInfo.summary, isDragDelay, dragSummaryInfo.detailedSummary,
         dragSummaryInfo.summaryFormat, dragSummaryInfo.version, dragSummaryInfo.totalSize, "", materialId };
     return true;
 }
@@ -784,10 +816,11 @@ bool TryToStartDrag(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
         asyncCtx->dragPointerEvent.pointerId, asyncCtx->instanceId);
     LogDragInfoInner(asyncCtx, dragData);
     auto result = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(
-        dragData, std::make_shared<OHOS::Ace::StartDragListenerImpl>(callback));
+        dragData, std::make_shared<OHOS::Ace::StartDragListenerImpl>(callback, asyncCtx->instanceId));
     if (result != 0) {
         return false;
     }
+    ExecuteAutoHideComponentTargets(asyncCtx);
     Msdp::DeviceStatus::InteractionManager::GetInstance()->UpdateDragStyle(
         Msdp::DeviceStatus::DragCursorStyle::MOVE, asyncCtx->dragPointerEvent.pointerEventId);
     if (DragControllerFuncWrapper::TryDoDragStartAnimation(subWindow, data, asyncCtxData)) {
@@ -961,6 +994,7 @@ std::shared_ptr<DragControllerAsyncCtx> ConvertDragControllerAsync(const ArkUIDr
     dragAsyncContext->dragAction = asyncCtx.dragAction;
     dragAsyncContext->callBackJsFunction = asyncCtx.callBackJsFunction;
     dragAsyncContext->destroyJsFunction = asyncCtx.destroyJsFunction;
+    dragAsyncContext->autoHideComponentUniqueIds = asyncCtx.autoHideComponentUniqueIds;
     UpdatePreviewOptionDefaultAttr(dragAsyncContext, asyncCtx);
     UpdateDragPreviewOptionsFromModifier(dragAsyncContext, asyncCtx);
     if (asyncCtx.unifiedData) {
@@ -968,6 +1002,12 @@ std::shared_ptr<DragControllerAsyncCtx> ConvertDragControllerAsync(const ArkUIDr
         auto udData = AceType::MakeRefPtr<UnifiedDataImpl>();
         udData->SetUnifiedData(unifiedDataPtr);
         dragAsyncContext->unifiedData = udData;
+    }
+    if (asyncCtx.dataLoadParams) {
+        auto dataLoadParamsPtr = std::static_pointer_cast<UDMF::DataLoadParams>(asyncCtx.dataLoadParams.GetSharedPtr());
+        auto dataLP = AceType::MakeRefPtr<DataLoadParamsImpl>();
+        dataLP->SetDataLoadParams(dataLoadParamsPtr);
+        dragAsyncContext->dataLoadParams = dataLP;
     }
 #if defined(PIXEL_MAP_SUPPORTED)
     if (asyncCtx.pixelMap) {

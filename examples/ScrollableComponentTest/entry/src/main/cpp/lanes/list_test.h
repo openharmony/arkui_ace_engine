@@ -26,8 +26,8 @@
 #include <arkui/native_interface.h>
 #include <arkui/native_node.h>
 #include <arkui/native_type.h>
-
 #include "common.h"
+#include <js_native_api_types.h>
 
 namespace ArkUICApiDemo {
 

@@ -25,9 +25,7 @@
 #include "base/image/pixel_map.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shadow.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components_ng/pattern/text/span_node.h"
-#include "core/components_ng/render/paragraph.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 
 namespace OHOS::Ace {
@@ -161,6 +159,9 @@ constexpr uint8_t TLV_TEXTDIRECTION_TAG = 0xA5;
 constexpr uint8_t TLV_SPAN_FONT_STYLE_VARIABLEFONTWEIGHT = 0xA6;
 constexpr uint8_t TLV_SPAN_FONT_STYLE_ENABLEVARIABLEFONTWEIGHT = 0xA7;
 constexpr uint8_t TLV_SPAN_FONT_STYLE_ENABLEDEVICEFONTWEIGHTCATEGORY = 0xA8;
+constexpr uint8_t TLV_SPAN_FONT_STYLE_FONTSIZESCALE = 0xA9;
+constexpr uint8_t TLV_SPAN_TEXT_LINE_STYLE_ISONLYBETWEENLINES = 0xAA;
+constexpr uint8_t TLV_SPAN_TEXT_LINE_STYLE_LINEHEIGHTMULTIPLY = 0xAB;
 
 #define TLV_DEFINE_ENUM_TYPE(type, tag) \
 public:                                                                     \

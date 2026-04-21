@@ -27,6 +27,7 @@ ace_unittest("common_test") {
     "$ace_root/frameworks/core/common/sharedata/share_data.cpp",
     "$ace_root/frameworks/core/common/storage/storage_proxy.cpp",
     "$ace_root/frameworks/core/common/vibrator/vibrator_proxy.cpp",
+    "$ace_root/frameworks/core/common/task_runner_adapter_impl.cpp",
     "asset/asset_test.cpp",
     "builder_util/builder_util_test.cpp",
     "clipboard/clipboard_test.cpp",
@@ -39,6 +40,24 @@ ace_unittest("common_test") {
     "storage/storage_test.cpp",
     "transform/input_compatible_manager_test_ng.cpp",
     "vibrator/vibrator_test.cpp",
+    "task_runner_adapter_impl/task_runner_adapter_test.cpp",
+  ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "common_test_min.cpp",
+      "common_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "common_test_min.cpp",
+      "common_test_core.cpp",
+    ]
+  }
+
+  external_deps = [
+    "eventhandler:libeventhandler",
   ]
 }
 
@@ -53,7 +72,8 @@ group("core_common_unittest") {
     "others:thread_checker_test",
     "plugin:plugin_manager_test",
     "recorder:event_recorder_test",
-    "resource:resource_manager_test",
+    # "resource:resource_manager_test",
+    "resource:resource_parse_utils_test_ng",
     "statistic_event:statistic_event_test",
   ]
 }

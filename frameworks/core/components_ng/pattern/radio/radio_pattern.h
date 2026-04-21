@@ -20,7 +20,6 @@
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/overlay/group_manager.h"
 #include "core/components_ng/pattern/radio/radio_accessibility_property.h"
 #include "core/components_ng/pattern/radio/radio_event_hub.h"
 #include "core/components_ng/pattern/radio/radio_layout_algorithm.h"
@@ -28,7 +27,12 @@
 #include "core/components_ng/pattern/radio/radio_paint_method.h"
 #include "core/components_ng/pattern/radio/radio_paint_property.h"
 
+namespace OHOS::Ace {
+class RadioTheme;
+}
+
 namespace OHOS::Ace::NG {
+class GroupManager;
 constexpr float DEFAULT_RADIO_IMAGE_SCALE = 0.7F;
 
 class RadioPattern : public Pattern {
@@ -200,6 +204,7 @@ public:
 
     void UpdateRadioComponentColor(const Color& color, const RadioColorType radioColorType);
     void OnColorConfigurationUpdate() override;
+    void OnColorModeChange(uint32_t colorMode) override;
     void SetUncheckedBorderColorByJSRadioTheme(bool flag)
     {
         borderColorByJSRadioTheme_ = flag;

@@ -180,7 +180,7 @@ public:
         return { 0, 0, 0, 0 };
     }
 
-    VectorF GetHostScale(RefPtr<FrameNode> host) const;
+    VectorF GetHostScale(const RefPtr<FrameNode>& host) const;
 
     virtual void ScrollToSafeArea() const {}
 

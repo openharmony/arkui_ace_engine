@@ -16,13 +16,14 @@
 #include "base/log/event_report.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
-
+#include "core/components/common/layout/grid_column_info.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_lanes_layout_algorithm.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -654,13 +655,13 @@ std::pair<float, float> ListItemGroupLayoutAlgorithm::GetItemGroupPosition(int32
         auto pos = itemPosition_.find(index);
         if (pos != itemPosition_.end()) {
             float refPos = (pos->second.endPos + pos->second.startPos) / 2 + paddingBeforeContent_; // 2:average
-            float delta = (startPos_ + endPos_) / 2 - refPos;
+            float delta = (startPos_ + startFixOffset_ + endPos_ - endFixOffset_) / 2 - refPos;
             return { delta, totalMainSize_ + paddingBeforeContent_ + paddingAfterContent_ + delta };
         }
     } else if (scrollAlign_ == ScrollAlign::START) {
         auto pos = itemPosition_.find(index);
         if (pos != itemPosition_.end()) {
-            float top = startPos_ + contentStartOffset_;
+            float top = startPos_ + startFixOffset_ + contentStartOffset_;
             if (sticky == V2::StickyStyle::HEADER || sticky == V2::StickyStyle::BOTH) {
                 top += headerMainSize_;
             }
@@ -671,7 +672,7 @@ std::pair<float, float> ListItemGroupLayoutAlgorithm::GetItemGroupPosition(int32
     } else if (scrollAlign_ == ScrollAlign::END) {
         auto pos = itemPosition_.find(index);
         if (pos != itemPosition_.end()) {
-            float bottom = endPos_ - contentEndOffset_;
+            float bottom = endPos_ - endFixOffset_ - contentEndOffset_;
             if (sticky == V2::StickyStyle::FOOTER || sticky == V2::StickyStyle::BOTH) {
                 bottom -= footerMainSize_;
             }
@@ -900,7 +901,7 @@ void ListItemGroupLayoutAlgorithm::MeasureStart(LayoutWrapper* layoutWrapper,
     const LayoutConstraintF& layoutConstraint, int32_t startIndex)
 {
     V2::StickyStyle sticky = listLayoutProperty_->GetStickyStyle().value_or(V2::StickyStyle::NONE);
-    float currentStartPos = startPos_ + contentStartOffset_;
+    float currentStartPos = startPos_ + startFixOffset_ + contentStartOffset_;
     if (sticky == V2::StickyStyle::HEADER || sticky == V2::StickyStyle::BOTH) {
         currentStartPos += headerMainSize_;
     }
@@ -929,7 +930,7 @@ void ListItemGroupLayoutAlgorithm::MeasureEnd(LayoutWrapper* layoutWrapper,
     const LayoutConstraintF& layoutConstraint, int32_t endIndex)
 {
     V2::StickyStyle sticky = listLayoutProperty_->GetStickyStyle().value_or(V2::StickyStyle::NONE);
-    float currentEndPos = endPos_ - contentEndOffset_;
+    float currentEndPos = endPos_ - endFixOffset_ - contentEndOffset_;
     if (sticky == V2::StickyStyle::FOOTER || sticky == V2::StickyStyle::BOTH) {
         currentEndPos -= footerMainSize_;
     }
@@ -1340,7 +1341,7 @@ void ListItemGroupLayoutAlgorithm::LayoutHeaderFooterRTL(LayoutWrapper* layoutWr
     if (headerWrapper) {
         float headPos = totalMainSize_ - headerMainSize_;
         UpdateZIndex(headerWrapper);
-        float const listMainSize = endPos_ - startPos_;
+        float const listMainSize = endPos_ - startPos_ - startFixOffset_ - endFixOffset_;
         if (Positive(listMainSize) && (sticky == V2::StickyStyle::BOTH || sticky == V2::StickyStyle::HEADER)) {
             auto headerMainSize = headerWrapper->GetGeometryNode()->GetFrameSize().MainSize(axis_);
             float stickyPos = listMainSize - contentEndOffset_ - mainPos - headerMainSize;
@@ -1385,7 +1386,7 @@ void ListItemGroupLayoutAlgorithm::LayoutHeaderFooterLTR(LayoutWrapper* layoutWr
     if (footerWrapper) {
         float endPos = totalMainSize_ - footerMainSize_;
         UpdateZIndex(footerWrapper);
-        float const listMainSize = endPos_ - startPos_;
+        float const listMainSize = endPos_ - startPos_ - startFixOffset_ - endFixOffset_;
         if (Positive(listMainSize) && (sticky == V2::StickyStyle::BOTH || sticky == V2::StickyStyle::FOOTER)) {
             auto footerMainSize = footerWrapper->GetGeometryNode()->GetFrameSize().MainSize(axis_);
             float stickyPos = listMainSize - contentEndOffset_ - mainPos - footerMainSize;

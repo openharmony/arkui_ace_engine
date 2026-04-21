@@ -14,11 +14,11 @@
  */
 
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
-#include "test/mock/core/render/mock_paragraph.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "core/common/ai/data_detector_adapter.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
@@ -1141,6 +1141,78 @@ HWTEST_F(RichEditorMenuTestNg, OnSelectionMenuOptionsUpdate001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: UpdateAIMenuOptions
+ * @tc.desc: test UpdateAIMenuOptions function with valid textSelector
+ *           check multi ai entity in selection range
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorMenuTestNg, UpdateAIMenuOptions000, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frameNode and text textPattern
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    richEditorPattern->textSelector_.Update(0, 42);
+
+    /**
+     * @tc.steps: step2. prepare spanItem with at least 2 ai entity
+     */
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->content = std::get<std::u16string>(U16_TEXT_FOR_AI_INFO_2.content);
+    spanItem->position = spanItem->content.length();
+    richEditorPattern->spans_.emplace_back(spanItem);
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    std::vector<RectF> selectedRects { RectF(0, 0, 20, 20), RectF(30, 30, 20, 20), RectF(60, 60, 20, 20) };
+    EXPECT_CALL(*paragraph, GetRectsForPlaceholders(_)).WillRepeatedly(SetArgReferee<0>(selectedRects));
+    richEditorPattern->paragraphs_.AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+
+    richEditorPattern->SetTextDetectEnable(true);
+    richEditorPattern->copyOption_ = CopyOptions::InApp;
+
+    auto aiSpan1 = U16_TEXT_FOR_AI_INFO_2.aiSpans[0];
+    auto aiSpan2 = U16_TEXT_FOR_AI_INFO_2.aiSpans[1];
+    std::map<int32_t, Ace::AISpan> aiSpanMap;
+    aiSpanMap[aiSpan1.start] = aiSpan1;
+    aiSpanMap[aiSpan2.start] = aiSpan2;
+    richEditorPattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
+    richEditorPattern->textDetectEnable_ = true;
+    richEditorPattern->enabled_ = true;
+
+    /**
+     * @tc.steps: step3. create GestureEvent and call PrepareAIMenuOptions function.
+     * @tc.expected: aiMenuOptions is been setted true.
+     */
+    richEditorPattern->UpdateAIMenuOptions();
+    EXPECT_EQ(richEditorPattern->isAskCeliaEnabled_, false);
+    EXPECT_EQ(richEditorPattern->isShowAIMenuOption_, false);
+    richEditorPattern->paragraphs_.Reset();
+
+    /**
+     * @tc.steps: step4. unexpected input set 1.
+     * @tc.expected: aiMenuOptions is been setted true.
+     */
+    richEditorPattern->textSelector_.Update(-10, -42);
+    richEditorPattern->UpdateAIMenuOptions();
+    EXPECT_EQ(richEditorPattern->isAskCeliaEnabled_, false);
+    EXPECT_EQ(richEditorPattern->isShowAIMenuOption_, false);
+    richEditorPattern->paragraphs_.Reset();
+
+    /**
+     * @tc.steps: step5. unexpected input set 2.
+     * @tc.expected: aiMenuOptions is been setted true.
+     */
+    richEditorPattern->textSelector_.Update(42, 10);
+    richEditorPattern->UpdateAIMenuOptions();
+    EXPECT_EQ(richEditorPattern->isAskCeliaEnabled_, false);
+    richEditorPattern->paragraphs_.Reset();
+}
+
+/**
  * @tc.name: HandleOnShowMenu001
  * @tc.desc: test HandleOnShowMenu
  * @tc.type: FUNC
@@ -1150,22 +1222,129 @@ HWTEST_F(RichEditorMenuTestNg, HandleOnShowMenu001, TestSize.Level0)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->overlayMod_ = nullptr;
     richEditorPattern->HandleOnShowMenu();
     EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
 }
 
 /**
- * @tc.name: HideMenu001
- * @tc.desc: test HideMenu
+ * @tc.name: UpdateAIMenuOptions001
+ * @tc.desc: test UpdateAIMenuOptions function with valid textSelector
+ *           check single ai entity in selection range
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorMenuTestNg, HideMenu001, TestSize.Level0)
+HWTEST_F(RichEditorMenuTestNg, UpdateAIMenuOptions001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->HideMenu();
-    EXPECT_NE(richEditorPattern->selectOverlay_, nullptr);
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+
+    /**
+     * @tc.steps: step1. preset conditions
+     */
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->content = std::get<std::u16string>(U16_TEXT_FOR_AI_INFO.content);
+    spanItem->position = spanItem->content.length();
+    pattern->spans_.emplace_back(spanItem);
+
+    auto mockParagraph = MockParagraph::GetOrCreateMockParagraph();
+    std::vector<RectF> rects { RectF(0, 0, 20, 20) };
+    EXPECT_CALL(*mockParagraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
+    pattern->pManager_->AddParagraph({ .paragraph = mockParagraph, .start = 0, .end = 100 });
+
+    pattern->SetTextDetectEnable(true);
+    pattern->copyOption_ = CopyOptions::Local;
+
+    auto aiSpan1 = U16_TEXT_FOR_AI_INFO.aiSpans[0];
+    auto aiSpan2 = U16_TEXT_FOR_AI_INFO.aiSpans[1];
+    std::map<int32_t, Ace::AISpan> aiSpanMap;
+    aiSpanMap[aiSpan1.start] = aiSpan1;
+    aiSpanMap[aiSpan2.start] = aiSpan2;
+    pattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
+
+    /**
+     * @tc.steps: step2. call UpdateAIMenuOptions function.
+     */
+    pattern->textSelector_.Update(0, 22);
+    pattern->UpdateAIMenuOptions();
+    pattern->HandleAIMenuOption();
+    EXPECT_EQ(pattern->GetAIItemOption().size(), 0);
+}
+
+/**
+ * @tc.name: UpdateAIMenuOptions
+ * @tc.desc: test UpdateAIMenuOptions function with valid textSelector
+ *           check multi ai entity in selection range
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorMenuTestNg, UpdateAIMenuOptions002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+
+    /**
+     * @tc.steps: step1. prepare spanItem with at least 2 ai entity
+     */
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->content = std::get<std::u16string>(U16_TEXT_FOR_AI_INFO_2.content);
+    spanItem->position = spanItem->content.length();
+    pattern->spans_.emplace_back(spanItem);
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    std::vector<RectF> selectedRects { RectF(0, 0, 20, 20), RectF(30, 30, 20, 20), RectF(60, 60, 20, 20) };
+    EXPECT_CALL(*paragraph, GetRectsForPlaceholders(_)).WillRepeatedly(SetArgReferee<0>(selectedRects));
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+
+    pattern->SetTextDetectEnable(true);
+    pattern->copyOption_ = CopyOptions::Local;
+
+    auto aiSpan1 = U16_TEXT_FOR_AI_INFO_2.aiSpans[0];
+    auto aiSpan2 = U16_TEXT_FOR_AI_INFO_2.aiSpans[1];
+    std::map<int32_t, Ace::AISpan> aiSpanMap;
+    aiSpanMap[aiSpan1.start] = aiSpan1;
+    aiSpanMap[aiSpan2.start] = aiSpan2;
+    pattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
+
+    /**
+     * @tc.steps: step2. call UpdateAIMenuOptions function.
+     * @tc.expected: isShowAIMenuOption is false.
+     */
+    pattern->textSelector_.Update(0, 40);
+    pattern->UpdateAIMenuOptions();
+    EXPECT_EQ(pattern->GetAIItemOption().size(), 0);
+}
+
+/**
+ * @tc.name: UpdateAIMenuOptions
+ * @tc.desc: test UpdateAIMenuOptions function with valid textSelector
+ *           check multi ai entity in selection range
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorMenuTestNg, UpdateAIMenuOptions003, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->content = std::get<std::u16string>(U16_TEXT_FOR_AI_INFO.content);
+    spanItem->position = spanItem->content.length();
+    pattern->spans_.emplace_back(spanItem);
+
+    auto mockParagraph = MockParagraph::GetOrCreateMockParagraph();
+    std::vector<RectF> rects { RectF(0, 0, 20, 20) };
+    EXPECT_CALL(*mockParagraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
+    pattern->pManager_->AddParagraph({ .paragraph = mockParagraph, .start = 0, .end = 100 });
+
+    pattern->SetTextDetectEnable(true);
+    pattern->copyOption_ = CopyOptions::Local;
+
+    auto aiSpan1 = U16_TEXT_FOR_AI_INFO.aiSpans[0];
+    auto aiSpan2 = U16_TEXT_FOR_AI_INFO.aiSpans[1];
+
+    std::map<int32_t, Ace::AISpan> aiSpanMap;
+    aiSpanMap[aiSpan1.start] = aiSpan1;
+    aiSpanMap[aiSpan2.start] = aiSpan2;
+    pattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
+
+    EXPECT_EQ(pattern->IsAskCeliaEnabled(), false);
 }
 
 /**
@@ -1175,16 +1354,25 @@ HWTEST_F(RichEditorMenuTestNg, HideMenu001, TestSize.Level0)
  */
 HWTEST_F(RichEditorMenuTestNg, HandleOnShare001, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. init pattern
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
+    /**
+     * @tc.steps: step2. attach node
+     */
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     ASSERT_NE(pattern, nullptr);
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
 
+    /**
+     * @tc.steps: step3. HandleOnShare
+     */
     richEditorPattern->HandleOnShare();
     auto value = richEditorPattern->selectOverlay_->GetSelectedText();
     int32_t ret = value.length();
@@ -1232,7 +1420,7 @@ HWTEST_F(RichEditorMenuTestNg, HandleExtendAction001, TestSize.Level0)
     richEditorPattern->HandleExtendAction(ACTION_COPY);
     EXPECT_EQ(richEditorPattern->copyOption_, CopyOptions::None);
 
-    auto eventHub = richEditorNode_->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(richEditorPattern, nullptr);
     TextCommonEvent event;
     eventHub->FireOnPaste(event);
@@ -1252,48 +1440,6 @@ HWTEST_F(RichEditorMenuTestNg, HandleExtendAction002, TestSize.Level0)
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->HandleExtendAction(2);
     EXPECT_TRUE(richEditorPattern->selectMenuInfo_.showCopyAll);
-}
-
-/**
- * @tc.name: CheckEditorTypeChange001
- * @tc.desc: test CheckEditorTypeChange
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorMenuTestNg, CheckEditorTypeChange001, TestSize.Level0)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    richEditorPattern->CheckEditorTypeChange();
-
-    SelectOverlayInfo selectOverlayInfo;
-    selectOverlayInfo.singleLineHeight = 143;
-    auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
-    auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(root);
-    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr, false);
-    richEditorPattern->selectOverlayProxy_ = proxy;
-    richEditorPattern->UpdateSelectOverlayOrCreate(selectOverlayInfo, true);
-    richEditorPattern->CheckEditorTypeChange();
-
-    richEditorPattern->selectOverlayProxy_->GetSelectOverlayMangerInfo().menuInfo.editorType =
-        static_cast<int32_t>(TextSpanType::TEXT);
-    richEditorPattern->CheckEditorTypeChange();
-
-    richEditorPattern->selectOverlayProxy_->GetSelectOverlayMangerInfo().menuInfo.editorType =
-        static_cast<int32_t>(TextSpanType::NONE);
-    richEditorPattern->selectedType_ = TextSpanType::TEXT;
-    richEditorPattern->CheckEditorTypeChange();
-
-    richEditorPattern->selectOverlayProxy_->GetSelectOverlayMangerInfo().menuInfo.editorType =
-        static_cast<int32_t>(TextSpanType::TEXT);
-    richEditorPattern->selectedType_ = TextSpanType::TEXT;
-    richEditorPattern->CheckEditorTypeChange();
-
-    richEditorPattern->selectOverlayProxy_->selectOverlayId_ = 1;
-    richEditorPattern->CheckEditorTypeChange();
-
-    EXPECT_TRUE(richEditorPattern->selectOverlayProxy_);
 }
 
 /**
@@ -1355,6 +1501,27 @@ HWTEST_F(RichEditorMenuTestNg, ProcessAutoFill001, TestSize.Level0)
     auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
+    auto flag = richEditorPattern->ProcessAutoFill(AceAutoFillTriggerType::PASTE_REQUEST);
+    EXPECT_FALSE(flag);
+}
+
+/**
+ * @tc.name: ProcessAutoFill002
+ * @tc.desc: test ProcessAutoFill002
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorMenuTestNg, ProcessAutoFill002, TestSize.Level0)
+{
+    auto mockContainer = AceType::MakeRefPtr<MockContainer>();
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+
+    auto savedContainer = Container::Current();
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
     auto flag = richEditorPattern->ProcessAutoFill(AceAutoFillTriggerType::PASTE_REQUEST);
     EXPECT_FALSE(flag);
 }

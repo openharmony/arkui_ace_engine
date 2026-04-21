@@ -18,6 +18,8 @@
 
 #include "base/error/error_code.h"
 #include "core/animation/animation_pub.h"
+#include "core/animation/animator.h"
+#include "core/animation/curve_animation.h"
 #include "core/animation/spring_curve.h"
 #include "core/animation/keyframe_animation.h"
 #include "core/common/ace_engine.h"

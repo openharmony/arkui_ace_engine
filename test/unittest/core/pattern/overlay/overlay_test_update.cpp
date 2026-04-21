@@ -20,10 +20,10 @@
 
 #define private public
 #define protected public
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/error/error_code.h"
 #include "base/geometry/dimension.h"
@@ -77,6 +77,7 @@
 #include "core/components_ng/pattern/toast/toast_layout_algorithm.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -100,6 +101,31 @@ const Dimension DISAPPEAR_FONT_SIZE = 0.0_fp;
 const Dimension NORMAL_FONT_SIZE = 10.0_fp;
 const Dimension SELECT_FONT_SIZE = 15.0_fp;
 constexpr float KEYBOARD_HEIGHT = 600.0f;
+
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == DragBarTheme::TypeId()) {
+        return AceType::MakeRefPtr<DragBarTheme>();
+    } else if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == DialogTheme::TypeId()) {
+        return AceType::MakeRefPtr<DialogTheme>();
+    } else if (type == PickerTheme::TypeId()) {
+        return AceType::MakeRefPtr<PickerTheme>();
+    } else if (type == SelectTheme::TypeId()) {
+        return AceType::MakeRefPtr<SelectTheme>();
+    } else if (type == MenuTheme::TypeId()) {
+        return AceType::MakeRefPtr<MenuTheme>();
+    } else if (type == ToastTheme::TypeId()) {
+        return AceType::MakeRefPtr<ToastTheme>();
+    } else if (type == SheetTheme::TypeId()) {
+        return AceType::MakeRefPtr<SheetTheme>();
+    } else if (type == TextTheme::TypeId()) {
+        return AceType::MakeRefPtr<TextTheme>();
+    } else {
+        return nullptr;
+    }
+}
 } // namespace
 class OverlayTestUpdate : public testing::Test {
 public:
@@ -130,28 +156,10 @@ void OverlayTestUpdate::SetUpTestCase()
     MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
     MockPipelineContext::GetCurrentContext()->SetMinPlatformVersion((int32_t)PlatformVersion::VERSION_ELEVEN);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-        if (type == DragBarTheme::TypeId()) {
-            return AceType::MakeRefPtr<DragBarTheme>();
-        } else if (type == IconTheme::TypeId()) {
-            return AceType::MakeRefPtr<IconTheme>();
-        } else if (type == DialogTheme::TypeId()) {
-            return AceType::MakeRefPtr<DialogTheme>();
-        } else if (type == PickerTheme::TypeId()) {
-            return AceType::MakeRefPtr<PickerTheme>();
-        } else if (type == SelectTheme::TypeId()) {
-            return AceType::MakeRefPtr<SelectTheme>();
-        } else if (type == MenuTheme::TypeId()) {
-            return AceType::MakeRefPtr<MenuTheme>();
-        } else if (type == ToastTheme::TypeId()) {
-            return AceType::MakeRefPtr<ToastTheme>();
-        } else if (type == SheetTheme::TypeId()) {
-            return AceType::MakeRefPtr<SheetTheme>();
-        } else if (type == TextTheme::TypeId()) {
-            return AceType::MakeRefPtr<TextTheme>();
-        } else {
-            return nullptr;
-        }
+        return GetTheme(type);
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 void OverlayTestUpdate::TearDownTestCase()
@@ -301,6 +309,27 @@ HWTEST_F(OverlayTestUpdate, ToastTest001, TestSize.Level1)
     ToastView::UpdateTextLayoutProperty(textNode, MESSAGE, false, textColor);
     EXPECT_EQ(textLayoutProperty->GetTextOverflow(), TextOverflow::ELLIPSIS);
     EXPECT_EQ(textLayoutProperty->GetEllipsisMode(), EllipsisMode::TAIL);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+HWTEST_F(OverlayTestUpdate, ToastTextProperty001, TestSize.Level1)
+{
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    textNode->context_ = reinterpret_cast<PipelineContext*>(Referenced::RawPtr(context));
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    std::optional<Color> textColor = std::nullopt;
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    int32_t backupContextApiVersion = context->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    context->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    ToastView::UpdateTextLayoutProperty(textNode, MESSAGE, false, textColor);
+    EXPECT_TRUE(textLayoutProperty->GetEnableSmallLanguageTruncationValue(false));
+    EXPECT_TRUE(textLayoutProperty->GetOrphanCharOptimizationValue(false));
+    context->SetApiTargetVersion(backupContextApiVersion);
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
@@ -1733,13 +1762,22 @@ HWTEST_F(OverlayTestUpdate, ToastTest030, TestSize.Level1)
      */
     auto safeAreaManager = pipelineContext->GetSafeAreaManager();
     ASSERT_NE(safeAreaManager, nullptr);
-    float safeAreaTop = safeAreaManager->GetSystemSafeArea().top_.Length();
+    auto safeAreaInsets = OverlayManager::GetSafeAreaInsets(toastNode);
+    float expectedSafeAreaTop = safeAreaInsets.top_.Length();
+    auto alignment = toastProps->GetToastAlignmentValue(Alignment::BOTTOM_CENTER);
+    if (alignment == Alignment::TOP_LEFT || alignment == Alignment::TOP_CENTER || alignment == Alignment::TOP_RIGHT) {
+        auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
+        ASSERT_NE(toastTheme, nullptr);
+        expectedSafeAreaTop += toastTheme->GetTop().ConvertToPx();
+        pattern->CalculateTitleBarHeightForTopAlignment(expectedSafeAreaTop, pipelineContext, toastProps);
+    }
+
     const auto& safeArea = toastProps->GetSafeAreaInsets();
-    float safeAreaBottom =
-        safeArea ? safeArea->bottom_.Length() : safeAreaManager->GetSafeAreaWithoutProcess().bottom_.Length();
+    float safeAreaBottom = safeArea ? safeArea->bottom_.Length() : safeAreaInsets.bottom_.Length();
+
     EXPECT_EQ(pattern->wrapperRect_.Width(), pipelineContext->GetRootWidth());
-    EXPECT_EQ(pattern->wrapperRect_.Height(), pipelineContext->GetRootHeight()- safeAreaTop - safeAreaBottom);
-    EXPECT_EQ(pattern->wrapperRect_.Top(), safeAreaTop);
+    EXPECT_EQ(pattern->wrapperRect_.Height(), pipelineContext->GetRootHeight() - expectedSafeAreaTop - safeAreaBottom);
+    EXPECT_EQ(pattern->wrapperRect_.Top(), expectedSafeAreaTop);
 }
 
 /**
@@ -1856,10 +1894,19 @@ HWTEST_F(OverlayTestUpdate, ToastTest032, TestSize.Level1)
     /**
      * @tc.steps: step5. Test in hover mode, hover mode area is default, avoid keyboard toast's wrapper rect.
      */
-    float safeAreaTop = safeAreaManager->GetSystemSafeArea().top_.Length();
+    auto safeAreaInsets = OverlayManager::GetSafeAreaInsets(toastNode);
+    float expectedSafeAreaTop = safeAreaInsets.top_.Length();
+    auto alignment = toastProps->GetToastAlignmentValue(Alignment::BOTTOM_CENTER);
+    if (alignment == Alignment::TOP_LEFT || alignment == Alignment::TOP_CENTER || alignment == Alignment::TOP_RIGHT) {
+        auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
+        ASSERT_NE(toastTheme, nullptr);
+        expectedSafeAreaTop += toastTheme->GetTop().ConvertToPx();
+        pattern->CalculateTitleBarHeightForTopAlignment(expectedSafeAreaTop, pipelineContext, toastProps);
+    }
+
     EXPECT_EQ(pattern->wrapperRect_.Width(), pipelineContext->GetRootWidth());
-    EXPECT_EQ(pattern->wrapperRect_.Height(), foldCreaseTop - safeAreaTop);
-    EXPECT_EQ(pattern->wrapperRect_.Top(), safeAreaTop);
+    EXPECT_EQ(pattern->wrapperRect_.Height(), foldCreaseTop - expectedSafeAreaTop);
+    EXPECT_EQ(pattern->wrapperRect_.Top(), expectedSafeAreaTop);
     auto reset = safeAreaManager->UpdateKeyboardSafeArea(0.0f);
     EXPECT_EQ(reset, true);
 }
@@ -1917,10 +1964,19 @@ HWTEST_F(OverlayTestUpdate, ToastTest033, TestSize.Level1)
     /**
      * @tc.steps: step5. Test in hover mode, hover mode area is TOP_SCREEN.
      */
-    float safeAreaTop = safeAreaManager->GetSystemSafeArea().top_.Length();
+    auto safeAreaInsets = OverlayManager::GetSafeAreaInsets(toastNode);
+    float expectedSafeAreaTop = safeAreaInsets.top_.Length();
+    auto alignment = toastProps->GetToastAlignmentValue(Alignment::BOTTOM_CENTER);
+    if (alignment == Alignment::TOP_LEFT || alignment == Alignment::TOP_CENTER || alignment == Alignment::TOP_RIGHT) {
+        auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
+        ASSERT_NE(toastTheme, nullptr);
+        expectedSafeAreaTop += toastTheme->GetTop().ConvertToPx();
+        pattern->CalculateTitleBarHeightForTopAlignment(expectedSafeAreaTop, pipelineContext, toastProps);
+    }
+
     EXPECT_EQ(pattern->wrapperRect_.Width(), pipelineContext->GetRootWidth());
-    EXPECT_EQ(pattern->wrapperRect_.Height(), foldCreaseTop - safeAreaTop);
-    EXPECT_EQ(pattern->wrapperRect_.Top(), safeAreaTop);
+    EXPECT_EQ(pattern->wrapperRect_.Height(), foldCreaseTop - expectedSafeAreaTop);
+    EXPECT_EQ(pattern->wrapperRect_.Top(), expectedSafeAreaTop);
 }
 
 /**

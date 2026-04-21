@@ -30,7 +30,7 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT ListItemGroupModelNG : public ListItemGroupModel {
 public:
-    void Create(V2::ListItemGroupStyle listItemGroupStyle) override;
+    void Create(const V2::ListItemGroupOptions& options) override;
     void SetSpace(const Dimension& space) override;
     void SetDivider(const V2::ItemDivider& divider) override;
     void SetHeader(std::function<void()>&& header) override;
@@ -56,6 +56,8 @@ public:
     static V2::ItemDivider GetDivider(FrameNode* frameNode);
     static void SetSpace(FrameNode* frameNode, const Dimension& space);
     static void SetStyle(FrameNode* frameNode, V2::ListItemGroupStyle style);
+    static void SetHeaderStyle(FrameNode* frameNode, V2::ListItemGroupHeaderFooterStyle style);
+    static void SetFooterStyle(FrameNode* frameNode, V2::ListItemGroupHeaderFooterStyle style);
     static void RemoveHeader(FrameNode* frameNode);
     static void RemoveFooter(FrameNode* frameNode);
     static bool HasFooter(FrameNode* frameNode);

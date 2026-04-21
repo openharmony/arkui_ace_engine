@@ -59,10 +59,7 @@ JSOffscreenRenderingContext::JSOffscreenRenderingContext()
         renderingContext2DModel_ = AceType::MakeRefPtr<NG::OffscreenCanvasRenderingContext2DModelNG>();
     } else {
         const auto* modifier = GetCanvasInnerModifier();
-        if (modifier == nullptr) {
-            LOGF("Cannot find video modifier");
-            abort();
-        }
+        CHECK_NULL_VOID(modifier);
         void* renderContext = modifier->createCanvasRenderingContextModel(true);
         if (renderContext != nullptr) {
             renderingContext2DModel_ = AceType::Claim(reinterpret_cast<RenderingContext2DModel*>(renderContext));
@@ -132,6 +129,8 @@ void JSOffscreenRenderingContext::JSBind(BindingTarget globalObj)
     JSClass<JSOffscreenRenderingContext>::CustomProperty("letterSpacing",
         &JSCanvasRenderer::JSGetEmpty<StatisticEventType::CANVAS_LETTER_SPACING_GETTER>,
         &JSCanvasRenderer::JsSetLetterSpacing);
+    JSClass<JSOffscreenRenderingContext>::CustomProperty(
+        "antialias", &JSCanvasRenderer::JsGetAntialias, &JSCanvasRenderer::JsSetAntialias);
 
     // Define all methods of the "OffscreenCanvasRenderingContext2D"
     JSClass<JSOffscreenRenderingContext>::CustomMethod(

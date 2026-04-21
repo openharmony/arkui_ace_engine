@@ -15,6 +15,8 @@
 
 #include "pixel_map_ohos.h"
 
+#include <fstream>
+
 #include "drawable_descriptor.h"
 #include "media_errors.h"
 #include "pixel_map_manager.h"
@@ -135,6 +137,24 @@ AllocatorType PixelMapOhos::AllocatorTypeConverter(Media::AllocatorType allocato
             return AllocatorType::DMA_ALLOC;
         default:
             return AllocatorType::DEFAULT;
+    }
+}
+
+Media::AllocatorType PixelMapOhos::ConvertToMediaAllocatorType(Ace::AllocatorType allocatorType)
+{
+    switch (allocatorType) {
+        case AllocatorType::DEFAULT:
+            return Media::AllocatorType::DEFAULT;
+        case AllocatorType::HEAP_ALLOC:
+            return Media::AllocatorType::HEAP_ALLOC;
+        case AllocatorType::SHARE_MEM_ALLOC:
+            return Media::AllocatorType::SHARE_MEM_ALLOC;
+        case AllocatorType::CUSTOM_ALLOC:
+            return Media::AllocatorType::CUSTOM_ALLOC;
+        case AllocatorType::DMA_ALLOC:
+            return Media::AllocatorType::DMA_ALLOC;
+        default:
+            return Media::AllocatorType::DEFAULT;
     }
 }
 

@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
@@ -42,6 +41,11 @@ Ark_String GetIdImpl(Ark_EventTargetInfo peer)
     CHECK_NULL_RETURN(peer, {});
     return Converter::ArkValue<Ark_String>(peer->id, Converter::FC);
 }
+Ark_Int32 GetUniqueIdImpl(Ark_EventTargetInfo peer)
+{
+    CHECK_NULL_RETURN(peer, 0);
+    return Converter::ArkValue<Ark_Int32>(peer->uniqueId);
+}
 } // EventTargetInfoAccessor
 const GENERATED_ArkUIEventTargetInfoAccessor* GetEventTargetInfoAccessor()
 {
@@ -50,6 +54,7 @@ const GENERATED_ArkUIEventTargetInfoAccessor* GetEventTargetInfoAccessor()
         EventTargetInfoAccessor::ConstructImpl,
         EventTargetInfoAccessor::GetFinalizerImpl,
         EventTargetInfoAccessor::GetIdImpl,
+        EventTargetInfoAccessor::GetUniqueIdImpl,
     };
     return &EventTargetInfoAccessorImpl;
 }

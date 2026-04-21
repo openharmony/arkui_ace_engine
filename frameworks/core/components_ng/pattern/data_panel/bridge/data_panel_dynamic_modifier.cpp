@@ -148,7 +148,9 @@ void ConvertThemeColor(std::vector<OHOS::Ace::NG::Gradient>& colors)
     CHECK_NULL_VOID(pipelineContext);
     auto themeManager = pipelineContext->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
-    RefPtr<DataPanelTheme> theme = themeManager->GetTheme<DataPanelTheme>();
+    auto node = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(node);
+    RefPtr<DataPanelTheme> theme = node->GetTheme<DataPanelTheme>(true);
     auto themeColors = theme->GetColorsArray();
     for (const auto& item : themeColors) {
         OHOS::Ace::NG::Gradient gradient;
@@ -569,7 +571,9 @@ void ConvertThemeColorImpl(std::vector<OHOS::Ace::NG::Gradient>& colors)
     CHECK_NULL_VOID(pipelineContext);
     auto themeManager = pipelineContext->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
-    RefPtr<DataPanelTheme> theme = themeManager->GetTheme<DataPanelTheme>();
+    auto node = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(node);
+    RefPtr<DataPanelTheme> theme = node->GetTheme<DataPanelTheme>(true);
     auto themeColors = theme->GetColorsArray();
     for (const auto& item : themeColors) {
         OHOS::Ace::NG::Gradient gradient;

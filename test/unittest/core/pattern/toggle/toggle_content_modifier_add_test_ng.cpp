@@ -16,6 +16,7 @@
 #define private public
 #define protected public
 #include "base/geometry/dimension.h"
+#include "base/json/json_util.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components/toggle/toggle_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -31,7 +32,8 @@
 #include "core/components_ng/pattern/toggle/switch_pattern.h"
 #include "core/components_ng/pattern/toggle/toggle_model.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "interfaces/inner_api/ui_session/param_config.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1404,5 +1406,581 @@ HWTEST_F(ToggleContentModifierAddTestNg, ToggleContentModifierAddTestNg039, Test
     switchModifier.pointOffset_->Set(pointOffset);
     switchModifier.FixPointOffset();
     EXPECT_FALSE(switchModifier.isSizeChange_);
+}
+
+/**
+ * @tc.name: HandleBlurEvent001
+ * @tc.desc: Test SwitchPattern HandleBlurEvent resets focus state
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleContentModifierAddTestNg, HandleBlurEvent001, TestSize.Level1)
+{
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
+    auto switchFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(switchFrameNode, nullptr);
+    auto switchPattern = switchFrameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(switchPattern, nullptr);
+
+    switchPattern->touchHoverType_ = TouchHoverAnimationType::FOCUS;
+    switchPattern->HandleBlurEvent();
+    EXPECT_EQ(switchPattern->touchHoverType_, TouchHoverAnimationType::NONE);
+}
+
+/**
+ * @tc.name: HandleFocusEvent001
+ * @tc.desc: Test SwitchPattern HandleFocusEvent when focusActive is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleContentModifierAddTestNg, HandleFocusEvent001, TestSize.Level1)
+{
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
+    auto switchFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(switchFrameNode, nullptr);
+    auto switchPattern = switchFrameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(switchPattern, nullptr);
+
+    // Ensure focusManager_ is initialized so GetIsFocusActive can return true
+    auto pipeline = switchFrameNode->GetContextRefPtr();
+    ASSERT_NE(pipeline, nullptr);
+    auto focusManager = pipeline->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->SetIsFocusActive(true);
+
+    switchPattern->touchHoverType_ = TouchHoverAnimationType::NONE;
+    switchPattern->HandleFocusEvent();
+    EXPECT_EQ(switchPattern->touchHoverType_, TouchHoverAnimationType::FOCUS);
+}
+
+/**
+ * @tc.name: HandleFocusEvent002
+ * @tc.desc: Test SwitchPattern HandleFocusEvent when focusActive is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleContentModifierAddTestNg, HandleFocusEvent002, TestSize.Level1)
+{
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
+    auto switchFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(switchFrameNode, nullptr);
+    auto switchPattern = switchFrameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(switchPattern, nullptr);
+
+    auto pipeline = switchFrameNode->GetContextRefPtr();
+    ASSERT_NE(pipeline, nullptr);
+    auto focusManager = pipeline->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->SetIsFocusActive(false);
+
+    switchPattern->touchHoverType_ = TouchHoverAnimationType::NONE;
+    switchPattern->HandleFocusEvent();
+    // When focusActive is false, OnIsFocusActiveUpdate is not called, type stays NONE
+    EXPECT_EQ(switchPattern->touchHoverType_, TouchHoverAnimationType::NONE);
+}
+
+/**
+ * @tc.name: AddIsFocusActiveUpdateEvent001
+ * @tc.desc: Test SwitchPattern AddIsFocusActiveUpdateEvent creates callback when null
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleContentModifierAddTestNg, AddIsFocusActiveUpdateEvent001, TestSize.Level1)
+{
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
+    auto switchFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(switchFrameNode, nullptr);
+    auto switchPattern = switchFrameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(switchPattern, nullptr);
+
+    switchPattern->isFocusActiveUpdateEvent_ = nullptr;
+    switchPattern->AddIsFocusActiveUpdateEvent();
+    EXPECT_TRUE(switchPattern->isFocusActiveUpdateEvent_ != nullptr);
+}
+
+/**
+ * @tc.name: AddIsFocusActiveUpdateEvent002
+ * @tc.desc: Test SwitchPattern AddIsFocusActiveUpdateEvent preserves existing callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleContentModifierAddTestNg, AddIsFocusActiveUpdateEvent002, TestSize.Level1)
+{
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
+    auto switchFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(switchFrameNode, nullptr);
+    auto switchPattern = switchFrameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(switchPattern, nullptr);
+
+    std::function<void(bool)> existingCallback = [](bool) {};
+    switchPattern->isFocusActiveUpdateEvent_ = existingCallback;
+    switchPattern->AddIsFocusActiveUpdateEvent();
+    // Should not overwrite existing callback
+    EXPECT_TRUE(switchPattern->isFocusActiveUpdateEvent_ != nullptr);
+}
+
+/**
+ * @tc.name: OnIsFocusActiveUpdate001
+ * @tc.desc: Test SwitchPattern OnIsFocusActiveUpdate when isFocusActive is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleContentModifierAddTestNg, OnIsFocusActiveUpdate001, TestSize.Level1)
+{
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
+    auto switchFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(switchFrameNode, nullptr);
+    auto switchPattern = switchFrameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(switchPattern, nullptr);
+
+    switchPattern->OnIsFocusActiveUpdate(true);
+    EXPECT_EQ(switchPattern->touchHoverType_, TouchHoverAnimationType::FOCUS);
+}
+
+/**
+ * @tc.name: OnIsFocusActiveUpdate002
+ * @tc.desc: Test SwitchPattern OnIsFocusActiveUpdate when isFocusActive is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleContentModifierAddTestNg, OnIsFocusActiveUpdate002, TestSize.Level1)
+{
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
+    auto switchFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(switchFrameNode, nullptr);
+    auto switchPattern = switchFrameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(switchPattern, nullptr);
+
+    switchPattern->OnIsFocusActiveUpdate(false);
+    EXPECT_EQ(switchPattern->touchHoverType_, TouchHoverAnimationType::NONE);
+}
+
+/**
+ * @tc.name: UpdateColorWhenIsOn001
+ * @tc.desc: Test UpdateColorWhenIsOn when isOn is true and selectedColor matches theme
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleContentModifierAddTestNg, UpdateColorWhenIsOn001, TestSize.Level1)
+{
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
+    auto switchFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(switchFrameNode, nullptr);
+    auto switchPattern = switchFrameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(switchPattern, nullptr);
+
+    auto paintProperty = switchFrameNode->GetPaintProperty<SwitchPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    switchPattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
+    ASSERT_NE(switchPattern->paintMethod_, nullptr);
+    switchPattern->switchTheme_ = AceType::MakeRefPtr<SwitchTheme>();
+    ASSERT_NE(switchPattern->switchTheme_, nullptr);
+
+    Color activeColor = switchPattern->switchTheme_->GetActiveColor();
+    paintProperty->UpdateSelectedColor(activeColor);
+    switchPattern->UpdateColorWhenIsOn(true);
+    EXPECT_TRUE(paintProperty->HasSelectedColor());
+}
+
+/**
+ * @tc.name: UpdateColorWhenIsOn002
+ * @tc.desc: Test UpdateColorWhenIsOn when isOn is false and unselectedColor matches theme
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleContentModifierAddTestNg, UpdateColorWhenIsOn002, TestSize.Level1)
+{
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
+    auto switchFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(switchFrameNode, nullptr);
+    auto switchPattern = switchFrameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(switchPattern, nullptr);
+
+    auto paintProperty = switchFrameNode->GetPaintProperty<SwitchPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    switchPattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
+    ASSERT_NE(switchPattern->paintMethod_, nullptr);
+    switchPattern->switchTheme_ = AceType::MakeRefPtr<SwitchTheme>();
+    ASSERT_NE(switchPattern->switchTheme_, nullptr);
+
+    Color inactiveColor = switchPattern->switchTheme_->GetInactiveColor();
+    paintProperty->UpdateUnselectedColor(inactiveColor);
+    switchPattern->isFocus_ = false;
+    switchPattern->UpdateColorWhenIsOn(false);
+    EXPECT_TRUE(paintProperty->HasUnselectedColor());
+}
+
+/**
+ * @tc.name: UpdateColorWhenIsOn003
+ * @tc.desc: Test UpdateColorWhenIsOn when isOn is false, isFocus_ is true, and unselectedColor matches theme
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleContentModifierAddTestNg, UpdateColorWhenIsOn003, TestSize.Level1)
+{
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
+    auto switchFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(switchFrameNode, nullptr);
+    auto switchPattern = switchFrameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(switchPattern, nullptr);
+
+    auto paintProperty = switchFrameNode->GetPaintProperty<SwitchPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    switchPattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
+    ASSERT_NE(switchPattern->paintMethod_, nullptr);
+    switchPattern->switchTheme_ = AceType::MakeRefPtr<SwitchTheme>();
+    ASSERT_NE(switchPattern->switchTheme_, nullptr);
+
+    Color inactiveColor = switchPattern->switchTheme_->GetInactiveColor();
+    paintProperty->UpdateUnselectedColor(inactiveColor);
+    switchPattern->isFocus_ = true;
+    switchPattern->UpdateColorWhenIsOn(false);
+    EXPECT_TRUE(paintProperty->HasUnselectedColor());
+}
+
+/**
+ * @tc.name: UpdateColorWhenIsOn004
+ * @tc.desc: Test UpdateColorWhenIsOn when isOn is true but selectedColor does not match theme
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleContentModifierAddTestNg, UpdateColorWhenIsOn004, TestSize.Level1)
+{
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
+    auto switchFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(switchFrameNode, nullptr);
+    auto switchPattern = switchFrameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(switchPattern, nullptr);
+
+    auto paintProperty = switchFrameNode->GetPaintProperty<SwitchPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    switchPattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
+    ASSERT_NE(switchPattern->paintMethod_, nullptr);
+    switchPattern->switchTheme_ = AceType::MakeRefPtr<SwitchTheme>();
+    ASSERT_NE(switchPattern->switchTheme_, nullptr);
+
+    // Set a different selected color that doesn't match theme active color
+    paintProperty->UpdateSelectedColor(Color::RED);
+    Color prevColor = paintProperty->GetSelectedColor().value();
+    switchPattern->UpdateColorWhenIsOn(true);
+    // Color should not be updated since it doesn't match theme active color
+    EXPECT_EQ(paintProperty->GetSelectedColor().value(), prevColor);
+}
+
+/**
+ * @tc.name: UpdateColorWhenIsOn005
+ * @tc.desc: Test UpdateColorWhenIsOn when isOn is false and unselectedColor does not match theme
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleContentModifierAddTestNg, UpdateColorWhenIsOn005, TestSize.Level1)
+{
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
+    auto switchFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(switchFrameNode, nullptr);
+    auto switchPattern = switchFrameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(switchPattern, nullptr);
+
+    auto paintProperty = switchFrameNode->GetPaintProperty<SwitchPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    switchPattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
+    ASSERT_NE(switchPattern->paintMethod_, nullptr);
+    switchPattern->switchTheme_ = AceType::MakeRefPtr<SwitchTheme>();
+    ASSERT_NE(switchPattern->switchTheme_, nullptr);
+
+    // Set a different unselected color that doesn't match theme inactive color
+    paintProperty->UpdateUnselectedColor(Color::GREEN);
+    Color prevColor = paintProperty->GetUnselectedColor().value();
+    switchPattern->isFocus_ = false;
+    switchPattern->UpdateColorWhenIsOn(false);
+    // Color should not be updated since it doesn't match theme inactive color
+    EXPECT_EQ(paintProperty->GetUnselectedColor().value(), prevColor);
+}
+
+/**
+ * @tc.name: GetInnerFocusPaintRect001
+ * @tc.desc: Test GetInnerFocusPaintRect when pointRadius * 2 > height
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleContentModifierAddTestNg, GetInnerFocusPaintRect001, TestSize.Level1)
+{
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
+    auto switchFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(switchFrameNode, nullptr);
+    auto switchPattern = switchFrameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(switchPattern, nullptr);
+
+    switchPattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
+    ASSERT_NE(switchPattern->paintMethod_, nullptr);
+    auto switchModifier = AceType::MakeRefPtr<SwitchModifier>(
+        SizeF(FORTY_FLOAT, THIRTY_FLOAT), OffsetF(ZERO_FLOAT, ZERO_FLOAT), ZERO_FLOAT, true,
+        Color::WHITE, Color::WHITE, ZERO_FLOAT);
+    ASSERT_NE(switchModifier, nullptr);
+    switchPattern->paintMethod_->switchModifier_ = switchModifier;
+
+    // pointRadius * 2 > height_ branch
+    constexpr float TEST_HEIGHT = 20.0f;
+    constexpr float TEST_WIDTH = 60.0f;
+    constexpr float TEST_POINT_RADIUS = 15.0f;
+    constexpr float TEST_TRACK_RADIUS = 10.0f;
+    switchPattern->height_ = TEST_HEIGHT;
+    switchPattern->width_ = TEST_WIDTH;
+    switchPattern->offset_ = OffsetF(ZERO_FLOAT, ZERO_FLOAT);
+    switchModifier->pointRadius_ = TEST_POINT_RADIUS;
+    switchModifier->SetActualTrackRadius(TEST_TRACK_RADIUS);
+
+    RoundRect paintRect;
+    EXPECT_NO_FATAL_FAILURE(switchPattern->GetInnerFocusPaintRect(paintRect));
+}
+
+/**
+ * @tc.name: GetInnerFocusPaintRect002
+ * @tc.desc: Test GetInnerFocusPaintRect when pointRadius * 2 <= height and trackRadius != SWITCH_ERROR_RADIUS
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleContentModifierAddTestNg, GetInnerFocusPaintRect002, TestSize.Level1)
+{
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
+    auto switchFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(switchFrameNode, nullptr);
+    auto switchPattern = switchFrameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(switchPattern, nullptr);
+
+    switchPattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
+    ASSERT_NE(switchPattern->paintMethod_, nullptr);
+    auto switchModifier = AceType::MakeRefPtr<SwitchModifier>(
+        SizeF(FORTY_FLOAT, THIRTY_FLOAT), OffsetF(ZERO_FLOAT, ZERO_FLOAT), ZERO_FLOAT, true,
+        Color::WHITE, Color::WHITE, ZERO_FLOAT);
+    ASSERT_NE(switchModifier, nullptr);
+    switchPattern->paintMethod_->switchModifier_ = switchModifier;
+
+    // pointRadius * 2 <= height_ branch, trackRadius != SWITCH_ERROR_RADIUS
+    constexpr float TEST_HEIGHT = 50.0f;
+    constexpr float TEST_WIDTH = 80.0f;
+    constexpr float TEST_POINT_RADIUS = 10.0f;
+    constexpr float TEST_TRACK_RADIUS = 25.0f;
+    switchPattern->height_ = TEST_HEIGHT;
+    switchPattern->width_ = TEST_WIDTH;
+    switchPattern->offset_ = OffsetF(ZERO_FLOAT, ZERO_FLOAT);
+    switchModifier->pointRadius_ = TEST_POINT_RADIUS;
+    switchModifier->SetActualTrackRadius(TEST_TRACK_RADIUS);
+
+    RoundRect paintRect;
+    EXPECT_NO_FATAL_FAILURE(switchPattern->GetInnerFocusPaintRect(paintRect));
+}
+
+/**
+ * @tc.name: GetInnerFocusPaintRect003
+ * @tc.desc: Test GetInnerFocusPaintRect when pointRadius * 2 > height and width < height
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleContentModifierAddTestNg, GetInnerFocusPaintRect003, TestSize.Level1)
+{
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
+    auto switchFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(switchFrameNode, nullptr);
+    auto switchPattern = switchFrameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(switchPattern, nullptr);
+
+    switchPattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
+    ASSERT_NE(switchPattern->paintMethod_, nullptr);
+    auto switchModifier = AceType::MakeRefPtr<SwitchModifier>(
+        SizeF(FORTY_FLOAT, THIRTY_FLOAT), OffsetF(ZERO_FLOAT, ZERO_FLOAT), ZERO_FLOAT, true,
+        Color::WHITE, Color::WHITE, ZERO_FLOAT);
+    ASSERT_NE(switchModifier, nullptr);
+    switchPattern->paintMethod_->switchModifier_ = switchModifier;
+
+    // pointRadius * 2 > height_ and width_ < height_ sub-branch
+    constexpr float TEST_HEIGHT = 20.0f;
+    constexpr float TEST_WIDTH = 15.0f;
+    constexpr float TEST_POINT_RADIUS = 15.0f;
+    constexpr float TEST_TRACK_RADIUS = 10.0f;
+    switchPattern->height_ = TEST_HEIGHT;
+    switchPattern->width_ = TEST_WIDTH;
+    switchPattern->offset_ = OffsetF(ZERO_FLOAT, ZERO_FLOAT);
+    switchModifier->pointRadius_ = TEST_POINT_RADIUS;
+    switchModifier->SetActualTrackRadius(TEST_TRACK_RADIUS);
+
+    RoundRect paintRect;
+    EXPECT_NO_FATAL_FAILURE(switchPattern->GetInnerFocusPaintRect(paintRect));
+}
+
+/**
+ * @tc.name: GetInnerFocusPaintRect004
+ * @tc.desc: Test GetInnerFocusPaintRect when pointRadius * 2 <= height and width < height and pointRadius > trackRadius
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleContentModifierAddTestNg, GetInnerFocusPaintRect004, TestSize.Level1)
+{
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
+    auto switchFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(switchFrameNode, nullptr);
+    auto switchPattern = switchFrameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(switchPattern, nullptr);
+
+    switchPattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
+    ASSERT_NE(switchPattern->paintMethod_, nullptr);
+    auto switchModifier = AceType::MakeRefPtr<SwitchModifier>(
+        SizeF(FORTY_FLOAT, THIRTY_FLOAT), OffsetF(ZERO_FLOAT, ZERO_FLOAT), ZERO_FLOAT, true,
+        Color::WHITE, Color::WHITE, ZERO_FLOAT);
+    ASSERT_NE(switchModifier, nullptr);
+    switchPattern->paintMethod_->switchModifier_ = switchModifier;
+
+    // pointRadius * 2 <= height_, width_ < height_ and pointRadius > trackRadius
+    constexpr float TEST_HEIGHT = 50.0f;
+    constexpr float TEST_WIDTH = 30.0f;
+    constexpr float TEST_POINT_RADIUS = 20.0f;
+    constexpr float TEST_TRACK_RADIUS = 10.0f;
+    switchPattern->height_ = TEST_HEIGHT;
+    switchPattern->width_ = TEST_WIDTH;
+    switchPattern->offset_ = OffsetF(ZERO_FLOAT, ZERO_FLOAT);
+    switchModifier->pointRadius_ = TEST_POINT_RADIUS;
+    switchModifier->SetActualTrackRadius(TEST_TRACK_RADIUS);
+
+    RoundRect paintRect;
+    EXPECT_NO_FATAL_FAILURE(switchPattern->GetInnerFocusPaintRect(paintRect));
+}
+
+/**
+ * @tc.name: GetInnerFocusPaintRect005
+ * @tc.desc: Test GetInnerFocusPaintRect when trackRadius == SWITCH_ERROR_RADIUS
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleContentModifierAddTestNg, GetInnerFocusPaintRect005, TestSize.Level1)
+{
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
+    auto switchFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(switchFrameNode, nullptr);
+    auto switchPattern = switchFrameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(switchPattern, nullptr);
+
+    switchPattern->paintMethod_ = AceType::MakeRefPtr<SwitchPaintMethod>();
+    ASSERT_NE(switchPattern->paintMethod_, nullptr);
+    auto switchModifier = AceType::MakeRefPtr<SwitchModifier>(
+        SizeF(FORTY_FLOAT, THIRTY_FLOAT), OffsetF(ZERO_FLOAT, ZERO_FLOAT), ZERO_FLOAT, true,
+        Color::WHITE, Color::WHITE, ZERO_FLOAT);
+    ASSERT_NE(switchModifier, nullptr);
+    switchPattern->paintMethod_->switchModifier_ = switchModifier;
+
+    // trackRadius == SWITCH_ERROR_RADIUS branch
+    constexpr float TEST_HEIGHT = 50.0f;
+    constexpr float TEST_WIDTH = 80.0f;
+    constexpr float TEST_POINT_RADIUS = 10.0f;
+    switchPattern->height_ = TEST_HEIGHT;
+    switchPattern->width_ = TEST_WIDTH;
+    switchPattern->offset_ = OffsetF(ZERO_FLOAT, ZERO_FLOAT);
+    switchModifier->pointRadius_ = TEST_POINT_RADIUS;
+    switchModifier->SetActualTrackRadius(SWITCH_ERROR_RADIUS);
+
+    RoundRect paintRect;
+    EXPECT_NO_FATAL_FAILURE(switchPattern->GetInnerFocusPaintRect(paintRect));
+}
+
+/**
+ * @tc.name: DumpSimplifyInfoOnlyForParamConfig001
+ * @tc.desc: Test DumpSimplifyInfoOnlyForParamConfig when isOn is true and interactionInfo is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleContentModifierAddTestNg, DumpSimplifyInfoOnlyForParamConfig001, TestSize.Level1)
+{
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
+    auto switchFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(switchFrameNode, nullptr);
+    auto switchPattern = switchFrameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(switchPattern, nullptr);
+
+    auto paintProperty = switchFrameNode->GetPaintProperty<SwitchPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->UpdateIsOn(true);
+
+    auto json = JsonUtil::CreateSharedPtrJson(true);
+    ParamConfig config;
+    config.interactionInfo = true;
+    switchPattern->DumpSimplifyInfoOnlyForParamConfig(json, config);
+    EXPECT_NE(json->GetString("isOn"), "");
+}
+
+/**
+ * @tc.name: DumpSimplifyInfoOnlyForParamConfig002
+ * @tc.desc: Test DumpSimplifyInfoOnlyForParamConfig when isOn is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleContentModifierAddTestNg, DumpSimplifyInfoOnlyForParamConfig002, TestSize.Level1)
+{
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
+    auto switchFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(switchFrameNode, nullptr);
+    auto switchPattern = switchFrameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(switchPattern, nullptr);
+
+    auto paintProperty = switchFrameNode->GetPaintProperty<SwitchPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->UpdateIsOn(false);
+
+    auto json = JsonUtil::CreateSharedPtrJson(true);
+    ParamConfig config;
+    config.interactionInfo = true;
+    switchPattern->DumpSimplifyInfoOnlyForParamConfig(json, config);
+    EXPECT_NE(json->GetString("isOn"), "");
+}
+
+/**
+ * @tc.name: DumpSimplifyInfoOnlyForParamConfig003
+ * @tc.desc: Test DumpSimplifyInfoOnlyForParamConfig when interactionInfo is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleContentModifierAddTestNg, DumpSimplifyInfoOnlyForParamConfig003, TestSize.Level1)
+{
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
+    auto switchFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(switchFrameNode, nullptr);
+    auto switchPattern = switchFrameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(switchPattern, nullptr);
+
+    auto paintProperty = switchFrameNode->GetPaintProperty<SwitchPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->UpdateIsOn(true);
+
+    auto json = JsonUtil::CreateSharedPtrJson(true);
+    ParamConfig config;
+    config.interactionInfo = false;
+    switchPattern->DumpSimplifyInfoOnlyForParamConfig(json, config);
+    // When interactionInfo is false, isOn should not be written even if HasIsOn is true
+    EXPECT_EQ(json->GetString("isOn"), "");
+}
+
+/**
+ * @tc.name: DumpSimplifyInfoOnlyForParamConfig004
+ * @tc.desc: Test DumpSimplifyInfoOnlyForParamConfig when HasIsOn is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleContentModifierAddTestNg, DumpSimplifyInfoOnlyForParamConfig004, TestSize.Level1)
+{
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::SWITCH, IS_ON);
+    auto switchFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(switchFrameNode, nullptr);
+    auto switchPattern = switchFrameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(switchPattern, nullptr);
+
+    auto paintProperty = switchFrameNode->GetPaintProperty<SwitchPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    // Reset IsOn so HasIsOn returns false (Create sets it by default)
+    paintProperty->ResetIsOn();
+
+    auto json = JsonUtil::CreateSharedPtrJson(true);
+    ParamConfig config;
+    config.interactionInfo = true;
+    switchPattern->DumpSimplifyInfoOnlyForParamConfig(json, config);
+    // When HasIsOn is false, isOn should not be written
+    EXPECT_EQ(json->GetString("isOn"), "");
 }
 } // namespace OHOS::Ace::NG

@@ -16,6 +16,7 @@
 #include "bridge/declarative_frontend/jsview/js_view.h"
 
 #include "base/log/ace_checker.h"
+#include "base/log/ace_scoring_log.h"
 #include "base/log/ace_performance_check.h"
 #include "base/log/ace_trace.h"
 #include "base/memory/ace_type.h"
@@ -34,6 +35,7 @@
 #include "bridge/declarative_frontend/jsview/models/view_full_update_model_impl.h"
 #include "bridge/declarative_frontend/jsview/models/view_partial_update_model_impl.h"
 #include "bridge/declarative_frontend/ng/declarative_frontend_ng.h"
+#include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/layout_inspector.h"
@@ -97,6 +99,59 @@ void JSView::JSBind(BindingTarget object)
 {
     JSViewPartialUpdate::JSBind(object);
     JSViewFullUpdate::JSBind(object);
+}
+
+void JSView::FireOnShow()
+{
+    if (jsViewFunction_) {
+        ACE_SCORING_EVENT("OnShow");
+        jsViewFunction_->ExecuteShow();
+    }
+}
+
+void JSView::FireOnHide()
+{
+    if (jsViewFunction_) {
+        ACE_SCORING_EVENT("OnHide");
+        jsViewFunction_->ExecuteHide();
+    }
+}
+
+bool JSView::FireOnBackPress()
+{
+    if (jsViewFunction_) {
+        ACE_SCORING_EVENT("OnBackPress");
+        return jsViewFunction_->ExecuteOnBackPress();
+    }
+    return false;
+}
+
+std::string JSView::FireOnFormRecycle()
+{
+    if (jsViewFunction_) {
+        ACE_SCORING_EVENT("OnFormRecycle");
+        return jsViewFunction_->ExecuteOnFormRecycle();
+    }
+    LOGE("jsViewFunction_ is null");
+    return "";
+}
+
+void JSView::FireOnFormRecover(const std::string& statusData)
+{
+    if (jsViewFunction_) {
+        ACE_SCORING_EVENT("OnFormRecover");
+        return jsViewFunction_->ExecuteOnFormRecover(statusData);
+    }
+    LOGE("jsViewFunction_ is null");
+}
+
+void JSView::FireOnNewParam(const std::string& newParam)
+{
+    if (jsViewFunction_) {
+        ACE_SCORING_EVENT("OnNewParam");
+        return jsViewFunction_->ExecuteOnNewParam(newParam);
+    }
+    TAG_LOGE(AceLogTag::ACE_ROUTER, "fire onNewParam failed, jsViewFunction_ is null!");
 }
 
 void JSView::RenderJSExecution()
@@ -867,6 +922,15 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
             uiNode->SetFilePath(sources);
         }
     }
+
+    // Register __onJSInstanceIdUpdate__Internal callback when enableCustomComponentCrossAbility is enabled
+    if (AceApplicationInfo::GetInstance().GetEnableCustomComponentCrossAbility()) {
+        JSRef<JSVal> onInstanceIdUpdateFunc = jsViewObject_->GetProperty("__onJSInstanceIdUpdate__Internal");
+        if (onInstanceIdUpdateFunc->IsFunction()) {
+            RegisterOnInstanceIdUpdateCallback(onInstanceIdUpdateFunc);
+        }
+    }
+
     return node;
 }
 
@@ -1420,26 +1484,90 @@ void JSViewPartialUpdate::JSRegisterUpdateInstanceForEnvFunc(const JSCallbackInf
         LOGE("NativeViewPartialUpdate JSRegisterUpdateInstanceForEnvFunc argument invalid");
         return;
     }
- 
-    auto updateInstanceForEnvValue = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(info[0]));
-    CHECK_NULL_VOID(updateInstanceForEnvValue);
-    auto updateInstanceForEnvValueFunc = [weak = WeakClaim(this), execCtx = info.GetExecutionContext(),
-        func = std::move(updateInstanceForEnvValue)](int32_t instanceId) {
+
+    auto jsCallback = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(info[0]));
+    CHECK_NULL_VOID(jsCallback);
+
+    // Save Env callback
+    updateInstanceForEnvCallback_ = [weak = WeakClaim(this), execCtx = info.GetExecutionContext(),
+                                     func = std::move(jsCallback)](int32_t instanceId) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("updateInstanceForEnvValueFunc");
+
         auto self = weak.Upgrade();
         CHECK_NULL_VOID(self);
+
+        // Env scenario logic: check GetLatestInstanceId
         if (self->GetLatestInstanceId() == instanceId) {
             return;
         }
+
         self->SetLatestInstanceId(instanceId);
         JSRef<JSVal> newInstanceId = JSRef<JSVal>::Make(ToJSValue(instanceId));
         JSRef<JSVal> param[1] = { newInstanceId };
         func->ExecuteJS(1, param);
     };
-    ViewPartialUpdateModel::GetInstance()->RegisterUpdateInstanceForEnvFunc(viewNode_,
-        std::move(updateInstanceForEnvValueFunc));
+
+    // Re-register combined callback
+    RegisterCombinedCallbackToBackend();
 }
+
+void JSViewPartialUpdate::RegisterCombinedCallbackToBackend()
+{
+    // Create combined callback
+    auto combinedCallback = [weak = WeakClaim(this)](int32_t instanceId) {
+        auto self = weak.Upgrade();
+        CHECK_NULL_VOID(self);
+
+        // Call Env callback
+        if (self->updateInstanceForEnvCallback_) {
+            self->updateInstanceForEnvCallback_(instanceId);
+        }
+
+        // Call Switch callback (check needRebuild_ first)
+        if (self->updateJSInstanceCallback_) {
+            self->updateJSInstanceCallback_(instanceId);
+        }
+    };
+
+    // Register combined callback to backend using RegisterUpdateJSInstanceCallback
+    // This directly sets updateJSInstanceCallback_ without needRebuild_ check
+    ViewPartialUpdateModel::GetInstance()->RegisterUpdateJSInstanceCallback(
+        viewNode_, std::move(combinedCallback));
+}
+
+void JSViewPartialUpdate::RegisterOnInstanceIdUpdateCallback(const JSRef<JSFunc>& onInstanceIdUpdateFunc)
+{
+    // Save Switch callback for cross-ability scenario
+    updateJSInstanceCallback_ = [weak = WeakClaim(this), func = std::move(onInstanceIdUpdateFunc),
+                                 viewNode = this->viewNode_](int32_t instanceId) {
+        auto self = weak.Upgrade();
+        CHECK_NULL_VOID(self);
+        JAVASCRIPT_EXECUTION_SCOPE_STATIC;
+        if (self->GetInstanceId() == instanceId) {
+            return;
+        }
+        self->SetInstanceId(instanceId);
+        RefPtr<AceType> node = viewNode.Upgrade();
+        auto customNodeBase = AceType::DynamicCast<NG::CustomNodeBase>(node);
+        CHECK_NULL_VOID(customNodeBase);
+        if (!customNodeBase->NeedRebuild()) {
+            return;
+        }
+        auto jsFunc = JSRef<JSFunc>::Cast(func);
+        if (!self->jsViewObject_.IsEmpty() && !self->jsViewObject_->IsUndefined()) {
+            jsFunc->Call(self->jsViewObject_);
+        } else {
+            TAG_LOGW(AceLogTag::ACE_STATE_MGMT,
+                "JSView %{public}s jsViewObject_ is empty, cannot invoke updateJSInstanceCallback_",
+                self->GetJSViewName().c_str());
+        }
+        customNodeBase->ResetNeedRebuild();
+    };
+
+    // Re-register combined callback
+    RegisterCombinedCallbackToBackend();
+}
+
 
 void JSViewPartialUpdate::SetLatestInstanceId(const int32_t instanceId)
 {

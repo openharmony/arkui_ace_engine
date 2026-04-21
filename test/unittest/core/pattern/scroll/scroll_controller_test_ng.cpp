@@ -14,11 +14,11 @@
  */
 
 #include "scroll_test_ng.h"
-#include "test/mock/adapter/mock_ui_session_manager.h"
-#include "test/mock/core/animation/mock_animation_manager.h"
+#include "test/mock/interfaces/inner_api/ui_session/mock_ui_session_manager.h"
+#include "test/mock/frameworks/core/animation/mock_animation_manager.h"
 #include "core/common/resource/resource_parse_utils.h"
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/core/common/mock_resource_adapter_v2.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/core/common/mock_resource_adapter_v2.h"
 
 namespace OHOS::Ace::NG {
 class ScrollControllerTestNg : public ScrollTestNg, public testing::WithParamInterface<bool> {};
@@ -550,6 +550,69 @@ HWTEST_F(ScrollControllerTestNg, OnInjectionEventTest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnInjectionEventTest003
+ * @tc.desc: test OnInjectionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollControllerTestNg, OnInjectionEventTest003, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::NONE, true, EffectEdge::START);
+    CreateContent();
+    CreateScrollDone();
+
+    std::string command = R"()";
+    pattern_->OnInjectionEvent(command);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->currentOffset_, 0);
+    EXPECT_EQ(pattern_->GetFirstIndex(), -1);
+
+    command = R"({"cmd":"scrollByOffset","eventId":123123,"offset":-20})";
+    pattern_->OnInjectionEvent(command);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->currentOffset_, 0);
+    EXPECT_EQ(pattern_->GetFirstIndex(), -1);
+
+    command = R"({"cmd":"scrollByOffset","eventId":123123,"offset":20})";
+    pattern_->OnInjectionEvent(command);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->currentOffset_, -20);
+    EXPECT_EQ(pattern_->GetFirstIndex(), -1);
+
+    command = R"({"cmd":"scrollByOffset","eventId":123123,"offset":-10})";
+    pattern_->OnInjectionEvent(command);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->currentOffset_, -10);
+    EXPECT_EQ(pattern_->GetFirstIndex(), -1);
+
+    command = R"({"cmd":"scrolloffset","eventId":123123,"offset":10})";
+    pattern_->OnInjectionEvent(command);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->currentOffset_, -10);
+    EXPECT_EQ(pattern_->GetFirstIndex(), -1);
+
+    command = R"({"cmd":"scrollByOffset","eventId":123123)";
+    pattern_->OnInjectionEvent(command);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->currentOffset_, -10);
+    EXPECT_EQ(pattern_->GetFirstIndex(), -1);
+
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    command = R"({"cmd":"scrollByOffset","eventId":123123,"offset":10})";
+    pattern_->OnInjectionEvent(command);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->currentOffset_, -600);
+    EXPECT_EQ(pattern_->GetFirstIndex(), -1);
+}
+
+/**
  * @tc.name: ReportComponentChangeEventTest001
  * @tc.desc: Test ReportComponentChangeEvent
  * @tc.type: FUNC
@@ -572,5 +635,54 @@ HWTEST_F(ScrollControllerTestNg, ReportComponentChangeEventTest001, TestSize.Lev
     std::string command = R"()";
     pattern_->OnInjectionEvent(command);
     EXPECT_EQ(pattern_->currentOffset_, 0);
+}
+
+/**
+ * @tc.name: GetBindingFrameNodeId001
+ * @tc.desc: Test GetBindingFrameNodeId returns valid node id after scroll is created
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollControllerTestNg, GetBindingFrameNodeId001, TestSize.Level1)
+{
+    CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+
+    /**
+     * @tc.steps: step1. Get the binding frame node id from controller
+     * @tc.expected: The node id should match the scroll frame node's id
+     */
+    auto nodeId = positionController_->GetBindingFrameNodeId();
+    EXPECT_EQ(nodeId, frameNode_->GetId());
+}
+
+/**
+ * @tc.name: GetBindingFrameNodeId002
+ * @tc.desc: Test GetBindingFrameNodeId returns -1 when pattern is not set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollControllerTestNg, GetBindingFrameNodeId002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a standalone controller without binding to any pattern
+     * @tc.expected: GetBindingFrameNodeId should return -1
+     */
+    auto controller = AceType::MakeRefPtr<ScrollableController>();
+    EXPECT_EQ(controller->GetBindingFrameNodeId(), -1);
+}
+
+/**
+ * @tc.name: GetBindingFrameNodeId003
+ * @tc.desc: Test ScrollControllerBase default GetBindingFrameNodeId returns -1
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollControllerTestNg, GetBindingFrameNodeId003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call base class GetBindingFrameNodeId
+     * @tc.expected: Default implementation should return -1
+     */
+    auto baseController = AceType::MakeRefPtr<ScrollControllerBase>();
+    EXPECT_EQ(baseController->GetBindingFrameNodeId(), -1);
 }
 } // namespace OHOS::Ace::NG

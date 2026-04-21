@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,8 @@
 
 #include "base/log/dump_log.h"
 #include "core/components/checkable/checkable_theme.h"
+#include "core/components_ng/pattern/checkbox/toggle_checkbox_pattern.h"
+#include "core/components_ng/pattern/overlay/group_manager.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
@@ -301,6 +303,7 @@ void CheckBoxPattern::MarkIsSelected(bool isSelected)
     auto eventHub = GetEventHub<CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->UpdateChangeEvent(isSelected);
+    ReportToggleChangeEvent(isSelected);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (isSelected) {
@@ -676,6 +679,7 @@ void CheckBoxPattern::ChangeSelfStatusAndNotify(const RefPtr<CheckBoxPaintProper
             TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkbox node %{public}d update change event %{public}d",
                 host->GetId(), isSelected);
             checkboxEventHub->UpdateChangeEvent(isSelected);
+            ReportToggleChangeEvent(isSelected);
         }
     }
     StartCustomNodeAnimation(isSelected);
@@ -746,7 +750,9 @@ void CheckBoxPattern::LoadBuilder()
         builder_.value()();
         customNode = NG::ViewStackProcessor::GetInstance()->Finish();
         CHECK_NULL_VOID(customNode);
-        builderNode_ = AceType::DynamicCast<FrameNode>(customNode);
+        auto firstFrameNode = customNode->GetFrameChildByIndex(0, false);
+        CHECK_NULL_VOID(firstFrameNode);
+        builderNode_ = AceType::DynamicCast<FrameNode>(firstFrameNode);
         CHECK_NULL_VOID(builderNode_);
         builderNode_->MountToParent(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
@@ -1288,6 +1294,8 @@ int32_t CheckBoxPattern::OnInjectionEvent(const std::string& command)
 
 void CheckBoxPattern::ReportChangeEvent(bool selectStatus)
 {
+    bool isToggle = AceType::InstanceOf<ToggleCheckBoxPattern>(Claim(this));
+    CHECK_EQUAL_VOID(isToggle, true);
     auto params = JsonUtil::Create();
     CHECK_NULL_VOID(params);
     params->Put("selectStatus", selectStatus);
@@ -1301,6 +1309,25 @@ void CheckBoxPattern::ReportChangeEvent(bool selectStatus)
     json->Put("nodeId", id);
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", json->ToString(),
         ComponentEventType::COMPONENT_EVENT_SELECT);
+}
+
+void CheckBoxPattern::ReportToggleChangeEvent(bool isOn)
+{
+    bool isToggle = AceType::InstanceOf<ToggleCheckBoxPattern>(Claim(this));
+    CHECK_NE_VOID(isToggle, true);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto nodeId = host->GetId();
+    auto params = JsonUtil::Create();
+    CHECK_NULL_VOID(params);
+    params->Put("nodeId", nodeId);
+    params->Put("isOn", isOn);
+    auto json = JsonUtil::Create();
+    CHECK_NULL_VOID(json);
+    json->Put("event", "onToggleChange");
+    json->Put("params", params);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(
+        "result", json->ToString(), ComponentEventType::COMPONENT_EVENT_SELECT);
 }
 
 void CheckBoxPattern::RegisterVisibleAreaChange()

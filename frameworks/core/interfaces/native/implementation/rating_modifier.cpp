@@ -18,14 +18,23 @@
 #include "ui/base/utils/utils.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+#ifdef ARKUI_CAPI_UNITTEST
+const GENERATED_ArkUIRatingModifier* GetRatingStaticModifier();
+#endif
 const GENERATED_ArkUIRatingModifier* GetRatingModifier()
 {
     static const GENERATED_ArkUIRatingModifier* cachedModifier = nullptr;
+
     if (cachedModifier == nullptr) {
+#ifdef ARKUI_CAPI_UNITTEST
+        cachedModifier = GeneratedModifier::GetRatingStaticModifier();
+#else
         auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Rating");
         CHECK_NULL_RETURN(module, nullptr);
         cachedModifier = reinterpret_cast<const GENERATED_ArkUIRatingModifier*>(module->GetStaticModifier());
+#endif
     }
+
     return cachedModifier;
 }
 }

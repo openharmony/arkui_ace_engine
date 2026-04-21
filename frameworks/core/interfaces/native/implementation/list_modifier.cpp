@@ -334,21 +334,6 @@ void SetScrollSnapAlignImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     ListModelStatic::SetScrollSnapAlign(frameNode, Converter::OptConvertPtr<ScrollSnapAlign>(value));
 }
-void SetChildrenMainSizeImpl(Ark_NativePointer node,
-                             const Opt_ChildrenMainSize* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        ListModelStatic::ResetListChildrenMainSize(frameNode);
-        return;
-    }
-    auto peer = *optValue;
-    CHECK_NULL_VOID(peer);
-    RefPtr<ListChildrenMainSize> handler = ListModelStatic::GetOrCreateListChildrenMainSize(frameNode);
-    peer->SetHandler(handler);
-}
 void SetMaintainVisibleContentPositionImpl(Ark_NativePointer node,
                                            const Opt_Boolean* value)
 {
@@ -374,18 +359,17 @@ void SetStackFromEndImpl(Ark_NativePointer node,
     ListModelStatic::SetStackFromEnd(frameNode, convValue);
 }
 void SetEditModeOptionsImpl(Ark_NativePointer node,
-                            const Opt_EditModeOptions* value)
+                            const Ark_EditModeOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     EditModeOptions options;
-    auto convValue = Converter::GetOptPtr(value);
-    if (convValue) {
+    if (value) {
         auto enableGatherSelectedItemsAnimation =
-            Converter::OptConvert<bool>(convValue->enableGatherSelectedItemsAnimation);
+            Converter::OptConvert<bool>(value->enableGatherSelectedItemsAnimation);
         options.enableGatherSelectedItemsAnimation = enableGatherSelectedItemsAnimation.value_or(false);
 
-        auto onGetPreviewBadge = Converter::OptConvert<::Callback_Union_Boolean_I32>(convValue->onGetPreviewBadge);
+        auto onGetPreviewBadge = Converter::OptConvert<::OnGetPreviewBadgeCallback>(value->onGetPreviewBadge);
         if (onGetPreviewBadge) {
             auto modelCallback = [callback = CallbackHelper(*onGetPreviewBadge)]() -> PreviewBadge {
                 auto resultOpt = callback.InvokeWithOptConvertResult<PreviewBadge, Ark_Union_Boolean_I32,
@@ -430,6 +414,18 @@ void SetScrollSnapAnimationSpeedImpl(Ark_NativePointer node,
         speed = static_cast<int32_t>(ScrollSnapAnimationSpeed::NORMAL);
     }
     ListModelStatic::SetScrollSnapAnimationSpeed(frameNode, static_cast<ScrollSnapAnimationSpeed>(speed));
+}
+void SetBackPressBehaviorImpl(Ark_NativePointer node,
+                              const Opt_ListBackPressBehavior* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto behavior = Converter::GetOptPtr(value);
+    bool closeSwipeAction = true;
+    if (behavior.has_value()) {
+        closeSwipeAction = Converter::GetOpt(behavior->closeSwipeAction).value_or(true);
+    }
+    ListModelNG::SetBackPressCloseSwipeAction(frameNode, closeSwipeAction);
 }
 void SetOnScrollIndexImpl(Ark_NativePointer node,
                           const Opt_Callback_I32_I32_I32_Void* value)
@@ -481,7 +477,7 @@ void SetOnItemMoveImpl(Ark_NativePointer node,
     auto onItemMove = [callback = CallbackHelper(*optValue)](int32_t from, int32_t to) {
         auto arkFrom = Converter::ArkValue<Ark_Int32>(from);
         auto arkTo = Converter::ArkValue<Ark_Int32>(to);
-        auto arkResult = callback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(arkFrom, arkTo);
+        auto arkResult = callback.InvokeWithObtainResult<Ark_Boolean, synthetic_Callback_Boolean_Void>(arkFrom, arkTo);
         return Converter::Convert<bool>(arkResult);
     };
     ListModelStatic::SetOnItemMove(frameNode, std::move(onItemMove));
@@ -501,7 +497,7 @@ void SetOnItemDragStartImpl(Ark_NativePointer node,
         auto arkDragInfo = Converter::ArkValue<Ark_ItemDragInfo>(dragInfo);
         auto arkItemIndex = Converter::ArkValue<Ark_Int32>(itemIndex);
         auto builderOpt = callback.InvokeWithOptConvertResult<CustomNodeBuilder, Opt_CustomNodeBuilder,
-            Callback_Opt_CustomBuilder_Void>(arkDragInfo, arkItemIndex);
+            Callback_Opt_CustomNodeBuilder_Void>(arkDragInfo, arkItemIndex);
         if (!builderOpt.has_value()) {
             return nullptr;
         }
@@ -729,7 +725,6 @@ const GENERATED_ArkUIListModifier* GetListModifier()
         ListAttributeModifier::SetChainAnimationOptionsImpl,
         ListAttributeModifier::SetStickyImpl,
         ListAttributeModifier::SetScrollSnapAlignImpl,
-        ListAttributeModifier::SetChildrenMainSizeImpl,
         ListAttributeModifier::SetMaintainVisibleContentPositionImpl,
         ListAttributeModifier::SetSupportEmptyBranchInLazyLoadingImpl,
         ListAttributeModifier::SetStackFromEndImpl,
@@ -737,6 +732,7 @@ const GENERATED_ArkUIListModifier* GetListModifier()
         ListAttributeModifier::SetFocusWrapModeImpl,
         ListAttributeModifier::SetSyncLoadImpl,
         ListAttributeModifier::SetScrollSnapAnimationSpeedImpl,
+        ListAttributeModifier::SetBackPressBehaviorImpl,
         ListAttributeModifier::SetOnScrollIndexImpl,
         ListAttributeModifier::SetOnScrollVisibleContentChangeImpl,
         ListAttributeModifier::SetOnItemMoveImpl,

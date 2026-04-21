@@ -64,15 +64,19 @@ public:
     void UpdateBorderWidth(const CalcDimension& borderWidth, bool isFirstLoad = false);
     void UpdateOuterBorderWidth(const CalcDimension& outerBorderWidth, bool isFirstLoad = false);
     void OnColorConfigurationUpdate() override;
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
 private:
     void OnModifyDone() override;
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override;
+    void ReportComponentChangeEvent(const std::string& event);
     void BorderDumpInfo();
     void BorderDumpInfo(std::unique_ptr<JsonValue>& json);
     int32_t textNodeId_ = -2;
+    int32_t count_ = 0;
+    std::string value_;
 };
 } // namespace OHOS::Ace::NG
 

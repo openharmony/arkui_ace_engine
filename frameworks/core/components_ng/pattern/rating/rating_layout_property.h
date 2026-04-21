@@ -21,7 +21,6 @@
 #include "base/geometry/dimension.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/rating/rating_property_group.h"
-#include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;

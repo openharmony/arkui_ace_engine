@@ -14,7 +14,7 @@
  */
 
 #include "swiper_test_ng.h"
-#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
 
 #include "core/components_ng/pattern/swiper/swiper_paint_method.h"
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_method.h"
@@ -632,7 +632,14 @@ HWTEST_F(SwiperIndicatorModifierTestTwoNg, DotIndicatorModifier013, TestSize.Lev
     dotIndicatorModifier.PaintBackground(context, contentProperty);
 
     /**
-     * @tc.steps: step3.Call vectorBlackPointCenterX.size is 0
+     * @tc.steps: step3.Call isLongPressed true
+     * @tc.expected: The PaintBackground executed successfuly
+     */
+    dotIndicatorModifier.isLongPressed_ = true;
+    dotIndicatorModifier.PaintBackground(context, contentProperty);
+
+    /**
+     * @tc.steps: step4.Call vectorBlackPointCenterX.size is 0
      * @tc.expected: The PaintBackground executed successfuly
      */
     vectorBlackPointCenterX.clear();

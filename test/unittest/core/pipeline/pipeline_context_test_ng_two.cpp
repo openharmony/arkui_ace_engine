@@ -17,6 +17,7 @@
 // Add the following two macro definitions to test the private and protected method.
 #define private public
 #define protected public
+#include "core/common/event_manager.h"
 
 #include "adapter/ohos/osal/thp_extra_manager_impl.h"
 #include "core/accessibility/accessibility_manager_ng.h"
@@ -27,7 +28,7 @@
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/event/axis_event.h"
 #include "core/event/mouse_event.h"
-#include "test/mock/core/common/mock_window.h"
+#include "test/mock/frameworks/core/common/mock_window.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1547,7 +1548,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg176, TestSize.Level1)
     RefPtr<FrameNode> child = FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, 0, AceType::MakeRefPtr<Pattern>());
     context_->rootNode_->children_.clear();
     context_->rootNode_->AddChild(child);
-    context_->MarkDirtyOverlay();
+    context_->OnKeyboardAvoidOverlay();
     EXPECT_EQ(context_->rootNode_->GetChildren().size(), 1);
 }
 
@@ -2017,6 +2018,12 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg190, TestSize.Level1)
      * Test the parameters frameCallbackFunc and idleCallbackFunc are not nullptr, and delayMillis is granter than 0.
      * @tc.expected: The member frameCallbackFuncs_ is not empty
      */
+    frameCallbackFunc = [](uint64_t nanoTimestamp) {
+        return;
+    };
+    idleCallbackFunc = [](uint64_t nanoTimestamp, uint32_t frameCount) {
+        return;
+    };
     context_->frameCallbackFuncs_.clear();
     context_->AddFrameCallback(std::move(frameCallbackFunc), std::move(idleCallbackFunc), delayMillis);
     EXPECT_FALSE(context_->frameCallbackFuncs_.empty());
@@ -2191,7 +2198,8 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg195, TestSize.Level1)
      * @tc.steps2: Call function FlushWindowActivateChangedCallback;
      * @tc.expected: The onWindowActivateChangedCallbacks_ is empty
      */
-    context_->onWindowActivateChangedCallbacks_.insert(10);
+    auto emptyNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    context_->onWindowActivateChangedCallbacks_.insert(emptyNodeId);
     context_->FlushWindowActivateChangedCallback(isActivate);
     EXPECT_TRUE(context_->onWindowActivateChangedCallbacks_.empty());
 
@@ -2199,9 +2207,11 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg195, TestSize.Level1)
      * @tc.steps3: Call function FlushWindowActivateChangedCallback;
      * @tc.expected: The onWindowActivateChangedCallbacks_ is not empty
      */
-    context_->onWindowActivateChangedCallbacks_.insert(10);
-    ElementIdType elmtId = 10;
-    RefPtr<FrameNode> rootNode = AceType::MakeRefPtr<FrameNode>("test3", 3, AceType::MakeRefPtr<Pattern>());
+    auto activeNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    context_->onWindowActivateChangedCallbacks_.insert(activeNodeId);
+    ElementIdType elmtId = activeNodeId;
+    RefPtr<FrameNode> rootNode = AceType::MakeRefPtr<FrameNode>(
+        "test3", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     WeakPtr<FrameNode> referenced = AceType::WeakClaim(AceType::RawPtr(rootNode));
     ElementRegister::GetInstance()->AddReferenced(elmtId, referenced);
     context_->FlushWindowActivateChangedCallback(isActivate);
@@ -2214,6 +2224,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg195, TestSize.Level1)
     isActivate = true;
     context_->FlushWindowActivateChangedCallback(isActivate);
     EXPECT_TRUE(!context_->onWindowActivateChangedCallbacks_.empty());
+    ElementRegister::GetInstance()->RemoveItemSilently(elmtId);
 }
 
 /**
@@ -2405,10 +2416,10 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg303, TestSize.Level1)
      * @tc.steps2: Call the function CompensateTouchMoveEventBeforeDown.
      * @tc.expected: Test if this function is available and the events is consumed.
      */
-    context_->CompensateTouchMoveEventBeforeDown();
+    context_->CompensateTouchMoveEventBeforeDown(context_->touchEvents_);
     context_->touchEvents_.push_back(touchEventOne);
     context_->touchEvents_.push_back(touchEventTwo);
-    context_->CompensateTouchMoveEventBeforeDown();
+    context_->CompensateTouchMoveEventBeforeDown(context_->touchEvents_);
     EXPECT_TRUE(context_->touchEvents_.empty());
 }
 
@@ -2706,6 +2717,52 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg409, TestSize.Level1)
     context_->OnAxisEvent(lastEvent, context_->rootNode_);
     context_->OnAxisEvent(currentEvent, context_->rootNode_);
     EXPECT_EQ(context_->eventManager_->deviceIdChecker_.empty(), false);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg410
+ * @tc.desc: Test OnTouchEvent with SourceTool.MOUSE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg410, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    const std::chrono::milliseconds timeoutMs{ 300 };
+    const std::chrono::milliseconds durationVsyncTimeMs{ 7 };
+    TimeStamp currentTime = std::chrono::high_resolution_clock::now();
+    context_->compatibleManager_.BreakGenerate();
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.id = 1;
+    touchEvent.x = 100.0f;
+    touchEvent.y = 100.0f;
+    touchEvent.sourceTool = SourceTool::FINGER;
+    touchEvent.sourceType = SourceType::TOUCH;
+    touchEvent.primitiveSourceTool = SourceTool::MOUSE;
+    touchEvent.convertInfo.first = UIInputEventType::AXIS;
+    touchEvent.SetTime(currentTime - durationVsyncTimeMs * 2);
+    touchEvent.isGenerate = false;
+    context_->OnTouchEvent(touchEvent, false);
+    EXPECT_EQ(context_->compatibleManager_.GetCurrentStateType(), StateType::READY);
+
+    touchEvent.type = TouchType::MOVE;
+    touchEvent.y = 200.0f;
+    touchEvent.SetTime(currentTime - durationVsyncTimeMs);
+    context_->OnTouchEvent(touchEvent, false);
+    EXPECT_EQ(context_->compatibleManager_.GetCurrentStateType(), StateType::ONGOING);
+
+    touchEvent.type = TouchType::UP;
+    touchEvent.SetTime(currentTime);
+    context_->OnTouchEvent(touchEvent, false);
+
+    context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
+    int32_t timeSleepUs = durationVsyncTimeMs.count() * 1000;
+    while (context_->compatibleManager_.GetGeneratedMoveEvent()) {
+        usleep(timeSleepUs);
+        context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
+        ASSERT_TRUE(std::chrono::high_resolution_clock::now() - currentTime < timeoutMs);
+    }
+    EXPECT_EQ(context_->compatibleManager_.GetCurrentStateType(), StateType::IDLE);
 }
 } // namespace NG
 } // namespace OHOS::Ace

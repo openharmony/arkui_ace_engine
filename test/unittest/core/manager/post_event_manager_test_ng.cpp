@@ -21,9 +21,10 @@
 #include "core/event/touch_event.h"
 #define private public
 #define protected public
+#include "core/common/event_manager.h"
 
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -38,6 +39,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 const std::string ROOT_TAG("root");
+constexpr int32_t DEFAULT_POINTER_TIME_DIFFERENT = 1;
 } // namespace
 
 class PostEventManagerTestNg : public testing::Test {
@@ -792,6 +794,32 @@ HWTEST_F(PostEventManagerTestNg, PostTouchEventTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PostTouchEventWithStrategyTest001
+ * @tc.desc: test PostTouchEventWithStrategy func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, PostTouchEventWithStrategyTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a FrameNode and set gesture.
+     */
+    Init();
+
+    /**
+     * @tc.steps: step2. Simulate when the user touchDown and then handles the out-of-hand
+     *                   action event through the PostDownEvent function.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<NG::UINode>(frameNode);
+    TouchEvent touchEvent;
+    touchEvent.type = Ace::TouchType::DOWN;
+    postEventManager_->passThroughResult_ = true;
+    postEventManager_->PostTouchEventWithStrategy(uiNode, std::move(touchEvent));
+
+    EXPECT_FALSE(postEventManager_->passThroughResult_);
+}
+
+/**
  * @tc.name: PostTouchEventTest002
  * @tc.desc: test PostTouchEvent func.
  * @tc.type: FUNC
@@ -847,6 +875,44 @@ HWTEST_F(PostEventManagerTestNg, PostMouseEventTest001, TestSize.Level1)
     postEventManager_->PostMouseEvent(uiNode, std::move(mouseEvent));
 
     EXPECT_FALSE(postEventManager_->passThroughResult_);
+}
+
+/**
+ * @tc.name: PostAxisEventWithStrategy001
+ * @tc.desc: test PostAxisEventWithStrategy func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, PostAxisEventWithStrategy001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a FrameNode and set gesture.
+     */
+    Init();
+
+    /**
+     * @tc.steps: step2. Simulate when the user touchDown and then handles the out-of-hand
+     *                   action event through the PostDownEvent function.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<NG::UINode>(frameNode);
+    AxisEvent axisEvent;
+    postEventManager_->passThroughResult_ = true;
+    postEventManager_->PostAxisEventWithStrategy(uiNode, std::move(axisEvent));
+
+    EXPECT_FALSE(postEventManager_->passThroughResult_);
+}
+
+/**
+ * @tc.name: PostAxisEventWithStrategy002
+ * @tc.desc: test PostAxisEventWithStrategy with null uiNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, PostAxisEventWithStrategy002, TestSize.Level1)
+{
+    Init();
+    AxisEvent axisEvent;
+    auto result = postEventManager_->PostAxisEventWithStrategy(nullptr, std::move(axisEvent));
+    EXPECT_FALSE(result);
 }
 
 /**
@@ -1310,6 +1376,19 @@ HWTEST_F(PostEventManagerTestNg, PostMouseEventTest003, TestSize.Level1)
     Init();
     MouseEvent mouseEvent;
     auto result = postEventManager_->PostMouseEvent(nullptr, std::move(mouseEvent));
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: PostMouseEventWithStrategy001
+ * @tc.desc: test PostMouseEventWithStrategy with null uiNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, PostMouseEventWithStrategy001, TestSize.Level1)
+{
+    Init();
+    MouseEvent mouseEvent;
+    auto result = postEventManager_->PostMouseEventWithStrategy(nullptr, std::move(mouseEvent));
     EXPECT_FALSE(result);
 }
 
@@ -1832,6 +1911,8 @@ HWTEST_F(PostEventManagerTestNg, CheckPointValidityTest002, TestSize.Level1)
     eventAction.touchEvent = touchEvent;
     postEventManager_->postEventAction_.push_back(eventAction);
 
+    // cost 1ms to creat different time
+    std::this_thread::sleep_for(std::chrono::milliseconds(DEFAULT_POINTER_TIME_DIFFERENT));
     // Check with different time
     TouchEvent touchEvent2;
     touchEvent2.type = TouchType::MOVE;
@@ -2659,40 +2740,6 @@ HWTEST_F(PostEventManagerTestNg, ClearPostInputActionsTouchTest002, TestSize.Lev
 }
 
 /**
- * @tc.name: ClearPostInputActionsDefaultTypeTest
- * @tc.desc: test ClearPostInputActions with default/invalid type.
- * @tc.type: FUNC
- */
-HWTEST_F(PostEventManagerTestNg, ClearPostInputActionsDefaultTypeTest, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. construct FrameNode and UINode.
-     */
-    Init();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
-    auto uiNode = AceType::DynamicCast<NG::UINode>(frameNode);
-
-    /**
-     * @tc.steps: step2. add touch event.
-     */
-    TouchEvent touchEvent;
-    touchEvent.type = TouchType::DOWN;
-    touchEvent.id = 1;
-    PostEventAction action;
-    action.targetNode = uiNode;
-    action.touchEvent = touchEvent;
-    postEventManager_->postInputEventAction_.push_back(action);
-
-    auto sizeBefore = postEventManager_->postInputEventAction_.size();
-
-    /**
-     * @tc.steps: step3. try to clear with invalid type and verify size unchanged.
-     */
-    postEventManager_->ClearPostInputActions(uiNode, 1, static_cast<PostInputEventType>(99));
-    EXPECT_EQ(postEventManager_->postInputEventAction_.size(), sizeBefore);
-}
-
-/**
  * @tc.name: PostMouseEventFullSequenceTest
  * @tc.desc: test PostMouseEvent with full event sequence.
  * @tc.type: FUNC
@@ -2743,6 +2790,40 @@ HWTEST_F(PostEventManagerTestNg, PostMouseEventFullSequenceTest, TestSize.Level1
     releaseEvent.id = 1;
     postEventManager_->PostMouseEvent(uiNode, std::move(releaseEvent));
     EXPECT_TRUE(postEventManager_->postMouseEventAction_.empty());
+}
+
+/**
+ * @tc.name: ClearPostInputActionsDefaultTypeTest
+ * @tc.desc: test ClearPostInputActions with default/invalid type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, ClearPostInputActionsDefaultTypeTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct FrameNode and UINode.
+     */
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    /**
+     * @tc.steps: step2. add touch event.
+     */
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.id = 1;
+    PostEventAction action;
+    action.targetNode = uiNode;
+    action.touchEvent = touchEvent;
+    postEventManager_->postInputEventAction_.push_back(action);
+
+    auto sizeBefore = postEventManager_->postInputEventAction_.size();
+
+    /**
+     * @tc.steps: step3. try to clear with invalid type and verify size unchanged.
+     */
+    postEventManager_->ClearPostInputActions(uiNode, 1, static_cast<PostInputEventType>(99));
+    EXPECT_EQ(postEventManager_->postInputEventAction_.size(), sizeBefore);
 }
 
 /**
@@ -2975,5 +3056,40 @@ HWTEST_F(PostEventManagerTestNg, CheckAxisEventInstanceIDTest, TestSize.Level1)
 
     auto result2 = postEventManager_->CheckAxisEvent(uiNode, duplicateBeginEvent, 200);
     EXPECT_TRUE(result2);
+}
+
+/**
+ * @tc.name: CheckMouseEvent001
+ * @tc.desc: test CheckMouseEvent with duplicate PRESS event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, CheckMouseEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct FrameNode and UINode.
+     */
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    /**
+     * @tc.steps: step2. add first PRESS event to action queue.
+     */
+    MouseEvent pressEvent;
+    pressEvent.action = MouseAction::PRESS;
+    pressEvent.id = 1;
+    PostMouseEventAction action;
+    action.targetNode = uiNode;
+    action.mouseEvent = pressEvent;
+    postEventManager_->postMouseEventAction_.push_back(action);
+
+    /**
+     * @tc.steps: step3. test duplicate PRESS event and verify it succeeds (error is reported but returns true).
+     */
+    MouseEvent duplicatePressEvent;
+    duplicatePressEvent.action = MouseAction::PRESS;
+    duplicatePressEvent.id = 1;
+    auto result = postEventManager_->CheckMouseEvent(uiNode, duplicatePressEvent, 0);
+    EXPECT_TRUE(result);
 }
 } // namespace OHOS::Ace::NG

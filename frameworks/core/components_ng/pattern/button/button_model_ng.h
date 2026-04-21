@@ -19,7 +19,10 @@
 #include "core/common/resource/resource_object.h"
 #include "core/components_ng/base/common_configuration.h"
 #include "core/components_ng/pattern/button/button_model.h"
-#include "core/components/button/button_theme.h"
+
+namespace OHOS::Ace {
+class ButtonTheme;
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
 class ButtonConfiguration : public CommonConfiguration {
@@ -39,6 +42,7 @@ public:
     void SetFontStyle(const Ace::FontStyle& fontStyle) override;
     void SetFontFamily(const std::vector<std::string>& fontFamily) override;
     void SetFontColor(const Color& textColor) override;
+    void SetFontColorDefault(const Color& textColor) override;
     void SetType(const int value) override;
     void SetStateEffect(const bool stateEffect) override;
     void SetLabelStyle(ButtonParameters& buttonParameters) override;
@@ -48,6 +52,7 @@ public:
     void Padding(const PaddingProperty& paddingNew, const Edge& paddingOld) override;
     void OnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc, double distanceThreshold) override;
     void BackgroundColor(const Color& color, const bool& colorFlag) override;
+    void BackgroundColorDefault(const Color& color) override;
     void SetSize(const std::optional<Dimension>& width, const std::optional<Dimension>& height) override;
     void SetBorderRadius(const Dimension& radius) override;
     void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft, const std::optional<Dimension>& radiusTopRight,
@@ -73,7 +78,7 @@ public:
     void CreateWithDoubleResourceObj(const RefPtr<ResourceObject>& resObj,
         const ButtonDoubleType buttonDoubleType) override;
     static void UpdateResColor(FrameNode* frameNode, Color result, const ButtonColorType buttonColorType);
-    static void ParseButtonResColor(
+    static void ParseButtonResColor(const RefPtr<FrameNode>& frameNode,
         const RefPtr<ResourceObject>& resObj, Color& result, const ButtonColorType buttonColorType);
     void CreateWithFamiliesResourceObj(const RefPtr<ResourceObject>& resObj,
         const ButtonStringType buttonStringType) override;
@@ -95,7 +100,7 @@ public:
     static void SetFontWeight(FrameNode* frameNode, const Ace::FontWeight& fontWeight);
     static void SetFontStyle(FrameNode* frameNode, const Ace::FontStyle& fontStyle);
     static void SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& fontFamily);
-    static void SetFontColor(FrameNode* frameNode, const Color& textColor);
+    static void SetFontColor(FrameNode* frameNode, const Color& textColor, bool isUserSet = true);
     static void SetType(FrameNode* frameNode, const int value);
     static void SetStateEffect(FrameNode* frameNode, const bool stateEffect);
     static void SetLabelStyle(FrameNode* frameNode, const ButtonParameters& buttonParameters);

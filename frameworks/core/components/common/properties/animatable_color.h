@@ -16,9 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_PROPERTIES_ANIMATABLE_COLOR_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_PROPERTIES_ANIMATABLE_COLOR_H
 
+#include <functional>
+#include <memory>
+
 #include "base/utils/macros.h"
 #include "core/animation/animator.h"
-#include "core/animation/curve_animation.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/common/properties/color.h"
 
@@ -33,11 +35,12 @@ using RenderNodeAnimationCallback = std::function<void()>;
  */
 class ACE_FORCE_EXPORT AnimatableColor final : public Color {
 public:
-    ACE_FORCE_EXPORT AnimatableColor();
-    ACE_FORCE_EXPORT explicit AnimatableColor(uint32_t value, const AnimationOption& option = AnimationOption());
+    AnimatableColor();
+    explicit AnimatableColor(uint32_t value, const AnimationOption& option = AnimationOption());
 
-    ACE_FORCE_EXPORT explicit AnimatableColor(const Color& color, const AnimationOption& option = AnimationOption());
-    ACE_FORCE_EXPORT ~AnimatableColor();
+    explicit AnimatableColor(const Color& color, const AnimationOption& option = AnimationOption());
+    AnimatableColor(const AnimatableColor& other) : Color(other.GetValue()), animationOption_(other.animationOption_) {}
+    ~AnimatableColor();
 
     void SetContextAndCallback(const WeakPtr<PipelineContext>& context, const RenderNodeAnimationCallback& callback);
 
@@ -51,7 +54,7 @@ public:
         animationOption_ = option;
     }
 
-    ACE_FORCE_EXPORT AnimatableColor& operator=(const AnimatableColor& newColor);
+    AnimatableColor& operator=(const AnimatableColor& newColor);
 
 private:
     void AnimateTo(uint32_t endValue);

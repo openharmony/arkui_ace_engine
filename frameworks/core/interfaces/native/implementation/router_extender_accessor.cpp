@@ -71,7 +71,8 @@ void Push0Impl(Ark_VMContext vmContext,
     };
     promise->StartAsync(vmContext, *asyncWorker, std::move(execFunc));
 }
-void Push1Impl(Ark_NativePointer jsView,
+void Push1Impl(Ark_VMContext vmContext,
+               Ark_NativePointer jsView,
                const Ark_PageRouterOptions* options,
                const Opt_RouterFinishCallback* finishCallback,
                const Opt_Router_BusinessError_Void* callback_)
@@ -152,7 +153,8 @@ void Replace0Impl(Ark_VMContext vmContext,
     };
     promise->StartAsync(vmContext, *asyncWorker, std::move(execFunc));
 }
-void Replace1Impl(Ark_NativePointer jsView,
+void Replace1Impl(Ark_VMContext vmContext,
+                  Ark_NativePointer jsView,
                   const Ark_PageRouterOptions* options,
                   const Opt_RouterFinishCallback* finishCallback,
                   const Opt_Router_BusinessError_Void* callback_)
@@ -189,7 +191,8 @@ void Replace1Impl(Ark_NativePointer jsView,
     CHECK_NULL_VOID(delegate);
     delegate->ReplaceExtender(routerOptions, std::move(callback), jsView);
 }
-void Back0Impl(const Opt_RouterOptionsInner* options)
+void Back0Impl(Ark_VMContext vmContext,
+               const Opt_RouterOptionsInner* options)
 {
     CHECK_NULL_VOID(options);
     auto container = Container::Current();
@@ -207,7 +210,8 @@ void Back0Impl(const Opt_RouterOptionsInner* options)
     }
     delegate->BackExtender(url, params);
 }
-void Back1Impl(Ark_Int32 index,
+void Back1Impl(Ark_VMContext vmContext,
+               Ark_Int32 index,
                const Opt_String* optParams)
 {
     auto container = Container::Current();
@@ -221,9 +225,10 @@ void Back1Impl(Ark_Int32 index,
     }
     delegate->BackToIndexExtender(indexNum, params);
 }
-void RunPageImpl(Ark_NativePointer jsView,
-                              const Ark_PageRouterOptions* options,
-                              const Opt_RouterFinishCallback* finishCallback)
+void RunPageImpl(Ark_VMContext vmContext,
+                 Ark_NativePointer jsView,
+                 const Ark_PageRouterOptions* options,
+                 const Opt_RouterFinishCallback* finishCallback)
 {
     CHECK_NULL_VOID(jsView && options && finishCallback);
     PageRouterOptions routerOptions;
@@ -249,7 +254,7 @@ void RunPageImpl(Ark_NativePointer jsView,
     CHECK_NULL_VOID(delegate);
     delegate->RunPageExtender(routerOptions, std::move(callback), jsView);
 }
-void ClearImpl()
+void ClearImpl(Ark_VMContext vmContext)
 {
     auto container = Container::Current();
     CHECK_NULL_VOID(container);

@@ -15,7 +15,10 @@
 
 #include "core/components_ng/pattern/grid/grid_item_accessibility_property.h"
 
+#include "core/components_ng/pattern/grid/grid_accessibility_property.h"
+#include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
+#include "core/components_ng/pattern/grid/grid_pattern.h"
 
 namespace OHOS::Ace::NG {
 bool GridItemAccessibilityProperty::IsSelected() const

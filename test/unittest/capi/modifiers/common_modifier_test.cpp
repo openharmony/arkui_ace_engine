@@ -41,7 +41,7 @@ HWTEST_F(CommonModifierTest, commonTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> json = GetJsonValue(node_);
     const auto result = GetAttrValue<std::string>(json, ATTRIBUTE_ALIGN_NAME);
-    EXPECT_EQ(result, ATTRIBUTE_ALIGN_DEFAULT_VALUE);
+    EXPECT_THAT(result, Eq(ATTRIBUTE_ALIGN_DEFAULT_VALUE));
 }
 
 } // namespace OHOS::Ace::NG

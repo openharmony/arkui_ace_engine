@@ -32,26 +32,16 @@ void MarqueeModelNG::Create()
         auto textNode = FrameNode::CreateFrameNode(
             TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+        textLayoutProperty->UpdateEnableSmallLanguageTruncation(true);
         textLayoutProperty->UpdateMaxLines(1);
         frameNode->AddChild(textNode);
-
-        auto secondChild = FrameNode::CreateFrameNode(
-            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-        auto secondLayoutProperty = secondChild->GetLayoutProperty<TextLayoutProperty>();
-        secondLayoutProperty->UpdateMaxLines(1);
-        frameNode->AddChild(secondChild);
     } else {
         auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
         CHECK_NULL_VOID(textChild);
         auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateEnableSmallLanguageTruncation(true);
         textLayoutProperty->UpdateMaxLines(1);
-
-        auto secondChild = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
-        CHECK_NULL_VOID(secondChild);
-        auto secondLayoutProperty = secondChild->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(secondLayoutProperty);
-        secondLayoutProperty->UpdateMaxLines(1);
     }
     stack->Push(frameNode);
 }
@@ -186,6 +176,15 @@ void MarqueeModelNG::SetOnFinish(std::function<void()>&& onChange)
     eventHub->SetOnFinish(std::move(onChange));
 }
 
+void MarqueeModelNG::SetOnStop(std::function<void()>&& onChange)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<MarqueeEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnStop(std::move(onChange));
+}
+
 RefPtr<FrameNode> MarqueeModelNG::CreateFrameNode(int32_t nodeId)
 {
     auto frameNode = FrameNode::CreateFrameNode(MARQUEE_ETS_TAG, nodeId, AceType::MakeRefPtr<MarqueePattern>());
@@ -196,28 +195,16 @@ RefPtr<FrameNode> MarqueeModelNG::CreateFrameNode(int32_t nodeId)
         CHECK_NULL_RETURN(textNode, nullptr);
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_RETURN(textLayoutProperty, nullptr);
+        textLayoutProperty->UpdateEnableSmallLanguageTruncation(true);
         textLayoutProperty->UpdateMaxLines(TEXT_MAX_LINES);
         frameNode->AddChild(textNode);
-
-        auto secondChild = FrameNode::CreateFrameNode(
-            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-        CHECK_NULL_RETURN(secondChild, nullptr);
-        auto secondLayoutProperty = secondChild->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_RETURN(secondLayoutProperty, nullptr);
-        secondLayoutProperty->UpdateMaxLines(1);
-        frameNode->AddChild(secondChild);
     } else {
         auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
         CHECK_NULL_RETURN(textChild, nullptr);
         auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_RETURN(textLayoutProperty, nullptr);
+        textLayoutProperty->UpdateEnableSmallLanguageTruncation(true);
         textLayoutProperty->UpdateMaxLines(TEXT_MAX_LINES);
-
-        auto secondChild = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
-        CHECK_NULL_RETURN(secondChild, nullptr);
-        auto secondLayoutProperty = secondChild->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_RETURN(secondLayoutProperty, nullptr);
-        secondLayoutProperty->UpdateMaxLines(1);
     }
     return frameNode;
 }
@@ -344,6 +331,22 @@ void MarqueeModelNG::ResetOnFinish(FrameNode* frameNode)
     auto eventHub = frameNode->GetEventHub<MarqueeEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnFinish(nullptr);
+}
+
+void MarqueeModelNG::SetOnStop(FrameNode* frameNode, std::function<void()>&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<MarqueeEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnStop(std::move(onChange));
+}
+
+void MarqueeModelNG::ResetOnStop(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<MarqueeEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnStop(nullptr);
 }
 
 void MarqueeModelNG::SetMarqueeFrameRateRange(

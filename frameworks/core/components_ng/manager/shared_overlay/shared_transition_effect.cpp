@@ -15,6 +15,7 @@
 
 #include "core/components_ng/manager/shared_overlay/shared_transition_effect.h"
 
+#include "core/animation/curve_animation.h"
 #include "core/components/common/properties/motion_path_evaluator.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 

@@ -91,16 +91,16 @@ public:
 HWTEST_F(DataPanelModifierTest, setDataPanelOptionsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUES_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_VALUES_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_VALUES_DEFAULT_VALUE));
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MAX_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_MAX_DEFAULT_VALUE));
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TYPE_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_TYPE_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'values' of method 'setDataPanelOptions'
@@ -140,7 +140,7 @@ static std::vector<std::tuple<std::string, Opt_DataPanelType, std::string>> setD
 HWTEST_F(DataPanelModifierTest, setDataPanelOptionsTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_DataPanelOptions inputValueOptions;
     Ark_DataPanelOptions initValueOptions;
@@ -160,7 +160,7 @@ HWTEST_F(DataPanelModifierTest, setDataPanelOptionsTestValidValues, TestSize.Lev
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUES_NAME);
         DisposeNode(node);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 
     // Verifying attribute's 'max'  values
@@ -173,7 +173,7 @@ HWTEST_F(DataPanelModifierTest, setDataPanelOptionsTestValidValues, TestSize.Lev
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_NAME);
         DisposeNode(node);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 
     // Verifying attribute's 'type'  values
@@ -186,7 +186,7 @@ HWTEST_F(DataPanelModifierTest, setDataPanelOptionsTestValidValues, TestSize.Lev
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
         DisposeNode(node);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -217,7 +217,7 @@ static std::vector<std::tuple<std::string, Opt_DataPanelType>> setDataPanelOptio
 HWTEST_F(DataPanelModifierTest, setDataPanelOptionsTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_DataPanelOptions inputValueOptions;
     Ark_DataPanelOptions initValueOptions;
@@ -237,7 +237,7 @@ HWTEST_F(DataPanelModifierTest, setDataPanelOptionsTestInvalidValues, TestSize.L
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUES_NAME);
         DisposeNode(node);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 
     // Verifying attribute's 'max'  values
@@ -249,7 +249,7 @@ HWTEST_F(DataPanelModifierTest, setDataPanelOptionsTestInvalidValues, TestSize.L
         jsonValue = GetJsonValue(node);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_MAX_DEFAULT_VALUE) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(ATTRIBUTE_MAX_DEFAULT_VALUE)) << "Passed value is: " << std::get<0>(value);
     }
 
     // Verifying attribute's 'type'  values
@@ -261,7 +261,7 @@ HWTEST_F(DataPanelModifierTest, setDataPanelOptionsTestInvalidValues, TestSize.L
         jsonValue = GetJsonValue(node);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_TYPE_DEFAULT_VALUE) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(ATTRIBUTE_TYPE_DEFAULT_VALUE)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -273,8 +273,8 @@ HWTEST_F(DataPanelModifierTest, setDataPanelOptionsTestInvalidValues, TestSize.L
 HWTEST_F(DataPanelModifierTest, setCloseEffectTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CLOSE_EFFECT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_CLOSE_EFFECT_DEFAULT_VALUE);
+    auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CLOSE_EFFECT_NAME);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_CLOSE_EFFECT_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'closeEffect' of method 'closeEffect'
@@ -291,7 +291,7 @@ static std::vector<std::tuple<std::string, Ark_Boolean, std::string>> closeEffec
 HWTEST_F(DataPanelModifierTest, setCloseEffectTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_Boolean inputValueCloseEffect;
     Ark_Boolean initValueCloseEffect;
@@ -308,7 +308,7 @@ HWTEST_F(DataPanelModifierTest, setCloseEffectTestValidValues, TestSize.Level1)
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CLOSE_EFFECT_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -320,10 +320,10 @@ HWTEST_F(DataPanelModifierTest, setCloseEffectTestValidValues, TestSize.Level1)
 HWTEST_F(DataPanelModifierTest, setStrokeWidthTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STROKE_WIDTH_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_STROKE_WIDTH_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_STROKE_WIDTH_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'strokeWidth' of method 'strokeWidth'
@@ -339,7 +339,7 @@ static std::vector<std::tuple<std::string, Ark_Length, std::string>> strokeWidth
 HWTEST_F(DataPanelModifierTest, DISABLED_setStrokeWidthTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_Length inputValueStrokeWidth;
     Ark_Length initValueStrokeWidth;
@@ -356,7 +356,7 @@ HWTEST_F(DataPanelModifierTest, DISABLED_setStrokeWidthTestValidValues, TestSize
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STROKE_WIDTH_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -373,7 +373,7 @@ static std::vector<std::tuple<std::string, Ark_Length, std::string>> strokeWidth
 HWTEST_F(DataPanelModifierTest, DISABLED_setStrokeWidthTestResourceValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_Length inputValueStrokeWidth;
     Ark_Length initValueStrokeWidth;
@@ -390,7 +390,7 @@ HWTEST_F(DataPanelModifierTest, DISABLED_setStrokeWidthTestResourceValues, TestS
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STROKE_WIDTH_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -406,7 +406,7 @@ static std::vector<std::tuple<std::string, Ark_Length, std::string>> strokeWidth
 HWTEST_F(DataPanelModifierTest, setStrokeWidthTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_Length inputValueStrokeWidth;
     Ark_Length initValueStrokeWidth;
@@ -423,7 +423,7 @@ HWTEST_F(DataPanelModifierTest, setStrokeWidthTestInvalidValues, TestSize.Level1
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STROKE_WIDTH_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -435,10 +435,10 @@ HWTEST_F(DataPanelModifierTest, setStrokeWidthTestInvalidValues, TestSize.Level1
 HWTEST_F(DataPanelModifierTest, setTrackBackgroundColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TRACK_BACKGROUND_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TRACK_BACKGROUND_COLOR_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_TRACK_BACKGROUND_COLOR_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'trackBackgroundColor' of method 'trackBackgroundColor'
@@ -460,7 +460,7 @@ static std::vector<std::tuple<std::string, Ark_ResourceColor, std::string>>
 HWTEST_F(DataPanelModifierTest, DISABLED_setTrackBackgroundColorTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_ResourceColor inputValueTrackBackgroundColor;
     Ark_ResourceColor initValueTrackBackgroundColor;
@@ -477,7 +477,7 @@ HWTEST_F(DataPanelModifierTest, DISABLED_setTrackBackgroundColorTestValidValues,
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TRACK_BACKGROUND_COLOR_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -496,7 +496,7 @@ static std::vector<std::tuple<std::string, Ark_ResourceColor, std::string>>
 HWTEST_F(DataPanelModifierTest, setTrackBackgroundColorTestValidResourceValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_ResourceColor inputValueTrackBackgroundColor;
     Ark_ResourceColor initValueTrackBackgroundColor;
@@ -513,7 +513,7 @@ HWTEST_F(DataPanelModifierTest, setTrackBackgroundColorTestValidResourceValues, 
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TRACK_BACKGROUND_COLOR_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -534,7 +534,7 @@ static std::vector<std::tuple<std::string, Ark_ResourceColor, std::string>>
 HWTEST_F(DataPanelModifierTest, setTrackBackgroundColorTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_ResourceColor inputValueTrackBackgroundColor;
     Ark_ResourceColor initValueTrackBackgroundColor;
@@ -551,7 +551,7 @@ HWTEST_F(DataPanelModifierTest, setTrackBackgroundColorTestInvalidValues, TestSi
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TRACK_BACKGROUND_COLOR_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -563,7 +563,7 @@ HWTEST_F(DataPanelModifierTest, setTrackBackgroundColorTestInvalidValues, TestSi
 HWTEST_F(DataPanelModifierTest, setValueColorsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_VALUE_COLORS_NAME);
+    auto jsonArray = GetAttrObject(jsonValue, ATTRIBUTE_VALUE_COLORS_NAME);
     ASSERT_EQ(jsonArray->GetArraySize(), VALUE_COLORS_COLOR_THEME_VALUES_ARRAY_SIZE);
     for (int i = 0; i < jsonArray->GetArraySize(); i++) {
         auto gradientItem = jsonArray->GetArrayItem(i);
@@ -572,11 +572,11 @@ HWTEST_F(DataPanelModifierTest, setValueColorsTestDefaultValues, TestSize.Level1
             auto colorStopItem = gradientItem->GetArrayItem(j);
             auto colorCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_COLOR_NAME);
             auto offsetCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_OFFSET_NAME);
-            EXPECT_EQ(colorCheckValue, VALUE_COLORS_COLOR_THEME_DEFAULT);
+            EXPECT_THAT(colorCheckValue, Eq(VALUE_COLORS_COLOR_THEME_DEFAULT));
             if (0 == j) {
-                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_0_THEME_DEFAULT);
+                EXPECT_THAT(offsetCheckValue, Eq(VALUE_COLORS_OFFSET_0_THEME_DEFAULT));
             } else {
-                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_1_THEME_DEFAULT);
+                EXPECT_THAT(offsetCheckValue, Eq(VALUE_COLORS_OFFSET_1_THEME_DEFAULT));
             }
         }
     }
@@ -603,7 +603,7 @@ HWTEST_F(DataPanelModifierTest, setValueColorsTestStringValidValues, TestSize.Le
     modifier_->setValueColors(node_, &optValue);
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_VALUE_COLORS_NAME);
+    auto jsonArray = GetAttrObject(jsonValue, ATTRIBUTE_VALUE_COLORS_NAME);
     ASSERT_EQ(jsonArray->GetArraySize(), Fixtures::testFixtureColorsStrValidValues.size());
 
     for (int i = 0; i < jsonArray->GetArraySize(); i++) {
@@ -613,11 +613,11 @@ HWTEST_F(DataPanelModifierTest, setValueColorsTestStringValidValues, TestSize.Le
             auto colorStopItem = gradientItem->GetArrayItem(j);
             auto colorCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_COLOR_NAME);
             auto offsetCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_OFFSET_NAME);
-            EXPECT_EQ(colorCheckValue, std::get<2>(Fixtures::testFixtureColorsStrValidValues.at(i)));
+            EXPECT_THAT(colorCheckValue, Eq(std::get<2>(Fixtures::testFixtureColorsStrValidValues.at(i))));
             if (0 == j) {
-                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_0_THEME_DEFAULT);
+                EXPECT_THAT(offsetCheckValue, Eq(VALUE_COLORS_OFFSET_0_THEME_DEFAULT));
             } else {
-                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_1_THEME_DEFAULT);
+                EXPECT_THAT(offsetCheckValue, Eq(VALUE_COLORS_OFFSET_1_THEME_DEFAULT));
             }
         }
     }
@@ -644,7 +644,7 @@ HWTEST_F(DataPanelModifierTest, setValueColorsTestStringInvalidValues, TestSize.
     modifier_->setValueColors(node_, &optValue);
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_VALUE_COLORS_NAME);
+    auto jsonArray = GetAttrObject(jsonValue, ATTRIBUTE_VALUE_COLORS_NAME);
     ASSERT_EQ(jsonArray->GetArraySize(), VALUE_COLORS_COLOR_THEME_VALUES_ARRAY_SIZE);
 
     for (int i = 0; i < jsonArray->GetArraySize(); i++) {
@@ -654,11 +654,11 @@ HWTEST_F(DataPanelModifierTest, setValueColorsTestStringInvalidValues, TestSize.
             auto colorStopItem = gradientItem->GetArrayItem(j);
             auto colorCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_COLOR_NAME);
             auto offsetCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_OFFSET_NAME);
-            EXPECT_EQ(colorCheckValue, VALUE_COLORS_COLOR_THEME_DEFAULT);
+            EXPECT_THAT(colorCheckValue, Eq(VALUE_COLORS_COLOR_THEME_DEFAULT));
             if (0 == j) {
-                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_0_THEME_DEFAULT);
+                EXPECT_THAT(offsetCheckValue, Eq(VALUE_COLORS_OFFSET_0_THEME_DEFAULT));
             } else {
-                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_1_THEME_DEFAULT);
+                EXPECT_THAT(offsetCheckValue, Eq(VALUE_COLORS_OFFSET_1_THEME_DEFAULT));
             }
         }
     }
@@ -685,7 +685,7 @@ HWTEST_F(DataPanelModifierTest, DISABLED_setValueColorsTestNumberValidValues, Te
     modifier_->setValueColors(node_, &optValue);
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_VALUE_COLORS_NAME);
+    auto jsonArray = GetAttrObject(jsonValue, ATTRIBUTE_VALUE_COLORS_NAME);
     ASSERT_EQ(jsonArray->GetArraySize(), Fixtures::testFixtureColorsNumValidValues.size());
 
     for (int i = 0; i < jsonArray->GetArraySize(); i++) {
@@ -695,11 +695,11 @@ HWTEST_F(DataPanelModifierTest, DISABLED_setValueColorsTestNumberValidValues, Te
             auto colorStopItem = gradientItem->GetArrayItem(j);
             auto colorCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_COLOR_NAME);
             auto offsetCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_OFFSET_NAME);
-            EXPECT_EQ(colorCheckValue, std::get<2>(Fixtures::testFixtureColorsNumValidValues.at(i)));
+            EXPECT_THAT(colorCheckValue, Eq(std::get<2>(Fixtures::testFixtureColorsNumValidValues.at(i))));
             if (0 == j) {
-                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_0_THEME_DEFAULT);
+                EXPECT_THAT(offsetCheckValue, Eq(VALUE_COLORS_OFFSET_0_THEME_DEFAULT));
             } else {
-                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_1_THEME_DEFAULT);
+                EXPECT_THAT(offsetCheckValue, Eq(VALUE_COLORS_OFFSET_1_THEME_DEFAULT));
             }
         }
     }
@@ -726,7 +726,7 @@ HWTEST_F(DataPanelModifierTest, setValueColorsTestEnumValidValues, TestSize.Leve
     modifier_->setValueColors(node_, &optValue);
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_VALUE_COLORS_NAME);
+    auto jsonArray = GetAttrObject(jsonValue, ATTRIBUTE_VALUE_COLORS_NAME);
     ASSERT_EQ(jsonArray->GetArraySize(), Fixtures::testFixtureColorsEnumValidValues.size());
 
     for (int i = 0; i < jsonArray->GetArraySize(); i++) {
@@ -736,11 +736,11 @@ HWTEST_F(DataPanelModifierTest, setValueColorsTestEnumValidValues, TestSize.Leve
             auto colorStopItem = gradientItem->GetArrayItem(j);
             auto colorCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_COLOR_NAME);
             auto offsetCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_OFFSET_NAME);
-            EXPECT_EQ(colorCheckValue, std::get<2>(Fixtures::testFixtureColorsEnumValidValues.at(i)));
+            EXPECT_THAT(colorCheckValue, Eq(std::get<2>(Fixtures::testFixtureColorsEnumValidValues.at(i))));
             if (0 == j) {
-                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_0_THEME_DEFAULT);
+                EXPECT_THAT(offsetCheckValue, Eq(VALUE_COLORS_OFFSET_0_THEME_DEFAULT));
             } else {
-                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_1_THEME_DEFAULT);
+                EXPECT_THAT(offsetCheckValue, Eq(VALUE_COLORS_OFFSET_1_THEME_DEFAULT));
             }
         }
     }
@@ -767,7 +767,7 @@ HWTEST_F(DataPanelModifierTest, setValueColorsTestEnumInvalidValues, TestSize.Le
     modifier_->setValueColors(node_, &optValue);
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_VALUE_COLORS_NAME);
+    auto jsonArray = GetAttrObject(jsonValue, ATTRIBUTE_VALUE_COLORS_NAME);
     ASSERT_EQ(jsonArray->GetArraySize(), VALUE_COLORS_COLOR_THEME_VALUES_ARRAY_SIZE);
 
     for (int i = 0; i < jsonArray->GetArraySize(); i++) {
@@ -777,11 +777,11 @@ HWTEST_F(DataPanelModifierTest, setValueColorsTestEnumInvalidValues, TestSize.Le
             auto colorStopItem = gradientItem->GetArrayItem(j);
             auto colorCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_COLOR_NAME);
             auto offsetCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_OFFSET_NAME);
-            EXPECT_EQ(colorCheckValue, VALUE_COLORS_COLOR_THEME_DEFAULT);
+            EXPECT_THAT(colorCheckValue, Eq(VALUE_COLORS_COLOR_THEME_DEFAULT));
             if (0 == j) {
-                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_0_THEME_DEFAULT);
+                EXPECT_THAT(offsetCheckValue, Eq(VALUE_COLORS_OFFSET_0_THEME_DEFAULT));
             } else {
-                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_1_THEME_DEFAULT);
+                EXPECT_THAT(offsetCheckValue, Eq(VALUE_COLORS_OFFSET_1_THEME_DEFAULT));
             }
         }
     }
@@ -808,7 +808,7 @@ HWTEST_F(DataPanelModifierTest, setValueColorsTestResourceValidValues, TestSize.
     modifier_->setValueColors(node_, &optValue);
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_VALUE_COLORS_NAME);
+    auto jsonArray = GetAttrObject(jsonValue, ATTRIBUTE_VALUE_COLORS_NAME);
     ASSERT_EQ(jsonArray->GetArraySize(), Fixtures::testFixtureColorsResValidValues.size());
 
     for (int i = 0; i < jsonArray->GetArraySize(); i++) {
@@ -818,11 +818,11 @@ HWTEST_F(DataPanelModifierTest, setValueColorsTestResourceValidValues, TestSize.
             auto colorStopItem = gradientItem->GetArrayItem(j);
             auto colorCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_COLOR_NAME);
             auto offsetCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_OFFSET_NAME);
-            EXPECT_EQ(colorCheckValue, std::get<2>(Fixtures::testFixtureColorsResValidValues.at(i)));
+            EXPECT_THAT(colorCheckValue, Eq(std::get<2>(Fixtures::testFixtureColorsResValidValues.at(i))));
             if (0 == j) {
-                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_0_THEME_DEFAULT);
+                EXPECT_THAT(offsetCheckValue, Eq(VALUE_COLORS_OFFSET_0_THEME_DEFAULT));
             } else {
-                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_1_THEME_DEFAULT);
+                EXPECT_THAT(offsetCheckValue, Eq(VALUE_COLORS_OFFSET_1_THEME_DEFAULT));
             }
         }
     }
@@ -863,7 +863,7 @@ HWTEST_F(DataPanelModifierTest, setValueColorsTestLinearGradientValidValues, Tes
     modifier_->setValueColors(node_, &optValue);
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_VALUE_COLORS_NAME);
+    auto jsonArray = GetAttrObject(jsonValue, ATTRIBUTE_VALUE_COLORS_NAME);
     ASSERT_EQ(jsonArray->GetArraySize(), colorStopValues.size());
 
     for (int i = 0; i < jsonArray->GetArraySize(); i++) {
@@ -873,8 +873,8 @@ HWTEST_F(DataPanelModifierTest, setValueColorsTestLinearGradientValidValues, Tes
             auto colorStopItem = gradientItem->GetArrayItem(j);
             auto colorCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_COLOR_NAME);
             auto offsetCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_OFFSET_NAME);
-            EXPECT_EQ(colorCheckValue, (std::get<0>(colorStopValues.at(i).at(j))).value().ToString());
-            EXPECT_EQ(offsetCheckValue, std::to_string((std::get<1>(colorStopValues.at(i).at(j))).Value()));
+            EXPECT_THAT(colorCheckValue, Eq((std::get<0>(colorStopValues.at(i).at(j))).value().ToString()));
+            EXPECT_THAT(offsetCheckValue, Eq(std::to_string((std::get<1>(colorStopValues.at(i).at(j))).Value())));
         }
     }
 }
@@ -900,7 +900,7 @@ HWTEST_F(DataPanelModifierTest, setValueColorsTestLinearGradientInvalidValues, T
     modifier_->setValueColors(node_, &optValue);
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_VALUE_COLORS_NAME);
+    auto jsonArray = GetAttrObject(jsonValue, ATTRIBUTE_VALUE_COLORS_NAME);
     ASSERT_EQ(jsonArray->GetArraySize(), VALUE_COLORS_COLOR_THEME_VALUES_ARRAY_SIZE);
 
     for (int i = 0; i < jsonArray->GetArraySize(); i++) {
@@ -910,11 +910,11 @@ HWTEST_F(DataPanelModifierTest, setValueColorsTestLinearGradientInvalidValues, T
             auto colorStopItem = gradientItem->GetArrayItem(j);
             auto colorCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_COLOR_NAME);
             auto offsetCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_OFFSET_NAME);
-            EXPECT_EQ(colorCheckValue, VALUE_COLORS_COLOR_THEME_DEFAULT);
+            EXPECT_THAT(colorCheckValue, Eq(VALUE_COLORS_COLOR_THEME_DEFAULT));
             if (0 == j) {
-                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_0_THEME_DEFAULT);
+                EXPECT_THAT(offsetCheckValue, Eq(VALUE_COLORS_OFFSET_0_THEME_DEFAULT));
             } else {
-                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_1_THEME_DEFAULT);
+                EXPECT_THAT(offsetCheckValue, Eq(VALUE_COLORS_OFFSET_1_THEME_DEFAULT));
             }
         }
     }
@@ -928,8 +928,8 @@ HWTEST_F(DataPanelModifierTest, setValueColorsTestLinearGradientInvalidValues, T
 HWTEST_F(DataPanelModifierTest, DISABLED_setTrackShadowTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    auto shadowJsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
-    auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(shadowJsonArray, ATTRIBUTE_TRACK_SHADOW_COLORS_NAME);
+    auto shadowJsonArray = GetAttrObject(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
+    auto jsonArray = GetAttrObject(shadowJsonArray, ATTRIBUTE_TRACK_SHADOW_COLORS_NAME);
     ASSERT_EQ(jsonArray->GetArraySize(), VALUE_COLORS_COLOR_THEME_VALUES_ARRAY_SIZE);
 
     for (int i = 0; i < jsonArray->GetArraySize(); i++) {
@@ -939,21 +939,21 @@ HWTEST_F(DataPanelModifierTest, DISABLED_setTrackShadowTestDefaultValues, TestSi
             auto colorStopItem = gradientItem->GetArrayItem(j);
             auto colorCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_COLOR_NAME);
             auto offsetCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_OFFSET_NAME);
-            EXPECT_EQ(colorCheckValue, VALUE_COLORS_COLOR_THEME_DEFAULT);
+            EXPECT_THAT(colorCheckValue, Eq(VALUE_COLORS_COLOR_THEME_DEFAULT));
             if (0 == j) {
-                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_0_THEME_DEFAULT);
+                EXPECT_THAT(offsetCheckValue, Eq(VALUE_COLORS_OFFSET_0_THEME_DEFAULT));
             } else {
-                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_1_THEME_DEFAULT);
+                EXPECT_THAT(offsetCheckValue, Eq(VALUE_COLORS_OFFSET_1_THEME_DEFAULT));
             }
         }
     }
 
     auto radiusCheckValue = GetAttrValue<std::string>(shadowJsonArray, ATTRIBUTE_TRACK_SHADOW_RADIUS_NAME);
-    EXPECT_EQ(radiusCheckValue, TRACK_SHADOW_RADIUS_THEME_DEFAULT); // a theme value doesn't meet an sdk value
+    EXPECT_THAT(radiusCheckValue, Eq(TRACK_SHADOW_RADIUS_THEME_DEFAULT)); // a theme value doesn't meet an sdk value
     auto offsetXCheckValue = GetAttrValue<std::string>(shadowJsonArray, ATTRIBUTE_TRACK_SHADOW_OFFSET_X_NAME);
-    EXPECT_EQ(offsetXCheckValue, TRACK_SHADOW_OFFSET_X_THEME_DEFAULT); // a theme value doesn't meet an sdk value
+    EXPECT_THAT(offsetXCheckValue, Eq(TRACK_SHADOW_OFFSET_X_THEME_DEFAULT)); // a theme value doesn't meet an sdk value
     auto offsetYCheckValue = GetAttrValue<std::string>(shadowJsonArray, ATTRIBUTE_TRACK_SHADOW_OFFSET_Y_NAME);
-    EXPECT_EQ(offsetYCheckValue, TRACK_SHADOW_OFFSET_Y_THEME_DEFAULT); // a theme value doesn't meet an sdk value
+    EXPECT_THAT(offsetYCheckValue, Eq(TRACK_SHADOW_OFFSET_Y_THEME_DEFAULT)); // a theme value doesn't meet an sdk value
 }
 
 // Valid values for attribute 'radius' of method 'trackShadow'
@@ -1012,7 +1012,7 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestRadiusValidValues, TestSize.Le
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultTrackShadow;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
 
     Ark_DataPanelShadowOptions inputValueTrackShadow;
@@ -1030,10 +1030,10 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestRadiusValidValues, TestSize.Le
         auto optValue = Converter::ArkValue<Opt_DataPanelShadowOptions>(inputValueTrackShadow);
         modifier_->setTrackShadow(node_, &optValue);
         jsonValue = GetJsonValue(node_);
-        resultTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
+        resultTrackShadow = GetAttrObject(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
         resultStr = GetAttrValue<std::string>(resultTrackShadow, ATTRIBUTE_TRACK_SHADOW_RADIUS_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -1046,7 +1046,7 @@ HWTEST_F(DataPanelModifierTest, DISABLED_setTrackShadowTestRadiusInvalidValues, 
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultTrackShadow;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
 
     Ark_DataPanelShadowOptions inputValueTrackShadow;
@@ -1064,10 +1064,10 @@ HWTEST_F(DataPanelModifierTest, DISABLED_setTrackShadowTestRadiusInvalidValues, 
         auto optValue = Converter::ArkValue<Opt_DataPanelShadowOptions>(inputValueTrackShadow);
         modifier_->setTrackShadow(node_, &optValue);
         jsonValue = GetJsonValue(node_);
-        resultTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
+        resultTrackShadow = GetAttrObject(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
         resultStr = GetAttrValue<std::string>(resultTrackShadow, ATTRIBUTE_TRACK_SHADOW_RADIUS_NAME);
         expectedStr = TRACK_SHADOW_RADIUS_THEME_DEFAULT; // a theme value doesn't meet an sdk value
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -1080,7 +1080,7 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestOffsetXValidValues, TestSize.L
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultTrackShadow;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
 
     Ark_DataPanelShadowOptions inputValueTrackShadow;
@@ -1098,10 +1098,10 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestOffsetXValidValues, TestSize.L
         auto optValue = Converter::ArkValue<Opt_DataPanelShadowOptions>(inputValueTrackShadow);
         modifier_->setTrackShadow(node_, &optValue);
         jsonValue = GetJsonValue(node_);
-        resultTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
+        resultTrackShadow = GetAttrObject(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
         resultStr = GetAttrValue<std::string>(resultTrackShadow, ATTRIBUTE_TRACK_SHADOW_OFFSET_X_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -1114,7 +1114,7 @@ HWTEST_F(DataPanelModifierTest, DISABLED_setTrackShadowTestOffsetXInvalidValues,
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultTrackShadow;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
 
     Ark_DataPanelShadowOptions inputValueTrackShadow;
@@ -1132,10 +1132,10 @@ HWTEST_F(DataPanelModifierTest, DISABLED_setTrackShadowTestOffsetXInvalidValues,
         auto optValue = Converter::ArkValue<Opt_DataPanelShadowOptions>(inputValueTrackShadow);
         modifier_->setTrackShadow(node_, &optValue);
         jsonValue = GetJsonValue(node_);
-        resultTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
+        resultTrackShadow = GetAttrObject(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
         resultStr = GetAttrValue<std::string>(resultTrackShadow, ATTRIBUTE_TRACK_SHADOW_OFFSET_X_NAME);
         expectedStr = TRACK_SHADOW_OFFSET_X_THEME_DEFAULT; // a theme value doesn't meet an sdk value
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -1148,7 +1148,7 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestOffsetYValidValues, TestSize.L
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultTrackShadow;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
 
     Ark_DataPanelShadowOptions inputValueTrackShadow;
@@ -1166,10 +1166,10 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestOffsetYValidValues, TestSize.L
         auto optValue = Converter::ArkValue<Opt_DataPanelShadowOptions>(inputValueTrackShadow);
         modifier_->setTrackShadow(node_, &optValue);
         jsonValue = GetJsonValue(node_);
-        resultTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
+        resultTrackShadow = GetAttrObject(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
         resultStr = GetAttrValue<std::string>(resultTrackShadow, ATTRIBUTE_TRACK_SHADOW_OFFSET_Y_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -1182,7 +1182,7 @@ HWTEST_F(DataPanelModifierTest, DISABLED_setTrackShadowTestOffsetYInvalidValues,
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultTrackShadow;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
 
     Ark_DataPanelShadowOptions inputValueTrackShadow;
@@ -1200,10 +1200,10 @@ HWTEST_F(DataPanelModifierTest, DISABLED_setTrackShadowTestOffsetYInvalidValues,
         auto optValue = Converter::ArkValue<Opt_DataPanelShadowOptions>(inputValueTrackShadow);
         modifier_->setTrackShadow(node_, &optValue);
         jsonValue = GetJsonValue(node_);
-        resultTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
+        resultTrackShadow = GetAttrObject(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
         resultStr = GetAttrValue<std::string>(resultTrackShadow, ATTRIBUTE_TRACK_SHADOW_OFFSET_Y_NAME);
         expectedStr = TRACK_SHADOW_OFFSET_Y_THEME_DEFAULT; // a theme value doesn't meet an sdk value
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -1217,7 +1217,7 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorStringValidValues, TestSi
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> jsonTrackShadow;
     std::unique_ptr<JsonValue> jsonArray;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
 
     auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
@@ -1242,8 +1242,8 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorStringValidValues, TestSi
     modifier_->setTrackShadow(node_, &optValue);
 
     jsonValue = GetJsonValue(node_);
-    jsonTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
-    jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonTrackShadow, ATTRIBUTE_TRACK_SHADOW_COLORS_NAME);
+    jsonTrackShadow = GetAttrObject(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
+    jsonArray = GetAttrObject(jsonTrackShadow, ATTRIBUTE_TRACK_SHADOW_COLORS_NAME);
     ASSERT_EQ(jsonArray->GetArraySize(), Fixtures::testFixtureColorsStrValidValues.size());
 
     for (int i = 0; i < jsonArray->GetArraySize(); i++) {
@@ -1253,11 +1253,11 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorStringValidValues, TestSi
             auto colorStopItem = gradientItem->GetArrayItem(j);
             auto colorCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_COLOR_NAME);
             auto offsetCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_OFFSET_NAME);
-            EXPECT_EQ(colorCheckValue, std::get<2>(Fixtures::testFixtureColorsStrValidValues.at(i)));
+            EXPECT_THAT(colorCheckValue, Eq(std::get<2>(Fixtures::testFixtureColorsStrValidValues.at(i))));
             if (0 == j) {
-                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_0_THEME_DEFAULT);
+                EXPECT_THAT(offsetCheckValue, Eq(VALUE_COLORS_OFFSET_0_THEME_DEFAULT));
             } else {
-                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_1_THEME_DEFAULT);
+                EXPECT_THAT(offsetCheckValue, Eq(VALUE_COLORS_OFFSET_1_THEME_DEFAULT));
             }
         }
     }
@@ -1273,7 +1273,7 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorStringInvalidValues, Test
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> jsonTrackShadow;
     std::unique_ptr<JsonValue> jsonArray;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
 
     auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
@@ -1298,8 +1298,8 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorStringInvalidValues, Test
     modifier_->setTrackShadow(node_, &optValue);
 
     jsonValue = GetJsonValue(node_);
-    jsonTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
-    jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonTrackShadow, ATTRIBUTE_TRACK_SHADOW_COLORS_NAME);
+    jsonTrackShadow = GetAttrObject(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
+    jsonArray = GetAttrObject(jsonTrackShadow, ATTRIBUTE_TRACK_SHADOW_COLORS_NAME);
     ASSERT_EQ(jsonArray->GetArraySize(), VALUE_COLORS_COLOR_THEME_VALUES_ARRAY_SIZE);
 
     for (int i = 0; i < jsonArray->GetArraySize(); i++) {
@@ -1309,11 +1309,11 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorStringInvalidValues, Test
             auto colorStopItem = gradientItem->GetArrayItem(j);
             auto colorCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_COLOR_NAME);
             auto offsetCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_OFFSET_NAME);
-            EXPECT_EQ(colorCheckValue, VALUE_COLORS_COLOR_THEME_DEFAULT);
+            EXPECT_THAT(colorCheckValue, Eq(VALUE_COLORS_COLOR_THEME_DEFAULT));
             if (0 == j) {
-                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_0_THEME_DEFAULT);
+                EXPECT_THAT(offsetCheckValue, Eq(VALUE_COLORS_OFFSET_0_THEME_DEFAULT));
             } else {
-                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_1_THEME_DEFAULT);
+                EXPECT_THAT(offsetCheckValue, Eq(VALUE_COLORS_OFFSET_1_THEME_DEFAULT));
             }
         }
     }
@@ -1329,7 +1329,7 @@ HWTEST_F(DataPanelModifierTest, DISABLED_setTrackShadowTestColorNumberValidValue
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> jsonTrackShadow;
     std::unique_ptr<JsonValue> jsonArray;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
 
     auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
@@ -1354,8 +1354,8 @@ HWTEST_F(DataPanelModifierTest, DISABLED_setTrackShadowTestColorNumberValidValue
     modifier_->setTrackShadow(node_, &optValue);
 
     jsonValue = GetJsonValue(node_);
-    jsonTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
-    jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonTrackShadow, ATTRIBUTE_TRACK_SHADOW_COLORS_NAME);
+    jsonTrackShadow = GetAttrObject(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
+    jsonArray = GetAttrObject(jsonTrackShadow, ATTRIBUTE_TRACK_SHADOW_COLORS_NAME);
     ASSERT_EQ(jsonArray->GetArraySize(), Fixtures::testFixtureColorsNumValidValues.size());
 
     for (int i = 0; i < jsonArray->GetArraySize(); i++) {
@@ -1365,11 +1365,11 @@ HWTEST_F(DataPanelModifierTest, DISABLED_setTrackShadowTestColorNumberValidValue
             auto colorStopItem = gradientItem->GetArrayItem(j);
             auto colorCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_COLOR_NAME);
             auto offsetCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_OFFSET_NAME);
-            EXPECT_EQ(colorCheckValue, std::get<2>(Fixtures::testFixtureColorsNumValidValues.at(i)));
+            EXPECT_THAT(colorCheckValue, Eq(std::get<2>(Fixtures::testFixtureColorsNumValidValues.at(i))));
             if (0 == j) {
-                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_0_THEME_DEFAULT);
+                EXPECT_THAT(offsetCheckValue, Eq(VALUE_COLORS_OFFSET_0_THEME_DEFAULT));
             } else {
-                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_1_THEME_DEFAULT);
+                EXPECT_THAT(offsetCheckValue, Eq(VALUE_COLORS_OFFSET_1_THEME_DEFAULT));
             }
         }
     }
@@ -1385,7 +1385,7 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorEnumValidValues, TestSize
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> jsonTrackShadow;
     std::unique_ptr<JsonValue> jsonArray;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
 
     auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
@@ -1410,8 +1410,8 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorEnumValidValues, TestSize
     modifier_->setTrackShadow(node_, &optValue);
 
     jsonValue = GetJsonValue(node_);
-    jsonTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
-    jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonTrackShadow, ATTRIBUTE_TRACK_SHADOW_COLORS_NAME);
+    jsonTrackShadow = GetAttrObject(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
+    jsonArray = GetAttrObject(jsonTrackShadow, ATTRIBUTE_TRACK_SHADOW_COLORS_NAME);
     ASSERT_EQ(jsonArray->GetArraySize(), Fixtures::testFixtureColorsEnumValidValues.size());
 
     for (int i = 0; i < jsonArray->GetArraySize(); i++) {
@@ -1421,11 +1421,11 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorEnumValidValues, TestSize
             auto colorStopItem = gradientItem->GetArrayItem(j);
             auto colorCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_COLOR_NAME);
             auto offsetCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_OFFSET_NAME);
-            EXPECT_EQ(colorCheckValue, std::get<2>(Fixtures::testFixtureColorsEnumValidValues.at(i)));
+            EXPECT_THAT(colorCheckValue, Eq(std::get<2>(Fixtures::testFixtureColorsEnumValidValues.at(i))));
             if (0 == j) {
-                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_0_THEME_DEFAULT);
+                EXPECT_THAT(offsetCheckValue, Eq(VALUE_COLORS_OFFSET_0_THEME_DEFAULT));
             } else {
-                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_1_THEME_DEFAULT);
+                EXPECT_THAT(offsetCheckValue, Eq(VALUE_COLORS_OFFSET_1_THEME_DEFAULT));
             }
         }
     }
@@ -1441,7 +1441,7 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorEnumInvalidValues, TestSi
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> jsonTrackShadow;
     std::unique_ptr<JsonValue> jsonArray;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
 
     auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
@@ -1466,8 +1466,8 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorEnumInvalidValues, TestSi
     modifier_->setTrackShadow(node_, &optValue);
 
     jsonValue = GetJsonValue(node_);
-    jsonTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
-    jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonTrackShadow, ATTRIBUTE_TRACK_SHADOW_COLORS_NAME);
+    jsonTrackShadow = GetAttrObject(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
+    jsonArray = GetAttrObject(jsonTrackShadow, ATTRIBUTE_TRACK_SHADOW_COLORS_NAME);
     ASSERT_EQ(jsonArray->GetArraySize(), VALUE_COLORS_COLOR_THEME_VALUES_ARRAY_SIZE);
 
     for (int i = 0; i < jsonArray->GetArraySize(); i++) {
@@ -1477,11 +1477,11 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorEnumInvalidValues, TestSi
             auto colorStopItem = gradientItem->GetArrayItem(j);
             auto colorCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_COLOR_NAME);
             auto offsetCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_OFFSET_NAME);
-            EXPECT_EQ(colorCheckValue, VALUE_COLORS_COLOR_THEME_DEFAULT);
+            EXPECT_THAT(colorCheckValue, Eq(VALUE_COLORS_COLOR_THEME_DEFAULT));
             if (0 == j) {
-                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_0_THEME_DEFAULT);
+                EXPECT_THAT(offsetCheckValue, Eq(VALUE_COLORS_OFFSET_0_THEME_DEFAULT));
             } else {
-                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_1_THEME_DEFAULT);
+                EXPECT_THAT(offsetCheckValue, Eq(VALUE_COLORS_OFFSET_1_THEME_DEFAULT));
             }
         }
     }
@@ -1497,7 +1497,7 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorResourceValidValues, Test
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> jsonTrackShadow;
     std::unique_ptr<JsonValue> jsonArray;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
 
     auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
@@ -1522,8 +1522,8 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorResourceValidValues, Test
     modifier_->setTrackShadow(node_, &optValue);
 
     jsonValue = GetJsonValue(node_);
-    jsonTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
-    jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonTrackShadow, ATTRIBUTE_TRACK_SHADOW_COLORS_NAME);
+    jsonTrackShadow = GetAttrObject(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
+    jsonArray = GetAttrObject(jsonTrackShadow, ATTRIBUTE_TRACK_SHADOW_COLORS_NAME);
     ASSERT_EQ(jsonArray->GetArraySize(), Fixtures::testFixtureColorsResValidValues.size());
 
     for (int i = 0; i < jsonArray->GetArraySize(); i++) {
@@ -1533,11 +1533,11 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorResourceValidValues, Test
             auto colorStopItem = gradientItem->GetArrayItem(j);
             auto colorCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_COLOR_NAME);
             auto offsetCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_OFFSET_NAME);
-            EXPECT_EQ(colorCheckValue, std::get<2>(Fixtures::testFixtureColorsResValidValues.at(i)));
+            EXPECT_THAT(colorCheckValue, Eq(std::get<2>(Fixtures::testFixtureColorsResValidValues.at(i))));
             if (0 == j) {
-                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_0_THEME_DEFAULT);
+                EXPECT_THAT(offsetCheckValue, Eq(VALUE_COLORS_OFFSET_0_THEME_DEFAULT));
             } else {
-                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_1_THEME_DEFAULT);
+                EXPECT_THAT(offsetCheckValue, Eq(VALUE_COLORS_OFFSET_1_THEME_DEFAULT));
             }
         }
     }
@@ -1553,7 +1553,7 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorLinearGradientValidValues
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> jsonTrackShadow;
     std::unique_ptr<JsonValue> jsonArray;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
 
     auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
@@ -1578,8 +1578,8 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorLinearGradientValidValues
     modifier_->setTrackShadow(node_, &optValue);
 
     jsonValue = GetJsonValue(node_);
-    jsonTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
-    jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonTrackShadow, ATTRIBUTE_TRACK_SHADOW_COLORS_NAME);
+    jsonTrackShadow = GetAttrObject(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
+    jsonArray = GetAttrObject(jsonTrackShadow, ATTRIBUTE_TRACK_SHADOW_COLORS_NAME);
     ASSERT_EQ(jsonArray->GetArraySize(), colorStopValues.size());
 
     for (int i = 0; i < jsonArray->GetArraySize(); i++) {
@@ -1589,8 +1589,8 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorLinearGradientValidValues
             auto colorStopItem = gradientItem->GetArrayItem(j);
             auto colorCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_COLOR_NAME);
             auto offsetCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_OFFSET_NAME);
-            EXPECT_EQ(colorCheckValue, (std::get<0>(colorStopValues.at(i).at(j))).value().ToString());
-            EXPECT_EQ(offsetCheckValue, std::to_string((std::get<1>(colorStopValues.at(i).at(j))).Value()));
+            EXPECT_THAT(colorCheckValue, Eq((std::get<0>(colorStopValues.at(i).at(j))).value().ToString()));
+            EXPECT_THAT(offsetCheckValue, Eq(std::to_string((std::get<1>(colorStopValues.at(i).at(j))).Value())));
         }
     }
 }
@@ -1605,7 +1605,7 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorLinearGradientInvalidValu
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> jsonTrackShadow;
     std::unique_ptr<JsonValue> jsonArray;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
 
     auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
@@ -1630,8 +1630,8 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorLinearGradientInvalidValu
     modifier_->setTrackShadow(node_, &optValue);
 
     jsonValue = GetJsonValue(node_);
-    jsonTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
-    jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonTrackShadow, ATTRIBUTE_TRACK_SHADOW_COLORS_NAME);
+    jsonTrackShadow = GetAttrObject(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
+    jsonArray = GetAttrObject(jsonTrackShadow, ATTRIBUTE_TRACK_SHADOW_COLORS_NAME);
     ASSERT_EQ(jsonArray->GetArraySize(), VALUE_COLORS_COLOR_THEME_VALUES_ARRAY_SIZE);
 
     for (int i = 0; i < jsonArray->GetArraySize(); i++) {
@@ -1641,11 +1641,11 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorLinearGradientInvalidValu
             auto colorStopItem = gradientItem->GetArrayItem(j);
             auto colorCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_COLOR_NAME);
             auto offsetCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_OFFSET_NAME);
-            EXPECT_EQ(colorCheckValue, VALUE_COLORS_COLOR_THEME_DEFAULT);
+            EXPECT_THAT(colorCheckValue, Eq(VALUE_COLORS_COLOR_THEME_DEFAULT));
             if (0 == j) {
-                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_0_THEME_DEFAULT);
+                EXPECT_THAT(offsetCheckValue, Eq(VALUE_COLORS_OFFSET_0_THEME_DEFAULT));
             } else {
-                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_1_THEME_DEFAULT);
+                EXPECT_THAT(offsetCheckValue, Eq(VALUE_COLORS_OFFSET_1_THEME_DEFAULT));
             }
         }
     }

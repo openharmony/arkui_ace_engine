@@ -26,7 +26,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-std::optional<PickerTime> ProcessBindableSelected(FrameNode* frameNode, const Opt_Union_Date_Bindable& value)
+std::optional<PickerTime> ProcessBindableSelected(FrameNode* frameNode, const Opt_Union_Date_Bindable_Date& value)
 {
     std::optional<PickerTime> result;
     Converter::VisitUnion(
@@ -205,6 +205,7 @@ void SetOnEnterSelectedAreaImpl(Ark_NativePointer node, const Opt_Callback_TimeP
     }
     auto onEnterSelectedArea = [arkCallback = CallbackHelper(*optValue)](const BaseEventInfo* event) {
         const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(event);
+        CHECK_NULL_VOID(eventInfo);
         auto resultStr = eventInfo->GetSelectedStr();
         auto result = Converter::ArkValue<Ark_TimePickerResult>(resultStr);
         arkCallback.Invoke(result);

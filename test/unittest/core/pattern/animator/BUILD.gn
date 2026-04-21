@@ -17,4 +17,17 @@ ace_unittest("animator_test_ng") {
   module_name = "ImageSet-ImageAnimator"
   type = "new"
   sources = [ "animator_test_ng.cpp" ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "animator_test_min.cpp",
+      "animator_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "animator_test_min.cpp",
+      "animator_test_core.cpp",
+    ]
+  }
 }

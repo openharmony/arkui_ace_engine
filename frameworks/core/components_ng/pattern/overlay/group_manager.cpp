@@ -63,11 +63,14 @@ void GroupManager::UpdateRadioGroupValue(const std::string& group, int32_t radio
         if (!node) {
             continue;
         }
-        auto* modifier = GetRadioModifier();
+        auto modifier = GetRadioModifier();
         if (!modifier) {
             continue;
         }
         auto radioNode = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(node));
+        if (!radioNode) {
+            continue;
+        }
         modifier->updateUncheckStatus(radioNode);
     }
 }

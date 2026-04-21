@@ -15,11 +15,14 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_common_gesture_function.h"
 
+#include "frameworks/bridge/declarative_frontend/engine/js_types.h"
+
 namespace OHOS::Ace::Framework {
 
 JSRef<JSObject> JsCommonGestureFunction::GetTapLocation(const FingerInfo& fingerInfo)
 {
     JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+    objectTemplate->SetInternalFieldCount(1);
     JSRef<JSObject> tapLocation = objectTemplate->NewInstance();
     const OHOS::Ace::Offset& localOffset = fingerInfo.localLocation_;
     const OHOS::Ace::Offset& globalOffset = fingerInfo.globalLocation_;
@@ -35,6 +38,9 @@ JSRef<JSObject> JsCommonGestureFunction::GetTapLocation(const FingerInfo& finger
         "globalDisplayX", PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetX()));
     tapLocation->SetProperty<double>(
         "globalDisplayY", PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetY()));
+    tapLocation->SetPropertyObject("getCurrentLocalPosition",
+        JSRef<JSFunc>::New<FunctionCallback>(JsGetCurrentLocalPositionForFinger));
+    tapLocation->Wrap<FingerInfo>(const_cast<FingerInfo*>(&fingerInfo));
 
     return tapLocation;
 }

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SVG2 Coordinate System Test File -->
+<!-- Tests SVG2 coordinate system context, bounding box calculations, and units handling -->
+<svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Gradient with objectBoundingBox (SVG2 enhanced) -->
+    <linearGradient id="gradBBox" gradientUnits="objectBoundingBox" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FF5722"/>
+      <stop offset="100%" stop-color="#4CAF50"/>
+    </linearGradient>
+    
+    <!-- Gradient with userSpaceOnUse -->
+    <linearGradient id="gradUserSpace" gradientUnits="userSpaceOnUse" x1="50" y1="50" x2="350" y2="350">
+      <stop offset="0%" stop-color="#2196F3"/>
+      <stop offset="100%" stop-color="#FF9800"/>
+    </linearGradient>
+    
+    <!-- Pattern with objectBoundingBox -->
+    <pattern id="patternBBox" patternUnits="objectBoundingBox" width="0.1" height="0.1">
+      <circle cx="5" cy="5" r="4" fill="#E91E63"/>
+    </pattern>
+    
+    <!-- Pattern with userSpaceOnUse -->
+    <pattern id="patternUserSpace" patternUnits="userSpaceOnUse" width="20" height="20">
+      <rect width="10" height="10" fill="#9C27B0"/>
+      <rect x="10" y="10" width="10" height="10" fill="#00BCD4"/>
+    </pattern>
+    
+    <!-- Mask with objectBoundingBox -->
+    <mask id="maskBBox" maskUnits="objectBoundingBox" maskContentUnits="objectBoundingBox">
+      <rect x="0.1" y="0.1" width="0.8" height="0.8" fill="white"/>
+    </mask>
+    
+    <!-- Nested transform -->
+    <linearGradient id="nestedGrad" gradientTransform="translate(50, 50) rotate(45)">
+      <stop offset="0%" stop-color="#795548"/>
+      <stop offset="100%" stop-color="#607D8B"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- ObjectBoundingBox gradient test -->
+  <g>
+    <rect x="10" y="10" width="180" height="120" fill="url(#gradBBox)" stroke="#333" stroke-width="2"/>
+    <text x="100" y="70" fill="white" font-size="12" text-anchor="middle">ObjectBoundingBox</text>
+    <text x="100" y="85" fill="white" font-size="10" text-anchor="middle">gradientUnits</text>
+  </g>
+  
+  <!-- UserSpaceOnUse gradient test -->
+  <g>
+    <rect x="210" y="10" width="180" height="120" fill="url(#gradUserSpace)" stroke="#333" stroke-width="2"/>
+    <text x="300" y="70" fill="white" font-size="12" text-anchor="middle">UserSpaceOnUse</text>
+    <text x="300" y="85" fill="white" font-size="10" text-anchor="middle">gradientUnits</text>
+  </g>
+  
+  <!-- ObjectBoundingBox pattern test -->
+  <g>
+    <rect x="10" y="150" width="180" height="120" fill="url(#patternBBox)" stroke="#333" stroke-width="2"/>
+    <text x="100" y="210" fill="white" font-size="12" text-anchor="middle">Pattern BBox</text>
+    <text x="100" y="225" fill="white" font-size="10" text-anchor="middle">patternUnits</text>
+  </g>
+  
+  <!-- UserSpaceOnUse pattern test -->
+  <g>
+    <rect x="210" y="150" width="180" height="120" fill="url(#patternUserSpace)" stroke="#333" stroke-width="2"/>
+    <text x="300" y="210" fill="white" font-size="12" text-anchor="middle">Pattern UserSpace</text>
+    <text x="300" y="225" fill="white" font-size="10" text-anchor="middle">patternUnits</text>
+  </g>
+  
+  <!-- Mask coordinate system test -->
+  <g>
+    <circle cx="100" cy="330" r="60" fill="#3F51B5" mask="url(#maskBBox)"/>
+    <text x="100" y="330" fill="white" font-size="12" text-anchor="middle">Mask BBox</text>
+  </g>
+  
+  <!-- Nested coordinate system test -->
+  <g transform="translate(200, 270)">
+    <rect x="0" y="0" width="180" height="120" fill="url(#nestedGrad)" stroke="#333" stroke-width="2"/>
+    <text x="90" y="60" fill="white" font-size="12" text-anchor="middle">Nested Transform</text>
+    <text x="90" y="75" fill="white" font-size="10" text-anchor="middle">gradientTransform</text>
+  </g>
+  
+  <!-- Coordinate system comparison -->
+  <text x="200" y="395" fill="black" font-size="14" text-anchor="middle">
+    SVG2 Coordinate System Context Tests
+  </text>
+</svg>

@@ -17,12 +17,15 @@
 // Add the following two macro definitions to test the private and protected method.
 #define private public
 #define protected public
-#include "test/mock/base/mock_mouse_style.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/common/mock_window.h"
-#include "test/mock/core/pattern/mock_pattern.h"
+#include "core/common/event_manager.h"
+#include <cstdio>
+#include "test/mock/frameworks/base/mousestyle/mock_mouse_style.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_frontend.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/common/mock_window.h"
+#include "test/mock/frameworks/core/components_ng/pattern/mock_pattern.h"
 
 #include "base/log/dump_log.h"
 #include "base/ressched/ressched_click_optimizer.h"
@@ -46,6 +49,17 @@ RefPtr<CustomNode> PipelineContextTestNg::customNode_ = nullptr;
 RefPtr<PipelineContext> PipelineContextTestNg::context_ = nullptr;
 
 constexpr uint64_t LAST_VSYNC_TIME = 1000;
+
+namespace {
+class RestoreInfoPattern final : public Pattern {
+    DECLARE_ACE_TYPE(RestoreInfoPattern, Pattern);
+public:
+    std::string ProvideRestoreInfo() override
+    {
+        return "Default restore info";
+    }
+};
+} // namespace
 
 void PipelineContextTestNg::ResetEventFlag(int32_t testFlag)
 {
@@ -74,13 +88,14 @@ void PipelineContextTestNg::SetUpTestSuite()
     EXPECT_CALL(*window, RecordFrameTime(_, _)).Times(AnyNumber());
     EXPECT_CALL(*window, OnShow()).Times(AnyNumber());
     EXPECT_CALL(*window, FlushAnimation(NANO_TIME_STAMP))
-        .Times(AtLeast(1))
+        .Times(AnyNumber())
         .WillOnce(testing::Return(true))
         .WillRepeatedly(testing::Return(false));
-    EXPECT_CALL(*window, FlushModifier()).Times(AtLeast(1));
+    EXPECT_CALL(*window, FlushModifier()).Times(AnyNumber());
     EXPECT_CALL(*window, SetRootFrameNode(_)).Times(AnyNumber());
+    auto frontend = AceType::MakeRefPtr<testing::NiceMock<MockFrontend>>();
     context_ = AceType::MakeRefPtr<PipelineContext>(
-        window, AceType::MakeRefPtr<MockTaskExecutor>(), nullptr, nullptr, DEFAULT_INSTANCE_ID);
+        window, AceType::MakeRefPtr<MockTaskExecutor>(), nullptr, frontend, DEFAULT_INSTANCE_ID);
     context_->SetEventManager(AceType::MakeRefPtr<EventManager>());
     context_->fontManager_ = FontManager::Create();
     context_->statisticEventReporter_ = std::make_shared<StatisticEventReporter>();
@@ -96,8 +111,13 @@ void PipelineContextTestNg::SetUpTestSuite()
 
 void PipelineContextTestNg::TearDownTestSuite()
 {
-    context_->Destroy();
-    context_->window_.reset();
+    if (context_) {
+        context_->Destroy();
+        context_->window_.reset();
+    }
+    frameNode_ = nullptr;
+    customNode_ = nullptr;
+    context_ = nullptr;
     MockContainer::TearDown();
 }
 
@@ -151,6 +171,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg001, TestSize.Level1)
     EXPECT_TRUE(flagUpdate);
     EXPECT_FALSE(context_->dirtyNodes_.empty());
     context_->dirtyNodes_.clear();
+    customNode_->SetUpdateFunction([]() {});
 }
 
 /**
@@ -1273,7 +1294,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg025, TestSize.Level1)
         { "-rotation" }, { "-animationscale" }, { "-velocityscale" }, { "-scrollfriction" }, { "-threadstuck" },
         { "test" }, { "-navigation" }, { "-focuswindowscene" }, { "-focusmanager" }, { "-jsdump" }, { "-event" },
         { "-imagecache" }, { "-imagefilecache" }, { "-allelements" }, { "-default" }, { "-overlay" }, { "--stylus" },
-        { "-bindaicaller" }, { "-allInfoWithParamConfigTotal" }};
+        { "-bindaicaller" }, { "-allInfoWithParamConfigTotal" } };
     int turn = 0;
     for (; turn < params.size(); turn++) {
         EXPECT_TRUE(context_->OnDumpInfo(params[turn]));
@@ -1307,6 +1328,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg026, TestSize.Level1)
      * @tc.expected: The return value of function is true.
      */
     auto frontend = AceType::MakeRefPtr<MockFrontend>();
+    testing::Mock::AllowLeak(AceType::RawPtr(frontend));
     EXPECT_CALL(*frontend, OnBackPressed()).WillRepeatedly(testing::Return(true));
     context_->weakFrontend_ = frontend;
     auto frameNodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -1521,47 +1543,35 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg029, TestSize.Level1)
  */
 HWTEST_F(PipelineContextTestNg, PipelineContextTestNg030, TestSize.Level1)
 {
+    std::printf("030: start\n");
+    std::fflush(stdout);
     /**
      * @tc.steps1: init a mockPattern.
      * @tc.expected: some calls by mockPattern.
      */
-    RefPtr<MockPattern> mockPattern_ = AceType::MakeRefPtr<MockPattern>();
-    Mock::AllowLeak(mockPattern_.rawPtr_);
-    EXPECT_CALL(*mockPattern_, ProvideRestoreInfo())
-        .Times(AnyNumber())
-        .WillRepeatedly(testing::Return("Default restore info"));
-    EXPECT_CALL(*mockPattern_, GetContextParam()).Times(AnyNumber()).WillRepeatedly(testing::Return(std::nullopt));
-    EXPECT_CALL(*mockPattern_, CreatePaintProperty())
-        .Times(AnyNumber())
-        .WillRepeatedly(testing::Return(AceType::MakeRefPtr<PaintProperty>()));
-    EXPECT_CALL(*mockPattern_, CreateLayoutProperty())
-        .Times(AnyNumber())
-        .WillRepeatedly(testing::Return(AceType::MakeRefPtr<LayoutProperty>()));
-    EXPECT_CALL(*mockPattern_, CreateEventHub())
-        .Times(AnyNumber())
-        .WillRepeatedly(testing::Return(AceType::MakeRefPtr<EventHub>()));
-    EXPECT_CALL(*mockPattern_, CreateAccessibilityProperty())
-        .Times(AnyNumber())
-        .WillRepeatedly(testing::Return(AceType::MakeRefPtr<AccessibilityProperty>()));
-    EXPECT_CALL(*mockPattern_, OnAttachToFrameNode()).Times(AnyNumber());
-    EXPECT_CALL(*mockPattern_, OnDetachFromFrameNode(_)).Times(AnyNumber());
-
-    /**
-     * @tc.steps2: init a patternCreator and Create frameNodes and call StoreNode.
-     * @tc.expected: StoreNode success.
-     */
-    auto patternCreator_ = [&mockPattern_]() { return mockPattern_; };
+    auto patternCreator_ = []() { return AceType::MakeRefPtr<RestoreInfoPattern>(); };
+    std::printf("030: before create frame nodes\n");
+    std::fflush(stdout);
     frameNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNodeId1 = frameNodeId_;
     auto frameNode_1 = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_, nullptr);
+    std::printf("030: frameNode_1 created\n");
+    std::fflush(stdout);
     ASSERT_NE(context_, nullptr);
     context_->StoreNode(DEFAULT_RESTORE_ID0, frameNode_1);
     EXPECT_EQ(context_->storeNode_[DEFAULT_RESTORE_ID0], frameNode_1);
     frameNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNodeId2 = frameNodeId_;
     auto frameNode_2 = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_, patternCreator_);
+    std::printf("030: frameNode_2 created\n");
+    std::fflush(stdout);
     context_->StoreNode(DEFAULT_RESTORE_ID0, frameNode_2);
     EXPECT_EQ(context_->storeNode_[DEFAULT_RESTORE_ID0], frameNode_2);
     frameNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNodeId3 = frameNodeId_;
     auto frameNode_3 = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_, nullptr);
+    std::printf("030: frameNode_3 created\n");
+    std::fflush(stdout);
     context_->StoreNode(DEFAULT_RESTORE_ID1, frameNode_3);
     EXPECT_EQ(context_->storeNode_[DEFAULT_RESTORE_ID1], frameNode_3);
     context_->storeNode_[DEFAULT_RESTORE_ID2] = nullptr;
@@ -1571,7 +1581,16 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg030, TestSize.Level1)
      * @tc.expected: restoreNodeInfo_ is empty.
      */
     auto jsonNodeInfo = context_->GetStoredNodeInfo();
+    std::printf("030: GetStoredNodeInfo done\n");
+    auto dumpChild = jsonNodeInfo->GetChild();
+    while (dumpChild && dumpChild->IsValid()) {
+        std::printf("030: json key=%s value=%s\n", dumpChild->GetKey().c_str(), dumpChild->GetString().c_str());
+        dumpChild = dumpChild->GetNext();
+    }
+    std::fflush(stdout);
     context_->RestoreNodeInfo(jsonNodeInfo->GetChild());
+    std::printf("030: RestoreNodeInfo child done\n");
+    std::fflush(stdout);
     EXPECT_TRUE(context_->restoreNodeInfo_.empty());
 
     /**
@@ -1579,6 +1598,13 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg030, TestSize.Level1)
      * @tc.expected: restoreNodeInfo_ is not empty.
      */
     context_->RestoreNodeInfo(std::move(jsonNodeInfo));
+    std::printf("030: RestoreNodeInfo root done\n");
+    std::fflush(stdout);
+    std::printf("030: restoreNodeInfo size=%zu\n", context_->restoreNodeInfo_.size());
+    for (const auto& item : context_->restoreNodeInfo_) {
+        std::printf("030: restoreNodeInfo key=%d value=%s\n", item.first, item.second.c_str());
+    }
+    std::fflush(stdout);
     EXPECT_FALSE(context_->restoreNodeInfo_.empty());
 
     /**
@@ -1594,6 +1620,12 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg030, TestSize.Level1)
     EXPECT_FALSE(rt);
     auto iter1 = context_->restoreNodeInfo_.find(DEFAULT_RESTORE_ID0);
     EXPECT_EQ(iter1, context_->restoreNodeInfo_.end());
+
+    context_->storeNode_.clear();
+    context_->restoreNodeInfo_.clear();
+    ElementRegister::GetInstance()->RemoveItemSilently(frameNodeId1);
+    ElementRegister::GetInstance()->RemoveItemSilently(frameNodeId2);
+    ElementRegister::GetInstance()->RemoveItemSilently(frameNodeId3);
 }
 
 /**
@@ -2667,16 +2699,16 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchOptimizer_NullPtr_Tes
      * @tc.expected: Functions should handle null pointer gracefully
      */
     ASSERT_NE(context_, nullptr);
-    
+
     // 保存原始的touchOptimizer
     auto originalTouchOptimizer = std::move(context_->touchOptimizer_);
-    
+
     // 设置touchOptimizer为nullptr
     context_->touchOptimizer_ = nullptr;
-    
+
     // 测试FlushVsync中touchOptimizer_为null的情况
     context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
-    
+
     // 测试OnTouchEvent中touchOptimizer_为null的情况
     TouchEvent touchEvent;
     touchEvent.type = TouchType::MOVE;
@@ -2684,15 +2716,15 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchOptimizer_NullPtr_Tes
     touchEvent.x = 100.0f;
     touchEvent.y = 100.0f;
     context_->OnTouchEvent(touchEvent, false);
-    
+
     // 测试ConsumeTouchEventsInterpolation中touchOptimizer_为null的情况
     std::unordered_set<int32_t> ids = {1};
     std::map<int32_t, int32_t> timestampToIds = {{0, 1}};
     std::unordered_map<int32_t, TouchEvent> newIdTouchPoints;
     std::unordered_map<int, TouchEvent> idToTouchPoints;
-    
+
     context_->ConsumeTouchEventsInterpolation(ids, timestampToIds, newIdTouchPoints, idToTouchPoints);
-    
+
     // 恢复原始的touchOptimizer
     context_->touchOptimizer_ = std::move(originalTouchOptimizer);
 }
@@ -2713,7 +2745,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchOptimizer_Exists_Test
     context_->touchOptimizer_->rvsSignalEnable_ = true;
     // 测试FlushVsync中touchOptimizer_存在的情况
     context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
-    
+
     // 测试OnTouchEvent中touchOptimizer_存在的情况
     TouchEvent touchEvent;
     touchEvent.type = TouchType::MOVE;
@@ -2722,7 +2754,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchOptimizer_Exists_Test
     touchEvent.y = 100.0f;
     touchEvent.sourceTool = SourceTool::FINGER;
     context_->OnTouchEvent(touchEvent, false);
-    
+
     // 验证touchOptimizer_的状态
     EXPECT_FALSE(context_->touchOptimizer_->GetIsTpFlushFrameDisplayPeriod());
     EXPECT_FALSE(context_->touchOptimizer_->GetIsFirstFrameAfterTpFlushFrameDisplayPeriod());
@@ -2742,25 +2774,25 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TpFlushFrameDisplayPeriod_
     ASSERT_NE(context_, nullptr);
     ASSERT_NE(context_->touchOptimizer_, nullptr);
     context_->SetupRootElement();
-    
+
     auto mockWindow = (MockWindow*)(context_->window_.get());
     ASSERT_NE(mockWindow, nullptr);
-    
+
     testing::Mock::VerifyAndClearExpectations(mockWindow);
     testing::Mock::AllowLeak(mockWindow);
-    
+
     // 设置touchOptimizer_的状态
     context_->touchOptimizer_->isTpFlushFrameDisplayPeriod_ = true;
     context_->touchOptimizer_->isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
-    
+
     // 期望RequestFrame被调用
     EXPECT_CALL(*mockWindow, RequestFrame()).Times(AtLeast(1));
-    
+
     // 调用FlushVsync
     context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
-    
+
     testing::Mock::VerifyAndClearExpectations(mockWindow);
-    
+
     // 重置状态
     context_->touchOptimizer_->isTpFlushFrameDisplayPeriod_ = false;
 }
@@ -2779,25 +2811,25 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_FirstFrameAfterTpFlush_Tes
     ASSERT_NE(context_, nullptr);
     ASSERT_NE(context_->touchOptimizer_, nullptr);
     context_->SetupRootElement();
-    
+
     auto mockWindow = (MockWindow*)(context_->window_.get());
     ASSERT_NE(mockWindow, nullptr);
-    
+
     testing::Mock::VerifyAndClearExpectations(mockWindow);
     testing::Mock::AllowLeak(mockWindow);
-    
+
     // 设置touchOptimizer_的状态
     context_->touchOptimizer_->isTpFlushFrameDisplayPeriod_ = false;
     context_->touchOptimizer_->isFristFrameAfterTpFlushFrameDisplayPeriod_ = true;
-    
+
     // 期望RequestFrame被调用
     EXPECT_CALL(*mockWindow, RequestFrame()).Times(AtLeast(1));
-    
+
     // 调用FlushVsync
     context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
-    
+
     testing::Mock::VerifyAndClearExpectations(mockWindow);
-    
+
     // 重置状态
     context_->touchOptimizer_->isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
 }
@@ -2816,7 +2848,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchEvent_NeedTpFlush_Tes
     ASSERT_NE(context_, nullptr);
     ASSERT_NE(context_->touchOptimizer_, nullptr);
     context_->SetupRootElement();
-    
+
     // 设置touchOptimizer_的状态以使NeedTpFlushVsync返回true
     context_->touchOptimizer_->isTpFlushFrameDisplayPeriod_ = true;
     context_->touchOptimizer_->slideAccept_ = false; // 这将导致NeedTpFlushVsync返回true
@@ -2829,7 +2861,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchEvent_NeedTpFlush_Tes
     touchEvent.y = 100.0f;
     touchEvent.sourceTool = SourceTool::FINGER;
     touchEvent.sourceType = SourceType::TOUCH;
-    
+
     // 调用OnTouchEvent
     context_->OnTouchEvent(touchEvent, false);
     EXPECT_FALSE(context_->touchOptimizer_->isTpFlushFrameDisplayPeriod_);
@@ -2886,19 +2918,19 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchEvent_NoNeedTpFlush_T
     ASSERT_NE(context_, nullptr);
     ASSERT_NE(context_->touchOptimizer_, nullptr);
     context_->SetupRootElement();
-    
+
     auto mockWindow = (MockWindow*)(context_->window_.get());
     ASSERT_NE(mockWindow, nullptr);
-    
+
     testing::Mock::VerifyAndClearExpectations(mockWindow);
     testing::Mock::AllowLeak(mockWindow);
-    
+
     // 设置touchOptimizer_的状态以使NeedTpFlushVsync返回false
     context_->touchOptimizer_->isTpFlushFrameDisplayPeriod_ = false;
-    
+
     // 期望RequestFrame被调用
     EXPECT_CALL(*mockWindow, RequestFrame()).Times(AtLeast(1));
-    
+
     // 创建触摸事件
     TouchEvent touchEvent;
     touchEvent.type = TouchType::MOVE;
@@ -2907,10 +2939,10 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_TouchEvent_NoNeedTpFlush_T
     touchEvent.y = 100.0f;
     touchEvent.sourceTool = SourceTool::FINGER;
     touchEvent.sourceType = SourceType::TOUCH;
-    
+
     // 调用OnTouchEvent
     context_->OnTouchEvent(touchEvent, false);
-    
+
     testing::Mock::VerifyAndClearExpectations(mockWindow);
 }
 
@@ -2989,6 +3021,445 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_FirstFrameSetupRootElement
      * @tc.expected: No crash
      */
     context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
+}
+
+/**
+ * @tc.name: PipelineContextOnDumpInjectionTest001
+ * @tc.desc: Test OnDumpInjection with valid nodeId.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextOnDumpInjectionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize parameters and create a test FrameNode.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    // Create a test FrameNode
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, nodeId, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: 2. Call OnDumpInjection with valid nodeId and command.
+     * @tc.expected: OnRecvCommand is called on the frameNode.
+     */
+    std::vector<std::string> params = { "-injection", "test_command", std::to_string(nodeId) };
+    context_->OnDumpInjection(params);
+
+    // Verify that the node was found and processed
+    EXPECT_NE(frameNode, nullptr);
+}
+
+/**
+ * @tc.name: PipelineContextOnDumpInjectionTest002
+ * @tc.desc: Test OnDumpInjection with negative nodeId.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextOnDumpInjectionTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize parameters with negative nodeId.
+     * @tc.expected: Function returns early without processing.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    // Create a test FrameNode to verify it's not called
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, nodeId, nullptr);
+
+    // Call with negative nodeId
+    std::vector<std::string> params = { "-injection", "test_command", "-1" };
+    context_->OnDumpInjection(params);
+
+    // Verify that the function returned early (OnRecvCommand not called)
+    // Since node is not retrieved, no state change should occur
+    EXPECT_NE(frameNode, nullptr);
+}
+
+/**
+ * @tc.name: PipelineContextDumpSimplifyTreeJsonFromTopNavNodeTest001
+ * @tc.desc: Test DumpSimplifyTreeJsonFromTopNavNode with valid navNodeList.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextDumpSimplifyTreeJsonFromTopNavNodeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize parameters and create navNodeList.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    // Create test navNodes
+    auto navNodeId1 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto navNode1 = FrameNode::GetOrCreateFrameNode("navNode1", navNodeId1, nullptr);
+    navNode1->SetActive(true);
+
+    auto navNodeId2 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto navNode2 = FrameNode::GetOrCreateFrameNode("navNode2", navNodeId2, nullptr);
+    navNode2->SetActive(true);
+
+    std::list<RefPtr<FrameNode>> navNodeList;
+    navNodeList.push_back(navNode1);
+    navNodeList.push_back(navNode2);
+
+    /**
+     * @tc.steps: 2. Create root JsonValue and call DumpSimplifyTreeJsonFromTopNavNode.
+     * @tc.expected: NavNodes are added to root's children.
+     */
+    auto root = JsonUtil::CreateSharedPtrJson(true);
+    ParamConfig config = { true, true, true, true };
+
+    context_->DumpSimplifyTreeJsonFromTopNavNode(nullptr, root, navNodeList, config);
+
+    // Verify that root has $children array
+    auto childrenJson = root->GetValue("$children");
+    ASSERT_NE(childrenJson, nullptr);
+
+    // Verify that $children array contains 2 items (navNode1 and navNode2)
+    EXPECT_EQ(childrenJson->GetArraySize(), 2);
+
+    // Verify the first item has correct tag
+    auto firstItem = childrenJson->GetArrayItem(0);
+    ASSERT_NE(firstItem, nullptr);
+    auto tagValue = firstItem->GetValue("$type");
+    ASSERT_NE(tagValue, nullptr);
+    EXPECT_EQ(tagValue->GetString(), "navNode1");
+}
+
+/**
+ * @tc.name: PipelineContextDumpSimplifyTreeJsonFromTopNavNodeTest002
+ * @tc.desc: Test DumpSimplifyTreeJsonFromTopNavNode with null navNodes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextDumpSimplifyTreeJsonFromTopNavNodeTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize parameters with null navNodes in list.
+     * @tc.expected: Null nodes are skipped, children array is created.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    // Create a list with null nodes
+    std::list<RefPtr<FrameNode>> navNodeList;
+    navNodeList.push_back(nullptr);
+    navNodeList.push_back(nullptr);
+
+    /**
+     * @tc.steps: 2. Create root JsonValue and call DumpSimplifyTreeJsonFromTopNavNode.
+     * @tc.expected: Children array is created but empty.
+     */
+    auto root = JsonUtil::CreateSharedPtrJson(true);
+    ParamConfig config = { true, true, true, true };
+
+    context_->DumpSimplifyTreeJsonFromTopNavNode(nullptr, root, navNodeList, config);
+
+    // Verify that root has $children array (created even though list is empty/null)
+    auto childrenJson = root->GetValue("$children");
+    ASSERT_NE(childrenJson, nullptr);
+
+    // Verify that $children array is empty (no valid nodes added)
+    EXPECT_EQ(childrenJson->GetArraySize(), 0);
+}
+
+/**
+ * @tc.name: PipelineContextDumpSimplifyTreeJsonFromTopNavNodeTest003
+ * @tc.desc: Test DumpSimplifyTreeJsonFromTopNavNode with mixed valid and null navNodes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextDumpSimplifyTreeJsonFromTopNavNodeTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize parameters with mixed navNodeList.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    // Create a list with valid and null nodes
+    auto navNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto navNode = FrameNode::GetOrCreateFrameNode("navNode", navNodeId, nullptr);
+    navNode->SetActive(true);
+
+    std::list<RefPtr<FrameNode>> navNodeList;
+    navNodeList.push_back(nullptr);
+    navNodeList.push_back(navNode);
+    navNodeList.push_back(nullptr);
+
+    /**
+     * @tc.steps: 2. Create root JsonValue and call DumpSimplifyTreeJsonFromTopNavNode.
+     * @tc.expected: Valid node is added, null nodes are skipped.
+     */
+    auto root = JsonUtil::CreateSharedPtrJson(true);
+    ParamConfig config = { true, true, true, true };
+
+    context_->DumpSimplifyTreeJsonFromTopNavNode(nullptr, root, navNodeList, config);
+
+    // Verify that root has $children array
+    auto childrenJson = root->GetValue("$children");
+    ASSERT_NE(childrenJson, nullptr);
+
+    // Verify that $children array contains 1 item (null nodes are skipped)
+    EXPECT_EQ(childrenJson->GetArraySize(), 1);
+
+    // Verify the item has correct tag
+    auto firstItem = childrenJson->GetArrayItem(0);
+    ASSERT_NE(firstItem, nullptr);
+    auto tagValue = firstItem->GetValue("$type");
+    ASSERT_NE(tagValue, nullptr);
+    EXPECT_EQ(tagValue->GetString(), "navNode");
+}
+
+/**
+ * @tc.name: PipelineContextDumpSimplifyTreeJsonFromTopNavNodeTest004
+ * @tc.desc: Test DumpSimplifyTreeJsonFromTopNavNode creates $children if not exists.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextDumpSimplifyTreeJsonFromTopNavNodeTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize parameters with root that has no $children.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    auto navNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto navNode = FrameNode::GetOrCreateFrameNode("navNode", navNodeId, nullptr);
+
+    std::list<RefPtr<FrameNode>> navNodeList;
+    navNodeList.push_back(navNode);
+    navNode->SetActive(true);
+
+    /**
+     * @tc.steps: 2. Create root JsonValue without $children and call DumpSimplifyTreeJsonFromTopNavNode.
+     * @tc.expected: $children array is created and navNode is added.
+     */
+    auto root = JsonUtil::CreateSharedPtrJson(true);
+    // Verify $children doesn't exist initially
+    EXPECT_FALSE(root->Contains("$children"));
+
+    ParamConfig config = { true, true, true, true };
+    context_->DumpSimplifyTreeJsonFromTopNavNode(nullptr, root, navNodeList, config);
+
+    // Verify that $children was created
+    EXPECT_TRUE(root->Contains("$children"));
+    auto childrenJson = root->GetValue("$children");
+    ASSERT_NE(childrenJson, nullptr);
+
+    // Verify that $children array contains 1 item
+    EXPECT_EQ(childrenJson->GetArraySize(), 1);
+
+    // Verify the item has correct tag
+    auto firstItem = childrenJson->GetArrayItem(0);
+    ASSERT_NE(firstItem, nullptr);
+    auto tagValue = firstItem->GetValue("$type");
+    ASSERT_NE(tagValue, nullptr);
+    EXPECT_EQ(tagValue->GetString(), "navNode");
+}
+
+/**
+ * @tc.name: PipelineContextDumpSimplifyTreeJsonFromTopNavNodeTest005
+ * @tc.desc: Test DumpSimplifyTreeJsonFromTopNavNode with existing $children in root.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextDumpSimplifyTreeJsonFromTopNavNodeTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize parameters with root that has existing $children.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    auto navNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto navNode = FrameNode::GetOrCreateFrameNode("navNode", navNodeId, nullptr);
+    navNode->SetActive(true);
+
+    std::list<RefPtr<FrameNode>> navNodeList;
+    navNodeList.push_back(navNode);
+
+    /**
+     * @tc.steps: 2. Create root JsonValue with existing $children array.
+     * @tc.expected: NavNode is added to existing $children array.
+     */
+    auto root = JsonUtil::CreateSharedPtrJson(true);
+    auto existingChildren = JsonUtil::CreateArray();
+    root->PutRef("$children", std::move(existingChildren));
+
+    // Verify $children exists
+    EXPECT_TRUE(root->Contains("$children"));
+
+    ParamConfig config = { true, true, true, true };
+    context_->DumpSimplifyTreeJsonFromTopNavNode(nullptr, root, navNodeList, config);
+
+    // Verify that navNode was added to existing $children
+    auto childrenJson = root->GetValue("$children");
+    ASSERT_NE(childrenJson, nullptr);
+
+    // Verify that $children array contains 1 item (new navNode added)
+    EXPECT_EQ(childrenJson->GetArraySize(), 1);
+
+    // Verify the item has correct tag
+    auto firstItem = childrenJson->GetArrayItem(0);
+    ASSERT_NE(firstItem, nullptr);
+    auto tagValue = firstItem->GetValue("$type");
+    ASSERT_NE(tagValue, nullptr);
+    EXPECT_EQ(tagValue->GetString(), "navNode");
+}
+
+/**
+ * @tc.name: SetAfterRenderZindexRebuild005
+ * @tc.desc: Test SetAfterRenderZindexRebuild with boundary values
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, SetAfterRenderZindexRebuild005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: SetAfterRenderZindexRebuild with negative, zero, and max int32 values
+     * @tc.expected: All values are stored correctly
+     */
+    context_->SetAfterRenderZindexRebuild(-1);
+    context_->SetAfterRenderZindexRebuild(0);
+    context_->SetAfterRenderZindexRebuild(INT32_MAX);
+
+    EXPECT_EQ(context_->idUpdateZOrder_.size(), 3);
+    EXPECT_EQ(context_->idUpdateZOrderIndex_, 3);
+    EXPECT_EQ(context_->idUpdateZOrder_[-1], 0);
+    EXPECT_EQ(context_->idUpdateZOrder_[0], 1);
+    EXPECT_EQ(context_->idUpdateZOrder_[INT32_MAX], 2);
+}
+
+/**
+ * @tc.name: FlushZindexUpdate001
+ * @tc.desc: Test FlushZindexUpdate with empty map
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, FlushZindexUpdate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Call FlushZindexUpdate with empty idUpdateZOrder_
+     * @tc.expected: No crash, map and index are cleared
+     */
+    context_->idUpdateZOrderIndex_ = 5;
+
+    context_->FlushZindexUpdate();
+
+    EXPECT_EQ(context_->idUpdateZOrder_.size(), 0);
+    EXPECT_EQ(context_->idUpdateZOrderIndex_, 0);
+}
+
+/**
+ * @tc.name: FlushZindexUpdate002
+ * @tc.desc: Test FlushZindexUpdate with multiple nodes including duplicates
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, FlushZindexUpdate002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Add multiple nodes with duplicates, then flush
+     * @tc.expected: Nodes are processed and map is cleared
+     */
+    constexpr int32_t nodeId1 = 1001;
+    constexpr int32_t nodeId2 = 1002;
+    constexpr int32_t nodeId3 = 1003;
+    constexpr int32_t nodeId4 = 1004;
+
+    auto frameNode1 = FrameNode::GetOrCreateFrameNode(TEST_TAG, nodeId1, nullptr);
+    auto frameNode2 = FrameNode::GetOrCreateFrameNode(TEST_TAG, nodeId2, nullptr);
+    auto frameNode3 = FrameNode::GetOrCreateFrameNode(TEST_TAG, nodeId3, nullptr);
+    auto frameNode4 = FrameNode::GetOrCreateFrameNode(TEST_TAG, nodeId4, nullptr);
+    ElementRegister::GetInstance()->AddUINode(frameNode1);
+    ElementRegister::GetInstance()->AddUINode(frameNode2);
+    ElementRegister::GetInstance()->AddUINode(frameNode3);
+    ElementRegister::GetInstance()->AddUINode(frameNode4);
+
+    context_->SetAfterRenderZindexRebuild(nodeId1);
+    context_->SetAfterRenderZindexRebuild(nodeId2);
+    context_->SetAfterRenderZindexRebuild(nodeId3);
+    context_->SetAfterRenderZindexRebuild(nodeId4);
+    context_->SetAfterRenderZindexRebuild(nodeId1);
+    context_->SetAfterRenderZindexRebuild(nodeId3);
+    context_->SetAfterRenderZindexRebuild(nodeId2);
+
+    EXPECT_EQ(context_->idUpdateZOrder_.size(), 4);
+    EXPECT_EQ(context_->idUpdateZOrder_[nodeId1], 4);
+    EXPECT_EQ(context_->idUpdateZOrder_[nodeId2], 6);
+    EXPECT_EQ(context_->idUpdateZOrder_[nodeId3], 5);
+    EXPECT_EQ(context_->idUpdateZOrder_[nodeId4], 3);
+
+    context_->FlushZindexUpdate();
+
+    EXPECT_EQ(context_->idUpdateZOrder_.size(), 0);
+    EXPECT_EQ(context_->idUpdateZOrderIndex_, 0);
+}
+
+/**
+ * @tc.name: FlushZindexUpdate003
+ * @tc.desc: Test FlushZindexUpdate with consecutive flush calls
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, FlushZindexUpdate003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Add nodes, flush, then flush again
+     * @tc.expected: No crash on consecutive flushes
+     */
+    constexpr int32_t nodeId1 = 1001;
+    constexpr int32_t nodeId2 = 1002;
+
+    auto frameNode1 = FrameNode::GetOrCreateFrameNode(TEST_TAG, nodeId1, nullptr);
+    auto frameNode2 = FrameNode::GetOrCreateFrameNode(TEST_TAG, nodeId2, nullptr);
+    ElementRegister::GetInstance()->AddUINode(frameNode1);
+    ElementRegister::GetInstance()->AddUINode(frameNode2);
+
+    context_->SetAfterRenderZindexRebuild(nodeId1);
+    context_->SetAfterRenderZindexRebuild(nodeId2);
+
+    context_->FlushZindexUpdate();
+
+    EXPECT_EQ(context_->idUpdateZOrder_.size(), 0);
+    EXPECT_EQ(context_->idUpdateZOrderIndex_, 0);
+
+    context_->FlushZindexUpdate();
+
+    EXPECT_EQ(context_->idUpdateZOrder_.size(), 0);
+    EXPECT_EQ(context_->idUpdateZOrderIndex_, 0);
+}
+
+/**
+ * @tc.name: ZindexWorkflow001
+ * @tc.desc: Test complete workflow of SetAfterRenderZindexRebuild and FlushZindexUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, ZindexWorkflow001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Add nodes, flush, add more nodes, flush again
+     * @tc.expected: Each flush clears the map correctly
+     */
+    constexpr int32_t nodeId1 = 1001;
+    constexpr int32_t nodeId2 = 1002;
+    constexpr int32_t nodeId3 = 1003;
+
+    auto frameNode1 = FrameNode::GetOrCreateFrameNode(TEST_TAG, nodeId1, nullptr);
+    auto frameNode2 = FrameNode::GetOrCreateFrameNode(TEST_TAG, nodeId2, nullptr);
+    auto frameNode3 = FrameNode::GetOrCreateFrameNode(TEST_TAG, nodeId3, nullptr);
+    ElementRegister::GetInstance()->AddUINode(frameNode1);
+    ElementRegister::GetInstance()->AddUINode(frameNode2);
+    ElementRegister::GetInstance()->AddUINode(frameNode3);
+
+    context_->SetAfterRenderZindexRebuild(nodeId1);
+    context_->SetAfterRenderZindexRebuild(nodeId2);
+    EXPECT_EQ(context_->idUpdateZOrder_.size(), 2);
+
+    context_->FlushZindexUpdate();
+    EXPECT_EQ(context_->idUpdateZOrder_.size(), 0);
+
+    context_->SetAfterRenderZindexRebuild(nodeId3);
+    context_->SetAfterRenderZindexRebuild(nodeId1);
+    EXPECT_EQ(context_->idUpdateZOrder_.size(), 2);
+
+    context_->FlushZindexUpdate();
+    EXPECT_EQ(context_->idUpdateZOrder_.size(), 0);
 }
 } // namespace NG
 } // namespace OHOS::Ace

@@ -14,6 +14,7 @@
  */
 
 #include "core/common/event_dump.h"
+#include "core/common/event_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -536,7 +537,7 @@ void EventTreeRecord::Dump(std::unique_ptr<JsonValue>& json, int32_t depth, int3
 void EventTouchInfoRecord::AddTouchPoint(const TouchEvent& event, TimeStamp dispatchTime)
 {
     touchHistory_.emplace_back(EventTouchInfo { .pointerID = event.touchEventId,
-        .creatTime = event.GetTimeStamp(),
+        .creatTime = event.sensorTime,
         .processTime = event.processTime,
         .dispatchTime = dispatchTime });
     if (touchHistory_.size() >= MAX_HISTORY_TOUCH_INFO_SIZE) {

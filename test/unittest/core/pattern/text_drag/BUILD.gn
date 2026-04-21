@@ -16,5 +16,20 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("text_drag_test_ng") {
   module_name = "TextSet-TextSelection"
   type = "new"
+
   sources = [ "text_drag_test_ng.cpp" ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "text_drag_test_min.cpp",
+      "text_drag_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "text_drag_test_min.cpp",
+      "text_drag_test_core.cpp",
+    ]
+  }
+
 }

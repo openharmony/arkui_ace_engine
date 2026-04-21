@@ -27,6 +27,7 @@ void GridLayoutProperty::ResetGridLayoutInfoAndMeasure() const
     auto pattern = host->GetPattern<GridPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->ResetGridLayoutInfo();
+    pattern->ClearPreloadItemList();
     if (host->GetParent()) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }

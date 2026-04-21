@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/list/list_event_hub.h"
 
+#include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
 #include "core/pipeline_ng/pipeline_context.h"

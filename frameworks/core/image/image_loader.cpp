@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include "core/image/image_loader.h"
 
 #include "drawing/engine_adapter/skia_adapter/skia_data.h"
+#include "utils/data.h"
 #ifdef USE_NEW_SKIA
 #include "src/base/SkBase64.h"
 #else
@@ -26,9 +27,9 @@
 #include "sys/types.h"
 #include "unistd.h"
 
-#include "base/log/event_report.h"
 #include "base/image/file_uri_helper.h"
 #include "base/image/image_source.h"
+#include "base/log/event_report.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/resource_configuration.h"
 #include "base/utils/system_properties.h"
@@ -39,6 +40,7 @@
 #include "core/components_ng/image_provider/drawing_image_data.h"
 #include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/image/image_file_cache.h"
+#include "core/image/image_cache.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
@@ -248,7 +250,7 @@ std::shared_ptr<RSData> FileImageLoader::BuildImageData(const std::shared_ptr<RS
 #ifdef PREVIEW
     return rsData->BuildWithCopy(result->GetData(), result->GetSize()) ? rsData : nullptr;
 #else
-    DataWrapper* wrapper = new DataWrapper{ std::move(result) };
+    DataWrapper* wrapper = new DataWrapper { std::move(result) };
     CHECK_NULL_RETURN(wrapper, nullptr);
     if (wrapper->data == nullptr) {
         delete wrapper;

@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/event/ace_events.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
@@ -50,13 +51,13 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 
 #include "core/components_ng/render/adapter/rosen_window.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/render/mock_rosen_render_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
+
 #include "frameworks/core/components_ng/pattern/ui_extension/platform_event_proxy.h"
 #include "test/unittest/core/pattern/ui_extension/mock/mock_window_scene_helper.h"
 #include "../mock/mock_accessibility_child_tree_callback.h"
@@ -69,6 +70,13 @@ namespace {
     const std::string UI_EXTENSION_COMPONENT_ETS_TAG = "UIExtensionComponent";
     const int32_t IGNORE_POSITION_TRANSITION_SWITCH = -990;
 } // namespace
+
+#ifdef WINDOW_SCENE_SUPPORTED
+const RefPtr<UIExtensionManager>& PipelineContext::GetUIExtensionManager()
+{
+    return uiExtensionManager_;
+}
+#endif
 
 class UIExtensionComponentTestTwoNg : public testing::Test {
 public:
@@ -482,7 +490,7 @@ HWTEST_F(UIExtensionComponentTestTwoNg, SendBusinessDataSyncReplyTest001, TestSi
     AAFwk::Want reply;
     auto ret = pattern->SendBusinessDataSyncReply(code, want, reply);
     ASSERT_EQ(ret, false);
-    
+
     pattern->sessionWrapper_ = nullptr;
     ret = pattern->SendBusinessDataSyncReply(code, want, reply);
     ASSERT_EQ(ret, false);
@@ -519,7 +527,7 @@ HWTEST_F(UIExtensionComponentTestTwoNg, SendBusinessDataTest001, TestSize.Level1
     BusinessDataSendType type = BusinessDataSendType::ASYNC;
     auto ret = pattern->SendBusinessData(code, want, type);
     ASSERT_EQ(ret, false);
-    
+
     pattern->sessionWrapper_ = nullptr;
     ret = pattern->SendBusinessData(code, want, type);
     ASSERT_EQ(ret, false);
@@ -907,7 +915,7 @@ HWTEST_F(UIExtensionComponentTestTwoNg, UIExtensionComponentTwoTest002, TestSize
     pattern->instanceId_ = context->GetInstanceId();
     pattern->OnDetachContext(rawContext);
     EXPECT_EQ(pattern->hasDetachContext_, true);
-    
+
     pattern->OnDetachContext(rawContext);
     pattern->hasDetachContext_ = false;
     auto host = pattern->GetHost();
@@ -1385,20 +1393,20 @@ HWTEST_F(UIExtensionComponentTestTwoNg, UIExtensionHandleMouseEvent, TestSize.Le
     mouseInfo.SetPointerEvent(pointerEvent);
     pattern->HandleMouseEvent(mouseInfo);
     EXPECT_FALSE(pattern->lastPointerEvent_);
- 
+
     mouseInfo.SetSourceDevice(SourceType::MOUSE);
     mouseInfo.SetPullAction(MouseAction::PULL_MOVE);
     pattern->HandleMouseEvent(mouseInfo);
     EXPECT_FALSE(pattern->lastPointerEvent_);
- 
+
     mouseInfo.SetPullAction(MouseAction::PULL_UP);
     pattern->HandleMouseEvent(mouseInfo);
     EXPECT_FALSE(pattern->lastPointerEvent_);
- 
+
     mouseInfo.SetPullAction(MouseAction::PRESS);
     pattern->HandleMouseEvent(mouseInfo);
     EXPECT_TRUE(pattern->lastPointerEvent_);
- 
+
     mouseInfo.SetPullAction(MouseAction::RELEASE);
     pattern->HandleMouseEvent(mouseInfo);
     EXPECT_TRUE(pattern->lastPointerEvent_);
@@ -1528,6 +1536,36 @@ HWTEST_F(UIExtensionComponentTestTwoNg, OnAttachContextTest, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AddExtraInfoWithParamConfig002
+ * @tc.desc: Test Func AddExtraInfoWithParamConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, AddExtraInfoWithParamConfig002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct UIExtensionNode and get pattern
+     */
+    auto uiextensionNode = UIExtensionNode::GetOrCreateUIExtensionNode(
+        V2::UI_EXTENSION_COMPONENT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiextensionNode, nullptr);
+    auto pattern = uiextensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test Func AddExtraInfoWithParamConfig
+     */
+    auto json = JsonUtil::CreateSharedPtrJson();
+    ParamConfig config;
+    config.accessibilityInfo = true;
+    config.interactionInfo = true;
+    config.cacheNodes = true;
+    config.withUIExtension = true;
+    config.interactionInfo = true;
+    pattern->AddExtraInfoWithParamConfig(json, config);
+    EXPECT_EQ(json->GetString("$child-uec"), "");
+}
+
+/**
  * @tc.name: PluginComponentTest001
  * @tc.desc: Test PluginComponent Creation
  * @tc.type: FUNC
@@ -1558,6 +1596,39 @@ HWTEST_F(UIExtensionComponentTestTwoNg, EmbeddedComponentTest001, TestSize.Level
     EXPECT_EQ(frameNode->GetTag(), V2::EMBEDDED_COMPONENT_ETS_TAG);
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     ASSERT_NE(pattern, nullptr);
+}
+
+/**
+ * @tc.name: ExecuteDumpTask001
+ * @tc.desc: Test Func AddExtraInfoWithParamConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, ExecuteDumpTask001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct UIExtensionNode and get pattern
+     */
+    auto uiextensionNode = UIExtensionNode::GetOrCreateUIExtensionNode(
+        V2::UI_EXTENSION_COMPONENT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiextensionNode, nullptr);
+    auto pattern = uiextensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test Func AddExtraInfoWithParamConfig
+     */
+    auto json = JsonUtil::CreateSharedPtrJson();
+    ParamConfig config;
+    std::vector<std::string> params;
+    params.push_back("-allInfoWithParamConfigTotal");
+    params.push_back("1");
+    params.push_back(config.interactionInfo ? "1" : "0");
+    params.push_back(config.accessibilityInfo ? "1" : "0");
+    params.push_back(config.cacheNodes ? "1" : "0");
+    params.push_back(config.withWeb ? "1" : "0");
+    params.push_back(config.withUIExtension ? "1" : "0");
+    pattern->ExecuteDumpTask(json, params, uiextensionNode);
+    EXPECT_EQ(json->GetString("$child-uec"), "");
 }
 
 /**
@@ -1606,5 +1677,28 @@ HWTEST_F(UIExtensionComponentTestTwoNg, UIExtensionComponentTouchTest001, TestSi
     uiextensionNode->TouchTest(globalPoint, parentLocalPoint,
         parentRevertPoint, touchRestrict, result, touchId, responseLinkResult, isDispatch);
     EXPECT_EQ(res, HitTestResult::BUBBLING);
+}
+
+/**
+ * @tc.name: UIExtensionComponentIsModalFixFocusTest001
+ * @tc.desc: Test UIExtension IsModalFixFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, UIExtensionComponentIsModalFixFocusTest001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. construct UIExtensionNode and get pattern
+    */
+    auto uiextensionNode = UIExtensionNode::GetOrCreateUIExtensionNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, 1,
+        []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiextensionNode, nullptr);
+    auto pattern = uiextensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+    * @tc.steps: step2. Test UIExtension pattern SetIsModalFixFocus and GetIsModalFixFocus
+    */
+    EXPECT_FALSE(pattern->GetIsModalFixFocus());
+    pattern->SetIsModalFixFocus(true);
+    EXPECT_TRUE(pattern->GetIsModalFixFocus());
 }
 } // namespace OHOS::Ace::NG

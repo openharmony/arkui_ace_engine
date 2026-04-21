@@ -16,6 +16,7 @@
 #include "core/components/plugin/hap_asset_provider_impl.h"
 
 #include "base/log/ace_trace.h"
+#include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace::Plugin {
@@ -56,6 +57,8 @@ std::unique_ptr<AssetMapping> HapAssetProviderImpl::GetAsMapping(const std::stri
         if (!mapper) {
             continue;
         }
+        mapper->SetAutoReleaseMem(true);
+        runtimeExtractor_->SetAutoCloseFd(true);
         if (mapper->GetDataLen()) {
             osStream.write((char*)mapper->GetDataPtr(), mapper->GetDataLen());
             return std::make_unique<HapAssetImplMapping>(osStream);

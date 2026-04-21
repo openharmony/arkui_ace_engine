@@ -20,6 +20,7 @@
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
 ParagraphStyle ParagraphUtil::GetParagraphStyle(const TextStyle& textStyle)
@@ -39,6 +40,7 @@ ParagraphStyle ParagraphUtil::GetParagraphStyle(const TextStyle& textStyle)
         .isOnlyBetweenLines = textStyle.GetIsOnlyBetweenLines(),
         .optimizeTrailingSpace = textStyle.GetOptimizeTrailingSpace(),
         .enableAutoSpacing = textStyle.GetEnableAutoSpacing(),
+        .orphanCharOptimization = textStyle.GetOrphanCharOptimization(),
         .compressLeadingPunctuation = textStyle.GetCompressLeadingPunctuation(),
         .includeFontPadding = textStyle.GetIncludeFontPadding(),
         .fallbackLineSpacing = textStyle.GetFallbackLineSpacing()
@@ -126,11 +128,17 @@ void ParagraphUtil::GetSpanParagraphStyle(
     if (lineStyle->HasLineHeight()) {
         pStyle.lineHeight = lineStyle->GetLineHeightValue();
     }
+    if (lineStyle->HasIsOnlyBetweenLines()) {
+        pStyle.isOnlyBetweenLines = lineStyle->GetIsOnlyBetweenLinesValue();
+    }
     if (lineStyle->HasHalfLeading()) {
         pStyle.halfLeading = lineStyle->GetHalfLeadingValue();
     }
     if (lineStyle->HasParagraphSpacing()) {
         pStyle.paragraphSpacing = lineStyle->GetParagraphSpacingValue();
+    }
+    if (lineStyle->HasOrphanCharOptimization()) {
+        pStyle.orphanCharOptimization = lineStyle->GetOrphanCharOptimizationValue();
     }
     // spanGroup.empty()代表ConstructParagraphSpanGroup时调用，不用于实际布局，仅用于比较段落间是否一致
     if (spanGroup.empty()) {

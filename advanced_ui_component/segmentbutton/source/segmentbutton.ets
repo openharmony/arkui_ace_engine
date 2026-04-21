@@ -18,6 +18,8 @@ import util from '@ohos.util';
 import { LengthMetrics, LengthUnit } from '@ohos.arkui.node';
 import I18n from '@ohos.i18n';
 import uiMaterial from '@ohos.arkui.uiMaterial';
+import { EnvironmentCallback } from '@kit.AbilityKit';
+import deviceInfo from '@ohos.deviceInfo';
 
 const MIN_ITEM_COUNT = 2
 const MAX_ITEM_COUNT = 5
@@ -53,7 +55,6 @@ interface SegmentButtonThemeInterface {
   SEGMENT_BUTTON_NORMAL_BORDER_RADIUS: Length | BorderRadiuses | LocalizedBorderRadiuses,
   SEGMENT_ITEM_TEXT_OVERFLOW: Resource,
   SEGMENT_BUTTON_FOCUS_TEXT_COLOR: ResourceColor,
-  SEGMENT_BUTTON_SHADOW: Resource,
   SEGMENT_FOCUS_STYLE_CUSTOMIZED: Resource,
   SEGMENT_BUTTON_CONTAINER_SHAPE: Resource,
   SEGMENT_BUTTON_SELECTED_BACKGROUND_SHAPE: Resource,
@@ -80,7 +81,6 @@ const segmentButtonTheme: SegmentButtonThemeInterface = {
   SEGMENT_BUTTON_NORMAL_BORDER_RADIUS: $r('sys.float.segment_button_normal_border_radius'),
   SEGMENT_ITEM_TEXT_OVERFLOW: $r('sys.float.segment_marquee'),
   SEGMENT_BUTTON_FOCUS_TEXT_COLOR: $r('sys.color.segment_button_focus_text_primary'),
-  SEGMENT_BUTTON_SHADOW: $r('sys.float.segment_button_shadow'),
   SEGMENT_TEXT_HORIZONTAL_PADDING: $r('sys.float.segment_button_text_l_r_padding'),
   SEGMENT_TEXT_VERTICAL_PADDING: $r('sys.float.segment_button_text_u_d_padding'),
   SEGMENT_TEXT_CAPSULE_VERTICAL_PADDING: $r('sys.float.segment_button_text_capsule_u_d_padding'),
@@ -412,13 +412,20 @@ export class SegmentButtonOptions {
       this.onButtonsUpdated();
       this.selectedFontColor = options.selectedFontColor ?? segmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR
       this.selectedBackgroundColor = options.selectedBackgroundColor ??
-      segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR
+        segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR
     } else {
       this.showText = true
     }
-    let themePadding = LengthMetrics.resource($r('sys.float.segment_button_baseplate_padding')).value;
+    let themePadding = LengthMetrics.resource($r('sys.float.padding_level2')).value;
     this.componentPadding = this.multiply ? 0 : themePadding;
-    this.backgroundSystemMaterial = options.backgroundSystemMaterial
+    let info = uiMaterial.getMaterialInfo();
+    if (info.state === uiMaterial.MaterialState.ENABLE && !options.backgroundSystemMaterial) {
+      this.backgroundSystemMaterial = new uiMaterial.ImmersiveMaterial({
+        style: uiMaterial.ImmersiveStyle.THIN
+      });
+    } else if (info.state !== uiMaterial.MaterialState.DISABLE) {
+      this.backgroundSystemMaterial = options.backgroundSystemMaterial;
+    }
   }
 
   public onButtonsUpdated() {
@@ -522,6 +529,39 @@ struct SelectItem {
   @Consume zoomScaleArray: number[]
   @Consume buttonBorderRadius: LocalizedBorderRadiuses[]
   @Prop isSegmentFocusStyleCustomized: boolean;
+  @Consume openSelectedItemSystemMaterial?: boolean = false;
+  @Consume selectedItemScale?: ScaleOptions;
+
+
+  getBackgroundColor(): ResourceColor {
+    if (this.options.selectedBackgroundColor) {
+      return this.options.selectedBackgroundColor;
+    }
+    if (this.options.type === 'tab') {
+      return segmentButtonTheme.TAB_SELECTED_BACKGROUND_COLOR;
+    } else {
+      return segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR;
+    }
+  }
+
+  getScale(): ScaleOptions | undefined {
+    if (this.openSelectedItemSystemMaterial) {
+      return this.selectedItemScale;
+    } else {
+      return {
+        x: this.zoomScaleArray[this.selectedIndexes[0]],
+        y: this.zoomScaleArray[this.selectedIndexes[0]]
+      };
+    }
+  }
+
+  getOpacity() {
+    if (this.openSelectedItemSystemMaterial) {
+      return 0.7;
+    } else {
+      return 1;
+    }
+  }
 
   build() {
     if (this.selectedIndexes !== void 0 && this.selectedIndexes.length !== 0) {
@@ -529,14 +569,10 @@ struct SelectItem {
         .direction(this.options.direction)
         .borderRadius(this.buttonBorderRadius[this.selectedIndexes[0]])
         .size(this.buttonItemsSize[this.selectedIndexes[0]])
-        .backgroundColor(this.options.selectedBackgroundColor ??
-          (this.options.type === 'tab' ? segmentButtonTheme.TAB_SELECTED_BACKGROUND_COLOR :
-            segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR))
+        .backgroundColor(this.getBackgroundColor())
         .position(this.selectedItemPosition)
-        .scale({ x: this.zoomScaleArray[this.selectedIndexes[0]], y: this.zoomScaleArray[this.selectedIndexes[0]] })
-        .shadow(this.isSegmentFocusStyleCustomized ? undefined :
-          resourceToNumber(this.getUIContext()?.getHostContext(), segmentButtonTheme.SEGMENT_BUTTON_SHADOW,
-            0) as ShadowStyle)
+        .scale(this.getScale())
+        .opacity(this.getOpacity())
     }
   }
 }
@@ -554,7 +590,7 @@ struct MultiSelectItemArray {
   onOptionsChange() {
     for (let i = 0; i < this.selectedIndexes.length; i++) {
       this.multiColor[this.selectedIndexes[i]] = this.options.selectedBackgroundColor ??
-      segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR
+        segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR
     }
   }
 
@@ -564,14 +600,14 @@ struct MultiSelectItemArray {
     }
     for (let i = 0; i < this.selectedIndexes.length; i++) {
       this.multiColor[this.selectedIndexes[i]] = this.options.selectedBackgroundColor ??
-      segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR
+        segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR
     }
   }
 
   aboutToAppear() {
     for (let i = 0; i < this.selectedIndexes.length; i++) {
       this.multiColor[this.selectedIndexes[i]] = this.options.selectedBackgroundColor ??
-      segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR
+        segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR
     }
   }
 
@@ -608,8 +644,30 @@ struct SegmentButtonItem {
   @Prop isSegmentFocusStyleCustomized: boolean;
   @State isTextInMarqueeCondition: boolean = false;
   @State isButtonTextFadeout?: boolean = false;
+  @State useAdaptiveLineHeight: boolean = false;
   private groupId: string = ''
   @Prop @Watch('onFocusIndex') hover: boolean;
+  private environmentCallbackID?: number = undefined;
+  private environmentCallback: EnvironmentCallback = {
+    onConfigurationUpdated: (configuration) => {
+      this.updateLanguageLineHeight();
+    },
+    onMemoryLevel() {
+    }
+  };
+
+  updateLanguageLineHeight(): void {
+    const resourceManager = this.getUIContext().getHostContext()?.resourceManager;
+    if (!resourceManager) {
+      console.error(`[SegmentButton] failed to get resourceManager`);
+      return;
+    }
+    try {
+      this.useAdaptiveLineHeight = resourceManager!.getStringByNameSync('text_fallback_line_spacing') === 'true';
+    } catch (e) {
+      console.error(`[SegmentButton] failed to get text_fallback_line_spacing resource`);
+    }
+  }
 
   private getTextPadding(): Padding | Dimension | LocalizedPadding {
     if (this.options.localizedTextPadding) {
@@ -651,6 +709,23 @@ struct SegmentButtonItem {
 
   aboutToAppear(): void {
     this.isButtonTextFadeout = this.isSegmentFocusStyleCustomized;
+    if (deviceInfo.sdkApiVersion >= 26) {
+      this.updateLanguageLineHeight();
+      let abilityContext = this.getUIContext().getHostContext();
+      if (abilityContext) {
+        this.environmentCallbackID = abilityContext.getApplicationContext().on('environment', this.environmentCallback);
+      }
+    }
+  }
+
+  aboutToDisappear(): void {
+    if (deviceInfo.sdkApiVersion >= 26 && this.environmentCallbackID) {
+      let abilityContext = this.getUIContext().getHostContext();
+      if (abilityContext) {
+        abilityContext.getApplicationContext().off('environment', this.environmentCallbackID);
+      }
+      this.environmentCallbackID = void 0;
+    }
   }
 
   isDefaultSelectedFontColor(): boolean {
@@ -713,6 +788,8 @@ struct SegmentButtonItem {
           .maxLines(1)
           .textAlign(TextAlign.Center)
           .padding(this.getTextPadding())
+          .includeFontPadding(this.useAdaptiveLineHeight)
+          .fallbackLineSpacing(this.useAdaptiveLineHeight)
       }
     }
     .direction(this.options.direction)
@@ -921,7 +998,7 @@ struct SegmentButtonItemArrayComponent {
     if (this.options.type === 'capsule' &&
       this.focusIndex >= 0 &&
       this.focusIndex < this.buttonItemsSelected.length &&
-    this.buttonItemsSelected[this.focusIndex]) {
+      this.buttonItemsSelected[this.focusIndex]) {
       focusOffset = CAPSULE_FOCUS_SELECTED_OFFSET;
     }
 
@@ -939,7 +1016,7 @@ struct SegmentButtonItemArrayComponent {
     const isCapsuleAndSelected = this.options.type === 'capsule' &&
       this.focusIndex >= 0 &&
       this.focusIndex < this.buttonItemsSelected.length &&
-    this.buttonItemsSelected[this.focusIndex];
+      this.buttonItemsSelected[this.focusIndex];
 
     return {
       width: isCapsuleAndSelected
@@ -1275,6 +1352,7 @@ class ItemProperty {
 
 @Component
 export struct SegmentButton {
+  @Prop enableStateAnimation: boolean = false
   @ObjectLink @Watch('onOptionsChange') options: SegmentButtonOptions
   @Link @Watch('onSelectedChange') selectedIndexes: number[]
   public onItemClicked?: Callback<number>
@@ -1312,11 +1390,14 @@ export struct SegmentButton {
   }, (_: Object, index) => new HoverColorProperty())
   private doSelectedChangeAnimate: boolean = false
   private isCurrentPositionSelected: boolean = false
+  private isCurrentPositionPressed: boolean = false
   private panGestureStartPoint: Point = { x: 0, y: 0 }
   private isPanGestureMoved: boolean = false
   @State shouldMirror: boolean = false
   private isGestureInProgress: boolean = false;
   private isCustomizedCache?: boolean;
+  @Provide openSelectedItemSystemMaterial?: boolean = false;
+  @Provide selectedItemScale?: ScaleOptions = undefined;
 
   onItemsPositionChange() {
     if (this.options === void 0 || this.options.buttons === void 0) {
@@ -1386,7 +1467,7 @@ export struct SegmentButton {
     }
     this.updateSelectedIndexes()
     this.setItemsSelected()
-    if (this.doSelectedChangeAnimate) {
+    if (this.doSelectedChangeAnimate  || this.enableStateAnimation) {
       this.updateAnimatedProperty(this.getSelectedChangeCurve())
     } else {
       this.updateAnimatedProperty(null)
@@ -1468,14 +1549,16 @@ export struct SegmentButton {
           .direction(this.options.direction)
           .size(this.componentSize)
           .backgroundColor(this.options.backgroundColor ?? segmentButtonTheme.BACKGROUND_COLOR)
-          .systemMaterial(this.options.backgroundSystemMaterial)
           .borderRadius(getBackgroundBorderRadius(
             this.options,
             this.componentSize.height as number / 2
           ))
           .backgroundBlurStyle(this.options.backgroundBlurStyle, undefined, { disableSystemAdaptation: true })
-          .borderWidth(segmentButtonTheme.SEGMENT_BUTTON_BORDER_WIDTH)
-          .borderColor(segmentButtonTheme.SEGMENT_BUTTON_BORDER_COLOR)
+          .borderWidth(this.options.backgroundSystemMaterial ? undefined
+            : segmentButtonTheme.SEGMENT_BUTTON_BORDER_WIDTH)
+          .borderColor(this.options.backgroundSystemMaterial ? undefined
+            : segmentButtonTheme.SEGMENT_BUTTON_BORDER_COLOR)
+          .systemMaterial(this.options.backgroundSystemMaterial)
         }
         Stack() {
           if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
@@ -1542,138 +1625,223 @@ export struct SegmentButton {
       }
     })
     .accessibilityLevel('no')
-    .priorityGesture(
-      GestureGroup(GestureMode.Exclusive,
-        TapGesture()
-          .onAction((event: GestureEvent) => {
-            if (this.isGestureInProgress) {
-              return;
-            }
-            let fingerInfo = event.fingerList.find(Boolean)
-            if (fingerInfo === void 0) {
-              return
-            }
-            if (this.options === void 0 || this.options.buttons === void 0) {
-              return
-            }
-            let selectedInfo = fingerInfo.localX
+    .priorityGesture(GestureGroup(GestureMode.Parallel,
+      TapGesture()
+        .onAction((event: GestureEvent) => {
+          if (this.isGestureInProgress) {
+            return;
+          }
+          let fingerInfo = event.fingerList.find(Boolean)
+          if (fingerInfo === void 0) {
+            return
+          }
+          if (this.options === void 0 || this.options.buttons === void 0) {
+            return
+          }
+          let selectedInfo = fingerInfo.localX
 
-            let buttonLength: number = Math.min(this.options.buttons.length, this.buttonItemsSize.length)
-            for (let i = 0; i < buttonLength; i++) {
-              selectedInfo = selectedInfo - (this.buttonItemsSize[i].width as number)
-              if (selectedInfo >= 0) {
-                continue
-              }
-              this.doSelectedChangeAnimate =
-                this.selectedIndexes[0] > Math.min(this.options.buttons.length,
-                  this.buttonItemsSize.length) ? false : true
+          let buttonLength: number = Math.min(this.options.buttons.length, this.buttonItemsSize.length)
+          for (let i = 0; i < buttonLength; i++) {
+            selectedInfo = selectedInfo - (this.buttonItemsSize[i].width as number)
+            if (selectedInfo >= 0) {
+              continue
+            }
+            this.doSelectedChangeAnimate =
+              this.selectedIndexes[0] > Math.min(this.options.buttons.length,
+                this.buttonItemsSize.length) ? false : true
 
-              let realClickIndex: number = this.isShouldMirror() ? buttonLength - 1 - i : i
-              if (this.onItemClicked) {
-                this.onItemClicked(realClickIndex)
-              }
-              if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
-                let selectedIndex: number = this.selectedIndexes.indexOf(realClickIndex)
-                if (selectedIndex === -1) {
-                  this.selectedIndexes.push(realClickIndex)
-                } else {
-                  this.selectedIndexes.splice(selectedIndex, 1)
-                }
+            let realClickIndex: number = this.isShouldMirror() ? buttonLength - 1 - i : i
+            if (this.onItemClicked) {
+              this.onItemClicked(realClickIndex)
+            }
+            if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
+              let selectedIndex: number = this.selectedIndexes.indexOf(realClickIndex)
+              if (selectedIndex === -1) {
+                this.selectedIndexes.push(realClickIndex)
               } else {
-                this.selectedIndexes[0] = realClickIndex
+                this.selectedIndexes.splice(selectedIndex, 1)
               }
-              this.doSelectedChangeAnimate = false
+            } else {
+              this.selectedIndexes[0] = realClickIndex
+            }
+            this.doSelectedChangeAnimate = false
+            break
+          }
+        }),
+      SwipeGesture()
+        .onAction((event: GestureEvent) => {
+          if (this.options === void 0 || this.options.buttons === void 0 ||
+            event.sourceTool === SourceTool.TOUCHPAD) {
+            return
+          }
+          if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
+            // Non swipe gesture in multi-select mode
+            return
+          }
+          if (this.isCurrentPositionSelected) {
+            return
+          }
+
+          // Only handle horizontal swipes (angle between -45 to 45 degrees or 135 to 225 degrees)
+          let isHorizontalSwipe = (Math.abs(event.angle) <= 45) || (Math.abs(event.angle) >= 135);
+          if (!isHorizontalSwipe) {
+            return;
+          }
+
+          let isSwipeRight = Math.abs(event.angle) <= 45; // swipe right
+          let isSwipeLeft = Math.abs(event.angle) >= 135; // swipe left
+
+          let isSwipeToNext = this.isShouldMirror() ? isSwipeLeft : isSwipeRight;
+          let isSwipeToPrevious = this.isShouldMirror() ? isSwipeRight : isSwipeLeft;
+
+          if (isSwipeToNext && this.selectedIndexes[0] !== Math.min(this.options.buttons.length,
+            this.buttonItemsSize.length) - 1) {
+            // Move to next
+            this.doSelectedChangeAnimate = true
+            this.selectedIndexes[0] = this.selectedIndexes[0] + 1
+            this.doSelectedChangeAnimate = false
+          } else if (isSwipeToPrevious && this.selectedIndexes[0] !== 0) {
+            // Move to previous
+            this.doSelectedChangeAnimate = true
+            this.selectedIndexes[0] = this.selectedIndexes[0] - 1
+            this.doSelectedChangeAnimate = false
+          }
+        }),
+      LongPressGesture({ repeat: false, duration: 200 })
+        .onAction((event: GestureEvent) => {
+          if (!this.isBackgroundSystemMaterialEnabled()) {
+            return
+          }
+          if (this.options === void 0 || this.options.buttons === void 0) {
+            return
+          }
+          if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
+            // Non long press gesture in multi-select mode
+            return
+          }
+          let fingerInfo = event.fingerList.find(Boolean)
+          if (fingerInfo === void 0) {
+            return
+          }
+          let selectedInfo = fingerInfo.localX
+
+          let buttonLength: number = Math.min(this.options.buttons.length, this.buttonItemsSize.length);
+          for (let i = 0; i < buttonLength; i++) {
+            selectedInfo = selectedInfo - (this.buttonItemsSize[i].width as number)
+            if (selectedInfo < 0) {
+              let realIndex = this.isShouldMirror() ? buttonLength - 1 - i : i;
+              this.isCurrentPositionPressed = realIndex === this.selectedIndexes[0] ? true : false;
               break
             }
-          }),
-        SwipeGesture()
-          .onAction((event: GestureEvent) => {
-            if (this.options === void 0 || this.options.buttons === void 0 ||
-              event.sourceTool === SourceTool.TOUCHPAD) {
-              return
-            }
-            if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
-              // Non swipe gesture in multi-select mode
-              return
-            }
-            if (this.isCurrentPositionSelected) {
-              return
-            }
+          }
+          if (this.isCurrentPositionPressed && !this.openSelectedItemSystemMaterial) {
+            this.startSelectMaterialAnimation();
+          }
+        })
+        .onActionCancel((event: GestureEvent) => {
+          if (!this.isBackgroundSystemMaterialEnabled()) {
+            return
+          }
+          if (this.options === void 0 || this.options.buttons === void 0) {
+            return
+          }
+          if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
+            // Non drag gesture in multi-select mode
+            return
+          }
 
-            // Only handle horizontal swipes (angle between -45 to 45 degrees or 135 to 225 degrees)
-            let isHorizontalSwipe = (Math.abs(event.angle) <= 45) || (Math.abs(event.angle) >= 135);
-            if (!isHorizontalSwipe) {
-              return;
-            }
+          if (this.isCurrentPositionPressed && this.openSelectedItemSystemMaterial) {
+            this.finishSelectMaterialAnimation();
+          }
+          this.isCurrentPositionPressed = false;
+        })
+        .onActionEnd((event: GestureEvent) => {
+          if (!this.isBackgroundSystemMaterialEnabled()) {
+            return
+          }
+          if (this.options === void 0 || this.options.buttons === void 0) {
+            return
+          }
+          if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
+            // Non drag gesture in multi-select mode
+            return
+          }
+          if (this.isCurrentPositionPressed && this.openSelectedItemSystemMaterial) {
+            this.finishSelectMaterialAnimation();
+          }
+          this.isCurrentPositionPressed = false;
+        }),
+      PanGesture({ direction: PanDirection.Horizontal })
+        .onActionStart((event: GestureEvent) => {
+          this.isGestureInProgress = true;
+          if (this.options === void 0 || this.options.buttons === void 0) {
+            return
+          }
+          if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
+            // Non drag gesture in multi-select mode
+            return
+          }
+          let fingerInfo = event.fingerList.find(Boolean)
+          if (fingerInfo === void 0) {
+            return
+          }
+          let selectedInfo = fingerInfo.localX
+          this.panGestureStartPoint = { x: fingerInfo.globalX, y: fingerInfo.globalY }
+          this.isPanGestureMoved = false
 
-            let isSwipeRight = Math.abs(event.angle) <= 45; // swipe right
-            let isSwipeLeft = Math.abs(event.angle) >= 135; // swipe left
+          let buttonLength: number = Math.min(this.options.buttons.length, this.buttonItemsSize.length);
+          for (let i = 0; i < buttonLength; i++) {
+            selectedInfo = selectedInfo - (this.buttonItemsSize[i].width as number)
+            if (selectedInfo < 0) {
+              let realIndex = this.isShouldMirror() ? buttonLength - 1 - i : i;
+              this.isCurrentPositionSelected = realIndex === this.selectedIndexes[0] ? true : false;
+              break
+            }
+          }
 
-            let isSwipeToNext = this.isShouldMirror() ? isSwipeLeft : isSwipeRight;
-            let isSwipeToPrevious = this.isShouldMirror() ? isSwipeRight : isSwipeLeft;
+          if (this.isBackgroundSystemMaterialEnabled() && this.isCurrentPositionSelected) {
+            this.getUIContext().animateTo({
+              curve: curves.interpolatingSpring(0, 1, 195, 14),
+            }, () => {
+              this.selectedItemScale = { x: 1.01, y: 0.99 }
+            })
+          }
+        })
+        .onActionUpdate((event: GestureEvent) => {
+          if (this.options === void 0 || this.options.buttons === void 0) {
+            return
+          }
+          if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
+            // Non drag gesture in multi-select mode
+            return
+          }
+          if (!this.isCurrentPositionSelected) {
+            return
+          }
+          let fingerInfo = event.fingerList.find(Boolean)
+          if (fingerInfo === void 0) {
+            return
+          }
+          let selectedInfo = fingerInfo.localX
+          if (!this.isPanGestureMoved && this.isMovedFromPanGestureStartPoint(fingerInfo.globalX,
+            fingerInfo.globalY)) {
+            this.isPanGestureMoved = true
+          }
 
-            if (isSwipeToNext && this.selectedIndexes[0] !== Math.min(this.options.buttons.length,
-              this.buttonItemsSize.length) - 1) {
-              // Move to next
-              this.doSelectedChangeAnimate = true
-              this.selectedIndexes[0] = this.selectedIndexes[0] + 1
-              this.doSelectedChangeAnimate = false
-            } else if (isSwipeToPrevious && this.selectedIndexes[0] !== 0) {
-              // Move to previous
-              this.doSelectedChangeAnimate = true
-              this.selectedIndexes[0] = this.selectedIndexes[0] - 1
-              this.doSelectedChangeAnimate = false
-            }
-          }),
-        PanGesture({direction: PanDirection.Horizontal})
-          .onActionStart((event: GestureEvent) => {
-            this.isGestureInProgress = true;
-            if (this.options === void 0 || this.options.buttons === void 0) {
-              return
-            }
-            if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
-              // Non drag gesture in multi-select mode
-              return
-            }
-            let fingerInfo = event.fingerList.find(Boolean)
-            if (fingerInfo === void 0) {
-              return
-            }
-            let selectedInfo = fingerInfo.localX
-            this.panGestureStartPoint = { x: fingerInfo.globalX, y: fingerInfo.globalY }
-            this.isPanGestureMoved = false
-
+          if (this.isBackgroundSystemMaterialEnabled()) {
+            let nowX = fingerInfo.globalX - this.panGestureStartPoint.x +
+              (this.buttonItemsPosition[this.selectedIndexes[0]].start?.value as number)
+            nowX = Math.max(this.buttonItemsPosition[0].start?.value as number, nowX);
             let buttonLength: number = Math.min(this.options.buttons.length, this.buttonItemsSize.length);
-            for (let i = 0; i < buttonLength; i++) {
-              selectedInfo = selectedInfo - (this.buttonItemsSize[i].width as number)
-              if (selectedInfo < 0) {
-                let realIndex = this.isShouldMirror() ? buttonLength - 1 - i : i;
-                this.isCurrentPositionSelected = realIndex === this.selectedIndexes[0] ? true : false;
-                break
-              }
-            }
-          })
-          .onActionUpdate((event: GestureEvent) => {
-            if (this.options === void 0 || this.options.buttons === void 0) {
-              return
-            }
-            if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
-              // Non drag gesture in multi-select mode
-              return
-            }
-            if (!this.isCurrentPositionSelected) {
-              return
-            }
-            let fingerInfo = event.fingerList.find(Boolean)
-            if (fingerInfo === void 0) {
-              return
-            }
-            let selectedInfo = fingerInfo.localX
-            if (!this.isPanGestureMoved && this.isMovedFromPanGestureStartPoint(fingerInfo.globalX,
-              fingerInfo.globalY)) {
-              this.isPanGestureMoved = true
-            }
+            nowX = Math.min(this.buttonItemsPosition[buttonLength - 1].start?.value as number, nowX);
 
+            this.selectedItemPosition = {
+              start: LengthMetrics.vp(nowX),
+              end: this.selectedItemPosition.end,
+              top: this.selectedItemPosition.top,
+              bottom: this.selectedItemPosition.bottom
+            }
+          } else {
             let buttonLength: number = Math.min(this.options.buttons.length, this.buttonItemsSize.length);
             for (let i = 0; i < buttonLength; i++) {
               selectedInfo = selectedInfo - (this.buttonItemsSize[i].width as number);
@@ -1696,24 +1864,49 @@ export struct SegmentButton {
                 })
               }
             })
-          })
-          .onActionEnd((event: GestureEvent) => {
-            this.isGestureInProgress = false;
-            if (this.options === void 0 || this.options.buttons === void 0) {
-              return
+          }
+        })
+        .onActionEnd((event: GestureEvent) => {
+          this.isGestureInProgress = false;
+          if (this.options === void 0 || this.options.buttons === void 0) {
+            return
+          }
+          if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
+            // Non drag gesture in multi-select mode
+            return
+          }
+          let fingerInfo = event.fingerList.find(Boolean)
+          if (fingerInfo === void 0) {
+            return
+          }
+          if (!this.isPanGestureMoved && this.isMovedFromPanGestureStartPoint(fingerInfo.globalX,
+            fingerInfo.globalY)) {
+            this.isPanGestureMoved = true
+          }
+
+          if (this.isBackgroundSystemMaterialEnabled()) {
+
+            let selectedInfo = fingerInfo.localX
+            let buttonLength: number = Math.min(this.options.buttons.length, this.buttonItemsSize.length);
+            let realIndex: number = -1;
+            for (let i = 0; i < buttonLength; i++) {
+              selectedInfo = selectedInfo - (this.buttonItemsSize[i].width as number)
+              if (selectedInfo < 0) {
+                realIndex = this.isShouldMirror() ? buttonLength - 1 - i : i;
+                break
+              }
             }
-            if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
-              // Non drag gesture in multi-select mode
-              return
+            if (realIndex === -1) {
+              realIndex = this.isShouldMirror() ? 0 : buttonLength - 1
             }
-            let fingerInfo = event.fingerList.find(Boolean)
-            if (fingerInfo === void 0) {
-              return
-            }
-            if (!this.isPanGestureMoved && this.isMovedFromPanGestureStartPoint(fingerInfo.globalX,
-              fingerInfo.globalY)) {
-              this.isPanGestureMoved = true
-            }
+            this.getUIContext().animateTo({ curve: this.getSelectedChangeCurve() }, () => {
+              this.selectedIndexes[0] = realIndex;
+              this.selectedItemPosition = this.buttonItemsPosition[realIndex];
+            })
+            this.finishSelectMaterialAnimation();
+
+          } else {
+
             if (this.isMouseWheelScroll(event)) {
               let offset = event.offsetX !== 0 ? event.offsetX : event.offsetY
               this.doSelectedChangeAnimate = true
@@ -1733,23 +1926,57 @@ export struct SegmentButton {
             animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, () => {
               this.zoomScaleArray[this.selectedIndexes[0]] = 1
             })
-            this.isCurrentPositionSelected = false
+          }
+          this.isCurrentPositionSelected = false
+        })
+        .onActionCancel(() => {
+          this.isGestureInProgress = false;
+          if (this.options === void 0 || this.options.buttons === void 0) {
+            return
+          }
+          if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
+            return
+          }
+          animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, () => {
+            this.zoomScaleArray[this.selectedIndexes[0]] = 1
           })
-          .onActionCancel(() => {
-            this.isGestureInProgress = false;
-            if (this.options === void 0 || this.options.buttons === void 0) {
-              return
-            }
-            if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
-              return
-            }
-            animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, () => {
-              this.zoomScaleArray[this.selectedIndexes[0]] = 1
-            })
-            this.isCurrentPositionSelected = false
-          })
-      )
-    )
+          this.isCurrentPositionSelected = false
+          if (this.isBackgroundSystemMaterialEnabled()) {
+            this.finishSelectMaterialAnimation();
+          }
+        })))
+  }
+
+  private isBackgroundSystemMaterialEnabled(): boolean {
+    return this.options !== undefined &&
+      this.options.backgroundSystemMaterial !== undefined;
+  }
+
+  startSelectMaterialAnimation() {
+    if (!this.openSelectedItemSystemMaterial) {
+      this.getUIContext().animateTo({
+        curve: curves.interpolatingSpring(0, 1, 195, 14),
+      }, () => {
+        this.selectedItemScale = { x: 1.23, y: 1.18 }
+        this.openSelectedItemSystemMaterial = true;
+      })
+    }
+  }
+
+  finishSelectMaterialAnimation() {
+    if (this.openSelectedItemSystemMaterial) {
+      this.getUIContext().animateTo({ curve: curves.interpolatingSpring(0, 1, 195, 14) }, () => {
+        this.selectedItemScale = { x: 1.23, y: 1.18 }
+      })
+      this.getUIContext()
+        .animateTo({
+          curve: curves.interpolatingSpring(0, 1, 195, 14), delay: 300, onFinish: () => {
+          }
+        }, () => {
+          this.openSelectedItemSystemMaterial = false
+          this.selectedItemScale = undefined
+        })
+    }
   }
 
   getMaxFontSize(): number {
@@ -1785,18 +2012,34 @@ export struct SegmentButton {
       this.buttonItemsSelected.forEach((selected, index) => {
         this.buttonItemProperty[index].fontColor = selected ?
           this.options.selectedFontColor ?? (this.options.type === 'tab' ?
-          segmentButtonTheme.TAB_SELECTED_FONT_COLOR : segmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR) :
+            segmentButtonTheme.TAB_SELECTED_FONT_COLOR : segmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR) :
           this.options.fontColor ?? segmentButtonTheme.FONT_COLOR
       })
     }
     if (curve) {
-      animateTo({ curve: curve }, setAnimatedPropertyFunc)
+      if (this.options.backgroundSystemMaterial) {
+        this.getUIContext().animateTo({
+          curve: curves.interpolatingSpring(0, 1, 195, 14),
+        }, () => {
+          this.selectedItemScale = { x: 1.01, y: 0.99 }
+          this.openSelectedItemSystemMaterial = true;
+        })
+        this.getUIContext().animateTo({ curve: curve }, setAnimatedPropertyFunc)
+        this.getUIContext().animateTo({
+          curve: curves.interpolatingSpring(0, 1, 195, 14),
+          delay: 200
+        }, () => {
+          this.openSelectedItemSystemMaterial = false;
+        })
+      } else {
+        this.getUIContext().animateTo({ curve: curve }, setAnimatedPropertyFunc);
+      }
     } else {
-      setAnimatedPropertyFunc()
+      setAnimatedPropertyFunc();
     }
     this.buttonItemsSelected.forEach((selected, index) => {
       this.buttonItemProperty[index].fontSize = selected ? this.options.selectedFontSize ??
-      segmentButtonTheme.SELECTED_FONT_SIZE : this.options.fontSize ?? segmentButtonTheme.FONT_SIZE
+        segmentButtonTheme.SELECTED_FONT_SIZE : this.options.fontSize ?? segmentButtonTheme.FONT_SIZE
       this.buttonItemProperty[index].fontWeight = selected ? this.options.selectedFontWeight ?? FontWeight.Medium :
         this.options.fontWeight ?? initFontWeight(FontWeight.Regular)
       this.buttonItemProperty[index].isSelected = selected

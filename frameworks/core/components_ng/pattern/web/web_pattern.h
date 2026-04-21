@@ -45,6 +45,7 @@
 #include "core/components_ng/pattern/web/web_accessibility_event_report.h"
 #include "core/components_ng/pattern/web/web_accessibility_property.h"
 #include "core/components_ng/pattern/web/web_context_select_overlay.h"
+#include "core/components_ng/pattern/web/web_context_menu_overlay.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
 #include "core/components_ng/pattern/web/web_layout_algorithm.h"
 #include "core/components_ng/pattern/web/web_paint_property.h"
@@ -70,6 +71,7 @@
 namespace OHOS::Ace {
 class WebDelegateObserver;
 class ImageAnalyzerManager;
+struct TextDetectConfig;
 }
 
 namespace OHOS::NWeb {
@@ -112,6 +114,11 @@ struct TouchInfo {
     int32_t id = -1;
 };
 } // namespace
+
+namespace SameLayerSurface {
+void SetSameLayerSurfaceId(const std::string& surfaceId);
+void RemoveSameLayerSurfaceId(const std::string& surfaceId);
+}
 
 enum class WebInfoType : int32_t {
     TYPE_MOBILE,
@@ -277,7 +284,7 @@ public:
     void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType,
         AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST) override;
-
+    int32_t OnInjectionEvent(const std::string& command) override;
     void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "", bool isPopup = false) override;
 
     Color GetDefaultBackgroundColor();
@@ -623,6 +630,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedRuleTag, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedRuleType, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, TextAutosizing, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, KeyboardAppearanceMode, WebKeyboardAppearanceMode);
     using NativeVideoPlayerConfigType = std::tuple<bool, bool>;
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeVideoPlayerConfig, NativeVideoPlayerConfigType);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SelectionMenuOptions, WebMenuOptionsParam);
@@ -641,6 +649,9 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ForceEnableZoom, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, BackToTop, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableAutoFill, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableDefaultContextMenu, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableDrag, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ScrollbarLayoutPolicy, ScrollbarLayoutPolicy);
 
     bool IsFocus() const
     {
@@ -661,6 +672,16 @@ public:
     void NotifyMenuLifeCycleEvent(MenuLifeCycleEvent menuLifeCycleEvent);
     void MenuNodeDestroyCallback();
     void UninitMenuLifeCycleCallback();
+    void ShowDefaultContextMenu();
+    bool IsContextMenuShow();
+    void SetEnableDefaultContextMenu(bool enable)
+    {
+        isEnableDefaultContextMenu_ = enable;
+    }
+    bool IsEnableDefaultContextMenu()
+    {
+        return isEnableDefaultContextMenu_;
+    }
     void OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, bool isRichtext = true, bool result = false);
     void OnContextMenuHide();
     void OnQuickMenuDismissed();
@@ -791,8 +812,11 @@ public:
     {
         return isImeStatus_ == VkState::VK_SHOW;
     }
+    bool OnNestedScrollV2(float& x, float& y);
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
     bool OnNestedScroll(float& x, float& y, float& xVelocity, float& yVelocity, bool& isAvailable);
+    void EnableScrollDirectionalLock(bool enabled,
+        ScrollDirectionalLockType type = ScrollDirectionalLockType::NESTED_SCROLL);
     bool IsRtl();
     std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetAccessibilityNodeById(int64_t accessibilityId);
     std::shared_ptr<NG::TransitionalNodeInfo> GetFocusedAccessibilityNode(int64_t accessibilityId,
@@ -803,6 +827,9 @@ public:
     bool ExecuteAction(int64_t accessibilityId, AceAction action,
         const std::map<std::string, std::string>& actionArguments) const;
     void SetAccessibilityState(bool state, bool isDelayed = false);
+    bool GetAccessibilityState();
+    void OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEventType eventType, const std::string& argument);
+    bool IsAccessibilitySamePage();
     void UpdateScrollBarWithBorderRadius();
     void UpdateFocusedAccessibilityId(int64_t accessibilityId = -1);
     void ClearFocusedAccessibilityId();
@@ -903,9 +930,12 @@ public:
     // The magnifier needs this to know the web's offset
     OffsetF GetTextPaintOffset() const override;
     void OnColorConfigurationUpdate() override;
+    void OnLanguageConfigurationUpdate() override;
+    void OnDirectionConfigurationUpdate() override;
+    void OnScrollbarLayoutPolicyUpdate(ScrollbarLayoutPolicy layoutPolicy);
     void RecordWebEvent(bool isInit = false) override;
     bool RunJavascriptAsync(const std::string& jsCode, std::function<void(const std::string&)>&& callback);
-
+    std::string GetLayoutModeStr();
     void DumpSimplifyInfoOnlyForParamConfig(
         std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig()) override;
     void AddExtraInfoWithParamConfig(
@@ -1018,6 +1048,9 @@ public:
     }
 
     bool CheckCreateImageFrameNode(const std::string& snapshotPath, uint32_t width, uint32_t height);
+    int SendCommandToNWeb(std::unique_ptr<JsonValue> comJson);
+    int ExecuteCommand(const std::string& eventTypeStr, const std::string& xpathStr, int32_t durationInt,
+                        const std::string& alignStr, int32_t offsetInt);
     void CreateSnapshotImageFrameNode(const std::string& snapshotPath, uint32_t width, uint32_t height);
     void RemoveSnapshotFrameNode(bool isAnimate = false);
     void RealRemoveSnapshotFrameNode();
@@ -1071,6 +1104,9 @@ public:
         isTextSelectionEnable_ = textSelectionEnable;
     }
     void NotifyOverlayRotation();
+    void SetScrollbarLayoutPolicy(ScrollbarLayoutPolicy policy);
+    void SetIsSystemRtlEnable(bool enable);
+    void UpdateScrollbarLayout();
 protected:
     void ModifyWebSrc(const std::string& webSrc)
     {
@@ -1081,6 +1117,7 @@ protected:
 
 private:
     friend class WebContextSelectOverlay;
+    friend class WebContextMenuOverlay;
     friend class WebSelectOverlay;
     friend class WebDataDetectorAdapter;
     friend class WebAccessibilityEventReport;
@@ -1194,6 +1231,7 @@ private:
     void WindowDrag(int32_t width, int32_t height);
     void OnOverlayScrollbarEnabledUpdate(bool enable);
     void OnKeyboardAvoidModeUpdate(const WebKeyboardAvoidMode& mode);
+    void OnKeyboardAppearanceModeUpdate(const WebKeyboardAppearanceMode& mode);
     void OnEnabledHapticFeedbackUpdate(bool enable);
     void OnOptimizeParserBudgetEnabledUpdate(bool value);
     void OnEnableFollowSystemFontWeightUpdate(bool value);
@@ -1204,10 +1242,13 @@ private:
     void WebRotateRenderEffect(WindowSizeChangeReason type);
     void OnForceEnableZoomUpdate(bool value);
     void OnEnableAutoFillUpdate(bool isEnabled);
+    void OnEnableDefaultContextMenuUpdate(bool isEnabled);
+    void OnEnableDragUpdate(bool isEnabled);
 
     int GetWebId();
 
     void InitEvent();
+    void InitEventAfterUpdate();
     void InitConfigChangeCallback(const RefPtr<PipelineContext>& context);
     void InitFeatureParam();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -1349,6 +1390,34 @@ private:
     bool FilterScrollEventHandleVelocity(const float velocity);
     void CheckAndSetWebNestedScrollExisted();
     void CalculateTooltipOffset(RefPtr<FrameNode>& tooltipNode, OffsetF& tooltipOfffset);
+
+    // Tooltip placement avoidance methods
+    struct TooltipPosition {
+        float x;
+        float y;
+    };
+
+    // Encapsulates parameters for tooltip placement calculation
+    struct TooltipCalculationContext {
+        float mouseX;
+        float mouseY;
+        float tooltipWidth;
+        float tooltipHeight;
+        float webWidth;
+        float webHeight;
+    };
+
+    OffsetF CalculateTooltipOffsetWithPlacement(const TooltipCalculationContext& context);
+
+    TooltipPosition GetPositionForPlacement(
+        Placement placement,
+        float mouseX, float mouseY,
+        float tooltipWidth, float tooltipHeight);
+
+    bool CheckPlacementAvailable(
+        const TooltipPosition& pos,
+        const TooltipCalculationContext& context);
+
     void HandleShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
     bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow);
     void ShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
@@ -1405,6 +1474,7 @@ private:
     void UpdateTouchpadSlidingStatus(const GestureEvent& event);
     CursorStyleInfo GetAndUpdateCursorStyleInfo(
         const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info);
+    void ProcessCustomCursor(std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info);
     bool MenuAvoidKeyboard(bool hideOrClose, double height = 0.0f);
     int32_t GetVisibleViewportAvoidHeight();
 
@@ -1415,6 +1485,7 @@ private:
     std::u16string GetSelectedValue(int32_t startIndex, int32_t endIndex);
     RefPtr<TextFieldTheme> GetTheme() const;
     void GetAIWriteInfo(AIWriteInfo& info);
+    void RemoveOfflineWebWindowStateChangedCallbackIfNeed(const RefPtr<PipelineContext>& context, int32_t nodeId);
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -1496,6 +1567,7 @@ private:
     bool isShowAutofillPopup_ = false;
     OffsetF webOffset_;
     RefPtr<WebContextSelectOverlay> contextSelectOverlay_ = nullptr;
+    RefPtr<WebContextMenuOverlay> contextMenuOverlay_ = nullptr;
     RefPtr<WebContextMenuParam> contextMenuParam_ = nullptr;
     RefPtr<ContextMenuResult> contextMenuResult_ = nullptr;
     RectF selectArea_;
@@ -1614,6 +1686,7 @@ private:
     bool isLayoutModeChanged_ = false;
     bool isDragEnd_ = false;
     std::shared_ptr<OHOS::NWeb::NWebCursorInfo> nweb_cursorInfo_;
+    std::unique_ptr<uint8_t[]> custom_cursorImg_;
     bool isMouseLocked_ = false;
     OHOS::NWeb::CursorType cursorType_;
     float touchPointX = 0;
@@ -1660,6 +1733,7 @@ private:
     bool dragResizeTimerFlag_ = false;
     int32_t dragResizeTimerCount_ = 0;
     WeakPtr<PipelineContext> pipeline_;
+    WeakPtr<PipelineContext> offlineWebPipelineContext_;
     bool isTextSelectionEnable_ = false;
     bool isMenuShownFromWeb_ = false;
     bool isMenuShownFromWebBeforeStartClose_ = false;
@@ -1667,6 +1741,7 @@ private:
     bool isHoverNWeb_ = false;
     bool isUpSupplementDown_ = false;
     bool isSupplementMouseLeave_ = false;
+    bool isEnableDefaultContextMenu_ = false;
     int64_t lastMenuCloseTimestamp_ = -1;
 
     OHNativeWindow* pipNativeWindow_ = nullptr;
@@ -1674,6 +1749,11 @@ private:
     int showMagnifierFingerId_ = -1;
 
     std::unique_ptr<WebDomDocument> webDomDocument_;
+    bool useSemiSamePage_ {false};  // is true mean SemiSamePage has been used
+    // Directional lock properties
+    bool isDirectionalLockEnabled_ = true;
+    ScrollDirectionalLockType scrollDirectionalLockType_ = ScrollDirectionalLockType::NESTED_SCROLL;
+    ScrollbarLayoutPolicy scrollbarLayoutPolicy_ = ScrollbarLayoutPolicy::CONTENT;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;

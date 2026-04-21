@@ -28,6 +28,8 @@ class GlobalScopeCommonAccessorTest : public StaticAccessorTest<GENERATED_ArkUIG
     &GENERATED_ArkUIAccessors::getGlobalScopeAccessor> {
 };
 
+#ifdef WRONG_GEN_v140
+// DISABLED_TEST: gen140 GENERATED_ArkUIGlobalScopeAccessor has no vp2px, px2vp members
 /**
  * @tc.name: vp2pxTest
  * @tc.desc:
@@ -79,6 +81,7 @@ HWTEST_F(GlobalScopeCommonAccessorTest, px2vpTest, TestSize.Level1)
     EXPECT_EQ(0, Converter::Convert<int32_t>(accessor_->px2vp(nullptr)));
 }
 
+// DISABLED_TEST: gen140 GENERATED_ArkUIGlobalScopeAccessor has no animateTo member
 /**
  * @tc.name: animateToTest
  * @tc.desc:
@@ -107,6 +110,7 @@ HWTEST_F(GlobalScopeCommonAccessorTest, animateToTest, TestSize.Level1)
 
     accessor_->animateTo(&param, &callback);
 }
+#endif
 
 /**
  * @tc.name: animateToImmediatelyTest
@@ -124,7 +128,7 @@ HWTEST_F(GlobalScopeCommonAccessorTest, animateToImmediatelyTest, TestSize.Level
     param.expectedFrameRateRange = Converter::ArkValue<Opt_ExpectedFrameRateRange>(Ark_Empty());
     param.finishCallbackType = Converter::ArkValue<Opt_FinishCallbackType>(Ark_Empty());
     param.iterations = Converter::ArkValue<Opt_Int32>(Ark_Empty());
-    param.onFinish = Converter::ArkValue<Opt_Callback_Void>(Ark_Empty());
+    param.onFinish = Converter::ArkValue<Opt_synthetic_Callback_Void>(Ark_Empty());
     param.playMode = Converter::ArkValue<Opt_PlayMode>(Ark_Empty());
     param.tempo = Converter::ArkValue<Opt_Float64>(Ark_Empty());
 
@@ -132,9 +136,9 @@ HWTEST_F(GlobalScopeCommonAccessorTest, animateToImmediatelyTest, TestSize.Level
     auto event = [](const Ark_Int32 resourceId) {
         EXPECT_EQ(contextId, Converter::Convert<int32_t>(resourceId));
     };
-    auto callback = Converter::ArkValue<Callback_Void>(event, contextId);
+    auto optCb = Converter::ArkCallback<Opt_VoidCallback>(event, contextId);
 
-    accessor_->animateToImmediately(&param, &callback);
+    accessor_->animateToImmediately(&param, &optCb.value);
 }
 
 } // namespace OHOS::Ace::NG

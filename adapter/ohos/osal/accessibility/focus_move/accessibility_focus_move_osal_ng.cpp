@@ -278,9 +278,7 @@ Accessibility::FocusMoveResult FocusStrategyOsalNG::DetectElementInfoFocusableTh
         return result;
     }
     auto checkResult = client->CheckNodeIsReadable(checkNode, isReadable);
-    if (checkResult != Accessibility::RET_OK) {
-        return result;
-    }
+    CHECK_NE_RETURN(checkResult, Accessibility::RET_OK, result);
     if (detectParam.needCheckValid && isReadable) {
         if (!CheckNodeIsAvailable(checkNode)) {
             result.resultType = FocusMoveResultType::SEARCH_FAIL;

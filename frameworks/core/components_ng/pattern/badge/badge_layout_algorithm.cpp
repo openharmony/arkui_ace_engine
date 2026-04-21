@@ -192,15 +192,14 @@ static OffsetF GetTextDataOffset(const RefPtr<BadgeLayoutProperty> layoutPropert
     return textOffset;
 }
 
-static OffsetF GetTextOffsetByPosition(const RefPtr<BadgeLayoutProperty> layoutProperty,
-                                       const RefPtr<GeometryNode>&geometryNode)
+static void LayoutIsPositionXy(const RefPtr<BadgeLayoutProperty> layoutProperty,
+                               const RefPtr<GeometryNode>&geometryNode, OffsetF& textOffset)
 {
     auto offset = geometryNode->GetFrameOffset();
     auto badgePositionX = layoutProperty->GetBadgePositionX();
     auto badgePositionY = layoutProperty->GetBadgePositionY();
-    OffsetF textOffset =
+    textOffset =
         OffsetF(offset.GetX() + badgePositionX->ConvertToPx(), offset.GetY() + badgePositionY->ConvertToPx());
-    return textOffset;
 }
 
 static void AdjustTextOffsetForBadge(const RefPtr<BadgeLayoutProperty>& layoutProperty,
@@ -335,7 +334,7 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             geometryNode, textData == u" ");
         AdjustTextOffsetForBadge(layoutProperty, textGeometryNode, badgeCircleDiameter, textData == u" ", textOffset);
     } else {
-        textOffset = GetTextOffsetByPosition(layoutProperty, geometryNode);
+        LayoutIsPositionXy(layoutProperty, geometryNode, textOffset);
     }
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         textGeometryNode->SetMarginFrameOffset(textOffset - geometryNode->GetFrameOffset());
@@ -408,7 +407,7 @@ void BadgeLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
             frameSize.SetHeight(childFrame.Height());
         }
     }
-
+    
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
 }
 

@@ -259,9 +259,9 @@ LayoutConstraintF LinearSplitLayoutAlgorithm::GetChildConstrain(
             constrain.selfIdealSize.SetWidth(childMaxSize);
         } else {
             if (index == 0) {
-                childMaxSize -= startMargin;
+                childMaxSize -= endMargin;
             } else if (index == visibleChildCount_ - 1) {
-                childMaxSize = childMaxSize - endMargin + static_cast<float>(DEFAULT_SPLIT_HEIGHT);
+                childMaxSize = childMaxSize - startMargin + static_cast<float>(DEFAULT_SPLIT_HEIGHT);
             } else {
                 childMaxSize -= startMargin + endMargin;
             }
@@ -433,6 +433,9 @@ void LinearSplitLayoutAlgorithm::LayoutColumnSplit(
             }
         } else {
             childOffsetCross = childrenDragPos_[index];
+        }
+        if (index != 0) {
+            childOffsetCross += startMargin;
         }
         item->GetGeometryNode()->SetMarginFrameOffset(OffsetF(childOffsetMain, childOffsetCross));
         UpdateChildPositionWidthIgnoreLayoutSafeArea(item, OffsetF(childOffsetMain, childOffsetCross));
@@ -708,7 +711,7 @@ void LinearSplitLayoutAlgorithm::MeasureAdaptiveLayoutChildren(LayoutWrapper* la
         }
         child->Measure(layoutConstraint);
     }
-    if (host && host->GetContext() && !bundle.first.empty()) {
+    if (host && host->GetContext() && GetNeedPostponeForIgnore() && !bundle.first.empty()) {
         auto context = host->GetContext();
         host->SetDelaySelfLayoutForIgnore();
         bundle.second = host;

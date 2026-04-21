@@ -26,8 +26,6 @@ import { KeyCode } from '@kit.InputKit';
 const INDEX_ZERO: number = 0;
 const INDEX_ONE: number = 1;
 const INDEX_TWO: number = 2;
-// 字体字重缩放等数值
-const DEFAULT_FONT_SCALE: number = 1;
 // 行数及整体高度
 const SINGLE_LINE_NUM: number = 1;
 const DOUBLE_LINE_NUM: number = 2;
@@ -71,6 +69,7 @@ export enum OperationType {
 }
 
 export declare class OperationOption {
+  public id?: string;
   public value: ResourceStr;
   public action?: () => void;
   public accessibilityLevel?: string;
@@ -80,6 +79,7 @@ export declare class OperationOption {
 }
 
 export declare class SelectOptions {
+  public id?: string;
   public options: Array<SelectOption>;
   public selected?: number;
   public value?: ResourceStr;
@@ -101,6 +101,7 @@ class IconOptions {
 }
 
 class ContentIconOption {
+  public id?: string;
   public content?: ResourceStr;
   public subContent?: ResourceStr;
   public iconOptions?: IconOptions;
@@ -137,6 +138,9 @@ function secondaryTitleStyles(fontStyle: FontStyle) {
   .maxLines(fontStyle?.maxLines)
   .textOverflow({ overflow: TextOverflow.Ellipsis })
   .align(fontStyle?.alignment)
+  .fallbackLineSpacing(true)
+  .wordBreak(WordBreak.HYPHENATION)
+  .orphanCharOptimization(true)
 }
 
 @Extend(Text)
@@ -147,6 +151,9 @@ function primaryTitleStyles(fontStyle: FontStyle) {
   .maxLines(fontStyle?.maxLines)
   .textOverflow({ overflow: TextOverflow.Ellipsis })
   .align(fontStyle?.alignment)
+  .fallbackLineSpacing(true)
+  .wordBreak(WordBreak.HYPHENATION)
+  .orphanCharOptimization(true)
 }
 
 @Styles
@@ -290,6 +297,7 @@ export struct SubHeader {
   @Prop contentMargin: LocalizedMargin;
   @Prop contentPadding: LocalizedPadding;
   @Prop titleAccessibilityText: ResourceStr;
+  @Prop titleId?: string;
   subHeaderMargin: LocalizedMargin = {
     start: LengthMetrics.vp(getResourceValue('sys.float.subheader_content_margin_start')),
     end: LengthMetrics.vp(getResourceValue('sys.float.subheader_content_margin_end')),
@@ -448,7 +456,8 @@ export struct SubHeader {
         .width('100%')
         .accessibilityGroup(this.isLeftAreaAccessibilityGroup())
         .accessibilityText(this.getTitleAccessibilityText())
-        .accessibilityRole(this.primaryTitle || this.secondaryTitle ? AccessibilityRoleType.TITLE_BAR : undefined)
+        .accessibilityRole(this.select ? undefined : AccessibilityRoleType.TITLE_BAR)
+        .id(this.select ? undefined : this.titleId)
 
         if (this.isRightAreaExists()) {
           this.rightAreaParentAging();
@@ -470,7 +479,8 @@ export struct SubHeader {
         .flexShrink(1)
         .accessibilityGroup(this.isLeftAreaAccessibilityGroup())
         .accessibilityText(this.getTitleAccessibilityText())
-        .accessibilityRole(this.primaryTitle || this.secondaryTitle ? AccessibilityRoleType.TITLE_BAR : undefined)
+        .accessibilityRole(this.select ? undefined : AccessibilityRoleType.TITLE_BAR)
+        .id(this.select ? undefined : this.titleId)
 
         if (this.isRightAreaExists()) {
           this.rightAreaParent();
@@ -596,6 +606,7 @@ export struct SubHeader {
       .accessibilityGroup(true)
       .accessibilityText(this.getRightAreaAccessibilityText())
       .accessibilityDescription(this.getAccessibilityDescription())
+      .id(this.operationItem?.[0]?.id)
     } else {
       Row() {
         this.rightArea();
@@ -817,6 +828,7 @@ export struct SubHeader {
   @Builder
   SelectStyle(selectParam: SelectOptions): void {
     Select(selectParam.options)
+      .id(selectParam?.id)
       .height('auto')
       .width('auto')
       .selected(this.selectedIndex)
@@ -863,6 +875,7 @@ export struct SubHeader {
           .defaultFocus(button.defaultFocus)
           .focusable(true)
       }
+      .id(this.operationType === undefined ? button?.id : undefined)
       .focusable(true)
       .focusBox({
         margin: { value: INDEX_ZERO, unit: LengthUnit.VP },
@@ -1080,6 +1093,7 @@ export struct SubHeader {
             getResourceValue('sys.float.subheader_single_right_text_arrow_margin_bottom'))),
         })
       }
+      .id(textArrow?.id)
       .margin({ bottom: getResourceValue('sys.float.subheader_right_only_arrow_margin_bottom')})
       .focusable(true)
       .constraintSize({ minWidth: this.getRightAreaMinWidth() })
@@ -1099,6 +1113,7 @@ export struct SubHeader {
                 symbolicIconOption: this.operationSymbolOptions && this.operationSymbolOptions.length > index ?
                 this.operationSymbolOptions[index] : null,
               },
+              id: item.id,
               action: item.action,
               defaultFocus: item.defaultFocus,
               accessibilityLevel: item.accessibilityLevel,
@@ -1184,6 +1199,7 @@ struct SingleIconStyle {
       Button({ type: ButtonType.Normal, stateEffect: false }) {
         this.IconZone();
       }
+      .id(this.item?.id)
       .focusable(true)
       .defaultFocus(this.item.defaultFocus)
       .width(SINGLE_ICON_ZONE_SIZE())
@@ -1322,7 +1338,16 @@ class Util {
    */
   public static getNumberByResource(resourceId: number, defaultNumber: number): number {
     try {
-      let resourceNumber: number = resourceManager.getSystemResourceManager().getNumber(resourceId);
+      let currentDeviceType: resourceManager.DeviceType | undefined = 
+        resourceManager.getSysResourceManager()?.getConfigurationSync()?.deviceType;
+      let systemConfiguration: resourceManager.Configuration =
+        resourceManager.getSystemResourceManager()?.getConfigurationSync();
+      if (currentDeviceType !== undefined && systemConfiguration !== undefined) {
+        systemConfiguration.deviceType = currentDeviceType;
+      }
+      let resourceNumber: number = resourceManager.getSystemResourceManager()
+        .getOverrideResourceManager(systemConfiguration)
+        .getNumber(resourceId);
       if (resourceNumber === 0) {
         return defaultNumber;
       } else {

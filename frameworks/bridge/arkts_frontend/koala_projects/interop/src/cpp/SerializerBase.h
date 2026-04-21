@@ -102,7 +102,6 @@ public:
 
     SerializerBase(const SerializerBase&) = delete;
     SerializerBase& operator=(const SerializerBase&) = delete;
-
     void* release() {
         ownData = false;
         return data;
@@ -110,11 +109,12 @@ public:
     int length() {
         return position;
     }
-
     inline void check(int more) {
         if (position + more > dataLength) {
             if (ownData) {
-                resize((position + more) * 3 / 2 + 2);
+                constexpr auto SCALE_DENOMINATOR { 2 };
+                constexpr auto SCALE_NUMERATOR { 3 };
+                this->resize((position + more) * SCALE_NUMERATOR / SCALE_DENOMINATOR + SCALE_DENOMINATOR);
             } else {
                 INTEROP_FATAL("Buffer overrun: %d > %d\n", position + more, dataLength);
             }

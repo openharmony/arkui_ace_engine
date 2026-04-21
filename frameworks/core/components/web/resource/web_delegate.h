@@ -23,6 +23,7 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/render/render_surface.h"
 #include "core/pipeline/pipeline_base.h"
+#include "display_manager.h"
 #if defined (OHOS_STANDARD_SYSTEM) && defined (ENABLE_ROSEN_BACKEND)
 #include <ui/rs_surface_node.h>
 #endif
@@ -323,6 +324,7 @@ public:
 
     void Cancel() const override;
     void CopyImage() const override;
+    void SaveImage() const override;
     void Copy() const override;
     void Paste() const override;
     void Cut() const override;
@@ -948,6 +950,72 @@ private:
     std::vector<int32_t> pressedCodes_ {};
 };
 
+enum class WebCommandResult : int32_t {
+    SUCCESS = 10,
+    // environment error
+    FAILED = 11,
+    DELEGATE_NULL = 102,
+    CONTEXT_NULL = 103,
+    TASK_EXECUTOR_NULL = 104,
+    // json error
+    JSON_IS_INVALID = 110,
+    JSON_MISSING_EVENT_TYPE = 111,
+    JSON_INVALID_EVENT_TYPE = 112,
+    JSON_VALUE_ERROR_EVENT_TYPE = 113,
+    JSON_MISSING_XPATH = 114,
+    JSON_INVALID_XPATH = 115,
+    JSON_MISSING_DURATION = 116,
+    JSON_INVALID_DURATION = 117,
+    JSON_MISSING_ALIGN = 118,
+    JSON_INVALID_ALIGN = 119,
+    JSON_VALUE_ERROR_ALIGN = 120,
+    JSON_MISSING_OFFSET = 121,
+    JSON_INVALID_OFFSET = 122,
+    // runtime error
+    WEB_EXECUTE_TIMEOUT = 130,
+    ELEMENT_NOT_FOUND = 131,
+    WEB_NWEB_NULL = 132,
+};
+class NWebCommandActionImpl : public OHOS::NWeb::NWebCommandAction {
+public:
+    NWebCommandActionImpl(
+        const std::string &type, const std::string &path, int32_t dur, const std::string &al, int32_t off)
+        : event_type(type), XPath(path), duration(dur), align(al), offset(off)
+    {}
+
+    std::string GetEventType() override
+    {
+        return event_type;
+    }
+
+    std::string GetXPath() override
+    {
+        return XPath;
+    }
+
+    int32_t GetDuration() override
+    {
+        return duration;
+    }
+
+    std::string GetAlign() override
+    {
+        return align;
+    }
+
+    int32_t GetOffset() override
+    {
+        return offset;
+    }
+
+private:
+    std::string event_type = "";
+    std::string XPath = "";
+    int32_t duration = 0;
+    std::string align = "";
+    int32_t offset = 0;
+};
+
 class WebDelegate : public WebResource {
     DECLARE_ACE_TYPE(WebDelegate, WebResource);
 
@@ -1129,7 +1197,7 @@ public:
     bool GetPendingSizeStatus();
     void OnInactive();
     void OnActive();
-    void SetOfflineWebActiveStatus(int32_t webId, bool isActive);
+    void SetOfflineWebActiveStatus(bool isActive);
     void GestureBackBlur();
     void OnWebviewHide();
     void OnWebviewShow();
@@ -1154,6 +1222,7 @@ public:
         const NG::PointF& point, SourceType source, NG::AccessibilityHoverEventType eventType, TimeStamp time);
     void NotifyAutoFillViewData(const std::string& jsonStr, const OHOS::NWeb::NWebAutoFillTriggerType& type);
     void AutofillCancel(const std::string& fillContent);
+    void DoFillAutoFillData(uint32_t delayMs = 0);
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebHapValue>& viewDataJson);
     void UpdateOptimizeParserBudgetEnabled(const bool enable);
@@ -1310,6 +1379,7 @@ public:
     void GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight);
     void RestoreRenderFit();
     bool OnNestedScroll(float& x, float& y, float& xVelocity, float& yVelocity, bool& isAvailable);
+    bool OnNestedScrollV2(float& x, float& y);
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
     void SetPopupSurface(const RefPtr<NG::RenderSurface>& popupSurface);
@@ -1381,10 +1451,16 @@ public:
     int GetSelectEndIndex() const;
 
     void ReportEventJson(const std::string& jsonString);
+    void OnCreateAISession(WebAgentClientImpl::AISessionType type, const std::string& id,
+        const std::string& params, const std::function<void(uint32_t, const std::string&)>&& callback);
+    void OnExecuteAIAction(WebAgentClientImpl::AISessionType type, const std::string& id,
+        const std::string& params, const std::function<void(uint32_t, const std::string&)>&& callback);
+    void OnDestroyAISession(WebAgentClientImpl::AISessionType type, const std::string& id);
 
     void OnViewportFitChange(OHOS::NWeb::ViewportFit viewportFit);
     void OnCameraCaptureStateChanged(int originalState, int newState);
     void OnMicrophoneCaptureStateChanged(int originalState, int newState);
+    void OnInputMethodAttached();
     void OnAreaChange(const OHOS::Ace::Rect& area);
     void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type);
     std::string GetWebInfoType();
@@ -1456,6 +1532,8 @@ public:
 
     void UpdateWebMediaAVSessionEnabled(bool isEnabled);
 
+    void UpdateKeyboardAppearanceMode(const WebKeyboardAppearanceMode& mode);
+
     std::string GetCurrentLanguage();
     void RegisterNativeJavaScriptProxy(const std::string& obj, const std::vector<std::string>& method,
         std::vector<std::function<void(const std::vector<std::string>&)>> callbackImpl,
@@ -1485,6 +1563,7 @@ public:
     void RecordBlanklessFrameSize(uint32_t width, uint32_t height);
     bool IsBlanklessFrameValid() const;
     void SetEnableAutoFill(bool isEnabled);
+    void SetEnableDrag(bool isEnabled);
     void RemoveSnapshotFrameNodeIfNeeded();
     void CallBlanklessCallback(int32_t state, const std::string& reason);
 
@@ -1519,6 +1598,7 @@ public:
     void OnPdfLoadEvent(int32_t result, const std::string& url);
     void OnMediaCastEnter();
     void SetImeShow(bool visible);
+    int SendCommandActionToNWeb(const std::shared_ptr<OHOS::NWeb::NWebCommandAction>& simulatedAction);
     void OnRequestAutofill(int32_t menuType);
 
     bool HasOnNativeEmbedGestureEventV2()
@@ -1537,7 +1617,13 @@ public:
     void OnStatusBarClick();
     bool IsQuickMenuShow();
     void WebScrollStopFling();
+    void UpdateWebLtpoInfo();
+    void UnRegisterDisplayInfoChange();
+    void RegisterDisplayInfoChange();
     void RequestWebDomJsonString(const std::function<void(const std::string)>&& callback);
+    void SetScrollbarLayoutPolicy(ScrollbarLayoutPolicy policy);
+    void SetIsSystemRtlEnable(bool enable);
+    void FetchCloudControlWebAutoLayoutConfig();
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -1555,6 +1641,7 @@ private:
     void WebComponentClickReport(int64_t accessibilityId);
     void AccessibilityReleasePageEvent();
     void AccessibilitySendPageChange();
+    void HandleNativeEmbedLifecycle(std::shared_ptr<NWeb::NWebNativeEmbedDataInfo> dataInfo);
 
 #ifdef OHOS_STANDARD_SYSTEM
     sptr<OHOS::Rosen::Window> CreateWindow();
@@ -1706,6 +1793,7 @@ private:
     EventCallbackV2 onSafeBrowsingCheckFinishV2_;
     EventCallbackV2 onCameraCaptureStateChangedV2_;
     EventCallbackV2 onMicrophoneCaptureStateChangedV2_;
+    EventCallbackV2 onInputMethodAttachedV2_;
 
     int32_t renderMode_ = -1;
     int32_t layoutMode_ = -1;
@@ -1784,6 +1872,11 @@ private:
     double dragResize_preWidth_ = 0.0;
     bool enableFollowSystemFontWeight_ = false;
 
+    // autofill sync state
+    std::string pendingAutoFillJsonStr_;
+    OHOS::NWeb::NWebAutoFillTriggerType pendingAutoFillType_;
+    bool hasPendingAutoFill_ = false;
+
     // data detector js state
     bool initDataDetectorJS_ = false;
     bool isFileSelectorShow_ = false;
@@ -1791,6 +1884,7 @@ private:
     bool isVisible_ = false;
 
     sptr<OHOS::Rosen::ISwitchFreeMultiWindowListener> freeMultiWindowListener_ = nullptr;
+    sptr<OHOS::Rosen::DisplayManager::IDisplayAttributeListener> displayListener_ = nullptr;
 
     uint32_t blanklessFrameWidth_ = 0;
     uint32_t blanklessFrameHeight_ = 0;

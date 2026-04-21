@@ -25,6 +25,7 @@
 #include "base/geometry/dimension.h"
 #include "base/log/ace_scoring_log.h"
 #include "base/log/ace_trace.h"
+#include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
@@ -41,6 +42,7 @@
 #endif
 #include "bridge/declarative_frontend/jsview/js_text.h"
 #include "core/common/container.h"
+#include "core/components_v2/inspector/inspector_composed_component.h"
 #include "core/components_ng/pattern/text/span_model.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/span_node.h"
@@ -78,6 +80,34 @@ constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyl
 const int32_t DEFAULT_VARIABLE_FONT_WEIGHT = 400;
 const int32_t NUM_1 = 1;
 const int32_t NUM_2 = 2;
+
+bool ParseJsFontVariations(const JSRef<JSVal>& jsValue, FONT_VARIATIONS_LIST& fontVariations)
+{
+    if (!jsValue->IsArray()) {
+        return false;
+    }
+    auto jsArray = JSRef<JSArray>::Cast(jsValue);
+    auto length = jsArray->Length();
+    for (uint32_t i = 0; i < length; ++i) {
+        auto item = jsArray->GetValueAt(i);
+        if (!item->IsObject()) {
+            continue;
+        }
+        auto itemObject = JSRef<JSObject>::Cast(item);
+        auto axis = itemObject->GetProperty("axis");
+        auto value = itemObject->GetProperty("value");
+        auto isNormalized = itemObject->GetProperty("isNormalized");
+        if (!axis->IsString() || !value->IsNumber()) {
+            continue;
+        }
+        std::optional<bool> normalized;
+        if (isNormalized->IsBoolean()) {
+            normalized = isNormalized->ToBoolean();
+        }
+        fontVariations.push_back({ axis->ToString(), static_cast<float>(value->ToNumber<double>()), normalized });
+    }
+    return !fontVariations.empty();
+}
 } // namespace
 
 void JSSpan::RegisterSpanFontInfo(const JSCallbackInfo& info, Font& font)
@@ -172,27 +202,46 @@ void JSSpan::ProcessVariableFontWeight(const JSCallbackInfo& info)
         return;
     }
     int32_t variableFontWeight = DEFAULT_VARIABLE_FONT_WEIGHT;
-    ParseJsInt32(fontWeight, variableFontWeight);
+    if (fontWeight->IsNumber()) {
+        variableFontWeight = fontWeight->ToNumber<int32_t>();
+    } else {
+        std::string weight;
+        JSContainerBase::ParseJsString(fontWeight, weight);
+        auto parseResult = ParseFontWeight(weight);
+        if (parseResult.first) {
+            FontWeight fontWeightEnum = parseResult.second;
+            variableFontWeight = GetFontWeightNumericValue(fontWeightEnum);
+        } else {
+            variableFontWeight = StringUtils::IsNumber(weight) ?
+                StringUtils::StringToInt(weight, DEFAULT_VARIABLE_FONT_WEIGHT) : DEFAULT_VARIABLE_FONT_WEIGHT;
+        }
+    }
     SpanModel::GetInstance()->SetVariableFontWeight(variableFontWeight);
 }
 
 void JSSpan::ProcessFontConfigs(const JSCallbackInfo& info)
 {
-    if (!info[1]->IsObject()) {
+    auto tmpInfo = info[1];
+    if (tmpInfo->IsNull() || tmpInfo->IsUndefined() || !tmpInfo->IsObject()) {
         SpanModel::GetInstance()->ResetEnableVariableFontWeight();
         SpanModel::GetInstance()->ResetEnableDeviceFontWeightCategory();
         return;
     }
-    auto paramObject = JSRef<JSObject>::Cast(info[1]);
+    auto paramObject = JSRef<JSObject>::Cast(tmpInfo);
     if (!paramObject->HasProperty("fontWeightConfigs")) {
         SpanModel::GetInstance()->ResetEnableVariableFontWeight();
         SpanModel::GetInstance()->ResetEnableDeviceFontWeightCategory();
         return;
     }
     auto fontWeightValue = paramObject->GetProperty("fontWeightConfigs");
-    if (fontWeightValue->IsNull() || fontWeightValue->IsUndefined() || !fontWeightValue->IsObject()) {
+    if (fontWeightValue->IsNull() || fontWeightValue->IsUndefined()) {
         SpanModel::GetInstance()->ResetEnableVariableFontWeight();
         SpanModel::GetInstance()->ResetEnableDeviceFontWeightCategory();
+        return;
+    }
+    if (!fontWeightValue->IsObject()) {
+        SpanModel::GetInstance()->SetEnableVariableFontWeight(false);
+        SpanModel::GetInstance()->SetEnableDeviceFontWeightCategory(true);
         return;
     }
     auto fontWeightConfigsObject = JSRef<JSObject>::Cast(fontWeightValue);
@@ -207,10 +256,10 @@ void JSSpan::ProcessFontWeightConfigObject(const JSRef<JSObject>& paramObject)
             enableVariableFontWeight->IsBoolean()) {
             SpanModel::GetInstance()->SetEnableVariableFontWeight(enableVariableFontWeight->ToBoolean());
         } else {
-            SpanModel::GetInstance()->ResetEnableVariableFontWeight();
+            SpanModel::GetInstance()->SetEnableVariableFontWeight(false);
         }
     } else {
-        SpanModel::GetInstance()->ResetEnableVariableFontWeight();
+        SpanModel::GetInstance()->SetEnableVariableFontWeight(false);
     }
 
     if (paramObject->HasProperty("enableDeviceFontWeightCategory")) {
@@ -220,10 +269,10 @@ void JSSpan::ProcessFontWeightConfigObject(const JSRef<JSObject>& paramObject)
             SpanModel::GetInstance()->SetEnableDeviceFontWeightCategory(
                 enableDeviceFontWeightCategory->ToBoolean());
         } else {
-            SpanModel::GetInstance()->ResetEnableDeviceFontWeightCategory();
+            SpanModel::GetInstance()->SetEnableDeviceFontWeightCategory(true);
         }
     } else {
-        SpanModel::GetInstance()->ResetEnableDeviceFontWeightCategory();
+        SpanModel::GetInstance()->SetEnableDeviceFontWeightCategory(true);
     }
 }
 
@@ -274,12 +323,23 @@ void JSSpan::SetFontWeight(const JSCallbackInfo& info)
         return;
     }
     auto tmpInfo = info[1];
-    if (!tmpInfo->IsObject()) {
+    if (tmpInfo->IsNull() || tmpInfo->IsUndefined() || !tmpInfo->IsObject()) {
         ResetFontWeightConfigs();
         return;
     }
     int32_t variableFontWeight = DEFAULT_VARIABLE_FONT_WEIGHT;
-    ParseJsInt32(args, variableFontWeight);
+    if (args->IsNumber()) {
+        variableFontWeight = args->ToNumber<int32_t>();
+    } else {
+        auto parseResult = ParseFontWeight(fontWeight);
+        if (parseResult.first) {
+            FontWeight fontWeightEnum = parseResult.second;
+            variableFontWeight = GetFontWeightNumericValue(fontWeightEnum);
+        } else {
+            variableFontWeight = StringUtils::IsNumber(fontWeight) ?
+                StringUtils::StringToInt(fontWeight, DEFAULT_VARIABLE_FONT_WEIGHT) : DEFAULT_VARIABLE_FONT_WEIGHT;
+        }
+    }
     SpanModel::GetInstance()->SetVariableFontWeight(variableFontWeight);
     auto paramObject = JSRef<JSObject>::Cast(tmpInfo);
     ProcessFontWeightConfigObject(paramObject);
@@ -468,7 +528,7 @@ void JSSpan::JsOnClick(const JSCallbackInfo& info)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("onClick");
             PipelineContext::SetCallBackNode(node);
-            func->Execute(*clickInfo);
+            func->Execute(execCtx.vm_, *clickInfo);
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
             JSInteractableView::ReportClickEvent(node);
 #endif
@@ -540,6 +600,18 @@ void JSSpan::SetTextShadow(const JSCallbackInfo& info)
     ParseTextShadowFromShadowObject(info[0], shadows);
     SpanModel::GetInstance()->SetTextShadow(shadows);
 }
+
+void JSSpan::SetFontVariations(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    FONT_VARIATIONS_LIST fontVariations;
+    if (!ParseJsFontVariations(info[0], fontVariations)) {
+        SpanModel::GetInstance()->ResetFontVariations();
+    }
+    SpanModel::GetInstance()->SetFontVariations(fontVariations);
+}
  
 
 void JSSpan::SetAccessibilityText(const JSCallbackInfo& info)
@@ -585,7 +657,7 @@ void JSSpan::SetOnHover(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onHover");
         PipelineContext::SetCallBackNode(node);
-        func->HoverExecute(isHover, hoverInfo);
+        func->HoverExecute(execCtx.vm_, isHover, hoverInfo);
     };
     SpanModel::GetInstance()->SetOnHover(std::move(onHover));
 }
@@ -605,6 +677,7 @@ void JSSpan::JSBind(BindingTarget globalObj)
     JSClass<JSSpan>::StaticMethod("baselineOffset", &JSSpan::SetBaselineOffset, opt);
     JSClass<JSSpan>::StaticMethod("textCase", &JSSpan::SetTextCase, opt);
     JSClass<JSSpan>::StaticMethod("textShadow", &JSSpan::SetTextShadow, opt);
+    JSClass<JSSpan>::StaticMethod("fontVariations", &JSSpan::SetFontVariations, opt);
     JSClass<JSSpan>::StaticMethod("decoration", &JSSpan::SetDecoration);
     JSClass<JSSpan>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSSpan>::StaticMethod("onHover", &JSSpan::SetOnHover);

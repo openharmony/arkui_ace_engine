@@ -424,10 +424,10 @@ struct GridLayoutInfo {
     bool offsetEnd_ = false; // true if content bottom is truly reached
 
     // Grid has GridItem whose columnEnd - columnStart > 0
-    bool hasBigItem_;
+    bool hasBigItem_ = false;
 
     // Grid has GridItem whose rowEnd - rowStart > 0
-    bool hasMultiLineItem_;
+    bool hasMultiLineItem_ = false;
     // false when offset is updated but layout hasn't happened, so data is out of sync
     bool synced_ = false;
 

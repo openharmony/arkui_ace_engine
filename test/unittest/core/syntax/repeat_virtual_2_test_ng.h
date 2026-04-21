@@ -27,7 +27,7 @@
 
 #define private public
 #define protected public
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -92,7 +92,7 @@ public:
     /**
      * Function needed by RepeatVirtualScrollCaches constructor is special test case
      */
-    std::function<std::pair<RIDType, uint32_t>(IndexType)> onGetRid4Index_;
+    std::function<std::pair<RIDType, uint32_t>(IndexType, bool)> onGetRid4Index_;
     std::function<void(IndexType, IndexType)> onRecycleItems_;
     std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)> onActiveRange_;
     std::function<void(IndexType, IndexType)> onMoveFromTo_;

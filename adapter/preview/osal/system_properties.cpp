@@ -15,6 +15,8 @@
 
 #include "base/utils/system_properties.h"
 
+#include "ui/properties/ui_material_enums.h"
+
 #include "base/utils/layout_break_point.h"
 
 #include "base/log/log.h"
@@ -32,6 +34,7 @@ constexpr char PROPERTY_DEVICE_TYPE_CAR[] = "car";
 constexpr int32_t DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD = 20;
 
 constexpr int32_t DEFAULT_VELOCITY_TRACKER_POINTNUMBER_VALUE = 20;
+constexpr int32_t DEFAULT_FORM_TASK_PRIORITY = 2;
 
 static constexpr char UNDEFINED_PARAM[] = "undefined parameter";
 
@@ -86,10 +89,12 @@ bool SystemProperties::eventBenchMarkEnabled_ = false;
 DebugFlags SystemProperties::debugFlags_ = 0;
 bool SystemProperties::layoutDetectEnabled_ = false;
 std::atomic<bool> SystemProperties::debugBoundaryEnabled_(false);
+bool SystemProperties::gestureDebugBoundaryEnabled_ = false;
 bool SystemProperties::debugAutoUIEnabled_ = false;
 bool SystemProperties::debugOffsetLogEnabled_ = false;
 bool SystemProperties::downloadByNetworkEnabled_ = false;
 bool SystemProperties::recycleImageEnabled_ = false;
+bool SystemProperties::imageReleaseManageObjectEnabled_ = false;
 bool SystemProperties::gpuUploadEnabled_ = false;
 bool SystemProperties::isHookModeEnabled_ = false;
 bool SystemProperties::astcEnabled_ = false;
@@ -128,7 +133,6 @@ double SystemProperties::scrollableDistance_ = 0.0;
 bool SystemProperties::taskPriorityAdjustmentEnable_ = false;
 int32_t SystemProperties::dragDropFrameworkStatus_ = 0;
 int32_t SystemProperties::touchAccelarate_ = 0;
-int32_t SystemProperties::pageLoadTimethreshold_ = 1000; // page load max timethreshold is 1000ms.
 bool SystemProperties::pageTransitionFrzEnabled_ = false;
 bool SystemProperties::forcibleLandscapeEnabled_ = false;
 bool SystemProperties::softPagetransition_ = false;
@@ -142,6 +146,7 @@ bool SystemProperties::isVelocityWithinTimeWindow_ = true;
 bool SystemProperties::isVelocityWithoutUpPoint_ = true;
 bool SystemProperties::prebuildInMultiFrameEnabled_ = false;
 bool SystemProperties::isOpenYuvDecode_ = false;
+bool SystemProperties::autoResizeEnabled_ = false;
 std::once_flag SystemProperties::getSysPropertiesFlag_;
 
 bool SystemProperties::IsOpIncEnable()
@@ -289,11 +294,6 @@ bool SystemProperties::GetIsUseMemoryMonitor()
     return false;
 }
 
-int32_t SystemProperties::GetComponentLoadNumber()
-{
-    return 1;
-}
-
 bool SystemProperties::IsFormAnimationLimited()
 {
     return true;
@@ -419,6 +419,11 @@ bool SystemProperties::IsSmallFoldProduct()
     return false;
 }
 
+bool SystemProperties::IsPortraitFoldProduct()
+{
+    return false;
+}
+
 bool SystemProperties::IsBigFoldProduct()
 {
     return false;
@@ -469,11 +474,6 @@ int32_t SystemProperties::GetTouchAccelarate()
     return touchAccelarate_;
 }
 
-int32_t SystemProperties::GetPageLoadTimethreshold()
-{
-    return pageLoadTimethreshold_;
-}
-
 bool SystemProperties::GetContainerDeleteFlag()
 {
     return true;
@@ -512,6 +512,11 @@ bool SystemProperties::GetMultiInstanceEnabled()
 int32_t SystemProperties::getFormSharedImageCacheThreshold()
 {
     return formSharedImageCacheThreshold_;
+}
+
+bool SystemProperties::IsFormSkeletonRSTransactionEnabled()
+{
+    return true;
 }
 
 void SystemProperties::SetMultiInstanceEnabled(bool enabled)
@@ -631,5 +636,15 @@ void SystemProperties::SetPerformanceMonitorEnabled(bool performanceMonitorEnabl
 void SystemProperties::SetFocusCanBeActive(bool focusCanBeActive)
 {
     focusCanBeActive_.store(focusCanBeActive);
+}
+
+UiMaterialLevel SystemProperties::GetUiMaterialLevel()
+{
+    return UiMaterialLevel::DEFAULT;
+}
+
+int32_t SystemProperties::GetFormTaskPriority()
+{
+    return DEFAULT_FORM_TASK_PRIORITY;
 }
 } // namespace OHOS::Ace

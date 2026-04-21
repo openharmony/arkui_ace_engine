@@ -23,8 +23,12 @@
 
 namespace OHOS::Ace {
 int32_t UIContentServiceProxy::GetInspectorTree(
-    const std::function<void(std::string, int32_t, bool)>& eventCallback, ParamConfig config)
+    const std::function<void(std::string, int32_t, bool)>& eventCallback, ParamConfig config, int32_t timeout)
 {
+    if (eventCallback == nullptr) {
+        LOGW("GetInspectorTree eventCallback is nullptr");
+        return PARAM_INVALID;
+    }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -36,7 +40,6 @@ int32_t UIContentServiceProxy::GetInspectorTree(
         LOGW("reportStub is nullptr");
         return FAILED;
     }
-    report_->RegisterGetInspectorTreeCallback(eventCallback);
 
     GetInspectorTreeConfigImpl configImpl(config);
     if (!data.WriteParcelable(&configImpl)) {
@@ -44,17 +47,30 @@ int32_t UIContentServiceProxy::GetInspectorTree(
         return FAILED;
     }
 
+    bool registerSuccess = report_->RegisterGetInspectorTreeCallback(eventCallback);
+    if (!registerSuccess) {
+        LOGW("GetInspectorTree register callback failed");
+        return LAST_UNFINISH;
+    }
+
     int32_t sendRequestErrorCode = Remote()->SendRequest(UI_CONTENT_SERVICE_GET_TREE, data, reply, option);
     if (sendRequestErrorCode != ERR_NONE) {
         LOGW("GetInspectorTree send request failed, errorCode is %{public}d", sendRequestErrorCode);
+        report_->UnregisterGetInspectorTreeCallback();
         return REPLY_ERROR;
     }
+    // Post timeoutCallbackRemove at last to avoid clear next callback register
+    report_->PostGetInspectorTreeCallbackRemoveTask(timeout);
     return NO_ERROR;
 }
 
 int32_t UIContentServiceProxy::GetVisibleInspectorTree(
-    const std::function<void(std::string, int32_t, bool)>& eventCallback, ParamConfig config)
+    const std::function<void(std::string, int32_t, bool)>& eventCallback, ParamConfig config, int32_t timeout)
 {
+    if (eventCallback == nullptr) {
+        LOGW("GetVisibleInspectorTree eventCallback is nullptr");
+        return PARAM_INVALID;
+    }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -66,18 +82,25 @@ int32_t UIContentServiceProxy::GetVisibleInspectorTree(
         LOGW("reportStub is nullptr");
         return FAILED;
     }
-    report_->RegisterGetInspectorTreeCallback(eventCallback);
 
     GetInspectorTreeConfigImpl configImpl(config);
     if (!data.WriteParcelable(&configImpl)) {
         LOGW("GetVisibleInspectorTree write config failed");
         return FAILED;
     }
+    bool registerSuccess = report_->RegisterGetInspectorTreeCallback(eventCallback);
+    if (!registerSuccess) {
+        LOGW("GetVisibleInspectorTree register callback failed");
+        return LAST_UNFINISH;
+    }
     int32_t sendRequestErrorCode = Remote()->SendRequest(GET_VISIBLE_TREE, data, reply, option);
     if (sendRequestErrorCode != ERR_NONE) {
         LOGW("GetVisibleInspectorTree send request failed, errorCode is %{public}d", sendRequestErrorCode);
+        report_->UnregisterGetInspectorTreeCallback();
         return REPLY_ERROR;
     }
+    // Post timeoutCallbackRemove at last to avoid clear next callback register
+    report_->PostGetInspectorTreeCallbackRemoveTask(timeout);
     return NO_ERROR;
 }
 
@@ -107,7 +130,8 @@ int32_t UIContentServiceProxy::GetLatestHitTestNodeInfosForTouch(
 }
 
 
-int32_t UIContentServiceProxy::Connect(const EventCallback& eventCallback)
+int32_t UIContentServiceProxy::Connect(const EventCallback& eventCallback,
+    std::shared_ptr<AppExecFwk::EventHandler> eventHandler)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -132,6 +156,7 @@ int32_t UIContentServiceProxy::Connect(const EventCallback& eventCallback)
         return REPLY_ERROR;
     }
     isConnected_ = true;
+    report_->SetEventHandler(eventHandler);
     return NO_ERROR;
 }
 
@@ -1040,7 +1065,8 @@ int32_t UIContentServiceProxy::UnregisterContentChangeCallback()
 }
 
 int32_t UIContentServiceProxy::GetStateMgmtInfo(const std::string& componentName, const std::string& propertyName,
-    const std::string& jsonPath, const std::function<void(std::vector<std::string>)>& eventCallback)
+    const std::string& jsonPath, const std::function<void(std::vector<std::string>)>& eventCallback,
+    bool onlyVisible)
 {
     MessageParcel value;
     MessageParcel reply;
@@ -1059,6 +1085,10 @@ int32_t UIContentServiceProxy::GetStateMgmtInfo(const std::string& componentName
     }
     if (!value.WriteString(jsonPath)) {
         LOGW("GetStateMgmtInfo write jsonPath failed");
+        return FAILED;
+    }
+    if (!value.WriteBool(onlyVisible)) {
+        LOGW("GetStateMgmtInfo write onlyVisible failed");
         return FAILED;
     }
     if (report_ == nullptr) {

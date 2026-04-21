@@ -16,11 +16,16 @@
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_pattern.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
+#include "adapter/ohos/entrance/dynamic_component/dynamic_component_renderer_impl.h"
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "adapter/ohos/osal/want_wrap_ohos.h"
 #include "base/log/log_wrapper.h"
 #include "base/log/dump_log.h"
+#include "core/common/container_handler.h"
+#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 #include "core/components_ng/pattern/ui_extension/platform_utils.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
+#include "core/components_ng/property/accessibility_property.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "display_manager.h"
@@ -387,6 +392,9 @@ void DynamicPattern::OnAttachContext(PipelineContext *context)
         this->SetAllowCrossProcessNesting(false);
     }
     AddToPageEventController();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    context->GetDynamicComponentSafeManager()->aliveDynamics_.try_emplace(host->GetId(), WeakClaim(this));
 }
 
 void DynamicPattern::RegisterPipelineEvent(int32_t instanceId)
@@ -523,6 +531,9 @@ void DynamicPattern::OnDetachContext(PipelineContext *context)
     auto instanceId = context->GetInstanceId();
     PLATFORM_LOGI("OnDetachContext instanceId: %{public}d.", instanceId);
     UnRegisterPipelineEvent(instanceId);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    context->GetDynamicComponentSafeManager()->aliveDynamics_.erase(host->GetId());
 }
 
 void DynamicPattern::UnRegisterPipelineEvent(int32_t instanceId)
@@ -765,4 +776,13 @@ void DynamicPattern::HandleMouseEvent(const MouseInfo& info)
     }
     PlatformPattern::HandleMouseEvent(info);
 }
+
+std::shared_ptr<UIContent> DynamicPattern::GetUIContent() const
+{
+    CHECK_NULL_RETURN(dynamicComponentRenderer_, nullptr);
+    auto render = AceType::DynamicCast<DynamicComponentRendererImpl>(dynamicComponentRenderer_);
+    CHECK_NULL_RETURN(render, nullptr);
+    return render->GetUIContent();
+}
+
 } // namespace OHOS::Ace::NG

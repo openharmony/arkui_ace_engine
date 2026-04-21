@@ -33,8 +33,7 @@ NG::MenuItemModelNG* GetMenuItemModel()
     if (model == nullptr) {
         auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("MenuItem");
         if (module == nullptr) {
-            LOGF("Can't find MenuItem dynamic module");
-            abort();
+            LOGF_ABORT("Can't find MenuItem dynamic module");
         }
         model = reinterpret_cast<NG::MenuItemModelNG*>(module->GetModel());
     }

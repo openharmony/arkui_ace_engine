@@ -50,12 +50,13 @@ constexpr auto DEFAULT_COLOR = Color(0x99182431);
 } // namespace
 
 /**
- * @tc.name: createDestroyPeerTest
+ * @tc.name: constructTestLifetime
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressMaskAccessorTest, createDestroyPeerTest, TestSize.Level1)
+HWTEST_F(ProgressMaskAccessorTest, constructTestLifetime, TestSize.Level1)
 {
+    ASSERT_NE(accessor_->construct, nullptr);
     auto peer1 = CreatePeerInstanceT();
     auto peer2 = CreatePeerInstanceT();
     auto peer3 = CreatePeerInstanceT();
@@ -79,11 +80,11 @@ HWTEST_F(ProgressMaskAccessorTest, createDestroyPeerTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: ctorDefaultTest
+ * @tc.name: constructTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressMaskAccessorTest, ctorDefaultTest, TestSize.Level1)
+HWTEST_F(ProgressMaskAccessorTest, constructTestDefaultValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_, nullptr);
     ASSERT_NE(peer_, nullptr);
@@ -96,11 +97,11 @@ HWTEST_F(ProgressMaskAccessorTest, ctorDefaultTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: ctorValidTest
+ * @tc.name: constructTestValid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressMaskAccessorTest, ctorValidTest, TestSize.Level1)
+HWTEST_F(ProgressMaskAccessorTest, constructTestValid, TestSize.Level1)
 {
     const std::vector<std::tuple<Ark_Number, float, Ark_Number, float, Ark_ResourceColor, Color>> validValues {
         {
@@ -132,11 +133,11 @@ HWTEST_F(ProgressMaskAccessorTest, ctorValidTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: ctorInvalidTest
+ * @tc.name: constructTestInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressMaskAccessorTest, ctorInvalidTest, TestSize.Level1)
+HWTEST_F(ProgressMaskAccessorTest, constructTestInvalid, TestSize.Level1)
 {
     const std::vector<std::tuple<Ark_Number, float, Ark_Number, float, Ark_ResourceColor, Color>> validValues {
         {
@@ -173,11 +174,11 @@ HWTEST_F(ProgressMaskAccessorTest, ctorInvalidTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: updateProgressValidTest
+ * @tc.name: updateProgressTestValid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressMaskAccessorTest, updateProgressValidTest, TestSize.Level1)
+HWTEST_F(ProgressMaskAccessorTest, updateProgressTestValid, TestSize.Level1)
 {
     const std::vector<std::tuple<Ark_Number, float>> validValues {
         {Converter::ArkValue<Ark_Number>(0), 0},
@@ -196,11 +197,11 @@ HWTEST_F(ProgressMaskAccessorTest, updateProgressValidTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: updateProgressInvalidTest
+ * @tc.name: updateProgressTestInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressMaskAccessorTest, updateProgressInvalidTest, TestSize.Level1)
+HWTEST_F(ProgressMaskAccessorTest, updateProgressTestInvalid, TestSize.Level1)
 {
     const std::vector<Ark_Number> validValues {
         Converter::ArkValue<Ark_Number>(-1),
@@ -219,11 +220,11 @@ HWTEST_F(ProgressMaskAccessorTest, updateProgressInvalidTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: updateColorValidTest
+ * @tc.name: updateColorTestValid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressMaskAccessorTest, updateColorValidTest, TestSize.Level1)
+HWTEST_F(ProgressMaskAccessorTest, updateColorTestValid, TestSize.Level1)
 {
     const std::vector<std::tuple<Ark_ResourceColor, Color>> validValues {
         {Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_RED), Color::RED},
@@ -241,11 +242,11 @@ HWTEST_F(ProgressMaskAccessorTest, updateColorValidTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: updateColorInvalidTest
+ * @tc.name: updateColorTestInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressMaskAccessorTest, updateColorInvalidTest, TestSize.Level1)
+HWTEST_F(ProgressMaskAccessorTest, updateColorTestInvalid, TestSize.Level1)
 {
     const std::vector<Ark_ResourceColor> validValues {
         Converter::ArkUnion<Ark_ResourceColor, Ark_String>(""),
@@ -262,11 +263,11 @@ HWTEST_F(ProgressMaskAccessorTest, updateColorInvalidTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: enableBreathingAnimationValidTest
+ * @tc.name: enableBreathingAnimationTestValid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressMaskAccessorTest, enableBreathingAnimationValidTest, TestSize.Level1)
+HWTEST_F(ProgressMaskAccessorTest, enableBreathingAnimationTestValid, TestSize.Level1)
 {
     const std::vector<std::tuple<Ark_Boolean, bool>> validValues {
         {Converter::ArkValue<Ark_Boolean>(false), false},

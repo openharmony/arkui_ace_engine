@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,7 +35,18 @@ public:
         CHECK_NULL_VOID(stack);
         auto frameNode = AceType::DynamicCast<NG::FrameNode>(stack->GetMainFrameNode());
         CHECK_NULL_VOID(frameNode);
-        NG::MenuItemModelNG::SetLabelFontColor(frameNode, themeColors.value().FontPrimary());
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            if (!frameNode->GetThemeScopeId()) {
+                NG::MenuItemModelNG::SetLabelFontColor(frameNode, themeColors.value().FontPrimary());
+            } else {
+                auto selectTheme = frameNode->GetTheme<SelectTheme>(true);
+                CHECK_NULL_VOID(selectTheme);
+                NG::MenuItemModelNG::SetLabelFontColor(frameNode, selectTheme->GetMenuFontColor());
+            }
+            NG::MenuItemModelNG::UpdateLabelFontColorSetByUser(false);
+        } else {
+            NG::MenuItemModelNG::SetLabelFontColor(frameNode, themeColors.value().FontPrimary());
+        }
     }
 };
 } // namespace OHOS::Ace::Framework

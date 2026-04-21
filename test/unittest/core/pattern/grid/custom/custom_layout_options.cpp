@@ -104,4 +104,118 @@ GridLayoutOptions Get3LinesIrregularDemoOptions(int32_t childrenCount, float ite
     options.getStartIndexByIndex = std::move(onGetStartIndexByIndex);
     return options;
 }
+
+namespace {
+void Init6NodesGroupIrregularIndexes(std::set<int32_t>& irregularIndexes, int32_t childrenCount)
+{
+    int32_t nodesPerGroup = 6;
+    int32_t firstIrregularPos = 0;
+    int32_t secondIrregularPos = 4;
+    for (int32_t i = 0; i < childrenCount; i++) {
+        int32_t posInGroup = i % nodesPerGroup;
+        if (posInGroup == firstIrregularPos || posInGroup == secondIrregularPos) {
+            irregularIndexes.emplace(i);
+        }
+    }
+}
+
+GridItemSize Get6NodesGroupItemSize(int32_t index)
+{
+    return {
+        .rows = 2, .columns = 2
+    };
+}
+
+GridStartLineInfo Get6NodesGroupStartIndexByOffset(
+    float offset, int32_t crossCount, int32_t nodesPerGroup, int32_t rowsPerGroup, float itemMainSize)
+{
+    if (offset < 0.0f) {
+        return {
+            .startIndex = 0,
+            .startLine = 0,
+            .startOffset = 0 - offset,
+            .totalOffset = offset
+        };
+    }
+    float groupHeight = rowsPerGroup * itemMainSize;
+    int32_t groupIndex = static_cast<int32_t>(offset / groupHeight);
+    float offsetInGroup = std::fmod(offset, groupHeight);
+    int32_t lineInGroup = static_cast<int32_t>(offsetInGroup / itemMainSize);
+    float startOffset = std::fmod(offsetInGroup, itemMainSize);
+
+    return {
+        .startIndex = groupIndex * nodesPerGroup,
+        .startLine = groupIndex * rowsPerGroup + lineInGroup,
+        .startOffset = 0 - startOffset,
+        .totalOffset = offset
+    };
+}
+
+GridStartLineInfo Get6NodesGroupStartIndexByIndex(
+    int32_t targetIndex, int32_t nodesPerGroup, int32_t rowsPerGroup, float itemMainSize)
+{
+    if (nodesPerGroup <= 0) {
+        nodesPerGroup = 1;
+    }
+    int32_t groupIndex = targetIndex / nodesPerGroup;
+    int32_t posInGroup = targetIndex % nodesPerGroup;
+
+    int32_t startLine = groupIndex * rowsPerGroup;
+    int32_t startIndex = groupIndex * nodesPerGroup;
+    float offset = 0.0f;
+
+    int32_t halfNodesPerGroup = nodesPerGroup / 2;
+    int32_t halfRowsPerGroup = rowsPerGroup / 2;
+    int32_t firstGroupEnd = 1;
+    int32_t secondGroupEnd = 2;
+    int32_t thirdGroupEnd = halfNodesPerGroup - 1;
+    if (posInGroup <= firstGroupEnd) {
+        startLine += 0;
+        startIndex += 0;
+        offset = 0.0f;
+    } else if (posInGroup == secondGroupEnd) {
+        startLine += 0;
+        startIndex += 0;
+        offset = -itemMainSize;
+    } else if (posInGroup <= thirdGroupEnd) {
+        startLine += halfRowsPerGroup;
+        startIndex += halfNodesPerGroup;
+        offset = 0.0f;
+    } else {
+        startLine += halfRowsPerGroup;
+        startIndex += halfNodesPerGroup;
+        offset = -itemMainSize;
+    }
+
+    return {
+        .startIndex = startIndex,
+        .startLine = startLine,
+        .startOffset = offset,
+        .totalOffset = startLine * itemMainSize - offset
+    };
+}
+} // namespace
+
+GridLayoutOptions Get6NodesGroupDemoOptions(int32_t childrenCount, float itemMainSize)
+{
+    GridLayoutOptions options;
+    int32_t crossCount = 3;
+    int32_t nodesPerGroup = 6;
+    int32_t rowsPerGroup = 4;
+
+    Init6NodesGroupIrregularIndexes(options.irregularIndexes, childrenCount);
+    options.getSizeByIndex = Get6NodesGroupItemSize;
+
+    auto onGetStartIndexByOffset = [crossCount, nodesPerGroup, rowsPerGroup, itemMainSize](float offset) {
+        return Get6NodesGroupStartIndexByOffset(offset, crossCount, nodesPerGroup, rowsPerGroup, itemMainSize);
+    };
+    options.getStartIndexByOffset = std::move(onGetStartIndexByOffset);
+
+    auto onGetStartIndexByIndex = [nodesPerGroup, rowsPerGroup, itemMainSize](int32_t targetIndex) {
+        return Get6NodesGroupStartIndexByIndex(targetIndex, nodesPerGroup, rowsPerGroup, itemMainSize);
+    };
+    options.getStartIndexByIndex = std::move(onGetStartIndexByIndex);
+
+    return options;
+}
 } // namespace OHOS::Ace::NG

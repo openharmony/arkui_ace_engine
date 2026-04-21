@@ -17,6 +17,8 @@
 
 #include "base/i18n/localization.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
@@ -58,10 +60,10 @@ RefPtr<FrameNode> CreateBarItemTextNode(const std::string& text)
     return textNode;
 }
 
-RefPtr<FrameNode> CreateBarItemIconNode(const std::string& src)
+RefPtr<FrameNode> CreateBarItemIconNode(const BarItem& barItem)
 {
     int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    ImageSourceInfo info(src);
+    ImageSourceInfo info(barItem.icon.value_or(""), barItem.bundleName, barItem.moduleName);
     auto iconNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, nodeId, AceType::MakeRefPtr<ImagePattern>());
     CHECK_NULL_RETURN(iconNode, nullptr);
     auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
@@ -95,7 +97,7 @@ void UpdateBarItemNodeWithItem(const RefPtr<BarItemNode>& barItemNode, const Bar
         barItemNode->AddChild(textNode);
     }
     if (barItem.icon.has_value() && !barItem.icon.value().empty()) {
-        auto iconNode = CreateBarItemIconNode(barItem.icon.value());
+        auto iconNode = CreateBarItemIconNode(barItem);
         barItemNode->SetIconNode(iconNode);
         barItemNode->AddChild(iconNode);
     }
@@ -156,7 +158,7 @@ void UpdateOldBarItems(const RefPtr<UINode>& oldBarContainer, const std::vector<
                     imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(newBarItem.icon.value()));
                     iconNode->MarkModifyDone();
                 } else {
-                    auto iconNode = CreateBarItemIconNode(newBarItem.icon.value());
+                    auto iconNode = CreateBarItemIconNode(newBarItem);
                     oldBarItem->SetIconNode(iconNode);
                     oldBarItem->AddChild(iconNode);
                     oldBarItem->MarkModifyDone();
@@ -353,6 +355,25 @@ RefPtr<FrameNode> NavigationModelStatic::CreateFrameNode(int32_t nodeId)
     }
 
     return navigationGroupNode;
+}
+
+void NavigationModelStatic::SetUseHomeDestination(FrameNode* frameNode, bool useHomeDestination)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto useHomeDest = navigationGroupNode->GetUseHomeDestination();
+    if (useHomeDest.has_value()) {
+        return;
+    }
+    navigationGroupNode->SetUseHomeDestinatoin(useHomeDestination);
+    if (!useHomeDestination) {
+        return;
+    }
+    auto navBar = navigationGroupNode->GetNavBarNode();
+    CHECK_NULL_VOID(navBar);
+    navigationGroupNode->RemoveChild(navBar);
+    navigationGroupNode->SetNavBarNode(nullptr);
 }
 
 void NavigationModelStatic::SetNavBarWidth(FrameNode* frameNode, const Dimension& value)
@@ -850,6 +871,7 @@ bool NavigationModelStatic::UpdateBackButtonProperty(const RefPtr<FrameNode>& ba
     backButtonLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(backButtonWidth), CalcLength(backButtonHeight)));
     backButtonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(backButtonRadiusSize));
+    backButtonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     renderContext->UpdateBackgroundColor(backButtonColor);
     PaddingProperty padding;
     padding.SetEdges(CalcLength(backButtonPadding));
@@ -988,6 +1010,15 @@ void NavigationModelStatic::SetEnableModeChangeAnimation(FrameNode* frameNode, b
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, EnableModeChangeAnimation, isEnable, navigationGroupNode);
 }
 
+void NavigationModelStatic::SetEnableVisibilityLifecycleWithContentCover(FrameNode* frameNode, bool isEnable)
+{
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigation);
+    auto pattern = navigation->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableVisibilityLifecycleWithContentCover(isEnable);
+}
+
 void NavigationModelStatic::SetRecoverable(FrameNode* frameNode, const std::optional<bool>& recoverable)
 {
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
@@ -1008,5 +1039,37 @@ void NavigationModelStatic::UpdateDefineColor(FrameNode* frameNode, bool isDefin
 void NavigationModelStatic::UpdateDividerColor(FrameNode* frameNode, const Color& color)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, DividerColor, color, frameNode);
+}
+
+void NavigationModelStatic::SetSplitPlaceholder(FrameNode* frameNode, const RefPtr<UINode>& splitPlaceholder)
+{
+    CHECK_NULL_VOID(splitPlaceholder);
+    CHECK_NULL_VOID(frameNode);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    if (!navigationGroupNode->GetPlaceholderContentNode()) {
+        int32_t placeholderContentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        auto placeholderContentNode = FrameNode::GetOrCreateFrameNode(V2::SPLIT_PLACEHOLDER_CONTENT_ETS_TAG,
+            placeholderContentNodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
+        placeholderContentNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
+        SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
+            .edges = SAFE_AREA_EDGE_ALL };
+        placeholderContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+        const auto& eventHub = placeholderContentNode->GetEventHub<EventHub>();
+        if (eventHub) {
+            eventHub->SetEnabled(false);
+        }
+        auto focusHub = placeholderContentNode->GetOrCreateFocusHub();
+        if (focusHub) {
+            focusHub->SetFocusable(false);
+        }
+        auto renderContext = placeholderContentNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->SetClipToBounds(true);
+        renderContext->UpdateZIndex(-1);
+        navigationGroupNode->AddChild(placeholderContentNode);
+        navigationGroupNode->SetPlaceholderContentNode(placeholderContentNode);
+    }
+    navigationGroupNode->SetStaticSplitPlaceholder(splitPlaceholder);
 }
 } // namespace OHOS::Ace::NG

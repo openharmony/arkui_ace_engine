@@ -14,9 +14,11 @@
  */
 
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "overlay_manager.h"
 
 #include "base/geometry/dimension.h"
+#include "base/json/json_util.h"
 #include "base/log/dump_log.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
@@ -26,17 +28,16 @@
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/resource/resource_parse_utils.h"
-#include "core/components/drag_bar/drag_bar_theme.h"
+#include "core/common/window.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
-#include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
-#include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/overlay/sheet_view.h"
@@ -61,6 +62,8 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "interfaces/inner_api/ui_session/param_config.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -94,6 +97,7 @@ void SheetPresentationPattern::OnModifyDone()
     Pattern::CheckLocalized();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto renderContext = host->GetRenderContext();
     if (renderContext) {
         auto pipeline = host->GetContext();
@@ -110,7 +114,7 @@ void SheetPresentationPattern::OnModifyDone()
             options.blurStyle = blurStyle;
             renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
             renderContext->UpdateBackBlurStyle(sheetStyle.backgroundBlurStyle.value_or(options));
-        } else if (!sheetStyle.systemMaterial) {
+        } else if (!MaterialUtils::IsEnableMaterialParam(sheetStyle.systemMaterial)) {
             renderContext->UpdateBackgroundColor(
                 sheetStyle.backgroundColor.value_or(sheetTheme->GetSheetBackgoundColor()));
         }
@@ -120,6 +124,22 @@ void SheetPresentationPattern::OnModifyDone()
     InitSheetMode();
     sheetObject_->InitScrollProps();
     InitFoldCreaseRegion();
+}
+
+bool SheetPresentationPattern::IsBreakpointMatch()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_RETURN(windowManager, false);
+    auto width = windowManager->GetWidthBreakpointCallback();
+    auto height = windowManager->GetHeightBreakpointCallback();
+    if (width == WidthBreakpoint::WIDTH_MD && height == HeightBreakpoint::HEIGHT_SM) {
+        return true;
+    }
+    return false;
 }
 
 // check device is phone, fold status, and device in landscape
@@ -400,6 +420,7 @@ void SheetPresentationPattern::RegisterHoverModeChangeCallback()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto hoverModeChangeCallback = [weak = WeakClaim(this)](bool isHalfFoldHover) {
@@ -578,6 +599,7 @@ void SheetPresentationPattern::HandleFocusEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto sheetId = host->GetId();
     TAG_LOGI(AceLogTag::ACE_SHEET, "Sheet get focus, and id is : %{public}d", sheetId);
     SheetManager::GetInstance().SetFocusSheetId(sheetId);
@@ -2472,6 +2494,9 @@ void SheetPresentationPattern::OnWindowSizeChanged(int32_t width, int32_t height
 
 void SheetPresentationPattern::TranslateTo(float height)
 {
+    if (GetDismissProcess()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetRenderContext();
@@ -3846,6 +3871,8 @@ void SheetPresentationPattern::OnAppear()
     if (onAppear_) {
         onAppear_();
     }
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "SheetPresentation.onAppear",
+        ComponentEventType::COMPONENT_EVENT_SHEET_PRESENTATION);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         SendMessagesAfterFirstTransitionIn(true);
     }
@@ -3897,6 +3924,8 @@ void SheetPresentationPattern::OnDisappear()
         isExecuteOnDisappear_ = true;
         onDisappear_();
     }
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "SheetPresentation.onDisappear",
+        ComponentEventType::COMPONENT_EVENT_SHEET_PRESENTATION);
     isDismissProcess_ = false;
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -4045,8 +4074,43 @@ void SheetPresentationPattern::UpdateSheetType()
     }
 }
 
+std::optional<Dimension> SheetPresentationPattern::GetSheetMiniDeviceMarginWidth()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, std::nullopt);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, std::nullopt);
+    auto windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_RETURN(windowManager, std::nullopt);
+    auto width = windowManager->GetWidthBreakpointCallback();
+    // margin { X, Y }
+    if (width == WidthBreakpoint::WIDTH_XS || width == WidthBreakpoint::WIDTH_SM) {
+        return std::make_optional<Dimension>(16.0f, DimensionUnit::VP);
+    }
+    if (width == WidthBreakpoint::WIDTH_MD) {
+        return std::make_optional<Dimension>(24.0f, DimensionUnit::VP);
+    }
+    if (width == WidthBreakpoint::WIDTH_LG || width == WidthBreakpoint::WIDTH_XL) {
+        return std::make_optional<Dimension>(32.0f, DimensionUnit::VP);
+    }
+    return std::nullopt;
+}
+
+std::optional<Dimension> SheetPresentationPattern::GetSheetMiniDeviceMarginHeight()
+{
+    return std::make_optional<Dimension>(32.0f, DimensionUnit::VP);
+}
+
+void SheetPresentationPattern::InitSheetObjectDragEvent(RefPtr<SheetObject> sheetObject)
+{
+    auto sheetMinimizeObject = AceType::DynamicCast<SheetMinimizeObject>(sheetObject);
+    CHECK_NULL_VOID(sheetMinimizeObject);
+    sheetMinimizeObject->InitDragDropEvent();
+}
+
 void SheetPresentationPattern::InitSheetObject()
 {
+    ACE_UINODE_TRACE(GetHost());
     // The first CreateObject must be later than UpdateSheetStyle, must be earlier than MarkModifyDone.
     // And must be earlier than the entry animation.
     if (sheetType_ == SheetType::SHEET_SIDE) {
@@ -4059,6 +4123,7 @@ void SheetPresentationPattern::InitSheetObject()
         sheetObject_ = AceType::MakeRefPtr<SheetObject>(sheetType_);
     }
     sheetObject_->BindPattern(WeakClaim(this));
+    InitSheetObjectDragEvent(sheetObject_);
     // Don't process information here, such as events, etc
     // Because here only the SheetStyle is updated to the layoutProperty, but the properties are not parsed,
     // and the data is not updated to the pattern.
@@ -4082,6 +4147,7 @@ void SheetPresentationPattern::InitSheetObject()
  */
 void SheetPresentationPattern::UpdateSheetObject(SheetType newType)
 {
+    ACE_UINODE_TRACE(GetHost());
     CHECK_NULL_VOID(sheetObject_);
     RefPtr<SheetObject> sheetObject = sheetObject_;
     if (sheetObject->GetSheetType() == newType) {
@@ -4110,6 +4176,7 @@ void SheetPresentationPattern::UpdateSheetObject(SheetType newType)
 
     SetSheetObject(sheetObject);
     sheetObject_->BindPattern(WeakClaim(this));
+    InitSheetObjectDragEvent(sheetObject_);
     FireOnTypeDidChange();
     // start init new sheet data
     InitPanEvent();
@@ -4663,6 +4730,7 @@ void SheetPresentationPattern::RegisterShadowRes(const RefPtr<FrameNode>& sheetN
 void SheetPresentationPattern::UpdateSheetParamResource(const RefPtr<FrameNode>& sheetNode,
     NG::SheetStyle& sheetStyle)
 {
+    ACE_UINODE_TRACE(GetHost());
     if (sheetStyle.sheetHeight.height.has_value()) {
         auto resObj = sheetStyle.GetSheetHeightResObj();
         RegisterHeightRes(sheetNode, resObj);
@@ -4706,7 +4774,7 @@ void SheetPresentationPattern::UpdateSheetParamResource(const RefPtr<FrameNode>&
 void SheetPresentationPattern::RemoveSheetResourceByMaterial(
     const RefPtr<FrameNode>& sheetNode, NG::SheetStyle& sheetStyle)
 {
-    if (sheetStyle.systemMaterial) {
+    if (MaterialUtils::IsEnableMaterialParam(sheetStyle.systemMaterial)) {
         CHECK_NULL_VOID(sheetNode);
         auto pattern = sheetNode->GetPattern<SheetPresentationPattern>();
         CHECK_NULL_VOID(pattern);
@@ -4752,6 +4820,7 @@ bool SheetPresentationPattern::IsPcOrPadFreeMultiWindowMode() const
 
 RefPtr<LayoutAlgorithm> SheetPresentationPattern::CreateLayoutAlgorithm()
 {
+    ACE_UINODE_TRACE(GetHost());
     auto sheetType = sheetType_;
     if (sheetType == SheetType::SHEET_SIDE) {
         return MakeRefPtr<SheetPresentationSideLayoutAlgorithm>();
@@ -4763,5 +4832,69 @@ RefPtr<LayoutAlgorithm> SheetPresentationPattern::CreateLayoutAlgorithm()
         return MakeRefPtr<SheetPresentationMinimizeLayoutAlgorithm>();
     }
     return MakeRefPtr<SheetPresentationLayoutAlgorithm>(sheetType, sheetPopupInfo_);
+}
+
+int32_t SheetPresentationPattern::ParseCommand(const std::string& command, SheetCmdType& cmdType)
+{
+    cmdType = SheetCmdType::CMD_UNKNOWN;
+    auto json = JsonUtil::ParseJsonString(command);
+    if (!json || json->IsNull()) {
+        return RET_FAILED;
+    }
+    if (!json->Contains("cmd") || !json->GetValue("cmd")->IsString()) {
+        return RET_FAILED;
+    }
+    std::string cmdStr = json->GetString("cmd");
+    if (cmdStr != "CloseSheet") {
+        return RET_FAILED;
+    }
+    cmdType = SheetCmdType::CMD_CLOSE;
+    return RET_SUCCESS;
+}
+
+int32_t SheetPresentationPattern::OnInjectionEvent(const std::string& command)
+{
+    SheetCmdType cmdType = SheetCmdType::CMD_UNKNOWN;
+    if (command.empty()) {
+        TAG_LOGE(AceLogTag::ACE_SHEET, "SheetPresentationPattern: Injection command is empty");
+        return RET_FAILED;
+    }
+    if (RET_FAILED == ParseCommand(command, cmdType)) {
+        TAG_LOGE(AceLogTag::ACE_SHEET, "command json is error!");
+        return RET_FAILED;
+    }
+    // Handle bind sheet event
+    HandleBindSheetEvent(cmdType);
+    return RET_SUCCESS;
+}
+
+void SheetPresentationPattern::ReportCloseSheetResult(std::string result, std::string reason, std::string event)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto id = host->GetId();
+    auto params = JsonUtil::Create();
+    CHECK_NULL_VOID(params);
+    params->Put("nodeId", id);
+    params->Put("event", event.c_str());
+    params->Put("result", result.c_str());
+    params->Put("reason", reason.c_str());
+    auto json = JsonUtil::Create();
+    CHECK_NULL_VOID(json);
+    std::string eventResult = event + "Result";
+    json->Put(eventResult.c_str(), params);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(
+        "result", json->ToString(), ComponentEventType::COMPONENT_EVENT_SHEET_PRESENTATION);
+}
+
+void SheetPresentationPattern::HandleBindSheetEvent(SheetCmdType& cmdType)
+{
+    if (cmdType == SheetCmdType::CMD_CLOSE) {
+        DismissTransition(false, 0);
+        ReportCloseSheetResult("success", "", "CloseSheet");
+    } else {
+        std::string reason = "command is error!";
+        ReportCloseSheetResult("failed", reason, "CloseSheet");
+    }
 }
 } // namespace OHOS::Ace::NG

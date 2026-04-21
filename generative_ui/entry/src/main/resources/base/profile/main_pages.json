@@ -1,0 +1,12 @@
+{
+  "src": [
+    "pages/Index",
+    "pages/A2UIRenderDemo",
+    "pages/DataBindDemo",
+    "pages/SurfaceShowcase",
+    "pages/MultiSurfaceDemo",
+    "pages/MultiRenderComponentDemo",
+    "pages/ShowJsonFolder",
+    "pages/JSONDetail"
+  ]
+}

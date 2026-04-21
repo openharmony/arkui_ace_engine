@@ -32,7 +32,7 @@ void AssignArkValue(Ark_uiObserver_NavigationInfo& dst, const std::shared_ptr<OH
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace UIContextGetInfoAccessor {
-Opt_uiObserver_NavigationInfo GetNavigationInfoByUniqueIdImpl(Ark_Int64 id)
+Opt_uiObserver_NavigationInfo GetNavigationInfoByUniqueIdImpl(Ark_Int32 id)
 {
     auto retVal = Converter::ArkValue<Opt_uiObserver_NavigationInfo>();
     CHECK_NULL_RETURN(id, retVal);
@@ -40,7 +40,7 @@ Opt_uiObserver_NavigationInfo GetNavigationInfoByUniqueIdImpl(Ark_Int64 id)
     CHECK_NULL_RETURN(pipeline, retVal);
     auto navigationMgr = pipeline->GetNavigationManager();
     CHECK_NULL_RETURN(navigationMgr, retVal);
-    auto nodeId = Converter::Convert<int64_t>(id);
+    auto nodeId = Converter::Convert<int32_t>(id);
     auto nodePtr = AceType::DynamicCast<NG::UINode>(OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(nodeId));
     CHECK_NULL_RETURN(nodePtr, retVal);
     auto result = navigationMgr->GetNavigationInfo(nodePtr);

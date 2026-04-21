@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/common/clipboard/clipboard_proxy.h"
 #include "core/components/text_overlay/text_overlay_manager.h"
 
 #include "core/components/font/constants_converter.h"

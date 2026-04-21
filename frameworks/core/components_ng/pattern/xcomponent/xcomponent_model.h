@@ -83,6 +83,7 @@ public:
     virtual void SetRenderFit(RenderFit renderFit) {}
     virtual void EnableSecure(bool isSecure) {}
     virtual void HdrBrightness(float hdrBrightness) {}
+    virtual void HdrBrightness(float hdrBrightness, HdrType hdrType) {}
     virtual void EnableTransparentLayer(bool isTransparentLayer) {}
     virtual void SetScreenId(uint64_t screenId) {}
 };

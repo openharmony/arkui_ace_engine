@@ -22,11 +22,11 @@
 
 #define private public
 #define protected public
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/rosen/testing_canvas.h"
-#include "test/mock/core/rosen/testing_path.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/rosen/testing_canvas.h"
+#include "test/mock/frameworks/core/rosen/testing_path.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
@@ -49,8 +49,8 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_paint_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -58,6 +58,9 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float ZERO = 0.0f;
+constexpr float MESSAGE_OFFSET_X = 6.0f;
+constexpr float MESSAGE_OFFSET_Y = 16.0f;
+constexpr float EXPECTED_OFFSET_VALUE_ZERO = 0.0f;
 constexpr bool BUBBLE_PROPERTY_SHOW = true;
 constexpr bool BUBBLE_LAYOUT_PROPERTY_SHOW_IN_SUBWINDOW = true;
 constexpr bool BUBBLE_LAYOUT_PROPERTY_ENABLE_ARROW_TRUE = true;
@@ -84,7 +87,7 @@ const std::string BUBBLE_NEW_MESSAGE = "Good";
 const std::string STATE = "true";
 const OffsetF DISPLAY_WINDOW_OFFSET = OffsetF(ZERO, ZERO);
 const OffsetF TARGET_OFFSET(TARGET_X, TARGET_Y);
-const OffsetF MESSAGE_OFFSET = OffsetF(6, 16);
+const OffsetF MESSAGE_OFFSET = OffsetF(MESSAGE_OFFSET_X, MESSAGE_OFFSET_Y);
 const Color BUBBLE_PAINT_PROPERTY_MASK_COLOR = Color(0XFFFF0000);
 const Color BUBBLE_PAINT_PROPERTY_BACK_GROUND_COLOR = Color(0XFFFFFF00);
 const Color BUBBLE_PAINT_PROPERTY_TEXT_COLOR = Color(0XFFFF0000);
@@ -243,7 +246,7 @@ RefPtr<FrameNode> BubbleTestNg::CreateBubbleNode(const TestProperty& testPropert
  * @tc.desc: Test all the properties of bubble.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePatternTest001, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Initialize all properties of bubble.
@@ -296,7 +299,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest001, TestSize.Level1)
  * @tc.desc: Verify whether the layout property, layoutAlgorithm and event functions are created.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePatternTest002, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -343,7 +346,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest002, TestSize.Level1)
  * @tc.desc: Test event function of bubble.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, PanelPatternTest003, TestSize.Level1)
+HWTEST_F(BubbleTestNg, PanelPatternTest003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -386,7 +389,7 @@ HWTEST_F(BubbleTestNg, PanelPatternTest003, TestSize.Level1)
  * @tc.desc: Test bubble onModifyDone.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePatternTest004, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest004, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -436,7 +439,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest004, TestSize.Level1)
  * @tc.desc: Test bubble OnDirtyLayoutWrapperSwap.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePatternTest005, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest005, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -514,7 +517,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest005, TestSize.Level1)
  * @tc.desc: Test bubble pattern InitTouchEvent HandleTouchEvent HandleTouchDOWN.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePatternTest006, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest006, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -574,7 +577,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest006, TestSize.Level1)
  * @tc.desc: Test CreateBubbleNode with message and Update.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePatternTest007, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest007, TestSize.Level0)
 {
     // set value to popupParam
     auto popupParam = AceType::MakeRefPtr<PopupParam>();
@@ -602,6 +605,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest007, TestSize.Level1)
     auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerOne);
     EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
+    EXPECT_CALL(*themeManagerOne, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
     auto popupNode = BubbleView::CreateBubbleNode(targetNode->GetTag(), targetNode->GetId(), popupParam);
     EXPECT_NE(popupNode, nullptr);
     EXPECT_EQ(popupNode->GetPattern<BubblePattern>()->GetHasTransition(), true);
@@ -625,7 +629,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest007, TestSize.Level1)
  * @tc.desc: Test CreateCustomBubbleNode and Update.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePatternTest008, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest008, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. set value to popupParam.
@@ -692,7 +696,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest008, TestSize.Level1)
  * @tc.desc: Test StartEnteringAnimation and StartExitingAnimation.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePatternTest009, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest009, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble.
@@ -748,7 +752,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest009, TestSize.Level1)
  * @tc.desc: Test IsOnShow.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePatternTest010, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest010, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble.
@@ -774,7 +778,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest010, TestSize.Level1)
  * @tc.desc: Test GetInvisibleOffset.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePatternTest011, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest011, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble.
@@ -788,8 +792,8 @@ HWTEST_F(BubbleTestNg, BubblePatternTest011, TestSize.Level1)
     OffsetT<Dimension> offset;
     pattern->arrowPlacement_.reset();
     offset = pattern->GetInvisibleOffset();
-    EXPECT_EQ(offset.GetX().Value(), 0);
-    EXPECT_EQ(offset.GetY().Value(), 0);
+    EXPECT_EQ(offset.GetX().Value(), EXPECTED_OFFSET_VALUE_ZERO);
+    EXPECT_EQ(offset.GetY().Value(), EXPECTED_OFFSET_VALUE_ZERO);
     pattern->arrowPlacement_ = Placement::LEFT;
     offset = pattern->GetInvisibleOffset();
     EXPECT_GT(offset.GetX().Value(), 0);
@@ -828,8 +832,8 @@ HWTEST_F(BubbleTestNg, BubblePatternTest011, TestSize.Level1)
     EXPECT_LT(offset.GetY().Value(), 0);
     pattern->arrowPlacement_ = Placement::NONE;
     offset = pattern->GetInvisibleOffset();
-    EXPECT_EQ(offset.GetX().Value(), 0);
-    EXPECT_EQ(offset.GetY().Value(), 0);
+    EXPECT_EQ(offset.GetX().Value(), EXPECTED_OFFSET_VALUE_ZERO);
+    EXPECT_EQ(offset.GetY().Value(), EXPECTED_OFFSET_VALUE_ZERO);
 }
 
 /**
@@ -837,7 +841,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest011, TestSize.Level1)
  * @tc.desc: Test start animation in OnDirtyLayoutWrapperSwap.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePatternTest012, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest012, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble.
@@ -882,7 +886,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest012, TestSize.Level1)
  * @tc.desc: Test BubblePaintMethod PaintBorder PaintBubble.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePaintMethod001, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePaintMethod001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create the BubblePaintMethod.
@@ -971,7 +975,7 @@ HWTEST_F(BubbleTestNg, BubblePaintMethod001, TestSize.Level1)
  * @tc.desc: Test BubblePaintMethod UpdateArrowOffset.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePaintMethod002, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePaintMethod002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create the BubblePaintMethod.
@@ -1022,7 +1026,7 @@ HWTEST_F(BubbleTestNg, BubblePaintMethod002, TestSize.Level1)
  * @tc.desc: Test BubblePaintMethod PaintMask.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePaintMethod003, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePaintMethod003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create the BubblePaintMethod.
@@ -1064,7 +1068,7 @@ HWTEST_F(BubbleTestNg, BubblePaintMethod003, TestSize.Level1)
  * @tc.desc: Test bubble onModifyDone.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePatternTest013, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest013, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. set value to popupParam.
@@ -1096,6 +1100,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest013, TestSize.Level1)
     auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerOne);
     EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MockBubbleTheme>()));
+    EXPECT_CALL(*themeManagerOne, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<MockBubbleTheme>()));
     auto popupNode = BubbleView::CreateBubbleNode(targetNode->GetTag(), targetNode->GetId(), popupParam);
     ASSERT_NE(popupNode, nullptr);
     auto pattern = popupNode->GetPattern<BubblePattern>();
@@ -1126,7 +1131,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest013, TestSize.Level1)
  * @tc.desc: Test bubble hover and touch callback.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePatternTest014, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest014, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. set value to popupParam.
@@ -1146,6 +1151,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest014, TestSize.Level1)
     auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerOne);
     EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MockBubbleTheme>()));
+    EXPECT_CALL(*themeManagerOne, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<MockBubbleTheme>()));
     auto popupNode = BubbleView::CreateBubbleNode(targetNode->GetTag(), targetNode->GetId(), popupParam);
     ASSERT_NE(popupNode, nullptr);
     auto pattern = popupNode->GetPattern<BubblePattern>();
@@ -1206,7 +1212,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest014, TestSize.Level1)
  * @tc.desc: Test CreateBubbleNode with Offset, Radius, ArrowHeight, ArrowWidth and Shadow.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePatternTest015, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest015, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. set popup value to popupParam.
@@ -1234,6 +1240,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest015, TestSize.Level1)
     auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerOne);
     EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
+    EXPECT_CALL(*themeManagerOne, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
     auto popupNode = BubbleView::CreateBubbleNode(targetNode->GetTag(), targetNode->GetId(), popupParam);
     ASSERT_NE(popupNode, nullptr);
     auto firstTextNode = BubbleView::CreateMessage(popupParam->GetMessage(), popupParam->IsUseCustom());
@@ -1276,7 +1283,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest015, TestSize.Level1)
  * @tc.desc: Test CreateCustomBubbleNode with with Offset, Radius, ArrowHeight, ArrowWidth and Shadow.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePatternTest016, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest016, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. set popup value to popupParam.
@@ -1332,7 +1339,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest016, TestSize.Level1)
  * @tc.desc: Test UpdateCommonParam with with Offset, Radius, ArrowHeight, ArrowWidth and Shadow.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePatternTest021, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest021, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. set popup value to popupParam.
@@ -1377,7 +1384,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest021, TestSize.Level1)
  * @tc.desc: Test OnDetachFromFrameNodeImpl.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTestNg, BubblePatternTest022, TestSize.Level1)
+HWTEST_F(BubbleTestNg, BubblePatternTest022, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create bubble node with target node.

@@ -42,11 +42,11 @@ static const std::string TEST_DEFAULT_VALUE = "";
 static constexpr bool TEST_DEFAULT_CHECKED = false;
 
 /**
- * @tc.name: RadioContentModifierHelperAccessorTest
+ * @tc.name: contentModifierRadioTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RadioContentModifierHelperAccessor, radioContentModifierHelperAccessorTest, TestSize.Level1)
+HWTEST_F(RadioContentModifierHelperAccessor, contentModifierRadioTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->contentModifierRadio, nullptr);
 

@@ -58,10 +58,10 @@ public:
 HWTEST_F(ImageSpanModifierTest, DISABLED_setImageSpanOptionsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_VALUE_DEFAULT_VALUE) << "Default value for attribute 'value'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_VALUE_DEFAULT_VALUE)) << "Default value for attribute 'value'";
 }
 
 /*
@@ -88,7 +88,7 @@ HWTEST_F(ImageSpanModifierTest, DISABLED_setImageSpanOptionsTestValueValidValues
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setImageSpanOptions, attribute: value";
     };
 
@@ -125,7 +125,7 @@ HWTEST_F(ImageSpanModifierTest, DISABLED_setImageSpanOptionsTestValueInvalidValu
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_VALUE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_VALUE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setImageSpanOptions, attribute: value";
     };
 
@@ -143,10 +143,11 @@ HWTEST_F(ImageSpanModifierTest, DISABLED_setImageSpanOptionsTestValueInvalidValu
 HWTEST_F(ImageSpanModifierTest, setVerticalAlignTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VERTICAL_ALIGN_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_VERTICAL_ALIGN_DEFAULT_VALUE) << "Default value for attribute 'verticalAlign'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_VERTICAL_ALIGN_DEFAULT_VALUE)) <<
+        "Default value for attribute 'verticalAlign'";
 }
 
 /*
@@ -170,7 +171,7 @@ HWTEST_F(ImageSpanModifierTest, setVerticalAlignTestVerticalAlignValidValues, Te
         modifier_->setVerticalAlign(node_, &inputValueVerticalAlign);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VERTICAL_ALIGN_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setVerticalAlign, attribute: verticalAlign";
     };
 
@@ -200,7 +201,7 @@ HWTEST_F(ImageSpanModifierTest, setVerticalAlignTestVerticalAlignInvalidValues, 
         modifier_->setVerticalAlign(node_, &inputValueVerticalAlign);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VERTICAL_ALIGN_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_VERTICAL_ALIGN_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_VERTICAL_ALIGN_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setVerticalAlign, attribute: verticalAlign";
     };
 
@@ -219,10 +220,10 @@ HWTEST_F(ImageSpanModifierTest, setVerticalAlignTestVerticalAlignInvalidValues, 
 HWTEST_F(ImageSpanModifierTest, setObjectFitTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OBJECT_FIT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_OBJECT_FIT_DEFAULT_VALUE) << "Default value for attribute 'objectFit'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_OBJECT_FIT_DEFAULT_VALUE)) << "Default value for attribute 'objectFit'";
 }
 
 /*
@@ -245,7 +246,7 @@ HWTEST_F(ImageSpanModifierTest, setObjectFitTestObjectFitInvalidValues, TestSize
         modifier_->setObjectFit(node_, &inputValueObjectFit);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OBJECT_FIT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_OBJECT_FIT_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_OBJECT_FIT_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setObjectFit, attribute: objectFit";
     };
 

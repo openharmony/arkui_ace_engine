@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
@@ -181,6 +182,109 @@ void NavBarNode::SystemTransitionPopEnd(bool transitionIn)
     auto titleBarNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
     CHECK_NULL_VOID(titleBarNode);
     titleBarNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+}
+
+void NavBarNode::SplitTransitionPushStart(ForceSplitTransitionType type)
+{
+    SetIsOnAnimation(true);
+    auto renderContext = GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (type == ForceSplitTransitionType::TRANSITION_OUT) {
+        SetTransitionType(PageTransitionType::EXIT_PUSH);
+        auto eventHub = GetEventHub<EventHub>();
+        if (eventHub) {
+            eventHub->SetEnabledInternal(false);
+        }
+        renderContext->UpdateTranslateInXY(OffsetF(0.0f, 0.0f));
+    } else if (type == ForceSplitTransitionType::TRANSITION_MOVE || type == ForceSplitTransitionType::TRANSITION_IN) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "can't move or push in navBar in force split Animation.");
+    }
+}
+
+void NavBarNode::SplitTransitionPushEnd(ForceSplitTransitionType type)
+{
+    auto renderContext = GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (type == ForceSplitTransitionType::TRANSITION_OUT) {
+        auto geometryNode = GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        auto frameSizeWithSafeArea = geometryNode->GetFrameSize(true);
+        float width = frameSizeWithSafeArea.Width();
+        float isRTL = GetLanguageDirection();
+        renderContext->UpdateTranslateInXY(OffsetF(-width * isRTL, 0.0f));
+    } else if (type == ForceSplitTransitionType::TRANSITION_IN || type == ForceSplitTransitionType::TRANSITION_MOVE) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "can't move or push in navBar in force split Animation.");
+    }
+}
+
+void NavBarNode::SplitTransitionPushFinish(int32_t animationId)
+{
+    if (animationId != animationId_) {
+        return;
+    }
+    SetIsOnAnimation(false);
+    auto renderContext = GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateTranslateInXY(OffsetF(0.0f, 0.0f));
+    if (GetTransitionType() == PageTransitionType::EXIT_PUSH) {
+        auto property = GetLayoutProperty();
+        CHECK_NULL_VOID(property);
+        property->UpdateVisibility(VisibleType::INVISIBLE);
+        SetJSViewActive(false);
+        return;
+    }
+    auto eventHub = GetEventHub<EventHub>();
+    if (eventHub) {
+        eventHub->SetEnabledInternal(true);
+    }
+}
+
+void NavBarNode::SplitTransitionPopStart(ForceSplitTransitionType type)
+{
+    SetIsOnAnimation(true);
+    auto renderContext = GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (type == ForceSplitTransitionType::TRANSITION_IN) {
+        auto property = GetLayoutProperty();
+        CHECK_NULL_VOID(property);
+        property->UpdateVisibility(VisibleType::VISIBLE);
+        SetJSViewActive(true);
+        auto eventHub = GetEventHub<EventHub>();
+        if (eventHub) {
+            eventHub->SetEnabledInternal(true);
+        }
+        SetTransitionType(PageTransitionType::ENTER_POP);
+        auto geometryNode = GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        auto frameSizeWithSafeArea = geometryNode->GetFrameSize(true);
+        float width = frameSizeWithSafeArea.Width();
+        float isRTL = GetLanguageDirection();
+        renderContext->UpdateTranslateInXY(OffsetF(-width * isRTL, 0.0f));
+    } else if (type == ForceSplitTransitionType::TRANSITION_OUT || type == ForceSplitTransitionType::TRANSITION_MOVE) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "can't move or pop out navBar in force split Animation.");
+    }
+}
+
+void NavBarNode::SplitTransitionPopEnd(ForceSplitTransitionType type)
+{
+    auto renderContext = GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (type == ForceSplitTransitionType::TRANSITION_IN) {
+        renderContext->UpdateTranslateInXY(OffsetF(0.0f, 0.0f));
+    } else if (type == ForceSplitTransitionType::TRANSITION_OUT || type == ForceSplitTransitionType::TRANSITION_MOVE) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "can't move or pop out navBar in force split Animation.");
+    }
+}
+
+void NavBarNode::SplitTransitionPopFinish(int32_t animationId)
+{
+    if (animationId != animationId_) {
+        return;
+    }
+    SetIsOnAnimation(false);
+    auto renderContext = GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateTranslateInXY(OffsetF(0.0f, 0.0f));
 }
 
 bool NavBarNode::IsNodeInvisible(const RefPtr<FrameNode>& node)

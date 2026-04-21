@@ -94,16 +94,17 @@ void SetFontColor(ArkUINodeHandle node, ArkUI_Uint32* color, int32_t size)
     }
     SymbolModelNG::SetFontColor(frameNode, colorArray);
 }
-void SetFontColorJs(ArkUINodeHandle node, ArkUI_Uint32* color, ArkUI_Int32 size,
-    ArkUI_Int32* resIndexes, void** resObjects, ArkUI_Int32 resSize)
+void SetFontColorJs(ArkUINodeHandle node, const ArkUI_InnerColor* color, ArkUI_Int32 size, ArkUI_Int32* resIndexes,
+    void** resObjects, ArkUI_Int32 resSize)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     std::vector<Color> colorArray;
-    if (color != nullptr && size > 0) {
+    const auto* colorPtr = reinterpret_cast<const Color*>(color);
+    if (colorPtr != nullptr && size > 0) {
         colorArray.reserve(size);
         for (ArkUI_Int32 i = 0; i < size; i++) {
-            colorArray.emplace_back(Color(color[i]));
+            colorArray.emplace_back(colorPtr[i]);
         }
     }
     SymbolModelNG::SetFontColor(frameNode, colorArray);
@@ -181,7 +182,9 @@ void SetFontWeightStr(ArkUINodeHandle node, ArkUI_CharPtr weight)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    SymbolModelNG::SetFontWeight(frameNode, ConvertStrToFontWeight(weight));
+    auto theme = GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    SymbolModelNG::SetFontWeight(frameNode, ConvertStrToFontWeight(weight, theme->GetTextStyle().GetFontWeight()));
 }
 
 void SetFontWeight(ArkUINodeHandle node, ArkUI_Int32 weight)
@@ -195,7 +198,9 @@ void ResetFontWeight(ArkUINodeHandle node)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    SymbolModelNG::SetFontWeight(frameNode, Ace::FontWeight::NORMAL);
+    auto theme = GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    SymbolModelNG::SetFontWeight(frameNode, theme->GetTextStyle().GetFontWeight());
 }
 
 void SetRenderingStrategy(ArkUINodeHandle node, ArkUI_Uint32 renderingStrategy)

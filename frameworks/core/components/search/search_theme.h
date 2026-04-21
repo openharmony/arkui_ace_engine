@@ -381,12 +381,13 @@ protected:
     Color searchButtonTextColor_;
     Color symbolIconColor_;
     Color focusIconColor_;
-
-private:
     Color focusPlaceholderColor_;
     Color focusTextColor_;
+    Color searchDividerColor_;
     Color touchColor_;
     Color hoverColor_;
+
+private:
     Dimension height_;
     Dimension fontSize_;
     Dimension iconSize_;
@@ -405,7 +406,6 @@ private:
     Dimension iconHeight_;
     Dimension searchIconLeftSpace_;
     Dimension searchIconRightSpace_;
-    Color searchDividerColor_;
     CancelButtonStyle cancelButtonStyle_ = CancelButtonStyle::INPUT;
     uint32_t searchSymbolId_ = 0;
     uint32_t cancelSymbolId_ = 0;

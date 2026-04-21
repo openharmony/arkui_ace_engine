@@ -22,8 +22,8 @@
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_property.h"
 #include "core/components_ng/render/animation_utils.h"
-#include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/paint_wrapper.h"
+#include "core/components_ng/token_theme/token_theme_storage.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t ITEM_SIZE = 4;
@@ -44,7 +44,7 @@ enum class TouchBottomAnimationStage {
 class DotIndicatorModifier : public ContentModifier {
     DECLARE_ACE_TYPE(DotIndicatorModifier, ContentModifier);
 public:
-    DotIndicatorModifier()
+    DotIndicatorModifier(int32_t themeScopeId = TokenThemeStorage::INVALID_THEME_SCOPE_ID)
         : backgroundColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::TRANSPARENT)),
           vectorBlackPointCenterX_(AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(LinearVector<float>(0))),
           longPointLeftCenterX_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0)),
@@ -60,7 +60,8 @@ public:
           isFocused_(AceType::MakeRefPtr<PropertyBool>(false)),
           unselectedColor_(AceType::MakeRefPtr<PropertyColor>(Color::TRANSPARENT)),
           selectedColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::TRANSPARENT)),
-          touchBottomPointColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::TRANSPARENT))
+          touchBottomPointColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::TRANSPARENT)),
+          themeScopeId_(themeScopeId)
     {
         AttachProperty(vectorBlackPointCenterX_);
         AttachProperty(longPointLeftCenterX_);
@@ -266,6 +267,11 @@ public:
         return isPressed_;
     }
 
+    void SetIsLongPressed(bool isLongPressed)
+    {
+        isLongPressed_ = isLongPressed;
+    }
+
     void SetLongPointIsHover(bool isHover)
     {
         longPointIsHover_ = isHover;
@@ -356,12 +362,18 @@ public:
         return boundsRectF_;
     }
     void FinishAnimationToTargetImmediately(std::pair<float, float> centerX);
+
+    int32_t GetThemeScopeId() const
+    {
+        return themeScopeId_;
+    }
+
 protected:
-    static RefPtr<OHOS::Ace::SwiperIndicatorTheme> GetSwiperIndicatorTheme()
+    RefPtr<OHOS::Ace::SwiperIndicatorTheme> GetSwiperIndicatorTheme() const
     {
         auto pipelineContext = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipelineContext, nullptr);
-        auto swiperTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+        auto swiperTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>(themeScopeId_);
         CHECK_NULL_RETURN(swiperTheme, nullptr);
         return swiperTheme;
     }
@@ -419,6 +431,7 @@ protected:
     bool longPointIsHover_ = false;
     bool isHover_ = false;
     bool isPressed_ = false;
+    bool isLongPressed_ = false;
     bool longPointLeftAnimEnd_ = true;
     bool longPointRightAnimEnd_ = true;
 
@@ -447,6 +460,9 @@ protected:
     float rectHeight_ = 0.0f;
     LinearVector<float> targetVectorBlackPointCenterX_;
     TargetContentProperty targetContentProperty_;
+
+    int32_t themeScopeId_ = TokenThemeStorage::INVALID_THEME_SCOPE_ID;
+
     ACE_DISALLOW_COPY_AND_MOVE(DotIndicatorModifier);
 };
 } // namespace OHOS::Ace::NG

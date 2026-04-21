@@ -29,7 +29,7 @@ struct ImageExample057 {
         .fontWeight(FontWeight.Bold)
         .margin({ bottom: 20 })
 
-      Image($r('app.media.png'))
+      Image($r('app.media.startIcon'))
         .width(200)
         .height(200)
         .border({ width: this.borderWidth, color: this.borderColor, radius: 0 })

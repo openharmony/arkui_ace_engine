@@ -98,4 +98,33 @@ void RepeatModelNG::SetItemDragHandler(std::function<void(int32_t)>&& onLongPres
     node->SetItemDragHandler(
         std::move(onLongPress), std::move(onDragStart), std::move(onMoveThrough), std::move(onDrop));
 }
+
+bool RepeatModelNG::IsAllowAnimation()
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto node = AceType::DynamicCast<RepeatNode>(stack->GetMainElementNode());
+    CHECK_NULL_RETURN(node, false);
+    return node->IsAllowAnimation();
+}
+
+bool RepeatModelNG::IsImplicitAnimationOpen()
+{
+    return AnimationUtils::IsImplicitAnimationOpen();
+}
+
+bool RepeatModelNG::IsChildInAnimation(uint32_t fromIndex)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto node = AceType::DynamicCast<RepeatNode>(stack->GetMainElementNode());
+    CHECK_NULL_RETURN(node, false);
+    return node->IsChildInAnimation(fromIndex);
+}
+
+std::pair<int32_t, int32_t> RepeatModelNG::GetActiveRange()
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto node = AceType::DynamicCast<RepeatNode>(stack->GetMainElementNode());
+    CHECK_NULL_RETURN(node, std::make_pair(-1, -1));
+    return node->GetActiveRange();
+}
 } // namespace OHOS::Ace::NG

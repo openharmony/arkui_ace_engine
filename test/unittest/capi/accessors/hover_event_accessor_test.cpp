@@ -40,11 +40,11 @@ public:
 };
 
 /**
- * @tc.name: GetStopPropagationTest
+ * @tc.name: getStopPropagationTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(HoverEventAccessorTest, GetStopPropagationTest, TestSize.Level1)
+HWTEST_F(HoverEventAccessorTest, getStopPropagationTest, TestSize.Level1)
 {
     HoverInfo* eventInfo = peer_->GetEventInfo();
     ASSERT_NE(eventInfo, nullptr);

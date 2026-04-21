@@ -20,6 +20,7 @@
 #include "adapter/ohos/entrance/ace_extra_input_data.h"
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/tsa_advanced_feature.h"
+#include "core/event/focus_axis_event.h"
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -30,6 +31,10 @@ constexpr int32_t ANGLE_270 = 270;
 constexpr double SIZE_DIVIDE = 2.0;
 constexpr int32_t DIGIT_X_REVERSE = 23;
 constexpr int32_t DIGIT_Y_REVERSE = 24;
+constexpr int32_t DEFAULT_MOUSE_PROCESS_TOUCH_ID = 0;
+
+// Force value for mouse to touch event conversion
+constexpr float MOUSE_TO_TOUCH_FORCE = 3.0f;
 
 TouchType ConvertTouchEventType(int32_t originAction)
 {
@@ -347,6 +352,22 @@ void SetClonedPointerEvent(const MMI::PointerEvent* pointerEvent, ArkUITouchEven
     }
 }
 
+void SetClonedMousePointerEvent(const MMI::PointerEvent* pointerEvent, ArkUIMouseEvent* arkUIMouseEventCloned)
+{
+    if (pointerEvent) {
+        MMI::PointerEvent* clonedEvent = new MMI::PointerEvent(*pointerEvent);
+        arkUIMouseEventCloned->rawPointerEvent = clonedEvent;
+    }
+}
+
+void SetClonedAxisPointerEvent(const MMI::PointerEvent* pointerEvent, ArkUIAxisEvent* arkUIAxisEventCloned)
+{
+    if (pointerEvent) {
+        MMI::PointerEvent* clonedEvent = new MMI::PointerEvent(*pointerEvent);
+        arkUIAxisEventCloned->rawPointerEvent = clonedEvent;
+    }
+}
+
 void SetPostPointerEvent(TouchEvent& touchEvent, ArkUITouchEvent* arkUITouchEventCloned)
 {
     MMI::PointerEvent* pointerEvent = reinterpret_cast<MMI::PointerEvent*>(arkUITouchEventCloned->rawPointerEvent);
@@ -358,6 +379,28 @@ void SetPostPointerEvent(TouchEvent& touchEvent, ArkUITouchEvent* arkUITouchEven
     touchEvent.SetPointerEvent(pointer);
 }
 
+void SetPostMousePointerEvent(MouseEvent& mouseEvent, ArkUIMouseEvent* arkUIMouseEventCloned)
+{
+    MMI::PointerEvent* pointerEvent = reinterpret_cast<MMI::PointerEvent*>(arkUIMouseEventCloned->rawPointerEvent);
+    if (pointerEvent) {
+        MMI::PointerEvent* clonedEvent = new MMI::PointerEvent(*pointerEvent);
+        arkUIMouseEventCloned->rawPointerEvent = clonedEvent;
+    }
+    std::shared_ptr<const MMI::PointerEvent> pointer(pointerEvent);
+    mouseEvent.SetPointerEvent(pointer);
+}
+
+void SetPostAxisPointerEvent(AxisEvent& axisEvent, ArkUIAxisEvent* arkUIAxisEventCloned)
+{
+    MMI::PointerEvent* pointerEvent = reinterpret_cast<MMI::PointerEvent*>(arkUIAxisEventCloned->rawPointerEvent);
+    if (pointerEvent) {
+        MMI::PointerEvent* clonedEvent = new MMI::PointerEvent(*pointerEvent);
+        arkUIAxisEventCloned->rawPointerEvent = clonedEvent;
+    }
+    std::shared_ptr<const MMI::PointerEvent> pointer(pointerEvent);
+    axisEvent.SetPointerEvent(pointer);
+}
+
 void DestroyRawPointerEvent(ArkUITouchEvent* arkUITouchEvent)
 {
     MMI::PointerEvent* pointerEvent = reinterpret_cast<MMI::PointerEvent*>(arkUITouchEvent->rawPointerEvent);
@@ -365,6 +408,35 @@ void DestroyRawPointerEvent(ArkUITouchEvent* arkUITouchEvent)
         delete pointerEvent;
         pointerEvent = nullptr;
     }
+}
+
+void DestroyMouseRawPointerEvent(ArkUIMouseEvent* arkUIMouseEvent)
+{
+    MMI::PointerEvent* pointerEvent = reinterpret_cast<MMI::PointerEvent*>(arkUIMouseEvent->rawPointerEvent);
+    if (pointerEvent) {
+        delete pointerEvent;
+        pointerEvent = nullptr;
+    }
+}
+
+void DestroyAxisRawPointerEvent(ArkUIAxisEvent* arkUIAxisEvent)
+{
+    MMI::PointerEvent* pointerEvent = reinterpret_cast<MMI::PointerEvent*>(arkUIAxisEvent->rawPointerEvent);
+    if (pointerEvent) {
+        delete pointerEvent;
+        pointerEvent = nullptr;
+    }
+}
+
+uint64_t GetDumpSensorTime(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    CHECK_NULL_RETURN(pointerEvent, 0);
+    auto inputTime = pointerEvent->GetSensorInputTime();
+    if (inputTime == 0) {
+        // inject event has no sensor time.
+        inputTime = static_cast<uint64_t>(pointerEvent->GetActionTime());
+    }
+    return inputTime;
 }
 
 TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
@@ -385,6 +457,7 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
         .SetDeviceId(pointerEvent->GetDeviceId())
         .SetTargetDisplayId(pointerEvent->GetTargetDisplayId())
         .SetTouchEventId(pointerEvent->GetId());
+    event.sensorTime = TimeStamp(std::chrono::microseconds(GetDumpSensorTime(pointerEvent)));
     AceExtraInputData::ReadToTouchEvent(pointerEvent, event);
     event.pointerEvent = pointerEvent;
     int32_t orgDevice = pointerEvent->GetSourceType();
@@ -771,6 +844,7 @@ void ConvertAxisEventToTouchEvent(const std::shared_ptr<MMI::PointerEvent>& poin
         .SetPointerEvent(pointerEvent);
     touchEvt.convertInfo.first = UIInputEventType::AXIS;
     touchEvt.convertInfo.second = UIInputEventType::TOUCH;
+    touchEvt.primitiveSourceTool = GetSourceTool(pointerItem.GetToolType());
 
     touchEvt.pointers.emplace_back(std::move(touchPoint));
 }
@@ -990,8 +1064,8 @@ void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         TAG_LOGD(AceLogTag::ACE_DRAG, "Transmits the authentication information.");
         event.signature = pointerEvent->GetSignature();
         event.dragEventData = { .timestampMs = pointerEvent->GetDistributeEventTime(),
-            .coordinateX = pointerItem.GetDisplayXPos(),
-            .coordinateY = pointerItem.GetDisplayYPos() };
+            .coordinateX = pointerItem.GetGlobalX(),
+            .coordinateY = pointerItem.GetGlobalY() };
     }
 }
 
@@ -1215,5 +1289,35 @@ MouseAction GetMouseActionFromPointerEvent(const std::shared_ptr<MMI::PointerEve
     CHECK_NULL_RETURN(pointerEvent, MouseAction::NONE);
     auto pointerAction = pointerEvent->GetPointerAction();
     return ConvertMouseEventAction(pointerAction);
+}
+
+bool ProcessMouseToTouchEvent(const MouseEvent& event, TouchEvent& touchEvent, int32_t pointerAction)
+{
+    // Only process PRESS/MOVE/RELEASE/CANCEL event
+    switch (pointerAction) {
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN:
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_BUTTON_UP:
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL:
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE:
+            break;
+        default:
+            return false;
+    }
+
+    // Convert touch event properties
+    touchEvent = event.CreateTouchPoint();
+    touchEvent.id = DEFAULT_MOUSE_PROCESS_TOUCH_ID;
+    touchEvent.originalId = DEFAULT_MOUSE_PROCESS_TOUCH_ID;
+    for (auto& item : touchEvent.pointers) {
+        item.id = DEFAULT_MOUSE_PROCESS_TOUCH_ID;
+        item.originalId = DEFAULT_MOUSE_PROCESS_TOUCH_ID;
+        item.isPressed = (touchEvent.type == TouchType::DOWN) || (touchEvent.type == TouchType::MOVE);
+    }
+    touchEvent.convertInfo.first = UIInputEventType::MOUSE;
+    touchEvent.convertInfo.second = UIInputEventType::TOUCH;
+    touchEvent.SetSourceType(SourceType::TOUCH);
+    touchEvent.force = MOUSE_TO_TOUCH_FORCE;
+
+    return true;
 }
 } // namespace OHOS::Ace::Platform

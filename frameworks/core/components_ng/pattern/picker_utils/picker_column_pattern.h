@@ -15,10 +15,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PICKER_UTILS_PICKER_COLUMN_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PICKER_UTILS_PICKER_COLUMN_PATTERN_H
 #include <cstdint>
-
 #include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_ng/pattern/picker/datepicker_layout_property.h"
 #include "core/components_ng/pattern/picker_utils/picker_column_pattern_utils.h"
 #include "core/components_ng/pattern/picker_utils/picker_layout_property.h"
 #include "core/components_ng/pattern/picker_utils/toss_animation_controller.h"
@@ -96,11 +94,12 @@ public:
         uint32_t showCount, bool isDown, double scale) = 0;
     virtual void InitTextFontFamily() = 0;
     virtual uint32_t GetOptionCount() const = 0;
+    virtual uint32_t GetActualOptionCount() const = 0;
     virtual const Color& GetButtonHoverColor() const = 0;
     virtual const Color& GetButtonBgColor() const = 0;
     virtual const Color& GetButtonPressColor() const = 0;
     virtual bool CanMove(bool isDown) const = 0;
-    virtual bool GetCanLoopFromLayoutProperty() const = 0;
+    virtual bool GetCanLoopFromLayoutPropertyWithStartEnd() const = 0;
     virtual std::string GetCurrentOption() const = 0;
 
     virtual uint32_t GetShowCount() const

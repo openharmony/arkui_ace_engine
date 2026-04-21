@@ -13,15 +13,17 @@
  * limitations under the License.
  */
 
-
 #include <cstdlib>
-#include "node_model.h"
+#include <memory>
 #include "node_extened.h"
+#include "node_model.h"
 
-#include "base/utils/utils.h"
 #include "base/error/error_code.h"
+#include "base/log/log_wrapper.h"
+#include "base/utils/utils.h"
 #include "core/common/container_consts.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "error_message_macros.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -33,8 +35,8 @@ int32_t OH_ArkUI_NodeUtils_GetLayoutSize(ArkUI_NodeHandle node, ArkUI_IntSize* s
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    ArkUI_Int32* tempSize = new ArkUI_Int32[2];
-    impl->getNodeModifiers()->getFrameNodeModifier()->getLayoutSize(node->uiNodeHandle, tempSize);
+    ArkUI_Int32 tempSize[2];
+    impl->getNodeModifiers()->getFrameNodeModifier()->getLayoutSize(node->uiNodeHandle, &tempSize);
     size->width = tempSize[0];
     size->height = tempSize[1];
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
@@ -255,9 +257,10 @@ void OH_ArkUI_NodeUtils_RemoveCustomProperty(ArkUI_NodeHandle node, const char* 
 
 int32_t OH_ArkUI_NodeUtils_GetCustomProperty(ArkUI_NodeHandle node, const char* name, ArkUI_CustomProperty** handle)
 {
-    if (node == nullptr || name == nullptr) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        name, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Name parameter is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     char* value = nullptr;
     impl->getNodeModifiers()->getFrameNodeModifier()->getCustomProperty(node->uiNodeHandle, name, &value);
@@ -268,9 +271,11 @@ int32_t OH_ArkUI_NodeUtils_GetCustomProperty(ArkUI_NodeHandle node, const char* 
 
 int32_t OH_ArkUI_NodeUtils_GetActiveChildrenInfo(ArkUI_NodeHandle head, ArkUI_ActiveChildrenInfo** handle)
 {
-    CHECK_NULL_RETURN(head, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(head, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Head node parameter is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Native module not initialized");
     ArkUINodeHandle* innerNodes = nullptr;
     int32_t totalSize = 0;
     impl->getNodeModifiers()->getFrameNodeModifier()->getActiveChildrenInfo(
@@ -330,12 +335,21 @@ int32_t OH_ArkUI_NodeUtils_GetNodeType(ArkUI_NodeHandle node)
 
 int32_t OH_ArkUI_NodeUtils_GetWindowInfo(ArkUI_NodeHandle node, ArkUI_HostWindowInfo** info)
 {
-    CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(info, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        info, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Info parameter is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Native module not initialized");
     char* name = nullptr;
-    int32_t error = impl->getNodeModifiers()->getFrameNodeModifier()->getWindowInfoByNode(node->uiNodeHandle, &name);
+    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{ARKUI_ERROR_CODE_NO_ERROR,
+        __FUNCTION__, ""});
+    int32_t error = impl->getNodeModifiers()->getFrameNodeModifier()->getWindowInfoByNode(
+        node->uiNodeHandle, &name, reinterpret_cast<void*>(&errorInfoPtr));
+    if (error != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+    }
     *info = new ArkUI_HostWindowInfo({ .name = name });
     return error;
 }
@@ -401,23 +415,29 @@ int32_t OH_ArkUI_ActiveChildrenInfo_GetCount(ArkUI_ActiveChildrenInfo* handle)
 
 int32_t OH_ArkUI_NodeUtils_GetAttachedNodeHandleById(const char* id, ArkUI_NodeHandle* node)
 {
-    CHECK_NULL_RETURN(id, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(id, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Id parameter is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Native module not initialized");
     auto nodePtr = impl->getNodeModifiers()->getFrameNodeModifier()->getAttachedFrameNodeById(id);
-    CHECK_NULL_RETURN(nodePtr, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(nodePtr, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Node not found with given id");
     *node = OHOS::Ace::NodeModel::GetArkUINode(nodePtr);
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
 int32_t OH_ArkUI_NodeUtils_GetNodeHandleByUniqueId(const uint32_t uniqueId, ArkUI_NodeHandle* node)
 {
-    CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR,
+        __FUNCTION__, "Native module not initialized");
     auto nodePtr = impl->getNodeModifiers()->getFrameNodeModifier()->getFrameNodeByUniqueId(uniqueId);
     *node = OHOS::Ace::NodeModel::GetArkUINode(nodePtr);
-    CHECK_NULL_RETURN(*node, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(*node, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Node not found with given uniqueId");
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
@@ -425,13 +445,16 @@ int32_t OH_ArkUI_NodeUtils_GetNodeUniqueId(ArkUI_NodeHandle node, int32_t* uniqu
 {
     if (node == nullptr) {
         *uniqueId = -1;
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR,
+        __FUNCTION__, "Native module not initialized");
     auto id = impl->getNodeModifiers()->getFrameNodeModifier()->getIdByNodePtr(node->uiNodeHandle);
     *uniqueId = id;
     if (*uniqueId < 0) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Failed to get node uniqueId");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     return ARKUI_ERROR_CODE_NO_ERROR;
@@ -439,39 +462,69 @@ int32_t OH_ArkUI_NodeUtils_GetNodeUniqueId(ArkUI_NodeHandle node, int32_t* uniqu
 
 int32_t OH_ArkUI_NativeModule_AdoptChild(ArkUI_NodeHandle node, ArkUI_NodeHandle child)
 {
-    CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_NODE_CAN_NOT_ADOPT_TO);
+    CHECK_NULL_RETURN_WITH_MESSAGE(node, ARKUI_ERROR_CODE_NODE_CAN_NOT_ADOPT_TO,
+        __FUNCTION__, "Parent node parameter is null");
     if (!OHOS::Ace::NodeModel::CheckIsCNode(node)) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_NODE_CAN_NOT_ADOPT_TO,
+            __FUNCTION__, "Parent node is not a C node");
         return ARKUI_ERROR_CODE_NODE_CAN_NOT_ADOPT_TO;
     }
-    CHECK_NULL_RETURN(child, ARKUI_ERROR_CODE_NODE_CAN_NOT_BE_ADOPTED);
+    CHECK_NULL_RETURN_WITH_MESSAGE(child, ARKUI_ERROR_CODE_NODE_CAN_NOT_BE_ADOPTED,
+        __FUNCTION__, "Child node parameter is null");
     if (!OHOS::Ace::NodeModel::CheckIsCNode(child)) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_NODE_CAN_NOT_BE_ADOPTED,
+            __FUNCTION__, "Child node is not a C node");
         return ARKUI_ERROR_CODE_NODE_CAN_NOT_BE_ADOPTED;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
-    auto result =
-        impl->getNodeModifiers()->getNDKRenderNodeModifier()->adoptChild(node->uiNodeHandle, child->uiNodeHandle);
+    CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR,
+        __FUNCTION__, "Native module not initialized");
+    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{ARKUI_ERROR_CODE_NO_ERROR,
+        __FUNCTION__, ""});
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->adoptChild(
+        node->uiNodeHandle, child->uiNodeHandle, reinterpret_cast<void*>(&errorInfoPtr));
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+    }
     return result;
 }
 
 int32_t OH_ArkUI_NativeModule_RemoveAdoptedChild(ArkUI_NodeHandle node, ArkUI_NodeHandle child)
 {
-    CHECK_NULL_RETURN(node && child, OHOS::Ace::ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN);
-    if (!OHOS::Ace::NodeModel::CheckIsCNode(node) || !OHOS::Ace::NodeModel::CheckIsCNode(child)) {
+    CHECK_NULL_RETURN_WITH_MESSAGE(node && child, OHOS::Ace::ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN,
+        __FUNCTION__, "Parent node or child node parameter is null");
+    if (!OHOS::Ace::NodeModel::CheckIsCNode(node)) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN,
+            __FUNCTION__, "Parent node is not a C node");
+        return OHOS::Ace::ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN;
+    }
+    if (!OHOS::Ace::NodeModel::CheckIsCNode(child)) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN,
+            __FUNCTION__, "Child node is not a C node");
         return OHOS::Ace::ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
-    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()
-                    ->removeAdoptedChild(node->uiNodeHandle, child->uiNodeHandle);
+    CHECK_NULL_RETURN_WITH_MESSAGE(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR,
+        __FUNCTION__, "Native module not initialized");
+    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
+        __FUNCTION__, ""});
+    auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->removeAdoptedChild(
+        node->uiNodeHandle, child->uiNodeHandle, reinterpret_cast<void*>(&errorInfoPtr));
+    if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+    }
     return result;
 }
 
 int32_t OH_ArkUI_NativeModule_IsInRenderState(ArkUI_NodeHandle node, bool* isOnRenderTree)
 {
-    CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        isOnRenderTree, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "isOnRenderTree parameter is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
+    CHECK_NULL_RETURN_WITH_MESSAGE(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR,
+        __FUNCTION__, "Native module not initialized");
     auto result = impl->getNodeModifiers()->getFrameNodeModifier()->isOnRenderTree(node->uiNodeHandle);
     *isOnRenderTree = static_cast<bool>(result);
     return ARKUI_ERROR_CODE_NO_ERROR;
@@ -479,45 +532,84 @@ int32_t OH_ArkUI_NativeModule_IsInRenderState(ArkUI_NodeHandle node, bool* isOnR
 
 int32_t OH_ArkUI_NodeUtils_MoveTo(ArkUI_NodeHandle node, ArkUI_NodeHandle target_parent, int32_t index)
 {
-    if (node == nullptr || target_parent == nullptr
-        || !OHOS::Ace::NodeModel::CheckIsCNode(node) || !OHOS::Ace::NodeModel::CheckIsCNode(target_parent)) {
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        target_parent, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Target parent node parameter is null");
+    if (!OHOS::Ace::NodeModel::CheckIsCNodeOrAllowCrossLanguageTreeOperating(node) ||
+        !OHOS::Ace::NodeModel::CheckIsCNodeOrAllowCrossLanguageTreeOperating(target_parent)) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
-    int32_t errorCode = impl->getNodeModifiers()->getFrameNodeModifier()->moveNodeTo(node->uiNodeHandle,
-        target_parent->uiNodeHandle, index);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{ARKUI_ERROR_CODE_NO_ERROR,
+        __FUNCTION__, ""});
+    int32_t errorCode = impl->getNodeModifiers()->getFrameNodeModifier()->moveNodeTo(
+        node->uiNodeHandle, target_parent->uiNodeHandle, index, reinterpret_cast<void*>(&errorInfoPtr));
+    if (errorCode != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+    }
     return errorCode;
 }
 
 int32_t OH_ArkUI_NodeUtils_SetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_CrossLanguageOption* option)
 {
-    if (node == nullptr || option == nullptr || node->cNode == false) {
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        option, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Option parameter is null");
+    if (node->cNode == false) {
+        SET_ERROR_MESSAGE(
+            ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node is not a C node");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_PARAM_INVALID);
-    auto errorCode = impl->getNodeModifiers()->getFrameNodeModifier()->setCrossLanguageOptions(
-        node->uiNodeHandle, option->attributeSetting);
+    CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Native module not initialized");
+    ArkUICrossLanguageOption arkUIOption;
+    arkUIOption.attributeSetting = option->attributeSetting;
+    arkUIOption.treeOperatingStatus = static_cast<ArkUITreeOperatingStatus>(
+        static_cast<int32_t>(option->treeOperatingStatus));
+    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{ARKUI_ERROR_CODE_NO_ERROR,
+        __FUNCTION__, ""});
+    auto errorCode = impl->getNodeModifiers()->getFrameNodeModifier()->setCrossLanguageOptionsFull(
+        node->uiNodeHandle, &arkUIOption);
+    if (errorCode != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+    }
     return errorCode;
 }
 
 int32_t OH_ArkUI_NodeUtils_GetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_CrossLanguageOption* option)
 {
-    if (node == nullptr || option == nullptr) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        option, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Option parameter is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_PARAM_INVALID);
-    bool isCross = impl->getNodeModifiers()->getFrameNodeModifier()->getCrossLanguageOptions(node->uiNodeHandle);
-    option->attributeSetting = isCross;
+    CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Native module not initialized");
+    
+    ArkUICrossLanguageOption arkUIOption;
+    auto errorCode = impl->getNodeModifiers()->getFrameNodeModifier()->getCrossLanguageOptionsFull(
+        node->uiNodeHandle, &arkUIOption);
+    if (errorCode != OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        return errorCode;
+    }
+    
+    option->attributeSetting = arkUIOption.attributeSetting;
+    option->treeOperatingStatus = static_cast<OH_ArkUI_CrossLanguageOperatingStatus>(
+        static_cast<int32_t>(arkUIOption.treeOperatingStatus));
+    
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
 ArkUI_CrossLanguageOption* OH_ArkUI_CrossLanguageOption_Create(void)
 {
     ArkUI_CrossLanguageOption* option = new ArkUI_CrossLanguageOption {
-        .attributeSetting = false
+        .attributeSetting = false,
+        .treeOperatingStatus = OH_ARKUI_TREE_OPERATING_STATUS_UNDEFINED
     };
     return option;
 }
@@ -546,52 +638,85 @@ bool OH_ArkUI_CrossLanguageOption_GetAttributeSettingStatus(ArkUI_CrossLanguageO
     return option->attributeSetting;
 }
 
+void OH_ArkUI_CrossLanguageOption_SetTreeOperatingStatus(
+    ArkUI_CrossLanguageOption* option, OH_ArkUI_CrossLanguageOperatingStatus status)
+{
+    if (option == nullptr) {
+        return;
+    }
+    option->treeOperatingStatus = status;
+}
+
+OH_ArkUI_CrossLanguageOperatingStatus OH_ArkUI_CrossLanguageOption_GetTreeOperatingStatus(
+    ArkUI_CrossLanguageOption* option)
+{
+    if (option == nullptr) {
+        return OH_ARKUI_TREE_OPERATING_STATUS_UNDEFINED;
+    }
+    return option->treeOperatingStatus;
+}
+
 int32_t OH_ArkUI_NativeModule_InvalidateAttributes(ArkUI_NodeHandle node)
 {
-    if (node == nullptr || !OHOS::Ace::NodeModel::CheckIsCNode(node)) {
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
+    if (!OHOS::Ace::NodeModel::CheckIsCNode(node)) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node is not a C node");
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR,
+        __FUNCTION__, "Native module not initialized");
     impl->getNodeModifiers()->getFrameNodeModifier()->applyAttributesFinish(node->uiNodeHandle);
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
 int32_t OH_ArkUI_NodeUtils_GetFirstChildIndexWithoutExpand(ArkUI_NodeHandle node, uint32_t* index)
 {
-    if (node == nullptr) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Native module not initialized");
+    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{ARKUI_ERROR_CODE_NO_ERROR,
+        __FUNCTION__, ""});
     int32_t errorCode = impl->getNodeModifiers()->getFrameNodeModifier()->getFirstChildIndexWithoutExpand(
-        node->uiNodeHandle, index);
+        node->uiNodeHandle, index, reinterpret_cast<void*>(&errorInfoPtr));
+    if (errorCode != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+    }
     return errorCode;
 }
 
 int32_t OH_ArkUI_NodeUtils_GetLastChildIndexWithoutExpand(ArkUI_NodeHandle node, uint32_t* index)
 {
-    if (node == nullptr) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Native module not initialized");
+    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{ARKUI_ERROR_CODE_NO_ERROR,
+        __FUNCTION__, ""});
     int32_t errorCode = impl->getNodeModifiers()->getFrameNodeModifier()->getLastChildIndexWithoutExpand(
-        node->uiNodeHandle, index);
+        node->uiNodeHandle, index, reinterpret_cast<void*>(&errorInfoPtr));
+    if (errorCode != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+    }
     return errorCode;
 }
 
 int32_t OH_ArkUI_NodeUtils_GetChildWithExpandMode(ArkUI_NodeHandle node, int32_t position,
     ArkUI_NodeHandle* subnode, uint32_t expandMode)
 {
-    if (node == nullptr) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Native module not initialized");
     auto nodePtr = impl->getNodeModifiers()->getFrameNodeModifier()->getChild(
         node->uiNodeHandle, position, expandMode);
-    CHECK_NULL_RETURN(nodePtr, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(nodePtr, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Child node not found");
     *subnode = OHOS::Ace::NodeModel::GetArkUINode(nodePtr);
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -633,10 +758,13 @@ ArkUI_ErrorCode OH_ArkUI_RemoveSupportedUIStates(ArkUI_NodeHandle node, int32_t 
 
 int32_t OH_ArkUI_RunTaskInScope(ArkUI_ContextHandle uiContext, void* userData, void(*callback)(void* userData))
 {
-    CHECK_NULL_RETURN(uiContext, ARKUI_ERROR_CODE_UI_CONTEXT_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(uiContext, ARKUI_ERROR_CODE_UI_CONTEXT_INVALID,
+        __FUNCTION__, "UI context parameter is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
-    CHECK_NULL_RETURN(callback, ARKUI_ERROR_CODE_CALLBACK_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        callback, ARKUI_ERROR_CODE_CALLBACK_INVALID, __FUNCTION__, "Callback parameter is null");
     auto* context = reinterpret_cast<ArkUI_Context*>(uiContext);
     impl->getNodeModifiers()->getFrameNodeModifier()->runScopedTask(context->id, userData, callback);
     return ARKUI_ERROR_CODE_NO_ERROR;
@@ -809,6 +937,34 @@ int32_t OH_ArkUI_NativeModule_UnregisterCommonVisibleAreaApproximateChangeEvent(
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
+int32_t OH_ArkUI_NativeModule_RegisterCommonAreaApproximateChangeEvent(ArkUI_NodeHandle node,
+    float expectedUpdateInterval, void* userData, void (*callback)(ArkUI_NodeEvent* event))
+{
+    if (!node || !callback) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    if (!OHOS::Ace::NodeModel::MakeCommonEventMap(node, NODE_EVENT_ON_AREA_CHANGE, userData, callback)) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    impl->getNodeModifiers()->getCommonModifier()->setCommonOnAreaApproximateChangeEvent(
+        node->uiNodeHandle, node, expectedUpdateInterval);
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_NativeModule_UnregisterCommonAreaApproximateChangeEvent(ArkUI_NodeHandle node)
+{
+    CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    if (!OHOS::Ace::NodeModel::ClearCommonEventMap(node, NODE_EVENT_ON_AREA_CHANGE)) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    impl->getNodeModifiers()->getCommonModifier()->unregisterCommonOnAreaApproximateChangeEvent(node->uiNodeHandle);
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
 ArkUI_ContentTransitionEffect* OH_ArkUI_ContentTransitionEffect_Create(int32_t type)
 {
     ArkUI_ContentTransitionEffect* contentTransitionEffect = new ArkUI_ContentTransitionEffect;
@@ -828,15 +984,22 @@ int32_t OH_ArkUI_NativeModule_AtomicServiceMenuBarSetVisible(ArkUI_ContextHandle
 int32_t OH_ArkUI_NativeModule_ConvertPositionToWindow(
     ArkUI_NodeHandle targetNode, ArkUI_IntOffset position, ArkUI_IntOffset* windowPosition)
 {
-    CHECK_NULL_RETURN(targetNode, ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(windowPosition, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(targetNode, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Target node parameter is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(windowPosition, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Window position parameter is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR,
+        __FUNCTION__, "Native module not initialized");
     ArkUI_Float32 tempOffset[2] = { position.x, position.y };
     ArkUI_Float32 tempPosition[2];
-
+    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{ARKUI_ERROR_CODE_NO_ERROR,
+        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getFrameNodeModifier()->convertPositionToWindow(
-        targetNode->uiNodeHandle, &tempOffset, &tempPosition, false);
+        targetNode->uiNodeHandle, &tempOffset, &tempPosition, false, reinterpret_cast<void*>(&errorInfoPtr));
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+    }
     windowPosition->x = tempPosition[0];
     windowPosition->y = tempPosition[1];
     return result;
@@ -845,15 +1008,22 @@ int32_t OH_ArkUI_NativeModule_ConvertPositionToWindow(
 int32_t OH_ArkUI_NativeModule_ConvertPositionFromWindow(
     ArkUI_NodeHandle targetNode, ArkUI_IntOffset windowPosition, ArkUI_IntOffset* position)
 {
-    CHECK_NULL_RETURN(targetNode, ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(position, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(targetNode, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Target node parameter is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(position, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Position parameter is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR,
+        __FUNCTION__, "Native module not initialized");
     ArkUI_Float32 tempOffset[2] = { windowPosition.x, windowPosition.y };
     ArkUI_Float32 tempPosition[2];
-
+    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{ARKUI_ERROR_CODE_NO_ERROR,
+        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getFrameNodeModifier()->convertPositionFromWindow(
-        targetNode->uiNodeHandle, &tempOffset, &tempPosition, false);
+        targetNode->uiNodeHandle, &tempOffset, &tempPosition, false, reinterpret_cast<void*>(&errorInfoPtr));
+    if (result != ARKUI_ERROR_CODE_NO_ERROR) {
+        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+    }
     position->x = tempPosition[0];
     position->y = tempPosition[1];
     return result;
@@ -861,30 +1031,41 @@ int32_t OH_ArkUI_NativeModule_ConvertPositionFromWindow(
 
 int32_t OH_ArkUI_NativeModule_GetPageRootNodeHandleByContext(ArkUI_ContextHandle uiContext, ArkUI_NodeHandle* rootNode)
 {
-    CHECK_NULL_RETURN(rootNode, ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(uiContext, ARKUI_ERROR_CODE_UI_CONTEXT_INVALID);
+    CHECK_NULL_RETURN_WITH_MESSAGE(rootNode, ARKUI_ERROR_CODE_PARAM_INVALID,
+        __FUNCTION__, "Root node parameter is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(uiContext, ARKUI_ERROR_CODE_UI_CONTEXT_INVALID,
+        __FUNCTION__, "UI context parameter is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR,
+        __FUNCTION__, "Native module not initialized");
     int32_t instanceId = OHOS::Ace::INSTANCE_ID_UNDEFINED;
     if (uiContext) {
         auto* context = reinterpret_cast<ArkUI_Context*>(uiContext);
         instanceId = context->id;
     }
     auto basicAPI = impl->getBasicAPI();
-    CHECK_NULL_RETURN(basicAPI, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    CHECK_NULL_RETURN_WITH_MESSAGE(basicAPI, ARKUI_ERROR_CODE_CAPI_INIT_ERROR,
+        __FUNCTION__, "Basic API is not initialized");
     auto invalid = basicAPI->checkUIContextInvalid(instanceId);
     if (invalid == ARKUI_ERROR_CODE_UI_CONTEXT_INVALID) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_UI_CONTEXT_INVALID, __FUNCTION__, "UI context is invalid");
         return ARKUI_ERROR_CODE_UI_CONTEXT_INVALID;
     }
     auto nodeModifier = impl->getNodeModifiers();
-    CHECK_NULL_RETURN(nodeModifier, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    CHECK_NULL_RETURN_WITH_MESSAGE(nodeModifier, ARKUI_ERROR_CODE_CAPI_INIT_ERROR,
+        __FUNCTION__, "Node modifiers are not initialized");
     auto framenodeModifier = nodeModifier->getFrameNodeModifier();
-    CHECK_NULL_RETURN(framenodeModifier, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    CHECK_NULL_RETURN_WITH_MESSAGE(framenodeModifier, ARKUI_ERROR_CODE_CAPI_INIT_ERROR,
+        __FUNCTION__, "Frame node modifier is not initialized");
     auto nodePtr = framenodeModifier->getPageRootNode(instanceId);
     *rootNode = OHOS::Ace::NodeModel::GetArkUINode(nodePtr);
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
+const char* OH_ArkUI_NativeModule_GetErrorMessage()
+{
+    return OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
+}
 #ifdef __cplusplus
 };
 #endif

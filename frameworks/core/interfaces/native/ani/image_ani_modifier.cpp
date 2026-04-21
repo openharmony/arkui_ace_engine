@@ -45,7 +45,7 @@ void SetDrawableDescriptor(ArkUINodeHandle node, void* drawableDescriptor)
 void SetResizableLattice(ArkUINodeHandle node, void* aniLattice)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
-    auto lattice = DrawingLattice::CreateDrawingLatticeFromNative(aniLattice);
+    auto lattice = DrawingLattice::CreateDrawingLatticeFromSptr(aniLattice);
     ImageModelStatic::SetResizableLattice(frameNode, lattice);
 }
 

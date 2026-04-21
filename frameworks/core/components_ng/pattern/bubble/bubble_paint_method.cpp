@@ -51,9 +51,9 @@ static RefPtr<PopupTheme> GetPopupTheme(PaintWrapper* paintWrapper)
     CHECK_NULL_RETURN(renderContext, nullptr);
     auto host = renderContext->GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto popupTheme = pipeline->GetTheme<PopupTheme>();
+    auto bubblePattern = host->GetPattern<BubblePattern>();
+    CHECK_NULL_RETURN(bubblePattern, nullptr);
+    auto popupTheme = bubblePattern->GetPopupTheme();
     return popupTheme;
 }
 } // namespace
@@ -81,11 +81,7 @@ void BubblePaintMethod::PaintMask(RSCanvas& canvas, PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(renderContext);
     auto paintProperty = DynamicCast<BubbleRenderProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);
-    auto host = renderContext->GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipelineContext = host->GetContextRefPtr();
-    CHECK_NULL_VOID(pipelineContext);
-    auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
+    auto popupTheme = GetPopupTheme(paintWrapper);
     CHECK_NULL_VOID(popupTheme);
     auto maskColor = paintProperty->GetMaskColor().value_or(popupTheme->GetMaskColor());
     auto layoutSize = paintWrapper->GetContentSize();
@@ -167,9 +163,7 @@ void BubblePaintMethod::PaintBubble(RSCanvas& canvas, PaintWrapper* paintWrapper
     enableArrow_ = paintProperty->GetEnableArrow().value_or(true);
     arrowPlacement_ = paintProperty->GetPlacement().value_or(Placement::BOTTOM);
     UpdateArrowOffset(paintProperty->GetArrowOffset(), arrowPlacement_);
-    auto pipelineContext = BubbleGetPiplineContext(paintWrapper);
-    CHECK_NULL_VOID(pipelineContext);
-    auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
+    auto popupTheme = GetPopupTheme(paintWrapper);
     CHECK_NULL_VOID(popupTheme);
     backgroundColor_ = paintProperty->GetBackgroundColor().value_or(popupTheme->GetBackgroundColor());
     border_.SetBorderRadius(popupTheme->GetRadius());
@@ -231,11 +225,7 @@ bool BubblePaintMethod::IsPaintDoubleBorder(PaintWrapper* paintWrapper)
     UpdateArrowOffset(paintProperty->GetArrowOffset(), arrowPlacement_);
     auto renderContext = paintWrapper->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
-    auto host = renderContext->GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto pipelineContext = host->GetContextRefPtr();
-    CHECK_NULL_RETURN(pipelineContext, false);
-    auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
+    auto popupTheme = GetPopupTheme(paintWrapper);
     CHECK_NULL_RETURN(popupTheme, false);
     padding_ = isTips_ ? popupTheme->GetTipsPadding() : popupTheme->GetPadding();
     if (isTips_) {
@@ -294,11 +284,7 @@ void BubblePaintMethod::PaintOuterBorder(RSCanvas& canvas, PaintWrapper* paintWr
     isTips_ = paintProperty->GetIsTips().value_or(false);
     auto renderContext = paintWrapper->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto host = renderContext->GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipelineContext = host->GetContextRefPtr();
-    CHECK_NULL_VOID(pipelineContext);
-    auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
+    auto popupTheme = GetPopupTheme(paintWrapper);
     CHECK_NULL_VOID(popupTheme);
     RSPen paint;
     RSFilter filter;
@@ -355,11 +341,7 @@ void BubblePaintMethod::PaintInnerBorder(RSCanvas& canvas, PaintWrapper* paintWr
     CHECK_NULL_VOID(paintWrapper);
     auto renderContext = paintWrapper->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto host = renderContext->GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipelineContext = host->GetContextRefPtr();
-    CHECK_NULL_VOID(pipelineContext);
-    auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
+    auto popupTheme = GetPopupTheme(paintWrapper);
     CHECK_NULL_VOID(popupTheme);
     RSPen paint;
     RSFilter filter;
@@ -466,12 +448,11 @@ void BubblePaintMethod::ClipBubble(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(renderContext);
     auto host = renderContext->GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto paintProperty = DynamicCast<BubbleRenderProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);
     enableArrow_ = paintProperty->GetEnableArrow().value_or(true);
-    auto pipelineContext = host->GetContextRefPtr();
-    CHECK_NULL_VOID(pipelineContext);
-    auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
+    auto popupTheme = GetPopupTheme(paintWrapper);
     CHECK_NULL_VOID(popupTheme);
     if (clipFrameNode_) {
         ClipBubbleWithPath(clipFrameNode_);
@@ -1055,7 +1036,11 @@ void BubblePaintMethod::ClipBubbleWithPath(const RefPtr<FrameNode>& frameNode)
     path->SetBasicShapeType(BasicShapeType::PATH);
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateClipShape(path);
+    if (IsUserSetMaterial()) {
+        renderContext->SetShadowPath(clipPath_);
+    } else {
+        renderContext->UpdateClipShape(path);
+    }
 }
 
 } // namespace OHOS::Ace::NG

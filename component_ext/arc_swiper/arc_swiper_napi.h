@@ -22,6 +22,18 @@
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 
 namespace OHOS::Ace {
+
+// Type tags for napi_wrap_s/napi_unwrap_s type safety
+constexpr napi_type_tag ARC_SWIPER_CONTROLLER_TYPE_TAG = {
+    .lower = 0x7D3E8B2C9F5A1E4D,
+    .upper = 0x8B4F2C9E3D6A7F1B,
+};
+
+constexpr napi_type_tag ARC_SWIPER_INDICATOR_TYPE_TAG = {
+    .lower = 0x3A9F5E2D8B1C4A7E,
+    .upper = 0x6C7D3E9F2B5A8D1F,
+};
+
 napi_value JsCreate(napi_env env, napi_callback_info info);
 napi_value JsIndex(napi_env env, napi_callback_info info);
 napi_value JsIndicator(napi_env env, napi_callback_info info);

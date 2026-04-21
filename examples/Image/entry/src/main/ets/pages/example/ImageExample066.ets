@@ -29,7 +29,7 @@ struct ImageExample066 {
         .margin({ bottom: 20 })
 
       Stack({ alignContent: Alignment.TopEnd }) {
-        Image($r('app.media.png'))
+        Image($r('app.media.startIcon'))
           .width(200)
           .height(200)
 

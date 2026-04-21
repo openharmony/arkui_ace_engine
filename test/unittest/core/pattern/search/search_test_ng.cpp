@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/search/search_pattern.h"
 #include "core/components_ng/pattern/search/search_text_field.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -298,6 +299,21 @@ HWTEST_F(SearchTestNg, SearchPatternMethodTest002, TestSize.Level1)
     KeyEvent keyEventSeven(KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN);
     pattern->focusChoice_ = SearchPattern::FocusChoice::CANCEL_BUTTON;
     focusHub->ProcessOnKeyEventInternal(keyEventSeven);
+
+    /**
+     * @tc.cases: case8.
+     */
+    KeyEvent keyEventEight(KeyCode::KEY_SPACE, KeyAction::DOWN);
+    pattern->focusChoice_ = SearchPattern::FocusChoice::SEARCH_BUTTON;
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEventEight));
+
+    /**
+     * @tc.cases: case9.
+     */
+    KeyEvent keyEventNine(KeyCode::KEY_SPACE, KeyAction::DOWN);
+    pattern->focusChoice_ = SearchPattern::FocusChoice::CANCEL_BUTTON;
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEventNine));
+    EXPECT_EQ(pattern->focusChoice_, SearchPattern::FocusChoice::SEARCH);
 }
 
 /**
@@ -1028,6 +1044,27 @@ HWTEST_F(SearchTestNg, SetCancelIconSize001, TestSize.Level1)
     searchModelInstance.SetCancelIconColor(Color::RED);
     EXPECT_EQ(imageRenderProperty->GetSvgFillColor(), Color::RED);
 }
+
+/**
+ * @tc.name: SetCancelButtonStyle002
+ * @tc.desc: Set cancel button style
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SetCancelButtonStyle002, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto searchLayoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    ASSERT_NE(searchLayoutProperty, nullptr);
+    searchModelInstance.SetCancelButtonStyle(CancelButtonStyle::CONSTANT);
+    EXPECT_EQ(searchLayoutProperty->GetCancelButtonStyle(), CancelButtonStyle::CONSTANT);
+    searchModelInstance.SetCancelButtonStyle(CancelButtonStyle::INPUT);
+    EXPECT_EQ(searchLayoutProperty->GetCancelButtonStyle(), CancelButtonStyle::INPUT);
+    searchModelInstance.SetCancelButtonStyle(CancelButtonStyle::INVISIBLE);
+    EXPECT_EQ(searchLayoutProperty->GetCancelButtonStyle(), CancelButtonStyle::INVISIBLE);
+}
+
 
 /**
  * @tc.name: SetCancelImageIcon001
@@ -1917,6 +1954,8 @@ HWTEST_F(SearchTestNg, Pattern013, TestSize.Level1)
     ASSERT_NE(textFieldFrameNode, nullptr);
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(textFieldPattern, nullptr);
+    auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    MockPipelineContext::GetCurrent()->SetTextFieldManager(textFieldManager);
     /**
      * @tc.step: step2. call onFocusInternal_().
      */
@@ -2316,6 +2355,47 @@ HWTEST_F(SearchTestNg, testSelectedBackgroundColor001, TestSize.Level1)
     paintProperty->UpdateSelectedBackgroundColor(DEFAULT_SELECTED_BACKFROUND_COLOR_RED);
     frameNode->MarkModifyDone();
     EXPECT_EQ(paintProperty->GetSelectedBackgroundColor(), Color::RED);
+}
+
+/**
+ * @tc.name: testSelectedBackgroundColor002
+ * @tc.desc: test search selectedBackgroundColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, testSelectedBackgroundColor002, TestSize.Level1)
+{
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    /**
+     * @tc.steps: Create Text filed node
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    auto paintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
+
+    /**
+     * @tc.step: step2. Set selectedBackgroundColor
+     */
+    OHOS::Ace::NG::SearchModelNG::SetSelectedBackgroundColor(frameNode, DEFAULT_SELECTED_BACKFROUND_COLOR_BLUE);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(paintProperty->GetSelectedBackgroundColor(), Color::BLUE);
+
+    /**
+     * @tc.step: step3. Set selectedBackgroundColor
+     */
+    paintProperty->UpdateSelectedBackgroundColor(DEFAULT_SELECTED_BACKFROUND_COLOR_RED);
+    frameNode->MarkModifyDone();
+    EXPECT_EQ(paintProperty->GetSelectedBackgroundColor(), Color::RED);
+
+    /**
+     * @tc.step: step4. Reset selectedBackgroundColor
+     */
+    OHOS::Ace::NG::SearchModelNG::ResetSelectedBackgroundColor(frameNode);
+    frameNode->MarkModifyDone();
+    EXPECT_FALSE(paintProperty->HasSelectedBackgroundColor());
+    EXPECT_FALSE(paintProperty->HasSelectedBackgroundColorFlagByUser());
+
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**

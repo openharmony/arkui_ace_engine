@@ -17,7 +17,9 @@
 
 #include <cstdlib>
 #include <regex>
+#include <unordered_map>
 
+#include "base/utils/linear_map.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/resource/resource_manager.h"
@@ -209,6 +211,19 @@ std::string Color::ColorToString() const
     return colorStr;
 }
 
+std::string Color::ColorWithHdrToString() const
+{
+    auto colorStr = ColorToString();
+    if (!colorWithHeadRoom_.has_value()) {
+        return colorStr;
+    }
+    const auto& hdrColor = colorWithHeadRoom_.value();
+    std::ostringstream oss;
+    oss << colorStr << "|HDR:" << hdrColor.red << "," << hdrColor.green << "," << hdrColor.blue << ","
+        << hdrColor.alpha << "," << hdrColor.headRoom << "|CS:" << static_cast<int32_t>(GetColorSpace());
+    return oss.str();
+}
+
 // for example str = #FFFFFFFF
 Color Color::ColorFromString(const std::string& str)
 {
@@ -232,7 +247,8 @@ Color Color::ColorFromString(const std::string& str)
 
 std::string Color::ToString() const
 {
-    if (IsPlaceholder()) {
+    if (IsPlaceholder() &&
+        static_cast<int32_t>(GetPlaceholder()) <= static_cast<int32_t>(ColorPlaceholder::FOREGROUND)) {
         // Provide readable placeholder tag for debugging/logging.
         std::ostringstream oss;
         oss << ColorToString() << "|PH:";
@@ -277,6 +293,18 @@ Color Color::FromRGBO(uint8_t red, uint8_t green, uint8_t blue, double opacity)
 Color Color::FromRGB(uint8_t red, uint8_t green, uint8_t blue)
 {
     return FromARGB(0xff, red, green, blue);
+}
+
+Color Color::FromFloat(double red, double green, double blue, double opacity, double headRoom)
+{
+    ColorWithHeadRoom colorWithHeadRoom {
+        .red = static_cast<float>(red),
+        .green = static_cast<float>(green),
+        .blue = static_cast<float>(blue),
+        .alpha = static_cast<float>(opacity),
+        .headRoom = static_cast<float>(headRoom)
+    };
+    return Color(colorWithHeadRoom);
 }
 
 Color Color::BlendColor(const Color& overlayColor) const
@@ -701,6 +729,82 @@ void Color::UpdateColorByResourceId()
     auto newColor = resourceAdapter->GetColor(resourceId_);
     SetValue(newColor.GetValue());
 #endif
+}
+
+void Color::FillColorPlaceholderIfNeed(uint32_t resourceId)
+{
+    // Map for special system resource. Key is resId, value is the enum of ColorPlaceholder.
+    const static std::unordered_map<int32_t, ColorPlaceholder> specialResourceHolderMap = {
+        { 125830976, ColorPlaceholder::BRAND },
+        { 125830977, ColorPlaceholder::BRAND_FONT },
+        { 125830979, ColorPlaceholder::WARNING },
+        { 125830987, ColorPlaceholder::FONT_ON_PRIMARY },
+        { 125830982, ColorPlaceholder::FONT_PRIMARY },
+        { 125830983, ColorPlaceholder::FONT_SECONDARY },
+        { 125830984, ColorPlaceholder::FONT_TERTIARY },
+        { 125830985, ColorPlaceholder::FONT_FOURTH },
+        { 125830986, ColorPlaceholder::FONT_EMPHASIZE },
+        { 125830991, ColorPlaceholder::ICON_PRIMARY },
+        { 125830992, ColorPlaceholder::ICON_SECONDARY },
+        { 125830993, ColorPlaceholder::ICON_TERTIARY },
+        { 125830994, ColorPlaceholder::ICON_FOURTH },
+        { 125830995, ColorPlaceholder::ICON_EMPHASIZE },
+        { 125830996, ColorPlaceholder::ICON_SUB_EMPHASIZE },
+        { 125831005, ColorPlaceholder::COMP_BACKGROUND_PRIMARY_CONTRARY },
+        { 125834831, ColorPlaceholder::COMP_BACKGROUND_PRIMARY_CONTRARY_SECONDARY },
+        { 125831007, ColorPlaceholder::COMP_BACKGROUND_SECONDARY },
+        { 125831008, ColorPlaceholder::COMP_BACKGROUND_TERTIARY },
+        { 125831009, ColorPlaceholder::COMP_BACKGROUND_EMPHASIZE },
+        { 125831011, ColorPlaceholder::COMP_EMPHASIZE_SECONDARY },
+        { 125831012, ColorPlaceholder::COMP_EMPHASIZE_TERTIARY },
+        { 125831013, ColorPlaceholder::COMP_DIVIDER },
+        { 125831019, ColorPlaceholder::INTERACTIVE_HOVER },
+        { 125831021, ColorPlaceholder::INTERACTIVE_FOCUS },
+        { 125831020, ColorPlaceholder::INTERACTIVE_PRESSED },
+    };
+    auto iter = specialResourceHolderMap.find(resourceId);
+    if (iter != specialResourceHolderMap.end()) {
+        placeholder_ = iter->second;
+    }
+}
+
+void Color::FillColorPlaceholderIfNeed(const std::string& name)
+{
+    // Map for special system resource name. Sort by key MUST in ascending order.
+    static const LinearMapNode<ColorPlaceholder> specialResourceNameHolderMap[] = {
+        { "sys.color.brand", ColorPlaceholder::BRAND },
+        { "sys.color.brand_font", ColorPlaceholder::BRAND_FONT },
+        { "sys.color.comp_background_emphasize", ColorPlaceholder::COMP_BACKGROUND_EMPHASIZE },
+        { "sys.color.comp_background_primary_contrary", ColorPlaceholder::COMP_BACKGROUND_PRIMARY_CONTRARY },
+        { "sys.color.comp_background_primary_contrary_secondary",
+            ColorPlaceholder::COMP_BACKGROUND_PRIMARY_CONTRARY_SECONDARY },
+        { "sys.color.comp_background_secondary", ColorPlaceholder::COMP_BACKGROUND_SECONDARY },
+        { "sys.color.comp_background_tertiary", ColorPlaceholder::COMP_BACKGROUND_TERTIARY },
+        { "sys.color.comp_divider", ColorPlaceholder::COMP_DIVIDER },
+        { "sys.color.comp_emphasize_secondary", ColorPlaceholder::COMP_EMPHASIZE_SECONDARY },
+        { "sys.color.comp_emphasize_tertiary", ColorPlaceholder::COMP_EMPHASIZE_TERTIARY },
+        { "sys.color.font_emphasize", ColorPlaceholder::FONT_EMPHASIZE },
+        { "sys.color.font_fourth", ColorPlaceholder::FONT_FOURTH },
+        { "sys.color.font_on_primary", ColorPlaceholder::FONT_ON_PRIMARY },
+        { "sys.color.font_primary", ColorPlaceholder::FONT_PRIMARY },
+        { "sys.color.font_secondary", ColorPlaceholder::FONT_SECONDARY },
+        { "sys.color.font_tertiary", ColorPlaceholder::FONT_TERTIARY },
+        { "sys.color.icon_emphasize", ColorPlaceholder::ICON_EMPHASIZE },
+        { "sys.color.icon_fourth", ColorPlaceholder::ICON_FOURTH },
+        { "sys.color.icon_primary", ColorPlaceholder::ICON_PRIMARY },
+        { "sys.color.icon_secondary", ColorPlaceholder::ICON_SECONDARY },
+        { "sys.color.icon_sub_emphasize", ColorPlaceholder::ICON_SUB_EMPHASIZE },
+        { "sys.color.icon_tertiary", ColorPlaceholder::ICON_TERTIARY },
+        { "sys.color.interactive_focus", ColorPlaceholder::INTERACTIVE_FOCUS },
+        { "sys.color.interactive_hover", ColorPlaceholder::INTERACTIVE_HOVER },
+        { "sys.color.interactive_pressed", ColorPlaceholder::INTERACTIVE_PRESSED },
+        { "sys.color.warning", ColorPlaceholder::WARNING },
+    };
+    auto index =
+        BinarySearchFindIndex(specialResourceNameHolderMap, ArraySize(specialResourceNameHolderMap), name.c_str());
+    if (index != -1) {
+        placeholder_ = specialResourceNameHolderMap[index].value;
+    }
 }
 
 } // namespace OHOS::Ace

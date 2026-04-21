@@ -254,6 +254,11 @@ void TextAreaLayoutAlgorithm::ConstraintHeight(LayoutWrapper* layoutWrapper, Opt
         frameSize.SetHeight(textFieldContentConstraint.maxSize.Height() + pattern->GetVerticalPaddingAndBorderSum());
     } else {
         frameSize.SetHeight(contentHeight + pattern->GetVerticalPaddingAndBorderSum());
+        auto voiceArea = DynamicCast<VoiceNodeResponseArea>(pattern->GetVoiceResponseArea());
+        if (voiceArea && frameSize.Height().has_value()) {
+            auto minHeight = voiceArea->GetVoiceVerticalPadding() + voiceArea->GetFrameSize().Height();
+            frameSize.SetHeight(std::max(minHeight, frameSize.Height().value()));
+        }
     }
 
     // Height is constrained by the CalcLayoutConstraint.
@@ -294,7 +299,7 @@ void TextAreaLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutProperty);
     auto context = frameNode->GetContext();
     CHECK_NULL_VOID(context);
-    parentGlobalOffset_ = frameNode->GetPaintRectOffsetNG(false, true) - context->GetRootRect().GetOffset();
+    parentGlobalOffset_ = frameNode->GetPaintRectOffset(false, true) - context->GetRootRect().GetOffset();
     auto align = Alignment::TOP_CENTER;
 
     auto border = pattern->GetBorderWidthProperty();

@@ -24,7 +24,7 @@
 #include "interfaces/native/node/gesture_impl.h"
 #define protected public
 #define private public
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/gestures/gesture_info.h"

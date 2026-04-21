@@ -53,14 +53,14 @@ class ClickEventImpl implements ClickEvent {
     public preventDefault() { };
     public target: EventTarget = new EventTargetImpl();
     public timestamp: int64;
-    public source: SourceType = SourceType.UNKNOWN;
+    public source: SourceType = SourceType.Unknown;
     public axisHorizontal?: double;
     public axisVertical?: double;
     public pressure: double;
     public tiltX: double;
     public tiltY: double;
     public rollAngle?: double;
-    public sourceTool: SourceTool = SourceTool.UNKNOWN;
+    public sourceTool: SourceTool = SourceTool.Unknown;
     public getModifierKeyState?: ModifierKeyStateGetter;
     public deviceId?: int32;
     public targetDisplayId?: int32;

@@ -19,6 +19,10 @@
 
 #include "test/unittest/core/pattern/test_ng.h"
 
+#include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
+#include "core/components_ng/pattern/scrollable/refresh_coordination.h"
+#include "core/components_ng/pattern/scrollable/scrollable_theme.h"
+
 namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;

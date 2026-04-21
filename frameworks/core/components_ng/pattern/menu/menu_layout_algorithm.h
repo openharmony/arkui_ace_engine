@@ -24,10 +24,24 @@
 #include "core/components/common/properties/placement.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_paint_property.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/menu_property.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_paint_method.h"
+
+#if defined(ENABLE_ROSEN_BACKEND)
+namespace OHOS::Rosen {
+    class RSNGShapeBase;
+    template<typename T>
+    class Vector2;
+    typedef Vector2<float> Vector2f;
+}
+#endif
+
+namespace OHOS::Ace {
+class SelectTheme;
+class GridColumnInfo;
+}
 
 namespace OHOS::Ace::NG {
 struct PreviewMenuParam {
@@ -74,7 +88,9 @@ struct MenuDumpInfo {
     OffsetF anchorPosition;
 };
 class MenuLayoutProperty;
+class MenuPaintProperty;
 class MenuPattern;
+class SafeAreaManager;
 class MenuLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(MenuLayoutAlgorithm, BoxLayoutAlgorithm);
 public:
@@ -102,7 +118,8 @@ public:
     // 1. menu showed in subwindow for PC can show expand main window
     // 2. menu showed in subwindow from UIExtension can show expand UIExtension window
     bool canExpandCurrentWindow_ = false;
-    void InitCanExpandCurrentWindow(bool isContextMenu, const RefPtr<MenuLayoutProperty>& menuLayoutProperty);
+    void InitCanExpandCurrentWindow(bool isContextMenu, const RefPtr<MenuLayoutProperty>& menuLayoutProperty,
+        const RefPtr<MenuPattern>& menuPattern);
     bool HoldEmbeddedMenuPosition(LayoutWrapper* layoutWrapper);
     Rect GetMenuWindowRectInfo(const RefPtr<MenuPattern>& menuPattern);
     bool IsExpandDisplay();
@@ -162,6 +179,8 @@ private:
     void UpdateConstraintWidth(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
     void UpdateConstraintHeight(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
     void UpdateConstraintSelectHeight(LayoutWrapper* layoutWrapper, LayoutConstraintF& LayoutConstraintF);
+    void UpdateMaxSpaceHeightByMenuMaxHeight(const RefPtr<MenuPattern>& menuPattern,
+        const RefPtr<MenuLayoutProperty>& menuLayoutProps, float maxAvailableHeight, float& maxSpaceHeight);
     void UpdateConstraintBaseOnOptions(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
     void UpdateOptionConstraint(std::list<RefPtr<LayoutWrapper>>& options, float width);
     float GetMenuMaxBottom(const RefPtr<MenuPattern>& menuPattern);
@@ -288,6 +307,28 @@ private:
     void BuildTopArrowPath(float arrowX, float arrowY, std::string& path);
     void BuildRightArrowPath(float arrowX, float arrowY, std::string& path);
     void BuildLeftArrowPath(float arrowX, float arrowY, std::string& path);
+#if defined(ENABLE_ROSEN_BACKEND)
+    std::shared_ptr<OHOS::Rosen::RSNGShapeBase> GetMenuSDFShape(bool didNeedArrow);
+
+    std::shared_ptr<OHOS::Rosen::RSNGShapeBase> CreateSDFRRectShape();
+    void CalculateArrowVertices(
+        OHOS::Rosen::Vector2f& vertex0, OHOS::Rosen::Vector2f& vertex1, OHOS::Rosen::Vector2f& vertex2);
+    void CalculateBottomArrowVertices(
+        OHOS::Rosen::Vector2f& vertex0, OHOS::Rosen::Vector2f& vertex1, OHOS::Rosen::Vector2f& vertex2);
+    void CalculateLeftArrowVertices(
+        OHOS::Rosen::Vector2f& vertex0, OHOS::Rosen::Vector2f& vertex1, OHOS::Rosen::Vector2f& vertex2);
+    void CalculateTopArrowVertices(
+        OHOS::Rosen::Vector2f& vertex0, OHOS::Rosen::Vector2f& vertex1, OHOS::Rosen::Vector2f& vertex2);
+    void CalculateRightArrowVertices(
+        OHOS::Rosen::Vector2f& vertex0, OHOS::Rosen::Vector2f& vertex1, OHOS::Rosen::Vector2f& vertex2);
+
+    std::shared_ptr<OHOS::Rosen::RSNGShapeBase> CreateSDFTriangleShape(
+        const OHOS::Rosen::Vector2f& vertex0, const OHOS::Rosen::Vector2f& vertex1,
+        const OHOS::Rosen::Vector2f& vertex2);
+    std::shared_ptr<OHOS::Rosen::RSNGShapeBase> CreateSmoothUnionShape(
+        const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shapeX,
+        const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shapeY);
+#endif
     std::string BuildTopLinePath(const OffsetF& arrowPosition, float radiusPx,
         Placement arrowBuildPlacement, bool didNeedArrow);
     std::string BuildRightLinePath(const OffsetF& arrowPosition, float radiusPx,
@@ -383,6 +424,7 @@ private:
     bool didNeedArrow_ = false;
     std::optional<PreviewScaleMode> previewScaleMode_ = std::nullopt;
     std::optional<AvailableLayoutAreaMode> availableLayoutAreaMode_ = std::nullopt;
+    std::optional<MenuPathParams> pathParams_ = std::nullopt;
 
     using PlacementFunc = OffsetF (MenuLayoutAlgorithm::*)(const SizeF&, const OffsetF&, const OffsetF&);
     std::map<Placement, PlacementFunc> placementFuncMap_;

@@ -28,32 +28,52 @@ void DestroyPeerImpl(Ark_LineHeightStyle peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_LineHeightStyle ConstructImpl(const Ark_LengthMetrics* lineHeight)
+Ark_LineHeightStyle Construct0Impl(const Ark_LengthMetrics* lineHeight)
 {
     auto peer = PeerUtils::CreatePeer<LineHeightStylePeer>();
     Dimension height = Converter::OptConvert<Dimension>(*lineHeight).value_or(Dimension());
     peer->span = AceType::MakeRefPtr<LineHeightSpan>(height);
     return peer;
 }
+Ark_LineHeightStyle Construct1Impl(const Ark_LengthMetrics* lineHeight,
+                                   Ark_Float64 lineHeightMultiple)
+{
+    auto peer = PeerUtils::CreatePeer<LineHeightStylePeer>();
+    Dimension height = Converter::OptConvert<Dimension>(*lineHeight).value_or(Dimension());
+    auto multiple = Converter::OptConvert<double>(lineHeightMultiple);
+    peer->span = AceType::MakeRefPtr<LineHeightSpan>(height, multiple);
+    return peer;
+}
+
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 Ark_Float64 GetLineHeightImpl(Ark_LineHeightStyle peer)
 {
-    Ark_Float64 ret = Converter::ArkValue<Ark_Float64>(0);
-    CHECK_NULL_RETURN(peer, ret);
-    CHECK_NULL_RETURN(peer->span, ret);
+    Ark_Float64 invalid = Converter::ArkValue<Ark_Float64>(0);
+    CHECK_NULL_RETURN(peer, invalid);
+    CHECK_NULL_RETURN(peer->span, invalid);
     return Converter::ArkValue<Ark_Float64>(peer->span->GetLineHeight().ConvertToVp());
+}
+Opt_Float64 GetLineHeightMultipleImpl(Ark_LineHeightStyle peer)
+{
+    Opt_Float64 invalid = Converter::ArkValue<Opt_Float64>();
+    CHECK_NULL_RETURN(peer, invalid);
+    CHECK_NULL_RETURN(peer->span, invalid);
+    auto multiple = peer->span->GetLineHeightMultiple();
+    return Converter::ArkValue<Opt_Float64>(multiple);
 }
 } // LineHeightStyleAccessor
 const GENERATED_ArkUILineHeightStyleAccessor* GetLineHeightStyleAccessor()
 {
     static const GENERATED_ArkUILineHeightStyleAccessor LineHeightStyleAccessorImpl {
         LineHeightStyleAccessor::DestroyPeerImpl,
-        LineHeightStyleAccessor::ConstructImpl,
+        LineHeightStyleAccessor::Construct0Impl,
+        LineHeightStyleAccessor::Construct1Impl,
         LineHeightStyleAccessor::GetFinalizerImpl,
         LineHeightStyleAccessor::GetLineHeightImpl,
+        LineHeightStyleAccessor::GetLineHeightMultipleImpl,
     };
     return &LineHeightStyleAccessorImpl;
 }

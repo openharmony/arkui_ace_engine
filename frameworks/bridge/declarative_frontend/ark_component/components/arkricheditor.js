@@ -212,6 +212,10 @@ class ArkRichEditorComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, RichEditorSingleLineModifier.identity, RichEditorSingleLineModifier, value);
     return this;
   }
+  orphanCharOptimization(enable) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorOrphanCharOptimizationModifier.identity, RichEditorOrphanCharOptimizationModifier, enable);
+    return this;
+  }
 }
 
 class RichEditorEnableDataDetectorModifier extends ModifierWithKey {
@@ -854,7 +858,21 @@ class RichEditorSingleLineModifier extends ModifierWithKey {
 }
 RichEditorSingleLineModifier.identity = Symbol('richEditorSingleLine');
 
-class JSRichEditor extends JSContainerBase {
+class RichEditorOrphanCharOptimizationModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetOrphanCharOptimization(node);
+    } else {
+      getUINativeModule().richEditor.setOrphanCharOptimization(node, this.value);
+    }
+  }
+}
+RichEditorOrphanCharOptimizationModifier.identity = Symbol('richEditorOrphanCharOptimization');
+
+class JSRichEditor extends JSViewAbstract {
     static create(params) {
         getUINativeModule().richEditor.create(params);
     }
@@ -954,9 +972,6 @@ class JSRichEditor extends JSContainerBase {
     static onCopy(callback) {
         getUINativeModule().richEditor.setOnCopy(true, callback);
     }
-    static onShare(callback) {
-        getUINativeModule().richEditor.setOnShare(true, callback);
-    }
     static onWillAttachIME(callback) {
         getUINativeModule().richEditor.setOnWillAttachIME(true, callback);
     }
@@ -1004,6 +1019,9 @@ class JSRichEditor extends JSContainerBase {
     }
     static singleLine(callback) {
         getUINativeModule().richEditor.setSingleLine(true, callback);
+    }
+    static orphanCharOptimization(enable) {
+        getUINativeModule().richEditor.setOrphanCharOptimization(true, enable);
     }
     static clip(callback) {
       if (callback === undefined) {
@@ -1061,4 +1079,5 @@ function exportView() {
     globalThis.RichEditor = JSRichEditor;
 }
 
-export default { ArkRichEditorComponent, createComponent, exportComponent, exportView };
+function loadComponent() {}
+export default { ArkRichEditorComponent, createComponent, exportComponent, exportView, loadComponent };

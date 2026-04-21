@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_SWIPER_ROSEN_RENDER_SWIPER_H
 
 #include "compatible/components/swiper/render_swiper.h"
-#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace {
 class RosenRenderSwiper : public RenderSwiper {

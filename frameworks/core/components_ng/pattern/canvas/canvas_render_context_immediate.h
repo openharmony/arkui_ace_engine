@@ -32,6 +32,7 @@ public:
         isVisible_ = isVisible;
     }
 
+    std::optional<bool> GetAntialiasExt() const override;
     TransformParam GetTransform() const override;
     LineDashParam GetLineDash() const override;
 

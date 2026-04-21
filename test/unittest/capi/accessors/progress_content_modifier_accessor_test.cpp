@@ -42,11 +42,11 @@ static constexpr float TEST_DEFAULT_VALUE = 0;
 static constexpr float TEST_DEFAULT_TOTAL = 100;
 
 /**
- * @tc.name: ProgressContentModifierHelperAccessorTest
+ * @tc.name: contentModifierProgressTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressContentModifierHelperAccessor, ProgressContentModifierHelperAccessorTest, TestSize.Level1)
+HWTEST_F(ProgressContentModifierHelperAccessor, contentModifierProgressTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->contentModifierProgress, nullptr);
 

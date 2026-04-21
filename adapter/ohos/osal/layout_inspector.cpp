@@ -292,7 +292,7 @@ void LayoutInspector::SetCallback(int32_t instanceId)
     WebSocketManager::RegisterSendInstanceMessageCallback(sendInstanceMessageCallBack);
 }
 
-void LayoutInspector::CreateContainerLayoutInfo(RefPtr<Container>& container)
+void LayoutInspector::CreateContainerLayoutInfo(RefPtr<Container>& container, bool isNeedFreeNodes)
 {
     CHECK_NULL_VOID(container);
     if (container->IsDynamicRender()) {
@@ -303,9 +303,9 @@ void LayoutInspector::CreateContainerLayoutInfo(RefPtr<Container>& container)
     ContainerScope socpe(containerId);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    auto getInspectorTask = [container, containerId]() {
+    auto getInspectorTask = [container, containerId, isNeedFreeNodes]() {
         std::string treeJson;
-        GetInspectorTreeJsonStr(treeJson, containerId);
+        GetInspectorTreeJsonStr(treeJson, containerId, isNeedFreeNodes);
         auto message = JsonUtil::Create(true);
         GetSnapshotJson(containerId, message);
         CHECK_NULL_VOID(message);
@@ -359,13 +359,14 @@ void LayoutInspector::CreateLayoutInfo(int32_t containerId)
     return CreateContainerLayoutInfo(container);
 }
 
-void LayoutInspector::CreateLayoutInfoByWinId(uint32_t windId)
+void LayoutInspector::CreateLayoutInfoByWinId(uint32_t windId, bool isNeedFreeNodes)
 {
-    auto container = Container::GetByWindowId(windId);
+    auto container = windId == OHOS::Ace::NG::INSPECTOR_INVALID_WINDOW_ID ?
+        Container::GetNormalFocused() : Container::GetByWindowId(windId);
     if (container) {
         TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "start get container %{public}d info", container->GetInstanceId());
     }
-    return CreateContainerLayoutInfo(container);
+    return CreateContainerLayoutInfo(container, isNeedFreeNodes);
 }
 
 void LayoutInspector::SendInspctorAbilities()
@@ -392,7 +393,7 @@ void LayoutInspector::Create3DLayoutInfoByWinId(uint32_t windId)
     return CreateContainer3DLayoutInfo(container);
 }
 
-void LayoutInspector::GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t containerId)
+void LayoutInspector::GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t containerId, bool isNeedFreeNodes)
 {
     auto container = AceEngine::Get().GetContainer(containerId);
     CHECK_NULL_VOID(container);
@@ -402,8 +403,10 @@ void LayoutInspector::GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t 
     if (container->IsUseNewPipeline()) {
         if (containerId >= MIN_SUBCONTAINER_ID && containerId < MIN_PLUGIN_SUBCONTAINER_ID) {
             treeJsonStr = NG::Inspector::GetSubWindowInspector(true);
-        } else {
+        } else if (!isNeedFreeNodes) {
             treeJsonStr = NG::Inspector::GetInspector(true);
+        } else {
+            treeJsonStr = NG::Inspector::GetFreeNodesInspector();
         }
     } else {
         auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
@@ -634,18 +637,13 @@ std::pair<uint32_t, int32_t> LayoutInspector::ProcessMessages(const std::string&
         TriggerArkUIInteractionEventStatus(message);
     }
     auto windowResult = NG::Inspector::ParseWindowIdFromMsg(message);
-    uint32_t windowId = windowResult.first;
-    if (windowId == OHOS::Ace::NG::INSPECTOR_INVALID_WINDOW_ID && windowResult.second != QUERY_ABILITY) {
-        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "input message: %{public}s", message.c_str());
-        return windowResult;
-    }
 
     switch (windowResult.second) {
         case UI_TREE:
-            CreateLayoutInfoByWinId(windowId);
+            CreateLayoutInfoByWinId(windowResult.first, NG::Inspector::ParseNeedFreeNodes(message));
             break;
         case THREE_DIMENSIONS_TREE:
-            Create3DLayoutInfoByWinId(windowId);
+            Create3DLayoutInfoByWinId(windowResult.first);
             break;
         case QUERY_ABILITY:
             SendInspctorAbilities();

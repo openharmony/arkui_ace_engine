@@ -18,6 +18,7 @@
 
 #include "test/unittest/core/pattern/test_ng.h"
 
+#include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {

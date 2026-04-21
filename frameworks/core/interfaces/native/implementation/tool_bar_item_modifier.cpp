@@ -13,33 +13,54 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
+
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/toolbaritem/toolbaritem_model_static.h"
+#include "core/interfaces/native/utility/converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ToolBarItemModifier {
-Ark_NativePointer ConstructImpl(Ark_Int32 id,
-                                Ark_Int32 flags)
+Ark_NativePointer ConstructImpl(Ark_Int32 id, Ark_Int32 flags)
 {
-    return {};
+    auto frameNode = ToolBarItemModelStatic::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
-} // ToolBarItemModifier
+} // namespace ToolBarItemModifier
 namespace ToolBarItemInterfaceModifier {
-void SetToolBarItemOptionsImpl(Ark_NativePointer node,
-                               const Opt_ToolBarItemOptions* options)
+void SetToolBarItemOptionsImpl(Ark_NativePointer node, const Opt_ToolBarItemOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optOptions = Converter::GetOptPtr(options);
+    CHECK_NULL_VOID(optOptions);
+    auto placement = Converter::OptConvert<Ark_ToolBarItemPlacement>(optOptions->placement)
+                         .value_or(Ark_ToolBarItemPlacement::ARK_TOOL_BAR_ITEM_PLACEMENT_TOP_BAR_LEADING);
+    ToolBarItemModelStatic::SetPlacement(frameNode, static_cast<int32_t>(placement));
+}
+} // namespace ToolBarItemInterfaceModifier
+namespace ToolBarItemAttributeModifier {
+void SetDebugLineImpl(Ark_NativePointer node,
+                      const Ark_String* sourceLine,
+                      const Opt_String* moduleName)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(sourceLine);
+    //auto convValue = Converter::OptConvert<type>(sourceLine); // for enums
+    // ToolBarItemModelNG::SetSetDebugLine(frameNode, convValue);
 }
-} // ToolBarItemInterfaceModifier
+} // ToolBarItemAttributeModifier
 const GENERATED_ArkUIToolBarItemModifier* GetToolBarItemModifier()
 {
     static const GENERATED_ArkUIToolBarItemModifier ArkUIToolBarItemModifierImpl {
         ToolBarItemModifier::ConstructImpl,
         ToolBarItemInterfaceModifier::SetToolBarItemOptionsImpl,
+        ToolBarItemAttributeModifier::SetDebugLineImpl,
     };
     return &ArkUIToolBarItemModifierImpl;
 }
 
-}
+} // namespace OHOS::Ace::NG::GeneratedModifier

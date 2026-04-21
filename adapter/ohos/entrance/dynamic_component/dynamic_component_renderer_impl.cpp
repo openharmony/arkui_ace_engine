@@ -21,8 +21,10 @@
 #include "adapter/ohos/entrance/ui_content_impl.h"
 #include "bridge/card_frontend/form_frontend_declarative.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_pattern.h"
 #include "core/components_ng/pattern/ui_extension/isolated_component/isolated_pattern.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/components_ng/pattern/window_scene/screen/screen_pattern.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
@@ -763,7 +765,19 @@ void DynamicComponentRendererImpl::UpdateDynamicViewportConfig(const SizeF& size
             " subRSTransaction[%{public}d]", subRSUIContext != nullptr, subRSTransaction != nullptr);
         }
     }
- 
+    std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea> avoidAreaMap;
+    sptr<OHOS::Rosen::OccupiedAreaChangeInfo> occupiedAreaChangeInfo = nullptr;
+    auto pipeline = hostContainer->GetPipelineContext();
+    if (pipeline) {
+        auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+        if (ngPipeline) {
+            auto dynamicComponentSafeManager = ngPipeline->GetDynamicComponentSafeManager();
+            avoidAreaMap = dynamicComponentSafeManager->GetAvoidAreaIntersection(
+                dynamicComponentSafeManager->GetAvoidArea(), vpConfig);
+            occupiedAreaChangeInfo = dynamicComponentSafeManager->GetOccupiedAreaChangeInfo();
+        }
+    }
+
     bool optionIsValid = option && option->IsValid();
     TAG_LOGI(aceLogTag_, "Update DC[%{public}d] Size: %{public}s -> [%{public}d x %{public}d], "
         "reason:[%{public}d], hasSyncTransaction:[%{public}d], orientation:[%{public}d], "
@@ -776,7 +790,7 @@ void DynamicComponentRendererImpl::UpdateDynamicViewportConfig(const SizeF& size
         static_cast<int32_t>(reason), hostRSTransaction != nullptr, orientation,
         std::to_string(syncId).c_str(), optionIsValid);
     auto task = [weak = WeakClaim(this), vpConfig, option, aceLogTag = aceLogTag_,
-        offset, reason, hostRSTransaction, syncId]() {
+        offset, reason, hostRSTransaction, syncId, avoidAreaMap, occupiedAreaChangeInfo]() {
         auto renderer = weak.Upgrade();
         CHECK_NULL_VOID(renderer);
         auto uiContent = std::static_pointer_cast<UIContentImpl>(renderer->uiContent_);
@@ -790,6 +804,14 @@ void DynamicComponentRendererImpl::UpdateDynamicViewportConfig(const SizeF& size
             config.SetPosition(offset.GetX(), offset.GetY());
         }
         auto removeTransaction = [hostRSTransaction, reason, uiContent, aceLogTag, syncId]() {
+            if (reason != Rosen::SizeChangeReason::ROTATION &&
+                reason != Rosen::SizeChangeReason::SCENE_WITH_ANIMATION) {
+                return;
+            }
+
+            CHECK_NULL_VOID(uiContent);
+            uiContent->NotifyRotationAnimationEnd();
+
             if (hostRSTransaction && reason == Rosen::SizeChangeReason::ROTATION) {
                 auto subRSUIContext =
                     DynamicComponentRendererImpl::GetRSUIContextByInstanceId(uiContent->GetInstanceId());
@@ -823,7 +845,8 @@ void DynamicComponentRendererImpl::UpdateDynamicViewportConfig(const SizeF& size
             return;
         }
         uiContent->UpdateViewportConfigWithAnimation(
-            config, static_cast<Rosen::WindowSizeChangeReason>(reason), *option, hostRSTransaction);
+            config, static_cast<Rosen::WindowSizeChangeReason>(reason), *option, hostRSTransaction,
+            avoidAreaMap, occupiedAreaChangeInfo);
         removeTransaction();
     };
     bool contentReady = false;
@@ -911,7 +934,7 @@ int32_t DynamicComponentRendererImpl::GetSCBOrientation(const RefPtr<FrameNode>&
     CHECK_NULL_RETURN(screenSession, 0);
     return static_cast<int32_t>(screenSession->GetScreenProperty().GetDisplayOrientation());
 }
- 
+
 std::shared_ptr<Rosen::RSUIContext> DynamicComponentRendererImpl::GetRSUIContextByInstanceId(
     int32_t instanceId)
 {
@@ -923,7 +946,7 @@ std::shared_ptr<Rosen::RSUIContext> DynamicComponentRendererImpl::GetRSUIContext
     CHECK_NULL_RETURN(rsUIDirector, nullptr);
     return rsUIDirector->GetRSUIContext();
 }
- 
+
 std::shared_ptr<Rosen::RSTransaction> DynamicComponentRendererImpl::GetCommonRSTransactionByRSUIcontext(
     const std::shared_ptr<Rosen::RSUIContext>& rsUIContext)
 {
@@ -932,7 +955,7 @@ std::shared_ptr<Rosen::RSTransaction> DynamicComponentRendererImpl::GetCommonRST
     CHECK_NULL_RETURN(transactionController, nullptr);
     return transactionController->GetCommonRSTransaction();
 }
- 
+
 std::shared_ptr<Rosen::RSTransaction> DynamicComponentRendererImpl::GetSyncRSTransactionByInstanceId(int32_t instanceId)
 {
     auto rsUIContext = DynamicComponentRendererImpl::GetRSUIContextByInstanceId(instanceId);

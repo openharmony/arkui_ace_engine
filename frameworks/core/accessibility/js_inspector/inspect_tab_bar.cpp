@@ -14,6 +14,7 @@
  */
 
 #include "inspect_tab_bar.h"
+#include "base/utils/system_properties.h"
 
 namespace OHOS::Ace::Framework {
 InspectTabBar::InspectTabBar(NodeId nodeId, const std::string& nodeName) : InspectNode(nodeId, nodeName) {

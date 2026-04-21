@@ -18,7 +18,7 @@
 
 #include <vector>
 
-#include "generated/arkoala_api_generated.h"
+#include "arkoala_api_generated.h"
 #include "ui/base/macros.h"
 
 namespace OHOS::Ace {

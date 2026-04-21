@@ -1,3 +1,5 @@
+'use static'
+
 import UIAbility from '@ohos.app.ability.UIAbility';
 import AbilityConstant from '@ohos.app.ability.AbilityConstant';
 import Want from '@ohos.app.ability.Want';
@@ -21,7 +23,7 @@ class EntryAbility extends UIAbility {
         }
         hilog.info(0x0000, 'testTag', 'loadContent ok');
       });
-    } catch (e: Error) {
+    } catch (e) {
       hilog.info(0x0000, 'testTag', 'loadContent catch error：-----------' + e.message);
     }
   }

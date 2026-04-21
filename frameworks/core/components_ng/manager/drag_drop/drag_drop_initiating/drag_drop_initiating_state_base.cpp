@@ -19,7 +19,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_initiating/drag_drop_initiating_state_machine.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/gestures/drag_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -89,7 +89,8 @@ void DragDropInitiatingStateBase::FireCustomerOnDragEnd()
     gestureHub->FireCustomerOnDragEnd(pipelineContext, eventHub);
 }
 
-void DragDropInitiatingStateBase::HidePixelMap(bool startDrag, double x, double y, bool showAnimation)
+void DragDropInitiatingStateBase::HidePixelMap(bool startDrag, double x, double y, bool showAnimation,
+    int32_t currentState)
 {
     auto machine = GetStateMachine();
     CHECK_NULL_VOID(machine);
@@ -102,7 +103,9 @@ void DragDropInitiatingStateBase::HidePixelMap(bool startDrag, double x, double 
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);
-    if (params.hasGatherNode) {
+    // When coming from MOVING state, HideGatherNode() has already been called in Init(),
+    // so skip HideDragNodeCopyWithAnimation to avoid duplicate call
+    if (currentState != static_cast<int32_t>(DragDropInitiatingStatus::MOVING) && params.hasGatherNode) {
         DragAnimationHelper::HideDragNodeCopyWithAnimation(manager, frameNode);
     }
 

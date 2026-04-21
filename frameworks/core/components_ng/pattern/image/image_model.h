@@ -24,6 +24,8 @@
 #include "base/geometry/dimension.h"
 #include "base/image/drawing_color_filter.h"
 #include "base/image/drawing_lattice.h"
+#include "base/image/image_defines.h"
+#include "base/image/image_resizable_slice.h"
 #include "base/image/pixel_map.h"
 #include "base/memory/referenced.h"
 #include "core/common/resource/resource_object.h"
@@ -35,7 +37,10 @@
 #include "core/components/image/image_event.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/drawable/drawable_descriptor.h"
-#include "core/image/image_source_info.h"
+
+namespace OHOS::Ace {
+class ImageSourceInfo;
+}
 
 namespace OHOS::Ace {
 enum class ImageResourceType { SRC, ALT, FILL_COLOR, BORDER_RADIUS };

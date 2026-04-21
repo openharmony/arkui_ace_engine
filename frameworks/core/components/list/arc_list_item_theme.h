@@ -46,7 +46,7 @@ public:
             return theme;
         }
 
-    private:
+    protected:
         void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<ArcListItemTheme>& theme) const
         {
             static const Dimension arcListItemGroupInterval = 4.0_vp;
@@ -133,16 +133,17 @@ public:
 protected:
     ArcListItemTheme() = default;
 
-private:
     Color itemDefaultColor_;
+    Color focusBorderColor_;
+    Color hoverColor_;
+    Color pressColor_;
+
+private:
     Dimension defaultHeight_ = 48.0_vp;
     NG::BorderRadiusProperty itemBorderRadius_;
     Dimension itemLeftPadding_;
     Dimension itemRightPadding_;
-    Color focusBorderColor_;
     Dimension focusBorderWidth_ = 2.0_vp;
-    Color hoverColor_;
-    Color pressColor_;
     double disabledAlpha_ = 0.4;
     Dimension borderRadiusValue_;
     int32_t hoverAnimationDuration_ = 0;

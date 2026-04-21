@@ -186,7 +186,6 @@ const GENERATED_ArkUINavPathInfoAccessor* GetNavPathInfoAccessor()
         NavPathInfoAccessor::GetIsEntryImpl,
         NavPathInfoAccessor::SetIsEntryImpl,
         NavPathInfoAccessor::GetNavDestinationIdImpl,
-        NavPathInfoAccessor::SetNavDestinationIdImpl,
     };
     return &NavPathInfoAccessorImpl;
 }

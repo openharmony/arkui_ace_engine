@@ -15,7 +15,7 @@
 
 #include "gtest/gtest.h"
 #include "core/components_ng/manager/frame_rate/frame_rate_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "ui/animation/frame_rate_range.h"
 
 using namespace testing;

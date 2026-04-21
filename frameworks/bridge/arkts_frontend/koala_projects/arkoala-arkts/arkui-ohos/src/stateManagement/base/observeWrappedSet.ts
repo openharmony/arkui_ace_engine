@@ -20,7 +20,7 @@ import { ObserveSingleton } from './observeSingleton';
 import { ObserveWrappedKeyedMeta } from './observeWrappedBase';
 
 final class CONSTANT {
-    public static readonly OB_SET_ANY_PROPERTY = '__OB_ANY_INDEX';
+    public static readonly OB_SET_ANY_PROPERTY = '__OB_ANY_PROPERTY';
     public static readonly OB_LENGTH = '__OB_LENGTH';
 }
 
@@ -40,15 +40,25 @@ export class WrappedSet<K> extends Set<K> implements IObservedObject, ObserveWra
     private ____V1RenderId: RenderIdType = 0;
     @JSONStringifyIgnore
     private allowDeep_: boolean;
+    private isAPI_ : boolean;
+    @JSONStringifyIgnore
+    public isStaticSetProxy_: boolean = true;
     /**
      * Constructs a Set from another Set
      * @param set another Set
      */
-    constructor(set: Set<K>, allowDeep: boolean) {
+    constructor(set: Set<K>, allowDeep: boolean, isAPI: boolean = false) {
         super();
         this.store_ = set;
         this.allowDeep_ = allowDeep;
-        this.meta_ = FactoryInternal.mkMutableKeyedStateMeta('WrappedSet');
+        this.isAPI_ = isAPI;
+        this.meta_ = FactoryInternal.mkMutableKeyedStateMeta(
+            (
+                this.allowDeep_ ? 
+                    this.isAPI_ ? '__metaBuiltInMakeObserved_'
+                        : '__metaBuiltInV2_'
+                    : '__metaBuiltInV1_'
+            ) +'WrappedSet', this);
     }
 
     // implementation of ISubscribedWatches by forwarding to subscribedWatches

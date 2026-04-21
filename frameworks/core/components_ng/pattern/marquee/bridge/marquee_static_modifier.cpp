@@ -177,7 +177,7 @@ void SetMarqueeUpdateStrategyImpl(Ark_NativePointer node,
     MarqueeModelNG::SetMarqueeUpdateStrategy(frameNode, convValue);
 }
 void SetOnStartImpl(Ark_NativePointer node,
-                    const Opt_Callback_Void* value)
+                    const Opt_synthetic_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -192,7 +192,7 @@ void SetOnStartImpl(Ark_NativePointer node,
     MarqueeModelNG::SetOnStart(frameNode, std::move(onStart));
 }
 void SetOnBounceImpl(Ark_NativePointer node,
-                     const Opt_Callback_Void* value)
+                     const Opt_synthetic_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -207,7 +207,7 @@ void SetOnBounceImpl(Ark_NativePointer node,
     MarqueeModelNG::SetOnBounce(frameNode, onBounce);
 }
 void SetOnFinishImpl(Ark_NativePointer node,
-                     const Opt_Callback_Void* value)
+                     const Opt_synthetic_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -220,6 +220,21 @@ void SetOnFinishImpl(Ark_NativePointer node,
         arkCallback.InvokeSync();
     };
     MarqueeModelNG::SetOnFinish(frameNode, onFinish);
+}
+void SetOnStopImpl(Ark_NativePointer node,
+                   const Opt_VoidCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        MarqueeModelNG::ResetOnStop(frameNode);
+        return;
+    }
+    auto onStop = [arkCallback = CallbackHelper(*optValue)]() -> void {
+        arkCallback.InvokeSync();
+    };
+    MarqueeModelNG::SetOnStop(frameNode, onStop);
 }
 } // MarqueeAttributeModifier
 const GENERATED_ArkUIMarqueeModifier* GetMarqueeStaticModifier()
@@ -236,6 +251,7 @@ const GENERATED_ArkUIMarqueeModifier* GetMarqueeStaticModifier()
         MarqueeAttributeModifier::SetOnStartImpl,
         MarqueeAttributeModifier::SetOnBounceImpl,
         MarqueeAttributeModifier::SetOnFinishImpl,
+        MarqueeAttributeModifier::SetOnStopImpl,
     };
     return &ArkUIMarqueeModifierImpl;
 }

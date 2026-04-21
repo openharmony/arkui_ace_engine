@@ -18,8 +18,8 @@
 #include "base/utils/utils.h"
 #define protected public
 #define private public
-#include "test/mock/core/render/mock_canvas_image.h"
-#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_canvas_image.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
 
 #include "base/geometry/ng/point_t.h"
 #include "core/components/common/properties/paint_state.h"

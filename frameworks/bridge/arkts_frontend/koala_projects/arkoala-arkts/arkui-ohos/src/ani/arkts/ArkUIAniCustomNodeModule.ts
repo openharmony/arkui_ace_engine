@@ -27,6 +27,12 @@ export class ArkUIAniCustomNodeModule {
     native static _CustomNode_SetBuildFunction(ptr: KPointer, buildFunc: () => KPointer): void
 
     native static _CustomNode_AddChild(parent: KPointer, child: KPointer): void
+
+    native static _CustomNode_CallDefaultMeasure(ptr: KPointer): SizeResult
+
+    native static _CustomNode_CallDefaultLayout(ptr: KPointer): void
+
+    native static _CustomNode_EnvFunction(ptr: KPointer, envFunc: (instanceId: int32) => void): void
 }
 
 export class MeasurableLayoutableInner implements Measurable, Layoutable {
@@ -48,13 +54,13 @@ export class MeasurableLayoutableInner implements Measurable, Layoutable {
     public override layout(position: Position | undefined ) {
         this.layoutInner(position)
     }
-    public override getMargin(): DirectionalEdgesT<number> | undefined {
+    public override getMargin(): DirectionalEdgesT<double> | undefined {
         return this.getMarginInner()
     }
-    public override getPadding(): DirectionalEdgesT<number> | undefined {
+    public override getPadding(): DirectionalEdgesT<double> | undefined {
         return this.getPaddingInner()
     }
-    public override getBorderWidth(): DirectionalEdgesT<number> | undefined {
+    public override getBorderWidth(): DirectionalEdgesT<double> | undefined {
         return this.getBorderWidthInner()
     }
     

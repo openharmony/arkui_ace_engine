@@ -31,13 +31,22 @@ bool HoverEventTarget::HandleHoverEvent(bool isHovered, const MouseEvent& event)
     }
     lastHoverState_ = isHovered;
     HoverInfo hoverInfo;
+    bool needPostEvent = isPostEventResult_ || event.passThrough;
+    NG::PointF localPoint(event.x, event.y);
+    NG::NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, needPostEvent, event.postEventNodeId);
+    auto localOffset = Offset(localPoint.GetX(), localPoint.GetY());
+    auto frameNodeWeak = GetAttachedNode();
+    auto globalOffset = event.GetOffset();
+    hoverInfo.SetCurrentLocalLocationGetter([frameNodeWeak, needPostEvent, postEventNodeId = event.postEventNodeId,
+                                                globalOffset, localOffset]() {
+        CHECK_NULL_RETURN(frameNodeWeak.Upgrade(), localOffset);
+        NG::PointF currentLocalPoint(globalOffset.GetX(), globalOffset.GetY());
+        NG::NGGestureRecognizer::Transform(currentLocalPoint, frameNodeWeak, true, needPostEvent, postEventNodeId);
+        return Offset(currentLocalPoint.GetX(), currentLocalPoint.GetY());
+    });
     auto node = GetAttachedNode().Upgrade();
     if (node) {
-        NG::PointF localPoint(event.x, event.y);
-        NG::NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_);
-        auto localX = static_cast<float>(localPoint.GetX());
-        auto localY = static_cast<float>(localPoint.GetY());
-        hoverInfo.SetLocalLocation(Offset(localX, localY));
+        hoverInfo.SetLocalLocation(localOffset);
         if (SystemProperties::GetDebugEnabled()) {
             TAG_LOGI(AceLogTag::ACE_MOUSE,
                 "HandleHoverEvent_node(%{public}s/%{public}d/%{public}s/%{public}s) isHovered:%{public}d",
@@ -71,6 +80,20 @@ bool HoverEventTarget::HandlePenHoverEvent(bool isHovered, const TouchEvent& eve
         return false;
     }
     HoverInfo hoverInfo;
+    bool needPostEvent = isPostEventResult_ || event.passThrough;
+    NG::PointF lastLocalPoint(event.x, event.y);
+    NG::NGGestureRecognizer::Transform(lastLocalPoint, GetAttachedNode(), false,
+        needPostEvent, event.postEventNodeId);
+    auto localOffset = Offset(lastLocalPoint.GetX(), lastLocalPoint.GetY());
+    auto frameNodeWeak = GetAttachedNode();
+    auto globalOffset = event.GetOffset();
+    hoverInfo.SetCurrentLocalLocationGetter([frameNodeWeak, needPostEvent, postEventNodeId = event.postEventNodeId,
+                                                globalOffset, localOffset]() {
+        CHECK_NULL_RETURN(frameNodeWeak.Upgrade(), localOffset);
+        NG::PointF currentLocalPoint(globalOffset.GetX(), globalOffset.GetY());
+        NG::NGGestureRecognizer::Transform(currentLocalPoint, frameNodeWeak, true, needPostEvent, postEventNodeId);
+        return Offset(currentLocalPoint.GetX(), currentLocalPoint.GetY());
+    });
     hoverInfo.SetTimeStamp(event.time);
     hoverInfo.SetDeviceId(event.deviceId);
     hoverInfo.SetSourceDevice(event.sourceType);
@@ -84,12 +107,7 @@ bool HoverEventTarget::HandlePenHoverEvent(bool isHovered, const TouchEvent& eve
     if (event.rollAngle.has_value()) {
         hoverInfo.SetRollAngle(event.rollAngle.value_or(0.0f));
     }
-    NG::PointF lastLocalPoint(event.x, event.y);
-    NG::NGGestureRecognizer::Transform(lastLocalPoint, GetAttachedNode(), false,
-        isPostEventResult_, event.postEventNodeId);
-    auto localX = static_cast<float>(lastLocalPoint.GetX());
-    auto localY = static_cast<float>(lastLocalPoint.GetY());
-    hoverInfo.SetLocalLocation(Offset(localX, localY));
+    hoverInfo.SetLocalLocation(localOffset);
     hoverInfo.SetGlobalLocation(Offset(event.x, event.y));
     hoverInfo.SetScreenLocation(Offset(event.screenX, event.screenY));
     hoverInfo.SetGlobalDisplayLocation(Offset(event.globalDisplayX, event.globalDisplayY));
@@ -107,6 +125,20 @@ bool HoverEventTarget::HandlePenHoverMoveEvent(const TouchEvent& event)
         return false;
     }
     HoverInfo hoverInfo;
+    bool needPostEvent = isPostEventResult_ || event.passThrough;
+    NG::PointF lastLocalPoint(event.x, event.y);
+    NG::NGGestureRecognizer::Transform(lastLocalPoint, GetAttachedNode(), false,
+        needPostEvent, event.postEventNodeId);
+    auto localOffset = Offset(lastLocalPoint.GetX(), lastLocalPoint.GetY());
+    auto frameNodeWeak = GetAttachedNode();
+    auto globalOffset = event.GetOffset();
+    hoverInfo.SetCurrentLocalLocationGetter([frameNodeWeak, needPostEvent, postEventNodeId = event.postEventNodeId,
+                                                globalOffset, localOffset]() {
+        CHECK_NULL_RETURN(frameNodeWeak.Upgrade(), localOffset);
+        NG::PointF currentLocalPoint(globalOffset.GetX(), globalOffset.GetY());
+        NG::NGGestureRecognizer::Transform(currentLocalPoint, frameNodeWeak, true, needPostEvent, postEventNodeId);
+        return Offset(currentLocalPoint.GetX(), currentLocalPoint.GetY());
+    });
     hoverInfo.SetTimeStamp(event.time);
     hoverInfo.SetDeviceId(event.deviceId);
     hoverInfo.SetSourceDevice(event.sourceType);
@@ -120,12 +152,7 @@ bool HoverEventTarget::HandlePenHoverMoveEvent(const TouchEvent& event)
     if (event.rollAngle.has_value()) {
         hoverInfo.SetRollAngle(event.rollAngle.value_or(0.0f));
     }
-    NG::PointF lastLocalPoint(event.x, event.y);
-    NG::NGGestureRecognizer::Transform(lastLocalPoint, GetAttachedNode(), false,
-        isPostEventResult_, event.postEventNodeId);
-    auto localX = static_cast<float>(lastLocalPoint.GetX());
-    auto localY = static_cast<float>(lastLocalPoint.GetY());
-    hoverInfo.SetLocalLocation(Offset(localX, localY));
+    hoverInfo.SetLocalLocation(localOffset);
     hoverInfo.SetGlobalLocation(Offset(event.x, event.y));
     hoverInfo.SetScreenLocation(Offset(event.screenX, event.screenY));
     hoverInfo.SetGlobalDisplayLocation(Offset(event.globalDisplayX, event.globalDisplayY));
@@ -208,11 +235,19 @@ bool MouseEventTarget::HandleMouseEvent(const MouseEvent& event)
     info.SetGlobalLocation(event.GetOffset());
     NG::PointF localPoint(event.x, event.y);
     bool needPostEvent = isPostEventResult_ || event.passThrough;
+    auto frameNodeWeak = GetAttachedNode();
+    auto globalOffset = event.GetOffset();
     NG::NGGestureRecognizer::Transform(
         localPoint, GetAttachedNode(), false, needPostEvent, event.postEventNodeId);
-    auto localX = static_cast<float>(localPoint.GetX());
-    auto localY = static_cast<float>(localPoint.GetY());
-    info.SetLocalLocation(Offset(localX, localY));
+    auto localOffset = Offset(localPoint.GetX(), localPoint.GetY());
+    info.SetCurrentLocalLocationGetter([frameNodeWeak, needPostEvent, postEventNodeId = event.postEventNodeId,
+                                           globalOffset, localOffset]() {
+        CHECK_NULL_RETURN(frameNodeWeak.Upgrade(), localOffset);
+        NG::PointF currentLocalPoint(globalOffset.GetX(), globalOffset.GetY());
+        NG::NGGestureRecognizer::Transform(currentLocalPoint, frameNodeWeak, true, needPostEvent, postEventNodeId);
+        return Offset(currentLocalPoint.GetX(), currentLocalPoint.GetY());
+    });
+    info.SetLocalLocation(localOffset);
     info.SetScreenLocation(event.GetScreenOffset());
     info.SetGlobalDisplayLocation(event.GetGlobalDisplayOffset());
     info.SetTimeStamp(event.time);
@@ -226,10 +261,26 @@ bool MouseEventTarget::HandleMouseEvent(const MouseEvent& event)
     info.SetRawDeltaY(event.rawDeltaY);
     info.SetPressedButtons(event.pressedButtonsArray);
     info.SetIsRightButtonEventFromDoulbeTap(event.isRightButtonEventFromDoulbeTap);
+    info.SetEventHandleId(event.eventHandleId);
+    for (const auto& historyEvent : event.history) {
+        info.AddHistoryLocationInfo(CreateMouseHistoricalPoint(historyEvent, needPostEvent));
+    }
     // onMouseCallback_ may be overwritten in its invoke so we copy it first
     auto onMouseCallback = onMouseCallback_;
     onMouseCallback(info);
     return info.IsStopPropagation();
+}
+MouseHistoricalPoint MouseEventTarget::CreateMouseHistoricalPoint(const MouseEvent& event, bool needPostEvent) const
+{
+    NG::PointF localPoint(event.x, event.y);
+    NG::NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, needPostEvent, event.postEventNodeId);
+    return MouseHistoricalPoint {
+        .localLocation = Offset(static_cast<float>(localPoint.GetX()), static_cast<float>(localPoint.GetY())),
+        .screenLocation = event.GetScreenOffset(),
+        .globalLocation = event.GetOffset(),
+        .globalDisplayLocation = event.GetGlobalDisplayOffset(),
+        .time = event.time,
+    };
 }
 std::shared_ptr<MMI::PointerEvent> MouseEvent::GetMouseEventPointerEvent() const
 {
@@ -307,5 +358,128 @@ MouseEvent MouseInfo::ConvertToMouseEvent() const
     mouseEvent.pressedKeyCodes_ = GetPressedKeyCodes();
     mouseEvent.pressedButtonsArray = pressedButtonsArray_;
     return mouseEvent;
+}
+
+void HoverEffectTarget::SetHoverNode(const WeakPtr<NG::FrameNode>& node)
+{
+    hoverNode_ = node;
+}
+
+WeakPtr<NG::FrameNode> HoverEffectTarget::GetHoverNode() const
+{
+    return hoverNode_;
+}
+
+MouseEvent MouseEvent::CloneWith(float scale) const
+{
+    if (NearEqual(scale, 0.f)) {
+        return {};
+    }
+    MouseEvent mouseEvent;
+    mouseEvent.id = id;
+    mouseEvent.x = x / scale;
+    mouseEvent.y = y / scale;
+    mouseEvent.z = z / scale;
+    mouseEvent.deltaX = deltaX / scale;
+    mouseEvent.deltaY = deltaY /  scale;
+    mouseEvent.deltaZ = deltaZ / scale;
+    mouseEvent.scrollX = scrollX /  scale;
+    mouseEvent.scrollY = scrollY /  scale;
+    mouseEvent.scrollZ = scrollZ / scale;
+    mouseEvent.screenX = screenX / scale;
+    mouseEvent.screenY = screenY / scale;
+    mouseEvent.globalDisplayX = globalDisplayX / scale;
+    mouseEvent.globalDisplayY = globalDisplayY / scale;
+    mouseEvent.action = action;
+    mouseEvent.pullAction = pullAction;
+    mouseEvent.button = button;
+    mouseEvent.pressedButtons = pressedButtons;
+    mouseEvent.time = time;
+    mouseEvent.deviceId = deviceId;
+    mouseEvent.targetDisplayId = targetDisplayId;
+    mouseEvent.sourceType = sourceType;
+    mouseEvent.sourceTool = sourceTool;
+    mouseEvent.pointerEvent = pointerEvent;
+    mouseEvent.originalId = originalId;
+    mouseEvent.pressedKeyCodes_ = pressedKeyCodes_;
+    mouseEvent.isInjected = isInjected;
+    mouseEvent.isPrivacyMode = isPrivacyMode;
+    mouseEvent.mockFlushEvent = mockFlushEvent;
+    mouseEvent.rawDeltaX = rawDeltaX;
+    mouseEvent.rawDeltaY = rawDeltaY;
+    mouseEvent.pressedButtonsArray = pressedButtonsArray;
+    mouseEvent.passThrough = passThrough;
+    mouseEvent.pressedTime = pressedTime;
+    mouseEvent.convertInfo = convertInfo;
+    mouseEvent.isRightButtonEventFromDoulbeTap = isRightButtonEventFromDoulbeTap;
+    // Only set postEventNodeId when the event supports passThrough
+    if (passThrough) {
+        mouseEvent.postEventNodeId = postEventNodeId;
+    }
+    return mouseEvent;
+}
+
+MouseEvent MouseEvent::CreateScaleEvent(float scale) const
+{
+    if (NearZero(scale)) {
+        return CloneWith(1);
+    }
+    return CloneWith(scale);
+}
+
+TouchEvent MouseEvent::CreateTouchPoint() const
+{
+    TouchType type = TouchType::UNKNOWN;
+    if (action == MouseAction::PRESS) {
+        type = TouchType::DOWN;
+    } else if (action == MouseAction::RELEASE) {
+        type = TouchType::UP;
+    } else if (action == MouseAction::MOVE) {
+        type = TouchType::MOVE;
+    } else if (action == MouseAction::CANCEL) {
+        type = TouchType::CANCEL;
+    } else {
+        type = TouchType::UNKNOWN;
+    }
+    int32_t pointId = id;
+    if (sourceType == SourceType::MOUSE) {
+        pointId = GetPointerId(pointId);
+    }
+    auto pointOriginalId = sourceType == SourceType::MOUSE ? GetId() : originalId;
+    TouchPoint point { .id = pointId,
+        .x = x,
+        .y = y,
+        .screenX = screenX,
+        .screenY = screenY,
+        .globalDisplayX = globalDisplayX,
+        .globalDisplayY = globalDisplayY,
+        .downTime = pressedTime,
+        .size = 0.0,
+        .isPressed = (type == TouchType::DOWN),
+        .originalId = pointOriginalId };
+    TouchEvent event;
+    event.SetId(pointId)
+        .SetX(x).SetY(y).SetScreenX(screenX).SetScreenY(screenY)
+        .SetGlobalDisplayX(globalDisplayX).SetGlobalDisplayY(globalDisplayY)
+        .SetType(type)
+        .SetTime(time)
+        .SetPressedTime(pressedTime)
+        .SetSize(0.0)
+        .SetDeviceId(deviceId)
+        .SetTargetDisplayId(targetDisplayId)
+        .SetSourceType(sourceType)
+        .SetSourceTool(sourceTool)
+        .SetPointerEvent(pointerEvent)
+        .SetTouchEventId(touchEventId)
+        .SetOriginalId(pointOriginalId)
+        .SetIsInjected(isInjected);
+    event.isPrivacyMode = isPrivacyMode;
+    event.pointers.emplace_back(std::move(point));
+    event.pressedKeyCodes_ = pressedKeyCodes_;
+    event.passThrough = passThrough;
+    if (passThrough) {
+        event.postEventNodeId = postEventNodeId;
+    }
+    return event;
 }
 } // namespace OHOS::Ace

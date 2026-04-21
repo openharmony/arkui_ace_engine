@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/select_overlay/select_overlay_layout_algorithm.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include <cmath>
 #include <optional>
@@ -24,6 +25,7 @@
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -680,7 +682,7 @@ OffsetF SelectOverlayLayoutAlgorithm::NewMenuAvoidStrategy(
     float positionX = (selectArea.Left() + selectArea.Right() - menuWidth) / 2.0f;
     auto hasKeyboard = GreatNotEqual(keyboardInsert.Length(), 0.0f);
     auto downHandle = info_->handleReverse ? info_->firstHandle : info_->secondHandle;
-    auto downHandlePaint = downHandle.paintRect + windowOffset;
+    auto downHandlePaint = downHandle.GetPaintRect() + windowOffset;
     auto downHandleIsReallyShow = hasKeyboard ? ((LessOrEqual((double)downHandlePaint.Bottom(),
         (double)keyboardInsert.start)) ? true : false) : downHandle.isShow;
     auto upHandle = info_->handleReverse ? info_->secondHandle : info_->firstHandle;

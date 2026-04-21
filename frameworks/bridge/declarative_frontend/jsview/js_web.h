@@ -25,6 +25,12 @@
 #include "core/event/mouse_event.h"
 
 namespace OHOS::Ace::Framework {
+
+constexpr napi_type_tag WEB_PIXEL_MAP_TYPE_TAG = {
+    .lower = 0xA7E5D9F3C8B6A4E2,
+    .upper = 0x8E6B4C9D7A3F2E5D,
+};
+
 using JSwebEventCallback = std::function<void()>;
 class JSWeb : public JSContainerBase {
 public:
@@ -50,6 +56,7 @@ public:
     static void OnErrorReceive(const JSCallbackInfo& args);
     static void OnHttpErrorReceive(const JSCallbackInfo& args);
     static void OnFileSelectorShow(const JSCallbackInfo& args);
+    static void AISessionOptions(const JSCallbackInfo& args);
     static void OnInterceptRequest(const JSCallbackInfo& args);
     static void OnOverrideErrorPage(const JSCallbackInfo& args);
     static void OnUrlLoadIntercept(const JSCallbackInfo& args);
@@ -168,6 +175,8 @@ public:
     static void JSBackToTop(const JSCallbackInfo& info);
     static void OnCameraCaptureStateChanged(const JSCallbackInfo& args);
     static void OnMicrophoneCaptureStateChanged(const JSCallbackInfo& args);
+    static void EnableDrag(const JSCallbackInfo& args);
+    static void OnInputMethodAttached(const JSCallbackInfo& args);
     static JSRef<JSVal> CreateJSWindowNewHandler(const WebWindowNewEvent& eventInfo);
     static bool HandleWindowNewEvent(const WebWindowNewEvent* eventInfo);
     static JSRef<JSVal> CreateJSWindowNewExtHandler(const WebWindowNewExtEvent& eventInfo);
@@ -215,6 +224,7 @@ public:
     static void OnAdsBlocked(const JSCallbackInfo& args);
     static void ForceDisplayScrollBar(const JSCallbackInfo& args);
     static void KeyboardAvoidMode(int32_t mode);
+    static void KeyboardAppearance(int32_t mode);
     static void EditMenuOptions(const JSCallbackInfo& info);
     static void EnableHapticFeedback(const JSCallbackInfo& args);
     static void EnableWebAVSession(const JSCallbackInfo& args);
@@ -236,6 +246,9 @@ public:
     static void OnSafeBrowsingCheckFinish(const JSCallbackInfo& args);
     static void OnVerifyPinRequest(const JSCallbackInfo& args);
     static void EnableAutoFill(const JSCallbackInfo& args);
+    static void EnableDefaultContextMenu(const JSCallbackInfo& args);
+    static void EnableScrollDirectionalLock(const JSCallbackInfo& args);
+    static void ScrollbarLayoutPolicy(const JSCallbackInfo& args);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);

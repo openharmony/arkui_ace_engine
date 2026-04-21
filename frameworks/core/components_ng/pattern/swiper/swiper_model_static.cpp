@@ -27,9 +27,7 @@ namespace OHOS::Ace::NG {
 void SwiperModelStatic::ParseAndSetArrowStyle(FrameNode* frameNode, const SwiperArrowParameters& swiperArrowParameters)
 {
     CHECK_NULL_VOID(frameNode);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    auto swiperIndicatorTheme = frameNode->GetTheme<SwiperIndicatorTheme>(true);
     CHECK_NULL_VOID(swiperIndicatorTheme);
     SwiperArrowParameters arrowParameters;
     arrowParameters.isShowBackground =
@@ -86,9 +84,7 @@ void SwiperModelStatic::ParseAndSetArrowStyle(FrameNode* frameNode, const Swiper
 void SwiperModelStatic::SetDefaultArrowStyle(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    auto swiperIndicatorTheme = frameNode->GetTheme<SwiperIndicatorTheme>(true);
     CHECK_NULL_VOID(swiperIndicatorTheme);
     SwiperArrowParameters swiperArrowParameters;
     swiperArrowParameters.isShowBackground = swiperIndicatorTheme->GetIsShowArrowBackground();
@@ -147,6 +143,9 @@ RefPtr<FrameNode> SwiperModelStatic::CreateFrameNode(int32_t nodeId)
     swiperNode = AceType::MakeRefPtr<SwiperNode>(V2::SWIPER_ETS_TAG, nodeId, AceType::MakeRefPtr<SwiperPattern>());
     swiperNode->InitializePatternAndContext();
     ElementRegister::GetInstance()->AddUINode(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(pattern, swiperNode);
+    pattern->SetIsPureSwiper(true);
     return swiperNode;
 }
 
@@ -274,6 +273,14 @@ void SwiperModelStatic::SetCachedCount(FrameNode* frameNode, int32_t cachedCount
 void SwiperModelStatic::SetCachedIsShown(FrameNode* frameNode, bool isShown)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, CachedIsShown, isShown, frameNode);
+}
+
+void SwiperModelStatic::SetCachedIndependent(FrameNode* frameNode, bool independent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCachedCountIndependent(independent);
 }
 
 void SwiperModelStatic::SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect)
@@ -477,6 +484,33 @@ void SwiperModelStatic::SetNextMargin(FrameNode* frameNode, const Dimension& nex
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetNextMarginIgnoreBlank(*ignoreBlank);
+}
+
+void SwiperModelStatic::SetMaintainVisibleContentPosition(FrameNode* frameNode, bool value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, MaintainVisibleContentPosition, value, frameNode);
+}
+
+void SwiperModelStatic::SetOnScrollStateChanged(
+    FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onScrollStateChanged)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateOnScrollStateChangedEvent([event = std::move(onScrollStateChanged)](int32_t index) {
+        CHECK_NULL_VOID(event);
+        SwiperChangeEvent eventInfo(index);
+        event(&eventInfo);
+    });
+}
+
+void SwiperModelStatic::SetFillType(FrameNode* frameNode, int32_t options)
+{
+    if (!InRegion(static_cast<int32_t>(PresetFillType::BREAKPOINT_DEFAULT),
+            static_cast<int32_t>(PresetFillType::BREAKPOINT_SM2MD3LG5), options)) {
+        options = 0;
+    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, FillType, options, frameNode);
 }
 
 void SwiperModelStatic::SetOnChangeEvent(FrameNode* frameNode,

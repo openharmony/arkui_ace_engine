@@ -22,7 +22,6 @@
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
@@ -141,7 +140,7 @@ RefPtr<FrameNode> CreateToolbarItemIconNode(const BarItem& barItem)
         return iconNode;
     }
     int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    ImageSourceInfo info(barItem.icon.value());
+    ImageSourceInfo info(barItem.icon.value(), barItem.bundleName, barItem.moduleName);
     auto iconNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, nodeId, AceType::MakeRefPtr<ImagePattern>());
     auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
@@ -198,7 +197,7 @@ void UpdateBarItemPattern(const RefPtr<BarItemNode>& barItemNode, const BarItem&
         if (barItem.activeIconSymbol.has_value() && barItem.activeIconSymbol.value() != nullptr) {
             barItemPattern->SetActiveIconSymbol(barItem.activeIconSymbol.value());
         } else if (barItem.activeIcon.has_value()) {
-            ImageSourceInfo activeIconInfo(barItem.activeIcon.value());
+            ImageSourceInfo activeIconInfo(barItem.activeIcon.value(), barItem.bundleName, barItem.moduleName);
             activeIconInfo.SetFillColor(theme->GetToolbarActiveIconColor());
             barItemPattern->SetActiveIconImageSourceInfo(activeIconInfo);
         }
@@ -347,6 +346,7 @@ RefPtr<FrameNode> CreateToolbarItemInContainer(
     auto renderContext = toolBarItemNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    toolBarItemLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     MarginProperty margin;
     AddSafeIntervalBetweenToolbarItem(margin, count, toolbarItemSize, param.needMoreButton);
     toolBarItemLayoutProperty->UpdateMargin(margin);
@@ -419,6 +419,7 @@ RefPtr<FrameNode> CreateToolbarMoreMenuNode(const RefPtr<BarItemNode>& barItemNo
     auto renderContext = toolBarItemNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    menuItemLayoutProperty->UpdateBackgroundColorFlagByUser(true);
 
     MarginProperty menuButtonMargin;
     menuButtonMargin.left = CalcLength(theme->GetToolbarItemMargin());

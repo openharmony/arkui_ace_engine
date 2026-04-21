@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class TabsModifier extends ArkTabsComponent implements AttributeModifier<TabsAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {

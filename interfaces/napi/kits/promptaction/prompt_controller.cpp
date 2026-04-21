@@ -26,6 +26,7 @@ void PromptDialogController::Close()
     }
     auto dialogNode = node_.Upgrade();
     CHECK_NULL_VOID(dialogNode);
+    ACE_UINODE_TRACE(dialogNode);
     auto pipeline = dialogNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
@@ -44,6 +45,7 @@ PromptActionCommonState PromptDialogController::GetState()
     }
     auto dialogNode = node_.Upgrade();
     CHECK_NULL_RETURN(dialogNode, state);
+    ACE_UINODE_TRACE(dialogNode);
     auto pattern = dialogNode->GetPattern<NG::DialogPattern>();
     CHECK_NULL_RETURN(pattern, state);
     state = pattern->GetState();

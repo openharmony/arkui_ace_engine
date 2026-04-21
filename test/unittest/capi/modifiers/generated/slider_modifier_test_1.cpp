@@ -26,28 +26,30 @@ using namespace TestConst::Slider;
 HWTEST_F(SliderModifierTest, DISABLED_setSliderOptionsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_VALUE_DEFAULT_VALUE) << "Default value for attribute 'options.value'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_VALUE_DEFAULT_VALUE)) << "Default value for attribute 'options.value'";
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MIN_DEFAULT_VALUE) << "Default value for attribute 'options.min'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_MIN_DEFAULT_VALUE)) << "Default value for attribute 'options.min'";
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MAX_DEFAULT_VALUE) << "Default value for attribute 'options.max'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_MAX_DEFAULT_VALUE)) << "Default value for attribute 'options.max'";
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STEP_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_STEP_DEFAULT_VALUE) << "Default value for attribute 'options.step'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_STEP_DEFAULT_VALUE)) << "Default value for attribute 'options.step'";
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STYLE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_DEFAULT_VALUE) << "Default value for attribute 'options.style'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_STYLE_DEFAULT_VALUE)) << "Default value for attribute 'options.style'";
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIRECTION_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DIRECTION_DEFAULT_VALUE) << "Default value for attribute 'options.direction'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_DIRECTION_DEFAULT_VALUE)) <<
+        "Default value for attribute 'options.direction'";
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_REVERSE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_REVERSE_DEFAULT_VALUE) << "Default value for attribute 'options.reverse'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_REVERSE_DEFAULT_VALUE)) <<
+        "Default value for attribute 'options.reverse'";
 }
 
 /*
@@ -84,7 +86,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setSliderOptionsTestOptionsValueValidValue
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setSliderOptions, attribute: options.value";
     };
 
@@ -126,7 +128,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setSliderOptionsTestOptionsValueInvalidVal
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_VALUE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_VALUE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setSliderOptions, attribute: options.value";
     };
 
@@ -168,7 +170,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setSliderOptionsTestOptionsMinValidValues,
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setSliderOptions, attribute: options.min";
     };
 
@@ -210,7 +212,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setSliderOptionsTestOptionsMinInvalidValue
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_MIN_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_MIN_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setSliderOptions, attribute: options.min";
     };
 
@@ -252,7 +254,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setSliderOptionsTestOptionsMaxValidValues,
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setSliderOptions, attribute: options.max";
     };
 
@@ -294,7 +296,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setSliderOptionsTestOptionsMaxInvalidValue
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_MAX_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_MAX_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setSliderOptions, attribute: options.max";
     };
 
@@ -336,7 +338,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setSliderOptionsTestOptionsStepValidValues
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STEP_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setSliderOptions, attribute: options.step";
     };
 
@@ -378,7 +380,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setSliderOptionsTestOptionsStepInvalidValu
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STEP_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STEP_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_STEP_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setSliderOptions, attribute: options.step";
     };
 
@@ -420,7 +422,7 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsStyleValidValues, TestSi
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STYLE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setSliderOptions, attribute: options.style";
     };
 
@@ -462,7 +464,7 @@ HWTEST_F(SliderModifierTest, setSliderOptionsTestOptionsStyleInvalidValues, Test
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STYLE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STYLE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_STYLE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setSliderOptions, attribute: options.style";
     };
 
@@ -505,7 +507,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setSliderOptionsTestOptionsDirectionValidV
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIRECTION_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setSliderOptions, attribute: options.direction";
     };
 
@@ -547,7 +549,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setSliderOptionsTestOptionsDirectionInvali
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIRECTION_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_DIRECTION_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_DIRECTION_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setSliderOptions, attribute: options.direction";
     };
 
@@ -590,7 +592,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setSliderOptionsTestOptionsReverseValidVal
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_REVERSE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setSliderOptions, attribute: options.reverse";
     };
 
@@ -632,7 +634,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setSliderOptionsTestOptionsReverseInvalidV
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_REVERSE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_REVERSE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_REVERSE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setSliderOptions, attribute: options.reverse";
     };
 
@@ -648,10 +650,10 @@ HWTEST_F(SliderModifierTest, DISABLED_setSliderOptionsTestOptionsReverseInvalidV
 HWTEST_F(SliderModifierTest, DISABLED_setBlockColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BLOCK_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_BLOCK_COLOR_DEFAULT_VALUE) << "Default value for attribute 'blockColor'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_BLOCK_COLOR_DEFAULT_VALUE)) << "Default value for attribute 'blockColor'";
 }
 
 /*
@@ -675,7 +677,7 @@ HWTEST_F(SliderModifierTest, setBlockColorTestBlockColorValidValues, TestSize.Le
         modifier_->setBlockColor(node_, &inputValueBlockColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BLOCK_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setBlockColor, attribute: blockColor";
     };
 
@@ -714,7 +716,7 @@ HWTEST_F(SliderModifierTest, setBlockColorTestBlockColorInvalidValues, TestSize.
         modifier_->setBlockColor(node_, &inputValueBlockColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BLOCK_COLOR_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_BLOCK_COLOR_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_BLOCK_COLOR_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setBlockColor, attribute: blockColor";
     };
 
@@ -738,10 +740,10 @@ HWTEST_F(SliderModifierTest, setBlockColorTestBlockColorInvalidValues, TestSize.
 HWTEST_F(SliderModifierTest, DISABLED_setTrackColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TRACK_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TRACK_COLOR_DEFAULT_VALUE) << "Default value for attribute 'trackColor'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_TRACK_COLOR_DEFAULT_VALUE)) << "Default value for attribute 'trackColor'";
 }
 
 /*
@@ -765,7 +767,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setTrackColorTestTrackColorValidValues, Te
         modifier_->setTrackColor(node_, &inputValueTrackColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TRACK_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setTrackColor, attribute: trackColor";
     };
 
@@ -813,7 +815,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setTrackColorTestTrackColorInvalidValues, 
         modifier_->setTrackColor(node_, &inputValueTrackColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TRACK_COLOR_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_TRACK_COLOR_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_TRACK_COLOR_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setTrackColor, attribute: trackColor";
     };
 
@@ -841,10 +843,11 @@ HWTEST_F(SliderModifierTest, DISABLED_setTrackColorTestTrackColorInvalidValues, 
 HWTEST_F(SliderModifierTest, DISABLED_setSelectedColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_COLOR_DEFAULT_VALUE) << "Default value for attribute 'selectedColor'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SELECTED_COLOR_DEFAULT_VALUE)) <<
+        "Default value for attribute 'selectedColor'";
 }
 
 /*
@@ -868,7 +871,7 @@ HWTEST_F(SliderModifierTest, setSelectedColorTestSelectedColorValidValues, TestS
         modifier_->setSelectedColor(node_, &inputValueSelectedColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setSelectedColor, attribute: selectedColor";
     };
 
@@ -916,7 +919,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setSelectedColorTestSelectedColorInvalidVa
         modifier_->setSelectedColor(node_, &inputValueSelectedColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_COLOR_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_COLOR_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SELECTED_COLOR_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setSelectedColor, attribute: selectedColor";
     };
 
@@ -944,10 +947,10 @@ HWTEST_F(SliderModifierTest, DISABLED_setSelectedColorTestSelectedColorInvalidVa
 HWTEST_F(SliderModifierTest, setShowStepsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_STEPS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_STEPS_DEFAULT_VALUE) << "Default value for attribute 'showSteps'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SHOW_STEPS_DEFAULT_VALUE)) << "Default value for attribute 'showSteps'";
 }
 
 /*
@@ -970,7 +973,7 @@ HWTEST_F(SliderModifierTest, setShowStepsTestShowStepsValidValues, TestSize.Leve
         modifier_->setShowSteps(node_, &inputValueShowSteps);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_STEPS_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setShowSteps, attribute: showSteps";
     };
 
@@ -999,7 +1002,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setShowStepsTestShowStepsInvalidValues, Te
         modifier_->setShowSteps(node_, &inputValueShowSteps);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_STEPS_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_STEPS_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SHOW_STEPS_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setShowSteps, attribute: showSteps";
     };
 
@@ -1015,10 +1018,11 @@ HWTEST_F(SliderModifierTest, DISABLED_setShowStepsTestShowStepsInvalidValues, Te
 HWTEST_F(SliderModifierTest, DISABLED_setTrackThicknessTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TRACK_THICKNESS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TRACK_THICKNESS_DEFAULT_VALUE) << "Default value for attribute 'trackThickness'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_TRACK_THICKNESS_DEFAULT_VALUE)) <<
+        "Default value for attribute 'trackThickness'";
 }
 
 /*
@@ -1042,7 +1046,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setTrackThicknessTestTrackThicknessValidVa
         modifier_->setTrackThickness(node_, &inputValueTrackThickness);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TRACK_THICKNESS_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setTrackThickness, attribute: trackThickness";
     };
 
@@ -1078,7 +1082,7 @@ HWTEST_F(SliderModifierTest, setTrackThicknessTestTrackThicknessInvalidValues, T
         modifier_->setTrackThickness(node_, &inputValueTrackThickness);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TRACK_THICKNESS_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_TRACK_THICKNESS_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_TRACK_THICKNESS_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setTrackThickness, attribute: trackThickness";
     };
 
@@ -1105,10 +1109,10 @@ HWTEST_F(SliderModifierTest, setTrackThicknessTestTrackThicknessInvalidValues, T
 HWTEST_F(SliderModifierTest, setBlockBorderColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BLOCK_BORDER_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_BLOCK_BORDER_COLOR_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_BLOCK_BORDER_COLOR_DEFAULT_VALUE)) <<
         "Default value for attribute 'blockBorderColor'";
 }
 
@@ -1133,7 +1137,7 @@ HWTEST_F(SliderModifierTest, setBlockBorderColorTestBlockBorderColorValidValues,
         modifier_->setBlockBorderColor(node_, &inputValueBlockBorderColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BLOCK_BORDER_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setBlockBorderColor, attribute: blockBorderColor";
     };
 
@@ -1172,7 +1176,7 @@ HWTEST_F(SliderModifierTest, setBlockBorderColorTestBlockBorderColorInvalidValue
         modifier_->setBlockBorderColor(node_, &inputValueBlockBorderColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BLOCK_BORDER_COLOR_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_BLOCK_BORDER_COLOR_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_BLOCK_BORDER_COLOR_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setBlockBorderColor, attribute: blockBorderColor";
     };
 
@@ -1196,10 +1200,10 @@ HWTEST_F(SliderModifierTest, setBlockBorderColorTestBlockBorderColorInvalidValue
 HWTEST_F(SliderModifierTest, setBlockBorderWidthTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BLOCK_BORDER_WIDTH_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_BLOCK_BORDER_WIDTH_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_BLOCK_BORDER_WIDTH_DEFAULT_VALUE)) <<
         "Default value for attribute 'blockBorderWidth'";
 }
 
@@ -1224,7 +1228,7 @@ HWTEST_F(SliderModifierTest, setBlockBorderWidthTestBlockBorderWidthValidValues,
         modifier_->setBlockBorderWidth(node_, &inputValueBlockBorderWidth);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BLOCK_BORDER_WIDTH_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setBlockBorderWidth, attribute: blockBorderWidth";
     };
 
@@ -1260,7 +1264,7 @@ HWTEST_F(SliderModifierTest, setBlockBorderWidthTestBlockBorderWidthInvalidValue
         modifier_->setBlockBorderWidth(node_, &inputValueBlockBorderWidth);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BLOCK_BORDER_WIDTH_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_BLOCK_BORDER_WIDTH_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_BLOCK_BORDER_WIDTH_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setBlockBorderWidth, attribute: blockBorderWidth";
     };
 
@@ -1287,10 +1291,10 @@ HWTEST_F(SliderModifierTest, setBlockBorderWidthTestBlockBorderWidthInvalidValue
 HWTEST_F(SliderModifierTest, DISABLED_setStepColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STEP_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_STEP_COLOR_DEFAULT_VALUE) << "Default value for attribute 'stepColor'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_STEP_COLOR_DEFAULT_VALUE)) << "Default value for attribute 'stepColor'";
 }
 
 /*
@@ -1314,7 +1318,7 @@ HWTEST_F(SliderModifierTest, setStepColorTestStepColorValidValues, TestSize.Leve
         modifier_->setStepColor(node_, &inputValueStepColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STEP_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setStepColor, attribute: stepColor";
     };
 
@@ -1353,7 +1357,7 @@ HWTEST_F(SliderModifierTest, setStepColorTestStepColorInvalidValues, TestSize.Le
         modifier_->setStepColor(node_, &inputValueStepColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STEP_COLOR_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STEP_COLOR_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_STEP_COLOR_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setStepColor, attribute: stepColor";
     };
 
@@ -1377,10 +1381,10 @@ HWTEST_F(SliderModifierTest, setStepColorTestStepColorInvalidValues, TestSize.Le
 HWTEST_F(SliderModifierTest, DISABLED_setTrackBorderRadiusTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TRACK_BORDER_RADIUS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TRACK_BORDER_RADIUS_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_TRACK_BORDER_RADIUS_DEFAULT_VALUE)) <<
         "Default value for attribute 'trackBorderRadius'";
 }
 
@@ -1405,7 +1409,7 @@ HWTEST_F(SliderModifierTest, setTrackBorderRadiusTestTrackBorderRadiusValidValue
         modifier_->setTrackBorderRadius(node_, &inputValueTrackBorderRadius);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TRACK_BORDER_RADIUS_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setTrackBorderRadius, attribute: trackBorderRadius";
     };
 
@@ -1441,7 +1445,7 @@ HWTEST_F(SliderModifierTest, setTrackBorderRadiusTestTrackBorderRadiusInvalidVal
         modifier_->setTrackBorderRadius(node_, &inputValueTrackBorderRadius);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TRACK_BORDER_RADIUS_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_TRACK_BORDER_RADIUS_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_TRACK_BORDER_RADIUS_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setTrackBorderRadius, attribute: trackBorderRadius";
     };
 
@@ -1468,10 +1472,10 @@ HWTEST_F(SliderModifierTest, setTrackBorderRadiusTestTrackBorderRadiusInvalidVal
 HWTEST_F(SliderModifierTest, setSelectedBorderRadiusTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_BORDER_RADIUS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_BORDER_RADIUS_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SELECTED_BORDER_RADIUS_DEFAULT_VALUE)) <<
         "Default value for attribute 'selectedBorderRadius'";
 }
 
@@ -1496,7 +1500,7 @@ HWTEST_F(SliderModifierTest, setSelectedBorderRadiusTestSelectedBorderRadiusVali
         modifier_->setSelectedBorderRadius(node_, &inputValueSelectedBorderRadius);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_BORDER_RADIUS_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setSelectedBorderRadius, attribute: selectedBorderRadius";
     };
 
@@ -1532,7 +1536,7 @@ HWTEST_F(SliderModifierTest, setSelectedBorderRadiusTestSelectedBorderRadiusInva
         modifier_->setSelectedBorderRadius(node_, &inputValueSelectedBorderRadius);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_BORDER_RADIUS_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_BORDER_RADIUS_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SELECTED_BORDER_RADIUS_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setSelectedBorderRadius, attribute: selectedBorderRadius";
     };
 
@@ -1559,15 +1563,15 @@ HWTEST_F(SliderModifierTest, setSelectedBorderRadiusTestSelectedBorderRadiusInva
 HWTEST_F(SliderModifierTest, DISABLED_setBlockSizeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultBlockSize =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BLOCK_SIZE_NAME);
-    std::string resultStr;
+    std::unique_ptr<JsonValue> resultBlockSize = GetAttrObject(jsonValue, ATTRIBUTE_BLOCK_SIZE_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(resultBlockSize, ATTRIBUTE_BLOCK_SIZE_I_WIDTH_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_BLOCK_SIZE_I_WIDTH_DEFAULT_VALUE) << "Default value for attribute 'blockSize.width'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_BLOCK_SIZE_I_WIDTH_DEFAULT_VALUE)) <<
+        "Default value for attribute 'blockSize.width'";
 
     resultStr = GetAttrValue<std::string>(resultBlockSize, ATTRIBUTE_BLOCK_SIZE_I_HEIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_BLOCK_SIZE_I_HEIGHT_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_BLOCK_SIZE_I_HEIGHT_DEFAULT_VALUE)) <<
         "Default value for attribute 'blockSize.height'";
 }
 
@@ -1593,9 +1597,9 @@ HWTEST_F(SliderModifierTest, DISABLED_setBlockSizeTestBlockSizeWidthValidValues,
         WriteTo(inputValueBlockSize).width = value;
         modifier_->setBlockSize(node_, &inputValueBlockSize);
         auto jsonValue = GetJsonValue(node_);
-        auto resultBlockSize = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BLOCK_SIZE_NAME);
+        auto resultBlockSize = GetAttrObject(jsonValue, ATTRIBUTE_BLOCK_SIZE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultBlockSize, ATTRIBUTE_BLOCK_SIZE_I_WIDTH_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setBlockSize, attribute: blockSize.width";
     };
 
@@ -1632,9 +1636,9 @@ HWTEST_F(SliderModifierTest, setBlockSizeTestBlockSizeWidthInvalidValues, TestSi
         WriteTo(inputValueBlockSize).width = value;
         modifier_->setBlockSize(node_, &inputValueBlockSize);
         auto jsonValue = GetJsonValue(node_);
-        auto resultBlockSize = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BLOCK_SIZE_NAME);
+        auto resultBlockSize = GetAttrObject(jsonValue, ATTRIBUTE_BLOCK_SIZE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultBlockSize, ATTRIBUTE_BLOCK_SIZE_I_WIDTH_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_BLOCK_SIZE_I_WIDTH_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_BLOCK_SIZE_I_WIDTH_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setBlockSize, attribute: blockSize.width";
     };
 
@@ -1675,9 +1679,9 @@ HWTEST_F(SliderModifierTest, DISABLED_setBlockSizeTestBlockSizeHeightValidValues
         WriteTo(inputValueBlockSize).height = value;
         modifier_->setBlockSize(node_, &inputValueBlockSize);
         auto jsonValue = GetJsonValue(node_);
-        auto resultBlockSize = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BLOCK_SIZE_NAME);
+        auto resultBlockSize = GetAttrObject(jsonValue, ATTRIBUTE_BLOCK_SIZE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultBlockSize, ATTRIBUTE_BLOCK_SIZE_I_HEIGHT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setBlockSize, attribute: blockSize.height";
     };
 
@@ -1714,9 +1718,9 @@ HWTEST_F(SliderModifierTest, setBlockSizeTestBlockSizeHeightInvalidValues, TestS
         WriteTo(inputValueBlockSize).height = value;
         modifier_->setBlockSize(node_, &inputValueBlockSize);
         auto jsonValue = GetJsonValue(node_);
-        auto resultBlockSize = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BLOCK_SIZE_NAME);
+        auto resultBlockSize = GetAttrObject(jsonValue, ATTRIBUTE_BLOCK_SIZE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultBlockSize, ATTRIBUTE_BLOCK_SIZE_I_HEIGHT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_BLOCK_SIZE_I_HEIGHT_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_BLOCK_SIZE_I_HEIGHT_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setBlockSize, attribute: blockSize.height";
     };
 
@@ -1753,10 +1757,10 @@ HWTEST_F(SliderModifierTest, DISABLED_setBlockStyleTestPlaceholder, TestSize.Lev
 HWTEST_F(SliderModifierTest, DISABLED_setStepSizeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STEP_SIZE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_STEP_SIZE_DEFAULT_VALUE) << "Default value for attribute 'stepSize'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_STEP_SIZE_DEFAULT_VALUE)) << "Default value for attribute 'stepSize'";
 }
 
 /*
@@ -1780,7 +1784,7 @@ HWTEST_F(SliderModifierTest, setStepSizeTestStepSizeValidValues, TestSize.Level1
         modifier_->setStepSize(node_, &inputValueStepSize);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STEP_SIZE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setStepSize, attribute: stepSize";
     };
 
@@ -1816,7 +1820,7 @@ HWTEST_F(SliderModifierTest, setStepSizeTestStepSizeInvalidValues, TestSize.Leve
         modifier_->setStepSize(node_, &inputValueStepSize);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STEP_SIZE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STEP_SIZE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_STEP_SIZE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setStepSize, attribute: stepSize";
     };
 
@@ -1843,10 +1847,10 @@ HWTEST_F(SliderModifierTest, setStepSizeTestStepSizeInvalidValues, TestSize.Leve
 HWTEST_F(SliderModifierTest, setSliderInteractionModeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SLIDER_INTERACTION_MODE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SLIDER_INTERACTION_MODE_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SLIDER_INTERACTION_MODE_DEFAULT_VALUE)) <<
         "Default value for attribute 'sliderInteractionMode'";
 }
 
@@ -1871,7 +1875,7 @@ HWTEST_F(SliderModifierTest, setSliderInteractionModeTestSliderInteractionModeVa
         modifier_->setSliderInteractionMode(node_, &inputValueSliderInteractionMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SLIDER_INTERACTION_MODE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setSliderInteractionMode, attribute: sliderInteractionMode";
     };
 
@@ -1902,7 +1906,7 @@ HWTEST_F(SliderModifierTest, setSliderInteractionModeTestSliderInteractionModeIn
         modifier_->setSliderInteractionMode(node_, &inputValueSliderInteractionMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SLIDER_INTERACTION_MODE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_SLIDER_INTERACTION_MODE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SLIDER_INTERACTION_MODE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setSliderInteractionMode, attribute: sliderInteractionMode";
     };
 
@@ -1919,10 +1923,10 @@ HWTEST_F(SliderModifierTest, setSliderInteractionModeTestSliderInteractionModeIn
 HWTEST_F(SliderModifierTest, setMinResponsiveDistanceTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_RESPONSIVE_DISTANCE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MIN_RESPONSIVE_DISTANCE_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_MIN_RESPONSIVE_DISTANCE_DEFAULT_VALUE)) <<
         "Default value for attribute 'minResponsiveDistance'";
 }
 
@@ -1946,7 +1950,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setMinResponsiveDistanceTestMinResponsiveD
         modifier_->setMinResponsiveDistance(node_, &inputValueMinResponsiveDistance);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_RESPONSIVE_DISTANCE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setMinResponsiveDistance, attribute: minResponsiveDistance";
     };
 
@@ -1975,7 +1979,7 @@ HWTEST_F(SliderModifierTest, setMinResponsiveDistanceTestMinResponsiveDistanceIn
         modifier_->setMinResponsiveDistance(node_, &inputValueMinResponsiveDistance);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_RESPONSIVE_DISTANCE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_MIN_RESPONSIVE_DISTANCE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_MIN_RESPONSIVE_DISTANCE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setMinResponsiveDistance, attribute: minResponsiveDistance";
     };
 
@@ -1994,15 +1998,16 @@ HWTEST_F(SliderModifierTest, setMinResponsiveDistanceTestMinResponsiveDistanceIn
 HWTEST_F(SliderModifierTest, setSlideRangeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultSlideRange =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SLIDE_RANGE_NAME);
-    std::string resultStr;
+    std::unique_ptr<JsonValue> resultSlideRange = GetAttrObject(jsonValue, ATTRIBUTE_SLIDE_RANGE_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(resultSlideRange, ATTRIBUTE_SLIDE_RANGE_I_FROM_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SLIDE_RANGE_I_FROM_DEFAULT_VALUE) << "Default value for attribute 'slideRange.from'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SLIDE_RANGE_I_FROM_DEFAULT_VALUE)) <<
+        "Default value for attribute 'slideRange.from'";
 
     resultStr = GetAttrValue<std::string>(resultSlideRange, ATTRIBUTE_SLIDE_RANGE_I_TO_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SLIDE_RANGE_I_TO_DEFAULT_VALUE) << "Default value for attribute 'slideRange.to'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SLIDE_RANGE_I_TO_DEFAULT_VALUE)) <<
+        "Default value for attribute 'slideRange.to'";
 }
 
 /*
@@ -2027,9 +2032,9 @@ HWTEST_F(SliderModifierTest, DISABLED_setSlideRangeTestSlideRangeFromValidValues
         WriteTo(inputValueSlideRange).from = value;
         modifier_->setSlideRange(node_, &inputValueSlideRange);
         auto jsonValue = GetJsonValue(node_);
-        auto resultSlideRange = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SLIDE_RANGE_NAME);
+        auto resultSlideRange = GetAttrObject(jsonValue, ATTRIBUTE_SLIDE_RANGE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultSlideRange, ATTRIBUTE_SLIDE_RANGE_I_FROM_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setSlideRange, attribute: slideRange.from";
     };
 
@@ -2060,9 +2065,9 @@ HWTEST_F(SliderModifierTest, setSlideRangeTestSlideRangeFromInvalidValues, TestS
         WriteTo(inputValueSlideRange).from = value;
         modifier_->setSlideRange(node_, &inputValueSlideRange);
         auto jsonValue = GetJsonValue(node_);
-        auto resultSlideRange = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SLIDE_RANGE_NAME);
+        auto resultSlideRange = GetAttrObject(jsonValue, ATTRIBUTE_SLIDE_RANGE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultSlideRange, ATTRIBUTE_SLIDE_RANGE_I_FROM_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_SLIDE_RANGE_I_FROM_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SLIDE_RANGE_I_FROM_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setSlideRange, attribute: slideRange.from";
     };
 
@@ -2095,9 +2100,9 @@ HWTEST_F(SliderModifierTest, DISABLED_setSlideRangeTestSlideRangeToValidValues, 
         WriteTo(inputValueSlideRange).to = value;
         modifier_->setSlideRange(node_, &inputValueSlideRange);
         auto jsonValue = GetJsonValue(node_);
-        auto resultSlideRange = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SLIDE_RANGE_NAME);
+        auto resultSlideRange = GetAttrObject(jsonValue, ATTRIBUTE_SLIDE_RANGE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultSlideRange, ATTRIBUTE_SLIDE_RANGE_I_TO_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setSlideRange, attribute: slideRange.to";
     };
 
@@ -2128,9 +2133,9 @@ HWTEST_F(SliderModifierTest, setSlideRangeTestSlideRangeToInvalidValues, TestSiz
         WriteTo(inputValueSlideRange).to = value;
         modifier_->setSlideRange(node_, &inputValueSlideRange);
         auto jsonValue = GetJsonValue(node_);
-        auto resultSlideRange = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SLIDE_RANGE_NAME);
+        auto resultSlideRange = GetAttrObject(jsonValue, ATTRIBUTE_SLIDE_RANGE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultSlideRange, ATTRIBUTE_SLIDE_RANGE_I_TO_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_SLIDE_RANGE_I_TO_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SLIDE_RANGE_I_TO_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setSlideRange, attribute: slideRange.to";
     };
 
@@ -2149,10 +2154,10 @@ HWTEST_F(SliderModifierTest, setSlideRangeTestSlideRangeToInvalidValues, TestSiz
 HWTEST_F(SliderModifierTest, DISABLED_setDigitalCrownSensitivityTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE)) <<
         "Default value for attribute 'digitalCrownSensitivity'";
 }
 
@@ -2177,8 +2182,9 @@ HWTEST_F(SliderModifierTest, DISABLED_setDigitalCrownSensitivityTestDigitalCrown
         modifier_->setDigitalCrownSensitivity(node_, &inputValueDigitalCrownSensitivity);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input <<
-                                          ", method: setDigitalCrownSensitivity, attribute: digitalCrownSensitivity";
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
+            "Input value is: " << input
+            << ", method: setDigitalCrownSensitivity, attribute: digitalCrownSensitivity";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumCrownSensitivityValidValues) {
@@ -2209,7 +2215,7 @@ HWTEST_F(
         modifier_->setDigitalCrownSensitivity(node_, &inputValueDigitalCrownSensitivity);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE)) <<
             "Input value is: " << input
             << ", method: setDigitalCrownSensitivity, attribute: digitalCrownSensitivity";
     };
@@ -2227,10 +2233,10 @@ HWTEST_F(
 HWTEST_F(SliderModifierTest, setEnableHapticFeedbackTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE)) <<
         "Default value for attribute 'enableHapticFeedback'";
 }
 
@@ -2254,7 +2260,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setEnableHapticFeedbackTestEnableHapticFee
         modifier_->setEnableHapticFeedback(node_, &inputValueEnableHapticFeedback);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setEnableHapticFeedback, attribute: enableHapticFeedback";
     };
 

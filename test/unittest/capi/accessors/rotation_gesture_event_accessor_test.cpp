@@ -43,11 +43,11 @@ public:
 };
 
 /**
- * @tc.name: GetAngleTest
+ * @tc.name: getAngleTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RotationGestureEventAccessorTest, GetAngleTest, TestSize.Level1)
+HWTEST_F(RotationGestureEventAccessorTest, getAngleTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumberFloatAnythingValidValues) {
         eventInfo_->SetAngle(value);
@@ -58,11 +58,11 @@ HWTEST_F(RotationGestureEventAccessorTest, GetAngleTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetAngleTest
+ * @tc.name: setAngleTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RotationGestureEventAccessorTest, SetAngleTest, TestSize.Level1)
+HWTEST_F(RotationGestureEventAccessorTest, setAngleTest, TestSize.Level1)
 {
     for (auto& [input, value, expected] : AccessorTestFixtures::testFixtureNumberValues) {
         accessor_->setAngle(peer_, &value);

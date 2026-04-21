@@ -205,6 +205,16 @@ public:
         return focusViewStack_;
     }
 
+    const std::list<WeakPtr<FocusView>>& GetModalFocusViewStack() const
+    {
+        return modalFocusViewStack_;
+    }
+
+    WeakPtr<FocusView> GetValidModalFocusView() const;
+    bool IsModalFocusViewStackValid();
+    void ArrangeModalFocusViewStack();
+    void EraseModalFocusView(const RefPtr<FocusView>& focusView);
+
     void SetRequestFocusCallback(const RequestFocusCallback& callback)
     {
         requestCallback_ = std::move(callback);
@@ -349,9 +359,9 @@ private:
     std::list<WeakPtr<FocusView>> focusViewStack_;
     WeakPtr<FocusView> lastFocusView_;
     const WeakPtr<PipelineContext> pipeline_;
+    std::list<WeakPtr<FocusView>> modalFocusViewStack_;
 
     RequestFocusCallback requestCallback_;
-
     WeakPtr<FocusHub> lastFocusStateNode_;
     WeakPtr<FocusHub> currentFocus_;
     /**

@@ -26,4 +26,11 @@ ace_unittest("dialog_test_ng") {
     "dialog_test_ng.cpp",
     "dialog_test_two_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "dialog_test_core.cpp" ]
+  } else {
+    sources += [ "dialog_test_core.cpp" ]
+  }
 }

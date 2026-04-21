@@ -95,7 +95,7 @@ struct Index {
               Text(item.name)
                 .fontSize(16)
                 .fontWeight(FontWeight.Bold);
-              Image($r('app.media.landscape'))
+              Image($r('app.media.background'))
                 .width('90%')
                 .aspectRatio(1.5)
                 .colorFilter(item.matrix)

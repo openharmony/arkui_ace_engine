@@ -22,11 +22,10 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
-#include "core/components/toast/toast_theme.h"
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/pattern/toast/toast_accessibility_property.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/toast/toast_layout_algorithm.h"
 #include "core/components_ng/pattern/toast/toast_layout_property.h"
 
@@ -59,6 +58,9 @@ public:
     }
 
     void InitWrapperRect(LayoutWrapper* layoutWrapper, const RefPtr<ToastLayoutProperty>& toastProps);
+
+    void CalculateTitleBarHeightForTopAlignment(float& safeAreaTop,
+        const RefPtr<PipelineContext>& pipelineContext, const RefPtr<ToastLayoutProperty>& toastProp);
 
     void OnAttachToFrameNode() override;
 

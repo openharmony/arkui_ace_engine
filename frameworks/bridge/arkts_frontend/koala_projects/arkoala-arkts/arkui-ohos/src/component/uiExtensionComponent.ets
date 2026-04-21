@@ -18,8 +18,7 @@ import { int32, int64, float32 } from "@koalaui/common"
 import { ArkCommonMethodPeer, CommonMethod, TerminationInfo } from "./common"
 import { BusinessError, Callback } from '#external'
 import { default as Want } from "@ohos.app.ability.Want"
-import { ErrorCallback, RecordData } from "@ohos.base"
-import { UIExtensionOptions } from "./uiExtensionComponent.ets"
+import { ErrorCallback } from "@ohos.base"
 import { EmbeddedType } from "./enums"
 import { ArkUIAniUiextensionModal, ArkUIAniUIExtensionOptions, ArkUIAniModule, ArkUIAniUiextensionProxyModal } from "arkui.ani"
 
@@ -49,7 +48,7 @@ export class ArkUIExtensionComponentPeerBase extends ArkCommonMethodPeer {
                 const onTerminated = this._callbackHelp?.onTerminated;
                 if (onTerminated !== undefined && onTerminated !== null) {
                     const param = {
-                        code: code1 as int,
+                        code: code1.toInt(),
                         want: want1
                     } as TerminationInfo
                     onTerminated(param);
@@ -129,7 +128,7 @@ export class ArkUIExtensionComponentPeerBase extends ArkCommonMethodPeer {
                     const onError = this._callbackHelp?.onError;
                     if (onError !== undefined && onError !== null) {
                         const param = {
-                            code: code1 as int,
+                            code: code1.toInt(),
                             name: name1,
                             message: message1
                         } as BusinessError

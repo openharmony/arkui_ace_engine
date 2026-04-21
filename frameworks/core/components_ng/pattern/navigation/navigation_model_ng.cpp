@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
 
 #include "base/i18n/localization.h"
 #include "base/memory/ace_type.h"
@@ -23,21 +24,16 @@
 #include "core/common/force_split/force_split_utils.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/properties/alignment.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/common/properties/shadow.h"
-#include "core/components/common/properties/shadow_config.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
-#include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/navigation/bar_item_event_hub.h"
 #include "core/components_ng/pattern/navigation/bar_item_node.h"
 #include "core/components_ng/pattern/navigation/bar_item_pattern.h"
@@ -46,7 +42,6 @@
 #include "core/components_ng/pattern/navigation/navdestination_content_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_content_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
-#include "core/components_ng/pattern/navigation/navigation_drag_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_event_hub.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
@@ -56,12 +51,6 @@
 #include "core/components_ng/pattern/navigation/navigation_toolbar_util.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
-#include "core/components_ng/pattern/navigator/navigator_event_hub.h"
-#include "core/components_ng/pattern/navigator/navigator_pattern.h"
-#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
-#include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
-#include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
-#include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "frameworks/base/system_bar/system_bar_style.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
@@ -84,10 +73,10 @@ RefPtr<FrameNode> CreateBarItemTextNode(const std::string& text)
     return textNode;
 }
 
-RefPtr<FrameNode> CreateBarItemIconNode(const std::string& src)
+RefPtr<FrameNode> CreateBarItemIconNode(const BarItem& barItem)
 {
     int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    ImageSourceInfo info(src);
+    ImageSourceInfo info(barItem.icon.value_or(""), barItem.bundleName, barItem.moduleName);
     auto iconNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, nodeId, AceType::MakeRefPtr<ImagePattern>());
     CHECK_NULL_RETURN(iconNode, nullptr);
     auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
@@ -124,7 +113,7 @@ void UpdateBarItemNodeWithItem(const RefPtr<BarItemNode>& barItemNode, const Bar
         }
     }
     if (barItem.icon.has_value() && !barItem.icon.value().empty()) {
-        auto iconNode = CreateBarItemIconNode(barItem.icon.value());
+        auto iconNode = CreateBarItemIconNode(barItem);
         barItemNode->SetIconNode(iconNode);
         barItemNode->AddChild(iconNode);
     }
@@ -186,7 +175,7 @@ void UpdateOldBarItems(const RefPtr<UINode>& oldBarContainer, const std::vector<
                     imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(newBarItem.icon.value()));
                     iconNode->MarkModifyDone();
                 } else {
-                    auto iconNode = CreateBarItemIconNode(newBarItem.icon.value());
+                    auto iconNode = CreateBarItemIconNode(newBarItem);
                     oldBarItem->SetIconNode(iconNode);
                     oldBarItem->AddChild(iconNode);
                     oldBarItem->MarkModifyDone();
@@ -418,6 +407,28 @@ bool NavigationModelNG::CreateContentNodeIfNeeded(const RefPtr<NavigationGroupNo
     return true;
 }
 
+Color NavigationModelNG::GetDividerNodeColor(const RefPtr<NavigationGroupNode>& navigationGroupNode,
+    RefPtr<FrameNode> dividerNode)
+{
+    auto context = navigationGroupNode->GetContext();
+    CHECK_NULL_RETURN(context, Color());
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_RETURN(theme, Color());
+    auto themeColor = theme->GetNavigationDividerColor();
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_RETURN(forceSplitMgr, themeColor);
+    if (forceSplitMgr->IsForceSplitEnable(false)) {
+        auto splitColor = forceSplitMgr->GetSplitDividerColor();
+        if (context->GetColorMode() == ColorMode::LIGHT && splitColor.first.has_value()) {
+            return splitColor.first.value();
+        }
+        if (context->GetColorMode() == ColorMode::DARK && splitColor.second.has_value()) {
+            return splitColor.second.value();
+        }
+    }
+    return themeColor;
+}
+
 bool NavigationModelNG::CreateDividerNodeIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode)
 {
     if (!navigationGroupNode->GetDividerNode()) {
@@ -440,10 +451,9 @@ bool NavigationModelNG::CreateDividerNodeIfNeeded(const RefPtr<NavigationGroupNo
         dividerLayoutProperty->UpdateVertical(true);
         auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
         CHECK_NULL_RETURN(dividerRenderProperty, false);
-        auto theme = NavigationGetTheme();
-        CHECK_NULL_RETURN(theme, false);
         dividerRenderProperty->UpdateDividerColor(Color::TRANSPARENT);
-        dividerNode->GetRenderContext()->UpdateBackgroundColor(theme->GetNavigationDividerColor());
+        dividerNode->GetRenderContext()->
+            UpdateBackgroundColor(GetDividerNodeColor(navigationGroupNode, dividerNode));
         dividerNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
     }
 
@@ -501,6 +511,7 @@ bool NavigationModelNG::ParseCommonTitle(
             auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
             textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : TITLEBAR_MAX_LINES);
             textLayoutProperty->UpdateContent(title);
+            NavigationTitleUtil::InitTextProperty(textLayoutProperty);
             break;
         }
         // create and init main title
@@ -922,6 +933,7 @@ bool NavigationModelNG::UpdateBackButtonProperty(const RefPtr<FrameNode>& backBu
         CalcSize(CalcLength(backButtonWidth), CalcLength(backButtonHeight)));
     backButtonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(backButtonRadiusSize));
     renderContext->UpdateBackgroundColor(backButtonColor);
+    backButtonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     PaddingProperty padding;
     padding.SetEdges(CalcLength(backButtonPadding));
     backButtonLayoutProperty->UpdatePadding(padding);
@@ -1533,6 +1545,7 @@ void NavigationModelNG::SetNavBarWidth(const Dimension& value, bool isDoubleBind
     navigationPattern->SetUserSetNavBarWidthFlag(true);
     if (navigationPattern->GetInitNavBarWidth() != value) {
         navigationPattern->SetInitNavBarWidth(value);
+        navigationPattern->SetIsNavBarWidthChange(true);
     }
 }
 
@@ -2189,6 +2202,7 @@ void NavigationModelNG::SetNavBarWidth(FrameNode* frameNode, const Dimension& va
     navigationPattern->SetUserSetNavBarWidthFlag(true);
     if (navigationPattern->GetInitNavBarWidth() != value) {
         navigationPattern->SetInitNavBarWidth(value);
+        navigationPattern->SetIsNavBarWidthChange(true);
     }
 }
 
@@ -3296,6 +3310,9 @@ void NavigationModelNG::UpdateDividerVisibility(FrameNode* frameNode, bool isSho
     auto layoutProperty = dividerNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(isShow ? VisibleType::VISIBLE : VisibleType::INVISIBLE);
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navigationPattern);
+    navigationPattern->SetUserSetDividerInvisibleFlag(!isShow);
 }
 
 void NavigationModelNG::UpdateDefineColor(bool isDefined)

@@ -64,11 +64,11 @@ public:
 };
 
 /*
- * @tc.name: setLocationButtonOptions0
+ * @tc.name: setLocationButtonOptions0Test
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LocationButtonModifierTest, setLocationButtonOptions0, TestSize.Level1)
+HWTEST_F(LocationButtonModifierTest, setLocationButtonOptions0Test, TestSize.Level1)
 {
     auto node = CreateNode();
     modifier_->setLocationButtonOptions0(node);

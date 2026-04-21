@@ -21,7 +21,7 @@
 
 #include "base/utils/macros.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "interfaces/inner_api/ace/modal_ui_extension_config.h"
 
 namespace OHOS::Ace::NG {
@@ -38,6 +38,9 @@ namespace OHOS::Ace::NG {
  * |--ModalPage(UEC)
  */
 
+using RectChangeFunc = std::function<void(const RectF& oldRect, const RectF& rect)>;
+using RectCallbackDeleter = void(*)(void*);
+
 class ACE_FORCE_EXPORT AppBarView : public Referenced {
 public:
     AppBarView() = default;
@@ -50,7 +53,7 @@ public:
     void SetIconColor(const std::optional<Color>& color) {}
     void SetStatusBarItemColor(bool isLight);
     std::optional<RectF> GetAppBarRect();
-    void OnMenuClick();
+    void OnMenuClick(std::map<std::string, std::string>& params);
     void OnCloseClick();
     void RequestAtomicServiceTerminate();
     void SetOnBackPressedConsumed();
@@ -66,6 +69,37 @@ public:
         const RefPtr<PipelineContext>& pipelineContext, std::function<void(const RectF& rect)>&& listener);
     static void RemoveRectChangeListener(const RefPtr<PipelineContext>& pipelineContext, int32_t id);
     void SetMenuBarVisible(bool visible);
+    void OnThirdCloseEvent(int32_t code);
+
+    void SetLastRectChangeTime(int64_t time)
+    {
+        lastRectChangeTime_ = time;
+    }
+    int64_t GetLastRectChangeTime() const
+    {
+        return lastRectChangeTime_;
+    }
+
+    void SetRectChangeCallbackContext(void* ctx, RectCallbackDeleter deleter) {
+        rectChangeCallbackRef_ = ctx;
+        rectCallbackDeleter_ = deleter;
+    }
+    void* GetRectChangeCallbackContext() const
+    {
+        return rectChangeCallbackRef_;
+    }
+
+    void SetRectChangeCallback(RectChangeFunc&& callback);
+    void UpdateVisibilityOfMenuBarRow(const RefPtr<FrameNode>& menubarRow, const RefPtr<Container>& container);
+protected:
+    virtual ~AppBarView()
+    {
+        if (rectChangeCallbackRef_ && rectCallbackDeleter_) {
+            rectCallbackDeleter_(rectChangeCallbackRef_);
+            rectChangeCallbackRef_ = nullptr;
+            rectCallbackDeleter_ = nullptr;
+        }
+    }
 private:
     RefPtr<FrameNode> BuildMenuBarRow();
     RefPtr<FrameNode> BuildMenuBar();
@@ -75,16 +109,23 @@ private:
     void BindJSContainer();
     void BindMenuCallback(const RefPtr<FrameNode>& menuButton);
     void BindCloseCallback(const RefPtr<FrameNode>& closeButton);
-    void CreateServicePanel(bool firstTry);
+    void CreateServicePanel(bool firstTry, std::map<std::string, std::string>&& params = {});
     void DestroyServicePanel();
     void FireExtensionHostParams();
+    void InitAbilityContextCallback();
+    void FireAbilityCloseEvent(int32_t code);
     static void InitUIExtensionNode(const RefPtr<FrameNode>& uiExtNode);
     static void InitAccessibility(RefPtr<UINode> uiNode);
+    void AddInnerOnSizeChangeCallback(RefPtr<FrameNode> frameNode);
     int32_t sessionId_ = 0;
 
     WeakPtr<FrameNode> atomicService_;
     RefPtr<FrameNode> contentStage_;
     static std::function<RefPtr<FrameNode>(NG::AppBarView* appBar, const RefPtr<FrameNode>& stage)> appBarNodeBuilder_;
+    int64_t lastRectChangeTime_ = 0;
+    void* rectChangeCallbackRef_ = nullptr;
+    RectCallbackDeleter rectCallbackDeleter_ = nullptr;
+    RectChangeFunc rectChangeCallback_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_APP_BAR_VIEW_H

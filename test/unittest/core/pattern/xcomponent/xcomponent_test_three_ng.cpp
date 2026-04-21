@@ -22,12 +22,12 @@
 
 #define private public
 #define protected public
-#include "test/mock/core/common/mock_image_analyzer_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/render/mock_render_surface.h"
-#include "test/mock/core/rosen/testing_canvas_utils.h"
-#include "test/mock/core/manager/mock_display_manager.h"
+#include "test/mock/frameworks/core/common/mock_image_analyzer_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_surface.h"
+#include "test/mock/frameworks/core/rosen/testing_canvas_utils.h"
+#include "test/mock/frameworks/base/display_manager/mock_display_manager.h"
 
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
@@ -493,8 +493,8 @@ HWTEST_F(XComponentTestThreeNg, XComponentSourceTypeTest, TestSize.Level1)
     TouchLocationInfo locationInfoSourceType(0);
     pattern->GetNativeXComponent();
     touchEventInfoSourceType.AddChangedTouchLocationInfo(std::move(locationInfoSourceType));
-    std::vector<SourceType> sourceTypes { SourceType::NONE, SourceType::MOUSE, SourceType::TOUCH, SourceType::TOUCH_PAD,
-        SourceType::KEYBOARD };
+    std::vector<SourceType> sourceTypes { SourceType::NONE, SourceType::MOUSE,
+        SourceType::TOUCH, SourceType::TOUCH_PAD, SourceType::KEYBOARD };
     for (SourceType& sourceType : sourceTypes) {
         touchEventInfoSourceType.SetSourceDevice(sourceType);
         pattern->HandleTouchEvent(touchEventInfoSourceType);
@@ -603,8 +603,8 @@ HWTEST_F(XComponentTestThreeNg, SetAndGetRenderFitBySurfaceIdTest, TestSize.Leve
     pattern->RegisterNode();
     for (int i = 0; i < NUM_SIXTEEN; ++i) {
         for (int j = 0; j < NUM_TWO; ++j) {
-            code = XComponentInnerSurfaceController::SetRenderFitBySurfaceId(SURFACE_ID, g_renderFitCases[i],
-                g_isEnableNewVersionRenderFitCases[j]);
+            code = XComponentInnerSurfaceController::SetRenderFitBySurfaceId(SURFACE_ID,
+                g_renderFitCases[i], g_isEnableNewVersionRenderFitCases[j]);
             EXPECT_EQ(code, 0);
             int32_t renderFitNumber = 0;
             bool isEnable = false;
@@ -621,8 +621,8 @@ HWTEST_F(XComponentTestThreeNg, SetAndGetRenderFitBySurfaceIdTest, TestSize.Leve
     pattern->RegisterNode();
     for (int i = 0; i < NUM_SIXTEEN; ++i) {
         for (int j = 0; j < NUM_TWO; ++j) {
-            code = XComponentInnerSurfaceController::SetRenderFitBySurfaceId(INVALID_SURFACE_ID, g_renderFitCases[i],
-                g_isEnableNewVersionRenderFitCases[j]);
+            code = XComponentInnerSurfaceController::SetRenderFitBySurfaceId(INVALID_SURFACE_ID,
+                g_renderFitCases[i], g_isEnableNewVersionRenderFitCases[j]);
             EXPECT_EQ(code, 1);
             int32_t renderFitNumber = 0;
             bool isEnable = false;

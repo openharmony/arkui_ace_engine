@@ -63,11 +63,11 @@ class ScrollableTargetInfoAccessorTest : public AccessorTestBase<GENERATED_ArkUI
 };
 
 /**
- * @tc.name: ctorTest
+ * @tc.name: constructTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollableTargetInfoAccessorTest, ctorTest, TestSize.Level1)
+HWTEST_F(ScrollableTargetInfoAccessorTest, constructTest, TestSize.Level1)
 {
     auto peer1 = reinterpret_cast<ScrollableTargetInfoPeer*>(this->accessor_->construct());
     auto peer2 = reinterpret_cast<ScrollableTargetInfoPeer*>(this->accessor_->construct());

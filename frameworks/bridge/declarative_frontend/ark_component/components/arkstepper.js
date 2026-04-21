@@ -115,7 +115,7 @@ class StepperOnPreviousModifier extends ModifierWithKey {
 }
 StepperOnPreviousModifier.identity = Symbol('onPrevious');
 
-class JSStepper extends JSViewAbstract {
+class JSStepper extends JSContainerBase {
     static create(params) {
         getUINativeModule().stepper.create(params);
     }
@@ -176,5 +176,5 @@ function exportComponent() {
 function exportView() {
     globalThis.Stepper = JSStepper;
 }
-
-export default { ArkStepperComponent, createComponent, exportComponent, exportView };
+function loadComponent() {}
+export default { ArkStepperComponent, createComponent, exportComponent, exportView, loadComponent };

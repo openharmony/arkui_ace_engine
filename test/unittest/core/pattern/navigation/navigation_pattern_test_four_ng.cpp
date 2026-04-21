@@ -21,6 +21,7 @@
 
 #define protected public
 #define private public
+#include "core/components_ng/manager/force_split/force_split_manager.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_content_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_drag_bar_pattern.h"
@@ -29,10 +30,11 @@
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
 #include "core/components_ng/pattern/stage/page_node.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -220,8 +222,8 @@ HWTEST_F(NavigationPatternTestFourNg, TryForceSplitIfNeeded003, TestSize.Level1)
     SystemProperties::orientation_ = DeviceOrientation::LANDSCAPE;
     auto backupCallback = std::move(windowManager->windowGetModeCallback_);
     windowManager->windowGetModeCallback_ = []() { return WindowMode::WINDOW_MODE_UNDEFINED; };
-    auto key = NavigationManager::DumpMapKey(navigationNode->GetId(), navigationNode->GetDepth());
-    manager->dumpMap_[key] = [](int depth) {};
+    auto key = NavigationManager::TargetNavigationKey(navigationNode->GetId(), navigationNode->GetDepth());
+    manager->targetNavigationMap_[key] = navigationPattern->pageNode_;
     property->UpdateHideNavBar(true);
 
     navigationPattern->TryForceSplitIfNeeded();
@@ -275,8 +277,8 @@ HWTEST_F(NavigationPatternTestFourNg, TryForceSplitIfNeeded004, TestSize.Level1)
     SystemProperties::orientation_ = DeviceOrientation::PORTRAIT;
     auto backupCallback = std::move(windowManager->windowGetModeCallback_);
     windowManager->windowGetModeCallback_ = []() { return WindowMode::WINDOW_MODE_UNDEFINED; };
-    auto key = NavigationManager::DumpMapKey(navigationNode->GetId(), navigationNode->GetDepth());
-    manager->dumpMap_[key] = [](int depth) {};
+    auto key = NavigationManager::TargetNavigationKey(navigationNode->GetId(), navigationNode->GetDepth());
+    manager->targetNavigationMap_[key] = navigationPattern->pageNode_;
     property->UpdateHideNavBar(true);
 
     navigationPattern->TryForceSplitIfNeeded();
@@ -364,8 +366,8 @@ HWTEST_F(NavigationPatternTestFourNg, TryForceSplitIfNeeded006, TestSize.Level1)
     SystemProperties::orientation_ = DeviceOrientation::LANDSCAPE;
     auto backupCallback = std::move(windowManager->windowGetModeCallback_);
     windowManager->windowGetModeCallback_ = []() { return WindowMode::WINDOW_MODE_UNDEFINED; };
-    auto key = NavigationManager::DumpMapKey(navigationNode->GetId(), navigationNode->GetDepth());
-    manager->dumpMap_[key] = [](int depth) {};
+    auto key = NavigationManager::TargetNavigationKey(navigationNode->GetId(), navigationNode->GetDepth());
+    manager->targetNavigationMap_[key] = navigationPattern->pageNode_;
     property->UpdateHideNavBar(true);
 
     navigationPattern->TryForceSplitIfNeeded();
@@ -420,8 +422,8 @@ HWTEST_F(NavigationPatternTestFourNg, TryForceSplitIfNeeded007, TestSize.Level1)
     SystemProperties::orientation_ = DeviceOrientation::PORTRAIT;
     auto backupCallback = std::move(windowManager->windowGetModeCallback_);
     windowManager->windowGetModeCallback_ = []() { return WindowMode::WINDOW_MODE_UNDEFINED; };
-    auto key = NavigationManager::DumpMapKey(navigationNode->GetId(), navigationNode->GetDepth());
-    manager->dumpMap_[key] = [](int depth) {};
+    auto key = NavigationManager::TargetNavigationKey(navigationNode->GetId(), navigationNode->GetDepth());
+    manager->targetNavigationMap_[key] = navigationPattern->pageNode_;
     property->UpdateHideNavBar(true);
 
     navigationPattern->TryForceSplitIfNeeded();

@@ -23,12 +23,12 @@
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/interfaces/native/node/menu_modifier.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
@@ -302,6 +302,7 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItemButton(const RefPtr<Navigat
         padding.SetEdges(CalcLength(BUTTON_PADDING));
         menuItemLayoutProperty->UpdatePadding(padding);
     }
+    menuItemLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     return menuItemNode;
 }
 
@@ -361,7 +362,7 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateBarItemIconNode(
         return iconNode;
     }
     int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    ImageSourceInfo info(barItem.icon.value());
+    ImageSourceInfo info(barItem.icon.value(), barItem.bundleName, barItem.moduleName);
     auto iconNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, nodeId, AceType::MakeRefPtr<ImagePattern>());
     auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
@@ -979,5 +980,28 @@ void NavigationTitleUtil::SetBackButtonText(const RefPtr<TitleBarNode>& titleBar
     } else {
         titleBarPattern->RemoveResObj(key);
     }
+}
+
+void NavigationTitleUtil::InitTextProperty(const RefPtr<TextLayoutProperty>& textLayoutProperty)
+{
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto& textStyle = textLayoutProperty->GetTextLineStyle();
+    CHECK_NULL_VOID(textStyle);
+    textStyle->UpdateOrphanCharOptimization(true);
+    auto hostNode = textLayoutProperty->GetHost();
+    if (CheckNeedFontPadding(hostNode)) {
+        textLayoutProperty->UpdateIncludeFontPadding(true);
+        textLayoutProperty->UpdateFallbackLineSpacing(true);
+    }
+}
+
+bool NavigationTitleUtil::CheckNeedFontPadding(const RefPtr<FrameNode>& textNode)
+{
+    CHECK_NULL_RETURN(textNode, false);
+    auto context = textNode->GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto fontManager = context->GetFontManager();
+    CHECK_NULL_RETURN(fontManager, false);
+    return fontManager->GetFallbackLineSpacingStyleOptimizeFlag();
 }
 } // namespace OHOS::Ace::NG

@@ -166,7 +166,7 @@ HWTEST_F(DecorationStyleAccessorTest, getStyleTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: getColorTest
+ * @tc.name: getColorTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */

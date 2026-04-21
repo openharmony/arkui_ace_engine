@@ -21,8 +21,8 @@
 #define protected public
 #define private public
 
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
@@ -45,8 +45,9 @@ const std::string TEXT_TIMER_FORMAT = "HH:mm:ss.SSS";
 } // namespace
 
 struct TestProperty {
-    std::optional<std::string> format = std::make_optional(TEXT_TIMER_FORMAT);;
+    std::optional<std::string> format = std::make_optional(TEXT_TIMER_FORMAT);
     std::optional<double> inputCount = std::nullopt;
+    std::optional<int32_t> startTime = std::nullopt;
     std::optional<bool> isCountDown = std::nullopt;
     std::optional<Dimension> fontSize = std::nullopt;
     std::optional<Color> textColor = std::nullopt;
@@ -89,6 +90,9 @@ RefPtr<FrameNode> TextTimerBuilderTestNg::CreateTextTimerParagraph(const TestPro
     }
     if (testProperty.isCountDown.has_value()) {
         textTimerModel.SetIsCountDown(testProperty.isCountDown.value());
+    }
+    if (testProperty.startTime.has_value()) {
+        textTimerModel.SetStartTime(testProperty.startTime.value());
     }
     if (testProperty.fontSize.has_value()) {
         textTimerModel.SetFontSize(testProperty.fontSize.value());
@@ -134,11 +138,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest015, TestSize.Level1)
      * @tc.steps: step2. make builderFunc callback
      */
     auto node = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_EQ(false, config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_EQ(false, config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step3. set parameters to pattern builderFunc and call BuildContentModifierNode
@@ -150,11 +154,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest015, TestSize.Level1)
      * @tc.steps: step4. make nextNode callback
      */
     auto nextNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_TRUE(config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_TRUE(config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step5. start timer and check value.
@@ -167,9 +171,9 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest015, TestSize.Level1)
      * @tc.steps: step5. make thirdNode callback
      */
     auto thirdNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(100.0, config.elapsedTime_);
-                return nullptr;
-            };
+        EXPECT_EQ(100.0, config.elapsedTime_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step6. Tick timer and check value.
@@ -202,11 +206,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest016, TestSize.Level1)
      * @tc.steps: step2. make builderFunc callback
      */
     auto node = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_EQ(false, config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_EQ(false, config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step3. set parameters to pattern builderFunc and call BuildContentModifierNode
@@ -218,11 +222,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest016, TestSize.Level1)
      * @tc.steps: step4. make nextNode callback
      */
     auto nextNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_TRUE(config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_TRUE(config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step5. start timer and check value.
@@ -235,9 +239,9 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest016, TestSize.Level1)
      * @tc.steps: step5. make thirdNode callback
      */
     auto thirdNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(150.0, config.elapsedTime_);
-                return nullptr;
-            };
+        EXPECT_EQ(150.0, config.elapsedTime_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step6. Tick timer and check value.
@@ -270,11 +274,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest017, TestSize.Level1)
      * @tc.steps: step2. make builderFunc callback
      */
     auto node = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_EQ(false, config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_EQ(false, config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step3. set parameters to pattern builderFunc and call BuildContentModifierNode
@@ -286,11 +290,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest017, TestSize.Level1)
      * @tc.steps: step4. make nextNode callback
      */
     auto nextNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_TRUE(config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_TRUE(config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step5. start timer and check value.
@@ -303,9 +307,9 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest017, TestSize.Level1)
      * @tc.steps: step5. make thirdNode callback
      */
     auto thirdNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(200.0, config.elapsedTime_);
-                return nullptr;
-            };
+        EXPECT_EQ(200.0, config.elapsedTime_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step6. Tick timer and check value.
@@ -338,11 +342,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest018, TestSize.Level1)
      * @tc.steps: step2. make builderFunc callback
      */
     auto node = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_EQ(false, config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_EQ(false, config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step3. set parameters to pattern builderFunc and call BuildContentModifierNode
@@ -354,11 +358,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest018, TestSize.Level1)
      * @tc.steps: step4. make nextNode callback
      */
     auto nextNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_TRUE(config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_TRUE(config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step5. start timer and check value.
@@ -371,9 +375,9 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest018, TestSize.Level1)
      * @tc.steps: step5. make thirdNode callback
      */
     auto thirdNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(250.0, config.elapsedTime_);
-                return nullptr;
-            };
+        EXPECT_EQ(250.0, config.elapsedTime_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step6. Tick timer and check value.
@@ -406,11 +410,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest019, TestSize.Level1)
      * @tc.steps: step2. make builderFunc callback
      */
     auto node = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_EQ(false, config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_EQ(false, config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step3. set parameters to pattern builderFunc and call BuildContentModifierNode
@@ -422,11 +426,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest019, TestSize.Level1)
      * @tc.steps: step4. make nextNode callback
      */
     auto nextNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_TRUE(config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_TRUE(config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step5. start timer and check value.
@@ -439,9 +443,9 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest019, TestSize.Level1)
      * @tc.steps: step5. make thirdNode callback
      */
     auto thirdNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(300.0, config.elapsedTime_);
-                return nullptr;
-            };
+        EXPECT_EQ(300.0, config.elapsedTime_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step6. Tick timer and check value.
@@ -474,11 +478,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest020, TestSize.Level1)
      * @tc.steps: step2. make builderFunc callback
      */
     auto node = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_EQ(false, config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_EQ(false, config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step3. set parameters to pattern builderFunc and call BuildContentModifierNode
@@ -490,11 +494,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest020, TestSize.Level1)
      * @tc.steps: step4. make nextNode callback
      */
     auto nextNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_TRUE(config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_TRUE(config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step5. start timer and check value.
@@ -507,9 +511,9 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest020, TestSize.Level1)
      * @tc.steps: step5. make thirdNode callback
      */
     auto thirdNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(350.0, config.elapsedTime_);
-                return nullptr;
-            };
+        EXPECT_EQ(350.0, config.elapsedTime_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step6. Tick timer and check value.
@@ -542,11 +546,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest021, TestSize.Level1)
      * @tc.steps: step2. make builderFunc callback
      */
     auto node = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_EQ(false, config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_EQ(false, config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step3. set parameters to pattern builderFunc and call BuildContentModifierNode
@@ -558,11 +562,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest021, TestSize.Level1)
      * @tc.steps: step4. make nextNode callback
      */
     auto nextNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_TRUE(config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_TRUE(config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step5. start timer and check value.
@@ -575,9 +579,9 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest021, TestSize.Level1)
      * @tc.steps: step5. make thirdNode callback
      */
     auto thirdNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(400.0, config.elapsedTime_);
-                return nullptr;
-            };
+        EXPECT_EQ(400.0, config.elapsedTime_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step6. Tick timer and check value.
@@ -610,11 +614,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest022, TestSize.Level1)
      * @tc.steps: step2. make builderFunc callback
      */
     auto node = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_EQ(false, config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_EQ(false, config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step3. set parameters to pattern builderFunc and call BuildContentModifierNode
@@ -626,11 +630,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest022, TestSize.Level1)
      * @tc.steps: step4. make nextNode callback
      */
     auto nextNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_TRUE(config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_TRUE(config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step5. start timer and check value.
@@ -642,9 +646,9 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest022, TestSize.Level1)
      * @tc.steps: step5. make thirdNode callback
      */
     auto thirdNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(450.0, config.elapsedTime_);
-                return nullptr;
-            };
+        EXPECT_EQ(450.0, config.elapsedTime_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step6. Tick timer and check value.
@@ -677,11 +681,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest023, TestSize.Level1)
      * @tc.steps: step2. make builderFunc callback
      */
     auto node = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_EQ(false, config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_EQ(false, config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step3. set parameters to pattern builderFunc and call BuildContentModifierNode
@@ -693,11 +697,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest023, TestSize.Level1)
      * @tc.steps: step4. make nextNode callback
      */
     auto nextNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_TRUE(config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_TRUE(config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step5. start timer and check value.
@@ -709,9 +713,9 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest023, TestSize.Level1)
      * @tc.steps: step5. make thirdNode callback
      */
     auto thirdNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(500.0, config.elapsedTime_);
-                return nullptr;
-            };
+        EXPECT_EQ(500.0, config.elapsedTime_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step6. Tick timer and check value.
@@ -744,11 +748,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest024, TestSize.Level1)
      * @tc.steps: step2. make builderFunc callback
      */
     auto node = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_EQ(false, config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_EQ(false, config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step3. set parameters to pattern builderFunc and call BuildContentModifierNode
@@ -760,11 +764,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest024, TestSize.Level1)
      * @tc.steps: step4. make nextNode callback
      */
     auto nextNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_TRUE(config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_TRUE(config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step5. start timer and check value.
@@ -776,9 +780,9 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest024, TestSize.Level1)
      * @tc.steps: step5. make thirdNode callback
      */
     auto thirdNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(550.0, config.elapsedTime_);
-                return nullptr;
-            };
+        EXPECT_EQ(550.0, config.elapsedTime_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step6. Tick timer and check value.
@@ -811,11 +815,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest025, TestSize.Level1)
      * @tc.steps: step2. make builderFunc callback
      */
     auto node = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_EQ(false, config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_EQ(false, config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step3. set parameters to pattern builderFunc and call BuildContentModifierNode
@@ -827,11 +831,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest025, TestSize.Level1)
      * @tc.steps: step4. make nextNode callback
      */
     auto nextNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_TRUE(config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_TRUE(config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step5. start timer and check value.
@@ -843,9 +847,9 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest025, TestSize.Level1)
      * @tc.steps: step5. make thirdNode callback
      */
     auto thirdNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(600.0, config.elapsedTime_);
-                return nullptr;
-            };
+        EXPECT_EQ(600.0, config.elapsedTime_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step6. Tick timer and check value.
@@ -878,11 +882,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest026, TestSize.Level1)
      * @tc.steps: step2. make builderFunc callback
      */
     auto node = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_EQ(false, config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_EQ(false, config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step3. set parameters to pattern builderFunc and call BuildContentModifierNode
@@ -894,11 +898,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest026, TestSize.Level1)
      * @tc.steps: step4. make nextNode callback
      */
     auto nextNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_TRUE(config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_TRUE(config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step5. start timer and check value.
@@ -910,9 +914,9 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest026, TestSize.Level1)
      * @tc.steps: step5. make thirdNode callback
      */
     auto thirdNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(650.0, config.elapsedTime_);
-                return nullptr;
-            };
+        EXPECT_EQ(650.0, config.elapsedTime_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step6. Tick timer and check value.
@@ -945,11 +949,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest027, TestSize.Level1)
      * @tc.steps: step2. make builderFunc callback
      */
     auto node = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_EQ(false, config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_EQ(false, config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step3. set parameters to pattern builderFunc and call BuildContentModifierNode
@@ -961,11 +965,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest027, TestSize.Level1)
      * @tc.steps: step4. make nextNode callback
      */
     auto nextNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_TRUE(config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_TRUE(config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step5. start timer and check value.
@@ -977,9 +981,9 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest027, TestSize.Level1)
      * @tc.steps: step5. make thirdNode callback
      */
     auto thirdNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(700.0, config.elapsedTime_);
-                return nullptr;
-            };
+        EXPECT_EQ(700.0, config.elapsedTime_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step6. Tick timer and check value.
@@ -1012,11 +1016,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest028, TestSize.Level1)
      * @tc.steps: step2. make builderFunc callback
      */
     auto node = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_EQ(false, config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_EQ(false, config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step3. set parameters to pattern builderFunc and call BuildContentModifierNode
@@ -1028,11 +1032,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest028, TestSize.Level1)
      * @tc.steps: step4. make nextNode callback
      */
     auto nextNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_TRUE(config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_TRUE(config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step5. start timer and check value.
@@ -1044,9 +1048,9 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest028, TestSize.Level1)
      * @tc.steps: step5. make thirdNode callback
      */
     auto thirdNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(750.0, config.elapsedTime_);
-                return nullptr;
-            };
+        EXPECT_EQ(750.0, config.elapsedTime_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step6. Tick timer and check value.
@@ -1079,11 +1083,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest029, TestSize.Level1)
      * @tc.steps: step2. make builderFunc callback
      */
     auto node = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_EQ(false, config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_EQ(false, config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step3. set parameters to pattern builderFunc and call BuildContentModifierNode
@@ -1095,11 +1099,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest029, TestSize.Level1)
      * @tc.steps: step4. make nextNode callback
      */
     auto nextNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_TRUE(config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_TRUE(config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step5. start timer and check value.
@@ -1111,9 +1115,9 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest029, TestSize.Level1)
      * @tc.steps: step5. make thirdNode callback
      */
     auto thirdNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(800.0, config.elapsedTime_);
-                return nullptr;
-            };
+        EXPECT_EQ(800.0, config.elapsedTime_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step6. Tick timer and check value.
@@ -1146,11 +1150,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest030, TestSize.Level1)
      * @tc.steps: step2. make builderFunc callback
      */
     auto node = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_EQ(false, config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_EQ(false, config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step3. set parameters to pattern builderFunc and call BuildContentModifierNode
@@ -1162,11 +1166,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest030, TestSize.Level1)
      * @tc.steps: step4. make nextNode callback
      */
     auto nextNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_TRUE(config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_TRUE(config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step5. start timer and check value.
@@ -1178,9 +1182,9 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest030, TestSize.Level1)
      * @tc.steps: step5. make thirdNode callback
      */
     auto thirdNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(850.0, config.elapsedTime_);
-                return nullptr;
-            };
+        EXPECT_EQ(850.0, config.elapsedTime_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step6. Tick timer and check value.
@@ -1213,11 +1217,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest031, TestSize.Level1)
      * @tc.steps: step2. make builderFunc callback
      */
     auto node = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_EQ(false, config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_EQ(false, config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step3. set parameters to pattern builderFunc and call BuildContentModifierNode
@@ -1229,11 +1233,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest031, TestSize.Level1)
      * @tc.steps: step4. make nextNode callback
      */
     auto nextNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_TRUE(config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_TRUE(config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step5. start timer and check value.
@@ -1245,9 +1249,9 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest031, TestSize.Level1)
      * @tc.steps: step5. make thirdNode callback
      */
     auto thirdNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(900.0, config.elapsedTime_);
-                return nullptr;
-            };
+        EXPECT_EQ(900.0, config.elapsedTime_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step6. Tick timer and check value.
@@ -1280,11 +1284,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest032, TestSize.Level1)
      * @tc.steps: step2. make builderFunc callback
      */
     auto node = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_EQ(false, config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_EQ(false, config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step3. set parameters to pattern builderFunc and call BuildContentModifierNode
@@ -1296,11 +1300,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest032, TestSize.Level1)
      * @tc.steps: step4. make nextNode callback
      */
     auto nextNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_TRUE(config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_TRUE(config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step5. start timer and check value.
@@ -1312,9 +1316,9 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest032, TestSize.Level1)
      * @tc.steps: step5. make thirdNode callback
      */
     auto thirdNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(950.0, config.elapsedTime_);
-                return nullptr;
-            };
+        EXPECT_EQ(950.0, config.elapsedTime_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step6. Tick timer and check value.
@@ -1347,11 +1351,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest033, TestSize.Level1)
      * @tc.steps: step2. make builderFunc callback
      */
     auto node = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_EQ(false, config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_EQ(false, config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step3. set parameters to pattern builderFunc and call BuildContentModifierNode
@@ -1363,11 +1367,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest033, TestSize.Level1)
      * @tc.steps: step4. make nextNode callback
      */
     auto nextNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_TRUE(config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_TRUE(config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step5. start timer and check value.
@@ -1379,9 +1383,9 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest033, TestSize.Level1)
      * @tc.steps: step5. make thirdNode callback
      */
     auto thirdNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(1000.0, config.elapsedTime_);
-                return nullptr;
-            };
+        EXPECT_EQ(1000.0, config.elapsedTime_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step6. Tick timer and check value.
@@ -1414,11 +1418,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest034, TestSize.Level1)
      * @tc.steps: step2. make builderFunc callback
      */
     auto node = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_EQ(false, config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_EQ(false, config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step3. set parameters to pattern builderFunc and call BuildContentModifierNode
@@ -1430,11 +1434,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest034, TestSize.Level1)
      * @tc.steps: step4. make nextNode callback
      */
     auto nextNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_TRUE(config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_TRUE(config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step5. start timer and check value.
@@ -1446,9 +1450,9 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest034, TestSize.Level1)
      * @tc.steps: step5. make thirdNode callback
      */
     auto thirdNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(1050.0, config.elapsedTime_);
-                return nullptr;
-            };
+        EXPECT_EQ(1050.0, config.elapsedTime_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step6. Tick timer and check value.
@@ -1481,11 +1485,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest035, TestSize.Level1)
      * @tc.steps: step2. make builderFunc callback
      */
     auto node = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_EQ(false, config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_EQ(false, config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step3. set parameters to pattern builderFunc and call BuildContentModifierNode
@@ -1497,11 +1501,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest035, TestSize.Level1)
      * @tc.steps: step4. make nextNode callback
      */
     auto nextNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_TRUE(config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_TRUE(config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step5. start timer and check value.
@@ -1513,9 +1517,9 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest035, TestSize.Level1)
      * @tc.steps: step5. make thirdNode callback
      */
     auto thirdNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(1100.0, config.elapsedTime_);
-                return nullptr;
-            };
+        EXPECT_EQ(1100.0, config.elapsedTime_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step6. Tick timer and check value.
@@ -1548,11 +1552,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest036, TestSize.Level1)
      * @tc.steps: step2. make builderFunc callback
      */
     auto node = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_EQ(false, config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_EQ(false, config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step3. set parameters to pattern builderFunc and call BuildContentModifierNode
@@ -1564,11 +1568,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest036, TestSize.Level1)
      * @tc.steps: step4. make nextNode callback
      */
     auto nextNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_TRUE(config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_TRUE(config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step5. start timer and check value.
@@ -1580,9 +1584,9 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest036, TestSize.Level1)
      * @tc.steps: step5. make thirdNode callback
      */
     auto thirdNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(1150.0, config.elapsedTime_);
-                return nullptr;
-            };
+        EXPECT_EQ(1150.0, config.elapsedTime_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step6. Tick timer and check value.
@@ -1615,11 +1619,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest037, TestSize.Level1)
      * @tc.steps: step2. make builderFunc callback
      */
     auto node = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_EQ(false, config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_EQ(false, config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step3. set parameters to pattern builderFunc and call BuildContentModifierNode
@@ -1631,11 +1635,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest037, TestSize.Level1)
      * @tc.steps: step4. make nextNode callback
      */
     auto nextNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_TRUE(config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_TRUE(config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step5. start timer and check value.
@@ -1647,9 +1651,9 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest037, TestSize.Level1)
      * @tc.steps: step5. make thirdNode callback
      */
     auto thirdNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(1200.0, config.elapsedTime_);
-                return nullptr;
-            };
+        EXPECT_EQ(1200.0, config.elapsedTime_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step6. Tick timer and check value.
@@ -1682,11 +1686,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest038, TestSize.Level1)
      * @tc.steps: step2. make builderFunc callback
      */
     auto node = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_EQ(false, config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_EQ(false, config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step3. set parameters to pattern builderFunc and call BuildContentModifierNode
@@ -1698,11 +1702,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest038, TestSize.Level1)
      * @tc.steps: step4. make nextNode callback
      */
     auto nextNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_TRUE(config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_TRUE(config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step5. start timer and check value.
@@ -1714,9 +1718,9 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest038, TestSize.Level1)
      * @tc.steps: step5. make thirdNode callback
      */
     auto thirdNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(1250.0, config.elapsedTime_);
-                return nullptr;
-            };
+        EXPECT_EQ(1250.0, config.elapsedTime_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step6. Tick timer and check value.
@@ -1749,11 +1753,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest039, TestSize.Level1)
      * @tc.steps: step2. make builderFunc callback
      */
     auto node = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_EQ(false, config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_EQ(false, config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step3. set parameters to pattern builderFunc and call BuildContentModifierNode
@@ -1765,11 +1769,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest039, TestSize.Level1)
      * @tc.steps: step4. make nextNode callback
      */
     auto nextNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_TRUE(config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_TRUE(config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step5. start timer and check value.
@@ -1781,9 +1785,9 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest039, TestSize.Level1)
      * @tc.steps: step5. make thirdNode callback
      */
     auto thirdNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(1300.0, config.elapsedTime_);
-                return nullptr;
-            };
+        EXPECT_EQ(1300.0, config.elapsedTime_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step6. Tick timer and check value.
@@ -1816,11 +1820,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest040, TestSize.Level1)
      * @tc.steps: step2. make builderFunc callback
      */
     auto node = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_EQ(false, config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_EQ(false, config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step3. set parameters to pattern builderFunc and call BuildContentModifierNode
@@ -1832,11 +1836,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest040, TestSize.Level1)
      * @tc.steps: step4. make nextNode callback
      */
     auto nextNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_TRUE(config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_TRUE(config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step5. start timer and check value.
@@ -1848,9 +1852,9 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest040, TestSize.Level1)
      * @tc.steps: step5. make thirdNode callback
      */
     auto thirdNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(1350.0, config.elapsedTime_);
-                return nullptr;
-            };
+        EXPECT_EQ(1350.0, config.elapsedTime_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step6. Tick timer and check value.
@@ -1883,11 +1887,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest041, TestSize.Level1)
      * @tc.steps: step2. make builderFunc callback
      */
     auto node = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_EQ(false, config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_EQ(false, config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step3. set parameters to pattern builderFunc and call BuildContentModifierNode
@@ -1899,11 +1903,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest041, TestSize.Level1)
      * @tc.steps: step4. make nextNode callback
      */
     auto nextNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_TRUE(config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_TRUE(config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step5. start timer and check value.
@@ -1915,9 +1919,9 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest041, TestSize.Level1)
      * @tc.steps: step5. make thirdNode callback
      */
     auto thirdNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(1400.0, config.elapsedTime_);
-                return nullptr;
-            };
+        EXPECT_EQ(1400.0, config.elapsedTime_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step6. Tick timer and check value.
@@ -1950,11 +1954,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest042, TestSize.Level1)
      * @tc.steps: step2. make builderFunc callback
      */
     auto node = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_EQ(false, config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_EQ(false, config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step3. set parameters to pattern builderFunc and call BuildContentModifierNode
@@ -1966,11 +1970,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest042, TestSize.Level1)
      * @tc.steps: step4. make nextNode callback
      */
     auto nextNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_TRUE(config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_TRUE(config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step5. start timer and check value.
@@ -1982,9 +1986,9 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest042, TestSize.Level1)
      * @tc.steps: step5. make thirdNode callback
      */
     auto thirdNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(1450.0, config.elapsedTime_);
-                return nullptr;
-            };
+        EXPECT_EQ(1450.0, config.elapsedTime_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step6. Tick timer and check value.
@@ -2017,11 +2021,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest043, TestSize.Level1)
      * @tc.steps: step2. make builderFunc callback
      */
     auto node = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_EQ(false, config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_EQ(false, config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step3. set parameters to pattern builderFunc and call BuildContentModifierNode
@@ -2033,11 +2037,11 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest043, TestSize.Level1)
      * @tc.steps: step4. make nextNode callback
      */
     auto nextNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(true, config.isCountDown_);
-                EXPECT_EQ(20000.0, config.count_);
-                EXPECT_TRUE(config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(true, config.isCountDown_);
+        EXPECT_EQ(20000.0, config.count_);
+        EXPECT_TRUE(config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step5. start timer and check value.
@@ -2049,9 +2053,9 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest043, TestSize.Level1)
      * @tc.steps: step5. make thirdNode callback
      */
     auto thirdNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(1500.0, config.elapsedTime_);
-                return nullptr;
-            };
+        EXPECT_EQ(1500.0, config.elapsedTime_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step6. Tick timer and check value.

@@ -14,12 +14,12 @@
  */
 
 #include "test/unittest/core/pipeline/pipeline_context_test_ng.h"
-#include "test/mock/base/mock_mouse_style.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/common/mock_window.h"
-#include "test/mock/core/pattern/mock_pattern.h"
+#include "test/mock/frameworks/base/mousestyle/mock_mouse_style.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/common/mock_window.h"
+#include "test/mock/frameworks/core/components_ng/pattern/mock_pattern.h"
 
 #include "base/log/dump_log.h"
 #include "base/ressched/ressched_click_optimizer.h"
@@ -50,7 +50,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg057, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     SafeAreaInsets::Inset left { 10, 0 };
     SafeAreaInsets::Inset top { 20, 0 };
     SafeAreaInsets::Inset right { 30, 0 };
@@ -85,7 +85,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg058, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     SafeAreaInsets::Inset left { 10, 0 };
     SafeAreaInsets::Inset top { 20, 0 };
     SafeAreaInsets::Inset right { 30, 0 };
@@ -98,18 +98,18 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg058, TestSize.Level
      */
     bool checkSceneBoardWindow = false;
     context_->minPlatformVersion_ = 9; // Less than PLATFORM_VERSION_TEN (10)
-    
+
     // Save original values
     auto originalCutoutSafeArea = context_->safeAreaManager_->cutoutSafeArea_;
-    
+
     context_->UpdateCutoutSafeAreaWithoutAnimation(cutoutSafeArea, checkSceneBoardWindow);
-    
+
     // Verify that cutoutSafeArea_ was not updated
     EXPECT_EQ(context_->safeAreaManager_->cutoutSafeArea_.left_.start, originalCutoutSafeArea.left_.start);
     EXPECT_EQ(context_->safeAreaManager_->cutoutSafeArea_.top_.start, originalCutoutSafeArea.top_.start);
     EXPECT_EQ(context_->safeAreaManager_->cutoutSafeArea_.right_.start, originalCutoutSafeArea.right_.start);
     EXPECT_EQ(context_->safeAreaManager_->cutoutSafeArea_.bottom_.start, originalCutoutSafeArea.bottom_.start);
-    
+
     // Restore original platform version
     context_->minPlatformVersion_ = 10;
 }
@@ -127,7 +127,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg059, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     SafeAreaInsets::Inset left { 15, 0 };
     SafeAreaInsets::Inset top { 25, 0 };
     SafeAreaInsets::Inset right { 35, 0 };
@@ -140,9 +140,9 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg059, TestSize.Level
      */
     bool checkSceneBoardWindow = false;
     context_->minPlatformVersion_ = 10; // Equal to PLATFORM_VERSION_TEN
-    
+
     context_->UpdateCutoutSafeAreaWithoutAnimation(cutoutSafeArea, checkSceneBoardWindow);
-    
+
     // Verify that cutoutSafeArea_ was updated
     EXPECT_EQ(context_->safeAreaManager_->cutoutSafeArea_.left_.start, 15);
     EXPECT_EQ(context_->safeAreaManager_->cutoutSafeArea_.top_.start, 25);
@@ -166,7 +166,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg060, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     SafeAreaInsets::Inset left { 0, 0 };
     SafeAreaInsets::Inset top { 0, 0 };
     SafeAreaInsets::Inset right { 0, 0 };
@@ -179,9 +179,9 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg060, TestSize.Level
      */
     bool checkSceneBoardWindow = false;
     context_->minPlatformVersion_ = 10;
-    
+
     context_->UpdateCutoutSafeAreaWithoutAnimation(zeroCutoutSafeArea, checkSceneBoardWindow);
-    
+
     // Verify that cutoutSafeArea_ was updated with zero values
     EXPECT_EQ(context_->safeAreaManager_->cutoutSafeArea_.left_.start, 0);
     EXPECT_EQ(context_->safeAreaManager_->cutoutSafeArea_.top_.start, 0);
@@ -202,7 +202,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg061, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     SafeAreaInsets::Inset left { -10, 0 };
     SafeAreaInsets::Inset top { -20, 0 };
     SafeAreaInsets::Inset right { -30, 0 };
@@ -215,9 +215,9 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg061, TestSize.Level
      */
     bool checkSceneBoardWindow = false;
     context_->minPlatformVersion_ = 10;
-    
+
     context_->UpdateCutoutSafeAreaWithoutAnimation(negativeCutoutSafeArea, checkSceneBoardWindow);
-    
+
     // Verify that cutoutSafeArea_ was updated with negative values
     EXPECT_EQ(context_->safeAreaManager_->cutoutSafeArea_.left_.start, -10);
     EXPECT_EQ(context_->safeAreaManager_->cutoutSafeArea_.top_.start, -20);
@@ -238,7 +238,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg062, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     SafeAreaInsets::Inset left { 10000, 0 };
     SafeAreaInsets::Inset top { 20000, 0 };
     SafeAreaInsets::Inset right { 30000, 0 };
@@ -251,9 +251,9 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg062, TestSize.Level
      */
     bool checkSceneBoardWindow = false;
     context_->minPlatformVersion_ = 10;
-    
+
     context_->UpdateCutoutSafeAreaWithoutAnimation(largeCutoutSafeArea, checkSceneBoardWindow);
-    
+
     // Verify that cutoutSafeArea_ was updated with large values
     EXPECT_EQ(context_->safeAreaManager_->cutoutSafeArea_.left_.start, 10000);
     EXPECT_EQ(context_->safeAreaManager_->cutoutSafeArea_.top_.start, 20000);
@@ -274,7 +274,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg063, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     SafeAreaInsets::Inset left { 10, 0 };
     SafeAreaInsets::Inset top { 20, 0 };
     SafeAreaInsets::Inset right { 30, 0 };
@@ -286,13 +286,13 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg063, TestSize.Level
      * @tc.expected: scbNavSafeArea_ is updated with the provided values.
      */
     bool checkSceneBoardWindow = true;
-    
+
     // Ensure scbNavSafeArea_ doesn't have a value initially
     context_->safeAreaManager_->scbNavSafeArea_.reset();
     EXPECT_FALSE(context_->safeAreaManager_->scbNavSafeArea_.has_value());
-    
+
     context_->UpdateNavSafeAreaWithoutAnimation(navSafeArea, checkSceneBoardWindow);
-    
+
     // Verify that scbNavSafeArea_ now has a value and matches the input
     EXPECT_TRUE(context_->safeAreaManager_->scbNavSafeArea_.has_value());
     if (context_->safeAreaManager_->scbNavSafeArea_.has_value()) {
@@ -301,7 +301,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg063, TestSize.Level
         EXPECT_EQ(context_->safeAreaManager_->scbNavSafeArea_.value().right_.start, 30u);
         EXPECT_EQ(context_->safeAreaManager_->scbNavSafeArea_.value().bottom_.start, 40u);
     }
-    
+
     // Verify that navSafeArea_ was not updated (since we took the early return path)
     EXPECT_EQ(context_->safeAreaManager_->navSafeArea_.left_.start, 0u);
     EXPECT_EQ(context_->safeAreaManager_->navSafeArea_.top_.start, 0u);
@@ -322,7 +322,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg064, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     SafeAreaInsets::Inset left { 15, 0 };
     SafeAreaInsets::Inset top { 25, 0 };
     SafeAreaInsets::Inset right { 35, 0 };
@@ -335,18 +335,18 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg064, TestSize.Level
      */
     bool checkSceneBoardWindow = false;
     context_->minPlatformVersion_ = 9; // Less than PLATFORM_VERSION_TEN (10)
-    
+
     // Save original values
     auto originalNavSafeArea = context_->safeAreaManager_->navSafeArea_;
-    
+
     context_->UpdateNavSafeAreaWithoutAnimation(navSafeArea, checkSceneBoardWindow);
-    
+
     // Verify that navSafeArea_ was not updated
     EXPECT_EQ(context_->safeAreaManager_->navSafeArea_.left_.start, originalNavSafeArea.left_.start);
     EXPECT_EQ(context_->safeAreaManager_->navSafeArea_.top_.start, originalNavSafeArea.top_.start);
     EXPECT_EQ(context_->safeAreaManager_->navSafeArea_.right_.start, originalNavSafeArea.right_.start);
     EXPECT_EQ(context_->safeAreaManager_->navSafeArea_.bottom_.start, originalNavSafeArea.bottom_.start);
-    
+
     // Restore original platform version
     context_->minPlatformVersion_ = 10;
 }
@@ -364,7 +364,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg065, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     SafeAreaInsets::Inset left { 20, 0 };
     SafeAreaInsets::Inset top { 30, 0 };
     SafeAreaInsets::Inset right { 40, 0 };
@@ -377,18 +377,18 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg065, TestSize.Level
      */
     bool checkSceneBoardWindow = false;
     context_->minPlatformVersion_ = 10;
-    
+
     // Save original values
     auto originalNavSafeArea = context_->safeAreaManager_->navSafeArea_;
-    
+
     context_->UpdateNavSafeAreaWithoutAnimation(navSafeArea, checkSceneBoardWindow);
-    
+
     // Verify that navSafeArea_ was updated
     EXPECT_EQ(context_->safeAreaManager_->navSafeArea_.left_.start, 20u);
     EXPECT_EQ(context_->safeAreaManager_->navSafeArea_.top_.start, 30u);
     EXPECT_EQ(context_->safeAreaManager_->navSafeArea_.right_.start, 40u);
     EXPECT_EQ(context_->safeAreaManager_->navSafeArea_.bottom_.start, 50u);
-    
+
     // Verify values changed from original
     EXPECT_NE(context_->safeAreaManager_->navSafeArea_.left_.start, originalNavSafeArea.left_.start);
     EXPECT_NE(context_->safeAreaManager_->navSafeArea_.top_.start, originalNavSafeArea.top_.start);
@@ -409,7 +409,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg066, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     SafeAreaInsets::Inset left { 0, 0 };
     SafeAreaInsets::Inset top { 0, 0 };
     SafeAreaInsets::Inset right { 0, 0 };
@@ -422,9 +422,9 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg066, TestSize.Level
      */
     bool checkSceneBoardWindow = false;
     context_->minPlatformVersion_ = 10;
-    
+
     context_->UpdateNavSafeAreaWithoutAnimation(zeroNavSafeArea, checkSceneBoardWindow);
-    
+
     // Verify that navSafeArea_ was updated with zero values
     EXPECT_EQ(context_->safeAreaManager_->navSafeArea_.left_.start, 0u);
     EXPECT_EQ(context_->safeAreaManager_->navSafeArea_.top_.start, 0u);
@@ -445,7 +445,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg067, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     SafeAreaInsets::Inset left { UINT32_MAX, 0 };
     SafeAreaInsets::Inset top { UINT32_MAX, 0 };
     SafeAreaInsets::Inset right { UINT32_MAX, 0 };
@@ -458,9 +458,9 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg067, TestSize.Level
      */
     bool checkSceneBoardWindow = false;
     context_->minPlatformVersion_ = 10;
-    
+
     context_->UpdateNavSafeAreaWithoutAnimation(maxNavSafeArea, checkSceneBoardWindow);
-    
+
     // Verify that navSafeArea_ was updated with maximum values
     EXPECT_EQ(context_->safeAreaManager_->navSafeArea_.left_.start, UINT32_MAX);
     EXPECT_EQ(context_->safeAreaManager_->navSafeArea_.top_.start, UINT32_MAX);
@@ -481,7 +481,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg068, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     SafeAreaInsets::Inset left { 100, 0 };
     SafeAreaInsets::Inset top { 0, 0 };
     SafeAreaInsets::Inset right { 200, 0 };
@@ -494,18 +494,18 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg068, TestSize.Level
      */
     bool checkSceneBoardWindow = false;
     context_->minPlatformVersion_ = 10;
-    
+
     // Save original values
     auto originalNavSafeArea = context_->safeAreaManager_->navSafeArea_;
-    
+
     context_->UpdateNavSafeAreaWithoutAnimation(mixedNavSafeArea, checkSceneBoardWindow);
-    
+
     // Verify that navSafeArea_ was updated with mixed values
     EXPECT_EQ(context_->safeAreaManager_->navSafeArea_.left_.start, 100u);
     EXPECT_EQ(context_->safeAreaManager_->navSafeArea_.top_.start, 0u);
     EXPECT_EQ(context_->safeAreaManager_->navSafeArea_.right_.start, 200u);
     EXPECT_EQ(context_->safeAreaManager_->navSafeArea_.bottom_.start, 0u);
-    
+
     // Verify some values changed from original
     EXPECT_NE(context_->safeAreaManager_->navSafeArea_.left_.start, originalNavSafeArea.left_.start);
     EXPECT_NE(context_->safeAreaManager_->navSafeArea_.right_.start, originalNavSafeArea.right_.start);
@@ -524,20 +524,20 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg069, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     /**
      * @tc.steps: 2. Save original keyboard inset value.
      * @tc.expected: Original value can be retrieved.
      */
     auto originalKeyboardInset = context_->safeAreaManager_->keyboardInset_;
-    
+
     /**
      * @tc.steps: 3. Call CheckAndUpdateKeyboardInset with a provided value.
      * @tc.expected: keyboardInset_ is updated with the normal value.
      */
     float testKeyboardHeight = 100.0f;
     context_->CheckAndUpdateKeyboardInset(testKeyboardHeight);
-    
+
     EXPECT_NE(context_->safeAreaManager_->keyboardInset_.start, testKeyboardHeight);
     EXPECT_EQ(context_->safeAreaManager_->keyboardInset_.start, originalKeyboardInset.start);
 }
@@ -555,20 +555,20 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg070, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     /**
      * @tc.steps: 2. Save original keyboard inset value.
      * @tc.expected: Original value can be retrieved.
      */
     auto originalKeyboardInset = context_->safeAreaManager_->keyboardInset_;
-    
+
     /**
      * @tc.steps: 3. Call CheckAndUpdateKeyboardInset with zero value.
      * @tc.expected: keyboardInset_ is updated with zero value.
      */
     float testKeyboardHeight = 0.0f;
     context_->CheckAndUpdateKeyboardInset(testKeyboardHeight);
-    
+
     // Verify that keyboardInset_ was updated with zero value
     EXPECT_EQ(context_->safeAreaManager_->keyboardInset_.start, testKeyboardHeight);
     if (originalKeyboardInset.start != 0.0f) {
@@ -589,7 +589,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg071, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     /**
      * @tc.steps: 2. Get the default keyboard offset value.
      * @tc.expected: Default value is 0.0f.
@@ -611,14 +611,14 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg072, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     /**
      * @tc.steps: 2. Set keyboard offset to a positive value.
      * @tc.expected: Value is set successfully.
      */
     float testOffset = 100.5f;
     context_->safeAreaManager_->UpdateKeyboardSafeArea(testOffset);
-    
+
     /**
      * @tc.steps: 3. Get the keyboard offset value.
      * @tc.expected: The retrieved value does not match the set value.
@@ -640,14 +640,14 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg073, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     /**
      * @tc.steps: 2. Set keyboard offset to zero.
      * @tc.expected: Value is set successfully.
      */
     float testOffset = 0.0f;
     context_->safeAreaManager_->UpdateKeyboardSafeArea(testOffset);
-    
+
     /**
      * @tc.steps: 3. Get the keyboard offset value.
      * @tc.expected: Retrieved value is zero.
@@ -670,7 +670,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg074, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     /**
      * @tc.steps: 2. Set page avoid offset to near zero and disable keyboard safe area.
      * @tc.expected: Function returns true because NearZero(GetPageAvoidOffset()) is true.
@@ -679,7 +679,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg074, TestSize.Level
     context_->safeAreaManager_->UpdateKeyboardOffset(0.0f);
     // Disable keyboard safe area by setting keyboard inset to zero
     context_->safeAreaManager_->UpdateKeyboardSafeArea(0);
-    
+
     bool result = context_->CheckNeedAvoidInSubWindow();
     EXPECT_FALSE(result);
 }
@@ -698,7 +698,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg075, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     /**
      * @tc.steps: 2. Set page avoid offset to non-zero and disable keyboard safe area.
      * @tc.expected: Function returns false because NearZero(GetPageAvoidOffset())
@@ -708,7 +708,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg075, TestSize.Level
     context_->safeAreaManager_->UpdateKeyboardOffset(100.0f);
     // Disable keyboard safe area by setting keyboard inset to zero
     context_->safeAreaManager_->UpdateKeyboardSafeArea(0);
-    
+
     bool result = context_->CheckNeedAvoidInSubWindow();
     EXPECT_TRUE(result);
 }
@@ -727,7 +727,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg076, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     /**
      * @tc.steps: 2. Set page avoid offset to near zero, enable keyboard safe area,
      * and set keyboard inset to zero.
@@ -738,7 +738,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg076, TestSize.Level
     context_->safeAreaManager_->UpdateKeyboardOffset(0.0f);
     // Set keyboard inset to zero
     context_->safeAreaManager_->UpdateKeyboardSafeArea(0);
-    
+
     bool result = context_->CheckNeedAvoidInSubWindow();
     EXPECT_FALSE(result);
 }
@@ -757,7 +757,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg077, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     /**
      * @tc.steps: 2. Set page avoid offset to near zero, enable
      * keyboard safe area, and set keyboard inset to positive value.
@@ -768,7 +768,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg077, TestSize.Level
     context_->safeAreaManager_->UpdateKeyboardOffset(0.0f);
     // Set keyboard inset to positive value
     context_->safeAreaManager_->UpdateKeyboardSafeArea(50);
-    
+
     bool result = context_->CheckNeedAvoidInSubWindow();
     EXPECT_FALSE(result);
 }
@@ -786,7 +786,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg078, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     /**
      * @tc.steps: 2. Set page avoid offset to negative value and enable
      * keyboard safe area with positive keyboard inset.
@@ -796,7 +796,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg078, TestSize.Level
     context_->safeAreaManager_->UpdateKeyboardOffset(-50.0f);
     // Set keyboard inset to positive value
     context_->safeAreaManager_->UpdateKeyboardSafeArea(30);
-    
+
     bool result = context_->CheckNeedAvoidInSubWindow();
     EXPECT_TRUE(result);
 }
@@ -814,7 +814,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg079, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     /**
      * @tc.steps: 2. Set page avoid offset to very small positive value and
      * enable keyboard safe area with zero keyboard inset.
@@ -825,7 +825,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg079, TestSize.Level
     context_->safeAreaManager_->UpdateKeyboardOffset(0.000001f);
     // Set keyboard inset to zero
     context_->safeAreaManager_->UpdateKeyboardSafeArea(0);
-    
+
     bool result = context_->CheckNeedAvoidInSubWindow();
     EXPECT_FALSE(result);
 }
@@ -843,7 +843,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg080, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     /**
      * @tc.steps: 2. Set page avoid offset to large value and enable
      * keyboard safe area with positive keyboard inset.
@@ -853,7 +853,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg080, TestSize.Level
     context_->safeAreaManager_->UpdateKeyboardOffset(10000.0f);
     // Set keyboard inset to positive value
     context_->safeAreaManager_->UpdateKeyboardSafeArea(100);
-    
+
     bool result = context_->CheckNeedAvoidInSubWindow();
     EXPECT_TRUE(result);
 }
@@ -871,7 +871,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg081, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     /**
      * @tc.steps: 2. Set page avoid offset to maximum float value
      * and enable keyboard safe area with positive keyboard inset.
@@ -881,7 +881,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg081, TestSize.Level
     context_->safeAreaManager_->UpdateKeyboardOffset(FLT_MAX);
     // Set keyboard inset to positive value
     context_->safeAreaManager_->UpdateKeyboardSafeArea(200);
-    
+
     bool result = context_->CheckNeedAvoidInSubWindow();
     EXPECT_TRUE(result);
 }
@@ -899,7 +899,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg082, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     /**
      * @tc.steps: 2. Set page avoid offset to minimum float value and
      * enable keyboard safe area with positive keyboard inset.
@@ -909,7 +909,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg082, TestSize.Level
     context_->safeAreaManager_->UpdateKeyboardOffset(FLT_MIN);
     // Set keyboard inset to positive value
     context_->safeAreaManager_->UpdateKeyboardSafeArea(150);
-    
+
     bool result = context_->CheckNeedAvoidInSubWindow();
     EXPECT_FALSE(result);
 }
@@ -927,7 +927,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg083, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     /**
      * @tc.steps: 2. Set page avoid offset to near zero, enable keyboard safe area,
      * and set keyboard inset to zero.
@@ -937,7 +937,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg083, TestSize.Level
     context_->safeAreaManager_->UpdateKeyboardOffset(0.0f);
     // Set keyboard inset to zero
     context_->safeAreaManager_->UpdateKeyboardSafeArea(0);
-    
+
     bool result = context_->CheckNeedAvoidInSubWindow();
     EXPECT_FALSE(result);
 }
@@ -956,11 +956,11 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg085, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     // Create and set up a mock text field manager
     auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
     context_->textFieldManager_ = textFieldManager;
-    
+
     /**
      * @tc.steps: 2. Test branch: manager->GetIfFocusTextFieldIsInline() is true.
      * @tc.expected: positionY is calculated using GetClickPosition() minus keyboardOffset.
@@ -968,11 +968,11 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg085, TestSize.Level
     textFieldManager->SetIfFocusTextFieldIsInline(true);
     textFieldManager->SetClickPosition(Offset(100.0f, 200.0f));
     context_->safeAreaManager_->UpdateKeyboardOffset(50.0f);
-    auto textFieldTest = -146;
+    auto textFieldTest = -346;
 
     // Call AvoidanceLogic with parameters that will not trigger keyboard avoidance
     context_->AvoidanceLogic(100.0f, nullptr, 30.0f, true);
-    
+
     // Verify that the keyboard safe area was updated
     EXPECT_EQ(context_->safeAreaManager_->keyboardOffset_, textFieldTest);
 }
@@ -991,23 +991,23 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg086, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
     context_->textFieldManager_ = textFieldManager;
-    
+
     /**
      * @tc.steps: 2. Test branch: manager->GetIfFocusTextFieldIsInline() is false.
      * @tc.expected: positionY is calculated using GetFocusedNodeCaretRect().Top().
      */
     textFieldManager->SetIfFocusTextFieldIsInline(false);
     context_->safeAreaManager_->UpdateKeyboardOffset(20.0f); // Safe area keyboard offset = 20
-    
+
     // Call AvoidanceLogic
     context_->AvoidanceLogic(80.0f, nullptr, 40.0f, true);
-    
+
     // Verify keyboard safe area was updated
     EXPECT_EQ(context_->safeAreaManager_->keyboardOffset_, -116);
-    
+
     // The positionY should be calculated as caretRect.Top() - keyboardOffset = 300 - 20 = 280
     // Since 280 + 40 = 320 and assuming rootHeight_ > 320 + 80, offset should remain 0
     EXPECT_FLOAT_EQ(context_->safeAreaManager_->keyboardOffset_, -116.0f);
@@ -1026,10 +1026,10 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg087, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
     context_->textFieldManager_ = textFieldManager;
-    
+
     /**
      * @tc.steps: 2. Test branch: manager->IsScrollableChild() is true and
      * condition rootHeight_ - positionY - safeHeight - bottomLen < 0 is met.
@@ -1038,19 +1038,19 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg087, TestSize.Level
     textFieldManager->SetIfFocusTextFieldIsInline(true);
     textFieldManager->SetClickPosition(Offset(100.0f, 750.0f)); // High Y position
     context_->safeAreaManager_->UpdateKeyboardOffset(0.0f);
-    
+
     // Mock navigation safe area with bottom length
     SafeAreaInsets::Inset bottom { 0, 4 };
     context_->safeAreaManager_->keyboardInset_ = bottom;
-    
+
     // Set root height to be smaller than positionY + safeHeight + bottomLen
     context_->rootHeight_ = 800.0f; // Smaller than 750 + 60 + 20 = 830
-    
+
     // Use a large safeHeight that would trigger the recalculation
     context_->AvoidanceLogic(100.0f, nullptr, 60.0f, true);
-    
+
     // Verify keyboard safe area was updated
-    EXPECT_EQ(context_->safeAreaManager_->keyboardOffset_, 0);
+    EXPECT_EQ(context_->safeAreaManager_->keyboardOffset_, -126);
 }
 
 /**
@@ -1067,10 +1067,10 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg088, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
     context_->textFieldManager_ = textFieldManager;
-    
+
     /**
      * @tc.steps: 2. Test branch: positionY + safeHeight > rootHeight_ - keyboardHeight.
      * @tc.expected: UpdateKeyboardOffset is called with calculated negative value.
@@ -1080,11 +1080,11 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg088, TestSize.Level
     context_->rootHeight_ = 800.0f; // Root height = 800
     context_->safeAreaManager_->UpdateKeyboardOffset(0.0f);
     context_->AvoidanceLogic(100.0f, nullptr, 30.0f, true);
-    
-    EXPECT_FLOAT_EQ(context_->safeAreaManager_->keyboardOffset_, 0.0f);
-    
+
+    EXPECT_FLOAT_EQ(context_->safeAreaManager_->keyboardOffset_, -46.0f);
+
     // Verify keyboard safe area was updated
-    EXPECT_EQ(context_->safeAreaManager_->keyboardOffset_, 0);
+    EXPECT_EQ(context_->safeAreaManager_->keyboardOffset_, -46);
 }
 
 /**
@@ -1100,10 +1100,10 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg089, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
     context_->textFieldManager_ = textFieldManager;
-    
+
     /**
      * @tc.steps: 2. Test with minimum values where NearZero(keyboardHeight) condition is met.
      * @tc.expected: Keyboard offset is set to 0.0f.
@@ -1111,10 +1111,10 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg089, TestSize.Level
     textFieldManager->SetIfFocusTextFieldIsInline(true);
     textFieldManager->SetClickPosition(Offset(100.0f, 100.0f));
     context_->AvoidanceLogic(0.0f, nullptr, 30.0f, true);
-    
+
     // When keyboardHeight is near zero, the offset should be 0 regardless of other conditions
     EXPECT_FLOAT_EQ(context_->safeAreaManager_->keyboardOffset_, 0.0f);
-    
+
     // Verify keyboard safe area was updated (to 0)
     EXPECT_EQ(context_->safeAreaManager_->keyboardOffset_, 0);
 }
@@ -1133,10 +1133,10 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg090, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
     context_->textFieldManager_ = textFieldManager;
-    
+
     /**
      * @tc.steps: 2. Test the scrollResult branch where FlushUITasks()
      * is called after scrolling.
@@ -1145,10 +1145,10 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg090, TestSize.Level
      */
     textFieldManager->SetIfFocusTextFieldIsInline(false);
     context_->AvoidanceLogic(80.0f, nullptr, 40.0f, true);
-    
+
     // Verify that the keyboard safe area was updated
     EXPECT_EQ(context_->safeAreaManager_->keyboardOffset_, 0);
-    
+
     // The offset should be 0 since 200 (caret top) + 40 <= 800 (rootHeight_) - 80
     EXPECT_FLOAT_EQ(context_->safeAreaManager_->keyboardOffset_, 0);
 }
@@ -1167,10 +1167,10 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg091, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
     context_->textFieldManager_ = textFieldManager;
-    
+
     /**
      * @tc.steps: 2. Test with zero navigation safe area bottom length.
      * @tc.expected: bottomLen should be 0.
@@ -1178,29 +1178,29 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg091, TestSize.Level
     textFieldManager->SetIfFocusTextFieldIsInline(true);
     textFieldManager->SetClickPosition(Offset(100.0f, 700.0f));
     context_->safeAreaManager_->UpdateKeyboardOffset(0.0f);
-    
+
     // Mock navigation safe area with zero bottom length
     SafeAreaInsets::Inset bottom { 0, 4 };
     context_->safeAreaManager_->keyboardInset_ = bottom;
-    
+
     context_->rootHeight_ = 800.0f;
-    
+
     // With high positionY and scrollable child, safeHeight should be recalculated if needed
     context_->AvoidanceLogic(100.0f, nullptr, 150.0f, true);
-    
+
     // Verify that the keyboard safe area was updated
-    EXPECT_EQ(context_->safeAreaManager_->keyboardOffset_, 0);
-    
+    EXPECT_EQ(context_->safeAreaManager_->keyboardOffset_, -166);
+
     /**
      * @tc.steps: 3. Test with zero safeHeight.
      * @tc.expected: Calculations work with zero safeHeight.
      */
     textFieldManager->SetClickPosition(Offset(100.0f, 200.0f));
     context_->AvoidanceLogic(50.0f, nullptr, 0.0f, true);
-    
+
     // Verify keyboard safe area was updated
     EXPECT_EQ(context_->safeAreaManager_->keyboardOffset_, 0);
-    
+
     /**
      * @tc.steps: 4. Test with keyboard height that results in
      * positionY + safeHeight <= rootHeight_ - keyboardHeight.
@@ -1209,7 +1209,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg091, TestSize.Level
     textFieldManager->SetIfFocusTextFieldIsInline(true);
     textFieldManager->SetClickPosition(Offset(100.0f, 100.0f));
     context_->AvoidanceLogic(50.0f, nullptr, 30.0f, true);
-    
+
     // This should result in 0 offset since condition is false
     EXPECT_FLOAT_EQ(context_->safeAreaManager_->keyboardOffset_, 0.0f);
 }
@@ -1227,10 +1227,10 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg092, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
     context_->textFieldManager_ = textFieldManager;
-    
+
     /**
      * @tc.steps: 2. Test branch: UsingCaretAvoidMode() returns true.
      * @tc.expected: OnCaretPositionChangeOrKeyboardHeightChange is called.
@@ -1238,19 +1238,19 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg092, TestSize.Level
     // Set up a mock container that can return true for UsingCaretAvoidMode
     auto mockContainer = MockContainer::Current();
     ASSERT_NE(mockContainer, nullptr);
-    
+
     float keyboardHeight = 100.0f;
     double positionY = 200.0;
     double height = 50.0;
     // Use a null shared_ptr since RSTransaction is forward declared
     std::shared_ptr<Rosen::RSTransaction> rsTransaction = nullptr;
     bool forceChange = false;
-    
+
     // Since we can't mock UsingCaretAvoidMode directly, we'll test the path by setting up conditions
     // that would cause the caret mode to be used if it were enabled
     context_->OnVirtualKeyboardHeightChange(keyboardHeight, positionY, height,
         rsTransaction, forceChange);
-    
+
     // Verify that the function completes without crashing
     EXPECT_EQ(context_->safeAreaManager_->keyboardOffset_, 0); // Placeholder assertion
 }
@@ -1268,10 +1268,10 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg093, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
     context_->textFieldManager_ = textFieldManager;
-    
+
     /**
      * @tc.steps: 2. Set up keyboard inset to match keyboardHeight with tolerance.
      * @tc.expected: Function returns early due to NearEqual condition.
@@ -1279,23 +1279,23 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg093, TestSize.Level
     // Update keyboard inset to be keyboardHeight to test the first NearEqual condition
     float keyboardHeight = 100.0f;
     context_->safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
-    
+
     // Set previous keyboard avoid mode and PrevHasTextFieldPattern to true
     context_->prevKeyboardAvoidMode_ = context_->safeAreaManager_->GetKeyBoardAvoidMode();
     textFieldManager->UpdatePrevHasTextFieldPattern();
-    
+
     double positionY = 200.0;
     double height = 50.0;
     std::shared_ptr<Rosen::RSTransaction> rsTransaction = nullptr;
     bool forceChange = false; // Not forcing change to trigger the NearEqual condition
-    
+
     // Call OnVirtualKeyboardHeightChange with parameters that will trigger NearEqual condition
     context_->OnVirtualKeyboardHeightChange(keyboardHeight, positionY, height,
         rsTransaction, forceChange);
-    
+
     // Verify that keyboard safe area was updated
     EXPECT_EQ(context_->safeAreaManager_->keyboardOffset_, 0);
-    
+
     /**
      * @tc.steps: 3. Test with keyboardHeight + 1 to trigger tolerance check.
      * @tc.expected: Function returns early due to NearEqual condition with +1 tolerance.
@@ -1303,13 +1303,13 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg093, TestSize.Level
     context_->safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight + 1.0f);
     context_->prevKeyboardAvoidMode_ = context_->safeAreaManager_->GetKeyBoardAvoidMode();
     textFieldManager->UpdatePrevHasTextFieldPattern();
-    
+
     context_->OnVirtualKeyboardHeightChange(keyboardHeight, positionY, height,
         rsTransaction, forceChange);
-    
+
     // Verify that the function handled the condition properly
     EXPECT_EQ(context_->safeAreaManager_->keyboardOffset_, 0);
-    
+
     /**
      * @tc.steps: 4. Test with keyboardHeight - 1 to trigger tolerance check.
      * @tc.expected: Function returns early due to NearEqual condition with -1 tolerance.
@@ -1317,10 +1317,10 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg093, TestSize.Level
     context_->safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight - 1.0f);
     context_->prevKeyboardAvoidMode_ = context_->safeAreaManager_->GetKeyBoardAvoidMode();
     textFieldManager->UpdatePrevHasTextFieldPattern();
-    
+
     context_->OnVirtualKeyboardHeightChange(keyboardHeight, positionY, height,
         std::static_pointer_cast<Rosen::RSTransaction>(rsTransaction), forceChange);
-    
+
     // Verify that the function handled the condition properly
     EXPECT_EQ(context_->safeAreaManager_->keyboardOffset_, 0);
 }
@@ -1338,27 +1338,27 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg094, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
     context_->textFieldManager_ = textFieldManager;
-    
+
     /**
      * @tc.steps: 2. Set up to trigger UsingCustomKeyboardAvoid branch.
      * @tc.expected: Function returns early with "Using Custom Avoid Instead" log.
      */
     // Mock UsingCustomKeyboardAvoid to return true by setting internal state
     textFieldManager->SetUsingCustomKeyboardAvoid(true);
-    
+
     float keyboardHeight = 100.0f;
     double positionY = 200.0;
     double height = 50.0;
     std::shared_ptr<Rosen::RSTransaction> rsTransaction = nullptr;
     bool forceChange = false;
-    
+
     // Call OnVirtualKeyboardHeightChange with parameters that will trigger custom keyboard avoid
     context_->OnVirtualKeyboardHeightChange(keyboardHeight, positionY, height,
         rsTransaction, forceChange);
-    
+
     // Since it returns early, no additional state changes should occur
     EXPECT_EQ(context_->safeAreaManager_->keyboardOffset_, 0);
 }
@@ -1376,26 +1376,26 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg095, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
     context_->textFieldManager_ = textFieldManager;
-    
+
     /**
      * @tc.steps: 2. Test with keyboardHeight >= rootHeight_.
      * @tc.expected: Function returns early with "Keyboard higher than whole rootrect" log.
      */
     context_->rootHeight_ = 500.0f;
     float keyboardHeight = 600.0f;
-    
+
     double positionY = 200.0;
     double height = 50.0;
     std::shared_ptr<Rosen::RSTransaction> rsTransaction = nullptr;
     bool forceChange = false;
-    
+
     // Call OnVirtualKeyboardHeightChange with keyboard higher than root
     context_->OnVirtualKeyboardHeightChange(keyboardHeight, positionY, height,
         rsTransaction, forceChange);
-    
+
     // Verify that the function returned early without processing
     EXPECT_EQ(context_->safeAreaManager_->keyboardOffset_, 0);
 }
@@ -1413,10 +1413,10 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg096, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
     context_->textFieldManager_ = textFieldManager;
-    
+
     /**
      * @tc.steps: 2. Test with forceChange = true to bypass NearEqual checks.
      * @tc.expected: Function continues execution even with same keyboard height.
@@ -1424,16 +1424,16 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg096, TestSize.Level
     float keyboardHeight = 100.0f;
     // Set the same keyboard height in safe area to test forceChange bypass
     context_->safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
-    
+
     double positionY = 200.0;
     double height = 50.0;
     std::shared_ptr<Rosen::RSTransaction> rsTransaction = nullptr;
     bool forceChange = true;
-    
+
     // Call OnVirtualKeyboardHeightChange with forceChange = true
     context_->OnVirtualKeyboardHeightChange(keyboardHeight, positionY, height,
         rsTransaction, forceChange);
-    
+
     // Verify that the function executed despite keyboard height being the same
     EXPECT_EQ(context_->safeAreaManager_->keyboardOffset_, 0);
 }
@@ -1451,10 +1451,10 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg097, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
     context_->textFieldManager_ = textFieldManager;
-    
+
     /**
      * @tc.steps: 2. Test with minimum float keyboard height value.
      * @tc.expected: Function handles minimum value without issues.
@@ -1464,14 +1464,14 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg097, TestSize.Level
     double height = 50.0;
     std::shared_ptr<Rosen::RSTransaction> rsTransaction = nullptr;
     bool forceChange = false;
-    
+
     // Call OnVirtualKeyboardHeightChange with minimum keyboard height
     context_->OnVirtualKeyboardHeightChange(keyboardHeight, positionY, height,
         rsTransaction, forceChange);
-    
+
     // Verify that the keyboard safe area was updated with the minimum value
     EXPECT_FLOAT_EQ(context_->safeAreaManager_->keyboardOffset_, 0);
-    
+
     /**
      * @tc.steps: 3. Test with zero keyboard height.
      * @tc.expected: Function handles zero value properly.
@@ -1479,7 +1479,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg097, TestSize.Level
     keyboardHeight = 0.0f;
     context_->OnVirtualKeyboardHeightChange(keyboardHeight, positionY, height,
         rsTransaction, forceChange);
-    
+
     // Verify that the keyboard safe area was updated with zero
     EXPECT_FLOAT_EQ(context_->safeAreaManager_->keyboardOffset_, 0);
 }
@@ -1497,10 +1497,10 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg098, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
     context_->textFieldManager_ = textFieldManager;
-    
+
     /**
      * @tc.steps: 2. Test with maximum float keyboard height value.
      * @tc.expected: Function handles maximum value without issues.
@@ -1510,19 +1510,19 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg098, TestSize.Level
     double height = 50.0;
     std::shared_ptr<Rosen::RSTransaction> rsTransaction = nullptr;
     bool forceChange = true; // Use forceChange to ensure execution
-    
+
     // Temporarily increase rootHeight_ to allow keyboardHeight < rootHeight_ condition
     float originalRootHeight = context_->rootHeight_;
     context_->rootHeight_ = FLT_MAX; // Set root height to maximum to allow the keyboard height
-    
+
     // Call OnVirtualKeyboardHeightChange with maximum keyboard height
     context_->safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
     context_->OnVirtualKeyboardHeightChange(keyboardHeight, positionY, height,
         rsTransaction, forceChange);
-    
+
     // Verify that the keyboard safe area was updated
     EXPECT_FLOAT_EQ(context_->safeAreaManager_->keyboardOffset_, 0);
-    
+
     // Restore original root height
     context_->rootHeight_ = originalRootHeight;
 }
@@ -1540,10 +1540,10 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg099, TestSize.Level
      */
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
-    
+
     auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
     context_->textFieldManager_ = textFieldManager;
-    
+
     /**
      * @tc.steps: 2. Test with large positionY and height values
      * that might trigger boundary conditions.
@@ -1554,11 +1554,11 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg099, TestSize.Level
     double height = 500.0;
     std::shared_ptr<Rosen::RSTransaction> rsTransaction = nullptr;
     bool forceChange = true;
-    
+
     // Call OnVirtualKeyboardHeightChange with large values
     context_->OnVirtualKeyboardHeightChange(keyboardHeight, positionY, height,
         rsTransaction, forceChange);
-    
+
     // Verify that the keyboard safe area was updated
     EXPECT_FLOAT_EQ(context_->safeAreaManager_->keyboardOffset_, -100);
 }

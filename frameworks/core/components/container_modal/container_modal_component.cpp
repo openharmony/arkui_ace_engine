@@ -266,7 +266,10 @@ std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool is
         isFloating ? FLOATING_TITLE_ROW : TITLE_ROW);
 
     // title control button
-    auto windowManager = context_.Upgrade()->GetWindowManager();
+    std::list<RefPtr<Component>> titleChildren;
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, titleChildren);
+    auto windowManager = context->GetWindowManager();
     auto leftSplitButton = isFocus ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_SPLIT_LEFT
                                    : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_SPLIT_LEFT;
     auto titleLeftSplitButton = BuildControlButton(leftSplitButton, [windowManager]() {
@@ -310,7 +313,6 @@ std::list<RefPtr<Component>> ContainerModalComponent::BuildTitleChildren(bool is
                 windowManager->WindowClose();
             }
         }, isFocus, isFloating);
-    std::list<RefPtr<Component>> titleChildren;
     titleChildren.emplace_back(SetPadding(titleIcon_, TITLE_PADDING_START, TITLE_ELEMENT_MARGIN_HORIZONTAL));
     if (isDeclarative_) {
         auto inspectorTitle = AceType::MakeRefPtr<V2::InspectorComposedComponent>(

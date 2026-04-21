@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text_field/text_selector.h"
+#include "core/components_ng/pattern/text/text_model.h"
 
 #ifdef WEB_SUPPORTED
 #include "arkweb_utils.h"
@@ -686,7 +687,7 @@ void SetOnTitleReceiveImpl(Ark_NativePointer node,
 #endif // WEB_SUPPORTED
 }
 void SetOnGeolocationHideImpl(Ark_NativePointer node,
-                              const Opt_Callback_Void* value)
+                              const Opt_synthetic_Callback_Void* value)
 {
 #ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -726,7 +727,7 @@ void SetOnGeolocationShowImpl(Ark_NativePointer node,
 #endif // WEB_SUPPORTED
 }
 void SetOnRequestSelectedImpl(Ark_NativePointer node,
-                              const Opt_Callback_Void* value)
+                              const Opt_synthetic_Callback_Void* value)
 {
 #ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -984,7 +985,7 @@ void SetOnResourceLoadImpl(Ark_NativePointer node,
 #endif // WEB_SUPPORTED
 }
 void SetOnFullScreenExitImpl(Ark_NativePointer node,
-                             const Opt_Callback_Void* value)
+                             const Opt_synthetic_Callback_Void* value)
 {
 #ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -1064,7 +1065,7 @@ void SetOnHttpAuthRequestImpl(Ark_NativePointer node,
 #endif // WEB_SUPPORTED
 }
 void SetOnInterceptRequestImpl(Ark_NativePointer node,
-                               const Opt_Type_WebAttribute_onInterceptRequest* value)
+                               const Opt_Callback_OnInterceptRequestEvent_Opt_WebResourceResponse* value)
 {
 #ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -1277,6 +1278,26 @@ void SetOnClientAuthenticationRequestImpl(Ark_NativePointer node,
     WebModelStatic::SetOnSslSelectCertRequest(frameNode, onClientAuthenticationRequest);
 #endif // WEB_SUPPORTED
 }
+void SetOnVerifyPinImpl(Ark_NativePointer node,
+                        const Opt_OnVerifyPinCallback* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // Implement Reset value
+        return;
+    }
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto VerifyPinEvent  = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) -> bool {
+        return OnVerifyPin(callback, weakNode, instanceId, info);
+    };
+    WebModelStatic::SetOnVerifyPinRequest(frameNode, VerifyPinEvent);
+#endif // WEB_SUPPORTED
+}
 void SetOnWindowNewImpl(Ark_NativePointer node,
                         const Opt_Callback_OnWindowNewEvent_Void* value)
 {
@@ -1318,7 +1339,7 @@ void SetOnWindowNewExtImpl(Ark_NativePointer node,
 #endif // WEB_SUPPORTED
 }
 void SetOnWindowExitImpl(Ark_NativePointer node,
-                         const Opt_Callback_Void* value)
+                         const Opt_synthetic_Callback_Void* value)
 {
 #ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -1352,7 +1373,7 @@ void SetMultiWindowAccessImpl(Ark_NativePointer node,
 #endif // WEB_SUPPORTED
 }
 void SetOnInterceptKeyEventImpl(Ark_NativePointer node,
-                                const Opt_Callback_KeyEvent_Boolean* value)
+                                const Opt_synthetic_Callback_KeyEvent_Boolean* value)
 {
 #ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -1790,7 +1811,7 @@ void SetOnLoadInterceptImpl(Ark_NativePointer node,
 #endif // WEB_SUPPORTED
 }
 void SetOnControllerAttachedImpl(Ark_NativePointer node,
-                                 const Opt_Callback_Void* value)
+                                 const Opt_synthetic_Callback_Void* value)
 {
 #ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -2245,7 +2266,8 @@ void SetEditMenuOptionsImpl(Ark_NativePointer node,
             auto menuItem = Converter::ArkValue<Ark_TextMenuItem>(menuOptionsParam);
             auto arkRange = Converter::ArkValue<Ark_TextRange>(range);
             auto arkResult =
-                arkMenuItemClick.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(menuItem, arkRange);
+                arkMenuItemClick.InvokeWithObtainResult<Ark_Boolean, synthetic_Callback_Boolean_Void>(
+                    menuItem, arkRange);
             return Converter::Convert<bool>(arkResult);
         };
     }
@@ -2393,6 +2415,111 @@ void SetNativeEmbedOptionsImpl(Ark_NativePointer node,
     WebModelStatic::SetNativeEmbedOptions(frameNode, *supportDefaultIntrinsicSize, *supportCssDisplayChange);
 #endif // WEB_SUPPORTED
 }
+void SetEnableDefaultContextMenuImpl(Ark_NativePointer node,
+                                     const Opt_Boolean* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<bool>(*value);
+    if (!convValue) {
+        return;
+    }
+    WebModelStatic::SetEnableDefaultContextMenu(frameNode, *convValue);
+#endif // WEB_SUPPORTED
+}
+void SetScrollbarLayoutPolicyImpl(Ark_NativePointer node,
+                                  const Opt_ScrollbarLayoutPolicy* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<ScrollbarLayoutPolicy>(*value);
+    if (!convValue) {
+        return;
+    }
+    WebModelStatic::SetScrollbarLayoutPolicy(frameNode, *convValue);
+#endif // WEB_SUPPORTED
+}
+void SetEnableDragImpl(Ark_NativePointer node,
+                       const Opt_Boolean* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<bool>(*value);
+    if (!convValue) {
+        return;
+    }
+    WebModelStatic::SetEnableDrag(frameNode, *convValue);
+#endif // WEB_SUPPORTED
+}
+
+void SetAiSessionOptionsImpl(Ark_NativePointer node, const Opt_Array_AISessionEvent* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<std::vector<Ark_AISessionEvent>>(*value)
+        .value_or(std::vector<Ark_AISessionEvent>{});
+    for (auto event : convValue) {
+        auto type = event.aiSessionType;
+        if (type == 0 || type > MAX_AI_SESSION_TYPE) {
+            continue;
+        }
+        AISessionCallback onCreateAISession = [arkCallback = CallbackHelper(event.onCreateAISession)](
+                const std::string& id, const std::string& params,
+                const std::function<void(uint32_t, const std::string&)>&& callback) -> bool {
+            auto arkId = Converter::ArkValue<Ark_String>(id);
+            auto arkParams = Converter::ArkValue<Ark_String>(params);
+            auto cont = CallbackKeeper::Claim<OnAISessionCallback>(
+                [callback = std::move(callback)](Ark_AISessionResultType state, Ark_String content) {
+                    auto contentStr = Converter::Convert<std::string>(content);
+                    callback(static_cast<uint32_t>(state), contentStr);
+                });
+            const auto result = arkCallback.InvokeWithOptConvertResult<
+                bool, Ark_Boolean, synthetic_Callback_Boolean_Void>(arkId, arkParams, cont.ArkValue());
+            return result.value_or(false);
+        };
+        AISessionCallback onExecuteAIAction = [arkCallback = CallbackHelper(event.onExecuteAIAction)](
+                const std::string& id, const std::string& params,
+                const std::function<void(uint32_t, const std::string&)>&& callback) -> bool {
+            auto arkId = Converter::ArkValue<Ark_String>(id);
+            auto arkParams = Converter::ArkValue<Ark_String>(params);
+            auto cont = CallbackKeeper::Claim<OnAISessionCallback>(
+                [callback = std::move(callback)](Ark_AISessionResultType state, Ark_String content) {
+                    auto contentStr = Converter::Convert<std::string>(content);
+                    callback(static_cast<uint32_t>(state), contentStr);
+                });
+            arkCallback.Invoke(arkId, arkParams, cont.ArkValue());
+            return true;
+        };
+        AISessionCallback onDestroyAISession = [arkCallback = CallbackHelper(event.onDestroyAISession)](
+                const std::string& id, const std::string& params,
+                const std::function<void(uint32_t, const std::string&)>&& callback) -> bool {
+            auto arkId = Converter::ArkValue<Ark_String>(id);
+            arkCallback.Invoke(arkId);
+            return true;
+        };
+        WebModelStatic::SetAISessionOptions(frameNode, type - 1,
+            std::move(onCreateAISession), std::move(onExecuteAIAction), std::move(onDestroyAISession));
+    }
+#endif // WEB_SUPPORTED
+}
+
+void SetKeyboardAppearanceImpl(Ark_NativePointer node, const Opt_WebKeyboardAppearanceMode* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<WebKeyboardAppearanceMode>(*value);
+    if (!convValue) {
+        return;
+    }
+    WebModelStatic::SetKeyboardAppearance(frameNode, convValue);
+#endif // WEB_SUPPORTED
+}
+
 void SetRegisterNativeEmbedRuleImpl(Ark_NativePointer node,
                                     const Opt_String* tag,
                                     const Opt_String* type)
@@ -2568,6 +2695,19 @@ void SetRotateRenderEffectImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<WebRotateEffect>(*value);
     WebModelStatic::SetRotateRenderEffect(frameNode, convValue);
+#endif // WEB_SUPPORTED
+}
+
+void SetEnableScrollDirectionalLockImpl(Ark_NativePointer node,
+                                        const Opt_Boolean* value,
+                                        const Opt_ScrollDirectionalLockType* type)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<bool>(*value);
+    auto typeValue = Converter::OptConvert<ScrollDirectionalLockType>(*type); // for enums
+    WebModelStatic::SetEnableScrollDirectionalLock(frameNode, convValue, typeValue);
 #endif // WEB_SUPPORTED
 }
 
@@ -2997,6 +3137,26 @@ void SetOnCameraCaptureStateChangeImpl(Ark_NativePointer node,
     WebModelStatic::SetCameraCaptureStateChangedId(frameNode, onCameraCaptureStateChange);
 #endif // WEB_SUPPORTED
 }
+
+void SetOnInputmethodAttachedImpl(Ark_NativePointer node,
+                                  const Opt_OnInputmethodAttachedCallback* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // Implement Reset value
+        return;
+    }
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onInputMethodAttached = [callback = CallbackHelper(*optValue), weakNode, instanceId]() {
+        OnInputmethodAttached(callback, weakNode, instanceId, nullptr);
+    };
+    WebModelStatic::SetInputMethodAttachedId(frameNode, std::move(onInputMethodAttached));
+#endif // WEB_SUPPORTED
+}
 } // WebAttributeModifier
 const GENERATED_ArkUIWebModifier* GetWebModifier()
 {
@@ -3010,7 +3170,6 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetImageAccessImpl,
         WebAttributeModifier::SetMixedModeImpl,
         WebAttributeModifier::SetZoomAccessImpl,
-        WebAttributeModifier::SetRotateRenderEffectImpl,
         WebAttributeModifier::SetGeolocationAccessImpl,
         WebAttributeModifier::SetJavaScriptProxyImpl,
         WebAttributeModifier::SetCacheModeImpl,
@@ -3024,8 +3183,8 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetDatabaseAccessImpl,
         WebAttributeModifier::SetInitialScaleImpl,
         WebAttributeModifier::SetMetaViewportImpl,
-        WebAttributeModifier::SetOnPageEndImpl,
         WebAttributeModifier::SetOnPageBeginImpl,
+        WebAttributeModifier::SetOnPageEndImpl,
         WebAttributeModifier::SetOnLoadStartedImpl,
         WebAttributeModifier::SetOnLoadFinishedImpl,
         WebAttributeModifier::SetOnProgressChangeImpl,
@@ -3040,7 +3199,6 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetOnConsoleImpl,
         WebAttributeModifier::SetOnErrorReceiveImpl,
         WebAttributeModifier::SetOnHttpErrorReceiveImpl,
-        WebAttributeModifier::SetOnOverrideErrorPageImpl,
         WebAttributeModifier::SetOnDownloadStartImpl,
         WebAttributeModifier::SetOnRefreshAccessedHistoryImpl,
         WebAttributeModifier::SetOnRenderExitedImpl,
@@ -3061,6 +3219,7 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetOnSslErrorEventReceiveImpl,
         WebAttributeModifier::SetOnSslErrorEventImpl,
         WebAttributeModifier::SetOnClientAuthenticationRequestImpl,
+        WebAttributeModifier::SetOnVerifyPinImpl,
         WebAttributeModifier::SetOnWindowNewImpl,
         WebAttributeModifier::SetOnWindowNewExtImpl,
         WebAttributeModifier::SetOnWindowExitImpl,
@@ -3109,9 +3268,9 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetOnNativeEmbedVisibilityChangeImpl,
         WebAttributeModifier::SetOnNativeEmbedGestureEventImpl,
         WebAttributeModifier::SetOnNativeEmbedMouseEventImpl,
-        WebAttributeModifier::SetOnNativeEmbedObjectParamChangeImpl,
         WebAttributeModifier::SetCopyOptionsImpl,
         WebAttributeModifier::SetOnOverrideUrlLoadingImpl,
+        WebAttributeModifier::SetOnOverrideErrorPageImpl,
         WebAttributeModifier::SetTextAutosizingImpl,
         WebAttributeModifier::SetEnableNativeMediaPlayerImpl,
         WebAttributeModifier::SetOnRenderProcessNotRespondingImpl,
@@ -3122,9 +3281,9 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetKeyboardAvoidModeImpl,
         WebAttributeModifier::SetEditMenuOptionsImpl,
         WebAttributeModifier::SetEnableHapticFeedbackImpl,
-        WebAttributeModifier::SetOptimizeParserBudgetImpl,
         WebAttributeModifier::SetEnableFollowSystemFontWeightImpl,
         WebAttributeModifier::SetEnableWebAVSessionImpl,
+        WebAttributeModifier::SetOptimizeParserBudgetImpl,
         WebAttributeModifier::SetRunJavaScriptOnDocumentStartImpl,
         WebAttributeModifier::SetRunJavaScriptOnDocumentEndImpl,
         WebAttributeModifier::SetRunJavaScriptOnHeadEndImpl,
@@ -3135,22 +3294,30 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetBypassVsyncConditionImpl,
         WebAttributeModifier::SetGestureFocusModeImpl,
         WebAttributeModifier::SetForceEnableZoomImpl,
-        WebAttributeModifier::SetBackToTopImpl,
+        WebAttributeModifier::SetOnNativeEmbedObjectParamChangeImpl,
+        WebAttributeModifier::SetRotateRenderEffectImpl,
+        WebAttributeModifier::SetZoomControlAccessImpl,
         WebAttributeModifier::SetOnDetectedBlankScreenImpl,
         WebAttributeModifier::SetBlankScreenDetectionConfigImpl,
-        WebAttributeModifier::SetZoomControlAccessImpl,
+        WebAttributeModifier::SetBackToTopImpl,
         WebAttributeModifier::SetEnableSelectedDataDetectorImpl,
-        WebAttributeModifier::SetOnTextSelectionChangeImpl,
         WebAttributeModifier::SetOnFirstScreenPaintImpl,
-        WebAttributeModifier::SetEnableImageAnalyzerImpl,
         WebAttributeModifier::SetEnableAutoFillImpl,
-        WebAttributeModifier::SetOnMicrophoneCaptureStateChangeImpl,
+        WebAttributeModifier::SetOnTextSelectionChangeImpl,
+        WebAttributeModifier::SetEnableImageAnalyzerImpl,
         WebAttributeModifier::SetOnCameraCaptureStateChangeImpl,
+        WebAttributeModifier::SetOnMicrophoneCaptureStateChangeImpl,
+        WebAttributeModifier::SetEnableDefaultContextMenuImpl,
+        WebAttributeModifier::SetEnableDragImpl,
+        WebAttributeModifier::SetScrollbarLayoutPolicyImpl,
+        WebAttributeModifier::SetAiSessionOptionsImpl,
+        WebAttributeModifier::SetKeyboardAppearanceImpl,
+        WebAttributeModifier::SetOnInputmethodAttachedImpl,
         WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
         WebAttributeModifier::SetBindSelectionMenuImpl,
+        WebAttributeModifier::SetEnableScrollDirectionalLockImpl,
     };
     return &ArkUIWebModifierImpl;
 }
 
 }
-

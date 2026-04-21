@@ -62,11 +62,11 @@ const std::vector<std::pair<Ark_Number, float>> testFixtureFloatValues = {
 };
 
 /**
- * @tc.name: GetModifierKeyStateTest
+ * @tc.name: getModifierKeyStateTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BaseEventAccessorTest, DISABLED_GetModifierKeyStateTest, TestSize.Level1)
+HWTEST_F(BaseEventAccessorTest, DISABLED_getModifierKeyStateTest, TestSize.Level1)
 {
     const std::vector<std::tuple<std::vector<std::string>, std::vector<KeyCode>, bool>> TEST_PLAN = {
         { {"ctrl"}, {KeyCode::KEY_CTRL_LEFT}, true },
@@ -88,11 +88,11 @@ HWTEST_F(BaseEventAccessorTest, DISABLED_GetModifierKeyStateTest, TestSize.Level
 }
 
 /**
- * @tc.name: GetTargetTest
+ * @tc.name: getTargetTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BaseEventAccessorTest, DISABLED_GetTargetTest, TestSize.Level1)
+HWTEST_F(BaseEventAccessorTest, DISABLED_getTargetTest, TestSize.Level1)
 {
     const Dimension height(100.f);
     const Dimension width(200.f);
@@ -125,11 +125,11 @@ HWTEST_F(BaseEventAccessorTest, DISABLED_GetTargetTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetTargetTest
+ * @tc.name: setTargetTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BaseEventAccessorTest, SetTargetTest, TestSize.Level1)
+HWTEST_F(BaseEventAccessorTest, setTargetTest, TestSize.Level1)
 {
     constexpr double height = 100;
     constexpr double width = 200;
@@ -157,11 +157,11 @@ HWTEST_F(BaseEventAccessorTest, SetTargetTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetTimeStampTest
+ * @tc.name: getTimeStampTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BaseEventAccessorTest, DISABLED_GetTimeStampTest, TestSize.Level1)
+HWTEST_F(BaseEventAccessorTest, DISABLED_getTimeStampTest, TestSize.Level1)
 {
     using TimeStamp = std::chrono::high_resolution_clock::time_point;
     using Duration = std::chrono::high_resolution_clock::duration;
@@ -181,11 +181,11 @@ HWTEST_F(BaseEventAccessorTest, DISABLED_GetTimeStampTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetTimeStampTest
+ * @tc.name: setTimeStampTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BaseEventAccessorTest, DISABLED_SetTimeStampTest, TestSize.Level1)
+HWTEST_F(BaseEventAccessorTest, DISABLED_setTimeStampTest, TestSize.Level1)
 {
     using TimeStamp = std::chrono::high_resolution_clock::time_point;
     using Duration = std::chrono::high_resolution_clock::duration;
@@ -205,17 +205,22 @@ HWTEST_F(BaseEventAccessorTest, DISABLED_SetTimeStampTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetSourceTest
+ * @tc.name: getSourceTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BaseEventAccessorTest, GetSourceTest, TestSize.Level1)
+HWTEST_F(BaseEventAccessorTest, getSourceTest, TestSize.Level1)
 {
     const std::vector<std::pair<SourceType, Ark_SourceType>> TEST_PLAN = {
         { SourceType::NONE, Ark_SourceType::ARK_SOURCE_TYPE_UNKNOWN },
         { SourceType::MOUSE, Ark_SourceType::ARK_SOURCE_TYPE_MOUSE },
         { SourceType::TOUCH, Ark_SourceType::ARK_SOURCE_TYPE_TOUCH_SCREEN },
-        { SourceType::TOUCH_PAD, static_cast<Ark_SourceType>(-1) }
+        { SourceType::TOUCH_PAD, Ark_SourceType::ARK_SOURCE_TYPE_UNKNOWN },
+        { SourceType::KEYBOARD, Ark_SourceType::ARK_SOURCE_TYPE_UNKNOWN },
+        { SourceType::JOYSTICK, Ark_SourceType::ARK_SOURCE_TYPE_UNKNOWN },
+        { SourceType::CROWN, Ark_SourceType::ARK_SOURCE_TYPE_UNKNOWN },
+        { static_cast<SourceType>(-1), Ark_SourceType::ARK_SOURCE_TYPE_UNKNOWN },
+        { static_cast<SourceType>(INT_MAX), Ark_SourceType::ARK_SOURCE_TYPE_UNKNOWN }
     };
 
     for (auto& [input, expected] : TEST_PLAN) {
@@ -225,15 +230,15 @@ HWTEST_F(BaseEventAccessorTest, GetSourceTest, TestSize.Level1)
     }
 
     auto source = accessor_->getSource(nullptr);
-    EXPECT_EQ(source, static_cast<Ark_SourceType>(-1));
+    EXPECT_EQ(source, Ark_SourceType::ARK_SOURCE_TYPE_UNKNOWN);
 }
 
 /**
- * @tc.name: SetSourceTest
+ * @tc.name: setSourceTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BaseEventAccessorTest, SetSourceTest, TestSize.Level1)
+HWTEST_F(BaseEventAccessorTest, setSourceTest, TestSize.Level1)
 {
     const std::vector<SourceType> TEST_PLAN = {
         SourceType::MOUSE,
@@ -249,11 +254,11 @@ HWTEST_F(BaseEventAccessorTest, SetSourceTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetPressureTest
+ * @tc.name: getPressureTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BaseEventAccessorTest, GetPressureTest, TestSize.Level1)
+HWTEST_F(BaseEventAccessorTest, getPressureTest, TestSize.Level1)
 {
     for (auto& [value, expected] : testFixtureInt32Values) {
         baseEvent_->SetForce(expected);
@@ -263,11 +268,11 @@ HWTEST_F(BaseEventAccessorTest, GetPressureTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetPressureTest
+ * @tc.name: setPressureTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BaseEventAccessorTest, SetPressureTest, TestSize.Level1)
+HWTEST_F(BaseEventAccessorTest, setPressureTest, TestSize.Level1)
 {
     for (auto& [value, expected] : testFixtureInt32Values) {
         accessor_->setPressure(peer_, &value);
@@ -277,11 +282,11 @@ HWTEST_F(BaseEventAccessorTest, SetPressureTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetTiltXTest
+ * @tc.name: getTiltXTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BaseEventAccessorTest, GetTiltXTest, TestSize.Level1)
+HWTEST_F(BaseEventAccessorTest, getTiltXTest, TestSize.Level1)
 {
     for (auto& [value, expected] : testFixtureInt32Values) {
         baseEvent_->SetTiltX(expected);
@@ -291,11 +296,11 @@ HWTEST_F(BaseEventAccessorTest, GetTiltXTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetTiltXTest
+ * @tc.name: setTiltXTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BaseEventAccessorTest, SetTiltXTest, TestSize.Level1)
+HWTEST_F(BaseEventAccessorTest, setTiltXTest, TestSize.Level1)
 {
     for (auto& [value, expected] : testFixtureInt32Values) {
         accessor_->setTiltX(peer_, &value);
@@ -306,11 +311,11 @@ HWTEST_F(BaseEventAccessorTest, SetTiltXTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetTiltYTest
+ * @tc.name: getTiltYTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BaseEventAccessorTest, GetTiltYTest, TestSize.Level1)
+HWTEST_F(BaseEventAccessorTest, getTiltYTest, TestSize.Level1)
 {
     for (auto& [value, expected] : testFixtureInt32Values) {
         baseEvent_->SetTiltY(expected);
@@ -320,11 +325,11 @@ HWTEST_F(BaseEventAccessorTest, GetTiltYTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetTiltYTest
+ * @tc.name: setTiltYTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BaseEventAccessorTest, SetTiltYTest, TestSize.Level1)
+HWTEST_F(BaseEventAccessorTest, setTiltYTest, TestSize.Level1)
 {
     for (auto& [value, expected] : testFixtureInt32Values) {
         accessor_->setTiltY(peer_, &value);
@@ -335,11 +340,11 @@ HWTEST_F(BaseEventAccessorTest, SetTiltYTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetRollAngleTest
+ * @tc.name: getRollAngleTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BaseEventAccessorTest, GetRollAngleTest, TestSize.Level1)
+HWTEST_F(BaseEventAccessorTest, getRollAngleTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getRollAngle, nullptr);
     for (auto& [value, expected] : testFixtureFloatValues) {
@@ -352,11 +357,11 @@ HWTEST_F(BaseEventAccessorTest, GetRollAngleTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetRollAngleTest
+ * @tc.name: setRollAngleTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BaseEventAccessorTest, SetRollAngleTest, TestSize.Level1)
+HWTEST_F(BaseEventAccessorTest, setRollAngleTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setRollAngle, nullptr);
     for (auto& [value, expected] : testFixtureFloatValues) {
@@ -368,11 +373,11 @@ HWTEST_F(BaseEventAccessorTest, SetRollAngleTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetSourceToolTest
+ * @tc.name: getSourceToolTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BaseEventAccessorTest, GetSourceToolTest, TestSize.Level1)
+HWTEST_F(BaseEventAccessorTest, getSourceToolTest, TestSize.Level1)
 {
     const std::vector<std::pair<SourceTool, Ark_SourceTool>> TEST_PLAN = {
         { SourceTool::UNKNOWN, Ark_SourceTool::ARK_SOURCE_TOOL_UNKNOWN },
@@ -399,11 +404,11 @@ HWTEST_F(BaseEventAccessorTest, GetSourceToolTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetSourceToolTest
+ * @tc.name: setSourceToolTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BaseEventAccessorTest, SetSourceToolTest, TestSize.Level1)
+HWTEST_F(BaseEventAccessorTest, setSourceToolTest, TestSize.Level1)
 {
     const std::vector<std::pair<SourceTool, SourceTool>> TEST_PLAN = {
         { SourceTool::UNKNOWN, SourceTool::UNKNOWN },
@@ -429,11 +434,11 @@ HWTEST_F(BaseEventAccessorTest, SetSourceToolTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetDeviceIdTest
+ * @tc.name: getDeviceIdTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BaseEventAccessorTest, GetDeviceIdTest, TestSize.Level1)
+HWTEST_F(BaseEventAccessorTest, getDeviceIdTest, TestSize.Level1)
 {
     for (auto& [value, expected] : testFixtureInt32Values) {
         baseEvent_->SetDeviceId(expected);
@@ -443,11 +448,11 @@ HWTEST_F(BaseEventAccessorTest, GetDeviceIdTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetDeviceIdTest
+ * @tc.name: setDeviceIdTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BaseEventAccessorTest, SetDeviceIdTest, TestSize.Level1)
+HWTEST_F(BaseEventAccessorTest, setDeviceIdTest, TestSize.Level1)
 {
     for (auto& [value, expected] : testFixtureInt32Values) {
         accessor_->setDeviceId(peer_, &value);
@@ -457,11 +462,11 @@ HWTEST_F(BaseEventAccessorTest, SetDeviceIdTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetTargetDisplayIdTest
+ * @tc.name: getTargetDisplayIdTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BaseEventAccessorTest, GetTargetDisplayIdTest, TestSize.Level1)
+HWTEST_F(BaseEventAccessorTest, getTargetDisplayIdTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getTargetDisplayId, nullptr);
     for (auto& [value, expected] : testFixtureInt32Values) {
@@ -477,11 +482,11 @@ HWTEST_F(BaseEventAccessorTest, GetTargetDisplayIdTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetTargetDisplayIdTest
+ * @tc.name: setTargetDisplayIdTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BaseEventAccessorTest, SetTargetDisplayIdTest, TestSize.Level1)
+HWTEST_F(BaseEventAccessorTest, setTargetDisplayIdTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setTargetDisplayId, nullptr);
     for (auto& [value, expected] : testFixtureInt32Values) {

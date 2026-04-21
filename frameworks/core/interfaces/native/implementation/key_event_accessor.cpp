@@ -14,9 +14,7 @@
  */
 
 #include <cstdint>
-#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/accessor_utils.h"
-#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/key_event_peer.h"
@@ -163,22 +161,6 @@ void SetIntentionCodeImpl(Ark_KeyEvent peer,
     CHECK_NULL_VOID(info);
     info->SetKeyIntention(static_cast<KeyIntention>(intentionCode));
 }
-Opt_ModifierKeyStateGetter GetGetModifierKeyStateImpl(Ark_KeyEvent peer)
-{
-    const auto invalid = Converter::ArkValue<Opt_ModifierKeyStateGetter>(Ark_Empty());
-    CHECK_NULL_RETURN(peer, invalid);
-    auto info = peer->GetBaseInfo();
-    CHECK_NULL_RETURN(info, invalid);
-    auto getter = CallbackKeeper::ReturnReverseCallback<ModifierKeyStateGetter,
-            std::function<void(const Array_String, const Callback_Boolean_Void)>>([info]
-            (const Array_String keys, const Callback_Boolean_Void continuation) {
-        auto eventKeys = info->GetPressedKeyCodes();
-        auto keysStr = Converter::Convert<std::vector<std::string>>(keys);
-        Ark_Boolean arkResult = Converter::ArkValue<Ark_Boolean>(AccessorUtils::CheckKeysPressed(keysStr, eventKeys));
-        CallbackHelper(continuation).InvokeSync(arkResult);
-    });
-    return Converter::ArkValue<Opt_ModifierKeyStateGetter, ModifierKeyStateGetter>(getter);
-}
 void SetGetModifierKeyStateImpl(Ark_KeyEvent peer,
                                 const Opt_ModifierKeyStateGetter* getModifierKeyState)
 {
@@ -289,7 +271,6 @@ const GENERATED_ArkUIKeyEventAccessor* GetKeyEventAccessor()
         KeyEventAccessor::SetTimestampImpl,
         KeyEventAccessor::GetIntentionCodeImpl,
         KeyEventAccessor::SetIntentionCodeImpl,
-        KeyEventAccessor::GetGetModifierKeyStateImpl,
         KeyEventAccessor::SetGetModifierKeyStateImpl,
         KeyEventAccessor::GetUnicodeImpl,
         KeyEventAccessor::SetUnicodeImpl,

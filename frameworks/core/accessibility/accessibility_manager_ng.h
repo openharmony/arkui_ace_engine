@@ -120,7 +120,7 @@ private:
     bool IsEventTypeChangeDirectHandleHover(
         AccessibilityHoverEventType eventType,
         AccessibilityHoverEventType prevEventType);
-    bool IsHandlePipelineAccessibilityHoverEnter(const RefPtr<NG::FrameNode>& root);
+    bool IsHandlePipelineAccessibilityHoverEnter(const RefPtr<NG::FrameNode>& root) const;
     void HandlePipelineAccessibilityHoverEnter(
         const RefPtr<NG::FrameNode>& root,
         TouchEvent& event,

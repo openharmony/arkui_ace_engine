@@ -40,6 +40,7 @@ struct ModalUIExtensionConfig {
     bool prohibitedRemoveByNavigation = true;
     bool isWindowModeFollowHost = false;
     bool isModalRequestFocus = true;
+    bool isModalFixFocus = false;
 };
 
 struct ModalUIExtensionAllowedUpdateConfig {

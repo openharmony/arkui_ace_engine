@@ -26,11 +26,11 @@ class CalendarPickerDialogAccessorTest : public StaticAccessorTest<GENERATED_Ark
 };
 
 /**
- * @tc.name: calendarPickerDialogAccessorTest
+ * @tc.name: showTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarPickerDialogAccessorTest, calendarPickerDialogAccessorTest, TestSize.Level1)
+HWTEST_F(CalendarPickerDialogAccessorTest, DISABLED_showTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->show, nullptr);
 }

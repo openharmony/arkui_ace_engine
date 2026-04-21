@@ -48,6 +48,7 @@
 #include "arkoala_api_generated.h"
 #include "generated/converter_generated.h"
 #include "peer_utils.h"
+#include "patch.h"
 
 // Forward declarations
 namespace OHOS::Ace {
@@ -65,6 +66,7 @@ class RichEditorAbstractSpanResult;
 class SelectionInfo;
 class SpanBase;
 class TouchLocationInfo;
+struct MouseHistoricalPoint;
 class BaseEventInfo;
 enum class AccessibilityActionInterceptResult : uint32_t;
 enum class AccessibilityHoverAction;
@@ -115,6 +117,7 @@ enum class SheetType;
 enum class SourceTool;
 enum class SourceType;
 enum class SpanType;
+enum class SuperscriptStyle;
 enum class SwipeActionState : uint32_t;
 enum class TabAnimateMode;
 enum class TabBarMode;
@@ -321,7 +324,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Buffer& dst, const std::string& src);
     void AssignArkValue(Ark_ConsoleMessageSource& dst, const ConsoleMessageSource& src);
     void AssignArkValue(Ark_CrownAction& dst, const CrownAction& src);
-    void AssignArkValue(Ark_Color& dst, const Color& src);
+    void AssignArkValue(Ark_arkui_component_enums_Color& dst, const Color& src);
     void AssignArkValue(Ark_Date& dst, const PickerDate& src);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_Date& dst, const std::string& src);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_Dimension& dst, const Dimension& src, ConvContext *ctx);
@@ -356,6 +359,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_GestureRecognizerState &dst, const NG::RefereeState& src);
     void AssignArkValue(Ark_Header& dst, const Header& src, ConvContext *ctx);
     void AssignArkValue(Ark_HistoricalPoint& dst, const OHOS::Ace::TouchLocationInfo& src);
+    void AssignArkValue(Ark_MouseHistoricalPoint& dst, const OHOS::Ace::MouseHistoricalPoint& src);
     void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_ImageFit& dst, const ImageFit& src);
     void AssignArkValue(Ark_ImageLoadResult& dst, const LoadImageSuccessEvent& src);
@@ -438,6 +442,8 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_RenderExitReason& dst, const RenderExitReason& src);
     void AssignArkValue(Ark_RenderProcessNotRespondingReason& dst, const RenderProcessNotRespondingReason& src);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_Resource& dst, const ResourceObject& src, ConvContext *ctx);
+    void AssignArkValue(Ark_ResourceStr &dst, const char *src, ConvContext *ctx);
+    void AssignArkValue(Ark_ResourceStr &dst, const std::string& src, ConvContext *ctx);
     void AssignArkValue(Ark_LinearGradientOptions& dst, const NG::Gradient& src, ConvContext *ctx);
     void AssignArkValue(Ark_RadialGradientOptions& dst, const NG::Gradient& src, ConvContext *ctx);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_RichEditorDeleteDirection& dst, const RichEditorDeleteDirection& src);
@@ -471,6 +477,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_String& dst, const FONT_FEATURES_LIST& src, ConvContext *ctx);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_String& dst, const std::u16string& src, ConvContext *ctx);
     void AssignArkValue(Ark_StyledStringKey& dst, SpanType src);
+    void AssignArkValue(Ark_SuperscriptStyle& dst, const SuperscriptStyle& src);
     void AssignArkValue(Ark_SwipeActionState& dst, const SwipeActionState& src);
     void AssignArkValue(Ark_SwipeDirection& dst, const SwipeDirection& src);
     void AssignArkValue(Ark_SwipeEdgeEffect& dst, const V2::SwipeEdgeEffect& src);
@@ -759,6 +766,15 @@ namespace OHOS::Ace::NG::Converter {
         return {
             .selector = SELECTOR_ID_12,
             .value12 = ArkValue<Which>(src, ctx),
+        };
+    }
+    template<typename To, typename Which, typename From,
+        std::enable_if_t<std::is_same_v<Which, decltype(To().value13)>, int> = SELECTOR_ID_13>
+    To ArkUnion(const From& src, ConvContext *ctx = nullptr)
+    {
+        return {
+            .selector = SELECTOR_ID_13,
+            .value13 = ArkValue<Which>(src, ctx),
         };
     }
     template<typename To, typename Which,

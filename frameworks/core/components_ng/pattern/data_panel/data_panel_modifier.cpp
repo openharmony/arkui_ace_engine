@@ -35,31 +35,19 @@ constexpr float ZERO_CORNER_RADIUS = 0.0f;
 
 DataPanelModifier::DataPanelModifier(const WeakPtr<Pattern>& pattern) : pattern_(pattern)
 {
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<DataPanelTheme>();
+    auto patternhost = pattern_.Upgrade();
+    CHECK_NULL_VOID(patternhost);
+    auto host = patternhost->GetHost();
+    CHECK_NULL_VOID(host);
+    auto theme = host->GetTheme<DataPanelTheme>(true);
     auto colors = theme->GetColorsArray();
 
-    date_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0);
-    for (size_t i = 0; i < MAX_COUNT; ++i) {
-        auto value = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0);
-        AttachProperty(value);
-        values_.emplace_back(value);
-    }
-    max_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(DEFAULT_MAX_VALUE);
-    count_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(DEFAULT_VALUE_COUNT);
+    InitControlProperties();
+
     trackBackgroundColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(theme->GetBackgroundColor()));
     strokeWidth_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(theme->GetThickness().ConvertToPx());
-    isEffect_ = AceType::MakeRefPtr<PropertyBool>(true);
-    useContentModifier_ = AceType::MakeRefPtr<PropertyBool>(false);
-    updateDataPanel_ = AceType::MakeRefPtr<PropertyBool>(false);
-    AttachProperty(date_);
-    AttachProperty(max_);
-    AttachProperty(count_);
     AttachProperty(trackBackgroundColor_);
     AttachProperty(strokeWidth_);
-    AttachProperty(isEffect_);
-    AttachProperty(updateDataPanel_);
 
     shadowRadiusFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(theme->GetTrackShadowRadius().ConvertToPx());
     shadowOffsetXFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(theme->GetTrackShadowOffsetX().ConvertToPx());
@@ -89,6 +77,27 @@ DataPanelModifier::DataPanelModifier(const WeakPtr<Pattern>& pattern) : pattern_
     }
 }
 
+void DataPanelModifier::InitControlProperties()
+{
+    date_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0);
+    for (size_t i = 0; i < MAX_COUNT; ++i) {
+        auto value = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0);
+        AttachProperty(value);
+        values_.emplace_back(value);
+    }
+    max_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(DEFAULT_MAX_VALUE);
+    count_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(DEFAULT_VALUE_COUNT);
+    isEffect_ = AceType::MakeRefPtr<PropertyBool>(true);
+    useContentModifier_ = AceType::MakeRefPtr<PropertyBool>(false);
+    updateDataPanel_ = AceType::MakeRefPtr<PropertyBool>(false);
+    
+    AttachProperty(date_);
+    AttachProperty(max_);
+    AttachProperty(count_);
+    AttachProperty(isEffect_);
+    AttachProperty(updateDataPanel_);
+}
+
 void DataPanelModifier::onDraw(DrawingContext& context)
 {
     if (useContentModifier_->Get()) {
@@ -107,9 +116,7 @@ void DataPanelModifier::UpdateDate()
         // When the date update, the animation will repeat once.
         auto pattern = pattern_.Upgrade();
         auto host = pattern ? pattern->GetHost() : nullptr;
-        if (host) {
-            ACE_UINODE_TRACE(host);
-        }
+        ACE_UINODE_TRACE(host);
         date_->Set(ANIMATION_START);
         AnimationOption option = AnimationOption();
         RefPtr<Curve> curve = AceType::MakeRefPtr<SpringCurve>(

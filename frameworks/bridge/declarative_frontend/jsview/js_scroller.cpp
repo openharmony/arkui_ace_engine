@@ -17,14 +17,15 @@
 #include "bridge/declarative_frontend/jsview/js_scroller_binding.h"
 
 #include "base/geometry/axis.h"
-#include "base/log/event_report.h"
 #include "base/utils/linear_map.h"
 #include "base/utils/utils.h"
+#include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/animation/curves.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/align_declaration.h"
+#include "jsnapi_expo.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -80,6 +81,7 @@ void JSScrollerBinding::JSBind(BindingTarget globalObj)
     JSClass<JSScroller>::CustomMethod("getItemRect", &JSScrollerBinding::GetItemRect);
     JSClass<JSScroller>::CustomMethod("getItemIndex", &JSScrollerBinding::GetItemIndex);
     JSClass<JSScroller>::CustomMethod("contentSize", &JSScrollerBinding::ContentSize);
+    JSClass<JSScroller>::CustomMethod("getFrameNode", &JSScrollerBinding::GetFrameNode);
     JSClass<JSScroller>::Bind(globalObj, JSScrollerBinding::Constructor, JSScrollerBinding::Destructor);
 }
 
@@ -122,7 +124,7 @@ panda::Local<panda::ObjectRef> JSScroller::CreateRectangle(const Rect& info)
 
 void JSScrollerBinding::ScrollTo(const JSCallbackInfo& args)
 {
-    JSScroller* jsScroller = JSRef<JSObject>::Cast(args.This())->Unwrap<JSScroller>();
+    JSScroller* jsScroller = args.This()->Unwrap<JSScroller>();
     if (jsScroller == nullptr) {
         return;
     }
@@ -204,7 +206,7 @@ bool JSScrollerBinding::ParseCurveParams(RefPtr<Curve>& curve, const JSRef<JSVal
 
 void JSScrollerBinding::ScrollEdge(const JSCallbackInfo& args)
 {
-    JSScroller* jsScroller = JSRef<JSObject>::Cast(args.This())->Unwrap<JSScroller>();
+    JSScroller* jsScroller = args.This()->Unwrap<JSScroller>();
     if (jsScroller == nullptr) {
         return;
     }
@@ -240,7 +242,7 @@ void JSScrollerBinding::ScrollEdge(const JSCallbackInfo& args)
 
 void JSScrollerBinding::Fling(const JSCallbackInfo& args)
 {
-    JSScroller* jsScroller = JSRef<JSObject>::Cast(args.This())->Unwrap<JSScroller>();
+    JSScroller* jsScroller = args.This()->Unwrap<JSScroller>();
     if (jsScroller == nullptr) {
         return;
     }
@@ -265,7 +267,7 @@ void JSScrollerBinding::Fling(const JSCallbackInfo& args)
 
 void JSScrollerBinding::ScrollToIndex(const JSCallbackInfo& args)
 {
-    JSScroller* jsScroller = JSRef<JSObject>::Cast(args.This())->Unwrap<JSScroller>();
+    JSScroller* jsScroller = args.This()->Unwrap<JSScroller>();
     if (jsScroller == nullptr) {
         return;
     }
@@ -306,7 +308,7 @@ void JSScrollerBinding::ScrollToIndex(const JSCallbackInfo& args)
 
 void JSScrollerBinding::ScrollPage(const JSCallbackInfo& args)
 {
-    JSScroller* jsScroller = JSRef<JSObject>::Cast(args.This())->Unwrap<JSScroller>();
+    JSScroller* jsScroller = args.This()->Unwrap<JSScroller>();
     if (jsScroller == nullptr) {
         return;
     }
@@ -332,7 +334,7 @@ void JSScrollerBinding::ScrollPage(const JSCallbackInfo& args)
 
 void JSScrollerBinding::CurrentOffset(const JSCallbackInfo& args)
 {
-    JSScroller* jsScroller = JSRef<JSObject>::Cast(args.This())->Unwrap<JSScroller>();
+    JSScroller* jsScroller = args.This()->Unwrap<JSScroller>();
     if (jsScroller == nullptr) {
         return;
     }
@@ -348,7 +350,7 @@ void JSScrollerBinding::CurrentOffset(const JSCallbackInfo& args)
 
 void JSScrollerBinding::Offset(const JSCallbackInfo& args)
 {
-    JSScroller* jsScroller = JSRef<JSObject>::Cast(args.This())->Unwrap<JSScroller>();
+    JSScroller* jsScroller = args.This()->Unwrap<JSScroller>();
     if (jsScroller == nullptr) {
         return;
     }
@@ -366,7 +368,7 @@ void JSScrollerBinding::Offset(const JSCallbackInfo& args)
 
 void JSScrollerBinding::ScrollBy(const JSCallbackInfo& args)
 {
-    JSScroller* jsScroller = JSRef<JSObject>::Cast(args.This())->Unwrap<JSScroller>();
+    JSScroller* jsScroller = args.This()->Unwrap<JSScroller>();
     if (jsScroller == nullptr) {
         return;
     }
@@ -407,7 +409,7 @@ void JSScrollerBinding::ScrollBy(const JSCallbackInfo& args)
 
 void JSScrollerBinding::IsAtEnd(const JSCallbackInfo& args)
 {
-    JSScroller* jsScroller = JSRef<JSObject>::Cast(args.This())->Unwrap<JSScroller>();
+    JSScroller* jsScroller = args.This()->Unwrap<JSScroller>();
     if (jsScroller == nullptr) {
         return;
     }
@@ -421,7 +423,7 @@ void JSScrollerBinding::IsAtEnd(const JSCallbackInfo& args)
 
 void JSScrollerBinding::GetItemRect(const JSCallbackInfo& args)
 {
-    JSScroller* jsScroller = JSRef<JSObject>::Cast(args.This())->Unwrap<JSScroller>();
+    JSScroller* jsScroller = args.This()->Unwrap<JSScroller>();
     if (jsScroller == nullptr) {
         return;
     }
@@ -444,7 +446,7 @@ void JSScrollerBinding::GetItemRect(const JSCallbackInfo& args)
 
 void JSScrollerBinding::GetItemIndex(const JSCallbackInfo& args)
 {
-    JSScroller* jsScroller = JSRef<JSObject>::Cast(args.This())->Unwrap<JSScroller>();
+    JSScroller* jsScroller = args.This()->Unwrap<JSScroller>();
     if (jsScroller == nullptr) {
         return;
     }
@@ -486,7 +488,7 @@ void JSScrollerBinding::GetItemIndex(const JSCallbackInfo& args)
 
 void JSScrollerBinding::ContentSize(const JSCallbackInfo& args)
 {
-    JSScroller* jsScroller = JSRef<JSObject>::Cast(args.This())->Unwrap<JSScroller>();
+    JSScroller* jsScroller = args.This()->Unwrap<JSScroller>();
     if (jsScroller == nullptr) {
         return;
     }
@@ -501,5 +503,39 @@ void JSScrollerBinding::ContentSize(const JSCallbackInfo& args)
     retObj->SetProperty<double>("width", Dimension(contentSize.Width(), DimensionUnit::PX).ConvertToVp());
     retObj->SetProperty<double>("height", Dimension(contentSize.Height(), DimensionUnit::PX).ConvertToVp());
     args.SetReturnValue(retObj);
+}
+
+void JSScrollerBinding::GetFrameNode(const JSCallbackInfo& args)
+{
+    JSScroller* jsScroller = args.This()->Unwrap<JSScroller>();
+    if (jsScroller == nullptr) {
+        return;
+    }
+    auto scrollController = jsScroller->GetController().Upgrade();
+    if (!scrollController) {
+        return;
+    }
+
+    ContainerScope scope(jsScroller->GetInstanceId());
+    auto nodeId = scrollController->GetBindingFrameNodeId();
+    if (nodeId < 0) {
+        return;
+    }
+
+    auto vm = args.GetVm();
+    auto globalObj = JSNApi::GetGlobalObject(vm);
+    auto globalFunc = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "__getFrameNodeByNodeId__"));
+    JsiValue jsiValue(globalFunc);
+    auto globalFuncRef = JsiRef<JsiValue>::Make(jsiValue);
+    if (!globalFuncRef->IsFunction()) {
+        return;
+    }
+
+    RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(globalFuncRef));
+    JSRef<JSVal> params[ARGS_LENGTH];
+    params[0] = JSRef<JSVal>::Make(ToJSValue(jsScroller->GetInstanceId()));
+    params[1] = JSRef<JSVal>::Make(ToJSValue(nodeId));
+    auto frameNode = jsFunc->ExecuteJS(2, params);
+    args.SetReturnValue(frameNode);
 }
 } // namespace OHOS::Ace::Framework

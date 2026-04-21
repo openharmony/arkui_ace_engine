@@ -33,7 +33,8 @@ struct IndexPage {
   scroll: Scroller = new Scroller()
   @State arr: TextList[] = [
     new TextList(1, 'Back', 'pages/Index'),
-    new TextList(2, 'Attribute', 'pages/LazyVGridLayout/LazyVGridLayoutAttribute')
+    new TextList(2, 'Attribute', 'pages/LazyVGridLayout/LazyVGridLayoutAttribute'),
+    new TextList(3, 'List_LazyVGrid', 'pages/LazyVGridLayout/LazyVGridWithList')
   ]
   @State fontSize: Resource | undefined = undefined
   build() {

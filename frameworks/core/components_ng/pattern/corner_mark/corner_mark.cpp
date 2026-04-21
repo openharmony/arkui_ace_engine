@@ -121,7 +121,7 @@ int32_t CornerMark::AddCornerMarkNode(const RefPtr<NG::FrameNode>& node, const s
 int32_t CornerMark::UpdateCornerMarkNode(const RefPtr<NG::FrameNode>& node, const std::string& index)
 {
     auto frameNode = node->GetCornerMarkNode();
-    CHECK_NULL_RETURN(node->GetCornerMarkNode(), RET_FAILED);
+    CHECK_NULL_RETURN(frameNode, RET_FAILED);
     auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, RET_FAILED);
     auto container = Container::CurrentSafely();
@@ -191,5 +191,40 @@ void CornerMark::UpdateCornerMarkNodeColorMode(const RefPtr<NG::FrameNode>& node
     }
     context->FlushUITaskWithSingleDirtyNode(frameNode);
     context->FlushSyncGeometryNodeTasks();
+}
+
+void CornerMark::UpdateCornerMarkNodePosition(const RefPtr<NG::FrameNode>& node)
+{
+    if (!AceApplicationInfo::GetInstance().IsRightToLeft()) {
+        return;
+    }
+    auto frameNode = node->GetCornerMarkNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto cornerMarkTheme = pipelineContext->GetTheme<CornerMarkTheme>();
+    CHECK_NULL_VOID(cornerMarkTheme);
+    auto geometryNode = node->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto markWidth = cornerMarkTheme->GetWidth().ConvertToPx();
+    auto markHeight = cornerMarkTheme->GetHeight().ConvertToPx();
+    auto newLeft = geometryNode->GetFrameRect().Width() - markWidth;
+    RectF rect(newLeft, 0.0f, markWidth, markHeight);
+    textLayoutProperty->SetLayoutRect(rect);
+
+    // Called during SyncGeometryNode (layout in progress), so FlushUITaskWithSingleDirtyNode
+    // would be deferred and cause a one-frame visual jump. Sync geometry directly instead.
+    auto markGeometryNode = frameNode->GetGeometryNode();
+    CHECK_NULL_VOID(markGeometryNode);
+    markGeometryNode->SetFrameOffset(OffsetF(newLeft, 0.0f));
+    markGeometryNode->SetFrameSize(SizeF(markWidth, markHeight));
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SavePaintRect();
+    renderContext->SyncGeometryProperties(RawPtr(markGeometryNode));
 }
 } // namespace OHOS::Ace::NG

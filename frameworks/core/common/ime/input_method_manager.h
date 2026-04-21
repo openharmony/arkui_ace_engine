@@ -25,7 +25,7 @@
 #endif
 
 namespace OHOS::Ace {
-class InputMethodManager final {
+class ACE_FORCE_EXPORT InputMethodManager final {
 
 public:
     static InputMethodManager* GetInstance();
@@ -72,6 +72,7 @@ private:
     bool isLastFocusUIExtension_ = false;
     int32_t lastFocusNodeId_ = -1;
     bool lastKeep_ = false;
+    std::string preTag = "";
 };
 } // namespace OHOS::Ace
 

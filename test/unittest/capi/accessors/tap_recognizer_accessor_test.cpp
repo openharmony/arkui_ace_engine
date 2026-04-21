@@ -28,22 +28,22 @@ class TapRecognizerAccessorTest : public AccessorTestBase<GENERATED_ArkUITapReco
     &GENERATED_ArkUIAccessors::getTapRecognizerAccessor, TapRecognizerPeer> {};
 
 /**
- * @tc.name: CreatePeerTest
+ * @tc.name: constructTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TapRecognizerAccessorTest, CreatePeerTest, TestSize.Level1)
+HWTEST_F(TapRecognizerAccessorTest, constructTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->construct, nullptr);
     ASSERT_NE(peer_, nullptr);
 }
 
 /**
- * @tc.name: GetTapCountTest
+ * @tc.name: getTapCountTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TapRecognizerAccessorTest, GetTapCountTest, TestSize.Level1)
+HWTEST_F(TapRecognizerAccessorTest, getTapCountTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getTapCount, nullptr);
     ASSERT_NE(peer_, nullptr);

@@ -17,6 +17,7 @@
 
 #include "base/geometry/rect.h"
 #include "base/memory/ace_type.h"
+#include <vector>
 
 namespace OHOS::Ace {
 /**
@@ -76,6 +77,17 @@ enum class WindowStatus : uint32_t {
     WINDOW_STATUS_MINIMIZE,
     WINDOW_STATUS_FLOATING,
     WINDOW_STATUS_SPLITSCREEN
+};
+
+/**
+ * souce is Rosen::DisplaySourceMode
+ */
+enum class DisplaySourceMode : uint32_t {
+    NONE = 0,
+    MAIN = 1,
+    MIRROR = 2,
+    EXTEND = 3,
+    ALONE = 4,
 };
 
 class ACE_EXPORT DisplayInfo : public AceType {
@@ -155,6 +167,16 @@ public:
         height_ = height;
     }
 
+    DisplaySourceMode GetDisplaySourceMode()
+    {
+        return displaySourceMode_;
+    }
+
+    void SetDisplaySourceMode(DisplaySourceMode displaySourceMode)
+    {
+        displaySourceMode_ = displaySourceMode;
+    }
+
 private:
     FoldStatus foldStatus_ = FoldStatus::UNKNOWN;
     bool isFoldable_ = false;
@@ -163,6 +185,7 @@ private:
     uint64_t displayId_ = 0;
     int32_t width_ = 0;
     int32_t height_ = 0;
+    DisplaySourceMode displaySourceMode_ = DisplaySourceMode::NONE;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_DISPLAY_INFO_H

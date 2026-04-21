@@ -1,0 +1,76 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package arkui.component.idlize;
+
+[Synthetic]
+callback ButtonModifierBuilder = pointer (pointer parentNode, ButtonConfiguration config);
+[Synthetic]
+callback CheckBoxModifierBuilder = pointer (pointer parentNode, CheckBoxConfiguration config);
+[Synthetic]
+callback DataPanelModifierBuilder = pointer (pointer parentNode, DataPanelConfiguration config);
+[Synthetic]
+callback GaugeModifierBuilder = pointer (pointer parentNode, GaugeConfiguration config);
+[Synthetic]
+callback LoadingProgressModifierBuilder = pointer (pointer parentNode, LoadingProgressConfiguration config);
+[Synthetic]
+callback ProgressModifierBuilder = pointer (pointer parentNode, ProgressConfiguration config);
+[Synthetic]
+callback RadioModifierBuilder = pointer (pointer parentNode, RadioConfiguration config);
+[Synthetic]
+callback RatingModifierBuilder = pointer (pointer parentNode, RatingConfiguration config);
+[Synthetic]
+callback MenuItemModifierBuilder = pointer (pointer parentNode, MenuItemConfiguration config);
+[Synthetic]
+callback SliderModifierBuilder = pointer (pointer parentNode, SliderConfiguration config);
+[Synthetic]
+callback TextClockModifierBuilder = pointer (pointer parentNode, TextClockConfiguration config);
+[Synthetic]
+callback TextTimerModifierBuilder = pointer (pointer parentNode, TextTimerConfiguration config);
+[Synthetic]
+callback ToggleModifierBuilder = pointer (pointer parentNode, ToggleConfiguration config);
+[Synthetic]
+callback CheckBoxGroupModifierBuilder = pointer (pointer parentNode, CheckBoxGroupConfiguration config);
+
+[Entity=Class]
+interface ContentModifierHelper {
+    static void contentModifierButton(pointer node, [TypeArguments="ButtonConfiguration"] ContentModifier contentModifier, ButtonModifierBuilder builder);
+    static void resetContentModifierButton(pointer node);
+    static void contentModifierCheckBox(pointer node, [TypeArguments="CheckBoxConfiguration"] ContentModifier contentModifier, CheckBoxModifierBuilder builder);
+    static void resetContentModifierCheckBox(pointer node);
+    static void contentModifierDataPanel(pointer node, [TypeArguments="DataPanelConfiguration"] ContentModifier contentModifier, DataPanelModifierBuilder builder);
+    static void resetContentModifierDataPanel(pointer node);
+    static void contentModifierGauge(pointer node, [TypeArguments="GaugeConfiguration"] ContentModifier contentModifier, GaugeModifierBuilder builder);
+    static void resetContentModifierGauge(pointer node);
+    static void contentModifierLoadingProgress(pointer node, [TypeArguments="LoadingProgressConfiguration"] ContentModifier contentModifier, LoadingProgressModifierBuilder builder);
+    static void resetContentModifierLoadingProgress(pointer node);
+    static void contentModifierProgress(pointer node, [TypeArguments="ProgressConfiguration"] ContentModifier contentModifier, ProgressModifierBuilder builder);
+    static void resetContentModifierProgress(pointer node);
+    static void contentModifierRadio(pointer node, [TypeArguments="RadioConfiguration"] ContentModifier contentModifier, RadioModifierBuilder builder);
+    static void resetContentModifierRadio(pointer node);
+    static void contentModifierRating(pointer node, [TypeArguments="RatingConfiguration"] ContentModifier contentModifier, RatingModifierBuilder builder);
+    static void resetContentModifierRating(pointer node);
+    static void contentModifierMenuItem(pointer node, [TypeArguments="MenuItemConfiguration"] ContentModifier contentModifier, MenuItemModifierBuilder builder);
+    static void resetContentModifierMenuItem(pointer node);
+    static void contentModifierSlider(pointer node, [TypeArguments="SliderConfiguration"] ContentModifier contentModifier, SliderModifierBuilder builder);
+    static void resetContentModifierSlider(pointer node);
+    static void contentModifierTextClock(pointer node, [TypeArguments="TextClockConfiguration"] ContentModifier contentModifier, TextClockModifierBuilder builder);
+    static void resetContentModifierTextClock(pointer node);
+    static void contentModifierTextTimer(pointer node, [TypeArguments="TextTimerConfiguration"] ContentModifier contentModifier, TextTimerModifierBuilder builder);
+    static void resetContentModifierTextTimer(pointer node);
+    static void contentModifierToggle(pointer node, [TypeArguments="ToggleConfiguration"] ContentModifier contentModifier, ToggleModifierBuilder builder);
+    static void resetContentModifierToggle(pointer node);
+    static void contentModifierCheckBoxGroup(pointer node, [TypeArguments="CheckBoxGroupConfiguration"] ContentModifier contentModifier, CheckBoxGroupModifierBuilder builder);
+    static void resetContentModifierCheckBoxGroup(pointer node);
+};

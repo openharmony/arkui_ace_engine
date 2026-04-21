@@ -52,8 +52,8 @@ export class InteropExtendableComponent extends ExtendableComponent {
     /** @memo */ build(): void {}
 
     override __findProvidedVarV2__Internal<T>(providedPropName: string): IProviderDecoratedVariable<T> | undefined {
-        const createStaticProvider = (value: Object, viewV2: Object): ProviderDecoratedVariable<Object> => {
-            const result = new ProviderDecoratedVariable<Object>(ExtendableComponent.current as ExtendableComponent, providedPropName, providedPropName, value);
+        const createStaticProvider = (value: Any, viewV2: Any): ProviderDecoratedVariable<Any> => {
+            const result = new ProviderDecoratedVariable<Any>(ExtendableComponent.current as ExtendableComponent, providedPropName, providedPropName, value);
             result.viewV2 = viewV2;
             return result;
         }
@@ -65,7 +65,7 @@ export class InteropExtendableComponent extends ExtendableComponent {
     }
 
     override __findProvider__Internal<T>(providedPropName: string): IProviderDecoratedVariable<T> | undefined {
-        const result = this.__findProvidedVarV2__Internal(providedPropName);
+        const result = this.__findProvidedVarV2__Internal<T>(providedPropName);
         if (result == undefined) {
             return undefined;
         }
@@ -90,14 +90,6 @@ export class InteropExtendableComponent extends ExtendableComponent {
             const setSource = ((newVal: T): void => {
                 provideVar.set(newVal);
             });
-            const fireChange = (): void => {
-                provideVar.fireChange();
-            }
-            global.getProperty('updateNotifyCallback').invoke(value, ESValue.wrap(fireChange));
-            const notifyProxy = (): void => {
-                value.invokeMethod('syncPeerHasChanged');
-            };
-            provideVar.addWatch(notifyProxy);
             global.getProperty('updateSetValueCallback').invoke(value, ESValue.wrap(setSource));
             return provideVar;
         }
@@ -125,7 +117,7 @@ export class InteropExtendableComponent extends ExtendableComponent {
     }
 }
 
-export function updateInteropExtendableComponent(dynamicComponent: Object): void {
+export function updateInteropExtendableComponent(dynamicComponent: Any): void {
     ExtendableComponent.current = new InteropExtendableComponent(ESValue.wrap(dynamicComponent));
 }
 
@@ -150,7 +142,7 @@ export function registerResetInteropExtendableComponent(): void {
 
 export function createInteropView(staticComponent: ExtendableComponent): ESValue {
     const createState = ESValue.getGlobal().getProperty('createStateVariable');
-    const findProvidePU = (providedPropName: string): Object | null => {
+    const findProvidePU = (providedPropName: string): Any => {
         let provide = staticComponent.__findProvide__Internal<Object>(providedPropName);
         if (!provide) {
             return null;
@@ -174,7 +166,7 @@ export function createInteropView(staticComponent: ExtendableComponent): ESValue
             };
             state.addWatch(notifyProxy);
         }
-        return state.getProxy()!.unwrap()! as Object;
+        return state.getProxy()!.unwrap();
     };
     const createDummyViewV2 = ESValue.getGlobal().getProperty('createDummyViewV2');
     const findProvider = (varName: string) => {
@@ -187,17 +179,17 @@ export function createInteropView(staticComponent: ExtendableComponent): ESValue
         }
         const value = result.get();
         if (result.viewV2 === undefined) {
-            const dummyViewV2 = createDummyViewV2.invoke(result, varName, value).unwrap() as Object;
+            const dummyViewV2 = createDummyViewV2.invoke(result, varName, value).unwrap();
             result.viewV2 = dummyViewV2;
         }
         return [result.viewV2, varName];
     };
-    const findLocalStorageInterop = (): Object => {
+    const findLocalStorageInterop = (): Any => {
         const staticLocalStorage_ = staticComponent.__localStorage__Internal;
         if (staticLocalStorage_.getProxy() === undefined) {
             staticLocalStorage_.setProxy();
         }
-        return staticLocalStorage_.getProxy()!.unwrap()! as Object;
+        return staticLocalStorage_.getProxy()!.unwrap();
     };
 
     return ESValue.getGlobal().getProperty('createViewInterop').invoke(findProvidePU, findProvider, findLocalStorageInterop);

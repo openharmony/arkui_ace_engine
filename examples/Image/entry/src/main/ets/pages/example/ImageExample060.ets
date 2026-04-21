@@ -28,7 +28,7 @@ struct ImageExample060 {
         .fontWeight(FontWeight.Bold)
         .margin({ bottom: 20 })
 
-      Image($r('app.media.png'))
+      Image($r('app.media.startIcon'))
         .width(200)
         .height(150)
         .objectFit(this.imageFit)

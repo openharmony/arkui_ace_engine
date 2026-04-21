@@ -656,7 +656,7 @@ void PluginFrontend::OnDrawCompleted(const std::string& componentId)
     CHECK_NULL_VOID(delegate_);
 }
 
-void PluginFrontend::OnDrawChildrenCompleted(const std::string& componentId)
+void PluginFrontend::OnDrawChildrenCompleted(const std::string& componentId, const std::vector<int32_t>& childIds)
 {
     CHECK_NULL_VOID(delegate_);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -77,6 +77,7 @@ bool NavDestinationModelNG::ParseCommonTitle(
             // update main title
             auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
             textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : TITLEBAR_MAX_LINES);
+            NavigationTitleUtil::InitTextProperty(textLayoutProperty);
             if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
                 textLayoutProperty->UpdateHeightAdaptivePolicy(hasSubTitle ? TextHeightAdaptivePolicy::MAX_LINES_FIRST :
                     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
@@ -421,6 +422,7 @@ void NavDestinationModelNG::CreateBackButton(const RefPtr<NavDestinationGroupNod
         padding.SetEdges(CalcLength(BUTTON_PADDING));
         backButtonLayoutProperty->UpdatePadding(padding);
     }
+    backButtonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
 
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
         SystemProperties::IsNeedSymbol()) {
@@ -2090,5 +2092,24 @@ void NavDestinationModelNG::SetBackButtonTextResource(FrameNode* frameNode, cons
     CHECK_NULL_VOID(titleBarNode);
     NavigationTitleUtil::SetBackButtonText(titleBarNode, text,
         "navDestination.backButtonIcon.accessibilityText", resObj);
+}
+
+void NavDestinationModelNG::SetFreeze(bool freeze, bool isValid)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetFreeze(frameNode, freeze, isValid);
+}
+
+void NavDestinationModelNG::SetFreeze(FrameNode* frameNode, bool freeze, bool isValid)
+{
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationNode);
+    if (!isValid) {
+        ViewAbstract::SetFreeze(false);
+        navDestinationNode->SetIsUserSetFreeze(false);
+        return;
+    }
+    ViewAbstract::SetFreeze(freeze);
+    navDestinationNode->SetIsUserSetFreeze(true);
 }
 } // namespace OHOS::Ace::NG

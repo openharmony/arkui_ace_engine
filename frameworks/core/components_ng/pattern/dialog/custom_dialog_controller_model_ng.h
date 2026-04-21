@@ -17,10 +17,18 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DIALOG_CUSTOM_DIALOG_CONTROLLER_MODEL_NG_H
 
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #include "base/memory/ace_type.h"
+#include "base/thread/task_executor.h"
+
+namespace OHOS::Ace {
+class Container;
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
+class FrameNode;
+class OverlayManager;
+class UINode;
+
 class ACE_EXPORT CustomDialogControllerModelNG : public OHOS::Ace::CustomDialogControllerModel {
 public:
     void SetOpenDialog(DialogProperties& dialogProperties, const WeakPtr<AceType>& controller,

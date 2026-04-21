@@ -47,6 +47,8 @@ struct Parent {
   @State circularVal: Node = a;
   @State arrayVal: Object | null = JSON.parse(arrayJson);
   @State objectVal: Object | null = JSON.parse(objectJson);
+  @State plainString: string = 'Hello World';
+  @State emptyString: string = '';
   regularVar: Object | null = JSON.parse(json);
 
   aboutToAppear() {

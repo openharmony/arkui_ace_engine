@@ -16,9 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DYNAMIC_LAYOUT_DYNAMIC_LAYOUT_ALGORITHM_PARAM_BASE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DYNAMIC_LAYOUT_DYNAMIC_LAYOUT_ALGORITHM_PARAM_BASE_H
 
+#include <optional>
 #include "base/geometry/calc_dimension.h"
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/common/layout/constants.h"
 #include "ui/properties/flex.h"
 
 namespace OHOS::Ace::NG {
@@ -29,6 +31,7 @@ enum DynamicLayoutType {
     COLUMN_LAYOUT,
     ROW_LAYOUT,
     STACK_LAYOUT,
+    GRID_LAYOUT,  // Grid layout
 };
 
 using DynamicLayoutAlgorithmFunc = std::function<void(LayoutWrapper* layoutWrapper)>;
@@ -138,5 +141,38 @@ private:
     DynamicLayoutAlgorithmFunc onMeasureSizeFunc_;
     DynamicLayoutAlgorithmFunc onPlaceChildrenFunc_;
 };
+
+// Grid layout algorithm parameters
+class ACE_EXPORT GridLayoutAlgorithmParam : public AlgorithmParamBase {
+    DECLARE_ACE_TYPE(GridLayoutAlgorithmParam, AlgorithmParamBase);
+
+public:
+    GridLayoutAlgorithmParam()
+    {
+        SetDynamicLayoutType(DynamicLayoutType::GRID_LAYOUT);
+    }
+
+    // Column template settings
+    void SetColumnsTemplate(const std::string& columnsTemplate) { columnsTemplate_ = columnsTemplate; }
+    const std::string& GetColumnsTemplate() const { return columnsTemplate_; }
+
+    // Fill policy settings
+    void SetItemFillPolicy(PresetFillType itemFillPolicy) { itemFillPolicy_ = itemFillPolicy; }
+    const std::optional<PresetFillType>& GetItemFillPolicy() const { return itemFillPolicy_; }
+
+    // Gap settings
+    void SetRowsGap(const CalcDimension& rowsGap) { rowsGap_ = rowsGap; }
+    CalcDimension GetRowsGap() const { return rowsGap_; }
+
+    void SetColumnsGap(const CalcDimension& columnsGap) { columnsGap_ = columnsGap; }
+    CalcDimension GetColumnsGap() const { return columnsGap_; }
+
+private:
+    std::string columnsTemplate_;
+    std::optional<PresetFillType> itemFillPolicy_;
+    CalcDimension rowsGap_;
+    CalcDimension columnsGap_;
+};
+
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_DYNAMIC_LAYOUT_DYNAMIC_LAYOUT_ALGORITHM_PARAM_BASE_H

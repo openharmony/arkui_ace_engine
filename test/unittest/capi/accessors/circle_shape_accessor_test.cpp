@@ -52,12 +52,13 @@ public:
 };
 
 /**
- * @tc.name: sizeInitTest
+ * @tc.name: constructTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CircleShapeAccessorTest, sizeInitTest, TestSize.Level1)
+HWTEST_F(CircleShapeAccessorTest, constructTest, TestSize.Level1)
 {
+    ASSERT_NE(accessor_->construct, nullptr);
     ASSERT_NE(peer_, nullptr);
     EXPECT_EQ(peer_->shape->GetWidth().ConvertToPx(), TEST_WIDTH);
     EXPECT_EQ(peer_->shape->GetHeight().ConvertToPx(), TEST_HEIGHT);

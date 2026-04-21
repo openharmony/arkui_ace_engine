@@ -22,7 +22,7 @@
 #include "base/geometry/matrix4.h"
 #include "base/image/drawing_color_filter.h"
 #include "base/image/drawing_lattice.h"
-#include "base/image/pixel_map.h"
+#include "base/image/image_resizable_slice.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/common/layout/constants.h"
@@ -30,6 +30,11 @@
 #include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/image/image_source_info.h"
+
+
+namespace OHOS::Ace {
+    class PixelMap;
+}
 
 namespace OHOS::Ace::NG {
 using BorderRadiusArray = std::array<PointF, 4>;

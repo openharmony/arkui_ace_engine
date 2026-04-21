@@ -89,6 +89,12 @@ struct IndexPage {
     new TextList(55, 'SwipeActionC', 'pages/List/CAPI/SwipeAction'),
     new TextList(56, 'SnapSpeedC', 'pages/List/CAPI/SnapSpeed'),
     new TextList(57, 'SnapSpeedNoLazy', 'pages/List/CAPI/SnapSpeedNoLazy'),
+    new TextList(58, 'EditModeOptions', 'pages/List/ListEditModeOptions'),
+    new TextList(59, 'BindControllerDeclare', 'pages/List/bindController/ListDeclare'),
+    new TextList(60, 'BindControllerCommand', 'pages/List/bindController/ListCommand'),
+    new TextList(61, 'ListEventReport', 'pages/List/ListEventReport'),
+    new TextList(62, 'ListEventReportNestedScroll', 'pages/List/ListEventReportNestedScroll'),
+    new TextList(63, 'ListEmptyBranch', 'pages/List/ListEmptyBranch'),
   ]
   @State fontSize: Resource | undefined = undefined
   build() {

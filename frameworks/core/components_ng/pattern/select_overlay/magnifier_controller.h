@@ -16,14 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_FIELD_PATTERN_MAGNIFIER_CONTROLLER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_FIELD_PATTERN_MAGNIFIER_CONTROLLER_H
 
-#include "base/memory/type_info_base.h"
 #include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/size_t.h"
+#include "base/geometry/ng/rect_t.h"
+#include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
-#include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/render/drawing_forward.h"
-#include "frameworks/base/memory/referenced.h"
+#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -40,6 +38,8 @@ public:
     bool UpdateMagnifierOffsetX(OffsetF& magnifierPaintOffset, VectorF& magnifierOffset, VectorF& zoomOffset);
     bool UpdateMagnifierOffsetY(OffsetF& magnifierPaintOffset, VectorF& magnifierOffset, VectorF& zoomOffset);
     bool UpdateMagnifierOffset();
+    bool UpdateMagnifierEdgeY(const RefPtr<PipelineContext>& pipelineContext, float& magnifierY,
+        float& patternVisibleBottom, float& windowScale, int32_t& screenHeight);
 
     void UpdateShowMagnifier(bool isShowMagnifier = false);
 
@@ -108,6 +108,7 @@ private:
     bool isShowMagnifier_ = false;
     OffsetF localOffset_;
     OffsetF globalOffset_;
+    OffsetF patternOffset_;
     std::optional<OffsetF> localOffsetWithoutTrans_;
     WeakPtr<Pattern> pattern_;
     bool removeFrameNode_ = false;

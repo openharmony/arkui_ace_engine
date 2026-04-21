@@ -23,7 +23,6 @@
 #include "core/components/common/layout/align_declaration.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
-#include "core/components/text_overlay/text_overlay_manager.h"
 
 namespace OHOS::Ace::V2 {
 
@@ -619,8 +618,8 @@ inline std::string ConvertEllipsisModeToString(EllipsisMode value)
         { EllipsisMode::HEAD, "EllipsisMode.START" },
         { EllipsisMode::MIDDLE, "EllipsisMode.CENTER" },
         { EllipsisMode::TAIL, "EllipsisMode.END" },
-        { EllipsisMode::MULTILINE_HEAD, "EllipsisMode.MULTILINE_HEAD" },
-        { EllipsisMode::MULTILINE_MIDDLE, "EllipsisMode.MULTILINE_MIDDLE" },
+        { EllipsisMode::MULTILINE_HEAD, "EllipsisMode.MULTILINE_START" },
+        { EllipsisMode::MULTILINE_MIDDLE, "EllipsisMode.MULTILINE_CENTER" },
     };
     auto index = BinarySearchFindIndex(modalTable, ArraySize(modalTable), value);
     return index < 0 ? "EllipsisMode.END" : modalTable[index].value;

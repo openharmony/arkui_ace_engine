@@ -26,8 +26,6 @@
 #include "core/gestures/gesture_event.h"
 #include "core/gestures/gesture_info.h"
 #include "core/gestures/gesture_type.h"
-#include "core/gestures/velocity.h"
-#include "core/gestures/velocity_tracker.h"
 #include "core/components/common/properties/blur_style_option.h"
 #include "core/components/common/properties/shadow.h"
 #include "ui/properties/ui_material.h"
@@ -104,7 +102,7 @@ struct DragPreviewOption {
         int32_t badgeNumber;
         bool isShowBadge = true;
     };
-    std::optional<int32_t> GetCustomerBadgeNumber()
+    std::optional<int32_t> GetCustomerBadgeNumber() const
     {
         if (isNumber) {
             return badgeNumber > 1 ? badgeNumber : 1;

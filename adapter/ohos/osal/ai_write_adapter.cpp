@@ -19,7 +19,12 @@
 #include "bool_wrapper.h"
 #include "int_wrapper.h"
 #include "want.h"
+
+#include "base/memory/ace_type.h"
+#include "core/common/ace_application_info.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
+#include "interfaces/inner_api/ace/modal_ui_extension_config.h"
 
 namespace OHOS::Ace {
 const std::pair<std::string, std::string> UI_ENTENSION_TYPE = {"ability.want.params.uiExtensionType", "sys/commonUI"};

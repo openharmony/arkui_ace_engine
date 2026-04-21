@@ -128,7 +128,8 @@ const std::string CUSTOM_STORE_KEY = "STYLED_STRING_CUSTOM_STORE_";
 
 const std::unordered_set<SpanType> types = { SpanType::Font, SpanType::Gesture, SpanType::BaselineOffset,
     SpanType::Decoration, SpanType::LetterSpacing, SpanType::TextShadow, SpanType::LineHeight, SpanType::Image,
-    SpanType::CustomSpan, SpanType::ParagraphStyle, SpanType::ExtSpan, SpanType::BackgroundColor, SpanType::Url };
+    SpanType::CustomSpan, SpanType::ParagraphStyle, SpanType::ExtSpan, SpanType::BackgroundColor, SpanType::Url,
+    SpanType::LineSpacing };
 
 const std::unordered_map<SpanType, std::function<JSRef<JSObject>(const RefPtr<SpanBase>&)>> spanCreators = {
     { SpanType::Font, JSSpanString::CreateJsFontSpan }, { SpanType::Decoration, JSSpanString::CreateJsDecorationSpan },
@@ -141,6 +142,7 @@ const std::unordered_map<SpanType, std::function<JSRef<JSObject>(const RefPtr<Sp
     { SpanType::Image, JSSpanString::CreateJsImageSpan },
     { SpanType::ParagraphStyle, JSSpanString::CreateJsParagraphStyleSpan },
     { SpanType::Url, JSSpanString::CreateJsUrlSpan },
+    { SpanType::LineSpacing, JSSpanString::CreateJsLineSpacingSpan },
 };
 
 void JSSpanString::Constructor(const JSCallbackInfo& args)
@@ -291,7 +293,11 @@ void JSSpanString::GetSpans(const JSCallbackInfo& info)
                 spanObjectArray->SetValueAt(idx++, CreateJsSpanBaseObject(tempSpan));
             }
         } else {
-            spanObjectArray->SetValueAt(idx++, CreateJsSpanBaseObject(spanObject));
+            auto jsSanBaseObject = CreateJsSpanBaseObject(spanObject);
+            if (jsSanBaseObject.IsEmpty()) {
+                continue;
+            }
+            spanObjectArray->SetValueAt(idx++, jsSanBaseObject);
         }
     }
     info.SetReturnValue(JSRef<JSVal>::Cast(spanObjectArray));
@@ -304,6 +310,10 @@ JSRef<JSObject> JSSpanString::CreateJsSpanBaseObject(const RefPtr<SpanBase>& spa
     resultObj->SetProperty<int32_t>("length", spanObject->GetLength());
     resultObj->SetProperty<int32_t>("styledKey", static_cast<int32_t>(spanObject->GetSpanType()));
     JSRef<JSObject> obj = CreateJsSpanObject(spanObject);
+    if (obj->IsEmpty()) {
+        resultObj.Reset();
+        return resultObj;
+    }
     resultObj->SetPropertyObject("styledValue", obj);
     return resultObj;
 }
@@ -428,6 +438,16 @@ JSRef<JSObject> JSSpanString::CreateJsLineHeightSpan(const RefPtr<SpanBase>& spa
     return obj;
 }
 
+JSRef<JSObject> JSSpanString::CreateJsLineSpacingSpan(const RefPtr<SpanBase>& spanObject)
+{
+    auto span = AceType::DynamicCast<LineSpacingSpan>(spanObject);
+    CHECK_NULL_RETURN(span, JSRef<JSObject>::New());
+    JSRef<JSObject> obj = JSClass<JSLineSpacingSpan>::NewInstance();
+    auto lineSpacingSpan = Referenced::Claim(obj->Unwrap<JSLineSpacingSpan>());
+    lineSpacingSpan->SetLineSpacingSpan(span);
+    return obj;
+}
+
 JSRef<JSObject> JSSpanString::CreateJsImageSpan(const RefPtr<SpanBase>& spanObject)
 {
     auto span = AceType::DynamicCast<ImageSpan>(spanObject);
@@ -464,6 +484,8 @@ RefPtr<SpanBase> JSSpanString::ParseJsSpanBase(int32_t start, int32_t length, Sp
             return ParseJsTextShadowSpan(start, length, obj);
         case SpanType::LineHeight:
             return ParseJsLineHeightSpan(start, length, obj);
+        case SpanType::LineSpacing:
+            return ParseJsLineSpacingSpan(start, length, obj);
         case SpanType::Image:
             return GetImageAttachment(start, length, obj);
         case SpanType::ParagraphStyle:
@@ -577,8 +599,19 @@ RefPtr<SpanBase> JSSpanString::ParseJsLineHeightSpan(int32_t start, int32_t leng
     auto* base = obj->Unwrap<AceType>();
     auto* lineHeightSpan = AceType::DynamicCast<JSLineHeightSpan>(base);
     if (lineHeightSpan && lineHeightSpan->GetLineHeightSpan()) {
-        return AceType::MakeRefPtr<LineHeightSpan>(
-            lineHeightSpan->GetLineHeightSpan()->GetLineHeight(), start, start + length);
+        return AceType::MakeRefPtr<LineHeightSpan>(lineHeightSpan->GetLineHeightSpan()->GetLineHeight(),
+            lineHeightSpan->GetLineHeightSpan()->GetLineHeightMultiple(), start, start + length);
+    }
+    return nullptr;
+}
+
+RefPtr<SpanBase> JSSpanString::ParseJsLineSpacingSpan(int32_t start, int32_t length, const JSRef<JSObject>& obj)
+{
+    auto* base = obj->Unwrap<AceType>();
+    auto* lineSpacingSpan = AceType::DynamicCast<JSLineSpacingSpan>(base);
+    if (lineSpacingSpan && lineSpacingSpan->GetLineSpacingSpan()) {
+        return AceType::MakeRefPtr<LineSpacingSpan>(lineSpacingSpan->GetLineSpacingSpan()->GetLineSpacing(),
+            lineSpacingSpan->GetLineSpacingSpan()->GetLineSpacingOptions(), start, start + length);
     }
     return nullptr;
 }
@@ -623,9 +656,11 @@ RefPtr<SpanBase> JSSpanString::ParseJsCustomSpan(int32_t start, int32_t length, 
 
     // store custom spanobj in spanstring
     auto thisObj = args.This();
-    auto newIndex = customSpanStoreIndex_.fetch_add(1);
-    std::string key = CUSTOM_STORE_KEY + std::to_string(newIndex);
-    thisObj->SetPropertyObject(key.c_str(), styleStringValue);
+    if (!thisObj->IsEmpty()) {
+        auto newIndex = customSpanStoreIndex_.fetch_add(1);
+        std::string key = CUSTOM_STORE_KEY + std::to_string(newIndex);
+        thisObj->SetPropertyObject(key.c_str(), styleStringValue);
+    }
 
     auto spanBase = AceType::MakeRefPtr<JSCustomSpan>(JSRef<JSObject>(styleStringValue), args);
     spanBase->UpdateStartIndex(start);
@@ -747,9 +782,11 @@ RefPtr<CustomSpan> JSSpanString::ParseJsCustomSpan(const JSCallbackInfo& args)
 {
     // store custom spanobj in spanstring
     auto thisObj = args.This();
-    auto newIndex = customSpanStoreIndex_.fetch_add(1);
-    std::string key = CUSTOM_STORE_KEY + std::to_string(newIndex);
-    thisObj->SetPropertyObject(key.c_str(), args[0]);
+    if (!thisObj->IsEmpty()) {
+        auto newIndex = customSpanStoreIndex_.fetch_add(1);
+        std::string key = CUSTOM_STORE_KEY + std::to_string(newIndex);
+        thisObj->SetPropertyObject(key.c_str(), args[0]);
+    }
     return AceType::MakeRefPtr<JSCustomSpan>(args[0], args);
 }
 

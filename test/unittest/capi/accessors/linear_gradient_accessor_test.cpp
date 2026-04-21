@@ -33,8 +33,8 @@ namespace {
     };
 
     std::vector<std::pair<Ark_Color, float>> validValues2 = {
-        std::make_pair(Ark_Color::ARK_COLOR_BLUE, 0.5f),
-        std::make_pair(Ark_Color::ARK_COLOR_RED, 1.f),
+        std::make_pair(ARK_COLOR_BLUE, 0.5f),
+        std::make_pair(ARK_COLOR_RED, 1.f),
     };
 
     std::vector<std::pair<int32_t, float>> validValues3 = {
@@ -82,17 +82,17 @@ public:
 };
 
 /**
- * @tc.name: CtorColorArkStringTest
+ * @tc.name: constructTestColorArkString
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LinearGradientAccessorTest, CtorColorArkStringTest, TestSize.Level1)
+HWTEST_F(LinearGradientAccessorTest, constructTestColorArkString, TestSize.Level1)
 {
     std::vector<Ark_ColorStop> vectorData;
     for (const auto& pairItem : validValues) {
         auto colorStop = Ark_ColorStop {
-            .color = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(std::get<0>(pairItem)),
-            .offset = Converter::ArkValue<Opt_Length>(std::get<1>(pairItem)),
+            .color = Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<0>(pairItem)),
+            .offset = Converter::ArkValue<Ark_Length>(std::get<1>(pairItem)),
         };
         vectorData.push_back(colorStop);
     }
@@ -110,17 +110,17 @@ HWTEST_F(LinearGradientAccessorTest, CtorColorArkStringTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: CtorColorArkColorTest
+ * @tc.name: constructTestColorArkColor
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LinearGradientAccessorTest, CtorColorArkColorTest, TestSize.Level1)
+HWTEST_F(LinearGradientAccessorTest, constructTestColorArkColor, TestSize.Level1)
 {
     std::vector<Ark_ColorStop> vectorData;
     for (const auto& pairItem : validValues2) {
         auto colorStop = Ark_ColorStop {
-            .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<0>(pairItem)),
-            .offset = Converter::ArkValue<Opt_Length>(std::get<1>(pairItem)),
+            .color = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<0>(pairItem)),
+            .offset = Converter::ArkValue<Ark_Length>(std::get<1>(pairItem)),
         };
         vectorData.push_back(colorStop);
     }
@@ -138,17 +138,17 @@ HWTEST_F(LinearGradientAccessorTest, CtorColorArkColorTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: CtorColorArkNumberTest
+ * @tc.name: constructTestColorArkNumber
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LinearGradientAccessorTest, CtorColorArkNumberTest, TestSize.Level1)
+HWTEST_F(LinearGradientAccessorTest, constructTestColorArkNumber, TestSize.Level1)
 {
     std::vector<Ark_ColorStop> vectorData;
     for (const auto& pairItem : validValues3) {
         auto colorStop = Ark_ColorStop {
-            .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(std::get<0>(pairItem)),
-            .offset = Converter::ArkValue<Opt_Length>(std::get<1>(pairItem)),
+            .color = Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(std::get<0>(pairItem)),
+            .offset = Converter::ArkValue<Ark_Length>(std::get<1>(pairItem)),
         };
         vectorData.push_back(colorStop);
     }
@@ -166,17 +166,17 @@ HWTEST_F(LinearGradientAccessorTest, CtorColorArkNumberTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: CtorColorArkResourceTest
+ * @tc.name: constructTestColorArkResource
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LinearGradientAccessorTest, CtorColorArkResourceTest, TestSize.Level1)
+HWTEST_F(LinearGradientAccessorTest, constructTestColorArkResource, TestSize.Level1)
 {
     std::vector<Ark_ColorStop> vectorData;
     for (const auto& pairItem : validValues4) {
         auto colorStop = Ark_ColorStop {
-            .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(std::get<0>(pairItem)),
-            .offset = Converter::ArkValue<Opt_Length>(std::get<1>(pairItem)),
+            .color = Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(std::get<0>(pairItem)),
+            .offset = Converter::ArkValue<Ark_Length>(std::get<1>(pairItem)),
         };
         vectorData.push_back(colorStop);
     }
@@ -194,18 +194,18 @@ HWTEST_F(LinearGradientAccessorTest, CtorColorArkResourceTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: CtorInvalidValuesTest
+ * @tc.name: constructTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LinearGradientAccessorTest, CtorInvalidValuesTest, TestSize.Level1)
+HWTEST_F(LinearGradientAccessorTest, constructTestInvalidValues, TestSize.Level1)
 {
     std::vector<Ark_ColorStop> vectorData;
 
     for (const auto& pairItem : invalidValues) {
         auto colorStop = Ark_ColorStop {
-            .color = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(std::get<0>(pairItem)),
-            .offset = Converter::ArkValue<Opt_Length>(std::get<1>(pairItem)),
+            .color = Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<0>(pairItem)),
+            .offset = Converter::ArkValue<Ark_Length>(std::get<1>(pairItem)),
         };
         vectorData.push_back(colorStop);
     }

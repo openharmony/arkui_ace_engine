@@ -22,48 +22,48 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace {
-Ark_DirectionalEdgesT GenEdgesGlobalized(const NG::PaddingPropertyF& edgeNative, TextDirection direction)
+Ark_DirectionalEdgesT_F64 GenEdgesGlobalized(const NG::PaddingPropertyF& edgeNative, TextDirection direction)
 {
-    Ark_DirectionalEdgesT edges;
+    Ark_DirectionalEdgesT_F64 edges;
     auto pipeline = PipelineBase::GetCurrentContext();
     double px2vpScale = (pipeline && !NearZero(pipeline->GetDipScale())) ? 1.0 / pipeline->GetDipScale() : 1.0;
-    edges.top = Converter::ArkValue<Ark_Number>(edgeNative.top.value_or(0) * px2vpScale);
-    edges.bottom = Converter::ArkValue<Ark_Number>(edgeNative.bottom.value_or(0) * px2vpScale);
+    edges.top = Converter::ArkValue<Ark_Float64>(edgeNative.top.value_or(0) * px2vpScale);
+    edges.bottom = Converter::ArkValue<Ark_Float64>(edgeNative.bottom.value_or(0) * px2vpScale);
     if (direction != TextDirection::RTL) {
-        edges.start = Converter::ArkValue<Ark_Number>(edgeNative.left.value_or(0) * px2vpScale);
-        edges.end = Converter::ArkValue<Ark_Number>(edgeNative.right.value_or(0) * px2vpScale);
+        edges.start = Converter::ArkValue<Ark_Float64>(edgeNative.left.value_or(0) * px2vpScale);
+        edges.end = Converter::ArkValue<Ark_Float64>(edgeNative.right.value_or(0) * px2vpScale);
     } else {
-        edges.start = Converter::ArkValue<Ark_Number>(edgeNative.right.value_or(0) * px2vpScale);
-        edges.end = Converter::ArkValue<Ark_Number>(edgeNative.left.value_or(0) * px2vpScale);
+        edges.start = Converter::ArkValue<Ark_Float64>(edgeNative.right.value_or(0) * px2vpScale);
+        edges.end = Converter::ArkValue<Ark_Float64>(edgeNative.left.value_or(0) * px2vpScale);
     }
     return edges;
 }
-Ark_DirectionalEdgesT GenBorderWidthGlobalized(const NG::BorderWidthPropertyT<float>& edgeNative,
+Ark_DirectionalEdgesT_F64 GenBorderWidthGlobalized(const NG::BorderWidthPropertyT<float>& edgeNative,
     TextDirection direction)
 {
-    Ark_DirectionalEdgesT edges;
+    Ark_DirectionalEdgesT_F64 edges;
     auto pipeline = PipelineBase::GetCurrentContext();
     double px2vpScale = (pipeline && !NearZero(pipeline->GetDipScale())) ? 1.0 / pipeline->GetDipScale() : 1.0;
-    edges.top = Converter::ArkValue<Ark_Number>(edgeNative.topDimen.value_or(0) * px2vpScale);
-    edges.bottom = Converter::ArkValue<Ark_Number>(edgeNative.bottomDimen.value_or(0) * px2vpScale);
+    edges.top = Converter::ArkValue<Ark_Float64>(edgeNative.topDimen.value_or(0) * px2vpScale);
+    edges.bottom = Converter::ArkValue<Ark_Float64>(edgeNative.bottomDimen.value_or(0) * px2vpScale);
     if (direction != TextDirection::RTL) {
-        edges.start = Converter::ArkValue<Ark_Number>(edgeNative.leftDimen.value_or(0) * px2vpScale);
-        edges.end = Converter::ArkValue<Ark_Number>(edgeNative.rightDimen.value_or(0) * px2vpScale);
+        edges.start = Converter::ArkValue<Ark_Float64>(edgeNative.leftDimen.value_or(0) * px2vpScale);
+        edges.end = Converter::ArkValue<Ark_Float64>(edgeNative.rightDimen.value_or(0) * px2vpScale);
     } else {
-        edges.start = Converter::ArkValue<Ark_Number>(edgeNative.rightDimen.value_or(0) * px2vpScale);
-        edges.end = Converter::ArkValue<Ark_Number>(edgeNative.leftDimen.value_or(0) * px2vpScale);
+        edges.start = Converter::ArkValue<Ark_Float64>(edgeNative.rightDimen.value_or(0) * px2vpScale);
+        edges.end = Converter::ArkValue<Ark_Float64>(edgeNative.leftDimen.value_or(0) * px2vpScale);
     }
     return edges;
 }
-const Ark_DirectionalEdgesT DEFAULT_EDGES = {
-    .top = Converter::ArkValue<Ark_Number>(0.0f),
-    .bottom = Converter::ArkValue<Ark_Number>(0.0f),
-    .start = Converter::ArkValue<Ark_Number>(0.0f),
-    .end = Converter::ArkValue<Ark_Number>(0.0f),
+const Ark_DirectionalEdgesT_F64 DEFAULT_EDGES = {
+    .top = Converter::ArkValue<Ark_Float64>(0.0f),
+    .bottom = Converter::ArkValue<Ark_Float64>(0.0f),
+    .start = Converter::ArkValue<Ark_Float64>(0.0f),
+    .end = Converter::ArkValue<Ark_Float64>(0.0f),
 };
 const Ark_MeasureResult DEFAULT_MEASURE_RESULT = {
-    .width = Converter::ArkValue<Ark_Number>(0.0f),
-    .height = Converter::ArkValue<Ark_Number>(0.0f),
+    .width = Converter::ArkValue<Ark_Float64>(0.0f),
+    .height = Converter::ArkValue<Ark_Float64>(0.0f),
 };
 } // namespace
 namespace LayoutableAccessor {
@@ -80,13 +80,13 @@ Ark_NativePointer GetFinalizerImpl()
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void LayoutImpl(Ark_Layoutable peer,
-                const Ark_Position* position)
+                const Opt_Position* position)
 {
     CHECK_NULL_VOID(peer && peer->measureLayoutParam && position);
     auto child = peer->measureLayoutParam->GetOrCreateChildByIndex(peer->index);
     CHECK_NULL_VOID(child);
-    auto x = Converter::OptConvert<Dimension>(position->x);
-    auto y = Converter::OptConvert<Dimension>(position->y);
+    auto x = Converter::OptConvert<Dimension>(position->value.x);
+    auto y = Converter::OptConvert<Dimension>(position->value.y);
     if (!(x.has_value() || y.has_value())) {
         LOGE("LayoutableAccessor::LayoutImpl the position prop is illegal");
     } else {
@@ -97,38 +97,38 @@ void LayoutImpl(Ark_Layoutable peer,
     }
     child->Layout();
 }
-Opt_DirectionalEdgesT GetMarginImpl(Ark_Layoutable peer)
+Opt_DirectionalEdgesT_F64 GetMarginImpl(Ark_Layoutable peer)
 {
-    CHECK_NULL_RETURN(peer && peer->measureLayoutParam, Converter::ArkValue<Opt_DirectionalEdgesT>(Ark_Empty()));
+    CHECK_NULL_RETURN(peer && peer->measureLayoutParam, Converter::ArkValue<Opt_DirectionalEdgesT_F64>(Ark_Empty()));
     auto child = peer->measureLayoutParam->GetOrCreateChildByIndex(peer->index);
-    CHECK_NULL_RETURN(child, Converter::ArkValue<Opt_DirectionalEdgesT>(Ark_Empty()));
+    CHECK_NULL_RETURN(child, Converter::ArkValue<Opt_DirectionalEdgesT_F64>(Ark_Empty()));
     auto layoutProperty = child->GetLayoutProperty();
-    CHECK_NULL_RETURN(child->GetLayoutProperty(), Converter::ArkValue<Opt_DirectionalEdgesT>(Ark_Empty()));
+    CHECK_NULL_RETURN(child->GetLayoutProperty(), Converter::ArkValue<Opt_DirectionalEdgesT_F64>(Ark_Empty()));
     auto direction = layoutProperty->GetNonAutoLayoutDirection();
     auto result = GenEdgesGlobalized(layoutProperty->CreateMarginWithoutCache(), direction);
-    return Converter::ArkValue<Opt_DirectionalEdgesT>(result);
+    return Converter::ArkValue<Opt_DirectionalEdgesT_F64>(result);
 }
-Opt_DirectionalEdgesT GetPaddingImpl(Ark_Layoutable peer)
+Opt_DirectionalEdgesT_F64 GetPaddingImpl(Ark_Layoutable peer)
 {
-    CHECK_NULL_RETURN(peer && peer->measureLayoutParam, Converter::ArkValue<Opt_DirectionalEdgesT>(Ark_Empty()));
+    CHECK_NULL_RETURN(peer && peer->measureLayoutParam, Converter::ArkValue<Opt_DirectionalEdgesT_F64>(Ark_Empty()));
     auto child = peer->measureLayoutParam->GetOrCreateChildByIndex(peer->index);
-    CHECK_NULL_RETURN(child, Converter::ArkValue<Opt_DirectionalEdgesT>(Ark_Empty()));
+    CHECK_NULL_RETURN(child, Converter::ArkValue<Opt_DirectionalEdgesT_F64>(Ark_Empty()));
     auto layoutProperty = child->GetLayoutProperty();
-    CHECK_NULL_RETURN(child->GetLayoutProperty(), Converter::ArkValue<Opt_DirectionalEdgesT>(Ark_Empty()));
+    CHECK_NULL_RETURN(child->GetLayoutProperty(), Converter::ArkValue<Opt_DirectionalEdgesT_F64>(Ark_Empty()));
     auto direction = layoutProperty->GetNonAutoLayoutDirection();
     auto result = GenEdgesGlobalized(layoutProperty->CreatePaddingWithoutBorder(false, false), direction);
-    return Converter::ArkValue<Opt_DirectionalEdgesT>(result);
+    return Converter::ArkValue<Opt_DirectionalEdgesT_F64>(result);
 }
-Opt_DirectionalEdgesT GetBorderWidthImpl(Ark_Layoutable peer)
+Opt_DirectionalEdgesT_F64 GetBorderWidthImpl(Ark_Layoutable peer)
 {
-    CHECK_NULL_RETURN(peer && peer->measureLayoutParam, Converter::ArkValue<Opt_DirectionalEdgesT>(Ark_Empty()));
+    CHECK_NULL_RETURN(peer && peer->measureLayoutParam, Converter::ArkValue<Opt_DirectionalEdgesT_F64>(Ark_Empty()));
     auto child = peer->measureLayoutParam->GetOrCreateChildByIndex(peer->index);
-    CHECK_NULL_RETURN(child, Converter::ArkValue<Opt_DirectionalEdgesT>(Ark_Empty()));
+    CHECK_NULL_RETURN(child, Converter::ArkValue<Opt_DirectionalEdgesT_F64>(Ark_Empty()));
     auto layoutProperty = child->GetLayoutProperty();
-    CHECK_NULL_RETURN(child->GetLayoutProperty(), Converter::ArkValue<Opt_DirectionalEdgesT>(Ark_Empty()));
+    CHECK_NULL_RETURN(child->GetLayoutProperty(), Converter::ArkValue<Opt_DirectionalEdgesT_F64>(Ark_Empty()));
     auto direction = layoutProperty->GetNonAutoLayoutDirection();
     auto result = GenBorderWidthGlobalized(layoutProperty->CreateBorder(), direction);
-    return Converter::ArkValue<Opt_DirectionalEdgesT>(result);
+    return Converter::ArkValue<Opt_DirectionalEdgesT_F64>(result);
 }
 Ark_MeasureResult GetMeasureResultImpl(Ark_Layoutable peer)
 {
@@ -139,8 +139,8 @@ Ark_MeasureResult GetMeasureResultImpl(Ark_Layoutable peer)
     Dimension measureWidth(size.Width(), DimensionUnit::PX);
     Dimension measureHeight(size.Height(), DimensionUnit::PX);
     Ark_MeasureResult measureResult = {
-        .width = Converter::ArkValue<Ark_Number>(measureWidth.ConvertToVp()),
-        .height = Converter::ArkValue<Ark_Number>(measureHeight.ConvertToVp()),
+        .width = Converter::ArkValue<Ark_Float64>(measureWidth.ConvertToVp()),
+        .height = Converter::ArkValue<Ark_Float64>(measureHeight.ConvertToVp()),
     };
     return measureResult;
 }
@@ -149,17 +149,17 @@ void SetMeasureResultImpl(Ark_Layoutable peer,
 {
     LOGE("LayoutableAccessor::SetMeasureResultImpl is not implemented, only getter is supported");
 }
-Opt_Number GetUniqueIdImpl(Ark_Layoutable peer)
+Opt_Int32 GetUniqueIdImpl(Ark_Layoutable peer)
 {
-    Opt_Number invalid = Converter::ArkValue<Opt_Number>(Ark_Empty());
+    Opt_Int32 invalid = Converter::ArkValue<Opt_Int32>(Ark_Empty());
     CHECK_NULL_RETURN(peer && peer->measureLayoutParam, invalid);
     auto child = peer->measureLayoutParam->GetOrCreateChildByIndex(peer->index);
     CHECK_NULL_RETURN(child, invalid);
     auto uniqueId = child->GetHostNode()->GetId();
-    return Converter::ArkValue<Opt_Number>(uniqueId);
+    return Converter::ArkValue<Opt_Int32>(uniqueId);
 }
 void SetUniqueIdImpl(Ark_Layoutable peer,
-                     const Opt_Number* uniqueId)
+                     const Opt_Int32* uniqueId)
 {
     LOGE("LayoutableAccessor::SetUniqueIdImpl is not implemented, only getter is supported");
 }

@@ -23,9 +23,12 @@ ohos_copy("copy_arkui_ets") {
     "./arkui/NativePeerNode.d.ets",
     "./arkui/PeerNode.d.ets",
     "./arkui/ReusablePool.d.ets",
+    "./arkui/CommonModifier.d.ets",
+    "./arkui/CommonMethodModifier.d.ets",
   ]
   sources += [
     "./arkui/base/UIContextUtil.d.ets",
+    "./arkui/base/ArkUIObjectFinalizationRegisterProxy.d.ets",
   ]
   sources += [
     "./arkui/component.d.ets",
@@ -37,6 +40,7 @@ ohos_copy("copy_arkui_ets") {
     "./arkui/component/tabs.d.ets",
     "./arkui/component/text.d.ets",
     "./arkui/component/idlize.d.ets",
+    "./arkui/component/securityUIExtensionComponent.d.ets"
   ]
   sources += [
     "./@koalaui/common.d.ets",
@@ -47,8 +51,8 @@ ohos_copy("copy_arkui_ets") {
   sources += [ "./@koalaui/interop/Finalizable.d.ets" ]
   sources += [ "./@koalaui/interop/SerializerBase.d.ets" ]
   sources += [
-    "./@koalaui/runtime/annotations.d.ets",
     "./@koalaui/runtime/internals.d.ets",
+    "./@koalaui/runtime/annotations.d.ets",
     "./@koalaui/runtime/memo/node.d.ets",
     "./@koalaui/runtime/memo/remember.d.ets",
     "./@koalaui/runtime/states/Disposable.d.ets",
@@ -57,6 +61,7 @@ ohos_copy("copy_arkui_ets") {
   sources += [
     "./@ohos/router.d.ets",
     "./arkui/handwritten/Router.ts",
+    "./arkui/hooks/modifiers/ArkCommonModifier.d.ets",
   ]
   outputs = [ "$ohos_ets_inner_path/{{source_target_relative}}" ]
   part_name = ace_engine_part

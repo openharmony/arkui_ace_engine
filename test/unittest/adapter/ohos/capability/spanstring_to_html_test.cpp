@@ -39,7 +39,7 @@ namespace {
  *           between HTML and SpanString is accurate.
  * @tc.level: 1
  */
-HWTEST_F(HtmlConvertTestNg, SpanStringConvert000, TestSize.Level1)
+HWTEST_F(HtmlConvertTestNg, SpanStringConvert000, TestSize.Level0)
 {
     /**
      * @tc.steps1: Initialize a mutable SpanString with an image option and create a SpanString with

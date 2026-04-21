@@ -28,4 +28,11 @@ ace_unittest("grid_row_test_ng") {
     "measure/gridrow_measure_test_ng.cpp",
     "old_cases/grid_row_test_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "grid_row_test_core.cpp" ]
+  } else {
+    sources += [ "grid_row_test_core.cpp" ]
+  }
 }

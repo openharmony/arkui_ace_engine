@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/select_overlay/select_overlay_paint_method.h"
 
 #include "core/components/text_overlay/text_overlay_theme.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
@@ -56,7 +57,11 @@ void SelectOverlayPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(paintWrapper);
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
-    auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
+    auto caller = info_.callerFrameNode.Upgrade();
+    auto textOverlayTheme = caller ? caller->GetTheme<TextOverlayTheme>(true) : nullptr;
+    if (!textOverlayTheme) {
+        textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
+    }
     CHECK_NULL_VOID(textOverlayTheme);
     if (!IsModeSwitchComplete()) {
         return;

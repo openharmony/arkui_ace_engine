@@ -46,6 +46,8 @@ StatisticEventInfo StatisticEventReporter::ConvertToEvent(StatisticEventType eve
     switch (eventType) {
         case StatisticEventType::FA_APP_START:
             return { "FRAMEWORK", "FA_APP_START" };
+        case StatisticEventType::NAPI_SCOPE_ERROR:
+            return { "FRAMEWORK", "NAPI_SCOPE_ERROR" };
         case StatisticEventType::XCOMPONENT_TYPE_USE_STRING:
             return { "XCOMPONENT", "TYPE_USE_STRING" };
         case StatisticEventType::XCOMPONENT_SET_SURFACE_SIZE:
@@ -116,12 +118,24 @@ StatisticEventInfo StatisticEventReporter::ConvertToEvent(StatisticEventType eve
             return { "CANVAS", "NINE_PARAM_DRAWIMAGE" };
         case StatisticEventType::CANVAS_GLOBAL_ALPHA_MINUS_ONE:
             return { "CANVAS", "GLOBAL_ALPHA_MINUS_ONE" };
+        case StatisticEventType::WEB_LIKE_FRONTEND:
+            return { "FRAMEWORK", "WEB_LIKE_FRONTEND" };
+        case StatisticEventType::JS_CARD_FRONTEND:
+            return { "FRAMEWORK", "JS_CARD_FRONTEND" };
+        case StatisticEventType::FOCUSBOXSTYLE_MARGIN_STROKEWIDTH_MODIFIER:
+            return { "FRAMEWORK", "FOCUSBOXSTYLE_MARGIN_STROKEWIDTH_MODIFIER" };
+        case StatisticEventType::GESTURE_TWO_FINGER_LONGPRESS_TRIGGER_INFO:
+            return { "FRAMEWORK", "GESTURE_TWO_FINGER_LONGPRESS_TRIGGER_INFO" };
+        case StatisticEventType::FA_AND_DECLARATIVE_APP_START:
+            return { "FRAMEWORK", "FA_AND_DECLARATIVE_APP_START" };
         case StatisticEventType::VIDEO_INVALID_PROGRESS_RATE:
             return { "VIDEO", "INVALID_PROGRESS_RATE" };
         case StatisticEventType::VIDEO_EXCEED_PROGRESS_RATE:
             return { "VIDEO", "EXCEED_PROGRESS_RATE" };
         case StatisticEventType::CALL_SET_CACHE_RANGE:
             return { "LIST", "CALL_SET_CACHE_RANGE" };
+        case StatisticEventType::SCROLL_VISIBLE_CONTENT_CHANGE:
+            return { "LIST", "SCROLL_VISIBLE_CONTENT_CHANGE" };
         case StatisticEventType::SEARCH_ONDIDINSERT:
             return { "SEARCH", "ONDIDINSERT" };
         case StatisticEventType::SEARCH_ONWILLDELETE:
@@ -140,6 +154,10 @@ StatisticEventInfo StatisticEventReporter::ConvertToEvent(StatisticEventType eve
             return { "CLICK_AI_MENU", "DATE_TIME" };
         case StatisticEventType::CLICK_AI_MENU_ASK_CELIA:
             return { "CLICK_AI_MENU", "ASK_CELIA" };
+        case StatisticEventType::NAVIGATION_HOME_DESTINATION:
+            return { "NAVIGATION", "HOME_DESTINATION" };
+        case StatisticEventType::SHEETPAGE_ATTACH_ERR:
+            return { "SHEETPAGE", "ATTACH_ERR" };
         default:
             return { "", "" };
     }

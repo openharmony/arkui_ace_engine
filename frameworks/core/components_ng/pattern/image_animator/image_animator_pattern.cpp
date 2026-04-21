@@ -127,8 +127,9 @@ void ImageAnimatorPattern::UpdateShowingImageInfo(const RefPtr<FrameNode>& image
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
     if (images_[index].pixelMap == nullptr) {
-        imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(
-            images_[index].src, images_[index].bundleName, images_[index].moduleName));
+        ImageSourceInfo srcInfo(images_[index].src, images_[index].bundleName, images_[index].moduleName);
+        srcInfo.UpdateLocalColorMode(GetLocalColorMode());
+        imageLayoutProperty->UpdateImageSourceInfo(srcInfo);
     } else {
         imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(images_[index].pixelMap));
     }
@@ -166,7 +167,9 @@ void ImageAnimatorPattern::UpdateCacheImageInfo(CacheImageStruct& cacheImage, in
             imageLayoutProperty->HasImageSourceInfo() ? imageLayoutProperty->GetImageSourceInfoValue().GetSrc() : "";
         if (preSrc != image.src) {
             // need to cache newImage
-            imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(image.src, image.bundleName, image.moduleName));
+            ImageSourceInfo srcInfo(image.src, image.bundleName, image.moduleName);
+            srcInfo.UpdateLocalColorMode(GetLocalColorMode());
+            imageLayoutProperty->UpdateImageSourceInfo(srcInfo);
             cacheImage.index = index;
             cacheImage.isLoaded = false;
         }
@@ -726,6 +729,71 @@ void ImageAnimatorPattern::ControlAnimatedImageAnimation(const RefPtr<FrameNode>
     CHECK_NULL_VOID(image);
     if (!image->IsStatic()) {
         image->ControlAnimation(play);
+    }
+}
+
+bool ImageAnimatorPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    TAG_LOGI(AceLogTag::ACE_IMAGE, "ImageAnimatorPattern OnThemeScopeUpdate themeScopeId: %{public}d", themeScopeId);
+
+    // Update all cached image nodes via ImagePattern
+    for (auto& cacheImage : cacheImages_) {
+        if (cacheImage.imageNode) {
+            auto imagePattern = AceType::DynamicCast<ImagePattern>(cacheImage.imageNode->GetPattern());
+            if (imagePattern) {
+                imagePattern->TriggerThemeUpdate(themeScopeId);
+                cacheImage.isLoaded = false;
+            }
+        }
+    }
+
+    // Update currently displayed image nodes via ImagePattern
+    auto children = host->GetChildren();
+    for (auto& child : children) {
+        auto imageFrameNode = AceType::DynamicCast<FrameNode>(child);
+        if (imageFrameNode) {
+            auto imagePattern = AceType::DynamicCast<ImagePattern>(imageFrameNode->GetPattern());
+            if (imagePattern) {
+                imagePattern->TriggerThemeUpdate(themeScopeId);
+            }
+        }
+    }
+
+    return true;
+}
+
+void ImageAnimatorPattern::OnColorConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    TAG_LOGI(AceLogTag::ACE_IMAGE, "ImageAnimatorPattern OnColorConfigurationUpdate");
+
+    // Update all cached image nodes via ImagePattern
+    // Cached nodes are not in GetChildren(), so framework won't auto-notify them
+    // Call UpdateImageConfiguration which triggers OnConfigurationUpdate to reload images
+    for (auto& cacheImage : cacheImages_) {
+        if (cacheImage.imageNode) {
+            auto imagePattern = AceType::DynamicCast<ImagePattern>(cacheImage.imageNode->GetPattern());
+            if (imagePattern) {
+                imagePattern->OnConfigurationUpdate();
+                cacheImage.isLoaded = false;  // Mark as unloaded to prevent using stale cache
+            }
+        }
+    }
+
+    // Update currently displayed image nodes via ImagePattern
+    auto children = host->GetChildren();
+    for (auto& child : children) {
+        auto imageFrameNode = AceType::DynamicCast<FrameNode>(child);
+        if (imageFrameNode) {
+            auto imagePattern = AceType::DynamicCast<ImagePattern>(imageFrameNode->GetPattern());
+            if (imagePattern) {
+                imagePattern->OnConfigurationUpdate();
+            }
+        }
     }
 }
 } // namespace OHOS::Ace::NG

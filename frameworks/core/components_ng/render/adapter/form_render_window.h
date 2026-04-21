@@ -42,6 +42,7 @@ public:
 
     void RequestFrame() override;
     void Destroy() override;
+    void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
     void SetRootRenderNode(const RefPtr<RenderNode>& root) override {}
     void SetRootFrameNode(const RefPtr<NG::FrameNode>& root) override;
     void FlushFrameRate(int32_t rate, int32_t animatorExpectedFrameRate, int32_t rateType) override;

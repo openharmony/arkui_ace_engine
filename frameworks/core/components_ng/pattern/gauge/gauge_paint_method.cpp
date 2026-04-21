@@ -39,8 +39,8 @@ void GaugePaintMethod::SetBoundsRect()
         shadowOptions = paintProperty->GetShadowOptionsValue();
     }
     auto frameSize = hostGeometryNode->GetFrameSize();
-    float x = std::min<float>(shadowOptions.offsetX - shadowOptions.radius, boundsRect_.GetX());
-    float y = std::min<float>(shadowOptions.offsetY - shadowOptions.radius, boundsRect_.GetY());
+    float x = std::min<float>(shadowOptions.offsetX - shadowOptions.radius * 2.0f, boundsRect_.GetX());
+    float y = std::min<float>(shadowOptions.offsetY - shadowOptions.radius * 2.0f, boundsRect_.GetY());
     float width = std::max<float>(
         { boundsRect_.Width(), boundsRect_.GetX() + boundsRect_.Width() - x,
         shadowOptions.offsetX - x + frameSize.Width() + shadowOptions.radius * 2.0f,

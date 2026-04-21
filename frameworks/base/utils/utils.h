@@ -16,14 +16,18 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_UTILS_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_UTILS_H
 
-#include "base/log/log.h"
 #include "ui/base/utils/utils.h"
+
+namespace OHOS::Ace {
+template<class T>
+class RefPtr;
+
+std::string ReadFileToString(const std::string& packagePathStr, const std::string& fileName);
+} // namespace OHOS::Ace
+
 namespace OHOS::Ace::NG {
 class FrameNode;
 RefPtr<FrameNode> FindSameParentComponent(const RefPtr<FrameNode>& nodeA, const RefPtr<FrameNode>& nodeB);
 } // namespace OHOS::Ace::NG
 
-namespace OHOS::Ace {
-    std::string ReadFileToString(const std::string& packagePathStr, const std::string& fileName);
-} // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_UTILS_H

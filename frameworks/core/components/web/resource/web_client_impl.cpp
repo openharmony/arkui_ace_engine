@@ -148,6 +148,54 @@ void WebAgentClientImpl::ReportEventJson(const std::string& json)
     delegate->ReportEventJson(json);
 }
 
+void WebAgentClientImpl::OnCreateAISession(AISessionType type, const std::string& id, const std::string& params,
+    std::shared_ptr<NWeb::NWebStringVectorValueCallback> callback)
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "OnCreateAISession: type: %{public}d, id: %{public}s", type, id.c_str());
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    const auto wrappedCallback = [id, callback = std::move(callback)](uint32_t state, const std::string& content) {
+        if (state == RUNNING) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "OnCreateAISession running: id: %{public}s, content: %{public}s",
+                id.c_str(), content.c_str());
+            return;
+        }
+        if (state == FAILURE) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "OnCreateAISession failed: id: %{public}s, content: %{public}s",
+                id.c_str(), content.c_str());
+        }
+        callback->OnReceiveValue({ std::to_string(state), content });
+    };
+    delegate->OnCreateAISession(type, id, params, std::move(wrappedCallback));
+}
+
+void WebAgentClientImpl::OnExecuteAIAction(AISessionType type, const std::string& id, const std::string& params,
+    std::shared_ptr<NWeb::NWebStringVectorValueCallback> callback)
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "OnExecuteAIAction: type: %{public}d, id: %{public}s", type, id.c_str());
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    const auto wrappedCallback = [id, callback = std::move(callback)](uint32_t state, const std::string& content) {
+        if (state == FAILURE) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "OnExecuteAIAction failed: id: %{public}s, content: %{public}s",
+                id.c_str(), content.c_str());
+        }
+        callback->OnReceiveValue({ std::to_string(state), content });
+    };
+    delegate->OnExecuteAIAction(type, id, params, std::move(wrappedCallback));
+}
+
+void WebAgentClientImpl::OnDestroyAISession(AISessionType type, const std::string& id)
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "OnDestroyAISession: type: %{public}d, id: %{public}s", type, id.c_str());
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnDestroyAISession(type, id);
+}
+
 std::string SpanstringConvertHtmlImpl::SpanstringConvertHtml(const std::vector<uint8_t> &content)
 {
     ContainerScope scope(instanceId_);
@@ -992,7 +1040,12 @@ void WebClientImpl::OnLargestContentfulPaint(
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
     CHECK_NULL_VOID(details);
-    ContainerScope scope(delegate->GetInstanceId());
+    auto instanceId = delegate->GetInstanceId();
+    if (instanceId == INSTANCE_ID_UNDEFINED) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "instanceId is undefined! instanceId=%{public}d", instanceId);
+        return;
+    }
+    ContainerScope scope(instanceId);
     delegate->OnLargestContentfulPaint(details);
 }
 
@@ -1463,6 +1516,14 @@ bool WebClientImpl::OnNestedScroll(float& x, float& y, float& xVelocity, float& 
     return delegate->OnNestedScroll(x, y, xVelocity, yVelocity, isAvailable);
 }
 
+bool WebClientImpl::OnNestedScrollV2(float& x, float& y)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_RETURN(delegate, false);
+    ContainerScope scope(delegate->GetInstanceId());
+    return delegate->OnNestedScrollV2(x, y);
+}
+
 void WebClientImpl::OnLoadStarted(const std::string& url)
 {
     auto delegate = webDelegate_.Upgrade();
@@ -1490,21 +1551,20 @@ void WebClientImpl::OnPip(int status, int delegate_id, int child_id,
 }
 
 bool WebClientImpl::OnAllSslErrorRequestByJSV2(std::shared_ptr<NWeb::NWebJSAllSslErrorResult> result,
-    OHOS::NWeb::SslError error,
-    const std::string& url,
-    const std::string& originalUrl,
-    const std::string& referrer,
-    bool isFatalError,
-    bool isMainFrame,
-    const std::vector<std::string>& certChainData)
+    std::shared_ptr<NWeb::NWebAllSslErrorInfo> nwebAllSslError)
 {
+    if (nwebAllSslError == nullptr) {
+        return false;
+    }
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_RETURN(delegate, false);
     ContainerScope scope(delegate->GetInstanceId());
 
     bool jsResult = false;
     auto param = std::make_shared<WebAllSslErrorEvent>(AceType::MakeRefPtr<AllSslErrorResultOhos>(result),
-        static_cast<int32_t>(error), url, originalUrl, referrer, isFatalError, isMainFrame, certChainData);
+        static_cast<int32_t>(nwebAllSslError->GetError()), nwebAllSslError->GetUrl(),
+        nwebAllSslError->GetOriginalUrl(), nwebAllSslError->GetReferrer(), nwebAllSslError->GetIsFatalError(),
+        nwebAllSslError->GetIsMainFrame(), nwebAllSslError->GetCertChainData());
     auto task = delegate->GetTaskExecutor();
     if (task == nullptr) {
         return false;
@@ -1752,5 +1812,13 @@ void WebClientImpl::OnMediaCastEnter()
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
     delegate->OnMediaCastEnter();
+}
+
+void WebClientImpl::OnInputMethodAttached()
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnInputMethodAttached();
 }
 } // namespace OHOS::Ace

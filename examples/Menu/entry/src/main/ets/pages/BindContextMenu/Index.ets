@@ -15,6 +15,7 @@ struct Index {
     {title:'UIConsistency',utl:'pages/BindContextMenu/UIConsistency'},
     {title:'bindMenu',utl:'pages/BindContextMenu/bindMenu'},
     {title:'bindContextMenuTest',utl:'pages/BindContextMenu/bindContextMenuTest'},
+    {title:'bindContextMenuTestTwo',utl:'pages/BindContextMenu/bindContextMenus/bindContextMenu'},
     {title:'AvoidMenu',utl:'pages/BindContextMenu/AvoidMenu'}
   ]
 

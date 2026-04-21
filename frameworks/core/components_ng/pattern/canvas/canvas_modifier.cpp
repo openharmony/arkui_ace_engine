@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/canvas/canvas_modifier.h"
 
+#include "base/log/ace_trace.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
 #include "core/components_ng/render/render_context.h"
 #ifdef ENABLE_ROSEN_BACKEND

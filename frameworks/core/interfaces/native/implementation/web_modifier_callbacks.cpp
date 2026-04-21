@@ -46,6 +46,7 @@
 #include "core/interfaces/native/implementation/screen_capture_handler_peer_impl.h"
 #include "core/interfaces/native/implementation/ssl_error_handler_peer_impl.h"
 #include "core/interfaces/native/implementation/touch_event_peer.h"
+#include "core/interfaces/native/implementation/verify_pin_handler_peer_impl.h"
 #include "core/interfaces/native/implementation/web_context_menu_param_peer_impl.h"
 #include "core/interfaces/native/implementation/web_context_menu_result_peer_impl.h"
 #include "core/interfaces/native/implementation/web_keyboard_controller_peer_impl.h"
@@ -194,7 +195,8 @@ bool OnAlert(const CallbackHelper<Callback_OnAlertEvent_Boolean>& arkCallback,
     auto peer = new JsResultPeer();
     peer->result = eventInfo->GetResult();
     parameter.result = peer;
-    const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
+    const auto result = arkCallback.InvokeWithOptConvertResult<
+        bool, Ark_Boolean, synthetic_Callback_Boolean_Void>(parameter);
     return result.value_or(false);
 }
 
@@ -215,7 +217,8 @@ bool OnBeforeUnload(const CallbackHelper<Callback_OnBeforeUnloadEvent_Boolean>& 
     auto peer = new JsResultPeer();
     peer->result = eventInfo->GetResult();
     parameter.result = peer;
-    const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
+    const auto result = arkCallback.InvokeWithOptConvertResult<
+        bool, Ark_Boolean, synthetic_Callback_Boolean_Void>(parameter);
     return result.value_or(false);
 }
 
@@ -236,7 +239,8 @@ bool OnConfirm(const CallbackHelper<Callback_OnConfirmEvent_Boolean>& arkCallbac
     auto peer = new JsResultPeer();
     peer->result = eventInfo->GetResult();
     parameter.result = peer;
-    const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
+    const auto result = arkCallback.InvokeWithOptConvertResult<
+        bool, Ark_Boolean, synthetic_Callback_Boolean_Void>(parameter);
     return result.value_or(false);
 }
 
@@ -258,7 +262,8 @@ bool OnPrompt(const CallbackHelper<Callback_OnPromptEvent_Boolean>& arkCallback,
     auto peer = new JsResultPeer();
     peer->result = eventInfo->GetResult();
     parameter.result = peer;
-    const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
+    const auto result = arkCallback.InvokeWithOptConvertResult<
+        bool, Ark_Boolean, synthetic_Callback_Boolean_Void>(parameter);
     return result.value_or(false);
 }
 
@@ -276,7 +281,8 @@ bool OnConsole(const CallbackHelper<Callback_OnConsoleEvent_Boolean>& arkCallbac
     auto peer = new ConsoleMessagePeer();
     peer->webConsoleLog = eventInfo->GetMessage();
     parameter.message = peer;
-    const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
+    const auto result = arkCallback.InvokeWithOptConvertResult<
+        bool, Ark_Boolean, synthetic_Callback_Boolean_Void>(parameter);
     return result.value_or(false);
 }
 
@@ -384,7 +390,8 @@ bool OnShowFileSelector(const CallbackHelper<Callback_OnShowFileSelectorEvent_Bo
     auto resultPeer = new FileSelectorResultPeer();
     resultPeer->handler = eventInfo->GetFileSelectorResult();
     parameter.result = resultPeer;
-    const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
+    const auto result = arkCallback.InvokeWithOptConvertResult<
+        bool, Ark_Boolean, synthetic_Callback_Boolean_Void>(parameter);
     return result.value_or(false);
 }
 
@@ -554,12 +561,13 @@ bool OnHttpAuthRequest(const CallbackHelper<Callback_OnHttpAuthRequestEvent_Bool
     auto peer = new HttpAuthHandlerPeer();
     peer->handler = eventInfo->GetResult();
     parameter.handler = peer;
-    const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
+    const auto result = arkCallback.InvokeWithOptConvertResult<
+        bool, Ark_Boolean, synthetic_Callback_Boolean_Void>(parameter);
     return result.value_or(false);
 }
 
 RefPtr<WebResponse> OnInterceptRequest(
-    const CallbackHelper<Type_WebAttribute_onInterceptRequest>& arkCallback,
+    const CallbackHelper<Callback_OnInterceptRequestEvent_Opt_WebResourceResponse>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     const auto refNode = weakNode.Upgrade();
@@ -600,7 +608,7 @@ std::string OnOverrideErrorPage(
     auto requestPeer = new WebResourceRequestPeer();
     requestPeer->webRequest = eventInfo->GetWebResourceRequest();
     parameter.request = requestPeer;
-    return arkCallback.InvokeWithConvertResult<std::string, Ark_String, Callback_String_Void>(parameter);
+    return arkCallback.InvokeWithConvertResult<std::string, Ark_String, synthetic_Callback_String_Void>(parameter);
 }
 
 void OnPermissionRequest(const CallbackHelper<Callback_OnPermissionRequestEvent_Void>& arkCallback,
@@ -673,7 +681,8 @@ bool OnContextMenuShow(const CallbackHelper<Callback_OnContextMenuShowEvent_Bool
     auto resultPeer = new WebContextMenuResultPeer();
     resultPeer->handler = eventInfo->GetContextMenuResult();
     parameter.result = resultPeer;
-    const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
+    const auto result = arkCallback.InvokeWithOptConvertResult<
+        bool, Ark_Boolean, synthetic_Callback_Boolean_Void>(parameter);
     return result.value_or(false);
 }
 
@@ -797,6 +806,24 @@ bool OnClientAuthentication(const CallbackHelper<Callback_OnClientAuthentication
     return false;
 }
 
+bool OnVerifyPin(const CallbackHelper<OnVerifyPinCallback>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto* eventInfo = TypeInfoHelper::DynamicCast<WebVerifyPinEvent>(info);
+    CHECK_NULL_RETURN(eventInfo, false);
+    Ark_VerifyPinEvent parameter;
+    parameter.identity = Converter::ArkValue<Ark_String>(eventInfo->GetIdentity());
+    auto peer = new VerifyPinHandlerPeer();
+    peer->verifyPinHandler = eventInfo->GetResult();
+    parameter.handler = peer;
+    arkCallback.InvokeSync(parameter);
+    return true;
+}
+
 static bool HandleWindowNewEvent(const WebWindowNewEvent* eventInfo)
 {
     auto handler = eventInfo->GetWebWindowNewHandler();
@@ -907,7 +934,7 @@ void OnWindowExit(const CallbackHelper<Callback_Void>& arkCallback,
     arkCallback.InvokeSync();
 }
 
-bool OnInterceptKey(const CallbackHelper<Callback_KeyEvent_Boolean>& arkCallback,
+bool OnInterceptKey(const CallbackHelper<synthetic_Callback_KeyEvent_Boolean>& arkCallback,
     WeakPtr<FrameNode> weakNode, KeyEventInfo& keyEventInfo)
 {
     const auto refNode = weakNode.Upgrade();
@@ -916,7 +943,7 @@ bool OnInterceptKey(const CallbackHelper<Callback_KeyEvent_Boolean>& arkCallback
     CHECK_NULL_RETURN(pipelineContext, false);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     const auto event = Converter::SyncEvent<Ark_KeyEvent>(keyEventInfo);
-    const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(
+    const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, synthetic_Callback_Boolean_Void>(
         event.ArkValue());
     return result.value_or(false);
 }
@@ -1201,7 +1228,8 @@ bool OnLoadIntercept(const CallbackHelper<Callback_OnLoadInterceptEvent_Boolean>
     auto peer = new WebResourceRequestPeer();
     peer->webRequest = eventInfo->GetRequest();
     parameter.data = peer;
-    const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
+    const auto result = arkCallback.InvokeWithOptConvertResult<
+        bool, Ark_Boolean, synthetic_Callback_Boolean_Void>(parameter);
     return result.value_or(false);
 }
 
@@ -1373,8 +1401,24 @@ void OnNativeEmbedTouchInfo(const CallbackHelper<Callback_NativeEmbedTouchInfo_V
     Ark_NativeEmbedTouchInfo parameter;
     parameter.embedId = Converter::ArkValue<Opt_String>(eventInfo->GetEmbedId());
     auto touchEventInfo = eventInfo->GetTouchEventInfo();
-    const auto event = Converter::SyncEvent<Ark_TouchEvent>(touchEventInfo);
-    parameter.touchEvent = Converter::ArkValue<Opt_TouchEvent>(event.ArkValue());
+    Ark_TouchEventProxy proxy = {
+        .target = Converter::ArkValue<Ark_EventTarget>(touchEventInfo.GetTarget()),
+        .timeStamp = Converter::ArkValue<Ark_Int64>(
+            static_cast<int64_t>(touchEventInfo.GetTimeStamp().time_since_epoch().count())),
+        .source = Converter::ArkValue<Ark_SourceType>(touchEventInfo.GetSourceDevice()),
+        .pressure = Converter::ArkValue<Ark_Float64>(touchEventInfo.GetForce()),
+        .tiltX = Converter::ArkValue<Ark_Float64>(static_cast<double>(touchEventInfo.GetTiltX().value_or(0))),
+        .tiltY = Converter::ArkValue<Ark_Float64>(static_cast<double>(touchEventInfo.GetTiltY().value_or(0))),
+        .sourceTool = Converter::ArkValue<Ark_SourceTool>(touchEventInfo.GetSourceTool()),
+        .deviceId = Converter::ArkValue<Opt_Int32>(touchEventInfo.GetDeviceId()),
+        .targetDisplayId = Converter::ArkValue<Opt_Int32>(touchEventInfo.GetTargetDisplayId()),
+        .type = Converter::ArkValue<Ark_TouchType>(touchEventInfo.GetChangedTouches().front().GetTouchType()),
+        .touches = Converter::ArkValue<Array_TouchObject>(touchEventInfo.GetTouches(), Converter::FC),
+        .changedTouches = Converter::ArkValue<Array_TouchObject>(touchEventInfo.GetChangedTouches(), Converter::FC),
+        .ptr = &info
+    };
+    parameter.touchEvent = Converter::ArkValue<Opt_TouchEventProxy>(proxy);
+
     Ark_EventResult arkEventResult;
     auto peer = new EventResultPeer();
     peer->handler = eventInfo->GetResult();
@@ -1417,7 +1461,8 @@ bool OnOverrideUrlLoading(const CallbackHelper<OnOverrideUrlLoadingCallback>& ar
     auto peer = new WebResourceRequestPeer();
     peer->webRequest = eventInfo->GetRequest();
     parameter = peer;
-    const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
+    const auto result = arkCallback.InvokeWithOptConvertResult<
+        bool, Ark_Boolean, synthetic_Callback_Boolean_Void>(parameter);
     return result.value_or(false);
 }
 
@@ -1593,6 +1638,16 @@ void OnMicrophoneCaptureStateChange(const CallbackHelper<OnMicrophoneCaptureStat
     parameter.originalState = static_cast<Ark_MicrophoneCaptureState>(eventInfo->GetOriginalMicrophoneCaptureState());
     parameter.newState = static_cast<Ark_MicrophoneCaptureState>(eventInfo->GetNewMicrophoneCaptureState());
     arkCallback.InvokeSync(parameter);
+}
+
+void OnInputmethodAttached(const CallbackHelper<OnInputmethodAttachedCallback>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    arkCallback.InvokeSync();
 }
 } // namespace OHOS::Ace::NG::GeneratedModifier::WebAttributeModifier
 #endif // WEB_SUPPORTED

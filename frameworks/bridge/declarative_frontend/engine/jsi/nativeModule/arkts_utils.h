@@ -19,18 +19,16 @@
 #include "bridge/declarative_frontend/declarative_frontend.h"
 #include "bridge/declarative_frontend/engine/js_object_template.h"
 #include "bridge/declarative_frontend/frontend_delegate_declarative.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "ecmascript/napi/include/jsnapi.h"
+#include "ui/resource/node_info.h"
 
 namespace OHOS::Rosen {
 class BrightnessBlender;
 }
 
-namespace OHOS::Ace {
-class ResourceWrapper;
-}
 namespace OHOS::Ace {
 class ResourceWrapper;
 }
@@ -56,11 +54,6 @@ enum class ResourceType : uint32_t {
     MEDIA = 20000,
     RAWFILE = 30000,
     NONE = 40000
-};
-
-struct NodeInfo {
-    std::string nodeTag;
-    ColorMode localColorMode;
 };
 
 struct BorderRadiusOption {
@@ -124,6 +117,8 @@ public:
     static bool ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result);
     static bool ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result,
         RefPtr<ResourceObject>& resourceObject, const NodeInfo& nodeInfo);
+    static bool ParseJsColorAlphaForMaterial(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result,
+        RefPtr<ResourceObject>& resourceObject, const NodeInfo& nodeInfo);
     static bool ParseJsColorAlpha(
         const EcmaVM* vm, const Local<JSValueRef>& value, Color& result, const Color& defaultColor);
     static bool ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value,
@@ -136,6 +131,9 @@ public:
     static bool ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result);
     static bool ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result,
         RefPtr<ResourceObject>& resourceObject);
+    static bool ParseJsColorFromResourceForMaterial(
+        const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result, RefPtr<ResourceObject>& resourceObject);
+    static bool ParseHDRColorToColor(const EcmaVM* vm, const Local<panda::ObjectRef>& colorObj, Color& result);
     static bool ParseColorMetricsToColor(const EcmaVM *vm, const Local<JSValueRef> &jsValue, Color& result);
     static bool ParseColorMetricsToColor(
         const EcmaVM* vm, const Local<JSValueRef>& jsValue, Color& result, RefPtr<ResourceObject>& resourceObject);
@@ -257,6 +255,9 @@ public:
         std::vector<ArkUIInt32orFloat32>& values, std::vector<RefPtr<ResourceObject>>& vectorResObj);
     static void ParseGradientCenter(
         const EcmaVM* vm, const Local<JSValueRef>& value, std::vector<ArkUIInt32orFloat32>& values);
+    static void ParseGradientColorStopsWithFloatColor(const EcmaVM *vm, const Local<JSValueRef>& value,
+        std::vector<ArkUIInt32orFloat32>& colors, std::vector<RefPtr<ResourceObject>>& vectorResObj,
+        const NodeInfo& nodeInfo);
     static void ParseGradientColorStops(const EcmaVM *vm, const Local<JSValueRef>& value,
         std::vector<ArkUIInt32orFloat32>& colors, std::vector<RefPtr<ResourceObject>>& vectorResObj,
         const NodeInfo& nodeInfo);
@@ -485,7 +486,7 @@ public:
         const std::string& resName, const std::string& bundleName, const std::string& moduleName, int32_t& resId);
     static bool HasGetter(const EcmaVM* vm, const Local<panda::ObjectRef>& jsObj, int32_t propertyIndex);
     static int32_t GetStringFormatStartIndex(const EcmaVM* vm, const Local<panda::ObjectRef>& jsObj);
-    static std::string GetLocalizedNumberStr(const EcmaVM* vm, Local<panda::ArrayRef> item, const std::string& type);
+    static std::string TryLocalizeNumberStr(const std::string& result, const std::string& type);
     static void ParseMarginOrPaddingCorner(const EcmaVM* vm, const Local<JSValueRef>& value,
         std::optional<CalcDimension>& top, std::optional<CalcDimension>& bottom, std::optional<CalcDimension>& left,
         std::optional<CalcDimension>& right);

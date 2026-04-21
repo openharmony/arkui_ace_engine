@@ -46,6 +46,18 @@ void OffscreenCanvasRenderingContext2DModelNG::SetAntiAlias(bool anti)
     pattern_->SetAntiAlias(anti);
 }
 
+std::optional<bool> OffscreenCanvasRenderingContext2DModelNG::GetAntialiasExt() const
+{
+    CHECK_NULL_RETURN(pattern_, std::nullopt);
+    return pattern_->GetAntialiasExt();
+}
+
+void OffscreenCanvasRenderingContext2DModelNG::SetAntialiasExt(std::optional<bool> isEnabled)
+{
+    CHECK_NULL_VOID(pattern_);
+    pattern_->SetAntialiasExt(isEnabled);
+}
+
 void OffscreenCanvasRenderingContext2DModelNG::SetFontWeight(const FontWeight& weight)
 {
     CHECK_NULL_VOID(pattern_);

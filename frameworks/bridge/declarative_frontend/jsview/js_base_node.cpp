@@ -489,6 +489,107 @@ void JSBaseNode::PostInputEvent(const JSCallbackInfo& info)
     info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
 }
 
+int32_t JSBaseNode::GetStrategy(const JSCallbackInfo& info)
+{
+    if (info.Length() <= 1) {
+        return 0;
+    }
+    JSRef<JSVal> arg = info[1];
+    if (arg->IsNull() || arg->IsUndefined() || !arg->IsNumber()) {
+        return 0;
+    }
+    int32_t competitionStrategy = arg->ToNumber<int32_t>();
+    if (competitionStrategy != 0 && competitionStrategy != 1) {
+        return 0;
+    }
+    return competitionStrategy;
+}
+
+void JSBaseNode::PostTouchEventWithStrategy(const JSCallbackInfo& info, const RefPtr<NG::UINode>& node,
+    const RefPtr<NG::PostEventManager>& postEventManager, int32_t competitionStrategy)
+{
+    TouchEvent touchEvent;
+    if (!InitTouchEvent(info, touchEvent, false)) {
+        info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
+        return;
+    }
+    if (!competitionStrategy) {
+        touchEvent.isNewReferee = true;
+    }
+    bool result = postEventManager->PostTouchEventWithStrategy(node, std::move(touchEvent));
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
+}
+
+void JSBaseNode::PostMouseEventWithStrategy(const JSCallbackInfo& info, const RefPtr<NG::UINode>& node,
+    const RefPtr<NG::PostEventManager>& postEventManager, int32_t competitionStrategy)
+{
+    MouseEvent mouseEvent;
+    if (!InitMouseEvent(info, mouseEvent)) {
+        info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
+        return;
+    }
+    if (!competitionStrategy) {
+        mouseEvent.isNewReferee = true;
+    }
+    bool result = postEventManager->PostMouseEventWithStrategy(node, std::move(mouseEvent));
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
+}
+
+void JSBaseNode::PostAxisEventWithStrategy(const JSCallbackInfo& info, const RefPtr<NG::UINode>& node,
+    const RefPtr<NG::PostEventManager>& postEventManager, int32_t competitionStrategy)
+{
+    AxisEvent axisEvent;
+    if (!InitAxisEvent(info, axisEvent)) {
+        info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
+        return;
+    }
+    if (!competitionStrategy) {
+        axisEvent.isNewReferee = true;
+    }
+    bool result = postEventManager->PostAxisEventWithStrategy(node, std::move(axisEvent));
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
+}
+
+void JSBaseNode::PostInputEventWithStrategy(const JSCallbackInfo& info)
+{
+    auto node = realNode_.Upgrade();
+    if (!node || info.Length() < 1 || !info[0]->IsObject()) {
+        TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "PostInputEventWithStrategy params invalid");
+        info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
+        return;
+    }
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    if (!pipelineContext) {
+        TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "PostInputEventWithStrategy pipelineContext is invalid");
+        info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
+        return;
+    }
+    auto postEventManager = pipelineContext->GetPostEventManager();
+    if (!postEventManager) {
+        TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "PostInputEventWithStrategy postEventManager is invalid");
+        info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
+        return;
+    }
+    auto obj = JSRef<JSObject>::Cast(info[0]);
+    if (obj->IsUndefined() || obj.IsEmpty()) {
+        info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
+        TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "PostInputEventWithStrategy params is invalid");
+        return;
+    }
+    int32_t competitionStrategy = GetStrategy(info);
+    auto touchesJsVal = obj->GetProperty("touches");
+    if (touchesJsVal->IsArray()) {
+        PostTouchEventWithStrategy(info, node, postEventManager, competitionStrategy);
+        return;
+    }
+    auto scrollStep = obj->GetProperty("scrollStep");
+    if (scrollStep->IsNumber()) {
+        PostAxisEventWithStrategy(info, node, postEventManager, competitionStrategy);
+        return;
+    }
+    PostMouseEventWithStrategy(info, node, postEventManager, competitionStrategy);
+}
+
 bool JSBaseNode::GetTouches(const JSCallbackInfo& info, TouchEvent& touchEvent)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
@@ -679,6 +780,10 @@ bool JSBaseNode::InitTouchEvent(const JSCallbackInfo& info, TouchEvent& touchEve
     if (targetDisplayIdJsVal->IsNumber()) {
         touchEvent.targetDisplayId = targetDisplayIdJsVal->ToNumber<int32_t>();
     }
+    auto eventHandleIdJsVal = obj->GetProperty("eventHandleId");
+    if (eventHandleIdJsVal->IsNumber()) {
+        touchEvent.eventHandleId = eventHandleIdJsVal->ToNumber<int32_t>();
+    }
     ParamTouchEvent(info, touchEvent);
     BaseEventInfo* baseEventInfo = obj->Unwrap<BaseEventInfo>();
     if (baseEventInfo) {
@@ -776,6 +881,10 @@ bool JSBaseNode::InitMouseEvent(const JSCallbackInfo& info, MouseEvent& mouseEve
     auto actionJsVal = obj->GetProperty("action");
     if (actionJsVal->IsNumber()) {
         mouseEvent.action = static_cast<MouseAction>(actionJsVal->ToNumber<int32_t>());
+    }
+    auto eventHandleIdJsVal = obj->GetProperty("eventHandleId");
+    if (eventHandleIdJsVal->IsNumber()) {
+        mouseEvent.eventHandleId = eventHandleIdJsVal->ToNumber<int32_t>();
     }
     if (!ParamMouseEvent(info, mouseEvent)) {
         return false;
@@ -904,6 +1013,10 @@ bool JSBaseNode::InitAxisEvent(const JSCallbackInfo& info, AxisEvent& axisEvent)
     } else if (axisInfo) {
         axisEvent.rotateAxisAngle = axisInfo->GetRotateAxisAngle();
     }
+    auto eventHandleIdJsVal = obj->GetProperty("eventHandleId");
+    if (eventHandleIdJsVal->IsNumber()) {
+        axisEvent.eventHandleId = eventHandleIdJsVal->ToNumber<int32_t>();
+    }
     if (!ParamAxisEvent(info, axisEvent)) {
         TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "AxisEvent params invalid");
         return false;
@@ -1016,6 +1129,7 @@ void JSBaseNode::JSBind(BindingTarget globalObj)
     JSClass<JSBaseNode>::CustomMethod("onReuseWithBindObject", &JSBaseNode::OnReuseWithBindThis);
     JSClass<JSBaseNode>::CustomMethod("onRecycleWithBindObject", &JSBaseNode::OnRecycleWithBindThis);
     JSClass<JSBaseNode>::CustomMethod("postInputEvent", &JSBaseNode::PostInputEvent);
+    JSClass<JSBaseNode>::CustomMethod("postInputEventWithStrategy", &JSBaseNode::PostInputEventWithStrategy);
 
     JSClass<JSBaseNode>::Bind(globalObj, JSBaseNode::ConstructorCallback, JSBaseNode::DestructorCallback);
 }

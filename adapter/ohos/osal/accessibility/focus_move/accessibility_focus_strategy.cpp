@@ -32,6 +32,9 @@ std::shared_ptr<FocusRulesCheckNode> GetLastChildNode(
         if (checkNode && checkNode->IsChildTreeContainer()) {
             break;
         }
+        if (!checkNode || checkNode->GetAceChildren().empty()) {
+            break;
+        }
         children = checkNode->GetAceChildren();
     }
     return checkNode;

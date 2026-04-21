@@ -45,6 +45,7 @@
 #include "core/components_ng/pattern/swiper/swiper_content_transition_proxy.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
+#include "core/components_ng/token_theme/token_theme_storage.h"
 #include "core/common/dynamic_module_helper.h"
 
 namespace OHOS::Ace {
@@ -478,7 +479,7 @@ void JSSwiper::GetFontContent(const JSRef<JSVal>& font, bool isSelected, SwiperD
     JSRef<JSVal> size = obj->GetProperty("size");
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>(GetThemeScopeId());
     CHECK_NULL_VOID(swiperIndicatorTheme);
     // set font size, unit FP
     CalcDimension fontSize;
@@ -599,7 +600,7 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, SwiperParameters());
-    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>(GetThemeScopeId());
     CHECK_NULL_RETURN(swiperIndicatorTheme, SwiperParameters());
     SwiperParameters swiperParameters;
     RefPtr<ResourceObject> resLeftObj;
@@ -803,7 +804,7 @@ SwiperDigitalParameters JSSwiper::GetDigitIndicatorInfo(const JSRef<JSObject>& o
     JSRef<JSVal> setIgnoreSizeValue = obj->GetProperty("setIgnoreSizeValue");
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, SwiperDigitalParameters());
-    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>(GetThemeScopeId());
     CHECK_NULL_RETURN(swiperIndicatorTheme, SwiperDigitalParameters());
     SwiperDigitalParameters digitalParameters;
     RefPtr<ResourceObject> resLeftObj;
@@ -867,7 +868,7 @@ bool JSSwiper::GetArrowInfo(const JSRef<JSObject>& obj, SwiperArrowParameters& s
     auto arrowColorValue = obj->GetProperty("arrowColor");
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, false);
-    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>(GetThemeScopeId());
     CHECK_NULL_RETURN(swiperIndicatorTheme, false);
     swiperArrowParameters.isShowBackground = isShowBackgroundValue->IsBoolean()
                                                  ? isShowBackgroundValue->ToBoolean()
@@ -960,7 +961,7 @@ void JSSwiper::SetDisplayArrow(const JSCallbackInfo& info)
         if (info[0]->ToBoolean()) {
             auto pipelineContext = PipelineBase::GetCurrentContext();
             CHECK_NULL_VOID(pipelineContext);
-            auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+            auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>(GetThemeScopeId());
             CHECK_NULL_VOID(swiperIndicatorTheme);
             SwiperArrowParameters swiperArrowParameters;
             swiperArrowParameters.isShowBackground = swiperIndicatorTheme->GetIsShowArrowBackground();
@@ -1090,7 +1091,7 @@ void JSSwiper::SetIndicatorStyle(const JSCallbackInfo& info)
         JSRef<JSVal> ignoreSizeValue = obj->GetProperty("ignoreSize");
         auto pipelineContext = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
-        auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+        auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>(GetThemeScopeId());
         CHECK_NULL_VOID(swiperIndicatorTheme);
         RefPtr<ResourceObject> resLeftObj;
         RefPtr<ResourceObject> resTopObj;
@@ -1213,6 +1214,18 @@ void JSSwiper::SetDisplayMode(int32_t index)
     SwiperModel::GetInstance()->SetDisplayMode(DISPLAY_MODE[index]);
 }
 
+void JSSwiper::ParseCachedCountOptions(const JSRef<JSObject>& obj)
+{
+    auto isShown = obj->GetProperty("isShown");
+    if (isShown->IsBoolean()) {
+        SwiperModel::GetInstance()->SetCachedIsShown(isShown->ToBoolean());
+    }
+    auto independent = obj->GetProperty("independent");
+    if (independent->IsBoolean()) {
+        SwiperModel::GetInstance()->SetCachedIndependent(independent->ToBoolean());
+    }
+}
+
 void JSSwiper::SetCachedCount(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -1227,7 +1240,10 @@ void JSSwiper::SetCachedCount(const JSCallbackInfo& info)
         }
     }
     SwiperModel::GetInstance()->SetCachedCount(cachedCount);
-
+    if (info.Length() > 1 && info[1]->IsObject()) {
+        ParseCachedCountOptions(JSRef<JSObject>::Cast(info[1]));
+        return;
+    }
     auto isShown = info.Length() > 1 && info[1]->IsBoolean() && info[1]->ToBoolean();
     SwiperModel::GetInstance()->SetCachedIsShown(isShown);
 }
@@ -1900,6 +1916,7 @@ void JSSwiper::SetMaintainVisibleContentPosition(const JSCallbackInfo& info)
 
     SwiperModel::GetInstance()->SetMaintainVisibleContentPosition(info[0]->ToBoolean());
 }
+
 void JSSwiper::SetOnScrollStateChanged(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
@@ -1920,5 +1937,14 @@ void JSSwiper::SetOnScrollStateChanged(const JSCallbackInfo& info)
         func->Execute(*scrollStateInfo);
     };
     SwiperModel::GetInstance()->SetOnScrollStateChanged(std::move(onScrollStateChanged));
+}
+
+int32_t JSSwiper::GetThemeScopeId()
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    if (!frameNode || !frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return NG::TokenThemeStorage::INVALID_THEME_SCOPE_ID;
+    }
+    return frameNode->GetThemeScopeId();
 }
 } // namespace OHOS::Ace::Framework

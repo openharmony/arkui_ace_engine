@@ -66,11 +66,11 @@ public:
 };
 
 /**
- * @tc.name: getFromAndSetFromTest
+ * @tc.name: getFromTestAndSetFrom
  * @tc.desc: Check the functionality of getFrom and setFrom
  * @tc.type: FUNC
  */
-HWTEST_F(TabContentTransitionProxyAccessorTest, getFromAndSetFromTest, TestSize.Level1)
+HWTEST_F(TabContentTransitionProxyAccessorTest, getFromTestAndSetFrom, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setFrom, nullptr);
     ASSERT_NE(accessor_->getFrom, nullptr);
@@ -81,11 +81,11 @@ HWTEST_F(TabContentTransitionProxyAccessorTest, getFromAndSetFromTest, TestSize.
 }
 
 /**
- * @tc.name: getToAndSetToTest
+ * @tc.name: getToTestAndSetTo
  * @tc.desc: Check the functionality of getTo and setTo
  * @tc.type: FUNC
  */
-HWTEST_F(TabContentTransitionProxyAccessorTest, getToAndSetToTest, TestSize.Level1)
+HWTEST_F(TabContentTransitionProxyAccessorTest, getToTestAndSetTo, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setTo, nullptr);
     ASSERT_NE(accessor_->getTo, nullptr);

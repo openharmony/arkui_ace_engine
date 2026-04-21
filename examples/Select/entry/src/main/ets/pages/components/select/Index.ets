@@ -51,7 +51,8 @@ export struct SelectIndex {
     { name: 'SelectShowDefaultSelectedIcon', path: 'SelectShowDefaultSelectedIcon' },
     { name: 'selectOptionTextModifier', path: 'selectOptionTextModifier' },
     { name: 'selectSelectedOptionTextModifier', path: 'selectSelectedOptionTextModifier' },
-    { name: 'selectTextModifier', path: 'selectTextModifier' }
+    { name: 'selectTextModifier', path: 'selectTextModifier' },
+    { name: 'Select组合场景8', path: 'SelectLevel8' }
   ]
 
   build() {

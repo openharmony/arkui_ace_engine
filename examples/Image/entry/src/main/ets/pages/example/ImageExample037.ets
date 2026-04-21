@@ -47,7 +47,7 @@ struct ImageExample037 {
   @State onTree: boolean = true
   @State rotateDegree: number = 0
   @State fit: ImageFit = ImageFit.None
-  res: Resource = $r('app.media.UP')
+  res: Resource = $r('app.media.startIcon')
   @State selfOrientation: ImageRotateOrientation = ImageRotateOrientation.AUTO;
   @State enabledModifier: boolean = true;
 
@@ -87,13 +87,13 @@ struct ImageExample037 {
 
           Row() {
             Text('jpeg ')
-            Image($r('app.media.CCW1'))
+            Image($r('app.media.startIcon'))
               .width(100)
               .height(100)
 
               .attributeModifier(this.enabledModifier ? new MyImageModifier(this.selfOrientation) : new ImageModifier())
               .margin(5)
-            Image($r('app.media.CW1'))
+            Image($r('app.media.background'))
               .width(100).height(100)
               .orientation(ImageRotateOrientation.UP)
               .margin(5)
@@ -118,7 +118,7 @@ struct ImageExample037 {
 
           Row() {
             Text('svg ')
-            Image($r('app.media.200logo'))
+            Image($r('app.media.startIcon'))
               .width(100)
               .height(100)
 
@@ -132,7 +132,7 @@ struct ImageExample037 {
 
           Row() {
             Text('webp ')
-            Image($r('app.media.webp'))
+            Image($r('app.media.background'))
               .width(100)
               .height(100)
 
@@ -152,7 +152,7 @@ struct ImageExample037 {
 
               .attributeModifier(this.enabledModifier ? new MyImageModifier(this.selfOrientation) : new ImageModifier())
               .margin(5)
-            Image($r('app.media.leaf'))
+            Image($r('app.media.background'))
               .width(100).height(100)
               .orientation(ImageRotateOrientation.UP)
               .margin(5)

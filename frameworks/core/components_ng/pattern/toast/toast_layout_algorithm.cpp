@@ -14,11 +14,14 @@
  */
 
 #include "core/components_ng/pattern/toast/toast_layout_algorithm.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
+#include "core/components/toast/toast_theme.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -60,6 +63,7 @@ void ToastLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto toastPattern = frameNode->GetPattern<ToastPattern>();
     CHECK_NULL_VOID(toastPattern);
     auto toastProperty = frameNode->GetLayoutProperty<ToastLayoutProperty>();
@@ -111,6 +115,7 @@ void ToastLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(toastProps);
     auto toastNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(toastNode);
+    ACE_UINODE_TRACE(toastNode);
     auto toastPattern = toastNode->GetPattern<ToastPattern>();
     CHECK_NULL_VOID(toastPattern);
     toastPattern->InitWrapperRect(layoutWrapper, toastProps);
@@ -138,6 +143,7 @@ LayoutConstraintF ToastLayoutAlgorithm::GetTextLayoutConstraint(LayoutWrapper* l
     layoutConstraint = toastLayoutProperty->CreateChildConstraint();
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, layoutConstraint);
+    ACE_UINODE_TRACE(frameNode);
     auto toastPattern = frameNode->GetPattern<ToastPattern>();
     CHECK_NULL_RETURN(toastPattern, layoutConstraint);
     auto text = layoutWrapper->GetOrCreateChildByIndex(0);

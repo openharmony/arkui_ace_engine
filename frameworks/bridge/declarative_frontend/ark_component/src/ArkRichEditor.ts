@@ -538,6 +538,21 @@ class RichEditorUndoStyleModifier extends ModifierWithKey<Optional<UndoStyle>> {
   }
 }
 
+class RichEditorOrphanCharOptimizationModifier extends ModifierWithKey<Optional<boolean>> {
+  constructor(value: Optional<boolean>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('richEditorOrphanCharOptimization');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().richEditor.resetOrphanCharOptimization(node);
+    } else {
+      getUINativeModule().richEditor.setOrphanCharOptimization(node, this.value);
+    }
+  }
+}
+
+
 class RichEditorIncludeFontPaddingModifier extends ModifierWithKey<Optional<boolean>> {
   constructor(value: Optional<boolean>) {
     super(value);
@@ -759,6 +774,10 @@ class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEd
   }
   singleLine(value: boolean): RichEditorAttribute {
     modifierWithKey(this._modifiersWithKeys, RichEditorSingleLineModifier.identity, RichEditorSingleLineModifier, value);
+    return this;
+  }
+  orphanCharOptimization(enable: Optional<boolean>): RichEditorAttribute {
+    modifierWithKey(this._modifiersWithKeys, RichEditorOrphanCharOptimizationModifier.identity, RichEditorOrphanCharOptimizationModifier, enable);
     return this;
   }
 }

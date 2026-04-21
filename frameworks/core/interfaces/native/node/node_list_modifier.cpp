@@ -17,13 +17,13 @@
 #include "interfaces/native/node/list_option.h"
 #include "interfaces/native/node/node_model.h"
 
-#include "bridge/common/utils/utils.h"
 #include "core/components/list/list_theme.h"
 #include "core/components_ng/pattern/list/list_children_main_size.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
+#include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/interfaces/native/node/node_adapter_impl.h"
-#include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -799,6 +799,16 @@ void ResetInitialScroller(ArkUINodeHandle node)
     ListModelNG::SetScroller(frameNode, listController, listProxy);
 }
 
+void SetListScrollBarProxy(ArkUINodeHandle node, ArkUINodeHandle proxy)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto listProxy = AceType::Claim(reinterpret_cast<ScrollProxy*>(proxy));
+    pattern->SetScrollBarProxy(AceType::DynamicCast<ScrollBarProxy>(listProxy));
+}
+
 void SetScrollToItemInGroup(
     ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 indexInGroup, ArkUI_Bool smooth, ArkUI_Int32 align)
 {
@@ -995,6 +1005,35 @@ ArkUI_Bool GetSupportEmptyBranchInLazyLoading(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, false);
     return ListModelNG::GetSupportEmptyBranchInLazyLoading(frameNode);
 }
+
+ArkUINodeHandle GetListController(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto controller = ListModelNG::GetOrCreateController(frameNode);
+    return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(controller));
+}
+
+void SetBackPressCloseSwipeAction(ArkUINodeHandle node, ArkUI_Bool closeSwipeAction)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetBackPressCloseSwipeAction(frameNode, closeSwipeAction);
+}
+
+void ResetBackPressCloseSwipeAction(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetBackPressCloseSwipeAction(frameNode, true);
+}
+
+ArkUI_Bool GetBackPressCloseSwipeAction(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, true);
+    return ListModelNG::GetBackPressCloseSwipeAction(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1144,6 +1183,11 @@ const ArkUIListModifier* GetListModifier()
         .createWithResourceObjScrollBarColor = CreateWithResourceObjScrollBarColor,
         .setSupportEmptyBranchInLazyLoading = SetSupportEmptyBranchInLazyLoading,
         .getSupportEmptyBranchInLazyLoading = GetSupportEmptyBranchInLazyLoading,
+        .setScrollBarProxy = SetListScrollBarProxy,
+        .getController = GetListController,
+        .setBackPressCloseSwipeAction = SetBackPressCloseSwipeAction,
+        .resetBackPressCloseSwipeAction = ResetBackPressCloseSwipeAction,
+        .getBackPressCloseSwipeAction = GetBackPressCloseSwipeAction,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

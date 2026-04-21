@@ -1,7 +1,24 @@
+/*
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import { int32 } from "@koalaui/common";
 import { KPointer, nullptr } from '@koalaui/interop';
 import { default as image } from "@ohos.multimedia.image";
 import { ColorMetrics, DrawContext, LengthMetrics, Size } from "arkui.Graphics";
+import { ColorMetricsExt, TouchEventProxy, TouchEventHandwritten } from '#generated'
+import { TouchEvent, LayoutPolicy, LayoutPolicyInternal } from '../component/common'
 import { NodeController } from "arkui.NodeController";
 import { default as curves } from "@ohos.curves";
 import { default as matrix4 } from "@ohos.matrix4";
@@ -76,7 +93,6 @@ import { pointer } from "@koalaui/interop";
 import { Scene } from "graphics3d.Scene"
 import { Animation, Environment } from "graphics3d.SceneResources"
 import { UIContextUtil } from 'arkui/base/UIContextUtil';
-import { UIContextImpl } from 'arkui/base/UIContextImpl';
 import { int32 } from '@koalaui/common';
 import { FrameNodeUtils, FrameNodeInternal } from './../FrameNode';
 import { toPeerPtr } from '@koalaui/interop';
@@ -84,6 +100,16 @@ import { ComponentContentBase } from 'arkui/ComponentContent';
 import { applySymbolGlyphModifierToNode, applyTextModifierToNode } from "./../ApplyModifierToNode"
 import { ComponentContent } from 'arkui.ComponentContent';
 import { InputMethodExtraConfig } from "@ohos.inputMethod.ExtraConfig"
+import { BusinessErrorInterface, BusinessError } from "#generated";
+import { WaterFlowSections } from "#handwritten";
+import { WaterFlowSectionsInterface } from "#generated";
+import { CustomBuilderT, CustomNodeBuilderT, ResponseType } from '#generated'
+import { CommonModifier } from '#generated'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { ArcSwiperContentTransitionProxy, ArcSwiperContentTransitionProxyInternal} from '@ohos.arkui.ArcSwiper'
+import { CustomSpan, CustomSpanMeasureInfo, CustomSpanMeasureInfoProxy } from "#generated";
+import { CustomSpanWrapper } from "#generated";
+import { default as text } from '@ohos.graphics.text'
 
 export namespace extractors {
   export function toImagePixelMapPtr(value: image.PixelMap): KPointer {
@@ -97,12 +123,12 @@ export namespace extractors {
     return ArkUIAniModule._Extractors_ToInputMethodExtraConfigPtr(config);
   }
 
-  export function toColorMetricsPtr(value: ColorMetrics): KPointer {
-    return 123;
+  export function toTextParagraphPtr(paragraph: text.Paragraph): KPointer {
+    return ArkUIAniModule._Extractors_ToTextParagraphPtr(paragraph);
   }
-  export function fromColorMetricsPtr(ptr: KPointer): ColorMetrics {
-    const x: Object = {};
-    return x as ColorMetrics;
+
+  export function fromTextParagraphPtr(ptr: KPointer): text.Paragraph {
+    return ArkUIAniModule._Extractors_FromTextParagraphPtr(ptr);
   }
 
   export function toComponentContentBasePtr(value: ComponentContentBase): KPointer {
@@ -325,12 +351,12 @@ export namespace extractors {
   }
 
   export function toUIContextPtr(value: UIContext): KPointer {
-    let uicontextImpl = value as UIContextImpl;
-    let instanceId = uicontextImpl.instanceId_;
-    return instanceId as KPointer;
+    let uiContext = value as UIContext;
+    let instanceId = uiContext.instanceId_;
+    return instanceId.toLong();
   }
   export function fromUIContextPtr(ptr: KPointer): UIContext {
-    let instanceId: int32 = ptr as (int32);
+    let instanceId: int32 = ptr.toInt();
     return UIContextUtil.getOrCreateUIContextById(instanceId);
   }
 
@@ -641,5 +667,166 @@ export namespace extractors {
   export function fromComponentContentPtr(ptr: KPointer): ComponentContent {
     const x: Object = {};
     return x as ComponentContent;
+  }
+
+  export function toArcSwiperContentTransitionProxyPtr(value: ArcSwiperContentTransitionProxy): KPointer {
+    return toPeerPtr(value);
+  }
+  export function fromArcSwiperContentTransitionProxyPtr(ptr: KPointer): ArcSwiperContentTransitionProxy {
+    let proxy = ArcSwiperContentTransitionProxyInternal.fromPtr(ptr);
+    return proxy as ArcSwiperContentTransitionProxy;
+  }
+
+  export function transform_Ark_ColorMetrics_to_Ark_ColorMetricsExt(colorMetrics: ColorMetrics): ColorMetricsExt {
+    const colorMetricsExt = new ColorMetricsExt()
+    colorMetricsExt.red = colorMetrics.red
+    colorMetricsExt.green = colorMetrics.green
+    colorMetricsExt.blue = colorMetrics.blue
+    colorMetricsExt.alpha = colorMetrics.alpha
+    colorMetricsExt.resourceId = colorMetrics.getResourceId()
+    colorMetricsExt.colorSpace = colorMetrics.getColorSpace()
+    return colorMetricsExt
+  }
+
+  export function transform_Ark_ColorMetricsExt_to_Ark_ColorMetrics(colorMetricsExt: ColorMetricsExt): ColorMetrics {
+    const colorMetrics = ColorMetrics.colorWithSpace(
+      colorMetricsExt.colorSpace,
+      colorMetricsExt.red,
+      colorMetricsExt.green,
+      colorMetricsExt.blue,
+      colorMetricsExt.alpha
+    )
+    colorMetrics.setResourceId(colorMetricsExt.resourceId)
+    return colorMetrics
+  }
+
+  export function transform_Ark_TouchEventProxy_to_Ark_TouchEvent (proxy: TouchEventProxy): TouchEvent {
+    const touchEventHandwritten = new TouchEventHandwritten(proxy.ptr);
+    touchEventHandwritten.target = proxy.target
+    touchEventHandwritten.timestamp = proxy.timeStamp
+    touchEventHandwritten.source = proxy.source
+    touchEventHandwritten.pressure = proxy.pressure
+    touchEventHandwritten.tiltX = proxy.tiltX
+    touchEventHandwritten.tiltY = proxy.tiltY
+    touchEventHandwritten.sourceTool = proxy.sourceTool
+    touchEventHandwritten.deviceId = proxy.deviceId
+    touchEventHandwritten.targetDisplayId = proxy.targetDisplayId
+    touchEventHandwritten.type = proxy.type
+    touchEventHandwritten.touches = proxy.touches
+    touchEventHandwritten.changedTouches = proxy.changedTouches
+    touchEventHandwritten.ptr = proxy.ptr
+    return touchEventHandwritten;
+  }
+
+  export function transform_Ark_TouchEvent_to_Ark_TouchEventProxy (event: TouchEvent): TouchEventProxy {
+    const proxy = new TouchEventProxy();
+    proxy.target = event.target;
+    proxy.timeStamp = event.timestamp;
+    proxy.source = event.source;
+    proxy.pressure = event.pressure;
+    proxy.tiltX = event.tiltX;
+    proxy.tiltY = event.tiltY;
+    proxy.sourceTool = event.sourceTool;
+    proxy.deviceId = event.deviceId;
+    proxy.targetDisplayId = event.targetDisplayId;
+    proxy.type = event.type;
+    proxy.touches = event.touches;
+    proxy.changedTouches = event.changedTouches;
+    proxy.ptr = nullptr
+    if (event instanceof TouchEventHandwritten) {
+      const tmp = event as TouchEventHandwritten
+      proxy.ptr = tmp.ptr
+    }
+    return proxy;
+  }
+
+  export function normalizeLayoutPolicyByPtr(
+    peerPtr: KPointer | undefined,
+    fallback?: LayoutPolicy,
+  ): LayoutPolicy | undefined {
+    if (peerPtr === undefined || peerPtr == nullptr) {
+      return fallback;
+    }
+    if (peerPtr == LayoutPolicy.matchParent.getPeer()?.ptr) {
+      return LayoutPolicy.matchParent;
+    }
+    if (peerPtr == LayoutPolicy.wrapContent.getPeer()?.ptr) {
+      return LayoutPolicy.wrapContent;
+    }
+    if (peerPtr == LayoutPolicy.fixAtIdealSize.getPeer()?.ptr) {
+      return LayoutPolicy.fixAtIdealSize;
+    }
+    return fallback ?? LayoutPolicyInternal.fromPtr(peerPtr);
+  }
+
+  export function transform_Ark_CustomSpanMeasureInfo_to_Ark_CustomSpanMeasureInfoProxy(
+    value: CustomSpanMeasureInfo
+  ): CustomSpanMeasureInfoProxy {
+    return {
+      fontSize: value.fontSize,
+      maxWidth: value.maxWidth,
+      layoutPolicyPtr: value.layoutPolicy?.getPeer()?.ptr,
+    } as CustomSpanMeasureInfoProxy
+  }
+
+  export function transform_Ark_CustomSpanMeasureInfoProxy_to_Ark_CustomSpanMeasureInfo(
+    value: CustomSpanMeasureInfoProxy
+  ): CustomSpanMeasureInfo {
+    return {
+      fontSize: value.fontSize,
+      maxWidth: value.maxWidth,
+      layoutPolicy: normalizeLayoutPolicyByPtr(value.layoutPolicyPtr),
+    } as CustomSpanMeasureInfo
+  }
+
+  export function transform_Ark_BusinessError_Void_to_Ark_BusinessErrorInterface_Void(from: BusinessError<void>): BusinessErrorInterface<void> {
+        return {
+            name: from.name,
+            message: from.message,
+            stack: from.stack,
+            code: from.code,
+            data: undefined,
+        }
+    }
+  export function transform_Ark_BusinessErrorInterface_Void_to_Ark_BusinessError_Void(from: BusinessErrorInterface<void>): BusinessError<void> {
+    return new BusinessError(from.code, new Error()) // TODO how to construct error correctly?
+  }
+  export function transform_Ark_WaterFlowSections_to_Ark_WaterFlowSectionsInterface(from: WaterFlowSections): WaterFlowSectionsInterface {
+    throw new Error("Not implemented")
+  }
+  export function transform_Ark_WaterFlowSectionsInterface_to_Ark_WaterFlowSections(from: WaterFlowSectionsInterface): WaterFlowSections {
+    throw new Error("Not implemented")
+  }
+
+  export function transform_CustomBuilderT_ResponseType_to_CustomNodeBuilderT_ResponseType(
+    content: CustomBuilderT<ResponseType>): CustomNodeBuilderT<ResponseType> {
+      return CallbackTransformer.transformFromCustomBuilderT(content)
+    }
+  export function toCommonModifierPtr(value: CommonModifier): KPointer {
+    throw new Error("Not implemented")
+  }
+  export function fromCommonModifierPtr(ptr: KPointer): CommonModifier {
+    throw new Error("Not implemented")
+  }
+  export function toUiEffectHdrBrightnessBlenderPtr(value: uiEffect.HdrBrightnessBlender): KPointer {
+    throw new Error("Not implemented")
+  }
+  export function fromUiEffectHdrBrightnessBlenderPtr(ptr: KPointer): uiEffect.HdrBrightnessBlender {
+    throw new Error("Not implemented")
+  }
+
+  export function transform_Ark_CustomSpan_to_Ark_CustomSpanWrapper(value: CustomSpan): CustomSpanWrapper {
+      return {
+          managed: value,
+          nativeObj: value.nativeObj,
+          onDraw_callback: value.onDraw,
+          onMeasure_callback: value.onMeasure,
+      }
+  }
+  export function transform_Ark_CustomSpanWrapper_to_Ark_CustomSpan(value: CustomSpanWrapper): CustomSpan {
+      if (!(value.managed instanceof CustomSpan)) {
+        throw new Error("Invalid managed object type in CustomSpanWrapper");
+      }
+      return value.managed as CustomSpan
   }
 }

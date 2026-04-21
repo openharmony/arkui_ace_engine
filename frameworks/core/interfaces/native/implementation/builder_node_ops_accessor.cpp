@@ -24,7 +24,9 @@
 #include "ui/base/utils/utils.h"
 
 #include "base/geometry/ng/size_t.h"
+#include "base/utils/time_util.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/event/touch_event.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -49,7 +51,9 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void*>(&DestroyPeerImpl);
 }
-void CreateImpl(Ark_BuilderNodeOps peer, const Callback_Void* buildFunc)
+void CreateImpl(Ark_VMContext vmContext,
+                Ark_BuilderNodeOps peer,
+                const synthetic_Callback_Void* buildFunc)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(buildFunc);
@@ -97,7 +101,8 @@ void DisposeNodeImpl(Ark_BuilderNodeOps peer)
     peer->viewNode_.Reset();
     peer->realNode_.Reset();
 }
-void SetUpdateConfigurationCallbackImpl(Ark_BuilderNodeOps peer, const Callback_Void* configurationUpdateFunc)
+void SetUpdateConfigurationCallbackImpl(Ark_BuilderNodeOps peer,
+                                        const synthetic_Callback_Void* configurationUpdateFunc)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(peer->viewNode_);
@@ -137,34 +142,75 @@ void SetOptionsImpl(Ark_BuilderNodeOps peer, const Ark_BuilderNodeOptions* optio
     }
 }
 
-Ark_Boolean PostTouchEventImpl(Ark_BuilderNodeOps peer, Ark_TouchEvent event)
+void GetTouchEventFromProxy(const Ark_TouchEventProxy& proxy, TouchEvent& touchEvent, bool isPostTouchEvent)
 {
-    return Converter::ArkValue<Ark_Boolean>(false);
-}
-Ark_Boolean GetTouchEvent(const TouchEventInfo* touchEventInfo, TouchEvent& touchEvent)
-{
-    // get changedTouches
-    CHECK_NULL_RETURN(touchEventInfo, false);
-    touchEvent = touchEventInfo->ConvertToTouchEvent();
-    touchEvent.originalId = touchEvent.id;
-    touchEvent.operatingHand = touchEventInfo->GetChangedTouches().front().GetOperatingHand();
-    // get common
-    touchEvent.sourceType = touchEventInfo->GetSourceDevice();
-    touchEvent.sourceTool = touchEventInfo->GetSourceTool();
-    touchEvent.force = touchEventInfo->GetForce();
-    touchEvent.time = touchEventInfo->GetTimeStamp();
-    touchEvent.deviceId = touchEventInfo->GetDeviceId();
-    touchEvent.targetDisplayId = touchEventInfo->GetTargetDisplayId();
-    touchEvent.tiltX = touchEventInfo->GetTiltX();
-    touchEvent.tiltY = touchEventInfo->GetTiltY();
-    touchEvent.rollAngle = touchEventInfo->GetRollAngle();
-    touchEvent.SetPressedKeyCodes(touchEventInfo->GetPressedKeyCodes());
-    // get touches property
-    for (const auto& touch : touchEventInfo->GetTouches()) {
+    auto target = Converter::Convert<EventTarget>(proxy.target);
+    auto timeStamp = Converter::Convert<int64_t>(proxy.timeStamp);
+    auto pressure = Converter::Convert<double>(proxy.pressure);
+    auto tiltX = Converter::Convert<double>(proxy.tiltX);
+    auto tiltY = Converter::Convert<double>(proxy.tiltY);
+    auto deviceId = Converter::Convert<std::optional<int32_t>>(proxy.deviceId).value_or(-1);
+    auto targetDisplayId = Converter::Convert<std::optional<int32_t>>(proxy.targetDisplayId).value_or(-1);
+    auto sourceType = Converter::Convert<SourceType>(proxy.source);
+    auto sourceTool = Converter::Convert<SourceTool>(proxy.sourceTool);
+    auto type = Converter::Convert<std::optional<TouchType>>(proxy.type).value_or(TouchType::UNKNOWN);
+    auto touchList = Converter::Convert<std::list<TouchLocationInfo>>(proxy.touches);
+    auto changedTouchList = Converter::Convert<std::list<TouchLocationInfo>>(proxy.changedTouches);
+
+    if (!changedTouchList.empty()) {
+        if (isPostTouchEvent) {
+            touchEvent.x = static_cast<float>(changedTouchList.front().GetLocalLocation().GetX());
+            touchEvent.y = static_cast<float>(changedTouchList.front().GetLocalLocation().GetY());
+        } else {
+            touchEvent.x = static_cast<float>(changedTouchList.front().GetGlobalLocation().GetX());
+            touchEvent.y = static_cast<float>(changedTouchList.front().GetGlobalLocation().GetY());
+        }
+        touchEvent.screenX = static_cast<float>(changedTouchList.front().GetScreenLocation().GetX());
+        touchEvent.screenY = static_cast<float>(changedTouchList.front().GetScreenLocation().GetY());
+        touchEvent.localX = static_cast<float>(changedTouchList.front().GetLocalLocation().GetX());
+        touchEvent.localY = static_cast<float>(changedTouchList.front().GetLocalLocation().GetY());
+        touchEvent.globalDisplayX = static_cast<double>(changedTouchList.front().GetGlobalDisplayLocation().GetX());
+        touchEvent.globalDisplayY = static_cast<double>(changedTouchList.front().GetGlobalDisplayLocation().GetY());
+        touchEvent.id = changedTouchList.front().GetFingerId();
+        touchEvent.force = changedTouchList.front().GetForce();
+        touchEvent.type = changedTouchList.front().GetTouchType();
+        touchEvent.tiltX = changedTouchList.front().GetTiltX();
+        touchEvent.tiltY = changedTouchList.front().GetTiltY();
+        touchEvent.rollAngle = changedTouchList.front().GetRollAngle();
+        touchEvent.width = changedTouchList.front().GetWidth();
+        touchEvent.height = changedTouchList.front().GetHeight();
+        touchEvent.pressedTime = changedTouchList.front().GetPressedTime();
+        const auto& targetLocalOffset = changedTouchList.front().GetTarget().area.GetOffset();
+        const auto& targetOrigin = changedTouchList.front().GetTarget().origin;
+        touchEvent.targetPositionX = targetLocalOffset.GetX().ConvertToPx();
+        touchEvent.targetPositionY = targetLocalOffset.GetY().ConvertToPx();
+        touchEvent.targetGlobalPositionX = targetOrigin.GetX().ConvertToPx() + targetLocalOffset.GetX().ConvertToPx();
+        touchEvent.targetGlobalPositionY = targetOrigin.GetY().ConvertToPx() + targetLocalOffset.GetY().ConvertToPx();
+        touchEvent.widthArea = changedTouchList.front().GetTarget().area.GetWidth().ConvertToPx();
+        touchEvent.heightArea = changedTouchList.front().GetTarget().area.GetHeight().ConvertToPx();
+        touchEvent.deviceId = changedTouchList.front().GetDeviceId();
+        touchEvent.modifierKeyState = CalculateModifierKeyState(changedTouchList.front().GetPressedKeyCodes());
+    }
+    touchEvent.time = TimeStamp(std::chrono::microseconds(timeStamp));
+    touchEvent.force = pressure;
+    touchEvent.tiltX = tiltX;
+    touchEvent.tiltY = tiltY;
+    touchEvent.deviceId = deviceId;
+    touchEvent.targetDisplayId = targetDisplayId;
+    touchEvent.sourceType = sourceType;
+    touchEvent.sourceTool = sourceTool;
+    touchEvent.operatingHand = changedTouchList.front().GetOperatingHand();
+    touchEvent.type = type;
+    for (const auto& touch : touchList) {
         TouchPoint point;
         point.id = touch.GetFingerId();
-        point.x = touch.GetGlobalLocation().GetX();
-        point.y = touch.GetGlobalLocation().GetY();
+        if (isPostTouchEvent) {
+            point.x = touch.GetLocalLocation().GetX();
+            point.y = touch.GetLocalLocation().GetY();
+        } else {
+            point.x = touch.GetGlobalLocation().GetX();
+            point.y = touch.GetGlobalLocation().GetY();
+        }
         point.screenX = touch.GetScreenLocation().GetX();
         point.screenY = touch.GetScreenLocation().GetY();
         point.originalId = touch.GetFingerId();
@@ -177,9 +223,33 @@ Ark_Boolean GetTouchEvent(const TouchEventInfo* touchEventInfo, TouchEvent& touc
         point.downTime = touch.GetPressedTime();
         touchEvent.pointers.emplace_back(point);
     }
-    return true;
+    if (proxy.ptr) {
+        auto infoPtr = static_cast<TouchEventInfo*>(proxy.ptr);
+        if (infoPtr) {
+            touchEvent.SetPressedKeyCodes(infoPtr->GetPressedKeyCodes());
+        }
+    }
 }
- 	 
+
+Ark_Boolean PostTouchEventImpl(Ark_BuilderNodeOps peer, const Ark_TouchEventProxy* event)
+{
+    const auto errValue = Converter::ArkValue<Ark_Boolean>(false);
+    CHECK_NULL_RETURN(peer, errValue);
+    CHECK_NULL_RETURN(event, errValue);
+
+    auto pipelineContext = NG::PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(pipelineContext, errValue);
+
+    auto postEventManager = pipelineContext->GetPostEventManager();
+    CHECK_NULL_RETURN(postEventManager, errValue);
+
+    // Convert touch event from proxy
+    TouchEvent touchEvent;
+    GetTouchEventFromProxy(*event, touchEvent, true);
+
+    bool result = postEventManager->PostTouchEvent(peer->realNode_, std::move(touchEvent));
+    return Converter::ArkValue<Ark_Boolean>(result);
+}
 Ark_Boolean PostInputEventImpl(Ark_BuilderNodeOps peer, const Opt_InputEventType* event)
 {
     const auto errValue = Converter::ArkValue<Ark_Boolean>(false);
@@ -189,7 +259,7 @@ Ark_Boolean PostInputEventImpl(Ark_BuilderNodeOps peer, const Opt_InputEventType
         TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "PostInputEventImpl event is undefined");
         return errValue;
     }
-    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    auto pipelineContext = NG::PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipelineContext, errValue);
     auto postEventManager = pipelineContext->GetPostEventManager();
     CHECK_NULL_RETURN(postEventManager, errValue);
@@ -197,17 +267,15 @@ Ark_Boolean PostInputEventImpl(Ark_BuilderNodeOps peer, const Opt_InputEventType
     auto arkEevent = event->value;
     switch (arkEevent.selector) {
         case SELECTOR_ID_0: {
-            auto touchEventInfo = arkEevent.value0->GetEventInfo();
-            CHECK_NULL_RETURN(touchEventInfo, errValue);
+            auto proxy = arkEevent.value0;
             TouchEvent touchEvent;
-            if (!GetTouchEvent(touchEventInfo, touchEvent)) {
-                return errValue;
-            }
+            GetTouchEventFromProxy(proxy, touchEvent, false);
             result = postEventManager->PostTouchEvent(peer->realNode_, std::move(touchEvent));
             break;
         }
         case SELECTOR_ID_1: {
             auto mouseEventInfo = arkEevent.value1->GetEventInfo();
+            CHECK_NULL_RETURN(mouseEventInfo, errValue);
             auto mouseEvent = mouseEventInfo->ConvertToMouseEvent();
             mouseEvent.time = mouseEventInfo->GetTimeStamp();
             result = postEventManager->PostMouseEvent(peer->realNode_, std::move(mouseEvent));
@@ -215,6 +283,7 @@ Ark_Boolean PostInputEventImpl(Ark_BuilderNodeOps peer, const Opt_InputEventType
         }
         case SELECTOR_ID_2: {
             auto axisEventInfo = arkEevent.value2->GetEventInfo();
+            CHECK_NULL_RETURN(axisEventInfo, errValue);
             auto axisEvent = axisEventInfo->ConvertToAxisEvent();
             axisEvent.pressedCodes = axisEventInfo->GetPressedKeyCodes();
             result = postEventManager->PostAxisEvent(peer->realNode_, std::move(axisEvent));
@@ -227,6 +296,80 @@ Ark_Boolean PostInputEventImpl(Ark_BuilderNodeOps peer, const Opt_InputEventType
     }
     return Converter::ArkValue<Ark_Boolean>(result);
 }
+
+Ark_Boolean CheckPostInputEventWithStrategyImpl(Ark_BuilderNodeOps peer, const Opt_InputEventType* event,
+    const Opt_CompetitionStrategy* competitionStrategy)
+{
+    const auto errValue = Converter::ArkValue<Ark_Boolean>(false);
+    CHECK_NULL_RETURN(peer, errValue);
+    CHECK_NULL_RETURN(event, errValue);
+    CHECK_NULL_RETURN(competitionStrategy, errValue);
+    if (InteropTag::INTEROP_TAG_UNDEFINED == event->tag) {
+        TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "PostInputEventWithStrategyImpl event is undefined");
+        return errValue;
+    }
+    return Converter::ArkValue<Ark_Boolean>(true);
+}
+
+bool GetIsNewReferee(const Opt_CompetitionStrategy* competitionStrategy)
+{
+    bool isNewReferee = true;
+    if (competitionStrategy->tag != InteropTag::INTEROP_TAG_UNDEFINED &&
+        competitionStrategy->value == Ark_CompetitionStrategy::ARK_COMPETITION_STRATEGY_COMPETITION) {
+        isNewReferee = false;
+    }
+    return isNewReferee;
+}
+
+Ark_Boolean PostInputEventWithStrategyImpl(Ark_BuilderNodeOps peer, const Opt_InputEventType* event,
+    const Opt_CompetitionStrategy* competitionStrategy)
+{
+    const auto errValue = Converter::ArkValue<Ark_Boolean>(false);
+    if (!CheckPostInputEventWithStrategyImpl(peer, event, competitionStrategy)) {
+        return errValue;
+    }
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, errValue);
+    auto postEventManager = pipelineContext->GetPostEventManager();
+    CHECK_NULL_RETURN(postEventManager, errValue);
+    bool result = false;
+    auto arkEvent = event->value;
+    bool isNewReferee = GetIsNewReferee(competitionStrategy);
+    switch (arkEvent.selector) {
+        case SELECTOR_ID_0: {
+            auto proxy = arkEvent.value0;
+            TouchEvent touchEvent;
+            GetTouchEventFromProxy(proxy, touchEvent, false);
+            touchEvent.isNewReferee = isNewReferee;
+            result = postEventManager->PostTouchEventWithStrategy(peer->realNode_, std::move(touchEvent));
+            break;
+        }
+        case SELECTOR_ID_1: {
+            auto mouseEventInfo = arkEvent.value1->GetEventInfo();
+            CHECK_NULL_RETURN(mouseEventInfo, errValue);
+            auto mouseEvent = mouseEventInfo->ConvertToMouseEvent();
+            mouseEvent.time = mouseEventInfo->GetTimeStamp();
+            mouseEvent.isNewReferee = isNewReferee;
+            result = postEventManager->PostMouseEventWithStrategy(peer->realNode_, std::move(mouseEvent));
+            break;
+        }
+        case SELECTOR_ID_2: {
+            auto axisEventInfo = arkEvent.value2->GetEventInfo();
+            CHECK_NULL_RETURN(axisEventInfo, errValue);
+            auto axisEvent = axisEventInfo->ConvertToAxisEvent();
+            axisEvent.pressedCodes = axisEventInfo->GetPressedKeyCodes();
+            axisEvent.isNewReferee = isNewReferee;
+            result = postEventManager->PostAxisEventWithStrategy(peer->realNode_, std::move(axisEvent));
+            break;
+        }
+        default: {
+            result = false;
+            break;
+        }
+    }
+    return Converter::ArkValue<Ark_Boolean>(result);
+}
+
 Ark_NativePointer SetRootFrameNodeInBuilderNodeImpl(Ark_BuilderNodeOps peer, Ark_NativePointer node)
 {
     auto uiNode = reinterpret_cast<UINode*>(node);
@@ -251,6 +394,7 @@ const GENERATED_ArkUIBuilderNodeOpsAccessor* GetBuilderNodeOpsAccessor()
         BuilderNodeOpsAccessor::SetOptionsImpl,
         BuilderNodeOpsAccessor::PostTouchEventImpl,
         BuilderNodeOpsAccessor::PostInputEventImpl,
+        BuilderNodeOpsAccessor::PostInputEventWithStrategyImpl,
         BuilderNodeOpsAccessor::SetRootFrameNodeInBuilderNodeImpl,
     };
     return &BuilderNodeOpsAccessorImpl;

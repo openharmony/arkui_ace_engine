@@ -18,6 +18,7 @@
 #include "base/utils/utils.h"
 #include "core/animation/spring_curve.h"
 #include "core/components_ng/render/animation_utils.h"
+#include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/paint_property.h"
 
@@ -220,7 +221,7 @@ void DotIndicatorModifier::CalCBackground(ContentProperty& contentProperty)
 
     auto [rectLeft, rectRight, rectTop, rectBottom] =
         CalcAndAdjustIndicatorPaintRect(contentProperty, rectWidth, rectHeight);
-    if (Positive(pointNumber)) {
+    if (Positive(pointNumber) && isLongPressed_) {
         auto [leftCenterX, rightCenterX] = GetTouchBottomCenterX(contentProperty);
         leftCenterX = std::min(leftCenterX, contentProperty.vectorBlackPointCenterX[0]);
         rightCenterX = std::max(rightCenterX,

@@ -17,8 +17,8 @@
 #define protected public
 #define private public
 #include "base/subwindow/subwindow_manager.h"
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/unittest/core/base/view_abstract_test_ng.h"
 
 #include "core/common/resource/resource_parse_utils.h"
@@ -29,6 +29,7 @@
 #include "core/components_ng/base/view_abstract_model_static.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -160,6 +161,7 @@ HWTEST_F(ViewAbstractModelStaticTestNg, CheckMenuIsShow005, TestSize.Level1)
     auto menuNode = AceType::MakeRefPtr<FrameNode>("menu", targetId, AceType::MakeRefPtr<Pattern>());
     auto wrapperPattern = AceType::MakeRefPtr<MenuWrapperPattern>(targetId);
     menuNode->pattern_ = wrapperPattern;
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->menuMap_[targetId] = menuNode;
@@ -252,6 +254,7 @@ HWTEST_F(ViewAbstractModelStaticTestNg, BindMenu_BindMenuGestureBranch, TestSize
     auto rootNode = AceType::MakeRefPtr<FrameNode>("root", -1, AceType::MakeRefPtr<Pattern>());
     auto overlayManager = AceType::MakeRefPtr<NG::OverlayManager>(rootNode);
     pipeline->overlayManager_ = overlayManager;
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->menuMap_[targetId] = frameNode;

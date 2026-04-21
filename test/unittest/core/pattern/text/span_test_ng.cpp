@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#include "test/mock/base/mock_pixel_map.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/frameworks/base/image/mock_pixel_map.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
@@ -126,7 +126,7 @@ public:
  * @tc.desc: Test all the properties of text.
  * @tc.type: FUNC
  */
-HWTEST_F(SpanTestNg, SpanFrameNodeCreator001, TestSize.Level1)
+HWTEST_F(SpanTestNg, SpanFrameNodeCreator001, TestSize.Level0)
 {
     SpanModelNG spanModelNG;
     spanModelNG.Create(CREATE_VALUE_W);
@@ -2272,5 +2272,388 @@ HWTEST_F(SpanTestNg, ImageSpanViewSetSrc, TestSize.Level1)
     ImageSpanView::SetSrc(frameNode, src, bundleName, moduleName, false);
     auto srcInfo = imageLayoutProperty->GetImageSourceInfo();
     EXPECT_EQ(srcInfo->src_, src);
+}
+
+/**
+ * @tc.name: SpanNodeOnAllowForceDarkUpdate001
+ * @tc.desc: Test SpanNode OnAllowForceDarkUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanNodeOnAllowForceDarkUpdate001, TestSize.Level1)
+{
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+    spanNode->OnAllowForceDarkUpdate(1);
+    ASSERT_NE(spanNode, nullptr);
+}
+
+/**
+ * @tc.name: SpanNodeOnAllowForceDarkUpdate002
+ * @tc.desc: Test SpanNode OnAllowForceDarkUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanNodeOnAllowForceDarkUpdate002, TestSize.Level1)
+{
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+    spanNode->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
+    ASSERT_NE(spanNode->resourceMgr_, nullptr);
+    spanNode->OnAllowForceDarkUpdate(0);
+    ASSERT_NE(spanNode, nullptr);
+}
+
+/**
+ * @tc.name: SpanNodeSetDefaultFontColor001
+ * @tc.desc: Test SpanNode SetDefaultFontColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanNodeSetDefaultFontColor001, TestSize.Level1)
+{
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+    auto value = AceType::MakeRefPtr<PropertyValueBase>();
+    spanNode->SetDefaultFontColor(value);
+    ASSERT_NE(spanNode, nullptr);
+}
+
+/**
+ * @tc.name: SpanItemGetFontWeightConfigs001
+ * @tc.desc: Test SpanItem GetFontWeightConfigs with default values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanItemGetFontWeightConfigs001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize SpanModelNG and SpanNode
+     */
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+
+    /**
+     * @tc.steps: step2. not set, GetFontWeightConfigs returns default values
+     * @tc.expected: step2. enableVariableFontWeight is "false", enableDeviceFontWeightCategory is "true"
+     */
+    auto result = spanNode->spanItem_->GetFontWeightConfigs();
+    auto json = JsonUtil::ParseJsonString(result);
+    ASSERT_NE(json, nullptr);
+    EXPECT_TRUE(json->Contains("enableVariableFontWeight"));
+    EXPECT_EQ(json->GetValue("enableVariableFontWeight")->GetString(), "false");
+    EXPECT_TRUE(json->Contains("enableDeviceFontWeightCategory"));
+    EXPECT_EQ(json->GetValue("enableDeviceFontWeightCategory")->GetString(), "true");
+}
+
+/**
+ * @tc.name: SpanItemGetFontWeightConfigs002
+ * @tc.desc: Test SpanItem GetFontWeightConfigs after setting values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanItemGetFontWeightConfigs002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize SpanModelNG and SpanNode
+     */
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+
+    /**
+     * @tc.steps: step2. set EnableVariableFontWeight and EnableDeviceFontWeightCategory
+     * @tc.expected: step2. GetFontWeightConfigs returns the set values
+     */
+    spanModelNG.SetEnableVariableFontWeight(true);
+    spanModelNG.SetEnableDeviceFontWeightCategory(false);
+    auto result = spanNode->spanItem_->GetFontWeightConfigs();
+    auto json = JsonUtil::ParseJsonString(result);
+    ASSERT_NE(json, nullptr);
+    EXPECT_TRUE(json->Contains("enableVariableFontWeight"));
+    EXPECT_EQ(json->GetValue("enableVariableFontWeight")->GetString(), "true");
+    EXPECT_TRUE(json->Contains("enableDeviceFontWeightCategory"));
+    EXPECT_EQ(json->GetValue("enableDeviceFontWeightCategory")->GetString(), "false");
+}
+
+/**
+ * @tc.name: SpanItemToJsonValue003
+ * @tc.desc: Test SpanItem ToJsonValue contains variableFontWeight and fontWeightConfigs.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanItemToJsonValue003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create SpanModelNG instance and set font properties
+     *            - variableFontWeight: 350
+     *            - enableVariableFontWeight: true
+     *            - enableDeviceFontWeightCategory: false
+     * @tc.expected: SpanModelNG is initialized with specified properties
+     */
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    spanModelNG.SetVariableFontWeight(350);
+    spanModelNG.SetEnableVariableFontWeight(true);
+    spanModelNG.SetEnableDeviceFontWeightCategory(false);
+
+    /**
+     * @tc.steps: step2. Create SpanNode from ViewStackProcessor
+     * @tc.expected: SpanNode is created successfully
+     */
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(spanNode, nullptr);
+
+    /**
+     * @tc.steps: step3. Create TextFrameNode and TextPattern, then set to SpanItem
+     * @tc.expected: TextPattern is created and set successfully
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<TextPattern>());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    spanNode->spanItem_->SetTextPattern(textPattern);
+
+    auto json = JsonUtil::Create(true);
+    spanNode->ToJsonValue(json, filter);
+    EXPECT_TRUE(json->Contains("content"));
+    EXPECT_TRUE(json->GetValue("content")->GetString() == CREATE_VALUE);
+
+    EXPECT_TRUE(json->Contains("variableFontWeight"));
+    EXPECT_EQ(json->GetValue("variableFontWeight")->GetString(), "350");
+
+    EXPECT_TRUE(json->Contains("fontWeightConfigs"));
+    std::string configsStr = json->GetValue("fontWeightConfigs")->GetString();
+    auto configsJson = JsonUtil::ParseJsonString(configsStr);
+    ASSERT_NE(configsJson, nullptr);
+    EXPECT_TRUE(configsJson->Contains("enableVariableFontWeight"));
+    EXPECT_EQ(configsJson->GetValue("enableVariableFontWeight")->GetString(), "true");
+    EXPECT_TRUE(configsJson->Contains("enableDeviceFontWeightCategory"));
+    EXPECT_EQ(configsJson->GetValue("enableDeviceFontWeightCategory")->GetString(), "false");
+}
+
+/**
+ * @tc.name: SpanItemToJsonValue004
+ * @tc.desc: Test SpanItem ToJsonValue with default fontWeightConfigs values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanItemToJsonValue004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize SpanModelNG and SpanNode with default values
+     */
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(spanNode, nullptr);
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<TextPattern>());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    spanNode->spanItem_->SetTextPattern(textPattern);
+
+    /**
+     * @tc.steps: step2. not set fontWeightConfigs values, check default
+     * @tc.expected: step2. variableFontWeight is "0", fontWeightConfigs has default values
+     */
+    auto json = JsonUtil::Create(true);
+    spanNode->ToJsonValue(json, filter);
+    EXPECT_TRUE(json->Contains("variableFontWeight"));
+    EXPECT_EQ(json->GetValue("variableFontWeight")->GetString(), "0");
+
+    EXPECT_TRUE(json->Contains("fontWeightConfigs"));
+    std::string configsStr = json->GetValue("fontWeightConfigs")->GetString();
+    auto configsJson = JsonUtil::ParseJsonString(configsStr);
+    ASSERT_NE(configsJson, nullptr);
+    EXPECT_EQ(configsJson->GetValue("enableVariableFontWeight")->GetString(), "false");
+    EXPECT_EQ(configsJson->GetValue("enableDeviceFontWeightCategory")->GetString(), "true");
+}
+
+/**
+ * @tc.name: SpanItemFontWeightConfigsIndependence001
+ * @tc.desc: Test enableVariableFontWeight and enableDeviceFontWeightCategory are independent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanItemFontWeightConfigsIndependence001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize SpanModelNG and SpanNode
+     */
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set both enableVariableFontWeight=true and enableDeviceFontWeightCategory=true
+     * @tc.expected: step2. Both properties should be independently set to true
+     */
+    spanModelNG.SetEnableVariableFontWeight(true);
+    spanModelNG.SetEnableDeviceFontWeightCategory(true);
+
+    const auto& fontStyle = spanNode->spanItem_->fontStyle;
+    ASSERT_TRUE(fontStyle->GetEnableVariableFontWeight().has_value());
+    EXPECT_TRUE(fontStyle->GetEnableVariableFontWeight().value());
+    ASSERT_TRUE(fontStyle->GetEnableDeviceFontWeightCategory().has_value());
+    EXPECT_TRUE(fontStyle->GetEnableDeviceFontWeightCategory().value());
+}
+
+/**
+ * @tc.name: SpanItemFontWeightConfigsIndependence002
+ * @tc.desc: Test enableVariableFontWeight and enableDeviceFontWeightCategory are independent - both false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanItemFontWeightConfigsIndependence002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize SpanModelNG and SpanNode
+     */
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set both enableVariableFontWeight=false and enableDeviceFontWeightCategory=false
+     * @tc.expected: step2. Both properties should be independently set to false
+     */
+    spanModelNG.SetEnableVariableFontWeight(false);
+    spanModelNG.SetEnableDeviceFontWeightCategory(false);
+
+    const auto& fontStyle = spanNode->spanItem_->fontStyle;
+    ASSERT_TRUE(fontStyle->GetEnableVariableFontWeight().has_value());
+    EXPECT_FALSE(fontStyle->GetEnableVariableFontWeight().value());
+    ASSERT_TRUE(fontStyle->GetEnableDeviceFontWeightCategory().has_value());
+    EXPECT_FALSE(fontStyle->GetEnableDeviceFontWeightCategory().value());
+}
+
+/**
+ * @tc.name: SpanItemFontWeightConfigsIndependence003
+ * @tc.desc: Test enableVariableFontWeight and enableDeviceFontWeightCategory are independent - mixed values
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanItemFontWeightConfigsIndependence003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize SpanModelNG and SpanNode
+     */
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set enableVariableFontWeight=true and enableDeviceFontWeightCategory=false
+     * @tc.expected: step2. Properties should be independently set
+     */
+    spanModelNG.SetEnableVariableFontWeight(true);
+    spanModelNG.SetEnableDeviceFontWeightCategory(false);
+
+    const auto& fontStyle = spanNode->spanItem_->fontStyle;
+    ASSERT_TRUE(fontStyle->GetEnableVariableFontWeight().has_value());
+    EXPECT_TRUE(fontStyle->GetEnableVariableFontWeight().value());
+    ASSERT_TRUE(fontStyle->GetEnableDeviceFontWeightCategory().has_value());
+    EXPECT_FALSE(fontStyle->GetEnableDeviceFontWeightCategory().value());
+}
+
+/**
+ * @tc.name: SpanItemFontWeightConfigsIndependence004
+ * @tc.desc: Test enableVariableFontWeight and enableDeviceFontWeightCategory are independent - mixed values reversed
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanItemFontWeightConfigsIndependence004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize SpanModelNG and SpanNode
+     */
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set enableVariableFontWeight=false and enableDeviceFontWeightCategory=true
+     * @tc.expected: step2. Properties should be independently set
+     */
+    spanModelNG.SetEnableVariableFontWeight(false);
+    spanModelNG.SetEnableDeviceFontWeightCategory(true);
+
+    const auto& fontStyle = spanNode->spanItem_->fontStyle;
+    ASSERT_TRUE(fontStyle->GetEnableVariableFontWeight().has_value());
+    EXPECT_FALSE(fontStyle->GetEnableVariableFontWeight().value());
+    ASSERT_TRUE(fontStyle->GetEnableDeviceFontWeightCategory().has_value());
+    EXPECT_TRUE(fontStyle->GetEnableDeviceFontWeightCategory().value());
+}
+
+/**
+ * @tc.name: SpanItemResetFontWeightConfigs001
+ * @tc.desc: Test resetting enableVariableFontWeight and enableDeviceFontWeightCategory
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanItemResetFontWeightConfigs001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize SpanModelNG and SpanNode
+     */
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set values, then reset
+     * @tc.expected: step2. After reset, properties should return to default or unset state
+     */
+    spanModelNG.SetEnableVariableFontWeight(true);
+    spanModelNG.SetEnableDeviceFontWeightCategory(false);
+
+    // Reset
+    spanModelNG.ResetEnableVariableFontWeight();
+    spanModelNG.ResetEnableDeviceFontWeightCategory();
+
+    const auto& fontStyle = spanNode->spanItem_->fontStyle;
+    // After reset, properties should be unset (std::nullopt)
+    EXPECT_FALSE(fontStyle->GetEnableVariableFontWeight().has_value());
+    EXPECT_FALSE(fontStyle->GetEnableDeviceFontWeightCategory().has_value());
+}
+
+/**
+ * @tc.name: SpanItemToJsonWithFontWeightConfigs005
+ * @tc.desc: Test SpanItem ToJsonValue with all combinations of enableVariableFontWeight and
+ *           enableDeviceFontWeightCategory
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanItemToJsonWithFontWeightConfigs005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test case: both true
+     */
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    spanModelNG.SetVariableFontWeight(450);
+    spanModelNG.SetEnableVariableFontWeight(true);
+    spanModelNG.SetEnableDeviceFontWeightCategory(true);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(spanNode, nullptr);
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<TextPattern>());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    spanNode->spanItem_->SetTextPattern(textPattern);
+
+    auto json = JsonUtil::Create(true);
+    spanNode->ToJsonValue(json, filter);
+
+    // Verify both properties are true
+    EXPECT_TRUE(json->Contains("variableFontWeight"));
+    EXPECT_EQ(json->GetValue("variableFontWeight")->GetString(), "450");
+    EXPECT_TRUE(json->Contains("fontWeightConfigs"));
+    std::string configsStr = json->GetValue("fontWeightConfigs")->GetString();
+    auto configsJson = JsonUtil::ParseJsonString(configsStr);
+    ASSERT_NE(configsJson, nullptr);
+    EXPECT_EQ(configsJson->GetValue("enableVariableFontWeight")->GetString(), "true");
+    EXPECT_EQ(configsJson->GetValue("enableDeviceFontWeightCategory")->GetString(), "true");
+
+    ViewStackProcessor::GetInstance()->Finish();
 }
 } // namespace OHOS::Ace::NG

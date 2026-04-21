@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,17 @@ namespace {} // namespace
 
 class ProgressModifierTestNg : public ProgressTestNg {
 public:
+    RefPtr<FrameNode> CreateDefaultNode();
+    RefPtr<FrameNode> frameNode_ = CreateDefaultNode();
 };
+
+RefPtr<FrameNode> ProgressModifierTestNg::CreateDefaultNode()
+{
+    ProgressModelNG progressModelNG;
+    progressModelNG.Create(
+        PROGRESS_MODEL_NG_MIN, VALUE_OF_PROGRESS, PROGRESS_MODEL_NG_MIN, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_CAPSULE);
+    return AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+}
 
 /**
  * @tc.name: ProgressModifier001
@@ -1840,7 +1850,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressModifierAnimator001, TestSize.Level1)
      * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
      * @tc.expected: step1. Check the ProgressModifier property value.
      */
-    ProgressModifier progressModifier(frameNode_);;
+    ProgressModifier progressModifier(frameNode_);
     progressModifier.SetSmoothEffect(false);
     progressModifier.SetValue(PROGRESS_MODIFIER_VALUE);
     EXPECT_EQ(progressModifier.value_->Get(), PROGRESS_MODIFIER_VALUE);
@@ -1861,7 +1871,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressModifierAnimator002, TestSize.Level1)
      * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
      * @tc.expected: step1. Check the ProgressModifier property value.
      */
-    ProgressModifier progressModifier(frameNode_);;
+    ProgressModifier progressModifier(frameNode_);
     progressModifier.SetSmoothEffect(false);
     progressModifier.SetValue(PROGRESS_MODIFIER_VALUE2);
     EXPECT_EQ(progressModifier.value_->Get(), PROGRESS_MODIFIER_VALUE2);

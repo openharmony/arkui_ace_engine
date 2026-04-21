@@ -40,7 +40,9 @@ link_abc_files("arkoala_abc") {
 
 ohos_prebuilt_etc("arkoala_abc_prebuild") {
   source = "$target_out_dir/arkoala.abc"
-  deps = [ ":arkoala_abc" ]
+  deps = [
+    ":arkoala_abc"
+  ]
   module_install_dir = "framework"
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
@@ -53,10 +55,13 @@ template("arkts_frontend") {
     defines += invoker.defines
     configs = [ "$ace_root:ace_config" ]
     deps = [
-      ":ArkoalaNative_ark",
       "$ace_root/build:libace_compatible",
       "koala_projects/arkoala-arkts/arkui-ohos/src/ani/native:ani_utils_common",
     ]
+    
+    if (!build_ohos_sdk && !(defined(is_arkui_x) && is_arkui_x)) {
+      deps += [ ":ArkoalaNative_ark" ]
+    }
 
     sources = [
       "ani_context_module.cpp",
@@ -140,6 +145,7 @@ config("arkoala_native_config") {
     "koala_projects/interop/src/cpp/types",
     "koala_projects/interop/src/cpp/ohos",
     "$ace_root/interfaces/inner_api/ace_kit/include",
+    "$ace_root/frameworks/core/interfaces/native/generated/interface",
   ]
 }
 
@@ -156,9 +162,9 @@ ohos_shared_library("ArkoalaNative_ark") {
     "koala_projects/arkoala-arkts/framework/native/src/error_helper.cc",
     "koala_projects/arkoala-arkts/framework/native/src/events.cc",
     "koala_projects/arkoala-arkts/framework/native/src/generated/bridge_custom.cc",
-    "koala_projects/arkoala-arkts/framework/native/src/generated/bridge_generated.cc",
-    "koala_projects/arkoala-arkts/framework/native/src/generated/callback_deserialize_call.cc",
-    "koala_projects/arkoala-arkts/framework/native/src/generated/callback_managed_caller.cc",
+    "$idlize_gen_bridges_output_path/bridge_generated.cc",
+    "$idlize_gen_bridges_output_path/callback_deserialize_call.cc",
+    "$idlize_gen_bridges_output_path/callback_managed_caller.cc",
     "koala_projects/arkoala-arkts/framework/native/src/generated/library.cc",
     "koala_projects/arkoala-arkts/framework/native/src/resource_color_helper.cc",
     "koala_projects/arkoala-arkts/framework/native/src/vsync.cc",
@@ -174,6 +180,10 @@ ohos_shared_library("ArkoalaNative_ark") {
   ]
 
   configs = [ ":arkoala_native_config" ]
+
+  deps = [
+    "./arkoala_generator:idlize_gen"
+  ]
 
   external_deps = [
     "hilog:hilog_ndk",

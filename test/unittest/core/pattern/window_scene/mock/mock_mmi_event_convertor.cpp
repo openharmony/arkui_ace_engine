@@ -57,4 +57,9 @@ bool GetPointerEventToolType(const std::shared_ptr<MMI::PointerEvent>& pointerEv
 {
     return true;
 }
+
+bool ProcessMouseToTouchEvent(const MouseEvent& event, TouchEvent& touchEvent, int32_t pointerAction)
+{
+    return true;
+}
 } // namespace OHOS::Ace::Platform

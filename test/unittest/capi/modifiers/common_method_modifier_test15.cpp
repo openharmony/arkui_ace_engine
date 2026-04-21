@@ -146,7 +146,10 @@ public:
             checkNestedEvent = {
                 .resourceId = resourceId,
             };
+            auto accessors = fullAPI_->getAccessors();
+            auto accessor = accessors->getSheetDismissAccessor();
             checkNestedEvent->fired = true;
+            accessor->dismiss(parameter);
         };
         auto arkDismissCallback =
             Converter::ArkValue<Callback_SheetDismiss_Void>(dismissCallback, frameNode->GetId());
@@ -169,10 +172,14 @@ public:
     {
         checkNestedEvent.reset();
         auto dismissCallback = [](const Ark_Int32 resourceId, const Ark_DismissSheetAction parameter) {
+            auto accessors = fullAPI_->getAccessors();
+            auto accessor = accessors->getDismissSheetActionAccessor();
             checkNestedEvent = {
                 .resourceId = resourceId,
+                .reason = Converter::OptConvert<BindSheetDismissReason>(accessor->getReason(parameter)),
             };
             checkNestedEvent->fired = true;
+            accessor->dismiss(parameter);
         };
         auto arkDismissCallback =
             Converter::ArkValue<Callback_DismissSheetAction_Void>(dismissCallback, frameNode->GetId());
@@ -193,11 +200,11 @@ public:
 };
 
 /*
- * @tc.name: setBindSheetIsShowTest
+ * @tc.name: setBindSheetTestIsShow
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetIsShowTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetTestIsShow, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindSheet, nullptr);
     auto node = BlankModelNG::CreateFrameNode(EXPECTED_NODE_ID);
@@ -226,11 +233,11 @@ HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetIsShowTest, TestSize.L
 }
 
 /*
- * @tc.name: setBindSheetOnAppearTest
+ * @tc.name: setBindSheetTestOnAppear
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetOnAppearTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetTestOnAppear, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindSheet, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -239,11 +246,11 @@ HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetOnAppearTest, TestSize
     EXPECT_NE(node, nullptr);
     auto builder = CreateCustomNodeBuilder(node);
     auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder);
-    auto optOnAppearCallback = CreateOnAppearCallback<Opt_Callback_Void, Callback_Void>(frameNode);
+    auto optOnAppearCallback = CreateOnAppearCallback<Opt_VoidCallback, VoidCallback>(frameNode);
     // parameters
     auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_SheetOptions { .onAppear = optOnAppearCallback,
-        .onWillAppear = Converter::ArkValue<Opt_Callback_Void>(Ark_Empty()) };
+        .onWillAppear = Converter::ArkValue<Opt_VoidCallback>(Ark_Empty()) };
     auto optOptions = Converter::ArkValue<Opt_SheetOptions>(arkOptions);
 
     checkBuilderEvent.reset();
@@ -266,11 +273,11 @@ HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetOnAppearTest, TestSize
 }
 
 /*
- * @tc.name: setBindSheetOnDisAppearTest
+ * @tc.name: setBindSheetTestOnDisAppear
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetOnDisAppearTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetTestOnDisAppear, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindSheet, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -279,7 +286,7 @@ HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetOnDisAppearTest, TestS
     EXPECT_NE(node, nullptr);
     auto builder = CreateCustomNodeBuilder(node);
     auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder);
-    auto optOnAppearCallback = CreateOnAppearCallback<Opt_Callback_Void, Callback_Void>(frameNode);
+    auto optOnAppearCallback = CreateOnAppearCallback<Opt_VoidCallback, VoidCallback>(frameNode);
     // parameters
     auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_SheetOptions {
@@ -310,11 +317,11 @@ HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetOnDisAppearTest, TestS
 }
 
 /*
- * @tc.name: setBindSheetOnWillAppearTest
+ * @tc.name: setBindSheetTestOnWillAppear
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetOnWillAppearTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetTestOnWillAppear, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindSheet, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -323,7 +330,7 @@ HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetOnWillAppearTest, Test
     EXPECT_NE(node, nullptr);
     auto builder = CreateCustomNodeBuilder(node);
     auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder);
-    auto optOnAppearCallback = CreateOnAppearCallback<Opt_Callback_Void, Callback_Void>(frameNode);
+    auto optOnAppearCallback = CreateOnAppearCallback<Opt_VoidCallback, VoidCallback>(frameNode);
     // parameters
     auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_SheetOptions {
@@ -350,11 +357,11 @@ HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetOnWillAppearTest, Test
 }
 
 /*
- * @tc.name: setBindSheetOnWillDisAppearTest
+ * @tc.name: setBindSheetTestOnWillDisAppear
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetOnWillDisAppearTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetTestOnWillDisAppear, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindSheet, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -363,7 +370,7 @@ HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetOnWillDisAppearTest, T
     EXPECT_NE(node, nullptr);
     auto builder = CreateCustomNodeBuilder(node);
     auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder);
-    auto optOnAppearCallback = CreateOnAppearCallback<Opt_Callback_Void, Callback_Void>(frameNode);
+    auto optOnAppearCallback = CreateOnAppearCallback<Opt_VoidCallback, VoidCallback>(frameNode);
     // parameters
     auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_SheetOptions {
@@ -394,11 +401,11 @@ HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetOnWillDisAppearTest, T
 }
 
 /*
- * @tc.name: setBindSheetShouldDismissTest
+ * @tc.name: setBindSheetTestShouldDismiss
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetShouldDismissTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetTestShouldDismiss, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindSheet, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -436,11 +443,11 @@ HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetShouldDismissTest, Tes
 }
 
 /*
- * @tc.name: setBindSheetWillDismissTest
+ * @tc.name: setBindSheetTestWillDismiss
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetWillDismissTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetTestWillDismiss, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindSheet, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -478,16 +485,17 @@ HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetWillDismissTest, TestS
 
         EXPECT_TRUE(checkNestedEvent.has_value());
         EXPECT_EQ(checkNestedEvent->resourceId, frameNode->GetId());
+        EXPECT_EQ(checkNestedEvent->reason, expected);
         EXPECT_TRUE(checkNestedEvent->fired);
     }
 }
 
 /*
- * @tc.name: setBindSheetSpringBackTest
+ * @tc.name: setBindSheetTestSpringBack
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetSpringBackTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetTestSpringBack, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindSheet, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -524,11 +532,11 @@ HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetSpringBackTest, TestSi
 }
 
 /*
- * @tc.name: setBindSheetOnTypeDidChangeTest
+ * @tc.name: setBindSheetTestOnTypeDidChange
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetOnTypeDidChangeTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetTestOnTypeDidChange, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindSheet, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -569,11 +577,11 @@ HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetOnTypeDidChangeTest, T
 }
 
 /*
- * @tc.name: setBindSheetOnHeightDidChangeTest
+ * @tc.name: setBindSheetTestOnHeightDidChange
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetOnHeightDidChangeTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetTestOnHeightDidChange, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindSheet, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -614,11 +622,11 @@ HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetOnHeightDidChangeTest,
 }
 
 /*
- * @tc.name: setBindSheetOnWidthDidChangeTest
+ * @tc.name: setBindSheetTestOnWidthDidChange
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetOnWidthDidChangeTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetTestOnWidthDidChange, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindSheet, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -659,11 +667,11 @@ HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetOnWidthDidChangeTest, 
 }
 
 /*
- * @tc.name: setBindSheetOnDetentsDidChangeTest
+ * @tc.name: setBindSheetTestOnDetentsDidChange
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetOnDetentsDidChangeTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetTestOnDetentsDidChange, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindSheet, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);

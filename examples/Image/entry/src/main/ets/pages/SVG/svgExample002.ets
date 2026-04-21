@@ -79,7 +79,7 @@ struct svgExample002 {
         Image($r('app.media.testSvg'))
           .width(80)
           .height(80)
-          .fillColor(Color.Purple)
+          .fillColor('#800080')
 
         Image($r('app.media.testSvg'))
           .width(80)

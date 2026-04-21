@@ -14,11 +14,12 @@
  */
 #include "node_extened.h"
 
-
 #include "node_model.h"
 
 #include "base/error/error_code.h"
+#include "base/log/log_wrapper.h"
 #include "core/components_ng/base/ui_node.h"
+#include "error_message_macros.h"
 
 namespace OHOS::Ace::NodeModel {
 
@@ -52,10 +53,12 @@ void NodeAddExtraData(ArkUI_NodeHandle node, ArkUI_NodeCustomEventType eventType
 int32_t RegisterNodeCustomEvent(ArkUI_NodeHandle node, ArkUI_NodeCustomEventType eventType, int32_t targetId, void* userData)
 {
     if (!node || !CheckIsCNode(node)) {
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node is invalid");
         return ERROR_CODE_PARAM_INVALID;
     }
     if (eventType <= 0) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Custom event is not supported %{public}d", eventType);
+        SET_ERROR_MESSAGE(ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED, __FUNCTION__, "Custom event type is invalid");
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
     }
 
@@ -63,6 +66,8 @@ int32_t RegisterNodeCustomEvent(ArkUI_NodeHandle node, ArkUI_NodeCustomEventType
         if (node->type == ARKUI_NODE_CUSTOM || node->type == ARKUI_NODE_CUSTOM_SPAN) {
             NodeAddExtraData(node, ARKUI_NODE_CUSTOM_EVENT_ON_MEASURE, targetId, userData);
         } else {
+            SET_ERROR_MESSAGE(
+                ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED, __FUNCTION__, "Measure event is not supported");
             return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
         }
     }
@@ -71,6 +76,8 @@ int32_t RegisterNodeCustomEvent(ArkUI_NodeHandle node, ArkUI_NodeCustomEventType
         if (node->type == ARKUI_NODE_CUSTOM) {
             NodeAddExtraData(node, ARKUI_NODE_CUSTOM_EVENT_ON_LAYOUT, targetId, userData);
         } else {
+            SET_ERROR_MESSAGE(
+                ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED, __FUNCTION__, "Layout event is not supported");
             return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
         }
     }
@@ -221,6 +228,7 @@ void HandleCustomEvent(ArkUI_NodeCustomEvent* event)
 int32_t AddNodeCustomEventReceiver(ArkUI_NodeHandle nodePtr, void (*eventReceiver)(ArkUI_NodeCustomEvent* event))
 {
     if (!nodePtr || !eventReceiver || !CheckIsCNode(nodePtr)) {
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node or event receiver is invalid");
         return ERROR_CODE_PARAM_INVALID;
     }
     if (!nodePtr->customEventListeners) {
@@ -229,6 +237,7 @@ int32_t AddNodeCustomEventReceiver(ArkUI_NodeHandle nodePtr, void (*eventReceive
     auto eventListenersSet = reinterpret_cast<std::set<void (*)(ArkUI_NodeCustomEvent*)>*>(
         nodePtr->customEventListeners);
     if (!eventListenersSet) {
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Custom event listener set is invalid");
         return ERROR_CODE_PARAM_INVALID;
     }
     eventListenersSet->emplace(eventReceiver);
@@ -239,11 +248,13 @@ int32_t RemoveNodeCustomEventReceiver(ArkUI_NodeHandle nodePtr,
     void (*eventReceiver)(ArkUI_NodeCustomEvent* event))
 {
     if (!nodePtr || !eventReceiver || !nodePtr->customEventListeners || !CheckIsCNode(nodePtr)) {
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node or event receiver is invalid");
         return ERROR_CODE_PARAM_INVALID;
     }
     auto eventListenersSet = reinterpret_cast<std::set<void (*)(ArkUI_NodeCustomEvent*)>*>(
         nodePtr->customEventListeners);
     if (!eventListenersSet) {
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Custom event listener set is invalid");
         return ERROR_CODE_PARAM_INVALID;
     }
     eventListenersSet->erase(eventReceiver);
@@ -257,6 +268,7 @@ int32_t RemoveNodeCustomEventReceiver(ArkUI_NodeHandle nodePtr,
 int32_t SetMeasuredSize(ArkUI_NodeHandle node, int32_t width, int32_t height)
 {
     if (node == nullptr || !CheckIsCNode(node)) {
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node is invalid");
         return ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = GetFullImpl();
@@ -268,6 +280,7 @@ int32_t SetMeasuredSize(ArkUI_NodeHandle node, int32_t width, int32_t height)
 int32_t SetLayoutPosition(ArkUI_NodeHandle node, int32_t positionX, int32_t positionY)
 {
     if (node == nullptr || !CheckIsCNode(node)) {
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node is invalid");
         return ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = GetFullImpl();
@@ -327,6 +340,7 @@ ArkUI_IntOffset GetLayoutPosition(ArkUI_NodeHandle node)
 int32_t MeasureNode(ArkUI_NodeHandle node, ArkUI_LayoutConstraint* constraint)
 {
     if (node == nullptr || constraint == nullptr || !CheckIsCNode(node)) {
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node or layout constraint is invalid");
         return ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = GetFullImpl();
@@ -351,6 +365,7 @@ int32_t MeasureNode(ArkUI_NodeHandle node, ArkUI_LayoutConstraint* constraint)
 int32_t LayoutNode(ArkUI_NodeHandle node, int32_t positionX, int32_t positionY)
 {
     if (node == nullptr || !CheckIsCNode(node)) {
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node is invalid");
         return ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = GetFullImpl();
@@ -439,7 +454,10 @@ ArkUI_NodeHandle GetParent(ArkUI_NodeHandle node)
 
 int32_t RemoveAllChildren(ArkUI_NodeHandle parentNode)
 {
-    CHECK_NULL_RETURN(parentNode, ERROR_CODE_PARAM_INVALID);
+    if (parentNode == nullptr) {
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Parent node is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     const auto* impl = GetFullImpl();
     impl->getNodeModifiers()->getFrameNodeModifier()->clearChildren(parentNode->uiNodeHandle);
     return ERROR_CODE_NO_ERROR;

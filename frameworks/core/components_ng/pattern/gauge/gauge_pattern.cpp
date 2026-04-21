@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/gauge/gauge_pattern.h"
+#include "ui/base/versions.h"
 
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/gauge/gauge_layout_algorithm.h"
 #include "core/components_ng/pattern/gauge/gauge_theme.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/position_property.h"
 
@@ -33,12 +35,24 @@ bool GaugePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     return true;
 }
 
+bool GaugePattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return false;
+    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    return true;
+}
+
 void GaugePattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
     FireBuilder();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
 
     auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
@@ -376,7 +390,7 @@ void GaugePattern::UpdateIndicatorIconPath(
     CHECK_NULL_VOID(pipelineContext);
     auto paintProperty = host->GetPaintProperty<GaugePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (pipelineContext->IsSystmColorChange() || isFirstLoad) {
+    if (pipelineContext->IsSystemColorChange() || isFirstLoad) {
         paintProperty->UpdateIndicatorIconSourceInfo(ImageSourceInfo(iconPath, bundleName, moduleName));
     }
     if (host->GetRerenderable()) {
@@ -392,7 +406,7 @@ void GaugePattern::UpdateIndicatorSpace(const CalcDimension& space, bool isFirst
     CHECK_NULL_VOID(pipelineContext);
     auto paintProperty = host->GetPaintProperty<GaugePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (pipelineContext->IsSystmColorChange() || isFirstLoad) {
+    if (pipelineContext->IsSystemColorChange() || isFirstLoad) {
         paintProperty->UpdateIndicatorSpace(space);
     }
     if (host->GetRerenderable()) {

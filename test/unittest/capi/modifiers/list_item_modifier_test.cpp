@@ -88,11 +88,11 @@ public:
 };
 
 /*
- * @tc.name: Construct
+ * @tc.name: constructTest
  * @tc.desc: Check the functionality of ListItemModifier.Construct
  * @tc.type: FUNC
  */
-HWTEST_F(ListItemModifierTest, ConstructTest, TestSize.Level1)
+HWTEST_F(ListItemModifierTest, constructTest, TestSize.Level1)
 {
     const auto id = GetId();
     auto node = modifier_->construct(id, 0);
@@ -104,11 +104,11 @@ HWTEST_F(ListItemModifierTest, ConstructTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: ConstructWithLazy
+ * @tc.name: constructTestWithLazy
  * @tc.desc: Check the functionality of ListItemModifier.Construct
  * @tc.type: FUNC
  */
-HWTEST_F(ListItemModifierTest, ConstructWithLazyTest, TestSize.Level1)
+HWTEST_F(ListItemModifierTest, constructTestWithLazy, TestSize.Level1)
 {
     GeneratedModifier::LazyBuild::NeedLazyBuild();
     const auto id = GetId();
@@ -128,24 +128,24 @@ HWTEST_F(ListItemModifierTest, ConstructWithLazyTest, TestSize.Level1)
 HWTEST_F(ListItemModifierTest, DISABLED_setListItemOptionsTest, TestSize.Level1)
 {
     auto style = GetAttrValue<std::string>(node_, "itemStyle");
-    EXPECT_EQ(style, "ListItemStyle.NONE");
+    EXPECT_THAT(style, Eq("ListItemStyle.NONE"));
 
     Ark_ListItemOptions listItemOptions = {.style = Converter::ArkValue<Opt_ListItemStyle>(V2::ListItemStyle::CARD)};
     Opt_ListItemOptions arg = Converter::ArkValue<Opt_ListItemOptions>(listItemOptions);
     modifier_->setListItemOptions(node_, &arg);
     style = GetAttrValue<std::string>(node_, "itemStyle");
-    EXPECT_EQ(style, "ListItemStyle.CARD");
+    EXPECT_THAT(style, Eq("ListItemStyle.CARD"));
 
     arg = Converter::ArkValue<Opt_ListItemOptions>(Ark_Empty());
     modifier_->setListItemOptions(node_, &arg);
     style = GetAttrValue<std::string>(node_, "itemStyle");
-    EXPECT_EQ(style, "ListItemStyle.CARD");
+    EXPECT_THAT(style, Eq("ListItemStyle.CARD"));
 
     listItemOptions = {.style = Converter::ArkValue<Opt_ListItemStyle>(Ark_Empty())};
     arg = Converter::ArkValue<Opt_ListItemOptions>(listItemOptions);
     modifier_->setListItemOptions(node_, &arg);
     style = GetAttrValue<std::string>(node_, "itemStyle");
-    EXPECT_EQ(style, "ListItemStyle.NONE");
+    EXPECT_THAT(style, Eq("ListItemStyle.NONE"));
 }
 
 /*
@@ -155,27 +155,27 @@ HWTEST_F(ListItemModifierTest, DISABLED_setListItemOptionsTest, TestSize.Level1)
  */
 HWTEST_F(ListItemModifierTest, setSelectableTest, TestSize.Level1)
 {
-    bool selectable = GetAttrValue<bool>(node_, "selectable");
-    EXPECT_TRUE(selectable);
+    auto selectable = GetAttrValue<bool>(node_, "selectable");
+    EXPECT_THAT(selectable, Eq(true));
     auto optValue = Converter::ArkValue<Opt_Boolean>(false);
     modifier_->setSelectable(node_, &optValue);
     selectable = GetAttrValue<bool>(node_, "selectable");
-    EXPECT_FALSE(selectable);
+    EXPECT_THAT(selectable, Eq(false));
 }
 
 /*
- * @tc.name: setSelectableTest
+ * @tc.name: setSelectedTest
  * @tc.desc: Check the functionality of ListItemModifier.setSelected
  * @tc.type: FUNC
  */
 HWTEST_F(ListItemModifierTest, setSelectedTest, TestSize.Level1)
 {
-    bool selected = GetAttrValue<bool>(node_, "selected");
-    EXPECT_FALSE(selected);
+    auto selected = GetAttrValue<bool>(node_, "selected");
+    EXPECT_THAT(selected, Eq(false));
     auto optValue = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
     modifier_->setSelected(node_, &optValue);
     selected = GetAttrValue<bool>(node_, "selected");
-    EXPECT_TRUE(selected);
+    EXPECT_THAT(selected, Eq(true));
 }
 
 /*
@@ -218,29 +218,29 @@ HWTEST_F(ListItemModifierTest, setOnSelectTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setSwipeActionEdgeEffectTest
+ * @tc.name: setSwipeActionTestEdgeEffect
  * @tc.desc: Check the functionality of ListItemModifier.setSwipeAction
  * @tc.type: FUNC
  */
-HWTEST_F(ListItemModifierTest, setSwipeActionEdgeEffectTest, TestSize.Level1)
+HWTEST_F(ListItemModifierTest, setSwipeActionTestEdgeEffect, TestSize.Level1)
 {
     auto fullJson = GetJsonValue(node_);
-    auto swipeAction = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "swipeAction");
+    auto swipeAction = GetAttrObject(fullJson, "swipeAction");
     auto edgeEffect = GetAttrValue<std::string>(swipeAction, "edgeEffect");
-    EXPECT_EQ(edgeEffect, "");
+    EXPECT_THAT(edgeEffect, Eq(std::nullopt));
 
     Ark_SwipeActionOptions  options = {
         .start = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(Ark_Empty()),
         .end = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(Ark_Empty()),
-        .onOffsetChange = Converter::ArkValue<Opt_Callback_F64_Void>(Ark_Empty()),
+        .onOffsetChange = Converter::ArkValue<Opt_synthetic_Callback_F64_Void>(Ark_Empty()),
         .edgeEffect = Converter::ArkValue<Opt_SwipeEdgeEffect>(V2::SwipeEdgeEffect::None)
     };
     auto optOptions = Converter::ArkValue<Opt_SwipeActionOptions>(options);
     modifier_->setSwipeAction(node_, &optOptions);
     fullJson = GetJsonValue(node_);
-    swipeAction = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "swipeAction");
+    swipeAction = GetAttrObject(fullJson, "swipeAction");
     edgeEffect = GetAttrValue<std::string>(swipeAction, "edgeEffect");
-    EXPECT_EQ(edgeEffect, "SwipeEdgeEffect.None");
+    EXPECT_THAT(edgeEffect, Eq("SwipeEdgeEffect.None"));
 
     options = {
         .start = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(Ark_Empty()),
@@ -250,9 +250,9 @@ HWTEST_F(ListItemModifierTest, setSwipeActionEdgeEffectTest, TestSize.Level1)
     optOptions = Converter::ArkValue<Opt_SwipeActionOptions>(options);
     modifier_->setSwipeAction(node_, &optOptions);
     fullJson = GetJsonValue(node_);
-    swipeAction = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "swipeAction");
+    swipeAction = GetAttrObject(fullJson, "swipeAction");
     edgeEffect = GetAttrValue<std::string>(swipeAction, "edgeEffect");
-    EXPECT_EQ(edgeEffect, "SwipeEdgeEffect.Spring");
+    EXPECT_THAT(edgeEffect, Eq("SwipeEdgeEffect.Spring"));
 
     options = {
         .start = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(Ark_Empty()),
@@ -262,37 +262,37 @@ HWTEST_F(ListItemModifierTest, setSwipeActionEdgeEffectTest, TestSize.Level1)
     optOptions = Converter::ArkValue<Opt_SwipeActionOptions>(options);
     modifier_->setSwipeAction(node_, &optOptions);
     fullJson = GetJsonValue(node_);
-    swipeAction = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "swipeAction");
+    swipeAction = GetAttrObject(fullJson, "swipeAction");
     edgeEffect = GetAttrValue<std::string>(swipeAction, "edgeEffect");
-    EXPECT_EQ(edgeEffect, "");
+    EXPECT_THAT(edgeEffect, Eq(std::nullopt));
 }
 
 /**
- * @tc.name: setSwipeActionActionsTest
+ * @tc.name: setSwipeActionTestOffsetChange
  * @tc.desc: Check the functionality of ListItemModifier.setSwipeAction
  * @tc.type: FUNC
  */
-HWTEST_F(ListItemModifierTest, setSwipeActionOffsetChangeTest, TestSize.Level1)
+HWTEST_F(ListItemModifierTest, setSwipeActionTestOffsetChange, TestSize.Level1)
 {
     const int32_t offsetArg = 5;
 
     struct CheckEvent {
         int32_t resourceId;
-        double offset;
+        int32_t offset;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
-    auto checkCallback =
+    void (*checkCallback)(const Ark_Int32, const Ark_Float64) =
         [](const Ark_Int32 resourceId, const Ark_Float64 offset) {
             checkEvent = {
                 .resourceId = resourceId,
-                .offset = Converter::Convert<double>(offset)
+                .offset = Converter::Convert<int32_t>(offset)
             };
         };
 
     Ark_SwipeActionOptions arkOptions = {
-        .onOffsetChange = Converter::ArkValue<Opt_Callback_F64_Void>(
-            Converter::ArkValue<Callback_F64_Void>(checkCallback, TEST_RESOURCE_ID_1)),
+        .onOffsetChange = Converter::ArkValue<Opt_synthetic_Callback_F64_Void>(
+            Converter::ArkValue<synthetic_Callback_F64_Void>(checkCallback, TEST_RESOURCE_ID_1)),
     };
     auto optOptions = Converter::ArkValue<Opt_SwipeActionOptions>(arkOptions);
     modifier_->setSwipeAction(node_, &optOptions);
@@ -305,15 +305,15 @@ HWTEST_F(ListItemModifierTest, setSwipeActionOffsetChangeTest, TestSize.Level1)
     eventHub->FireOffsetChangeEvent(offsetArg);
     ASSERT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent.value().resourceId, TEST_RESOURCE_ID_1);
-    EXPECT_FLOAT_EQ(checkEvent.value().offset, offsetArg);
+    EXPECT_EQ(checkEvent.value().offset, offsetArg);
 }
 
 /**
- * @tc.name: setSwipeActionActionsTest
+ * @tc.name: setSwipeActionTestCustomBuilder
  * @tc.desc: Check the functionality of ListItemModifier.setSwipeAction
  * @tc.type: FUNC
  */
-HWTEST_F(ListItemModifierTest, setSwipeActionCustomBuilderTest, TestSize.Level1)
+HWTEST_F(ListItemModifierTest, setSwipeActionTestCustomBuilder, TestSize.Level1)
 {
     uiNode_1 = BlankModelNG::CreateFrameNode(NODE_ID_1);
     auto customBuilderStart = getBuilderCb(true);
@@ -344,11 +344,11 @@ HWTEST_F(ListItemModifierTest, setSwipeActionCustomBuilderTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setSwipeActionActionItemCustomBuilderTest
+ * @tc.name: setSwipeActionTestActionItemCustomBuilder
  * @tc.desc: Check the functionality of ListItemModifier.setSwipeAction
  * @tc.type: FUNC
  */
-HWTEST_F(ListItemModifierTest, setSwipeActionActionItemCustomBuilderTest, TestSize.Level1)
+HWTEST_F(ListItemModifierTest, setSwipeActionTestActionItemCustomBuilder, TestSize.Level1)
 {
     uiNode_1 = BlankModelNG::CreateFrameNode(NODE_ID_1);
     auto customBuilderStart = getBuilderCb(true);
@@ -385,11 +385,11 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemCustomBuilderTest, TestSi
 }
 
 /**
- * @tc.name: setSwipeActionActionItemOnActionCallbackTest
+ * @tc.name: setSwipeActionTestActionItemOnActionCallback
  * @tc.desc: Check the functionality of ListItemModifier.setSwipeAction
  * @tc.type: FUNC
  */
-HWTEST_F(ListItemModifierTest, setSwipeActionActionItemOnActionCallbackTest, TestSize.Level1)
+HWTEST_F(ListItemModifierTest, setSwipeActionTestActionItemOnActionCallback, TestSize.Level1)
 {
     static std::optional<CheckEvent> checkEventStart = std::nullopt;
     void (*checkCallbackStart)(const Ark_Int32) =
@@ -449,11 +449,11 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemOnActionCallbackTest, Tes
 }
 
 /**
- * @tc.name: setSwipeActionActionItemOnEnterActionAreaCallbackTest
+ * @tc.name: setSwipeActionTestActionItemOnEnterActionAreaCallback
  * @tc.desc: Check the functionality of ListItemModifier.setSwipeAction
  * @tc.type: FUNC
  */
-HWTEST_F(ListItemModifierTest, setSwipeActionActionItemOnEnterActionAreaCallbackTest, TestSize.Level1)
+HWTEST_F(ListItemModifierTest, setSwipeActionTestActionItemOnEnterActionAreaCallback, TestSize.Level1)
 {
     static std::optional<CheckEvent> checkEventStart = std::nullopt;
     void (*checkCallbackStart)(const Ark_Int32) =
@@ -513,11 +513,11 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemOnEnterActionAreaCallback
 }
 
 /**
- * @tc.name: setSwipeActionActionItemOnExitActionAreaCallbackTest
+ * @tc.name: setSwipeActionTestActionItemOnExitActionAreaCallback
  * @tc.desc: Check the functionality of ListItemModifier.setSwipeAction
  * @tc.type: FUNC
  */
-HWTEST_F(ListItemModifierTest, setSwipeActionActionItemOnExitActionAreaCallbackTest, TestSize.Level1)
+HWTEST_F(ListItemModifierTest, setSwipeActionTestActionItemOnExitActionAreaCallback, TestSize.Level1)
 {
     static std::optional<CheckEvent> checkEventStart = std::nullopt;
     void (*checkCallbackStart)(const Ark_Int32) =
@@ -577,11 +577,11 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemOnExitActionAreaCallbackT
 }
 
 /**
- * @tc.name: setSwipeActionActionItemOnStateChangeCallbackTest
+ * @tc.name: setSwipeActionTestActionItemOnStateChangeCallback
  * @tc.desc: Check the functionality of ListItemModifier.setSwipeAction
  * @tc.type: FUNC
  */
-HWTEST_F(ListItemModifierTest, setSwipeActionActionItemOnStateChangeCallbackTest, TestSize.Level1)
+HWTEST_F(ListItemModifierTest, setSwipeActionTestActionItemOnStateChangeCallback, TestSize.Level1)
 {
     struct CheckEvent { int32_t resourceId; std::optional<SwipeActionState> state; };
     static std::optional<CheckEvent> checkEventStart = std::nullopt;
@@ -640,19 +640,19 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemOnStateChangeCallbackTest
 }
 
 /**
- * @tc.name: setSwipeActionActionItemActionAreaDistanceTest
+ * @tc.name: setSwipeActionTestActionItemActionAreaDistance
  * @tc.desc: Check the functionality of ListItemModifier.setSwipeAction
  * @tc.type: FUNC
  */
-HWTEST_F(ListItemModifierTest, setSwipeActionActionItemActionAreaDistanceTest, TestSize.Level1)
+HWTEST_F(ListItemModifierTest, setSwipeActionTestActionItemActionAreaDistance, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
 
     auto startDeleteAreaDistance = GetAttrValue<std::string>(node_, "startDeleteAreaDistance");
     auto endDeleteAreaDistance = GetAttrValue<std::string>(node_, "endDeleteAreaDistance");
-    EXPECT_EQ(startDeleteAreaDistance, "0.00vp");
-    EXPECT_EQ(endDeleteAreaDistance, "0.00vp");
+    EXPECT_THAT(startDeleteAreaDistance, Eq("0.00vp"));
+    EXPECT_THAT(endDeleteAreaDistance, Eq("0.00vp"));
 
     Ark_SwipeActionItem itemStart = {
         .builder = Converter::ArkValue<Opt_CustomNodeBuilder>(Ark_Empty()),
@@ -677,24 +677,24 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemActionAreaDistanceTest, T
 
     startDeleteAreaDistance = GetAttrValue<std::string>(node_, "startDeleteAreaDistance");
     endDeleteAreaDistance = GetAttrValue<std::string>(node_, "endDeleteAreaDistance");
-    EXPECT_EQ(startDeleteAreaDistance, "55.50vp");
-    EXPECT_EQ(endDeleteAreaDistance, "77.70vp");
+    EXPECT_THAT(startDeleteAreaDistance, Eq("55.50vp"));
+    EXPECT_THAT(endDeleteAreaDistance, Eq("77.70vp"));
 }
 
 /**
- * @tc.name: setSwipeActionActionItemActionAreaDistanceNegativeTest
+ * @tc.name: setSwipeActionTestActionItemActionAreaDistanceNegative
  * @tc.desc: Check the functionality of ListItemModifier.setSwipeAction
  * @tc.type: FUNC
  */
-HWTEST_F(ListItemModifierTest, setSwipeActionActionItemActionAreaDistanceNegativeTest, TestSize.Level1)
+HWTEST_F(ListItemModifierTest, setSwipeActionTestActionItemActionAreaDistanceNegative, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
 
     auto startDeleteAreaDistance = GetAttrValue<std::string>(node_, "startDeleteAreaDistance");
     auto endDeleteAreaDistance = GetAttrValue<std::string>(node_, "endDeleteAreaDistance");
-    EXPECT_EQ(startDeleteAreaDistance, "0.00vp");
-    EXPECT_EQ(endDeleteAreaDistance, "0.00vp");
+    EXPECT_THAT(startDeleteAreaDistance, Eq("0.00vp"));
+    EXPECT_THAT(endDeleteAreaDistance, Eq("0.00vp"));
 
     Ark_SwipeActionItem itemStart = {
         .builder = Converter::ArkValue<Opt_CustomNodeBuilder>(Ark_Empty()),
@@ -719,24 +719,24 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemActionAreaDistanceNegativ
 
     startDeleteAreaDistance = GetAttrValue<std::string>(node_, "startDeleteAreaDistance");
     endDeleteAreaDistance = GetAttrValue<std::string>(node_, "endDeleteAreaDistance");
-    EXPECT_EQ(startDeleteAreaDistance, "-55.50vp");
-    EXPECT_EQ(endDeleteAreaDistance, "-77.70vp");
+    EXPECT_THAT(startDeleteAreaDistance, Eq("-55.50vp"));
+    EXPECT_THAT(endDeleteAreaDistance, Eq("-77.70vp"));
 }
 
 /**
- * @tc.name: setSwipeActionActionItemActionAreaDistanceOptionalTest
+ * @tc.name: setSwipeActionTestActionItemActionAreaDistanceOptional
  * @tc.desc: Check the functionality of ListItemModifier.setSwipeAction
  * @tc.type: FUNC
  */
-HWTEST_F(ListItemModifierTest, setSwipeActionActionItemActionAreaDistanceOptionalTest, TestSize.Level1)
+HWTEST_F(ListItemModifierTest, setSwipeActionTestActionItemActionAreaDistanceOptional, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
 
     auto startDeleteAreaDistance = GetAttrValue<std::string>(node_, "startDeleteAreaDistance");
     auto endDeleteAreaDistance = GetAttrValue<std::string>(node_, "endDeleteAreaDistance");
-    EXPECT_EQ(startDeleteAreaDistance, "0.00vp");
-    EXPECT_EQ(endDeleteAreaDistance, "0.00vp");
+    EXPECT_THAT(startDeleteAreaDistance, Eq("0.00vp"));
+    EXPECT_THAT(endDeleteAreaDistance, Eq("0.00vp"));
 
     Ark_SwipeActionItem itemStart = {
         .builder = Converter::ArkValue<Opt_CustomNodeBuilder>(Ark_Empty()),
@@ -761,8 +761,8 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemActionAreaDistanceOptiona
 
     startDeleteAreaDistance = GetAttrValue<std::string>(node_, "startDeleteAreaDistance");
     endDeleteAreaDistance = GetAttrValue<std::string>(node_, "endDeleteAreaDistance");
-    EXPECT_EQ(startDeleteAreaDistance, "55.50vp");
-    EXPECT_EQ(endDeleteAreaDistance, "77.70vp");
+    EXPECT_THAT(startDeleteAreaDistance, Eq("55.50vp"));
+    EXPECT_THAT(endDeleteAreaDistance, Eq("77.70vp"));
 
     // optional values
     itemStart = {
@@ -785,17 +785,17 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemActionAreaDistanceOptiona
 
     startDeleteAreaDistance = GetAttrValue<std::string>(node_, "startDeleteAreaDistance");
     endDeleteAreaDistance = GetAttrValue<std::string>(node_, "endDeleteAreaDistance");
-    EXPECT_EQ(startDeleteAreaDistance, "0.00vp");
-    EXPECT_EQ(endDeleteAreaDistance, "0.00vp");
+    EXPECT_THAT(startDeleteAreaDistance, Eq("0.00vp"));
+    EXPECT_THAT(endDeleteAreaDistance, Eq("0.00vp"));
 }
 
 #ifdef WRONG_OLD_GEN
 /*
- * @tc.name: setOnChangeEventSelectedImpl
+ * @tc.name: set_onChangeEvent_selectedTestValidCallback
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ListItemModifierTest, setOnChangeEventSelectedImpl, TestSize.Level1)
+HWTEST_F(ListItemModifierTest, set_onChangeEvent_selectedTestValidCallback, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<ListItemEventHub>();

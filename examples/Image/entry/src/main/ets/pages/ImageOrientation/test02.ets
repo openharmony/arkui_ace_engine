@@ -18,10 +18,10 @@ import { CircleShape } from '@kit.ArkUI'
 @Entry
 @Component
 struct Test01 {
-  @State res1: ResourceStr | undefined = $r('app.media.horizontal')
-  @State res2: ResourceStr | undefined = $r('app.media.rotate90cw')
-  @State res3: ResourceStr | undefined = $r('app.media.rotate270cw')
-  @State res4: ResourceStr | undefined = $r('app.media.rotate180')
+  @State res1: ResourceStr | undefined = $r('app.media.startIcon')
+  @State res2: ResourceStr | undefined = $r('app.media.background')
+  @State res3: ResourceStr | undefined = $r('app.media.foreground')
+  @State res4: ResourceStr | undefined = $r('app.media.startIcon')
   @State orientation: ImageRotateOrientation = ImageRotateOrientation.UP
   @State autoResize: boolean = false
   @State clipWidth: number = 50

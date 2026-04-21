@@ -24,6 +24,7 @@
 
 #include "arkoala_api_generated.h"
 #include "rich_editor_base_controller_peer_impl.h"
+#include "styled_string_peer.h"
 
 namespace OHOS::Ace::NG::Converter {
 template<> TextStyle Convert(const Ark_RichEditorTextStyle& src);
@@ -233,15 +234,13 @@ void SetTypingParagraphStyleImpl(Ark_RichEditorBaseController peer,
     peer->SetTypingParagraphStyle(typingParagraphStyle);
 }
 void SetSelectionImpl(Ark_RichEditorBaseController peer,
-                      const Ark_Int32* selectionStart,
-                      const Ark_Int32* selectionEnd,
+                      Ark_Int32 selectionStart,
+                      Ark_Int32 selectionEnd,
                       const Opt_SelectionOptions* options)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(selectionStart);
-    CHECK_NULL_VOID(selectionEnd);
-    int32_t start = Converter::Convert<int32_t>(*selectionStart);
-    int32_t end = Converter::Convert<int32_t>(*selectionEnd);
+    int32_t start = Converter::Convert<int32_t>(selectionStart);
+    int32_t end = Converter::Convert<int32_t>(selectionEnd);
     auto optOptions = Converter::OptConvertPtr<SelectionOptions>(options);
     peer->SetSelection(start, end, optOptions, start < end);
 }
@@ -290,6 +289,14 @@ void DeleteBackwardImpl(Ark_RichEditorBaseController peer)
     CHECK_NULL_VOID(peer);
     peer->DeleteBackward();
 }
+
+void SetStyledPlaceholderImpl(Ark_RichEditorBaseController peer, Ark_StyledString styledString)
+{
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(styledString);
+    peer->SetStyledPlaceholder(styledString->spanString);
+}
+
 } // RichEditorBaseControllerAccessor
 const GENERATED_ArkUIRichEditorBaseControllerAccessor* GetRichEditorBaseControllerAccessor()
 {
@@ -310,6 +317,7 @@ const GENERATED_ArkUIRichEditorBaseControllerAccessor* GetRichEditorBaseControll
         RichEditorBaseControllerAccessor::GetPreviewTextImpl,
         RichEditorBaseControllerAccessor::GetCaretRectImpl,
         RichEditorBaseControllerAccessor::DeleteBackwardImpl,
+        RichEditorBaseControllerAccessor::SetStyledPlaceholderImpl,
     };
     return &RichEditorBaseControllerAccessorImpl;
 }

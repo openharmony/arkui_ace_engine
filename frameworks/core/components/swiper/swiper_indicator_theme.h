@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SWIPER_SWIPER_INDICATOR_THEME_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SWIPER_SWIPER_INDICATOR_THEME_H
 
+#include "core/components/common/properties/text_style.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components_ng/property/gradient_property.h"
@@ -90,17 +91,19 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme->leftSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_left");
-            theme->rightSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_right");
-            theme->upSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_up");
-            theme->downSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_down");
+
             ParsePattern(themeConstants, theme);
             return theme;
         }
 
-    private:
+    protected:
         void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<SwiperIndicatorTheme>& theme) const
         {
+            theme->leftSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_left");
+            theme->rightSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_right");
+            theme->upSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_up");
+            theme->downSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_down");
+
             RefPtr<ThemeStyle> swiperPattern = themeConstants->GetPatternByName(THEME_PATTERN_SWIPER);
             if (!swiperPattern) {
                 LOGW("find pattern of swiper fail");
@@ -145,16 +148,14 @@ public:
             theme->hoverColor_ = swiperPattern->GetAttr<Color>("indicator_color_hover", Color::TRANSPARENT);
             theme->pressedColor_ = swiperPattern->GetAttr<Color>("indicator_color_pressed", Color::TRANSPARENT);
             theme->focusedColor_ = swiperPattern->GetAttr<Color>("indicator_color_focused", Color::TRANSPARENT);
-            theme->preAccessibilityText_ =
-                swiperPattern->GetAttr<std::string>("prev_arrow_accessibility_text", "");
-            theme->nextAccessibilityText_ =
-                swiperPattern->GetAttr<std::string>("next_arrow_accessibility_text", "");
-            ParsePattern2(themeConstants, theme, swiperPattern);
+            ParsePattern2(theme, swiperPattern);
         }
 
-        void ParsePattern2(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<SwiperIndicatorTheme>& theme,
-            const RefPtr<ThemeStyle> swiperPattern) const
+    private:
+        void ParsePattern2(const RefPtr<SwiperIndicatorTheme>& theme, const RefPtr<ThemeStyle> swiperPattern) const
         {
+            theme->preAccessibilityText_ = swiperPattern->GetAttr<std::string>("prev_arrow_accessibility_text", "");
+            theme->nextAccessibilityText_ = swiperPattern->GetAttr<std::string>("next_arrow_accessibility_text", "");
             theme->focusedBorderWidth_ = SWIPER_FOCUSED_BORDER_WIDTH;
             theme->hoverArrowBackgroundColor_ =
                 swiperPattern->GetAttr<Color>(ARROW_COLOR_BOARDCOLOR_HOVER, Color::TRANSPARENT);
@@ -195,13 +196,12 @@ public:
             theme->indicatorDragMaxAngle_ =
                 swiperPattern->GetAttr<double>("swiper_indicator_drag_max_angle", INDICATOR_DRAG_MAX_ANGLE);
 #ifdef SUPPORT_DIGITAL_CROWN
-            ParsePattern3(themeConstants, theme, swiperPattern);
+            ParsePattern3(theme, swiperPattern);
 #endif
         }
 
 #ifdef SUPPORT_DIGITAL_CROWN
-    void ParsePattern3(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<SwiperIndicatorTheme>& theme,
-            const RefPtr<ThemeStyle> swiperPattern) const
+        void ParsePattern3(const RefPtr<SwiperIndicatorTheme>& theme, const RefPtr<ThemeStyle> swiperPattern) const
         {
             theme->slowVelocityThreshold_ = swiperPattern->GetAttr<double>("swiper_slow_velocity_threshold", 0.0f);
             theme->mediumVelocityThreshold_ = swiperPattern->GetAttr<double>("swiper_medium_velocity_threshold", 0.0f);
@@ -624,7 +624,6 @@ public:
 protected:
     SwiperIndicatorTheme() = default;
 
-private:
     Color color_;
     Color selectedColor_;
     Color hoverColor_;

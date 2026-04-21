@@ -142,11 +142,15 @@ private:
     void FireStartEvent() const;
     void FireBounceEvent() const;
     void FireFinishEvent() const;
+    void FireStopEvent() const;
 
     void StartMarqueeAnimation();
+    void ExecuteStopMarquee();
     void StopMarqueeAnimation(bool stopAndStart);
+    void ChangeSecondChildVisibility(bool stopAndStart);
     void UpdateTextTranslateXY(float offsetX, bool cancel = false, bool isFirstTextNode = true);
     void PropertyCancelAnimationFinish();
+    bool AnimationParamChange();
     bool OnlyPlayStatusChange();
     void ChangeAnimationPlayStatus();
     void StoreProperties();
@@ -155,7 +159,9 @@ private:
     void OnAnimationFinish();
     float CalculateStart();
     float CalculateEnd();
-    float GetTextOffset(bool getFirstChild = true);
+    float GetTextOffset();
+    float GetTextOffsetOnly();
+    std::pair<float, float> GetDoubleTextOffset();
     float GetTextNodeWidth();
     double GetScrollAmount();
     void CheckTextDirectionChange(TextDirection direction);
@@ -167,6 +173,7 @@ private:
     void UpdateTextNodeAttr(RefPtr<FrameNode>& textChild);
     float GetMarqueeSpacing();
     bool NeedSecondChild();
+    void CreateSecondChild();
     void UpdateNodeInitialPos(bool cancel = false);
     void PlayMarqueeDoubleAnimation(float startPosition, float secondStartPos, int32_t playCount,
         bool needSecondPlay, StartMarqueeAnimationType startType);
@@ -196,15 +203,19 @@ private:
     int32_t secondAnimationId_ = 0;
     std::shared_ptr<AnimationUtils::Animation> animation_;
     std::shared_ptr<AnimationUtils::Animation> secondAnimation_;
+    double lastAnimationStart_ = 0.0;
+    double lastSecondAnimationStart_ = 0.0;
     bool playStatus_ = false;
     double scrollAmount_ = DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx();
     int32_t loop_ = -1;
     MarqueeDirection direction_ = MarqueeDirection::LEFT;
+    int32_t delay_ = 0;
     TextDirection currentTextDirection_ = TextDirection::LTR;
     ACE_DISALLOW_COPY_AND_MOVE(MarqueePattern);
     int32_t lastWindowHeight_ = 0.0;
     int32_t lastWindowWidth_ = 0.0;
     float marqueeWidth_ = 0.0f;
+    bool hasStart_ = false;
     std::optional<OffsetF> lastAnimationOffset_;
     std::optional<OffsetF> secondChildLastAnimationOffset_;
     std::unordered_map<MarqueeDynamicSyncSceneType, RefPtr<FrameRateRange>> frameRateRange_ ;

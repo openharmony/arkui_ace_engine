@@ -18,6 +18,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_common_utils.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h"
 
 namespace OHOS::Ace::Framework {
 using namespace OHOS::Ace::Framework::CommonUtils;
@@ -35,63 +36,6 @@ void JsClickFunction::Execute()
 
 void JsClickFunction::Execute(const ClickInfo& info)
 {
-    JSRef<JSObject> obj = JSRef<JSObject>::New();
-    Offset globalOffset = info.GetGlobalLocation();
-    Offset localOffset = info.GetLocalLocation();
-    Offset screenOffset = info.GetScreenLocation();
-    Offset globalDisplayOffset = info.GetGlobalDisplayLocation();
-    obj->SetProperty<double>("globalDisplayX", PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetX()));
-    obj->SetProperty<double>("globalDisplayY", PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetY()));
-    obj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
-    obj->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
-    obj->SetProperty<double>("windowX", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
-    obj->SetProperty<double>("windowY", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
-    obj->SetProperty<double>("screenX", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
-    obj->SetProperty<double>("screenY", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
-    obj->SetProperty<double>("x", PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
-    obj->SetProperty<double>("y", PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
-    obj->SetProperty<double>("timestamp", static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
-    obj->SetProperty<double>("source", static_cast<int32_t>(info.GetSourceDevice()));
-    obj->SetProperty<double>("deviceId", static_cast<int32_t>(info.GetDeviceId()));
-    obj->SetPropertyObject("getModifierKeyState",
-        JSRef<JSFunc>::New<FunctionCallback>(NG::ArkTSUtils::JsGetModifierKeyState));
-    auto target = CreateEventTargetObject(info);
-    obj->SetPropertyObject("target", target);
-    obj->SetProperty<double>("pressure", info.GetForce());
-    obj->SetProperty<double>("tiltX", info.GetTiltX().value_or(0.0f));
-    obj->SetProperty<double>("tiltY", info.GetTiltY().value_or(0.0f));
-    obj->SetProperty<double>("rollAngle", info.GetRollAngle().value_or(0.0f));
-    obj->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
-    obj->SetProperty<double>("axisVertical", 0.0f);
-    obj->SetProperty<double>("axisHorizontal", 0.0f);
-    obj->SetProperty<double>("axisPinch", 0.0f);
-    obj->SetProperty<int32_t>("targetDisplayId", info.GetTargetDisplayId());
-
-    JSRef<JSVal> param = obj;
-    JsFunction::ExecuteJS(1, &param);
-}
-
-static int32_t GetOperatingHand(GestureEvent& info)
-{
-    int32_t left = 0;
-    int32_t right = 0;
-    for (const FingerInfo& fingerInfo : info.GetFingerList()) {
-        if (fingerInfo.operatingHand_ == HAND_LEFT) {
-            ++left;
-        } else if (fingerInfo.operatingHand_ == HAND_RIGHT) {
-            ++right;
-        }
-    }
-    if (left > right) {
-        return HAND_LEFT;
-    } else if (right > left) {
-        return HAND_RIGHT;
-    }
-    return HAND_NONE;
-}
-
-void JsClickFunction::Execute(GestureEvent& info)
-{
     JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
     objectTemplate->SetInternalFieldCount(1);
     JSRef<JSObject> obj = objectTemplate->NewInstance();
@@ -101,7 +45,6 @@ void JsClickFunction::Execute(GestureEvent& info)
     Offset globalDisplayOffset = info.GetGlobalDisplayLocation();
     obj->SetProperty<double>("globalDisplayX", PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetX()));
     obj->SetProperty<double>("globalDisplayY", PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetY()));
-    obj->SetProperty<int32_t>("hand", GetOperatingHand(info));
     obj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
     obj->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
     obj->SetProperty<double>("windowX", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
@@ -112,11 +55,12 @@ void JsClickFunction::Execute(GestureEvent& info)
     obj->SetProperty<double>("y", PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
     obj->SetProperty<double>("timestamp", static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
     obj->SetProperty<double>("source", static_cast<int32_t>(info.GetSourceDevice()));
-    obj->SetProperty<double>("pressure", info.GetForce());
-    obj->SetPropertyObject("preventDefault", JSRef<JSFunc>::New<FunctionCallback>(JsClickPreventDefault));
     obj->SetProperty<double>("deviceId", static_cast<int32_t>(info.GetDeviceId()));
     obj->SetPropertyObject("getModifierKeyState",
         JSRef<JSFunc>::New<FunctionCallback>(NG::ArkTSUtils::JsGetModifierKeyState));
+    auto target = CreateEventTargetObject(info);
+    obj->SetPropertyObject("target", target);
+    obj->SetProperty<double>("pressure", info.GetForce());
     obj->SetProperty<double>("tiltX", info.GetTiltX().value_or(0.0f));
     obj->SetProperty<double>("tiltY", info.GetTiltY().value_or(0.0f));
     obj->SetProperty<double>("rollAngle", info.GetRollAngle().value_or(0.0f));
@@ -125,12 +69,25 @@ void JsClickFunction::Execute(GestureEvent& info)
     obj->SetProperty<double>("axisHorizontal", 0.0f);
     obj->SetProperty<double>("axisPinch", 0.0f);
     obj->SetProperty<int32_t>("targetDisplayId", info.GetTargetDisplayId());
-    auto target = CreateEventTargetObject(info);
-    obj->SetPropertyObject("target", target);
-    obj->Wrap<GestureEvent>(&info);
-    JSRef<JSVal> param = JSRef<JSObject>::Cast(obj);
+    obj->SetPropertyObject("getCurrentLocalPosition",
+        JSRef<JSFunc>::New<FunctionCallback>(JsGetCurrentLocalPosition));
+    obj->Wrap<ClickInfo>(const_cast<ClickInfo*>(&info));
+    JSRef<JSVal> param = obj;
+    JsFunction::ExecuteJS(1, &param);
+}
+
+void JsClickFunction::Execute(EcmaVM* vm, GestureEvent& info)
+{
+    // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+    // It is not allowed to hold this address elsewhere.
+    auto infoPtr = new GestureEvent(info);
+    auto obj = NG::FrameNodeBridge::CreateGestureEventInfo(vm, infoPtr);
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "preventDefault"),
+        panda::FunctionRef::New(vm, Framework::JsClickPreventDefault));
+    JSRef<JSVal> param = JSRef<JSVal>::Make(obj);
     ACE_BENCH_MARK_TRACE("OnClickEvent_end");
     JsFunction::ExecuteJS(1, &param);
+    info.SetPreventDefault(infoPtr->IsPreventDefault());
 }
 
 JSRef<JSArray> GetPressedButtons(MouseInfo& info)
@@ -145,54 +102,18 @@ JSRef<JSArray> GetPressedButtons(MouseInfo& info)
     return pressedButtonArr;
 }
 
-void JsClickFunction::Execute(MouseInfo& info)
+void JsClickFunction::Execute(EcmaVM* vm, MouseInfo& info)
 {
-    JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
-    objectTemplate->SetInternalFieldCount(1);
-    JSRef<JSObject> obj = objectTemplate->NewInstance();
-    obj->SetProperty<int32_t>("button", static_cast<int32_t>(info.GetButton()));
-    obj->SetProperty<int32_t>("action", static_cast<int32_t>(info.GetAction()));
-    Offset globalOffset = info.GetGlobalLocation();
-    Offset localOffset = info.GetLocalLocation();
-    Offset screenOffset = info.GetScreenLocation();
-    Offset globalDisplayOffset = info.GetGlobalDisplayLocation();
-    obj->SetProperty<double>("globalDisplayX", PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetX()));
-    obj->SetProperty<double>("globalDisplayY", PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetY()));
-    obj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
-    obj->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
-    obj->SetProperty<double>("windowX", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
-    obj->SetProperty<double>("windowY", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
-    obj->SetProperty<double>("screenX", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
-    obj->SetProperty<double>("screenY", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
-    obj->SetProperty<double>("x", PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
-    obj->SetProperty<double>("y", PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
-    obj->SetProperty<double>("timestamp", static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
-    obj->SetPropertyObject(
-        "stopPropagation", JSRef<JSFunc>::New<FunctionCallback>(JsStopPropagation));
-    obj->SetProperty<double>("deviceId", static_cast<int32_t>(info.GetDeviceId()));
-    obj->SetPropertyObject("getModifierKeyState",
-        JSRef<JSFunc>::New<FunctionCallback>(NG::ArkTSUtils::JsGetModifierKeyState));
-    obj->SetProperty<double>("source", static_cast<int32_t>(info.GetSourceDevice()));
-    obj->SetProperty<double>("pressure", info.GetForce());
-    obj->SetProperty<double>("tiltX", info.GetTiltX().value_or(0.0f));
-    obj->SetProperty<double>("tiltY", info.GetTiltY().value_or(0.0f));
-    obj->SetProperty<double>("rollAngle", info.GetRollAngle().value_or(0.0f));
-    obj->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
-    obj->SetProperty<double>("axisVertical", 0.0f);
-    obj->SetProperty<double>("axisHorizontal", 0.0f);
-    obj->SetProperty<double>("axisPinch", 0.0f);
-    auto target = CreateEventTargetObject(info);
-    obj->SetPropertyObject("target", target);
-    obj->SetProperty<int32_t>("targetDisplayId", info.GetTargetDisplayId());
-    obj->SetProperty<double>("rawDeltaX", PipelineBase::Px2VpWithCurrentDensity(info.GetRawDeltaX()));
-    obj->SetProperty<double>("rawDeltaY", PipelineBase::Px2VpWithCurrentDensity(info.GetRawDeltaY()));
-    obj->SetPropertyObject("pressedButtons", GetPressedButtons(info));
-    obj->Wrap<MouseInfo>(&info);
-
-    JSRef<JSVal> param = JSRef<JSObject>::Cast(obj);
-    ACE_BENCH_MARK_TRACE("OnMouseEvent_end type:%d button:%d", static_cast<int32_t>(info.GetAction()),
-        static_cast<int32_t>(info.GetButton()));
+    // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+    // It is not allowed to hold this address elsewhere.
+    auto infoPtr = new MouseInfo(info);
+    auto obj = NG::FrameNodeBridge::CreateMouseInfo(vm, infoPtr);
+    JSRef<JSVal> param = JSRef<JSVal>::Make(obj);
+    ACE_BENCH_MARK_TRACE("OnMouseEvent_end type:%d button:%d", static_cast<int32_t>(infoPtr->GetAction()),
+        static_cast<int32_t>(infoPtr->GetButton()));
     JsFunction::ExecuteJS(1, &param);
+    info.SetStopPropagation(infoPtr->IsStopPropagation());
+    info.SetPreventDefault(infoPtr->IsPreventDefault());
 }
 
 void JsWeakClickFunction::Execute()
@@ -208,7 +129,9 @@ void JsWeakClickFunction::Execute()
 
 void JsWeakClickFunction::Execute(const ClickInfo& info)
 {
-    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+    objectTemplate->SetInternalFieldCount(1);
+    JSRef<JSObject> obj = objectTemplate->NewInstance();
     Offset globalOffset = info.GetGlobalLocation();
     Offset localOffset = info.GetLocalLocation();
     Offset screenOffset = info.GetScreenLocation();
@@ -238,6 +161,9 @@ void JsWeakClickFunction::Execute(const ClickInfo& info)
     obj->SetProperty<double>("axisVertical", 0.0f);
     obj->SetProperty<double>("axisHorizontal", 0.0f);
     obj->SetProperty<double>("axisPinch", 0.0f);
+    obj->SetPropertyObject("getCurrentLocalPosition",
+        JSRef<JSFunc>::New<FunctionCallback>(JsGetCurrentLocalPosition));
+    obj->Wrap<ClickInfo>(const_cast<ClickInfo*>(&info));
 
     JSRef<JSVal> param = obj;
     JsWeakFunction::ExecuteJS(1, &param);
@@ -276,6 +202,8 @@ void JsWeakClickFunction::Execute(GestureEvent& info)
     obj->SetProperty<double>("axisVertical", 0.0f);
     obj->SetProperty<double>("axisHorizontal", 0.0f);
     obj->SetProperty<double>("axisPinch", 0.0f);
+    obj->SetPropertyObject("getCurrentLocalPosition",
+        JSRef<JSFunc>::New<FunctionCallback>(JsGetCurrentLocalPosition));
     auto target = CreateEventTargetObject(info);
     obj->SetPropertyObject("target", target);
     obj->Wrap<GestureEvent>(&info);
@@ -319,12 +247,15 @@ void JsWeakClickFunction::Execute(MouseInfo& info)
     obj->SetProperty<double>("axisVertical", 0.0f);
     obj->SetProperty<double>("axisHorizontal", 0.0f);
     obj->SetProperty<double>("axisPinch", 0.0f);
+    obj->SetPropertyObject("getCurrentLocalPosition",
+        JSRef<JSFunc>::New<FunctionCallback>(JsGetCurrentLocalPosition));
     auto target = CreateEventTargetObject(info);
     obj->SetPropertyObject("target", target);
     obj->SetProperty<int32_t>("targetDisplayId", info.GetTargetDisplayId());
     obj->SetProperty<double>("rawDeltaX", PipelineBase::Px2VpWithCurrentDensity(info.GetRawDeltaX()));
     obj->SetProperty<double>("rawDeltaY", PipelineBase::Px2VpWithCurrentDensity(info.GetRawDeltaY()));
     obj->SetPropertyObject("pressedButtons", GetPressedButtons(info));
+    obj->SetPropertyObject("getHistoricalPoints", JSRef<JSFunc>::New<FunctionCallback>(JsGetMouseHistoricalPoints));
     obj->Wrap<MouseInfo>(&info);
 
     JSRef<JSVal> param = JSRef<JSObject>::Cast(obj);

@@ -17,6 +17,8 @@
 
 #include "jsnapi_expo.h"
 
+#include <string>
+#include <cmath>
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -28,9 +30,9 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_xcomponent_bridge.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
-#include "core/common/event_info_manager.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/event/focus_axis_event.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node_pattern.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
@@ -38,6 +40,7 @@
 #include "core/components_ng/syntax/node_content.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/extension_custom_node.h"
+#include "frameworks/bridge/declarative_frontend/engine/js_types.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -51,6 +54,7 @@ constexpr int32_t INDEX_OF_OPTION_OF_VISIBLE = 3;
 constexpr int32_t INDEX_OF_FRAME_NODE_POINT = 3;
 constexpr int DEFAULT_EXPECTED_UPDATE_INTERVAL = 1000;
 constexpr int32_t SIZE_OF_ARRAY = 2;
+constexpr int32_t NUM_2 = 2;
 
 bool ParseFloatArray(const EcmaVM* vm, const panda::Local<panda::ArrayRef>& array, std::vector<float>& outArray)
 {
@@ -246,6 +250,8 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateTouchInfo(
         panda::NumberRef::New(vm, globalDisplayOffset.GetX() / density),
         panda::NumberRef::New(vm, globalDisplayOffset.GetY() / density) };
     auto touchInfoObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+    touchInfoObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getCurrentLocalPosition"),
+        panda::FunctionRef::New(vm, Framework::JsGetCurrentLocalPosition));
     touchInfoObj->SetNativePointerFieldCount(vm, 1);
     touchInfoObj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
     return touchInfoObj;
@@ -274,7 +280,7 @@ ArkUINativeModuleValue FrameNodeBridge::CreateFrameNode(ArkUIRuntimeCallInfo* ru
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto node = NG::CustomFrameNode::GetOrCreateCustomFrameNode(nodeId);
+    auto node = NG::CustomFrameNode::GetOrCreateCustomFrameNode(nodeId); // FrameNode
     node->SetExclusiveEventForChild(true);
     node->SetIsArkTsFrameNode(true);
     auto renderContext = node->GetRenderContext();
@@ -572,7 +578,7 @@ ArkUINativeModuleValue FrameNodeBridge::AdoptChild(ArkUIRuntimeCallInfo* runtime
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     CHECK_NULL_RETURN(!secondArg.IsNull(), defaultReturnValue);
     auto childNode = nodePtr(secondArg->ToNativePointer(vm)->Value());
-    auto result = GetArkUINodeModifiers()->getNDKRenderNodeModifier()->adoptChild(parentNode, childNode);
+    auto result = GetArkUINodeModifiers()->getNDKRenderNodeModifier()->adoptChild(parentNode, childNode, nullptr);
     return panda::NumberRef::New(vm, result);
 }
 
@@ -587,7 +593,8 @@ ArkUINativeModuleValue FrameNodeBridge::RemoveAdoptedChild(ArkUIRuntimeCallInfo*
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     CHECK_NULL_RETURN(!secondArg.IsNull(), defaultReturnValue);
     auto childNode = nodePtr(secondArg->ToNativePointer(vm)->Value());
-    auto result = GetArkUINodeModifiers()->getNDKRenderNodeModifier()->removeAdoptedChild(parentNode, childNode);
+    auto result =
+        GetArkUINodeModifiers()->getNDKRenderNodeModifier()->removeAdoptedChild(parentNode, childNode, nullptr);
     return panda::NumberRef::New(vm, result);
 }
 
@@ -662,7 +669,7 @@ ArkUINativeModuleValue FrameNodeBridge::ConvertPositionToWindow(ArkUIRuntimeCall
 
     ArkUI_Float32 targetNodePositionOffset[2];
     auto result = GetArkUINodeModifiers()->getFrameNodeModifier()->convertPositionToWindow(
-        nativeNode, &position, &targetNodePositionOffset, true);
+        nativeNode, &position, &targetNodePositionOffset, true, nullptr);
     if (result != ERROR_CODE_NO_ERROR) {
         Framework::ArrayRef::SetValueAt(vm, valueArray, 0, panda::NumberRef::New(vm, 0));
         return valueArray;
@@ -673,6 +680,81 @@ ArkUINativeModuleValue FrameNodeBridge::ConvertPositionToWindow(ArkUIRuntimeCall
     Framework::ArrayRef::SetValueAt(
         vm, valueArray, 2, panda::NumberRef::New(vm, targetNodePositionOffset[1])); // 2: index
     return valueArray;
+}
+
+ArkUINativeModuleValue FrameNodeBridge::CreateFrameNodes(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> countArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!countArg->IsNumber()) {
+        return panda::ArrayRef::New(vm, 0);
+    }
+    int32_t count = static_cast<int32_t>(countArg->ToNumber(vm)->Value());
+    if (count <= 0) {
+        return panda::ArrayRef::New(vm, 0);
+    }
+    auto resultArray = panda::ArrayRef::New(vm, static_cast<uint32_t>(count));
+    for (int32_t i = 0; i < count; i++) {
+        auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        auto node = NG::CustomFrameNode::GetOrCreateCustomFrameNode(nodeId);
+        node->SetExclusiveEventForChild(true);
+        node->SetIsArkTsFrameNode(true);
+        auto renderContext = node->GetRenderContext();
+        if (renderContext) {
+            renderContext->SetNeedDebugBoundary(true);
+        }
+        FrameNodeBridge::SetDrawFunc(node, runtimeCallInfo);
+        FrameNodeBridge::SetCustomFunc(node, runtimeCallInfo);
+        const char* keys[] = { "nodeId", "nativeStrongRef", "rawPtr_" };
+        int64_t rawPtr = reinterpret_cast<int64_t>(node.GetRawPtr());
+        Local<JSValueRef> values[] = { panda::NumberRef::New(vm, nodeId), NativeUtilsBridge::CreateStrongRef(vm, node),
+            panda::NumberRef::New(vm, rawPtr) };
+        auto resultObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+        panda::ArrayRef::SetValueAt(vm, resultArray, static_cast<uint32_t>(i), resultObj);
+    }
+    return resultArray;
+}
+
+ArkUINativeModuleValue FrameNodeBridge::GetFrameNodeById(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    if (!secondArg->IsString(vm)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto id = secondArg->ToString(vm)->ToString(vm);
+    auto targetNode = frameNode->GetFrameNodeByIdInSubTree(id);
+    CHECK_NULL_RETURN(targetNode, panda::JSValueRef::Undefined(vm));
+    return FrameNodeBridge::MakeFrameNodeInfo(
+        vm, reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(targetNode)));
+}
+
+ArkUINativeModuleValue FrameNodeBridge::GetFrameNodeByUniqueId(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    if (!secondArg->IsNumber()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    if (std::isinf(secondArg->ToNumber(vm)->Value()) == true || std::isnan(secondArg->ToNumber(vm)->Value()) == true) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto uniqueId = static_cast<int32_t>(secondArg->ToNumber(vm)->Value());
+    auto targetNode = frameNode->GetFrameNodeByUniqueIdInSubTree(uniqueId);
+    CHECK_NULL_RETURN(targetNode, panda::JSValueRef::Undefined(vm));
+    return FrameNodeBridge::MakeFrameNodeInfo(
+        vm, reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(targetNode)));
 }
 
 ArkUINativeModuleValue FrameNodeBridge::ConvertPositionFromWindow(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -699,7 +781,7 @@ ArkUINativeModuleValue FrameNodeBridge::ConvertPositionFromWindow(ArkUIRuntimeCa
 
     ArkUI_Float32 targetNodePositionOffset[2];
     auto result = GetArkUINodeModifiers()->getFrameNodeModifier()->convertPositionFromWindow(
-        nativeNode, &position, &targetNodePositionOffset, true);
+        nativeNode, &position, &targetNodePositionOffset, true, nullptr);
     if (result != ERROR_CODE_NO_ERROR) {
         Framework::ArrayRef::SetValueAt(vm, valueArray, 0, panda::NumberRef::New(vm, 0));
         return valueArray;
@@ -710,6 +792,30 @@ ArkUINativeModuleValue FrameNodeBridge::ConvertPositionFromWindow(ArkUIRuntimeCa
     Framework::ArrayRef::SetValueAt(
         vm, valueArray, 2, panda::NumberRef::New(vm, targetNodePositionOffset[1])); // 2: index
     return valueArray;
+}
+
+ArkUINativeModuleValue FrameNodeBridge::GetCommonViewParentId(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NumberRef::New(vm, -1));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::NumberRef::New(vm, -1));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::NumberRef::New(vm, -1));
+    auto result = GetArkUINodeModifiers()->getFrameNodeModifier()->getCommonViewParentId(nativeNode);
+    return panda::NumberRef::New(vm, result);
+}
+
+ArkUINativeModuleValue FrameNodeBridge::CreateNativeStrongRefWithPtrVal(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsNumber()) {
+        return panda::NativePointerRef::New(vm, nullptr);
+    }
+    int64_t ptr = firstArg->ToNumber(vm)->Value();
+    auto nodePtr = AceType::Claim(reinterpret_cast<AceType*>(ptr));
+    return NativeUtilsBridge::CreateStrongRef(vm, nodePtr);
 }
 
 void FrameNodeBridge::SetDrawFunc(const RefPtr<FrameNode>& frameNode, ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -856,7 +962,7 @@ ArkUINativeModuleValue FrameNodeBridge::GetFirstChildIndexWithoutExpand(ArkUIRun
     CHECK_NULL_RETURN(!firstArg.IsNull(), panda::NumberRef::New(vm, -1));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     uint32_t index = -1;
-    GetArkUINodeModifiers()->getFrameNodeModifier()->getFirstChildIndexWithoutExpand(nativeNode, &index);
+    GetArkUINodeModifiers()->getFrameNodeModifier()->getFirstChildIndexWithoutExpand(nativeNode, &index, nullptr);
     return panda::NumberRef::New(vm, index);
 }
 
@@ -867,7 +973,7 @@ ArkUINativeModuleValue FrameNodeBridge::GetLastChildIndexWithoutExpand(ArkUIRunt
     CHECK_NULL_RETURN(!firstArg.IsNull(), panda::NumberRef::New(vm, -1));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     uint32_t index = -1;
-    GetArkUINodeModifiers()->getFrameNodeModifier()->getLastChildIndexWithoutExpand(nativeNode, &index);
+    GetArkUINodeModifiers()->getFrameNodeModifier()->getLastChildIndexWithoutExpand(nativeNode, &index, nullptr);
     return panda::NumberRef::New(vm, index);
 }
 
@@ -932,7 +1038,7 @@ ArkUINativeModuleValue FrameNodeBridge::MoveTo(ArkUIRuntimeCallInfo* runtimeCall
     auto targetNativeNode = nodePtr(secondArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(2); // 2 : index of child node position
     int index = thirdArg->ToNumber(vm)->Value();
-    GetArkUINodeModifiers()->getFrameNodeModifier()->moveNodeTo(nativeNode, targetNativeNode, index);
+    GetArkUINodeModifiers()->getFrameNodeModifier()->moveNodeTo(nativeNode, targetNativeNode, index, nullptr);
     return panda::NumberRef::New(vm, ERROR_CODE_NO_ERROR);
 }
 ArkUINativeModuleValue FrameNodeBridge::GetIdByNodePtr(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -972,64 +1078,50 @@ static int32_t GetOperatingHand(GestureEvent& info)
     return HAND_NONE;
 }
 
-RefPtr<EventInfoManager> FrameNodeBridge::GetEventInfoManager(const WeakPtr<FrameNode>& node)
-{
-    auto frameNode = node.Upgrade();
-    if (!frameNode) {
-        TAG_LOGW(AceLogTag::ACE_UIEVENT, "node is null");
-        return nullptr;
-    }
-    auto pipeline = frameNode->GetContext();
-    if (pipeline == nullptr) {
-        TAG_LOGW(AceLogTag::ACE_UIEVENT, "pipeline is null");
-        return nullptr;
-    }
-    auto eventManager = pipeline->GetEventManager();
-    if (eventManager == nullptr) {
-        TAG_LOGW(AceLogTag::ACE_UIEVENT, "eventManager is null");
-        return nullptr;
-    }
-    return eventManager->GetEventInfoManager();
-}
-
 void FrameNodeBridge::ReleaseNativePtrFunc(void* env, void* nativePtr, void* data)
 {
-    TAG_LOGI(AceLogTag::ACE_UIEVENT, "release nativePtr func called");
-    auto nativeEventInfo = static_cast<ArkUINativeEventInfo*>(data);
-    if (nativeEventInfo == nullptr) {
-        TAG_LOGW(AceLogTag::ACE_UIEVENT, "nativeEventInfo is null");
-        return;
-    }
-    auto eventInfoManager = GetEventInfoManager(nativeEventInfo->frameNode_);
-    if (eventInfoManager == nullptr) {
-        TAG_LOGW(AceLogTag::ACE_UIEVENT, "eventInfoManager is null");
-        return;
-    }
-    int32_t eventId = -1;
-
-    switch (nativeEventInfo->tag_) {
+    NativePtrTag tag = static_cast<NativePtrTag>(reinterpret_cast<intptr_t>(data));
+    switch (tag) {
         case NATIVE_PTR_TAG_AXIS_INFO: {
             auto* axisEvent = static_cast<AxisInfo*>(nativePtr);
             CHECK_NULL_VOID(axisEvent);
-            eventId = axisEvent->GetEventId();
-            eventInfoManager->RemoveAxisInfo(eventId);
-            TAG_LOGI(AceLogTag::ACE_UIEVENT, "Remove AxisInfo: %{public}d", eventId);
+            delete axisEvent;
             break;
         }
         case NATIVE_PTR_TAG_MOUSE_INFO: {
             auto* mouseInfo = static_cast<MouseInfo*>(nativePtr);
             CHECK_NULL_VOID(mouseInfo);
-            eventId = mouseInfo->GetEventId();
-            eventInfoManager->RemoveMouseInfo(eventId);
-            TAG_LOGI(AceLogTag::ACE_UIEVENT, "Remove MouseInfo: %{public}d", eventId);
+            delete mouseInfo;
             break;
         }
         case NATIVE_PTR_TAG_TOUCH_EVENT_INFO: {
             auto* touchEventInfo = static_cast<TouchEventInfo*>(nativePtr);
             CHECK_NULL_VOID(touchEventInfo);
-            eventId = touchEventInfo->GetEventId();
-            eventInfoManager->RemoveTouchEventInfo(eventId);
-            TAG_LOGI(AceLogTag::ACE_UIEVENT, "Remove TouchEventInfo: %{public}d", eventId);
+            delete touchEventInfo;
+            break;
+        }
+        case NATIVE_PTR_TAG_GESTURE_EVENT: {
+            auto* gestureEvent = static_cast<GestureEvent*>(nativePtr);
+            CHECK_NULL_VOID(gestureEvent);
+            delete gestureEvent;
+            break;
+        }
+        case NATIVE_PTR_TAG_HOVER_INFO: {
+            auto* hoverInfo = static_cast<HoverInfo*>(nativePtr);
+            CHECK_NULL_VOID(hoverInfo);
+            delete hoverInfo;
+            break;
+        }
+        case NATIVE_PTR_TAG_FOCUS_AXIS_EVENT_INFO: {
+            auto* focusAxisEventInfo = static_cast<FocusAxisEventInfo*>(nativePtr);
+            CHECK_NULL_VOID(focusAxisEventInfo);
+            delete focusAxisEventInfo;
+            break;
+        }
+        case NATIVE_PTR_TAG_KEY_EVENT_INFO: {
+            auto* keyEventInfo = static_cast<KeyEventInfo*>(nativePtr);
+            CHECK_NULL_VOID(keyEventInfo);
+            delete keyEventInfo;
             break;
         }
         default: {
@@ -1037,19 +1129,18 @@ void FrameNodeBridge::ReleaseNativePtrFunc(void* env, void* nativePtr, void* dat
             return;
         }
     }
-    nativeEventInfo->DecRefCount();
-    TAG_LOGI(AceLogTag::ACE_UIEVENT, "nativePtr released");
 }
 
-Local<panda::ObjectRef> FrameNodeBridge::CreateGestureEventInfo(EcmaVM* vm, GestureEvent& info)
+Local<panda::ObjectRef> FrameNodeBridge::CreateGestureEventInfo(EcmaVM* vm, GestureEvent* infoPtr)
 {
-    const Offset& globalOffset = info.GetGlobalLocation();
-    const Offset& localOffset = info.GetLocalLocation();
-    const Offset& screenOffset = info.GetScreenLocation();
+    CHECK_NULL_RETURN(infoPtr, panda::ObjectRef::New(vm));
+    const Offset& globalOffset = infoPtr->GetGlobalLocation();
+    const Offset& localOffset = infoPtr->GetLocalLocation();
+    const Offset& screenOffset = infoPtr->GetScreenLocation();
     double density = PipelineBase::GetCurrentDensity();
-    const Offset& globalDisplayOffset = info.GetGlobalDisplayLocation();
+    const Offset& globalDisplayOffset = infoPtr->GetGlobalDisplayLocation();
     const char* keys[] = { "displayX", "displayY", "windowX", "windowY", "screenX", "screenY", "x", "y", "timestamp",
-        "source", "pressure", "deviceId", "hand", "globalDisplayX", "globalDisplayY" };
+        "source", "pressure", "deviceId", "hand", "globalDisplayX", "globalDisplayY", "getCurrentLocalPosition" };
     Local<JSValueRef> values[] = { panda::NumberRef::New(vm, screenOffset.GetX() / density),
         panda::NumberRef::New(vm, screenOffset.GetY() / density),
         panda::NumberRef::New(vm, globalOffset.GetX() / density),
@@ -1058,37 +1149,37 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateGestureEventInfo(EcmaVM* vm, Gest
         panda::NumberRef::New(vm, globalOffset.GetY() / density),
         panda::NumberRef::New(vm, localOffset.GetX() / density),
         panda::NumberRef::New(vm, localOffset.GetY() / density),
-        panda::NumberRef::New(vm, static_cast<double>(info.GetTimeStamp().time_since_epoch().count())),
-        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetSourceDevice())),
-        panda::NumberRef::New(vm, info.GetForce()),
-        panda::NumberRef::New(vm, info.GetDeviceId()),
-        panda::NumberRef::New(vm, GetOperatingHand(info)),
+        panda::NumberRef::New(vm, static_cast<double>(infoPtr->GetTimeStamp().time_since_epoch().count())),
+        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetSourceDevice())),
+        panda::NumberRef::New(vm, infoPtr->GetForce()), panda::NumberRef::New(vm, infoPtr->GetDeviceId()),
+        panda::NumberRef::New(vm, GetOperatingHand(*infoPtr)),
         panda::NumberRef::New(vm, globalDisplayOffset.GetX() / density),
-        panda::NumberRef::New(vm, globalDisplayOffset.GetY() / density) };
+        panda::NumberRef::New(vm, globalDisplayOffset.GetY() / density),
+        panda::FunctionRef::New(vm, Framework::JsGetCurrentLocalPosition) };
     auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
-    obj->Set(
-        vm, panda::StringRef::NewFromUtf8(vm, "targetDisplayId"), panda::NumberRef::New(vm, info.GetTargetDisplayId()));
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "targetDisplayId"),
+        panda::NumberRef::New(vm, infoPtr->GetTargetDisplayId()));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltX"),
-        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltX().value_or(0.0f))));
+        panda::NumberRef::New(vm, infoPtr->GetTiltX().value_or(0.0f)));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltY"),
-        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltY().value_or(0.0f))));
+        panda::NumberRef::New(vm, infoPtr->GetTiltY().value_or(0.0f)));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "rollAngle"),
-        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetRollAngle().value_or(0.0f))));
+        panda::NumberRef::New(vm, infoPtr->GetRollAngle().value_or(0.0f)));
     obj->Set(
         vm, panda::StringRef::NewFromUtf8(vm, "axisVertical"), panda::NumberRef::New(vm, static_cast<int32_t>(0.0f)));
     obj->Set(
         vm, panda::StringRef::NewFromUtf8(vm, "axisHorizontal"), panda::NumberRef::New(vm, static_cast<int32_t>(0.0f)));
-    obj->Set(
-        vm, panda::StringRef::NewFromUtf8(vm, "axisPinch"), panda::NumberRef::New(vm, static_cast<int32_t>(0.0f)));
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "axisPinch"), panda::NumberRef::New(vm, static_cast<int32_t>(0.0f)));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sourceTool"),
-        panda::NumberRef::New(vm, static_cast<int32_t>(static_cast<int32_t>(info.GetSourceTool()))));
-    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "target"), CreateEventTargetObject(vm, info));
+        panda::NumberRef::New(vm, static_cast<int32_t>(static_cast<int32_t>(infoPtr->GetSourceTool()))));
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "target"), CreateEventTargetObject(vm, *infoPtr));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getModifierKeyState"),
         panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "preventDefault"),
         panda::FunctionRef::New(vm, Framework::JsTouchPreventDefault));
     obj->SetNativePointerFieldCount(vm, 1);
-    obj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
+    obj->SetNativePointerField(
+        vm, 0, static_cast<void*>(infoPtr), ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_GESTURE_EVENT);
     return obj;
 }
 
@@ -1121,9 +1212,13 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnClick(ArkUIRuntimeCallInfo* runtime
         CHECK_NULL_VOID(!function.IsEmpty());
         CHECK_NULL_VOID(function->IsFunction(vm));
         PipelineContext::SetCallBackNode(node);
-        auto obj = CreateGestureEventInfo(vm, info);
+        // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+        // It is not allowed to hold this address elsewhere.
+        auto infoPtr = new GestureEvent(info);
+        auto obj = CreateGestureEventInfo(vm, infoPtr);
         panda::Local<panda::JSValueRef> params[1] = { obj };
         function->Call(vm, function.ToLocal(), params, 1);
+        info.SetPreventDefault(infoPtr->IsPreventDefault());
     };
     NG::ViewAbstract::SetFrameNodeCommonOnClick(frameNode, std::move(onClick));
     return panda::JSValueRef::Undefined(vm);
@@ -1139,18 +1234,17 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateTouchEventInfoObj(EcmaVM* vm, Tou
     return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
 }
 
-Local<panda::ObjectRef> FrameNodeBridge::CreateTouchEventInfo(
-    EcmaVM* vm, std::shared_ptr<TouchEventInfo> infoPtr, const WeakPtr<FrameNode>& node)
+Local<panda::ObjectRef> FrameNodeBridge::CreateTouchEventInfo(EcmaVM* vm, TouchEventInfo* infoPtr)
 {
     CHECK_NULL_RETURN(infoPtr, panda::ObjectRef::New(vm));
     panda::JsiFastNativeScope fastNativeScope(vm);
     auto eventObj = CreateTouchEventInfoObj(vm, *infoPtr);
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltX"),
-        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetTiltX().value_or(0.0f))));
+        panda::NumberRef::New(vm, infoPtr->GetTiltX().value_or(0.0f)));
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltY"),
-        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetTiltY().value_or(0.0f))));
+        panda::NumberRef::New(vm, infoPtr->GetTiltY().value_or(0.0f)));
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "rollAngle"),
-        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetRollAngle().value_or(0.0f))));
+        panda::NumberRef::New(vm, infoPtr->GetRollAngle().value_or(0.0f)));
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sourceTool"),
         panda::NumberRef::New(vm, static_cast<int32_t>(static_cast<int32_t>(infoPtr->GetSourceTool()))));
     auto touchArr = panda::ArrayRef::New(vm);
@@ -1187,19 +1281,13 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateTouchEventInfo(
         panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState));
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "targetDisplayId"),
         panda::NumberRef::New(vm, infoPtr->GetTargetDisplayId()));
-    auto eventInfoManager = GetEventInfoManager(node);
-    if (eventInfoManager == nullptr) {
-        eventObj->SetNativePointerFieldCount(vm, 1);
-        eventObj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr.get()));
-        return eventObj;
-    }
-    auto eventId = eventInfoManager->AddTouchEventInfo(infoPtr);
-    TAG_LOGI(AceLogTag::ACE_UIEVENT, "Add TouchEventInfo: %{public}d", eventId);
-    auto nativeEventInfo = AceType::MakeRefPtr<ArkUINativeEventInfo>(NATIVE_PTR_TAG_TOUCH_EVENT_INFO, node);
-    nativeEventInfo->IncRefCount();
+    eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "eventHandleId"),
+        panda::NumberRef::New(vm, infoPtr->GetEventHandleId()));
+    eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getCurrentLocalPosition"),
+        panda::FunctionRef::New(vm, Framework::JsGetCurrentLocalPosition));
     eventObj->SetNativePointerFieldCount(vm, 1);
-    eventObj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr.get()), ReleaseNativePtrFunc,
-        static_cast<void*>(nativeEventInfo.GetRawPtr()));
+    eventObj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc,
+        (void*)NATIVE_PTR_TAG_TOUCH_EVENT_INFO);
     return eventObj;
 }
 
@@ -1231,8 +1319,10 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnTouch(ArkUIRuntimeCallInfo* runtime
         CHECK_NULL_VOID(!function.IsEmpty());
         CHECK_NULL_VOID(function->IsFunction(vm));
         PipelineContext::SetCallBackNode(node);
-        auto infoPtr = std::make_shared<TouchEventInfo>(info);
-        auto eventObj = CreateTouchEventInfo(vm, infoPtr, node);
+        // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+        // It is not allowed to hold this address elsewhere.
+        auto infoPtr = new TouchEventInfo(info);
+        auto eventObj = CreateTouchEventInfo(vm, infoPtr);
         panda::Local<panda::JSValueRef> params[1] = { eventObj };
         function->Call(vm, function.ToLocal(), params, 1);
         info.SetStopPropagation(infoPtr->IsStopPropagation());
@@ -1310,25 +1400,30 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnDisappear(ArkUIRuntimeCallInfo* run
     return panda::JSValueRef::Undefined(vm);
 }
 
-Local<panda::ObjectRef> FrameNodeBridge::CreateKeyEventInfoObj(EcmaVM* vm, KeyEventInfo& info)
+Local<panda::ObjectRef> FrameNodeBridge::CreateKeyEventInfoObj(EcmaVM* vm, KeyEventInfo* infoPtr)
 {
+    CHECK_NULL_RETURN(infoPtr, panda::ObjectRef::New(vm));
     const char* keys[] = { "type", "keyCode", "keyText", "keySource", "deviceId", "metaKey", "unicode",
         "timestamp", "stopPropagation", "getModifierKeyState", "intentionCode", "isNumLockOn", "isCapsLockOn",
         "isScrollLockOn" };
-    Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyType())),
-        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyCode())),
-        panda::StringRef::NewFromUtf8(vm, info.GetKeyText().c_str()),
-        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeySource())),
-        panda::NumberRef::New(vm, info.GetDeviceId()), panda::NumberRef::New(vm, info.GetMetaKey()),
-        panda::NumberRef::New(vm, info.GetUnicode()),
-        panda::NumberRef::New(vm, static_cast<double>(info.GetTimeStamp().time_since_epoch().count())),
+    Local<JSValueRef> values[] = { panda::NumberRef::New(vm, infoPtr->GetJsKeyType()),
+        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetKeyCode())),
+        panda::StringRef::NewFromUtf8(vm, infoPtr->GetKeyText().c_str()),
+        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetKeySource())),
+        panda::NumberRef::New(vm, infoPtr->GetDeviceId()), panda::NumberRef::New(vm, infoPtr->GetMetaKey()),
+        panda::NumberRef::New(vm, infoPtr->GetUnicode()),
+        panda::NumberRef::New(vm, static_cast<double>(infoPtr->GetTimeStamp().time_since_epoch().count())),
         panda::FunctionRef::New(vm, Framework::JsStopPropagation),
         panda::FunctionRef::New(vm, NG::ArkTSUtils::JsGetModifierKeyState),
-        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyIntention())),
-        panda::BooleanRef::New(vm, info.GetNumLock()),
-        panda::BooleanRef::New(vm, info.GetCapsLock()),
-        panda::BooleanRef::New(vm, info.GetScrollLock()) };
-    return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetKeyIntention())),
+        panda::BooleanRef::New(vm, infoPtr->GetNumLock()),
+        panda::BooleanRef::New(vm, infoPtr->GetCapsLock()),
+        panda::BooleanRef::New(vm, infoPtr->GetScrollLock()) };
+    auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+    obj->SetNativePointerFieldCount(vm, 1);
+    obj->SetNativePointerField(
+        vm, 0, static_cast<void*>(infoPtr), ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_KEY_EVENT_INFO);
+    return obj;
 }
 
 ArkUINativeModuleValue FrameNodeBridge::SetOnKeyEvent(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -1359,11 +1454,13 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnKeyEvent(ArkUIRuntimeCallInfo* runt
         CHECK_NULL_VOID(!function.IsEmpty());
         CHECK_NULL_VOID(function->IsFunction(vm));
         PipelineContext::SetCallBackNode(node);
-        auto obj = CreateKeyEventInfoObj(vm, info);
-        obj->SetNativePointerFieldCount(vm, 1);
-        obj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
+        // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+        // It is not allowed to hold this address elsewhere.
+        auto infoPtr = new KeyEventInfo(info);
+        auto obj = CreateKeyEventInfoObj(vm, infoPtr);
         panda::Local<panda::JSValueRef> params[] = { obj };
         function->Call(vm, function.ToLocal(), params, 1);
+        info.SetStopPropagation(infoPtr->IsStopPropagation());
     };
 
     NG::ViewAbstract::SetJSFrameNodeOnKeyCallback(frameNode, std::move(onKeyEvent));
@@ -1438,21 +1535,22 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnBlur(ArkUIRuntimeCallInfo* runtimeC
     return panda::JSValueRef::Undefined(vm);
 }
 
-Local<panda::ObjectRef> FrameNodeBridge::CreateHoverInfo(EcmaVM* vm, HoverInfo& hoverInfo)
+Local<panda::ObjectRef> FrameNodeBridge::CreateHoverInfo(EcmaVM* vm, HoverInfo* infoPtr)
 {
+    CHECK_NULL_RETURN(infoPtr, panda::ObjectRef::New(vm));
     const char* keys[] = { "stopPropagation", "getModifierKeyState", "timestamp", "source", "target", "deviceId",
         "displayX", "displayY", "windowX", "windowY", "x", "y", "globalDisplayX", "globalDisplayY", };
     double density = PipelineBase::GetCurrentDensity();
-    const Offset& globalOffset = hoverInfo.GetGlobalLocation();
-    const Offset& localOffset = hoverInfo.GetLocalLocation();
-    const Offset& screenOffset = hoverInfo.GetScreenLocation();
-    const Offset& globalDisplayOffset = hoverInfo.GetGlobalDisplayLocation();
+    const Offset& globalOffset = infoPtr->GetGlobalLocation();
+    const Offset& localOffset = infoPtr->GetLocalLocation();
+    const Offset& screenOffset = infoPtr->GetScreenLocation();
+    const Offset& globalDisplayOffset = infoPtr->GetGlobalDisplayLocation();
     Local<JSValueRef> values[] = { panda::FunctionRef::New(vm, Framework::JsStopPropagation),
         panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState),
-        panda::NumberRef::New(vm, static_cast<double>(hoverInfo.GetTimeStamp().time_since_epoch().count())),
-        panda::NumberRef::New(vm, static_cast<int32_t>(hoverInfo.GetSourceDevice())),
-        CreateEventTargetObject(vm, hoverInfo),
-        panda::NumberRef::New(vm, static_cast<int32_t>(hoverInfo.GetDeviceId())),
+        panda::NumberRef::New(vm, static_cast<double>(infoPtr->GetTimeStamp().time_since_epoch().count())),
+        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetSourceDevice())),
+        CreateEventTargetObject(vm, *infoPtr),
+        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetDeviceId())),
         panda::NumberRef::New(vm, density != 0 ? screenOffset.GetX() / density : 0),
         panda::NumberRef::New(vm, density != 0 ? screenOffset.GetY() / density : 0),
         panda::NumberRef::New(vm, density != 0 ? globalOffset.GetX() / density : 0),
@@ -1463,7 +1561,10 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateHoverInfo(EcmaVM* vm, HoverInfo& 
         panda::NumberRef::New(vm, density != 0 ? globalDisplayOffset.GetY() / density : 0) };
     auto eventObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "rollAngle"),
-        panda::NumberRef::New(vm, static_cast<int32_t>(hoverInfo.GetRollAngle().value_or(0.0f))));
+        panda::NumberRef::New(vm, infoPtr->GetRollAngle().value_or(0.0f)));
+    eventObj->SetNativePointerFieldCount(vm, 1);
+    eventObj->SetNativePointerField(
+        vm, 0, static_cast<void*>(infoPtr), ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_HOVER_INFO);
     return eventObj;
 }
 
@@ -1496,11 +1597,13 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnHover(ArkUIRuntimeCallInfo* runtime
         CHECK_NULL_VOID(function->IsFunction(vm));
         PipelineContext::SetCallBackNode(node);
         auto isHoverParam = panda::BooleanRef::New(vm, isHover);
-        auto obj = CreateHoverInfo(vm, hoverInfo);
-        obj->SetNativePointerFieldCount(vm, 1);
-        obj->SetNativePointerField(vm, 0, static_cast<void*>(&hoverInfo));
+        // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+        // It is not allowed to hold this address elsewhere.
+        auto infoPtr = new HoverInfo(hoverInfo);
+        auto obj = CreateHoverInfo(vm, infoPtr);
         panda::Local<panda::JSValueRef> params[] = { isHoverParam, obj };
         function->Call(vm, function.ToLocal(), params, ArraySize(params));
+        hoverInfo.SetStopPropagation(infoPtr->IsStopPropagation());
     };
     NG::ViewAbstract::SetFrameNodeCommonOnHover(frameNode, std::move(onHover));
     return panda::JSValueRef::Undefined(vm);
@@ -1534,11 +1637,13 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnHoverMove(ArkUIRuntimeCallInfo* run
         CHECK_NULL_VOID(!function.IsEmpty());
         CHECK_NULL_VOID(function->IsFunction(vm));
         PipelineContext::SetCallBackNode(node);
-        auto obj = CreateHoverInfo(vm, hoverInfo);
-        obj->SetNativePointerFieldCount(vm, 1);
-        obj->SetNativePointerField(vm, 0, static_cast<void*>(&hoverInfo));
+        // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+        // It is not allowed to hold this address elsewhere.
+        auto infoPtr = new HoverInfo(hoverInfo);
+        auto obj = CreateHoverInfo(vm, infoPtr);
         panda::Local<panda::JSValueRef> params[] = { obj };
         function->Call(vm, function.ToLocal(), params, ArraySize(params));
+        hoverInfo.SetStopPropagation(infoPtr->IsStopPropagation());
     };
     NG::ViewAbstract::SetFrameNodeCommonOnHoverMove(frameNode, std::move(onHoverMove));
     return panda::JSValueRef::Undefined(vm);
@@ -1577,18 +1682,17 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateMouseInfoObj(EcmaVM* vm, MouseInf
     return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
 }
 
-Local<panda::ObjectRef> FrameNodeBridge::CreateMouseInfo(
-    EcmaVM* vm, std::shared_ptr<MouseInfo> infoPtr, const WeakPtr<FrameNode>& node)
+Local<panda::ObjectRef> FrameNodeBridge::CreateMouseInfo(EcmaVM* vm, MouseInfo* infoPtr)
 {
     CHECK_NULL_RETURN(infoPtr, panda::ObjectRef::New(vm));
     auto obj = CreateMouseInfoObj(vm, *infoPtr);
     obj->SetNativePointerFieldCount(vm, 1);
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltX"),
-        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetTiltX().value_or(0.0f))));
+        panda::NumberRef::New(vm, infoPtr->GetTiltX().value_or(0.0f)));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltY"),
-        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetTiltY().value_or(0.0f))));
+        panda::NumberRef::New(vm, infoPtr->GetTiltY().value_or(0.0f)));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "rollAngle"),
-        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetRollAngle().value_or(0.0f))));
+        panda::NumberRef::New(vm, infoPtr->GetRollAngle().value_or(0.0f)));
     obj->Set(
         vm, panda::StringRef::NewFromUtf8(vm, "axisVertical"), panda::NumberRef::New(vm, static_cast<int32_t>(0.0f)));
     obj->Set(
@@ -1598,6 +1702,10 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateMouseInfo(
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sourceTool"),
         panda::NumberRef::New(vm, static_cast<int32_t>(static_cast<int32_t>(infoPtr->GetSourceTool()))));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "target"), CreateEventTargetObject(vm, *infoPtr));
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "eventHandleId"),
+        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetEventHandleId())));
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getCurrentLocalPosition"),
+        panda::FunctionRef::New(vm, Framework::JsGetCurrentLocalPosition));
     auto pressedButtonArr = panda::ArrayRef::New(vm);
     uint32_t idx = 0;
     for (const auto& button : infoPtr->GetPressedButtons()) {
@@ -1605,19 +1713,11 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateMouseInfo(
             vm, pressedButtonArr, idx++, panda::NumberRef::New(vm, static_cast<int32_t>(button)));
     }
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "pressedButtons"), pressedButtonArr);
-    auto eventInfoManager = GetEventInfoManager(node);
-    if (eventInfoManager == nullptr) {
-        obj->SetNativePointerFieldCount(vm, 1);
-        obj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr.get()));
-        return obj;
-    }
-    auto eventId = eventInfoManager->AddMouseInfo(infoPtr);
-    TAG_LOGI(AceLogTag::ACE_UIEVENT, "Add MouseInfo: %{public}d", eventId);
-    auto nativeEventInfo = AceType::MakeRefPtr<ArkUINativeEventInfo>(NATIVE_PTR_TAG_MOUSE_INFO, node);
-    nativeEventInfo->IncRefCount();
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getHistoricalPoints"),
+        panda::FunctionRef::New(vm, Framework::JsGetMouseHistoricalPoints));
     obj->SetNativePointerFieldCount(vm, 1);
-    obj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr.get()), ReleaseNativePtrFunc,
-        static_cast<void*>(nativeEventInfo.GetRawPtr()));
+    obj->SetNativePointerField(
+        vm, 0, static_cast<void*>(infoPtr), ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_MOUSE_INFO);
     return obj;
 }
 
@@ -1649,8 +1749,10 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnMouse(ArkUIRuntimeCallInfo* runtime
         CHECK_NULL_VOID(!function.IsEmpty());
         CHECK_NULL_VOID(function->IsFunction(vm));
         PipelineContext::SetCallBackNode(node);
-        auto infoPtr = std::make_shared<MouseInfo>(info);
-        auto obj = CreateMouseInfo(vm, infoPtr, node);
+        // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+        // It is not allowed to hold this address elsewhere.
+        auto infoPtr = new MouseInfo(info);
+        auto obj = CreateMouseInfo(vm, infoPtr);
         panda::Local<panda::JSValueRef> params[1] = { obj };
         function->Call(vm, function.ToLocal(), params, 1);
         info.SetStopPropagation(infoPtr->IsStopPropagation());
@@ -1783,10 +1885,13 @@ ArkUINativeModuleValue FrameNodeBridge::GetMeasuredSize(ArkUIRuntimeCallInfo* ru
     CHECK_NULL_RETURN(!firstArg.IsNull(), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<Framework::ArrayRef> valueArray = Framework::ArrayRef::New(vm, 2);
-    auto size = GetArkUINodeModifiers()->getFrameNodeModifier()->getMeasuredSize(nativeNode);
-    CHECK_NULL_RETURN(size, panda::JSValueRef::Undefined(vm));
-    Framework::ArrayRef::SetValueAt(vm, valueArray, 0, panda::NumberRef::New(vm, size[0]));
-    Framework::ArrayRef::SetValueAt(vm, valueArray, 1, panda::NumberRef::New(vm, size[1]));
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    auto geometryNode = frameNode->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, panda::JSValueRef::Undefined(vm));
+    auto size = geometryNode->GetFrameSize();
+    Framework::ArrayRef::SetValueAt(vm, valueArray, 0, panda::NumberRef::New(vm, size.Width()));
+    Framework::ArrayRef::SetValueAt(vm, valueArray, 1, panda::NumberRef::New(vm, size.Height()));
     return valueArray;
 }
 ArkUINativeModuleValue FrameNodeBridge::SetOnAttach(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -1863,10 +1968,13 @@ ArkUINativeModuleValue FrameNodeBridge::GetLayoutPosition(ArkUIRuntimeCallInfo* 
     CHECK_NULL_RETURN(!firstArg.IsNull(), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<Framework::ArrayRef> valueArray = Framework::ArrayRef::New(vm, 2);
-    auto position = GetArkUINodeModifiers()->getFrameNodeModifier()->getLayoutPosition(nativeNode);
-    CHECK_NULL_RETURN(position, panda::JSValueRef::Undefined(vm));
-    Framework::ArrayRef::SetValueAt(vm, valueArray, 0, panda::NumberRef::New(vm, position[0]));
-    Framework::ArrayRef::SetValueAt(vm, valueArray, 1, panda::NumberRef::New(vm, position[1]));
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    auto geometryNode = frameNode->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, panda::JSValueRef::Undefined(vm));
+    auto position = geometryNode->GetMarginFrameOffset();
+    Framework::ArrayRef::SetValueAt(vm, valueArray, 0, panda::NumberRef::New(vm, position.GetX()));
+    Framework::ArrayRef::SetValueAt(vm, valueArray, 1, panda::NumberRef::New(vm, position.GetY()));
     return valueArray;
 }
 ArkUINativeModuleValue FrameNodeBridge::GetConfigBorderWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -1962,7 +2070,12 @@ ArkUINativeModuleValue FrameNodeBridge::GetNodeInstanceId(ArkUIRuntimeCallInfo* 
     auto frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::NumberRef::New(vm, -1));
     auto instanceId = frameNode->GetInstanceId();
-    return panda::NumberRef::New(vm, instanceId);
+    CHECK_EQUAL_RETURN(instanceId, -1, panda::NumberRef::New(vm, -1));
+    auto container = Container::GetContainer(instanceId);
+    CHECK_NULL_RETURN(container, panda::NumberRef::New(vm, -1));
+    auto uiContextType = container->GetUIContentType();
+    CHECK_EQUAL_RETURN(uiContextType, UIContentType::DYNAMIC_COMPONENT, panda::NumberRef::New(vm, instanceId));
+    return panda::NumberRef::New(vm, -1);
 }
 
 ArkUINativeModuleValue FrameNodeBridge::GetNodeType(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -2483,7 +2596,7 @@ ArkUINativeModuleValue FrameNodeBridge::AddFrameNodeToNodeContent(ArkUIRuntimeCa
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeContent = reinterpret_cast<ArkUINodeContentHandle>(secondArg->ToNativePointer(vm)->Value());
-    auto result = GetArkUINodeModifiers()->getNodeContentModifier()->addChild(nativeContent, nativeNode);
+    auto result = GetArkUINodeModifiers()->getNodeContentModifier()->addChild(nativeContent, nativeNode, nullptr);
     GetArkUIFullNodeAPI()->getBasicAPI()->markDirty(nativeNode, ARKUI_DIRTY_FLAG_MEASURE_SELF_AND_PARENT);
     if (result != ERROR_CODE_NO_ERROR) {
         LOGW("AddFrameNodeToNodeContent failed error:%{public}d", result);
@@ -2500,7 +2613,7 @@ ArkUINativeModuleValue FrameNodeBridge::RemoveFrameNodeFromNodeContent(ArkUIRunt
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeContent = reinterpret_cast<ArkUINodeContentHandle>(secondArg->ToNativePointer(vm)->Value());
     GetArkUIFullNodeAPI()->getBasicAPI()->markDirty(nativeNode, ARKUI_DIRTY_FLAG_MEASURE_SELF_AND_PARENT);
-    auto result = GetArkUINodeModifiers()->getNodeContentModifier()->removeChild(nativeContent, nativeNode);
+    auto result = GetArkUINodeModifiers()->getNodeContentModifier()->removeChild(nativeContent, nativeNode, nullptr);
     if (result != ERROR_CODE_NO_ERROR) {
         LOGW("RemoveFrameNodeFromNodeContent failed error:%{public}d", result);
     }
@@ -2558,7 +2671,18 @@ ArkUINativeModuleValue FrameNodeBridge::SetCrossLanguageOptions(ArkUIRuntimeCall
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     bool attributeSetting = secondArg->ToBoolean(vm)->Value();
-    int result = GetArkUINodeModifiers()->getFrameNodeModifier()->setCrossLanguageOptions(nativeNode, attributeSetting);
+    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    ArkUITreeOperatingStatus treeOperating = ARKUI_TREE_OPERATING_STATUS_UNDEFINED;
+    if (thirdArg->IsBoolean()) {
+        treeOperating = (thirdArg->ToBoolean(vm)->Value())
+                        ? ARKUI_TREE_OPERATING_STATUS_ENABLE
+                        : ARKUI_TREE_OPERATING_STATUS_DISABLE;
+    }
+    ArkUICrossLanguageOption option = {
+        .attributeSetting = attributeSetting,
+        .treeOperatingStatus = treeOperating
+    };
+    int result = GetArkUINodeModifiers()->getFrameNodeModifier()->setCrossLanguageOptionsFull(nativeNode, &option);
     return panda::NumberRef::New(vm, result);
 }
 
@@ -2579,6 +2703,31 @@ ArkUINativeModuleValue FrameNodeBridge::CheckIfCanCrossLanguageAttributeSetting(
     CHECK_NULL_RETURN(!firstArg.IsNull(), panda::BooleanRef::New(vm, false));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     bool result = GetArkUINodeModifiers()->getFrameNodeModifier()->checkIfCanCrossLanguageAttributeSetting(nativeNode);
+    return panda::BooleanRef::New(vm, result);
+}
+
+ArkUINativeModuleValue FrameNodeBridge::GetCrossLanguageTreeOperating(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::BooleanRef::New(vm, false));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto* currentNode = reinterpret_cast<UINode*>(nativeNode);
+    CHECK_NULL_RETURN(currentNode, panda::BooleanRef::New(vm, false));
+    bool result = static_cast<int32_t>(currentNode->GetTreeOperatingStatus()) == ARKUI_TREE_OPERATING_STATUS_ENABLE;
+    return panda::BooleanRef::New(vm, result);
+}
+
+ArkUINativeModuleValue FrameNodeBridge::CheckIfCanCrossLanguageTreeOperating(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::BooleanRef::New(vm, false));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto* currentNode = reinterpret_cast<UINode*>(nativeNode);
+    CHECK_NULL_RETURN(currentNode, panda::BooleanRef::New(vm, false));
+    bool result = currentNode -> IsCNode() ?
+        (static_cast<int32_t>(currentNode->GetTreeOperatingStatus()) == ARKUI_TREE_OPERATING_STATUS_ENABLE) : false;
     return panda::BooleanRef::New(vm, result);
 }
 

@@ -21,10 +21,10 @@
 #include "gtest/gtest.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
@@ -34,15 +34,20 @@
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
 #include "core/components/calendar/calendar_data_adapter.h"
+#include "core/components/calendar/calendar_theme_wrapper.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/theme/theme_attributes.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/token_theme/token_theme.h"
 #include "core/components_ng/pattern/calendar/calendar_model_ng.h"
 #include "core/components_ng/pattern/calendar/calendar_month_pattern.h"
 #include "core/components_ng/pattern/calendar/calendar_paint_method.h"
 #include "core/components_ng/pattern/calendar/calendar_paint_property.h"
 #include "core/components_ng/pattern/calendar/calendar_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
@@ -66,6 +71,8 @@ const double OFFSET_Y = 8.0;
 const float VALID_LENGTH = 10;
 const int32_t START_LENTH = 0;
 const int32_t CALEND_DAYS_LENTH = 12;
+constexpr int32_t TEST_SCOPED_THEME_SCOPE_ID = 42;
+constexpr int32_t TEST_CALENDAR_TOKEN_THEME_ID = 10001;
 } // namespace
 
 class CalendarPaintMethTest : public testing::Test {
@@ -1296,5 +1303,108 @@ HWTEST_F(CalendarPaintMethTest, CalTextHeight001, TestSize.Level1)
     double x = 0.0;
     auto dayOffset = Offset(x, y);
     EXPECT_FALSE(paintMethod->CalTextHeight(dayOffset, calendarDay));
+}
+
+/**
+ * @tc.name: CalendarThemeWrapper_ApplyTokenTheme001
+ * @tc.desc: CalendarThemeWrapper ApplyTokenTheme maps token font primary to entry font color.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPaintMethTest, CalendarThemeWrapper_ApplyTokenTheme001, TestSize.Level1)
+{
+    auto themeConstants = TestNG::CreateThemeConstants(THEME_PATTERN_CALENDAR);
+    ASSERT_NE(themeConstants, nullptr);
+    auto wrapper = CalendarThemeWrapper::WrapperBuilder().BuildWrapper(themeConstants);
+    ASSERT_NE(wrapper, nullptr);
+    auto calendarTheme = AceType::DynamicCast<CalendarTheme>(wrapper);
+    ASSERT_NE(calendarTheme, nullptr);
+
+    const Color tokenPrimary = Color::FromARGB(0xFF, 0x12, 0x34, 0x56);
+    std::vector<Color> colors(TokenColors::TOTAL_NUMBER, Color::BLACK);
+    colors[TokenColors::FONT_PRIMARY] = tokenPrimary;
+    auto tokenColors = AceType::MakeRefPtr<TokenColors>();
+    ASSERT_NE(tokenColors, nullptr);
+    tokenColors->SetColors(std::move(colors));
+    auto tokenTheme = AceType::MakeRefPtr<TokenTheme>(TEST_CALENDAR_TOKEN_THEME_ID);
+    ASSERT_NE(tokenTheme, nullptr);
+    tokenTheme->SetColors(tokenColors);
+
+    EXPECT_NE(calendarTheme->GetEntryFontColor(), tokenPrimary);
+    wrapper->ApplyTokenTheme(*tokenTheme);
+    EXPECT_EQ(calendarTheme->GetEntryFontColor(), tokenPrimary);
+}
+
+/**
+ * @tc.name: SetCalendarThemeUsesThemeNodeHostScope001
+ * @tc.desc: SetCalendarTheme resolves CalendarTheme from themeNode host theme scope when themeNode is set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPaintMethTest, SetCalendarThemeUsesThemeNodeHostScope001, TestSize.Level1)
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    const int32_t backupContainerApi = container->GetApiTargetVersion();
+    const int32_t backupPipelineApi = pipeline->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    pipeline->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+
+    auto backupThemeManager = pipeline->GetThemeManager();
+
+    auto defaultTheme = AceType::MakeRefPtr<CalendarTheme>();
+    ASSERT_NE(defaultTheme, nullptr);
+    defaultTheme->GetCalendarTheme().weekColor = Color::RED;
+
+    auto scopedTheme = AceType::MakeRefPtr<CalendarTheme>();
+    ASSERT_NE(scopedTheme, nullptr);
+    scopedTheme->GetCalendarTheme().weekColor = Color::BLUE;
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto resolveCalendarByScope = [defaultTheme, scopedTheme](int32_t themeScopeId) -> RefPtr<Theme> {
+        if (themeScopeId == TEST_SCOPED_THEME_SCOPE_ID) {
+            return scopedTheme;
+        }
+        return defaultTheme;
+    };
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillRepeatedly(Invoke([resolveCalendarByScope](ThemeType type) -> RefPtr<Theme> {
+            (void)type;
+            return resolveCalendarByScope(0);
+        }));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly(Invoke([resolveCalendarByScope](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            if (type == CalendarTheme::TypeId()) {
+                return resolveCalendarByScope(themeScopeId);
+            }
+            return AceType::MakeRefPtr<PickerTheme>();
+        }));
+    pipeline->SetThemeManager(themeManager);
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto themeHost = FrameNode::GetOrCreateFrameNode(
+        V2::COLUMN_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(themeHost, nullptr);
+    themeHost->SetThemeScopeId(TEST_SCOPED_THEME_SCOPE_ID);
+
+    ObtainedMonth obtainedMonth;
+    CalendarDay calendarDay;
+    CalendarPaintParams params;
+    params.markToday = false;
+    PickerDate defaultDate;
+    params.startDate = defaultDate;
+    params.endDate = defaultDate;
+    auto paintProperty = AceType::MakeRefPtr<CalendarPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
+    auto paintMethod =
+        AceType::MakeRefPtr<CalendarPaintMethod>(obtainedMonth, calendarDay, params, false, themeHost);
+    paintMethod->SetCalendarTheme(paintProperty);
+
+    EXPECT_EQ(paintMethod->weekColor_, ToRSColor(Color::BLUE));
+
+    pipeline->SetThemeManager(backupThemeManager);
+    container->SetApiTargetVersion(backupContainerApi);
+    pipeline->SetApiTargetVersion(backupPipelineApi);
 }
 } // namespace OHOS::Ace::NG

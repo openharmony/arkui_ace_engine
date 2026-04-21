@@ -1,0 +1,40 @@
+diff --git a/api/arkui/component/gesture.d.ets b/api/arkui/component/gesture.d.ets
+index 0f6960f..48fe4be 100644
+--- a/api/arkui/component/gesture.d.ets
++++ b/api/arkui/component/gesture.d.ets
+@@ -484,17 +484,6 @@ export declare interface EventLocationInfo {
+      * @since 24
+      */
+     globalDisplayY?: double;
+-
+- 	/**
+- 	 * Gets the coordinates of the top-left corner of the current component based on its real-time position.
+- 	 *
+- 	 * @returns { Coordinate2D } - return the coordinates of the top-left corner of the current component based on its
+- 	 * real-time position.
+- 	 * @syscap SystemCapability.ArkUI.ArkUI.Full
+- 	 * @stagemodelonly
+- 	 * @since 26.0.0
+- 	 */
+- 	default getCurrentLocalPosition(): Coordinate2D;
+ }
+ /**
+  * Type of the finger information.
+@@ -587,17 +576,6 @@ export declare interface FingerInfo {
+      * @since 23
+      */
+     hand?: InteractionHand;
+-
+- 	/**
+- 	 * Gets the coordinates of the top-left corner of the current component based on its real-time position.
+- 	 *
+- 	 * @returns { Coordinate2D } - return the coordinates of the top-left corner of the current component based on its
+- 	 * real-time position.
+- 	 * @syscap SystemCapability.ArkUI.ArkUI.Full
+- 	 * @stagemodelonly
+- 	 * @since 26.0.0
+- 	 */
+- 	default getCurrentLocalPosition(): Coordinate2D;
+ }
+ /**
+  * Defines the Gesture Type.

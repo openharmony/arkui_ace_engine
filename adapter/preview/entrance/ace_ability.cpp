@@ -33,6 +33,7 @@
 #include "adapter/preview/entrance/rs_dir_asset_provider.h"
 #include "adapter/preview/external/ability/stage/stage_context.h"
 #include "adapter/preview/inspector/inspector_client.h"
+#include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/resource/resource_configuration.h"
 #include "frameworks/base/utils/utils.h"
 #include "frameworks/bridge/common/utils/utils.h"

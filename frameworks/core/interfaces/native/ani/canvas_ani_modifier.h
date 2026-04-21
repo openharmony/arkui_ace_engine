@@ -18,6 +18,7 @@
 
 #include "core/interfaces/ani/ani_api.h"
 #include "core/common/ace_engine.h"
+#include "core/components_ng/render/drawing_forward.h"
 
 namespace OHOS::Ace::NG {
 const ArkUIAniCanvasModifier* GetCanvasAniModifier();

@@ -89,7 +89,7 @@ export class UIUtilsImpl {
         if (observed) {
             return observed;
         }
-        return UIUtilsImpl.set(source, new WrappedDate(source, allowDeep), allowDeep);
+        return UIUtilsImpl.set(source, new WrappedDate(source, allowDeep, isAPI), allowDeep);
     }
 
     public static makeObservedMap<K, V>(source: Map<K, V>, allowDeep: boolean, isAPI: boolean = false): Map<K, V> {
@@ -111,7 +111,7 @@ export class UIUtilsImpl {
         if (observed) {
             return observed;
         }
-        return UIUtilsImpl.set(source, new WrappedSet<T>(source, allowDeep), allowDeep);
+        return UIUtilsImpl.set(source, new WrappedSet<T>(source, allowDeep, isAPI), allowDeep);
     }
 
     // allowDeep is used to mark whether it need to use deep observation
@@ -174,7 +174,7 @@ export class UIUtilsImpl {
         return value;
     }
 
-    public makeObserved<T>(value: T): T {
+    public makeObserved<T extends Object>(value: T): T {
         if (!value || typeof value !== 'object') {
             return value as T;
         }
@@ -201,7 +201,7 @@ export class UIUtilsImpl {
         return value instanceof Array || value instanceof Map || value instanceof Set || value instanceof Date;
     }
 
-    public getTarget<T>(source: T): T {
+    public getTarget<T extends Object>(source: T): T {
         if (!source || typeof source !== 'object') {
             return source;
         }

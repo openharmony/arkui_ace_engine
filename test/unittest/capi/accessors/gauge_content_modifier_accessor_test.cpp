@@ -43,11 +43,11 @@ static constexpr int TEST_DEFAULT_MAX = 100;
 static constexpr int TEST_DEFAULT_VALUE = 0;
 
 /**
- * @tc.name: GaugeContentModifierHelperAccessorTest
+ * @tc.name: contentModifierGaugeTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GaugeContentModifierHelperAccessor, gaugeContentModifierHelperAccessorTest, TestSize.Level1)
+HWTEST_F(GaugeContentModifierHelperAccessor, contentModifierGaugeTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->contentModifierGauge, nullptr);
 

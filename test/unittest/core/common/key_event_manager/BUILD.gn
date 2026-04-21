@@ -17,4 +17,17 @@ ace_unittest("key_event_manager_test") {
   module_name = "FormAndSelection-Button"
   type = "new"
   sources = [ "key_event_manager_test.cpp" ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "key_event_manager_test_min.cpp",
+      "key_event_manager_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "key_event_manager_test_min.cpp",
+      "key_event_manager_test_core.cpp",
+    ]
+  }
 }

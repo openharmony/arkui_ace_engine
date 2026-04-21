@@ -886,7 +886,9 @@ TouchPosition TextSelectController::GetTouchLinePos(const Offset& localOffset)
     auto offset = localOffset - Offset(textRect.GetX(), textRect.GetY());
     LineMetrics lineMetrics;
     if (paragraph_->GetLineMetricsByCoordinate(offset, lineMetrics)) {
-        if (GreatNotEqual(offset.GetX(), lineMetrics.x + lineMetrics.width)) {
+        std::vector<RectF> tempRects;
+        paragraph_->GetRectsForRange(lineMetrics.startIndex, lineMetrics.endIndex, tempRects);
+        if (GreatNotEqual(offset.GetX(), lineMetrics.x + tempRects.back().Right())) {
             return TouchPosition::RIGHT;
         }
         if (LessNotEqual(offset.GetX(), lineMetrics.x)) {
@@ -954,7 +956,9 @@ void TextSelectController::AdjustHandleOffsetWithBoundary(RectF& handleRect)
     auto textField = DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_VOID(textField);
     if (textField->IsTextArea()) {
-        AdjustHandleInBoundary(handleRect);
+        if (!textField->IsHorizontalScrollEnabled()) {
+            AdjustHandleInBoundary(handleRect);
+        }
         return;
     }
     auto textRect = textField->GetTextRect();

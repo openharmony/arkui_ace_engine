@@ -19,7 +19,9 @@
 #include "core/interfaces/native/node/node_slider_modifier.h"
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
 #include "core/interfaces/native/node/checkboxgroup_modifier.h"
+#include "core/interfaces/native/node/text_clock_modifier.h"
 #include "core/interfaces/native/node/flow_item_modifier.h"
+#include "core/interfaces/native/node/marquee_modifier.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
 #include "core/interfaces/native/node/node_timepicker_modifier.h"
 #include "core/interfaces/native/node/radio_modifier.h"
@@ -362,7 +364,6 @@ void* createSliderNode(ArkUI_Int32 nodeId)
     CHECK_NULL_RETURN(arkUINodeHandle, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(arkUINodeHandle);
     CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
     return frameNode;
 }
 
@@ -605,7 +606,7 @@ void* createCustomSpanNode(ArkUI_Int32 nodeId)
 void* createQRcodeNode(ArkUI_Int32 nodeId)
 {
     auto arkUIQRCodeModifier = NG::NodeModifier::GetQRCodeModifier();
-    CHECK_NULL_RETURN(arkUIQRCodeModifier->createFrameNode, nullptr);
+    CHECK_NULL_RETURN(arkUIQRCodeModifier && arkUIQRCodeModifier->createFrameNode, nullptr);
     auto arkUINodeHandle = arkUIQRCodeModifier->createFrameNode(nodeId);
     CHECK_NULL_RETURN(arkUINodeHandle, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(arkUINodeHandle);
@@ -624,10 +625,9 @@ void* createBadgeNode(ArkUI_Int32 nodeId)
 
 void* createTextClockNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = TextClockModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto textClockModifier = NodeModifier::GetTextClockCustomModifier();
+    CHECK_NULL_RETURN(textClockModifier, nullptr);
+    return textClockModifier->createTextClockFrameNode(nodeId);
 }
 
 void* createTextTimerNode(ArkUI_Int32 nodeId)
@@ -640,11 +640,9 @@ void* createTextTimerNode(ArkUI_Int32 nodeId)
 
 void* createMarqueeNode(ArkUI_Int32 nodeId)
 {
-    auto nodeModifier = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifier, nullptr);
-    auto marqueeModifier = nodeModifier->getMarqueeModifier();
-    CHECK_NULL_RETURN(marqueeModifier, nullptr);
-    return marqueeModifier->createMarqueeFrameNode(nodeId);
+    auto modifier = NG::NodeModifier::GetMarqueeModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    return modifier->createMarqueeFrameNode(nodeId);
 }
 
 void* createCheckBoxGroupNode(ArkUI_Int32 nodeId)

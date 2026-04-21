@@ -28,6 +28,7 @@ public:
     static void SendThemeToNative(const JSCallbackInfo& info);
     static void RemoveThemeInNative(const JSCallbackInfo& info);
     static void SetThemeScopeId(const JSCallbackInfo& info);
+    static void GetCurrentBuildingWithThemeNodeId(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
 };
 

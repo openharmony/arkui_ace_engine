@@ -435,26 +435,26 @@ HWTEST_F(ViewPartialUpdateModelTestNg, ViewPartialUpdateModelTestNg012, TestSize
 HWTEST_F(ViewPartialUpdateModelTestNg, ViewPartialUpdateModelTestNg013, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. call the RegisterUpdateInstanceForEnvFunc function first and set input is null.
+     * @tc.steps: step1. call the RegisterUpdateJSInstanceCallback function first and set input is null.
      * @tc.expected: step1. the return value is false.
      */
     const WeakPtr<AceType>& nullNode = nullptr;
     ViewPartialUpdateModelNG TestViewPartialUpdateModelNG;
     auto updateInstanceForEnvValueFunc1 = [](int32_t instanceId) {};
 
-    bool result1 = TestViewPartialUpdateModelNG.RegisterUpdateInstanceForEnvFunc(
+    bool result1 = TestViewPartialUpdateModelNG.RegisterUpdateJSInstanceCallback(
         nullNode, std::move(updateInstanceForEnvValueFunc1));
     EXPECT_FALSE(result1);
 
     /**
-     * @tc.steps: step2. call the RegisterUpdateInstanceForEnvFunc function again and set input is not null.
+     * @tc.steps: step2. call the RegisterUpdateJSInstanceCallback function again and set input is not null.
      * @tc.expected: step2. the return value is true.
      */
     NodeInfoPU info;
     RefPtr<AceType> customNode = TestViewPartialUpdateModelNG.CreateNode(std::move(info));
     auto updateInstanceForEnvValueFunc2 = [](int32_t instanceId) {};
 
-    bool result2 = TestViewPartialUpdateModelNG.RegisterUpdateInstanceForEnvFunc(
+    bool result2 = TestViewPartialUpdateModelNG.RegisterUpdateJSInstanceCallback(
         customNode, std::move(updateInstanceForEnvValueFunc2));
     EXPECT_TRUE(result2);
 }

@@ -116,7 +116,7 @@ void FlushDirtyNodesWhenExist(const RefPtr<PipelineBase>& pipelineContext,
     }
 }
 void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, const AnimationOption& option,
-    const Callback_Void* event, int32_t triggerId, const std::optional<int32_t>& count)
+    const VoidCallback* event, int32_t triggerId, const std::optional<int32_t>& count)
 {
     CHECK_NULL_VOID(event);
     pipelineContext->StartImplicitAnimation(option, option.GetCurve(), option.GetOnFinishEvent(), count);
@@ -141,7 +141,7 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, const An
     pipelineContext->SetSyncAnimationOption(previousOption);
 }
 void StartAnimationForStageMode(const RefPtr<PipelineBase>& pipelineContext, const AnimationOption& option,
-    const Callback_Void* event, const std::optional<int32_t>& count, bool immediately)
+    const VoidCallback* event, const std::optional<int32_t>& count, bool immediately)
 {
     auto triggerId = pipelineContext->GetInstanceId();
     NG::ScopedViewStackProcessor scopedProcessor;
@@ -175,7 +175,7 @@ void StartAnimationForStageMode(const RefPtr<PipelineBase>& pipelineContext, con
     }
 }
 void StartAnimateToForFaMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOption& option,
-    const Callback_Void* event, const std::optional<int32_t>& count, bool immediately)
+    const VoidCallback* event, const std::optional<int32_t>& count, bool immediately)
 {
     NG::ScopedViewStackProcessor scopedProcessor;
     pipelineContext->FlushBuild();
@@ -194,7 +194,7 @@ void StartAnimateToForFaMode(const RefPtr<PipelineBase>& pipelineContext, Animat
         pipelineContext->RequestFrame();
     }
 }
-void StartAnimateTo(AnimationOption& option, const Callback_Void* event, const std::optional<int32_t>& count,
+void StartAnimateTo(AnimationOption& option, const VoidCallback* event, const std::optional<int32_t>& count,
     bool immediately, const std::function<void()>& onFinishEvent)
 {
     CHECK_NULL_VOID(event);
@@ -233,7 +233,7 @@ void FillTraceStream(std::shared_ptr<std::stringstream>& traceStreamPtr, const A
                     << ",curve:" << (option.GetCurve() ? option.GetCurve()->ToString().c_str() : "");
 }
 void AnimateToInner(const Ark_AnimateParam* value,
-                    const Callback_Void* event,
+                    const VoidCallback* event,
                     bool immediately)
 {
     CHECK_NULL_VOID(value);

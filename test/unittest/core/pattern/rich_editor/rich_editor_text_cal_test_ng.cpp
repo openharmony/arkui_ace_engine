@@ -14,12 +14,15 @@
  */
 
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
-#include "test/mock/core/render/mock_paragraph.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_udmf.h"
-#include "test/mock/base/mock_task_executor.h"
+
+#include "core/components_ng/base/observer_handler.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_udmf.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
@@ -199,7 +202,8 @@ public:
     MOCK_METHOD(void, RemoveTask, (TaskType type, const std::string& name), (override));
 
     MOCK_METHOD(bool, OnPostTask,
-        (Task && task, TaskType type, uint32_t delayTime, const std::string& name, PriorityType priorityType),
+        (Task && task, TaskType type, uint32_t delayTime, const std::string& name, PriorityType priorityType,
+        Ace::VsyncBarrierOption barrierOption),
         (const, override));
     MOCK_METHOD(Task, WrapTaskWithTraceId, (Task && task, int32_t id), (const, override));
     MOCK_METHOD(bool, OnPostTaskWithoutTraceId,
@@ -590,6 +594,57 @@ HWTEST_F(RichEditorTextCalTestNg, GetLeftWordPosition002, TestSize.Level0)
 }
 
 /**
+ * @tc.name: GetLeftWordPosition003
+ * @tc.desc: test GetLeftWordPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTextCalTestNg, GetLeftWordPosition003, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan("test content");
+    richEditorPattern->caretPosition_ = 5;
+
+    int32_t result = richEditorPattern->GetLeftWordPosition(richEditorPattern->caretPosition_);
+    EXPECT_GE(result, 0);
+}
+
+/**
+ * @tc.name: GetLeftWordPosition004
+ * @tc.desc: test GetLeftWordPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTextCalTestNg, GetLeftWordPosition004, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan("test@content");
+    richEditorPattern->caretPosition_ = 5;
+
+    int32_t result = richEditorPattern->GetLeftWordPosition(richEditorPattern->caretPosition_);
+    EXPECT_GE(result, 0);
+}
+
+/**
+ * @tc.name: GetLeftWordPosition005
+ * @tc.desc: test GetLeftWordPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTextCalTestNg, GetLeftWordPosition005, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan("test content@");
+    richEditorPattern->caretPosition_ = 12;
+
+    int32_t result = richEditorPattern->GetLeftWordPosition(richEditorPattern->caretPosition_);
+    EXPECT_GE(result, 0);
+}
+
+/**
  * @tc.name: HandleOnEscape001
  * @tc.desc: test HandleOnEscape
  * @tc.type: FUNC
@@ -790,6 +845,53 @@ HWTEST_F(RichEditorTextCalTestNg, RichEditorToJsonValue001, TestSize.Level0)
     EXPECT_TRUE(filter.IsFastFilter());
     richEditorPattern->ToJsonValue(jsonObject, filter);
     EXPECT_FALSE(jsonObject->IsNull());
+}
+
+/**
+ * @tc.name: RichEditorToJsonValue002
+ * @tc.desc: test ToJsonValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTextCalTestNg, RichEditorToJsonValue002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+
+    auto jsonObject = JsonUtil::Create(true);
+    InspectorFilter filter;
+    filter.filterFixed = 0;
+    filter.filterExt.clear();
+    EXPECT_FALSE(filter.IsFastFilter());
+    richEditorPattern->SetOrphanCharOptimization(true);
+    richEditorPattern->ToJsonValue(jsonObject, filter);
+    EXPECT_EQ(jsonObject->GetString("orphanCharOptimization"), "true");
+
+    filter.filterFixed = 10;
+    EXPECT_TRUE(filter.IsFastFilter());
+    richEditorPattern->ToJsonValue(jsonObject, filter);
+    EXPECT_FALSE(jsonObject->IsNull());
+}
+
+/**
+ * @tc.name: SetOrphanCharOptimization001
+ * @tc.desc: test SetOrphanCharOptimization
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTextCalTestNg, SetOrphanCharOptimization001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+
+    richEditorPattern->SetOrphanCharOptimization(true);
+    EXPECT_EQ(richEditorPattern->isOrphanCharOptimization_, true);
 }
 
 /**

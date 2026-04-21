@@ -16,6 +16,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("qrcode_test_ng") {
   type = "new"
   module_name = "InfoShowSet-QRCode"
+
   sources = [
     "$ace_root/frameworks/core/components_ng/pattern/qrcode/qrcode_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/qrcode/qrcode_model_ng.cpp",
@@ -24,6 +25,14 @@ ace_unittest("qrcode_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/qrcode/qrcode_pattern.cpp",
     "qrcode_test_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "qrcode_test_core.cpp" ]
+  } else {
+    sources += [ "qrcode_test_core.cpp" ]
+  }
+
   if (is_arkui_x) {
     deps = [ "//third_party/qrcodegen:ace_engine_qrcode" ]
   } else {

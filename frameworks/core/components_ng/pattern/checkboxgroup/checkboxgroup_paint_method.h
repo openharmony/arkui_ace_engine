@@ -18,6 +18,7 @@
 
 #include "ui/base/utils/utils.h"
 #include "base/memory/ace_type.h"
+#include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_modifier.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
 #include "core/components_ng/render/node_paint_method.h"

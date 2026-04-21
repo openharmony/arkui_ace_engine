@@ -126,6 +126,7 @@ public:
         const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& mainResObj) {};
     virtual void UpdateSubTitle(
         const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& subResObj) {};
+    virtual void SetFreeze(bool freeze, bool isValid) {}
 
 private:
     static std::unique_ptr<NavDestinationModel> instance_;

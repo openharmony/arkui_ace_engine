@@ -146,6 +146,7 @@ public:
     void ParseResObjItemMaxWidth(const RefPtr<ResourceObject>& resObj) override;
     void ParseResObjItemMinHeight(const RefPtr<ResourceObject>& resObj) override;
     void ParseResObjItemMaxHeight(const RefPtr<ResourceObject>& resObj) override;
+    void SetSupportLazyLoadingEmptyBranch(bool enable) override;
     static void ParseResObjFriction(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void ParseResObjScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void SetScrollBarColor(FrameNode* frameNode, const std::optional<Color>& scrollBarColor);
@@ -155,6 +156,8 @@ public:
     static void ParseResObjItemMaxWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void ParseResObjItemMinHeight(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void ParseResObjItemMaxHeight(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetSupportLazyLoadingEmptyBranch(FrameNode* frameNode, bool enable);
+    static bool GetSupportLazyLoadingEmptyBranch(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_MODEL_NG_H

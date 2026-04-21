@@ -20,6 +20,7 @@
 #include "base/memory/referenced.h"
 #include "core/animation/animator.h"
 #include "core/animation/curve_animation.h"
+#include "core/components/common/properties/border_image.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -40,8 +41,8 @@
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_v2/extensions/extension.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "ui/properties/ui_material.h"
 

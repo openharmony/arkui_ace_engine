@@ -682,6 +682,20 @@ class ListSupportEmptyBranchInLazyLoading  extends ModifierWithKey<boolean> {
   }
 }
 
+class ListBackPressCloseSwipeActionModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listBackPressCloseSwipeAction');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.setBackPressCloseSwipeAction(node, true);
+    } else {
+      getUINativeModule().list.setBackPressCloseSwipeAction(node, this.value);
+    }
+  }
+}
+
 interface ListParam {
   initialIndex?: number;
   space?: number | string;
@@ -900,6 +914,11 @@ class ArkListComponent extends ArkScrollable<ListAttribute> implements ListAttri
   }
   supportEmptyBranchInLazyLoading(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, ListSupportEmptyBranchInLazyLoading.identity, ListSupportEmptyBranchInLazyLoading, value);
+    return this;
+  }
+  backPressCloseSwipeAction(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, ListBackPressCloseSwipeActionModifier.identity,
+      ListBackPressCloseSwipeActionModifier, value);
     return this;
   }
 }

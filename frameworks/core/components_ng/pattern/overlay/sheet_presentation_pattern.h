@@ -49,6 +49,12 @@ enum class BindSheetDismissReason {
     SLIDE_DOWN,
     SLIDE,
 };
+enum class SheetMiniDefaultShowPosition {
+    LeftTop = 0,
+    RightTop,
+    LeftBottom,
+    RightBottom,
+};
 class ACE_EXPORT SheetPresentationPattern : public LinearLayoutPattern,
                                             public PopupBasePattern,
                                             public FocusView,
@@ -94,6 +100,7 @@ public:
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
+        ACE_UINODE_TRACE(GetHost());
         return MakeRefPtr<SheetPresentationProperty>();
     }
 
@@ -156,11 +163,21 @@ public:
         onAppear_ = std::move(onAppear);
     }
 
+    std::function<void()> GetSheetOnAppear() const
+    {
+        return onAppear_;
+    }
+
     void OnAppear();
 
     void UpdateOnWillAppear(std::function<void()>&& onWillAppear)
     {
         onWillAppear_ = std::move(onWillAppear);
+    }
+
+    std::function<void()> GetSheetOnWillAppear() const
+    {
+        return onWillAppear_;
     }
 
     void OnWillAppear();
@@ -459,6 +476,7 @@ public:
     }
 
     SheetType GetSheetType() const;
+    bool IsBreakpointMatch();
     bool IsPhoneInLandScape();
     bool IsShowCloseIcon();
     void InitSheetMode();
@@ -1030,6 +1048,18 @@ public:
     void SendMessagesBeforeTransitionOut();
     void SendMessagesAfterTransitionOut(FrameNode* sheetNode);
 
+    void SetSheetMiniDefaultShowPosition(SheetMiniDefaultShowPosition position)
+    {
+        sheetMiniShowPosition_ = position;
+    }
+
+    SheetMiniDefaultShowPosition GetSheetMiniDefaultShowPosition()
+    {
+        return sheetMiniShowPosition_;
+    }
+    std::optional<Dimension> GetSheetMiniDeviceMarginWidth();
+    std::optional<Dimension> GetSheetMiniDeviceMarginHeight();
+
     RefPtr<SheetObject> GetSheetObject() const
     {
         return sheetObject_;
@@ -1123,10 +1153,16 @@ public:
         return enableDragControl_;
     }
 
+    int32_t OnInjectionEvent(const std::string& command) override;
+
 protected:
     void OnDetachFromFrameNode(FrameNode* sheetNode) override;
 
 private:
+    enum class SheetCmdType { CMD_UNKNOWN, CMD_SLIDE, CMD_CLOSE };
+    int32_t ParseCommand(const std::string& command, SheetCmdType& cmdType);
+    void HandleBindSheetEvent(SheetCmdType& cmdType);
+    void ReportCloseSheetResult(std::string result, std::string reason, std::string event);
     void OnAttachToMainTree() override;
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -1144,6 +1180,7 @@ private:
     float GetCloseIconPosX(const SizeF& sheetSize, const RefPtr<SheetTheme>& sheetTheme);
     void UpdateSheetTitle();
     void UpdateFontScaleStatus();
+    void InitSheetObjectDragEvent(RefPtr<SheetObject> sheetObject);
 
     bool PostTask(const TaskExecutor::Task& task, const std::string& name);
     void CheckSheetHeightChange();
@@ -1265,6 +1302,8 @@ private:
     std::vector<float> sheetDetentHeight_;
     std::vector<float> unSortedSheetDentents_;
     std::vector<Rect> currentFoldCreaseRegion_;
+
+    SheetMiniDefaultShowPosition sheetMiniShowPosition_ = SheetMiniDefaultShowPosition::RightTop;
 
     std::shared_ptr<AnimationUtils::Animation> animation_;
     std::optional<int32_t> foldDisplayModeChangedCallbackId_;

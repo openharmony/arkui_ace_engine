@@ -92,7 +92,7 @@ private:
 };
 
 /**
- * @tc.name: setDisplayXTestValidValues
+ * @tc.name: getAxisMapTest
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -106,7 +106,7 @@ HWTEST_F(FocusAxisEventAccessorTest, getAxisMapTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetStopPropagationTest
+ * @tc.name: getStopPropagationTest
  * @tc.desc:
  * @tc.type: FUNC
  */

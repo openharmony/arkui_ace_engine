@@ -102,6 +102,7 @@ private:
     static void UpdateLabelStyle(const LabelStyle& labelStyle, RefPtr<TextLayoutProperty> textLayoutProperty);
     static void CreateMoreWithResourceObj(TabContentJsType jsType, FrameNode* frameNode,
         const RefPtr<ResourceObject>& resObj);
+    static void InitTabText(const RefPtr<TextLayoutProperty>& textLayoutProperty);
 };
 
 } // namespace OHOS::Ace::NG

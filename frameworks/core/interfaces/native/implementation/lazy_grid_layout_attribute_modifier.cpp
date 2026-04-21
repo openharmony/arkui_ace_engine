@@ -17,7 +17,9 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_model_static.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -52,6 +54,22 @@ void SetColumnsGapImpl(Ark_NativePointer node,
     }
     LazyGridLayoutModelStatic::SetColumnGap(frameNode, convValue);
 }
+void SetOnVisibleIndexesChangeImpl(Ark_NativePointer node, const Opt_OnVisibleIndexesChangeCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        LazyGridLayoutModelStatic::SetOnVisibleIndexesChange(frameNode, nullptr);
+        return;
+    }
+    auto onVisibleIndexesChange = [arkCallback = CallbackHelper(*optValue)](const int32_t start, const int32_t end) {
+        auto arkStart = Converter::ArkValue<Ark_Int32>(start);
+        auto arkEnd = Converter::ArkValue<Ark_Int32>(end);
+        arkCallback.Invoke(arkStart, arkEnd);
+    };
+    LazyGridLayoutModelStatic::SetOnVisibleIndexesChange(frameNode, std::move(onVisibleIndexesChange));
+}
 } // LazyGridLayoutAttributeModifier
 const GENERATED_ArkUILazyGridLayoutAttributeModifier* GetLazyGridLayoutAttributeModifier()
 {
@@ -59,6 +77,7 @@ const GENERATED_ArkUILazyGridLayoutAttributeModifier* GetLazyGridLayoutAttribute
         LazyGridLayoutAttributeModifier::ConstructImpl,
         LazyGridLayoutAttributeModifier::SetRowsGapImpl,
         LazyGridLayoutAttributeModifier::SetColumnsGapImpl,
+        LazyGridLayoutAttributeModifier::SetOnVisibleIndexesChangeImpl,
     };
     return &ArkUILazyGridLayoutAttributeModifierImpl;
 }

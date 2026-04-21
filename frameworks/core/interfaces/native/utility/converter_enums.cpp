@@ -101,6 +101,16 @@ void AssignCast(std::optional<WebRotateEffect>& dst, const Ark_WebRotateEffect& 
 }
 
 template<>
+void AssignCast(std::optional<ScrollDirectionalLockType>& dst, const Ark_ScrollDirectionalLockType& src)
+{
+    switch (src) {
+        case ARK_SCROLL_DIRECTIONAL_LOCK_TYPE_ALL: dst = ScrollDirectionalLockType::ALL; break;
+        case ARK_SCROLL_DIRECTIONAL_LOCK_TYPE_NESTED_SCROLL: dst = ScrollDirectionalLockType::NESTED_SCROLL; break;
+        default: LOGE("Unexpected enum value in Ark_ScrollDirectionalLockType: %{public}d", src);
+    }
+}
+
+template<>
 ACE_FORCE_EXPORT void AssignCast(std::optional<AutoCapitalizationMode>& dst, const Ark_AutoCapitalizationMode& src)
 {
     switch (src) {
@@ -217,22 +227,22 @@ void AssignCast(std::optional<ButtonStyleMode>& dst, const Ark_ButtonStyleMode& 
 }
 
 template<>
-ACE_FORCE_EXPORT void AssignCast(std::optional<Color>& dst, const enum Ark_Color& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<Color>& dst, const enum Ark_arkui_component_enums_Color& src)
 {
     switch (src) {
-        case ARK_COLOR_WHITE: dst = Color(0xffffffff); break; // White
-        case ARK_COLOR_BLACK: dst = Color(0xff000000); break; // Black
-        case ARK_COLOR_BLUE: dst = Color(0xff0000ff); break; // Blue
-        case ARK_COLOR_BROWN: dst = Color(0xffa52a2a); break; // Brown
-        case ARK_COLOR_GRAY: dst = Color(0xff808080); break; // Gray
-        case ARK_COLOR_GREEN: dst = Color(0xff008000); break; // Green
-        case ARK_COLOR_GREY: dst = Color(0xff808080); break; // Grey
-        case ARK_COLOR_ORANGE: dst = Color(0xffffa500); break; // Orange
-        case ARK_COLOR_PINK: dst = Color(0xffffc0cb); break; // Pink
-        case ARK_COLOR_RED: dst = Color(0xffff0000); break; // Red
-        case ARK_COLOR_YELLOW: dst = Color(0xffffff00); break; // Yellow
-        case ARK_COLOR_TRANSPARENT: dst = Color(0x00000000); break; // Transparent
-        default: LOGE("Unexpected enum value in Ark_Color: %{public}d", src);
+        case ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE: dst = Color(0xffffffff); break; // White
+        case ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLACK: dst = Color(0xff000000); break; // Black
+        case ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE: dst = Color(0xff0000ff); break; // Blue
+        case ARK_ARKUI_COMPONENT_ENUMS_COLOR_BROWN: dst = Color(0xffa52a2a); break; // Brown
+        case ARK_ARKUI_COMPONENT_ENUMS_COLOR_GRAY: dst = Color(0xff808080); break; // Gray
+        case ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREEN: dst = Color(0xff008000); break; // Green
+        case ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREY: dst = Color(0xff808080); break; // Grey
+        case ARK_ARKUI_COMPONENT_ENUMS_COLOR_ORANGE: dst = Color(0xffffa500); break; // Orange
+        case ARK_ARKUI_COMPONENT_ENUMS_COLOR_PINK: dst = Color(0xffffc0cb); break; // Pink
+        case ARK_ARKUI_COMPONENT_ENUMS_COLOR_RED: dst = Color(0xffff0000); break; // Red
+        case ARK_ARKUI_COMPONENT_ENUMS_COLOR_YELLOW: dst = Color(0xffffff00); break; // Yellow
+        case ARK_ARKUI_COMPONENT_ENUMS_COLOR_TRANSPARENT: dst = Color(0x00000000); break; // Transparent
+        default: LOGE("Unexpected enum value in Ark_arkui_component_enums_Color: %{public}d", src);
     }
 }
 
@@ -1401,6 +1411,18 @@ void AssignCast(std::optional<WebKeyboardAvoidMode>& dst, const Ark_WebKeyboardA
 }
 
 template<>
+void AssignCast(std::optional<WebKeyboardAppearanceMode>& dst, const Ark_WebKeyboardAppearanceMode& src)
+{
+    switch (src) {
+        case ARK_WEB_KEYBOARD_APPEARANCE_MODE_NONE_IMMERSIVE: dst = WebKeyboardAppearanceMode::NONE_IMMERSIVE; break;
+        case ARK_WEB_KEYBOARD_APPEARANCE_MODE_IMMERSIVE: dst = WebKeyboardAppearanceMode::IMMERSIVE; break;
+        case ARK_WEB_KEYBOARD_APPEARANCE_MODE_LIGHT_IMMERSIVE: dst = WebKeyboardAppearanceMode::LIGHT_IMMERSIVE; break;
+        case ARK_WEB_KEYBOARD_APPEARANCE_MODE_DARK_IMMERSIVE: dst = WebKeyboardAppearanceMode::DARK_IMMERSIVE; break;
+        default: LOGE("Unexpected enum value in Ark_WebKeyboardAppearanceMode: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<WebLayoutMode>& dst, const Ark_WebLayoutMode& src)
 {
     switch (src) {
@@ -1704,6 +1726,16 @@ void AssignCast(std::optional<Axis>& dst, const Ark_ScrollBarDirection& src)
         case ARK_SCROLL_BAR_DIRECTION_VERTICAL: dst = Axis::VERTICAL; break;
         case ARK_SCROLL_BAR_DIRECTION_HORIZONTAL: dst = Axis::HORIZONTAL; break;
         default: LOGE("Unexpected enum value in Ark_ScrollBarDirection: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<ScrollbarLayoutPolicy>& dst, const Ark_ScrollbarLayoutPolicy& src)
+{
+    switch (src) {
+        case ARK_SCROLLBAR_LAYOUT_POLICY_CONTENT: dst = ScrollbarLayoutPolicy::CONTENT; break;
+        case ARK_SCROLLBAR_LAYOUT_POLICY_SYSTEM: dst = ScrollbarLayoutPolicy::SYSTEM; break;
+        default: LOGE("Unexpected enum value in Ark_ScrollbarLayoutPolicy: %{public}d", src);
     }
 }
 
@@ -2056,6 +2088,17 @@ void AssignCast(std::optional<SwipeActionState>& dst, const Ark_SwipeActionState
         default: {
             LOGE("Unexpected enum value in Ark_SwipeActionState: %{public}d", src);
         }
+    }
+}
+
+template<>
+void AssignCast(std::optional<HdrType>& dst, const Ark_HdrType& src)
+{
+    switch (src) {
+        case ARK_HDR_TYPE_DEFAULT: dst = HdrType::DEFAULT; break;
+        case ARK_HDR_TYPE_AIHDR: dst = HdrType::AIHDR; break;
+        case ARK_HDR_TYPE_EDR: dst = HdrType::EDR; break;
+        default: LOGE("Unexpected enum value in Ark_HdrType: %{public}d", src);
     }
 }
 

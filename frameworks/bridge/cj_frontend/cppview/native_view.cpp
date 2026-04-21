@@ -144,10 +144,12 @@ RefPtr<AceType> NativeView::CreateUI()
                 std::string* val = static_cast<std::string*>(params);
                 CHECK_NULL_VOID(val);
                 self->cjView_->AboutToReuse(*val);
-            },
+            }
     };
     auto node = ViewPartialUpdateModel::GetInstance()->CreateNode(std::move(partialUpdateCallbacks));
+
     node_ = node;
+
     return node;
 }
 

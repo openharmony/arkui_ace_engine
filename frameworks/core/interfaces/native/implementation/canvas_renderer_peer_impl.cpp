@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#define _USE_MATH_DEFINES
+
 #include <cmath>
 
 #include "canvas_renderer_peer_impl.h"
@@ -140,7 +140,7 @@ static bool MatchColorWithRGBA(const std::string& colorStr, Color& color)
         char* pEnd = nullptr;
         errno = 0;
         double val = std::strtod(valueProps[i].c_str(), &pEnd);
-        if (pEnd == valueProps[i].c_str() || *pEnd != '\0' || errno == ERANGE) {
+        if (pEnd == nullptr || pEnd == valueProps[i].c_str() || *pEnd != '\0' || errno == ERANGE) {
             return false;
         }
         if (i < RGB_SUB_SIZE) {
@@ -1097,6 +1097,16 @@ void CanvasRendererPeerImpl::SetLetterSpacing(const Ace::Dimension& letterSpacin
     renderingContext2DModel_->SetLetterSpacing(letterSpacingCal);
     letterSpacing_ = letterSpacing;
 }
+std::optional<bool> CanvasRendererPeerImpl::GetAntialias() const
+{
+    CHECK_NULL_RETURN(renderingContext2DModel_, std::optional<bool>());
+    return renderingContext2DModel_->GetAntialiasExt();
+}
+void CanvasRendererPeerImpl::SetAntialias(std::optional<bool> enabled)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    renderingContext2DModel_->SetAntialiasExt(enabled);
+}
 // inheritance
 void CanvasRendererPeerImpl::ResetPaintState()
 {
@@ -1142,16 +1152,16 @@ void CanvasRendererPeerImpl::ExtractInfoToImage(Ace::CanvasImage& image, const D
     switch (params.size) {
         case SizeParam::TWO_ARGS:
             image.flag = IMAGE_FLAG_0;
-            GetDoubleArg(image.dx, params.dx);
-            GetDoubleArg(image.dy, params.dy);
+            image.dx = params.dx;
+            image.dy = params.dy;
             image.dx *= density;
             image.dy *= density;
             break;
         // 5 parameters: drawImage(image, dx, dy, dWidth, dHeight)
         case SizeParam::FOUR_ARGS:
             image.flag = IMAGE_FLAG_1;
-            GetDoubleArg(image.dx, params.dx);
-            GetDoubleArg(image.dy, params.dy);
+            image.dx = params.dx;
+            image.dy = params.dy;
             GetDoubleArg(image.dWidth, params.dWidth);
             GetDoubleArg(image.dHeight, params.dHeight);
             image.dx *= density;
@@ -1166,8 +1176,8 @@ void CanvasRendererPeerImpl::ExtractInfoToImage(Ace::CanvasImage& image, const D
             GetDoubleArg(image.sy, params.sy);
             GetDoubleArg(image.sWidth, params.sWidth);
             GetDoubleArg(image.sHeight, params.sHeight);
-            GetDoubleArg(image.dx, params.dx);
-            GetDoubleArg(image.dy, params.dy);
+            image.dx = params.dx;
+            image.dy = params.dy;
             GetDoubleArg(image.dWidth, params.dWidth);
             GetDoubleArg(image.dHeight, params.dHeight);
             // In higher versions, sx, sy, sWidth, sHeight are parsed in VP units

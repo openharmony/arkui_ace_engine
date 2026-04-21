@@ -22,4 +22,17 @@ ace_unittest("custom_node_ext_test") {
     "$ace_root/frameworks/core/components_ng/pattern/custom_node_ext/custom_node_ext_pattern.cpp",
     "custom_node_ext_test.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "custom_node_ext_test_min.cpp",
+      "custom_node_ext_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "custom_node_ext_test_min.cpp",
+      "custom_node_ext_test_core.cpp",
+    ]
+  }
 }

@@ -62,11 +62,11 @@ public:
 };
 
 /**
- * @tc.name: LengthTest
+ * @tc.name: lengthTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WaterFlowSectionAccessorTest, LengthTest, TestSize.Level1)
+HWTEST_F(WaterFlowSectionAccessorTest, lengthTest, TestSize.Level1)
 {
     Ark_SectionOptions section1;
     section1.columnsGap = Converter::ArkValue<Opt_Dimension>(1.f);
@@ -91,11 +91,11 @@ std::optional<decltype(T().ToString())> ToStr(const std::optional<T>& src)
 }
 
 /**
- * @tc.name: ValuesTest
+ * @tc.name: valuesTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WaterFlowSectionAccessorTest, ValuesTest, TestSize.Level1)
+HWTEST_F(WaterFlowSectionAccessorTest, valuesTest, TestSize.Level1)
 {
     Ark_SectionOptions section;
     section.columnsGap = Converter::ArkValue<Opt_Dimension>(1.f);
@@ -126,14 +126,14 @@ HWTEST_F(WaterFlowSectionAccessorTest, ValuesTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnGetItemMainSizeByIndexTest
+ * @tc.name: valuesTestOnGetItemMainSizeByIndex
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WaterFlowSectionAccessorTest, OnGetItemMainSizeByIndexTest, TestSize.Level1)
+HWTEST_F(WaterFlowSectionAccessorTest, valuesTestOnGetItemMainSizeByIndex, TestSize.Level1)
 {
     const auto inputValue = 123;
-    const auto expextedValue = 789;
+    const auto expectedValue = 789;
     auto onGetItemMainSizeByIndex = [](int32_t index) -> float {
         return index == 123 ? 789 : 0;
     };
@@ -158,6 +158,6 @@ HWTEST_F(WaterFlowSectionAccessorTest, OnGetItemMainSizeByIndexTest, TestSize.Le
                 auto resultOpt = callback.InvokeWithOptConvertResult<float, Ark_Number, Callback_Number_Void>(param);
                 return resultOpt.value_or(0);
             };
-    EXPECT_EQ(modelCallback(inputValue), expextedValue);
+    EXPECT_EQ(modelCallback(inputValue), expectedValue);
 }
 } // namespace OHOS::Ace::NG

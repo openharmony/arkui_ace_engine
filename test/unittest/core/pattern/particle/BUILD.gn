@@ -21,4 +21,16 @@ ace_unittest("particle_test_ng") {
     "$ace_root/test/unittest/core/pattern/particle/mock/mock_rosen_particle_context.cpp",
     "particle_test_ng.cpp",
   ]
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "particle_test_min.cpp",
+      "particle_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "particle_test_min.cpp",
+      "particle_test_core.cpp",
+    ]
+  }
 }

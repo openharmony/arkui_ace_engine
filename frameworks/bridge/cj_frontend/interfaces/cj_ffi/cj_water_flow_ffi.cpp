@@ -39,8 +39,7 @@ NG::WaterFlowModelNG* GetWaterFlowModel()
     if (!cachedModel) {
         auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("WaterFlow");
         if (module == nullptr) {
-            LOGF("Can't find WaterFlow dynamic module");
-            abort();
+            LOGF_ABORT("Can't find WaterFlow dynamic module");
         }
         cachedModel = reinterpret_cast<NG::WaterFlowModelNG*>(module->GetModel());
     }
@@ -379,13 +378,11 @@ void FfiOHOSAceFrameworkFlowItemCreate()
     if (!cachedModel) {
         auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("FlowItem");
         if (module == nullptr) {
-            LOGF("Can't find FlowItem dynamic module");
-            abort();
+            LOGF_ABORT("Can't find FlowItem dynamic module");
         }
         cachedModel = reinterpret_cast<NG::WaterFlowItemModelNG*>(module->GetModel());
         if (cachedModel == nullptr) {
-            LOGF("Can't find FlowItem model");
-            abort();
+            LOGF_ABORT("Can't find FlowItem model");
         }
     }
     cachedModel->Create();

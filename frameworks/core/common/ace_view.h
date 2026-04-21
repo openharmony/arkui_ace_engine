@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@
 #include "core/common/draw_delegate.h"
 #include "core/common/platform_res_register.h"
 #include "core/common/platform_window.h"
+#include "core/components/common/properties/color.h"
 
 namespace OHOS::Rosen {
 class RSTransaction;
@@ -151,11 +152,6 @@ public:
         return cachePath_;
     }
 
-    void SetCreateTime(std::chrono::time_point<std::chrono::high_resolution_clock> time)
-    {
-        createTime_ = time;
-    }
-
     void SetFirstUpDating(std::chrono::time_point<std::chrono::high_resolution_clock> time)
     {
         firstUpdating_ = true;
@@ -188,7 +184,6 @@ public:
     }
 
 protected:
-    std::chrono::time_point<std::chrono::high_resolution_clock> createTime_;
     std::chrono::time_point<std::chrono::high_resolution_clock> firstUpdateBegin_;
     std::string sessionID_;
     bool firstUpdating_ = false;

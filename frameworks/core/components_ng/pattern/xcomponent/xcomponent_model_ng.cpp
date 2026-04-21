@@ -309,6 +309,15 @@ void XComponentModelNG::HdrBrightness(float hdrBrightness)
     xcPattern->HdrBrightness(hdrBrightness);
 }
 
+void XComponentModelNG::HdrBrightness(float hdrBrightness, HdrType hdrType)
+{
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(frameNode);
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(xcPattern);
+    xcPattern->HdrBrightness(hdrBrightness, hdrType);
+}
+
 void XComponentModelNG::EnableTransparentLayer(bool isTransparentLayer)
 {
     auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
@@ -585,6 +594,14 @@ void XComponentModelNG::HdrBrightness(FrameNode* frameNode, float hdrBrightness)
     xcPattern->HdrBrightness(hdrBrightness);
 }
 
+void XComponentModelNG::HdrBrightness(FrameNode* frameNode, float hdrBrightness, HdrType hdrType)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(xcPattern);
+    xcPattern->HdrBrightness(hdrBrightness, hdrType);
+}
+
 void XComponentModelNG::EnableTransparentLayer(FrameNode* frameNode, bool enable)
 {
     CHECK_NULL_VOID(frameNode);
@@ -613,6 +630,17 @@ void XComponentModelNG::SetXComponentSurfaceRect(FrameNode* frameNode, float off
     float surfaceWidth, float surfaceHeight)
 {
     CHECK_NULL_VOID(frameNode);
+    if (AceType::InstanceOf<XComponentPatternV2>(frameNode->GetPattern())) {
+        InnerSetSurfaceRectV2(frameNode, offsetX, offsetY, surfaceWidth, surfaceHeight);
+        return;
+    }
+    InnerSetSurfaceRectV1(frameNode, offsetX, offsetY, surfaceWidth, surfaceHeight);
+}
+
+void XComponentModelNG::InnerSetSurfaceRectV1(FrameNode* frameNode, float offsetX, float offsetY,
+    float surfaceWidth, float surfaceHeight)
+{
+    CHECK_NULL_VOID(frameNode);
     auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(xcPattern);
     xcPattern->SetIdealSurfaceOffsetX(offsetX);
@@ -622,6 +650,21 @@ void XComponentModelNG::SetXComponentSurfaceRect(FrameNode* frameNode, float off
 
     const auto& [offsetChanged, sizeChanged, needFireNativeEvent] = xcPattern->UpdateSurfaceRect();
     xcPattern->HandleSurfaceChangeEvent(true, offsetChanged, sizeChanged, needFireNativeEvent);
+}
+
+void XComponentModelNG::InnerSetSurfaceRectV2(FrameNode* frameNode, float offsetX, float offsetY,
+    float surfaceWidth, float surfaceHeight)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto xcPattern = AceType::DynamicCast<XComponentPatternV2>(frameNode->GetPattern());
+    CHECK_NULL_VOID(xcPattern);
+    xcPattern->SetIdealSurfaceOffsetX(offsetX);
+    xcPattern->SetIdealSurfaceOffsetY(offsetY);
+    xcPattern->SetIdealSurfaceWidth(surfaceWidth);
+    xcPattern->SetIdealSurfaceHeight(surfaceHeight);
+
+    const auto& [offsetChanged, sizeChanged] = xcPattern->UpdateSurfaceRect();
+    xcPattern->HandleSurfaceChangeEvent(true, offsetChanged, sizeChanged, true);
 }
 
 void XComponentModelNG::GetXComponentSurfaceRect(FrameNode* frameNode, float& offsetX, float& offsetY,

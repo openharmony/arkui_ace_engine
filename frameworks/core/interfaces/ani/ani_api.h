@@ -21,9 +21,10 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <vector>
 
 #include "base/memory/referenced.h"
-#include "core/components_ng/base/frame_node.h"
+#include "ui/base/utils/utils.h"
 #include "frameworks/core/components/common/layout/constants.h"
 
 #ifdef __cplusplus
@@ -133,6 +134,10 @@ private:
 
 namespace OHOS::AbilityRuntime {
 class Context;
+}
+
+namespace OHOS::Ace::NG {
+class FrameNode;
 }
 
 namespace OHOS::Ace::Ani {
@@ -264,8 +269,10 @@ struct ArkUIDragControllerAsync {
     bool hasHandle = false;
     SharedPointerWrapper touchPoint;
     SharedPointerWrapper unifiedData;
+    SharedPointerWrapper dataLoadParams;
     SharedPointerWrapper pixelMap;
     std::vector<SharedPointerWrapper> pixelMapList;
+    std::vector<int32_t> autoHideComponentUniqueIds;
     ArkUINodeHandle customBuilderNode = nullptr;
     std::vector<ArkUINodeHandle> customBuilderNodeList;
     ani_fn_object asyncCallback = nullptr;
@@ -353,6 +360,15 @@ struct ArkUIComponentSnapshotAsync {
     ani_object destroyCallbackRef = nullptr;
     std::shared_ptr<void> pixelMap;
     std::function<void(std::shared_ptr<ArkUIComponentSnapshotAsync>)> callBackJsFunction;
+};
+
+struct ArkUIDrawableAsync {
+    int32_t imageWidth_ = 0;
+    int32_t imageHeight_ = 0;
+    int32_t errorCode = -1;
+    ani_env* env = nullptr;
+    ani_resolver deferred = nullptr;
+    std::function<void(std::shared_ptr<ArkUIDrawableAsync>)> callBackJsFunction;
 };
 
 typedef struct ArkUIAniTranslateOptions {
@@ -518,6 +534,7 @@ struct ArkUIAniDragModifier {
     SharedPointerWrapper (*getUnifiedData)(ani_long peer);
     ani_long (*createDataLoadParamsPeer)(void* dataLoadParams);
     void (*getPressedModifierKey)(ani_long nativePtr, char*** keys, ani_int* length);
+    void (*getPressedModifierKeyForTouch)(ani_long nativePtr, char*** keys, ani_int* length);
 };
 struct ArkUIAniXBarModifier {
     void (*setComponentCreateFunc)(std::function<int64_t(const int32_t&, const int32_t&)>&& fn);
@@ -559,6 +576,7 @@ struct ArkUIAniCommonModifier {
     void (*onMeasureInnerMeasure)(ani_long ptr);
     void (*onLayoutInnerLayout)(ani_long ptr);
     void (*setParallelScoped)(ani_boolean parallel);
+    void (*checkThreadValid)(ani_boolean checkUIThread, ani_long node);
     void (*setCustomPropertyCallBack)(
         ArkUINodeHandle node, std::function<void()>&& func,
         std::function<std::string(const std::string&)>&& getFunc,
@@ -572,7 +590,7 @@ struct ArkUIAniCommonModifier {
     ani_double (*lpx2px)(ani_double value, ani_int instanceId);
     ani_double (*px2lpx)(ani_double value, ani_int instanceId);
     std::optional<std::string> (*getWindowName)(ani_int instanceId);
-    std::optional<std::uint32_t> (*getWindowId)(ani_int instanceId);
+    ani_int (*getWindowId)(ani_int instanceId);
     ani_int (*getWindowWidthBreakpoint)();
     ani_int (*getWindowHeightBreakpoint)();
     void* (*transferKeyEventPointer)(ani_long nativePtr);
@@ -613,6 +631,7 @@ struct ArkUIAniCommonModifier {
     void (*applyThemeScopeId)(ani_env* env, ani_long ptr, ani_int themeScopeId);
     void (*setIsRecycleInvisibleImageMemory)(ani_boolean isRecycle, ani_int instanceId);
     void (*getBaseEventPressedModifierKey)(ani_long nativePtr, char*** keys, ani_int* length);
+    void (*getTouchEventPressedModifierKey)(ani_long nativePtr, char*** keys, ani_int* length);
     void (*getKeyEventPressedModifierKey)(ani_long nativePtr, char*** keys, ani_int* length);
     ani_boolean (*setClickEventPreventDefault)(ani_long nativePtr);
     ani_boolean (*setTouchEventPreventDefault)(ani_long nativePtr);
@@ -622,6 +641,7 @@ struct ArkUIAniCommonModifier {
     void(*getAllInstanceIds)(std::vector<int32_t>& instance);
     void(*resolveUIContext)(std::vector<int32_t>& instance);
     ani_long (*getPageRootNode)();
+    ani_boolean(*isEasySplit)(ArkUI_Int32 instanceId);
 };
 struct  ArkUICustomNodeInfo {
     std::function<void()> onPageShowFunc;
@@ -750,6 +770,7 @@ struct ArkUIAniTextBasedModifier {
     void* (*toTextModifierPeer)(std::function<void(OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode>)>& textApply,
         void* textModifierAni);
     void* (*toIMEExtraCfgPeer)(void* extraConfigPtr);
+    void* (*toTextParagraphPeer)(void* paragraphPtr);
 };
 struct ArkUIAniStyledStringModifier {
     void (*setPixelMap)(ArkUIStyledString peer, void* nativePixelMap);

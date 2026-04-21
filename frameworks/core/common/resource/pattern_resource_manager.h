@@ -20,11 +20,14 @@
 #include <map>
 #include <string>
 #include <unordered_map>
+#include <variant>
 
 #include "base/memory/ace_type.h"
+#include "interfaces/inner_api/ace_kit/include/ui/base/geometry/calc_dimension.h"
 
 #include "core/common/resource/resource_object.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/color.h"
+#include "core/components/common/properties/text_enums.h"
 
 namespace OHOS::Ace {
 enum class ValueType {
@@ -93,7 +96,7 @@ public:
 
     template<typename T>
     void UpdateProperty(std::function<void(const std::string&, const RefPtr<PropertyValueBase>&)>&& propUpdateFunc,
-        const std::string& key, const RefPtr<ResourceObject>& resObj)
+        const std::string& key, const RefPtr<ResourceObject>& resObj, bool adaptMaterial = false)
     {
         auto value = AceType::MakeRefPtr<PropertyValueBase>();
         if constexpr (std::is_same_v<T, std::string>) {
@@ -111,27 +114,38 @@ public:
         } else if constexpr(std::is_same_v<T, std::vector<std::string>>) {
             value->SetValueType(ValueType::VECTOR_STRING);
         }
-        ParsePropertyValue(resObj, value);
+        ParsePropertyValue(resObj, value, adaptMaterial);
         if (propUpdateFunc) {
             propUpdateFunc(key, value);
         }
     }
 
+    /**
+     * @param adaptMaterial Indicates whether the new material is adapted to special resources for color inversion.
+     * Only the Color type has differences. If the value is true, the color resolved from special resources will carry
+     * a non-NONE placeholder.
+     */
     template<typename T>
     void RegisterResource(std::function<void(const std::string&, const RefPtr<PropertyValueBase>&)>&& propUpdateFunc,
-        const std::string& key, const RefPtr<ResourceObject>& resObj, T value)
+        const std::string& key, const RefPtr<ResourceObject>& resObj, T value, bool adaptMaterial = false)
     {
-        auto&& updateFunc = [weakptr = AceType::WeakClaim(this), propUpdateFunc, key](
+        auto&& updateFunc = [weakptr = AceType::WeakClaim(this), propUpdateFunc, key, adaptMaterial](
                                 const RefPtr<ResourceObject>& resObj) mutable {
             auto manager = weakptr.Upgrade();
             if (manager) {
-                manager->UpdateProperty<T>(std::move(propUpdateFunc), key, resObj);
+                manager->UpdateProperty<T>(std::move(propUpdateFunc), key, resObj, adaptMaterial);
             }
         };
         AddResource(key, resObj, std::move(updateFunc));
     }
 
-    ACE_FORCE_EXPORT void ParsePropertyValue(const RefPtr<ResourceObject>& resObj, RefPtr<PropertyValueBase> value);
+    /**
+     * @param adaptMaterial Indicates whether the new material is adapted to special resources for color inversion.
+     * Only the Color type has differences. If the value is true, the color resolved from special resources will carry
+     * a non-NONE placeholder.
+     */
+    ACE_FORCE_EXPORT void ParsePropertyValue(
+        const RefPtr<ResourceObject>& resObj, RefPtr<PropertyValueBase> value, bool adaptMaterial = false);
 
     const std::vector<std::string>& GetResKeyArray();
 private:

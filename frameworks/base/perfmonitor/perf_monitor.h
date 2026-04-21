@@ -71,7 +71,7 @@ public:
     static PerfMonitor* pMonitor;
     static std::once_flag initFlag;
     static void InitInstance();
-    void SetApsMonitor(const std::shared_ptr<ApsMonitor>& apsMonitor);
+    void SetApsMonitor(ApsMonitor* apsMonitor);
     void ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName,
                            const std::string& pageName);
     void RecordWindowRectResize(OHOS::Ace::WindowSizeChangeReason reason,
@@ -82,7 +82,7 @@ public:
     void ReportSurface(const uint64_t& uniqueId, const std::string& surfaceName, const std::string& componentName,
         const std::string& bundleName, const int32_t pid);
 private:
-    std::shared_ptr<ApsMonitor> apsMonitor_ = nullptr;
+    ApsMonitor* apsMonitor_;
 };
 } // namespace OHOS::Ace
 #endif // ARKUI_PERF_MONITOR_H

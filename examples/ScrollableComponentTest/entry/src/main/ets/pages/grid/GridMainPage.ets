@@ -43,13 +43,7 @@ struct WaterFlowMainPage {
     new TextList(9, 'GridCAPI', 'pages/grid/GridCAPI'),
     new TextList(10, 'GrdiDragSample', 'pages/grid/GrdiDragSample'),
     new TextList(11, 'GridDragWithScroll', 'pages/grid/GridDragWithScroll'),
-    new TextList(12, 'cachedCount007', 'pages/grid/st/cachedCount007'),
-    new TextList(13, 'cachedCount008', 'pages/grid/st/cachedCount008'),
-    new TextList(14, 'GridDemo001', 'pages/grid/st/GridDemo001'),
-    new TextList(15, 'GridDemo002', 'pages/grid/st/GridDemo002'),
-    new TextList(16, 'GridDemo006', 'pages/grid/st/GridDemo006'),
-    new TextList(17, 'LazyVGridSample', 'pages/grid/st/LazyVGridSample'),
-    new TextList(18, 'NestedScroll001', 'pages/grid/st/NestedScroll001'),
+
     new TextList(19, 'GridIndex', 'pages/grid/GridIndex'),
     new TextList(20, 'GridModifierIndex', 'pages/grid/GridModifierIndex'),
     new TextList(21, 'scrollBarColor', 'pages/grid/scrollBarColor'),
@@ -57,6 +51,13 @@ struct WaterFlowMainPage {
     new TextList(24, 'GridTest', 'pages/grid/CAPI/GridTest'),
     new TextList(23, 'LayoutConstraints', 'pages/grid/LayoutConstraints/LayoutConstraints_MainPage'),
     new TextList(24, 'GridSwiperDragSort', 'pages/grid/GridSwiperDragSort'),
+    new TextList(25, 'EditModeOptions', 'pages/grid/GridEditModeOptions'),
+    new TextList(26, 'PageGridDragEvent', 'pages/grid/PageGridDragEvent'),
+    new TextList(27, 'BindControllerDeclare', 'pages/grid/bindController/GridDeclare'),
+    new TextList(28, 'BindControllerCommand', 'pages/grid/bindController/GridCommand'),
+    new TextList(29, 'GridEventReport', 'pages/grid/GridEventReport'),
+    new TextList(30, 'GridEventReportNestedScroll', 'pages/grid/GridEventReportNestedScroll'),
+    new TextList(31, 'GridEmptyBranch', 'pages/grid/GridEmptyBranch'),
   ]
   @State fontSize: Resource | undefined = undefined
 

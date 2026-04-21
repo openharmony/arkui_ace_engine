@@ -19,23 +19,23 @@
 #include <tuple>
 #include "core/animation/chain_animation.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/list/list_accessibility_property.h"
 #include "core/components_ng/pattern/list/list_children_main_size.h"
 #include "core/components_ng/pattern/list/list_content_modifier.h"
-#include "core/components_ng/pattern/list/list_event_hub.h"
-#include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
-#include "core/components_ng/pattern/list/list_layout_property.h"
-#include "core/components_ng/pattern/list/list_paint_method.h"
-#include "core/components_ng/pattern/list/list_position_map.h"
+#include "core/components_ng/pattern/list/list_properties.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/selectable_container_pattern.h"
-#include "core/components_ng/render/render_context.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
+#include "core/components/scroll/scroll_controller_base.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
+class ListAccessibilityProperty;
+class ListEventHub;
+class ListItemPattern;
+class ListLayoutProperty;
+class ListPositionMap;
 
 struct ListItemGroupPara {
     int32_t lanes = -1;
@@ -65,20 +65,11 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
-    RefPtr<LayoutProperty> CreateLayoutProperty() override
-    {
-        return MakeRefPtr<ListLayoutProperty>();
-    }
+    RefPtr<LayoutProperty> CreateLayoutProperty() override;
 
-    RefPtr<EventHub> CreateEventHub() override
-    {
-        return MakeRefPtr<ListEventHub>();
-    }
+    RefPtr<EventHub> CreateEventHub() override;
 
-    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
-    {
-        return MakeRefPtr<ListAccessibilityProperty>();
-    }
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override;
 
     bool UsResRegion() override
     {
@@ -91,7 +82,15 @@ public:
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
 
+    bool PostponedTaskForIgnoreCustomized() override
+    {
+        return true;
+    }
+    void PostponedTaskForIgnore(LayoutSafeAreaBundleType type) override;
+
     bool UpdateCurrentOffset(float offset, int32_t source) override;
+
+    void PostAsyncLoadTask();
 
     DisplayMode GetDefaultScrollBarDisplayMode() const override;
 
@@ -183,6 +182,8 @@ public:
         return itemPosition_;
     }
 
+    bool GetDummyItemRect(int32_t index, RectF& rect) const;
+
     double GetTotalOffset() const override
     {
         return currentOffset_;
@@ -191,6 +192,10 @@ public:
     float GetContentStartOffset() const override
     {
         return contentStartOffset_;
+    }
+    float GetContentEndOffset() const override
+    {
+        return contentEndOffset_;
     }
 
     RefPtr<ScrollControllerBase> GetPositionController() const
@@ -256,42 +261,20 @@ public:
     {
         multiSelectable_ = multiSelectable;
     }
-
+    void UpdateBackPressCloseSwipeActionCallback();
+    void SetBackPressCloseSwipeAction(bool closeSwipeAction)
+    {
+        closeSwipeActionByBackPress_ = closeSwipeAction;
+    }
+    bool GetBackPressCloseSwipeAction() const
+    {
+        return closeSwipeActionByBackPress_;
+    }
     void SetSwiperItem(WeakPtr<ListItemPattern> swiperItem);
-    WeakPtr<ListItemPattern> GetSwiperItem()
-    {
-        if (!swiperItem_.Upgrade()) {
-            return nullptr;
-        }
-        return swiperItem_;
-    }
-    void SetSwiperItemEnd(WeakPtr<ListItemPattern> swiperItem)
-    {
-        if (swiperItem == swiperItem_) {
-            canReplaceSwiperItem_ = true;
-        }
-    }
-    bool IsCurrentSwiperItem(WeakPtr<ListItemPattern> swiperItem)
-    {
-        if (!swiperItem_.Upgrade()) {
-            return true;
-        }
-        return swiperItem == swiperItem_;
-    }
-    bool CanReplaceSwiperItem()
-    {
-        auto listItemPattern = swiperItem_.Upgrade();
-        if (!listItemPattern) {
-            canReplaceSwiperItem_ = true;
-            return canReplaceSwiperItem_;
-        }
-        auto host = listItemPattern->GetHost();
-        if (!host || !host->IsOnMainTree()) {
-            canReplaceSwiperItem_ = true;
-            return canReplaceSwiperItem_;
-        }
-        return canReplaceSwiperItem_;
-    }
+    WeakPtr<ListItemPattern> GetSwiperItem();
+    void SetSwiperItemEnd(WeakPtr<ListItemPattern> swiperItem);
+    bool IsCurrentSwiperItem(WeakPtr<ListItemPattern> swiperItem);
+    bool CanReplaceSwiperItem();
 
     void SetPredictSnapOffset(float predictSnapOffset)
     {
@@ -403,6 +386,8 @@ public:
 
     SizeF GetChildrenExpandedSize() override;
 
+    bool GetIsAllowMouse() const override;
+
     inline int32_t GetItemStartIndex()
     {
         return itemStartIndex_;
@@ -500,8 +485,11 @@ public:
         return listSnapSpeed_;
     }
 
+    int32_t GetFirstIndex() const override;
+
 protected:
     void OnModifyDone() override;
+    void OnDetachFromMainTree() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     virtual bool ScrollListForFocus(int32_t nextIndex, int32_t curIndex, int32_t nextIndexInGroup);
     virtual void AdjustScrollPosition(int32_t nextIndex, int32_t curIndex);
@@ -513,6 +501,7 @@ protected:
     void SetChainAnimationLayoutAlgorithm(
         RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm, const RefPtr<ListLayoutProperty>& listLayoutProperty);
 
+    void ReportStatisticEventScrollVisibleContentChange();
     virtual void OnScrollVisibleContentChange(const RefPtr<ListEventHub>& listEventHub, bool indexChanged);
     virtual float GetScrollUpdateFriction(float overScroll);
     virtual ScrollAlign GetScrollToNodeAlign()
@@ -537,6 +526,8 @@ protected:
     float contentMainSize_ = 0.0f;
     float contentStartOffset_ = 0.0f;
     float contentEndOffset_ = 0.0f;
+    float startFixOffset_ = 0.0f;
+    float endFixOffset_ = 0.0f;
 
     float currentDelta_ = 0.0f;
     bool smooth_ = false;
@@ -564,6 +555,11 @@ protected:
     bool isStackFromEnd_ = true;
     FocusWrapMode focusWrapMode_ = FocusWrapMode::DEFAULT;
 private:
+    float GetListCrossAxisSize() const;
+    int32_t CalculateLaneNumber(int32_t index, const ListLayoutAlgorithm::PositionMap& itemPosition) const;
+    void CalculateCrossAxisPosition(int32_t lane, float listCrossSize, float& crossPos, float& crossSize) const;
+    void ApplyRtlTransform(float& mainPos, float mainSize) const;
+    RectF GetItemRectWithItemPosition(int32_t index, const std::map<int32_t, ListItemInfo>& itemPosition) const;
     void CheckAndUpdateAnimateTo(float relativeOffset, float prevOffset);
     void ResetScrollToIndexParams();
     void OnScrollEndCallback() override;
@@ -642,6 +638,8 @@ private:
     void GetListItemGroupEdge(bool& groupAtStart, bool& groupAtEnd) const;
     void RefreshLanesItemRange();
     void UpdateListDirectionInCardStyle();
+    VisibleContentInfo GetStartListItemIndex(const RefPtr<ListItemGroupPattern>& groupPattern);
+    VisibleContentInfo GetEndListItemIndex(const RefPtr<ListItemGroupPattern>& groupPattern);
     bool UpdateStartListItemIndex();
     bool UpdateEndListItemIndex();
     bool CalculateJumpOffset();
@@ -662,6 +660,7 @@ private:
     void ReportOnItemListEvent(const std::string& event);
     void ReportOnItemListScrollEvent(const std::string& event, int32_t startindex, int32_t endindex);
     int32_t OnInjectionEvent(const std::string& command) override;
+    void PostAfterCurrentLayoutTask();
 
     std::optional<int32_t> focusIndex_;
     std::optional<int32_t> focusGroupIndex_;
@@ -701,6 +700,8 @@ private:
     // ListItem swiperAction
     WeakPtr<ListItemPattern> swiperItem_;
     bool canReplaceSwiperItem_ = true;
+    bool closeSwipeActionByBackPress_ = true;
+    bool hasBackPressHandlerRegistered_ = false;
 
     RefPtr<SpringMotion> scrollToIndexMotion_;
     RefPtr<SpringMotion> scrollSnapMotion_;
@@ -722,6 +723,7 @@ private:
     int32_t draggingIndex_ = -1;
     bool heightEstimated_ = false;
     ScrollSnapAnimationSpeed listSnapSpeed_ = ScrollSnapAnimationSpeed::NORMAL;
+    std::optional<ExpandEdges> safeAreaPad_;
 };
 } // namespace OHOS::Ace::NG
 

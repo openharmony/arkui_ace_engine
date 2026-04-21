@@ -17,4 +17,17 @@ ace_unittest("grid_container_test_ng") {
   type = "new"
   module_name = "CommonProperties-LayoutAndBorder"
   sources = [ "grid_container_test_ng.cpp" ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "grid_container_test_min.cpp",
+      "grid_container_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "grid_container_test_min.cpp",
+      "grid_container_test_core.cpp",
+    ]
+  }
 }

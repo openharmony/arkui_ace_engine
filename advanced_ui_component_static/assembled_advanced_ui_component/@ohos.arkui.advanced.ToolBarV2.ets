@@ -158,7 +158,7 @@ export class ToolBarV2Item {
   @Trace
   public icon?: ToolBarV2ItemIconType = undefined;
   @Trace
-  public state?: ToolBarV2ItemState = 1 as ToolBarV2ItemState;
+  public state?: ToolBarV2ItemState = ToolBarV2ItemState.fromValue(1);
   @Trace
   public accessibilityText?: ResourceStr = '';
   @Trace
@@ -249,7 +249,7 @@ export class ToolBarV2Modifier implements AttributeModifier<ColumnAttribute> {
 }
 
 @ObservedV2
-class ToolBarV2Theme {
+export class ToolBarV2Theme {
   @Trace
   public iconPrimaryColor: ResourceColor = $r('sys.color.icon_primary');
   @Trace
@@ -685,7 +685,7 @@ export struct ToolBarV2 {
         this.gestureItem = item;
         this.gestureIndex = index;
         event.addGesture(
-          new LongPressGestureHandler({ repeat: false, duration: ButtonGestureModifier.longPressTime as int })
+          new LongPressGestureHandler({ repeat: false, duration: ButtonGestureModifier.longPressTime.toInt()})
             .onAction(() => {
               try {
                 this.getUIContext().getPromptAction().openCustomDialog({
@@ -721,7 +721,7 @@ export struct ToolBarV2 {
                 ).then((dialogId: int) => {
                   this.itemDialogId = dialogId;
                 });
-              } catch (error: ClassCastError) {
+              } catch (error) {
                 let code = (error as ClassCastError)?.code;
                 let message = (error as ClassCastError)?.message;
                 hilog.error(0x3900, 'Ace',
@@ -732,7 +732,7 @@ export struct ToolBarV2 {
               if (this.itemDialogId) {
                 try {
                   this.getUIContext().getPromptAction().closeCustomDialog(this.itemDialogId as int)
-                } catch (error: ClassCastError) {
+                } catch (error) {
                   let message = (error as ClassCastError).message;
                   let code = (error as ClassCastError).code;
                   console.error(`closeCustomDialog error code is ${code}, message is ${message}`);
@@ -743,7 +743,7 @@ export struct ToolBarV2 {
               if (this.itemDialogId) {
                 try {
                   this.getUIContext().getPromptAction().closeCustomDialog(this.itemDialogId as int)
-                } catch (error: ClassCastError) {
+                } catch (error) {
                   let message = (error as ClassCastError).message;
                   let code = (error as ClassCastError).code;
                   console.error(`closeCustomDialog error code is ${code}, message is ${message}`);

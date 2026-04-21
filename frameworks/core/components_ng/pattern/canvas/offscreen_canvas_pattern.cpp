@@ -186,6 +186,18 @@ void OffscreenCanvasPattern::SetAntiAlias(bool isEnabled)
     offscreenPaintMethod_->SetAntiAlias(isEnabled);
 }
 
+std::optional<bool> OffscreenCanvasPattern::GetAntialiasExt() const
+{
+    CHECK_NULL_RETURN(offscreenPaintMethod_, std::nullopt);
+    return offscreenPaintMethod_->GetAntialiasExt();
+}
+
+void OffscreenCanvasPattern::SetAntialiasExt(std::optional<bool> isEnabled)
+{
+    CHECK_NULL_VOID(offscreenPaintMethod_);
+    offscreenPaintMethod_->SetAntialiasExt(isEnabled);
+}
+
 void OffscreenCanvasPattern::SetFillColor(const Color& color)
 {
     offscreenPaintMethod_->SetFillColor(color);

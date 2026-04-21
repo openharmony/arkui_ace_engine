@@ -23,7 +23,7 @@
 
 #define private public
 #define protected public
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -77,7 +77,7 @@ public:
     }
 };
 
-auto g_onGetRid4Index = [](uint32_t index) -> std::pair<RIDType, uint32_t> {
+auto g_onGetRid4Index = [](uint32_t index, bool inAnimation) -> std::pair<RIDType, uint32_t> {
     return { index, index };
 };
 
@@ -105,26 +105,6 @@ HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2GetOrCreateRepeatNodeTest00
 
     ASSERT_NE(node, nullptr);
     EXPECT_EQ(node->GetTotalCount(), TOTAL_COUNT_5);
-}
-
-/**
- * @tc.name: RepeatVirtual2GetOrCreateRepeatNodeSameIdTest002
- * @tc.desc: Test GetOrCreateRepeatNode with same nodeId returns same instance
- * @tc.type: FUNC
- */
-HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2GetOrCreateRepeatNodeSameIdTest002, TestSize.Level1)
-{
-    auto node1 = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        NODE_ID_1, ARR_LEN_5, TOTAL_COUNT_5,
-        g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
-        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
-
-    auto node2 = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        NODE_ID_1, ARR_LEN_10, TOTAL_COUNT_10,
-        g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
-        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
-
-    EXPECT_EQ(node1, node2);
 }
 
 /**
@@ -702,6 +682,22 @@ HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2EmptyChildrenTest035, TestS
 
     ASSERT_NE(node, nullptr);
     (void)node->GetChildren(false);
+}
+
+/**
+ * @tc.name: RepeatVirtual2EmptyChildrenTest036
+ * @tc.desc: Test behavior with empty children and notDetach parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2EmptyChildrenTest036, TestSize.Level1)
+{
+    auto node = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
+        NODE_ID_2, ARR_LEN_10, TOTAL_COUNT_10,
+        g_onGetRid4Index, g_onRecycleItems, g_onActiveRange,
+        g_onMoveFromTo, g_onPurge, g_onUpdateDirty);
+
+    ASSERT_NE(node, nullptr);
+    (void)node->GetChildren(true);
 }
 
 } // namespace OHOS::Ace::NG

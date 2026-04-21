@@ -14,9 +14,9 @@
  */
 
 #include "list_test_ng.h"
-#include "test/mock/core/animation/mock_animation_manager.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/animation/mock_animation_manager.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "ui/base/geometry/dimension.h"
 
 #include "core/components/common/properties/shadow_config.h"
@@ -24,6 +24,8 @@
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/arc_list/arc_list_pattern.h"
 #include "core/components_ng/pattern/list/list_height_offset_calculator.h"
+#include "core/components_ng/pattern/list/list_item_drag_manager.h"
+#include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/syntax/for_each_model_ng.h"
 #include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_ng/syntax/lazy_for_each_model_ng.h"
@@ -31,6 +33,7 @@
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 #include "core/components_ng/syntax/repeat_model_ng.h"
 #include "core/components_ng/syntax/repeat_node.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "core/components_ng/syntax/syntax_item.h"
 #include "core/common/resource/resource_parse_utils.h"
 
@@ -221,7 +224,9 @@ ListItemGroupModelNG ListCommonTestNg::CreateListItemGroupWithHeaderAndFooter(in
     auto header = GetHeaderOrFooterButtonBuilder(count, "header", index);
     auto footer = GetHeaderOrFooterButtonBuilder(count, "footer", index);
     ListItemGroupModelNG groupModel;
-    groupModel.Create(V2::ListItemGroupStyle::NONE);
+    V2::ListItemGroupOptions groupOptions;
+    groupOptions.style = V2::ListItemGroupStyle::NONE;
+    groupModel.Create(groupOptions);
     groupModel.SetHeader(std::move(header));
     groupModel.SetFooter(std::move(footer));
     auto listItemGroup = ViewStackProcessor::GetInstance()->GetMainElementNode();
@@ -864,7 +869,7 @@ HWTEST_F(ListCommonTestNg, FocusStep008, TestSize.Level1)
     EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_MAIN_SIZE + 1.f);
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, 1, 0));
     FlushUITasks();
-    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_MAIN_SIZE + 1.f);
 
     /**
      * @tc.steps: step3. GetNextFocusNode func from bottom boundary item
@@ -877,7 +882,7 @@ HWTEST_F(ListCommonTestNg, FocusStep008, TestSize.Level1)
     EXPECT_EQ(pattern_->GetTotalOffset(), 0);
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, 3, 4));
     FlushUITasks();
-    EXPECT_EQ(pattern_->GetTotalOffset(), 100);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
 }
 
 /**
@@ -1777,7 +1782,9 @@ HWTEST_F(ListCommonTestNg, ListSelectForCardModeTest001, TestSize.Level1)
     ListModelNG model = CreateList();
     model.SetMultiSelectable(true);
     ListItemGroupModelNG groupModel;
-    groupModel.Create(V2::ListItemGroupStyle::CARD);
+    V2::ListItemGroupOptions groupOptions;
+    groupOptions.style = V2::ListItemGroupStyle::CARD;
+    groupModel.Create(groupOptions);
     CreateListItems(GROUP_ITEM_NUMBER, V2::ListItemStyle::CARD);
     ViewStackProcessor::GetInstance()->Pop();
     CreateDone();
@@ -1824,7 +1831,9 @@ HWTEST_F(ListCommonTestNg, ListSelectForCardModeTest002, TestSize.Level1)
     ListModelNG model = CreateList();
     model.SetMultiSelectable(true);
     ListItemGroupModelNG groupModel;
-    groupModel.Create(V2::ListItemGroupStyle::CARD);
+    V2::ListItemGroupOptions groupOptions;
+    groupOptions.style = V2::ListItemGroupStyle::CARD;
+    groupModel.Create(groupOptions);
     CreateListItems(GROUP_ITEM_NUMBER, V2::ListItemStyle::CARD);
     ViewStackProcessor::GetInstance()->Pop();
     CreateDone();
@@ -1876,7 +1885,9 @@ HWTEST_F(ListCommonTestNg, ListSelectForCardModeTest003, TestSize.Level1)
     ListModelNG model = CreateList();
     model.SetMultiSelectable(true);
     ListItemGroupModelNG groupModel;
-    groupModel.Create(V2::ListItemGroupStyle::CARD);
+    V2::ListItemGroupOptions groupOptions;
+    groupOptions.style = V2::ListItemGroupStyle::CARD;
+    groupModel.Create(groupOptions);
     CreateListItems(5, V2::ListItemStyle::CARD);
     ViewStackProcessor::GetInstance()->Pop();
     CreateDone();
@@ -4264,7 +4275,7 @@ HWTEST_F(ListCommonTestNg, FireFocus002, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(),
         10,
         10,
-        [](int32_t) { return std::make_pair(0, 0); },
+        [](int32_t, bool) { return std::make_pair(0, 0); },
         [](int32_t, int32_t) {},
         [](int32_t, int32_t, int32_t, int32_t, bool, bool) {},
         [](int32_t, int32_t) {},
@@ -4515,7 +4526,7 @@ HWTEST_F(ListCommonTestNg, LostChildFocusToSelf003, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(),
         10,
         10,
-        [](int32_t) { return std::make_pair(0, 0); },
+        [](int32_t, bool) { return std::make_pair(0, 0); },
         [](int32_t, int32_t) {},
         [](int32_t, int32_t, int32_t, int32_t, bool, bool) {},
         [](int32_t, int32_t) {},
@@ -5467,5 +5478,328 @@ HWTEST_F(ListCommonTestNg, CAPIListChildrenMainSizeTest001, TestSize.Level1)
     EXPECT_EQ(pattern_->childrenSize_->defaultSize_, defaultSize);
     const float* destData = pattern_->childrenSize_->childrenSize_.data();
     EXPECT_EQ(destData, srcData);
+}
+
+/**
+ * @tc.name: GetDummyItemRect001
+ * @tc.desc: Test ListPattern GetDummyItemRect when supportLazyLoadingEmptyBranch is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, GetDummyItemRect001, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    auto listNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0, listPattern);
+    ASSERT_NE(listNode, nullptr);
+
+    auto layoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateSupportLazyLoadingEmptyBranch(false);
+
+    RectF rect;
+    auto result = listPattern->GetDummyItemRect(0, rect);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: GetDummyItemRect002
+ * @tc.desc: Test ListPattern GetDummyItemRect when supportLazyLoadingEmptyBranch is true but itemPosition is empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, GetDummyItemRect002, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    auto listNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0, listPattern);
+    ASSERT_NE(listNode, nullptr);
+
+    auto layoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateSupportLazyLoadingEmptyBranch(true);
+
+    RectF rect;
+    auto result = listPattern->GetDummyItemRect(0, rect);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: GetDummyItemRect003
+ * @tc.desc: Test ListPattern GetDummyItemRect with itemPosition populated
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, GetDummyItemRect003, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    auto listNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0, listPattern);
+    ASSERT_NE(listNode, nullptr);
+
+    auto layoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateSupportLazyLoadingEmptyBranch(true);
+
+    listPattern->itemPosition_[0] = { 0, 10.0f, 50.0f, true };
+    listPattern->lanes_ = 1;
+
+    RectF rect;
+    auto result = listPattern->GetDummyItemRect(0, rect);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(rect.GetY(), 10.0f);
+    EXPECT_EQ(rect.Height(), 40.0f);
+}
+
+/**
+ * @tc.name: GetDummyItemRect004
+ * @tc.desc: Test ListPattern GetDummyItemRect with cachedItemPosition populated
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, GetDummyItemRect004, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    auto listNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0, listPattern);
+    ASSERT_NE(listNode, nullptr);
+
+    auto layoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateSupportLazyLoadingEmptyBranch(true);
+
+    listPattern->cachedItemPosition_[1] = { 1, 20.0f, 60.0f, true };
+    listPattern->lanes_ = 1;
+
+    RectF rect;
+    auto result = listPattern->GetDummyItemRect(1, rect);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(rect.GetY(), 20.0f);
+    EXPECT_EQ(rect.Height(), 40.0f);
+}
+
+/**
+ * @tc.name: GetDummyItemRect005
+ * @tc.desc: Test ListPattern GetDummyItemRect with multi-lanes
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, GetDummyItemRect005, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    auto listNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0, listPattern);
+    ASSERT_NE(listNode, nullptr);
+
+    auto layoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateSupportLazyLoadingEmptyBranch(true);
+
+    listPattern->itemPosition_[0] = { 0, 10.0f, 50.0f, true };
+    listPattern->itemPosition_[1] = { 1, 10.0f, 50.0f, true };
+    listPattern->itemPosition_[2] = { 2, 60.0f, 100.0f, true };
+    listPattern->lanes_ = 2;
+    listPattern->laneGutter_ = 10.0f;
+
+    RectF rect;
+    auto result = listPattern->GetDummyItemRect(2, rect);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(rect.GetY(), 60.0f);
+    EXPECT_EQ(rect.Height(), 40.0f);
+}
+
+/**
+ * @tc.name: GetDummyItemRect006
+ * @tc.desc: Test ListPattern GetDummyItemRect with RTL horizontal list
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, GetDummyItemRect006, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    auto listNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0, listPattern);
+    ASSERT_NE(listNode, nullptr);
+
+    auto layoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateSupportLazyLoadingEmptyBranch(true);
+    layoutProperty->UpdateListDirection(Axis::HORIZONTAL);
+
+    listPattern->itemPosition_[0] = { 0, 10.0f, 50.0f, true };
+    listPattern->lanes_ = 1;
+    listPattern->axis_ = Axis::HORIZONTAL;
+
+    RectF rect;
+    auto result = listPattern->GetDummyItemRect(0, rect);
+    EXPECT_TRUE(result);
+
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+}
+
+/**
+ * @tc.name: CheckItemExistence002
+ * @tc.desc: Test ListItemDragManager CheckItemExistence when frame node exists
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, CheckItemExistence002, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    auto listNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0, listPattern);
+    ASSERT_NE(listNode, nullptr);
+
+    auto forEach = AceType::MakeRefPtr<ForEachNode>(0);
+    RefPtr<ListItemDragManager> dragManager = AceType::MakeRefPtr<ListItemDragManager>(listNode, forEach);
+
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    auto itemNode = FrameNode::CreateFrameNode(
+        V2::LIST_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<ListItemPattern>(shallowBuilder));
+    forEach->children_.push_back(itemNode);
+
+    auto result = dragManager->CheckItemExistence(0);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: CheckItemExistence003
+ * @tc.desc: Test ListItemDragManager CheckItemExistence with lazy loading empty branch disabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, CheckItemExistence003, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    auto listNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0, listPattern);
+    ASSERT_NE(listNode, nullptr);
+
+    auto layoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateSupportLazyLoadingEmptyBranch(false);
+
+    auto forEach = AceType::MakeRefPtr<ForEachNode>(0);
+    RefPtr<ListItemDragManager> dragManager = AceType::MakeRefPtr<ListItemDragManager>(listNode, forEach);
+
+    auto result = dragManager->CheckItemExistence(0);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: GetDummyItemRectInDragManager003
+ * @tc.desc: Test ListItemDragManager GetDummyItemRect with null forEach
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, GetDummyItemRectInDragManager003, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    auto listNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0, listPattern);
+    ASSERT_NE(listNode, nullptr);
+
+    RefPtr<ForEachBaseNode> forEach = nullptr;
+    RefPtr<ListItemDragManager> dragManager = AceType::MakeRefPtr<ListItemDragManager>(listNode, forEach);
+
+    RectF rect;
+    auto result = dragManager->GetDummyItemRect(0, rect);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: GetDummyItemRect007
+ * @tc.desc: Test ListPattern GetDummyItemRect with vertical multi-lanes
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, GetDummyItemRect007, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    auto listNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0, listPattern);
+    ASSERT_NE(listNode, nullptr);
+
+    auto layoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateSupportLazyLoadingEmptyBranch(true);
+
+    listPattern->itemPosition_[0] = { 0, 0.0f, 50.0f, true };
+    listPattern->itemPosition_[1] = { 1, 0.0f, 50.0f, true };
+    listPattern->itemPosition_[2] = { 2, 0.0f, 50.0f, true };
+    listPattern->lanes_ = 3;
+    listPattern->laneGutter_ = 5.0f;
+    listPattern->axis_ = Axis::VERTICAL;
+
+    RectF rect;
+    auto result = listPattern->GetDummyItemRect(1, rect);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: GetDummyItemRect008
+ * @tc.desc: Test ListPattern GetDummyItemRect with horizontal list
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, GetDummyItemRect008, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    auto listNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0, listPattern);
+    ASSERT_NE(listNode, nullptr);
+
+    auto layoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateSupportLazyLoadingEmptyBranch(true);
+    layoutProperty->UpdateListDirection(Axis::HORIZONTAL);
+
+    listPattern->itemPosition_[0] = { 0, 10.0f, 60.0f, true };
+    listPattern->lanes_ = 1;
+    listPattern->axis_ = Axis::HORIZONTAL;
+
+    RectF rect;
+    auto result = listPattern->GetDummyItemRect(0, rect);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(rect.GetX(), 10.0f);
+    EXPECT_EQ(rect.Width(), 50.0f);
+}
+
+/**
+ * @tc.name: GetDummyItemRect009
+ * @tc.desc: Test ListPattern GetDummyItemRect with horizontal multi-lanes
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, GetDummyItemRect009, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    auto listNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0, listPattern);
+    ASSERT_NE(listNode, nullptr);
+
+    auto layoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateSupportLazyLoadingEmptyBranch(true);
+    layoutProperty->UpdateListDirection(Axis::HORIZONTAL);
+
+    listPattern->itemPosition_[0] = { 0, 10.0f, 60.0f, true };
+    listPattern->itemPosition_[1] = { 1, 10.0f, 60.0f, true };
+    listPattern->itemPosition_[2] = { 2, 70.0f, 120.0f, true };
+    listPattern->lanes_ = 2;
+    listPattern->laneGutter_ = 10.0f;
+    listPattern->axis_ = Axis::HORIZONTAL;
+
+    RectF rect;
+    auto result = listPattern->GetDummyItemRect(2, rect);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(rect.GetX(), 70.0f);
+    EXPECT_EQ(rect.Width(), 50.0f);
+}
+
+/**
+ * @tc.name: GetDummyItemRect010
+ * @tc.desc: Test ListPattern GetDummyItemRect with cached item and itemPosition both populated
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, GetDummyItemRect010, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    auto listNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0, listPattern);
+    ASSERT_NE(listNode, nullptr);
+
+    auto layoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateSupportLazyLoadingEmptyBranch(true);
+
+    listPattern->itemPosition_[0] = { 0, 10.0f, 50.0f, true };
+    listPattern->cachedItemPosition_[1] = { 1, 20.0f, 60.0f, true };
+    listPattern->lanes_ = 1;
+
+    RectF rect0, rect1;
+    auto result0 = listPattern->GetDummyItemRect(0, rect0);
+    auto result1 = listPattern->GetDummyItemRect(1, rect1);
+
+    EXPECT_TRUE(result0);
+    EXPECT_TRUE(result1);
+    EXPECT_EQ(rect0.GetY(), 10.0f);
+    EXPECT_EQ(rect1.GetY(), 20.0f);
 }
 } // namespace OHOS::Ace::NG

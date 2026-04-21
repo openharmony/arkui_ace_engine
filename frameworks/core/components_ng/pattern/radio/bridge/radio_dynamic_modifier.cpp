@@ -42,10 +42,6 @@ Framework::ViewAbstractModelImpl* GetViewAbstractModelImpl()
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int NUM_0 = 0;
-constexpr int NUM_1 = 1;
-constexpr int NUM_2 = 2;
-constexpr int NUM_3 = 3;
 constexpr bool DEFAULT_CHECKED = false;
 const int32_t ERROR_INT_CODE = -1;
 thread_local std::string g_radioStrValue;
@@ -153,7 +149,7 @@ void ResetRadioStyle(ArkUINodeHandle node)
 
 void SetRadioWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue)
 {
-    auto* frameNode = GetFrameNode(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
     if (unitEnum == DimensionUnit::CALC) {
@@ -165,14 +161,14 @@ void SetRadioWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, 
 
 void ResetRadioWidth(ArkUINodeHandle node)
 {
-    auto* frameNode = GetFrameNode(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::ClearWidthOrHeight(frameNode, true);
 }
 
 void SetRadioHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue)
 {
-    auto* frameNode = GetFrameNode(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
     if (unitEnum == DimensionUnit::CALC) {
@@ -184,7 +180,7 @@ void SetRadioHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit,
 
 void ResetRadioHeight(ArkUINodeHandle node)
 {
-    auto* frameNode = GetFrameNode(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::ClearWidthOrHeight(frameNode, false);
 }
@@ -399,7 +395,7 @@ void SetRadioOnChange(ArkUINodeHandle node, void* callback)
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     if (callback) {
-        auto onChange = reinterpret_cast<std::function<void(bool)>*>(callback);
+        auto onChange = reinterpret_cast<std::function<void(const bool)>*>(callback);
         RadioModelNG::SetOnChange(frameNode, std::move(*onChange));
     } else {
         RadioModelNG::SetOnChange(frameNode, nullptr);
@@ -415,7 +411,7 @@ void ResetRadioOnChange(ArkUINodeHandle node)
 
 void SetIsUserSetMargin(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     RadioModelNG::SetIsUserSetMargin(frameNode, true);
 }
@@ -433,11 +429,9 @@ void UpdateUncheckStatus(ArkUINodeHandle radioNode)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(radioNode);
     CHECK_NULL_VOID(frameNode);
-    auto nodeRef = ElementRegister::GetInstance()->GetNodeById(frameNode->GetId());
-    CHECK_NULL_VOID(nodeRef);
-    auto node = AceType::DynamicCast<FrameNode>(nodeRef);
+    auto node = AceType::Claim(frameNode);
     CHECK_NULL_VOID(node);
-    auto pattern = frameNode->GetPattern<RadioPattern>();
+    auto pattern = node->GetPattern<RadioPattern>();
     pattern->UpdateUncheckStatus(node);
 }
 
@@ -505,53 +499,6 @@ void SetRadioPaddingByJs(const struct ArkUIPaddingType* oldPaddings, const struc
     RadioModelNG::SetPadding(frameNode, padding);
 }
 
-void SetRadioMarginByJs(
-    const struct ArkUIPaddingType* values, ArkUI_Bool isLengthMetrics, void* rawPtr, ArkUI_Bool parse)
-{
-    auto frameNode = GetFrameNode(nullptr);
-    CHECK_NULL_VOID(frameNode);
-    RadioModelNG::SetIsUserSetMargin(frameNode, static_cast<bool>(true));
-    ViewAbstract::ResetResObj(frameNode, "margin");
-    if (!parse) {
-        ViewAbstract::SetMargin(frameNode, NG::CalcLength(0.0));
-        return;
-    }
-    CHECK_NULL_VOID(values);
-    auto topDimen = values->top.string ? CalcLength(values->top.string)
-                                       : CalcLength(values->top.value, static_cast<DimensionUnit>(values->top.unit));
-    auto bottomDimen = values->bottom.string
-                           ? CalcLength(values->bottom.string)
-                           : CalcLength(values->bottom.value, static_cast<DimensionUnit>(values->bottom.unit));
-    auto leftDimen = values->start.string
-                         ? CalcLength(values->start.string)
-                         : CalcLength(values->start.value, static_cast<DimensionUnit>(values->start.unit));
-    auto rightDimen = values->end.string ? CalcLength(values->end.string)
-                                         : CalcLength(values->end.value, static_cast<DimensionUnit>(values->end.unit));
-    NG::PaddingProperty margins;
-    if (values->top.isSet) {
-        margins.top = std::optional<CalcLength>(topDimen);
-    }
-    if (values->bottom.isSet) {
-        margins.bottom = std::optional<CalcLength>(bottomDimen);
-    }
-    if (values->start.isSet) {
-        isLengthMetrics ? margins.start = std::optional<CalcLength>(leftDimen)
-                        : margins.left = std::optional<CalcLength>(leftDimen);
-    }
-    if (values->end.isSet) {
-        isLengthMetrics ? margins.end = std::optional<CalcLength>(rightDimen)
-                        : margins.right = std::optional<CalcLength>(rightDimen);
-    }
-    if (SystemProperties::ConfigChangePerform() && rawPtr) {
-        auto objs = *(reinterpret_cast<const std::vector<RefPtr<ResourceObject>>*>(rawPtr));
-        ViewAbstractModelNG::RegisterEdgeMarginsResObj("margin.top", margins, objs[NUM_0]);
-        ViewAbstractModelNG::RegisterEdgeMarginsResObj("margin.bottom", margins, objs[NUM_1]);
-        ViewAbstractModelNG::RegisterEdgeMarginsResObj("margin.left", margins, objs[NUM_2]);
-        ViewAbstractModelNG::RegisterEdgeMarginsResObj("margin.right", margins, objs[NUM_3]);
-    }
-    ViewAbstract::SetMargin(frameNode, margins);
-}
-
 void SetCheckedBackgroundColorByJs(
     ArkUI_Uint32 checkedBackgroundColor, ArkUI_Bool isSetByJS, ArkUI_Bool isUserSetCheckedBackgroundColor)
 {
@@ -607,43 +554,6 @@ void CreateWithColorResourceObjByJs(void* resObj, const ArkUI_Int32 colorType)
         );
     }
     RadioModelNG::CreateWithColorResourceObj(frameNode, resourceObj, static_cast<RadioColorType>(colorType));
-}
-
-void SetRadioSizeByJs(ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue, void* resPtr, ArkUI_Bool isWidth)
-{
-    auto* frameNode = GetFrameNode(nullptr);
-    CHECK_NULL_VOID(frameNode);
-    ViewAbstract::ResetResObj(frameNode, isWidth ? "width" : "height");
-    ViewAbstract::ResetLayoutPolicyProperty(frameNode, isWidth);
-    if (!SystemProperties::ConfigChangePerform() ? LessNotEqual(value, 0.0) : (LessNotEqual(value, 0.0) && !resPtr)) {
-        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            ViewAbstract::ClearWidthOrHeight(frameNode, isWidth);
-            return;
-        }
-        value = 0.0f;
-    }
-    if (SystemProperties::ConfigChangePerform() && resPtr) {
-        auto* res = reinterpret_cast<ResourceObject*>(resPtr);
-        auto resObj = AceType::Claim(res);
-        if (isWidth) {
-            ViewAbstract::SetWidth(frameNode, resObj);
-        } else {
-            ViewAbstract::SetHeight(frameNode, resObj);
-        }
-        return;
-    }
-    CalcLength length;
-    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
-    if (unitEnum == DimensionUnit::CALC) {
-        length = CalcLength(std::string(calcValue));
-    } else {
-        length = CalcLength(value, unitEnum);
-    }
-    if (isWidth) {
-        ViewAbstract::SetWidth(frameNode, length);
-    } else {
-        ViewAbstract::SetHeight(frameNode, length);
-    }
 }
 
 ArkUINodeHandle CreateFrameNode(ArkUI_Uint32 nodeId)
@@ -715,6 +625,8 @@ void SetBuilderImpl(void* indicator) {}
 
 void SetOnRadioChangeImpl(ArkUINodeHandle node, void* extraParam) {}
 
+void SetIsUserSetMarginImpl(ArkUINodeHandle node) {}
+
 void SetRadioPaddingByJsImpl(const struct ArkUIPaddingType* oldPaddings, const struct ArkUIPaddingType* newPaddings)
 {
     PaddingPropertyF oldPadding({ 0.0f, 0.0f, 0.0f, 0.0f });
@@ -726,43 +638,6 @@ void SetRadioPaddingByJsImpl(const struct ArkUIPaddingType* oldPaddings, const s
     }
     PaddingProperty padding;
     GetRadioModelImpl()->SetPadding(oldPadding, padding);
-}
-
-void SetRadioMarginByJsImpl(
-    const struct ArkUIPaddingType* values, ArkUI_Bool isLengthMetrics, void* rawPtr, ArkUI_Bool parse)
-{
-    if (!parse) {
-        GetViewAbstractModelImpl()->SetMargin(CalcDimension(0.0));
-        return;
-    }
-    CHECK_NULL_VOID(values);
-    if (isLengthMetrics) {
-        return;
-    }
-    std::optional<CalcDimension> topDimen;
-    std::optional<CalcDimension> bottomDimen;
-    std::optional<CalcDimension> leftDimen;
-    std::optional<CalcDimension> rightDimen;
-    if (values->top.isSet) {
-        topDimen = values->top.string ? CalcDimension(values->top.string)
-                                      : CalcDimension(values->top.value, static_cast<DimensionUnit>(values->top.unit));
-    }
-    if (values->bottom.isSet) {
-        bottomDimen = values->bottom.string
-                          ? CalcDimension(values->bottom.string)
-                          : CalcDimension(values->bottom.value, static_cast<DimensionUnit>(values->bottom.unit));
-    }
-    if (values->start.isSet) {
-        leftDimen = values->start.string
-                        ? CalcDimension(values->start.string)
-                        : CalcDimension(values->start.value, static_cast<DimensionUnit>(values->start.unit));
-    }
-    if (values->end.isSet) {
-        rightDimen = values->end.string
-                         ? CalcDimension(values->end.string)
-                         : CalcDimension(values->end.value, static_cast<DimensionUnit>(values->end.unit));
-    }
-    GetViewAbstractModelImpl()->SetMargins(topDimen, bottomDimen, leftDimen, rightDimen);
 }
 
 void SetCheckedBackgroundColorByJsImpl(
@@ -780,29 +655,6 @@ void SetIndicatorColorByJsImpl(
 {}
 
 void CreateWithColorResourceObjByJsImpl(void* resObj, const ArkUI_Int32 colorType) {}
-
-void SetRadioSizeByJsImpl(
-    ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue, void* resPtr, ArkUI_Bool isWidth)
-{
-    if (LessNotEqual(value, 0.0)) {
-        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            return;
-        }
-        value = 0.0f;
-    }
-    CalcDimension dimension;
-    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
-    if (unitEnum == DimensionUnit::CALC) {
-        dimension = CalcDimension(std::string(calcValue));
-    } else {
-        dimension = CalcDimension(value, unitEnum);
-    }
-    if (isWidth) {
-        GetViewAbstractModelImpl()->SetWidth(dimension);
-    } else {
-        GetViewAbstractModelImpl()->SetHeight(dimension);
-    }
-}
 
 ArkUINodeHandle CreateFrameNodeImpl(ArkUI_Uint32 nodeId)
 {
@@ -845,7 +697,7 @@ const ArkUIRadioModifier* GetRadioDynamicModifier()
         .setRadioOptions = nullptr,
         .setRadioOnChange = SetRadioOnChangeImpl,
         .resetRadioOnChange = nullptr,
-        .setIsUserSetMargin = nullptr,
+        .setIsUserSetMargin = SetIsUserSetMarginImpl,
         .setRadioStylePtr = nullptr,
         .setRadioColorSetByUser = nullptr,
         .setOnChangeEvent = SetOnChangeEventImpl,
@@ -854,13 +706,11 @@ const ArkUIRadioModifier* GetRadioDynamicModifier()
         .setBuilder = SetBuilderImpl,
         .setOnRadioChange = SetOnRadioChangeImpl,
         .setRadioPaddingByJs = SetRadioPaddingByJsImpl,
-        .setRadioMarginByJs = SetRadioMarginByJsImpl,
         .setCheckedBackgroundColorByJs = SetCheckedBackgroundColorByJsImpl,
         .setUncheckedBorderColorByJs = SetUncheckedBorderColorByJsImpl,
         .setIsUserSetUncheckBorderColor = SetIsUserSetUncheckBorderColorImpl,
         .setIndicatorColorByJs = SetIndicatorColorByJsImpl,
         .createWithColorResourceObjByJs = CreateWithColorResourceObjByJsImpl,
-        .setRadioSizeByJs = SetRadioSizeByJsImpl,
         .createFrameNode = CreateFrameNodeImpl,
         };
         CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0);
@@ -905,13 +755,11 @@ const ArkUIRadioModifier* GetRadioDynamicModifier()
         .setBuilder = SetBuilder,
         .setOnRadioChange = SetOnRadioChange,
         .setRadioPaddingByJs = SetRadioPaddingByJs,
-        .setRadioMarginByJs = SetRadioMarginByJs,
         .setCheckedBackgroundColorByJs = SetCheckedBackgroundColorByJs,
         .setUncheckedBorderColorByJs = SetUncheckedBorderColorByJs,
         .setIsUserSetUncheckBorderColor = SetIsUserSetUncheckBorderColor,
         .setIndicatorColorByJs = SetIndicatorColorByJs,
         .createWithColorResourceObjByJs = CreateWithColorResourceObjByJs,
-        .setRadioSizeByJs = SetRadioSizeByJs,
         .createFrameNode = CreateFrameNode,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line

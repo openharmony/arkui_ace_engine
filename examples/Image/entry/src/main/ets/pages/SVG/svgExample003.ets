@@ -38,7 +38,7 @@ struct svgExample003 {
         Image($r('app.media.testSvg'))
           .width(50)
           .height(50)
-          .border({ width: 1, color: Color.LightGray })
+          .border({ width: 1, color: Color.Gray })
 
         // Medium-small size
         Text('Medium-Small: 80x80')
@@ -46,7 +46,7 @@ struct svgExample003 {
         Image($r('app.media.testSvg'))
           .width(80)
           .height(80)
-          .border({ width: 1, color: Color.LightGray })
+          .border({ width: 1, color: Color.Gray })
 
         // Medium size
         Text('Medium: 120x120')
@@ -54,7 +54,7 @@ struct svgExample003 {
         Image($r('app.media.testSvg'))
           .width(120)
           .height(120)
-          .border({ width: 1, color: Color.LightGray })
+          .border({ width: 1, color: Color.Gray })
 
         // Large size
         Text('Large: 180x180')
@@ -62,7 +62,7 @@ struct svgExample003 {
         Image($r('app.media.testSvg'))
           .width(180)
           .height(180)
-          .border({ width: 1, color: Color.LightGray })
+          .border({ width: 1, color: Color.Gray })
 
         // Extra large size
         Text('Extra Large: 250x250')
@@ -70,7 +70,7 @@ struct svgExample003 {
         Image($r('app.media.testSvg'))
           .width(250)
           .height(250)
-          .border({ width: 1, color: Color.LightGray })
+          .border({ width: 1, color: Color.Gray })
 
         Text('All images remain sharp and clear')
           .fontSize(14)

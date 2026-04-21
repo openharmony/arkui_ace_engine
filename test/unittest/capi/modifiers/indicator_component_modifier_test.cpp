@@ -105,12 +105,12 @@ HWTEST_F(IndicatorComponentModifierTests, setInitialIndexTest, TestSize.Level1)
     ASSERT_NE(modifier_->setInitialIndex, nullptr);
 
     auto checkDefVal = GetAttrValue<std::string>(node_, propName);
-    EXPECT_EQ(checkDefVal, defaultValue);
+    EXPECT_THAT(checkDefVal, Eq(defaultValue));
 
     for (auto [input, expected]: TEST_POSITIVE_INTEGER_PLAN) {
         modifier_->setInitialIndex(node_, &input);
         auto checkVal = GetAttrValue<std::string>(node_, propName);
-        EXPECT_EQ(checkVal, expected);
+        EXPECT_THAT(checkVal, Eq(expected));
     }
 }
 
@@ -126,12 +126,12 @@ HWTEST_F(IndicatorComponentModifierTests, setCountTest, TestSize.Level1)
     ASSERT_NE(modifier_->setCount, nullptr);
 
     auto checkDefVal = GetAttrValue<std::string>(node_, propName);
-    EXPECT_EQ(checkDefVal, defaultValue);
+    EXPECT_THAT(checkDefVal, Eq(defaultValue));
 
     for (auto [input, expected]: TEST_POSITIVE_INTEGER_PLAN) {
         modifier_->setCount(node_, &input);
         auto checkVal = GetAttrValue<std::string>(node_, propName);
-        EXPECT_EQ(checkVal, expected);
+        EXPECT_THAT(checkVal, Eq(expected));
     }
 }
 
@@ -147,15 +147,15 @@ HWTEST_F(IndicatorComponentModifierTests, setLoopTest, TestSize.Level1)
     ASSERT_NE(modifier_->setLoop, nullptr);
 
     auto checkDefVal = GetAttrValue<std::string>(node_, propName);
-    EXPECT_EQ(checkDefVal, defaultValue);
+    EXPECT_THAT(checkDefVal, Eq(defaultValue));
     auto optTrue = Converter::ArkValue<Opt_Boolean>(true);
     modifier_->setLoop(node_, &optTrue);
     auto checkValT = GetAttrValue<std::string>(node_, propName);
-    EXPECT_EQ(checkValT, "true");
+    EXPECT_THAT(checkValT, Eq("true"));
     auto optFalse = Converter::ArkValue<Opt_Boolean>(false);
     modifier_->setLoop(node_, &optFalse);
     auto checkValF = GetAttrValue<std::string>(node_, propName);
-    EXPECT_EQ(checkValF, "false");
+    EXPECT_THAT(checkValF, Eq("false"));
 }
 
 /**
@@ -170,15 +170,15 @@ HWTEST_F(IndicatorComponentModifierTests, setVerticalTest, TestSize.Level1)
     ASSERT_NE(modifier_->setVertical, nullptr);
 
     auto checkDefVal = GetAttrValue<std::string>(node_, propName);
-    EXPECT_EQ(checkDefVal, defaultValue);
+    EXPECT_THAT(checkDefVal, Eq(defaultValue));
     auto optTrue = Converter::ArkValue<Opt_Boolean>(true);
     modifier_->setVertical(node_, &optTrue);
     auto checkValT = GetAttrValue<std::string>(node_, propName);
-    EXPECT_EQ(checkValT, "true");
+    EXPECT_THAT(checkValT, Eq("true"));
     auto optFalse = Converter::ArkValue<Opt_Boolean>(false);
     modifier_->setVertical(node_, &optFalse);
     auto checkValF = GetAttrValue<std::string>(node_, propName);
-    EXPECT_EQ(checkValF, "false");
+    EXPECT_THAT(checkValF, Eq("false"));
 }
 
 /**

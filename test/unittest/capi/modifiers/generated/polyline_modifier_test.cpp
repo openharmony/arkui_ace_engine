@@ -54,10 +54,10 @@ public:
 HWTEST_F(PolylineModifierTest, DISABLED_setPointsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_POINTS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_POINTS_DEFAULT_VALUE) << "Default value for attribute 'points'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_POINTS_DEFAULT_VALUE)) << "Default value for attribute 'points'";
 }
 
 /*

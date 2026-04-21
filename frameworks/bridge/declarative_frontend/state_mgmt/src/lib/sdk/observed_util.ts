@@ -109,7 +109,7 @@ enum ObservedReason {
   V2_MAKE_NO_UI = 'The object data is wrapped by V2\'s makeObserved, but not used in UI',
   V2_PROXY_UI = 'The object data is built-in type proxy data (Array/Map/Set/Date) decorated with @Trace',
   V2_PROXY_NO_UI = 'The object data is built-in type proxy data (Array/Map/Set/Date) decorated with @Trace, ' +
-    'but not used in UI',
+  'but not used in UI',
   V1_UI = 'The object data is decorated with @Observed or wrapped by makeV1Observed',
   V1_NO_UI = 'The object data is decorated with @Observed or wrapped by makeV1Observed, but not used in UI',
   V1_TO_V2_UI = 'The V1 Observed object data is wrapped by enableV2Compatibility and used in @ComponentV2',
@@ -135,7 +135,7 @@ class ObservedUtil {
       const symbolRefs = target ? target[ObserveV2.SYMBOL_REFS] : undefined;
       ret.decoratorInfo = this.getV2Result(source, symbolRefs, 'MakeObserved');
       const flag = this.hasDependentElement(ret.decoratorInfo);
-      ret.reason = flag ? ObservedReason.V2_MAKE_UI: ObservedReason.V2_MAKE_NO_UI;
+      ret.reason = flag ? ObservedReason.V2_MAKE_UI : ObservedReason.V2_MAKE_NO_UI;
     } else if (ObserveV2.IsProxiedObservedV2(source)) {
       const target = UIUtilsImpl.instance().getTarget(source);
       const symbolRefs = target ? target[ObserveV2.SYMBOL_REFS] : undefined;
@@ -164,8 +164,11 @@ class ObservedUtil {
     const target = UIUtilsImpl.instance().getTarget(source);
     if (!Utils.isNull(target)) {
       const symRefs = target[ObserveV2.SYMBOL_REFS];
+      if (Utils.isNull(symRefs)) {
+        return decoratorInfos;
+      }
       Object.getOwnPropertyNames(symRefs).forEach((name: string) => {
-        const owningName = target.constructor.name;
+        const owningName = this.getOwnerName(target, source);
         const eleIdSet = symRefs[name];
         if (!Utils.isNull(eleIdSet) && eleIdSet.size > 0) {
           const decoratorInfo: DecoratorInfo = {
@@ -180,6 +183,18 @@ class ObservedUtil {
       });
     }
     return decoratorInfos;
+  }
+
+  private static getOwnerName(target: any, source: any): string {
+    let owningName: string = target.constructor.name;
+    if (!owningName) {
+      const sourceProto = Object.getPrototypeOf(source);
+      if (!Utils.isNull(sourceProto)) {
+        const sourceTarget = Object.getPrototypeOf(sourceProto);
+        owningName = sourceTarget ? sourceTarget.constructor.name : '';
+      }
+    }
+    return owningName;
   }
 
   private static hasDependentElement(decorators: Array<DecoratorInfo>): boolean {
@@ -230,10 +245,10 @@ class ObservedUtil {
     return decoratorInfos;
   }
 
-  private static getV2MakeObservedTarget(source: Object): any { 
+  private static getV2MakeObservedTarget(source: Object): any {
     let origin;
     let target;
-    if ((origin = UIUtilsImpl.instance().getTarget(source)) &&  (target = RefInfo.obj2ref.get(origin))) {
+    if ((origin = UIUtilsImpl.instance().getTarget(source)) && (target = RefInfo.obj2ref.get(origin))) {
       return target;
     }
     return undefined;
@@ -281,7 +296,7 @@ class ObservedUtil {
     const subsRefs = puProSubs.getSubscriberRefs();
     if (!Utils.isNull(subsRefs) && subsRefs.size > 0) {
       subsRefs.forEach((subRef: any) => {
-        decoratorInfos = this.getV1TrackDecorator(subRef, decoratorInfos,className);
+        decoratorInfos = this.getV1TrackDecorator(subRef, decoratorInfos, className);
       });
     }
     return decoratorInfos;
@@ -295,7 +310,7 @@ class ObservedUtil {
       if (!name.includes('OPTI_TRACKED_ASSIGNMENT_FAKE_OBJLINK_PROPERTY')) {
         const index = decorators.findIndex((item) => item.stateVariableName === name);
         if (index !== -1) {
-          decos[index].dependentInfo.push(... value);
+          decos[index].dependentInfo.push(...value);
         } else {
           const dec = {
             decoratorName: '@Track',

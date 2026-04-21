@@ -1,0 +1,34 @@
+{
+    "managed": {
+        "include": [
+            "framework/arkts/ArkUIGeneratedNativeModule.ets"
+        ],
+        "ignore": [
+            "CommonMethodModifier.ets",
+            "ImageModifier.ets",
+            "MarqueeModifier.ets",
+            "SwiperModifier.ets",
+            "SymbolGlyphModifier.ets",
+            "WebModifier.ets",
+            "TextAreaModifier.ets",
+            "TextInputModifier.ets",
+            "RichEditorModifier.ets",
+            "SearchModifier.ets",
+            "FormLinkModifier.ets"
+        ]
+    },
+    "native": [
+        {
+            "from": "sig/arkoala-arkts/framework/native/src/generated/arkoala_api_generated.h",
+            "to": "../../../../core/interfaces/native/generated/interface/arkoala_api_generated.h"
+        },
+        {
+            "from": "libace/utility/generated/converter_generated.h",
+            "to": "../../../../core/interfaces/native/utility/generated/converter_generated.h"
+        },
+        {
+            "from": "sig/arkoala-arkts/framework/native/src/generated/callback_kind.h",
+            "to": "../../koala_projects/arkoala-arkts/framework/native/src/generated/callback_kind.h"
+        }
+    ]
+}

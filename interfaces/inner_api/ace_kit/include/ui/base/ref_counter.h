@@ -23,20 +23,6 @@
 
 namespace OHOS::Ace {
 
-// Reference counter.
-class RefCounter {
-public:
-    virtual void IncStrongRef() = 0;
-    virtual int32_t DecStrongRef() = 0;
-    virtual bool TryIncStrongRef() = 0;
-    virtual int32_t StrongRefCount() const = 0;
-    virtual void IncWeakRef() = 0;
-    virtual void DecWeakRef() = 0;
-
-protected:
-    virtual ~RefCounter() = default;
-};
-
 // Define thread-safe counter using 'std::atomic' to implement Increase/Decrease count.
 class ThreadSafeCounter final {
 public:
@@ -77,73 +63,35 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(ThreadSafeCounter);
 };
 
-// Define thread-unsafe counter.
-class ThreadUnsafeCounter final {
-public:
-    explicit ThreadUnsafeCounter(int32_t count) : count_(count) {}
-    ~ThreadUnsafeCounter() = default;
-
-    void Increase()
-    {
-        ++count_;
-    }
-    int32_t Decrease()
-    {
-        int32_t count = --count_;
-        ACE_DCHECK(count >= 0);
-        return count;
-    }
-    int32_t CurrentCount() const
-    {
-        return count_;
-    }
-
-    // Try to increase count while current value is not zero.
-    bool TryIncrease()
-    {
-        if (CurrentCount() == 0) {
-            return false;
-        }
-        Increase();
-        return true;
-    }
-
-private:
-    int32_t count_ { 0 };
-
-    ACE_DISALLOW_COPY_AND_MOVE(ThreadUnsafeCounter);
-};
-
-template<class T>
-class RefCounterImpl final : public RefCounter {
+class RefCounter final {
 public:
     static RefCounter* Create()
     {
-        return new RefCounterImpl();
+        return new RefCounter();
     }
 
-    void IncStrongRef() final
+    void IncStrongRef()
     {
         strongRef_.Increase();
     }
-    int32_t DecStrongRef() final
+    int32_t DecStrongRef()
     {
         return strongRef_.Decrease();
     }
-    bool TryIncStrongRef() final
+    bool TryIncStrongRef()
     {
         return strongRef_.TryIncrease();
     }
-    int32_t StrongRefCount() const final
+    int32_t StrongRefCount() const
     {
         return strongRef_.CurrentCount();
     }
 
-    void IncWeakRef() final
+    void IncWeakRef()
     {
         weakRef_.Increase();
     }
-    void DecWeakRef() final
+    void DecWeakRef()
     {
         int32_t refCount = weakRef_.Decrease();
         if (refCount == 0) {
@@ -152,15 +100,15 @@ public:
         }
     }
 
+protected:
+    ~RefCounter() = default;
+
 private:
-    T strongRef_ { 0 };
+    ThreadSafeCounter strongRef_ { 0 };
     // Weak reference count should start with 1,
     // because instance MUST hold the reference counter for itself.
-    T weakRef_ { 1 };
+    ThreadSafeCounter weakRef_ { 1 };
 };
-
-using ThreadSafeRef = RefCounterImpl<ThreadSafeCounter>;
-using ThreadUnsafeRef = RefCounterImpl<ThreadUnsafeCounter>;
 
 } // namespace OHOS::Ace
 

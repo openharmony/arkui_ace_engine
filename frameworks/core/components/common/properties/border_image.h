@@ -39,92 +39,18 @@ public:
     const static uint8_t SOURCE_BIT = 1 << 3;
     const static uint8_t WIDTH_BIT = 1 << 4;
     const static uint8_t GRADIENT_BIT = 1 << 5;
-
     BorderImage() = default;
-    explicit BorderImage(const std::string& src)
-    {
-        src_ = src;
-    }
-
+    explicit BorderImage(const std::string& src);
     ~BorderImage() override = default;
-
-    const std::string& GetSrc() const
-    {
-        return src_;
-    }
-
-    void SetSrc(const std::string& src)
-    {
-        src_ = src;
-    }
-
-    const std::string& GetBundleName()
-    {
-        return bundleName_;
-    }
-
-    void SetBundleName(const std::string& bundleName)
-    {
-        bundleName_ = bundleName;
-    }
-
-    const std::string& GetModuleName()
-    {
-        return moduleName_;
-    }
-
-    void SetModuleName(const std::string& moduleName)
-    {
-        moduleName_ = moduleName;
-    }
-
-    std::string SliceToString()
-    {
-        std::string str;
-        if (borderImageLeft_.GetBorderImageSlice() == borderImageRight_.GetBorderImageSlice() &&
-            borderImageRight_.GetBorderImageSlice() == borderImageTop_.GetBorderImageSlice() &&
-            borderImageTop_.GetBorderImageSlice() == borderImageBottom_.GetBorderImageSlice()) {
-            str.append(borderImageLeft_.GetBorderImageSlice().ToString());
-        } else {
-            str.append("left: [").append(borderImageLeft_.GetBorderImageSlice().ToString()).append("] ");
-            str.append("right: [").append(borderImageRight_.GetBorderImageSlice().ToString()).append("] ");
-            str.append("top: [").append(borderImageTop_.GetBorderImageSlice().ToString()).append("] ");
-            str.append("bottom: [").append(borderImageBottom_.GetBorderImageSlice().ToString()).append("]");
-        }
-        return str;
-    }
-
-    std::string OutsetToString()
-    {
-        std::string str;
-        if (borderImageLeft_.GetBorderImageOutset() == borderImageRight_.GetBorderImageOutset() &&
-            borderImageRight_.GetBorderImageOutset() == borderImageTop_.GetBorderImageOutset() &&
-            borderImageTop_.GetBorderImageOutset() == borderImageBottom_.GetBorderImageOutset()) {
-            str.append(borderImageLeft_.GetBorderImageOutset().ToString());
-        } else {
-            str.append("left: [").append(borderImageLeft_.GetBorderImageOutset().ToString()).append("] ");
-            str.append("right: [").append(borderImageRight_.GetBorderImageOutset().ToString()).append("] ");
-            str.append("top: [").append(borderImageTop_.GetBorderImageOutset().ToString()).append("] ");
-            str.append("bottom: [").append(borderImageBottom_.GetBorderImageOutset().ToString()).append("]");
-        }
-        return str;
-    }
-
-    std::string WidthToString()
-    {
-        std::string str;
-        if (borderImageLeft_.GetBorderImageWidth() == borderImageRight_.GetBorderImageWidth() &&
-            borderImageRight_.GetBorderImageWidth() == borderImageTop_.GetBorderImageWidth() &&
-            borderImageTop_.GetBorderImageWidth() == borderImageBottom_.GetBorderImageWidth()) {
-            str.append(borderImageLeft_.GetBorderImageWidth().ToString());
-        } else {
-            str.append("left: [").append(borderImageLeft_.GetBorderImageWidth().ToString()).append("] ");
-            str.append("right: [").append(borderImageRight_.GetBorderImageWidth().ToString()).append("] ");
-            str.append("top: [").append(borderImageTop_.GetBorderImageWidth().ToString()).append("] ");
-            str.append("bottom: [").append(borderImageBottom_.GetBorderImageWidth().ToString()).append("]");
-        }
-        return str;
-    }
+    const std::string& GetSrc() const;
+    void SetSrc(const std::string& src);
+    const std::string& GetBundleName();
+    void SetBundleName(const std::string& bundleName);
+    const std::string& GetModuleName();
+    void SetModuleName(const std::string& moduleName);
+    std::string SliceToString();
+    std::string OutsetToString();
+    std::string WidthToString();
 
     struct BorderImageOption {
         std::optional<Dimension> leftDimension;
@@ -134,40 +60,15 @@ public:
         std::optional<Dimension> startDimension;
         std::optional<Dimension> endDimension;
     };
-
     void SetEdgeSlice(BorderImageDirection direction, const Dimension& sliceDimension);
-
     void SetEdgeOutset(BorderImageDirection direction, const Dimension& outsetDimension);
-
     void SetEdgeWidth(BorderImageDirection direction, const Dimension& widthDimension);
-
-    void SetRepeatMode(BorderImageRepeat repeatMode)
-    {
-        repeatMode_ = repeatMode;
-    }
-
-    BorderImageRepeat GetRepeatMode()
-    {
-        return repeatMode_;
-    }
-
-    void SetNeedFillCenter(bool needFillCenter)
-    {
-        needFillCenter_ = needFillCenter;
-    }
-
-    bool GetNeedFillCenter() const
-    {
-        return needFillCenter_;
-    }
-
+    void SetRepeatMode(BorderImageRepeat repeatMode);
+    BorderImageRepeat GetRepeatMode();
+    void SetNeedFillCenter(bool needFillCenter);
+    bool GetNeedFillCenter() const;
     BorderImageEdge& GetBorderImageEdge(BorderImageDirection direction);
-
-    bool HasBorderImageWidth() const
-    {
-        return hasBorderImageWidth_;
-    }
-
+    bool HasBorderImageWidth() const;
     std::optional<BorderImageEdge> borderImageStart_;
     std::optional<BorderImageEdge> borderImageEnd_;
 private:

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/common/font_manager.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"

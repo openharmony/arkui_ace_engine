@@ -29,6 +29,7 @@ public:
     int32_t ResponseShowCornerMarkEvent(const RefPtr<NG::FrameNode>& node, const std::string& command);
     static void UpdateCornerMarkNodeLanguage(const RefPtr<NG::FrameNode>& node);
     static void UpdateCornerMarkNodeColorMode(const RefPtr<NG::FrameNode>& node);
+    static void UpdateCornerMarkNodePosition(const RefPtr<NG::FrameNode>& node);
 
 private:
     int32_t AddCornerMarkNode(const RefPtr<NG::FrameNode>& node, const std::string& index);

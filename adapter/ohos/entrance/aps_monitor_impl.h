@@ -16,25 +16,31 @@
 #define FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_ENTRANCE_APS_MONITOR_IMPL_H
 
 #include "base/utils/aps_monitor.h"
+#include <mutex>
 
 namespace OHOS::Ace {
+using GetApsSdrRatioFunc = float (*)(std::string, int32_t indexForUsingClient);
 using SetSceneFunc = void (*)(std::string pkgName, std::string sceneName, uint32_t state);
 using ReSetClientFunc = void (*)();
 class ApsMonitorImpl final : public ApsMonitor {
 public:
-    explicit ApsMonitorImpl(int32_t instanceId) : instanceId_(instanceId) {}
+    static ApsMonitorImpl& GetInstance();
     ~ApsMonitorImpl() override;
     void SetApsScene(const std::string& sceneName, bool onOff) override;
+    float GetApsSdrRatio(const std::string& pkgName, int32_t indexForUsingClient) override;
+    void SetContainerInstanceId(int32_t instanceId);
 
 private:
     void LoadApsFuncOnce();
     void ReSetApsClient() override;
     static const std::set<std::string> apsScenes;
     void* loadfilehandle_ = nullptr;
+    GetApsSdrRatioFunc getApsSdrRatioFunc_ = nullptr;
     SetSceneFunc setFunc_ = nullptr;
     ReSetClientFunc resetFunc_ = nullptr;
     bool isloadapsfunc_ = false;
     int32_t instanceId_ = -1;
+    std::mutex mutex_;
 };
 
 } // namespace OHOS::Ace

@@ -79,10 +79,11 @@ public:
 HWTEST_F(WaterFlowModifierTest, setWaterFlowOptionsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LAYOUT_MODE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_LAYOUT_MODE_DEFAULT_VALUE) << "Default value for attribute 'options.layoutMode'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_LAYOUT_MODE_DEFAULT_VALUE)) <<
+        "Default value for attribute 'options.layoutMode'";
 }
 
 /*
@@ -109,7 +110,7 @@ HWTEST_F(WaterFlowModifierTest, DISABLED_setWaterFlowOptionsTestOptionsLayoutMod
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LAYOUT_MODE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setWaterFlowOptions, attribute: options.layoutMode";
     };
 
@@ -141,7 +142,7 @@ HWTEST_F(WaterFlowModifierTest, DISABLED_setWaterFlowOptionsTestOptionsLayoutMod
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LAYOUT_MODE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_LAYOUT_MODE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_LAYOUT_MODE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setWaterFlowOptions, attribute: options.layoutMode";
     };
 
@@ -158,10 +159,11 @@ HWTEST_F(WaterFlowModifierTest, DISABLED_setWaterFlowOptionsTestOptionsLayoutMod
 HWTEST_F(WaterFlowModifierTest, DISABLED_setColumnsTemplateTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLUMNS_TEMPLATE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_COLUMNS_TEMPLATE_DEFAULT_VALUE) << "Default value for attribute 'columnsTemplate'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_COLUMNS_TEMPLATE_DEFAULT_VALUE)) <<
+        "Default value for attribute 'columnsTemplate'";
 }
 
 /*
@@ -184,7 +186,7 @@ HWTEST_F(WaterFlowModifierTest, setColumnsTemplateTestColumnsTemplateValidValues
         modifier_->setColumnsTemplate(node_, &inputValueColumnsTemplate);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLUMNS_TEMPLATE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setColumnsTemplate, attribute: columnsTemplate";
     };
 
@@ -213,7 +215,7 @@ HWTEST_F(WaterFlowModifierTest, DISABLED_setColumnsTemplateTestColumnsTemplateIn
         modifier_->setColumnsTemplate(node_, &inputValueColumnsTemplate);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLUMNS_TEMPLATE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_COLUMNS_TEMPLATE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_COLUMNS_TEMPLATE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setColumnsTemplate, attribute: columnsTemplate";
     };
 
@@ -229,24 +231,23 @@ HWTEST_F(WaterFlowModifierTest, DISABLED_setColumnsTemplateTestColumnsTemplateIn
 HWTEST_F(WaterFlowModifierTest, DISABLED_setItemConstraintSizeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultItemConstraintSize =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_NAME);
-    std::string resultStr;
+    std::unique_ptr<JsonValue> resultItemConstraintSize = GetAttrObject(jsonValue, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(resultItemConstraintSize, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MIN_WIDTH_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MIN_WIDTH_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MIN_WIDTH_DEFAULT_VALUE)) <<
         "Default value for attribute 'itemConstraintSize.minWidth'";
 
     resultStr = GetAttrValue<std::string>(resultItemConstraintSize, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MAX_WIDTH_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MAX_WIDTH_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MAX_WIDTH_DEFAULT_VALUE)) <<
         "Default value for attribute 'itemConstraintSize.maxWidth'";
 
     resultStr = GetAttrValue<std::string>(resultItemConstraintSize, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MIN_HEIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MIN_HEIGHT_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MIN_HEIGHT_DEFAULT_VALUE)) <<
         "Default value for attribute 'itemConstraintSize.minHeight'";
 
     resultStr = GetAttrValue<std::string>(resultItemConstraintSize, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MAX_HEIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MAX_HEIGHT_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MAX_HEIGHT_DEFAULT_VALUE)) <<
         "Default value for attribute 'itemConstraintSize.maxHeight'";
 }
 
@@ -276,8 +277,7 @@ HWTEST_F(WaterFlowModifierTest, setItemConstraintSizeTestItemConstraintSizeMinWi
         WriteTo(inputValueItemConstraintSize).minWidth = value;
         modifier_->setItemConstraintSize(node_, &inputValueItemConstraintSize);
         auto jsonValue = GetJsonValue(node_);
-        auto resultItemConstraintSize =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_NAME);
+        auto resultItemConstraintSize = GetAttrObject(jsonValue, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultItemConstraintSize, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MIN_WIDTH_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -321,8 +321,7 @@ HWTEST_F(WaterFlowModifierTest, setItemConstraintSizeTestItemConstraintSizeMinWi
         WriteTo(inputValueItemConstraintSize).minWidth = value;
         modifier_->setItemConstraintSize(node_, &inputValueItemConstraintSize);
         auto jsonValue = GetJsonValue(node_);
-        auto resultItemConstraintSize =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_NAME);
+        auto resultItemConstraintSize = GetAttrObject(jsonValue, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultItemConstraintSize, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MIN_WIDTH_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MIN_WIDTH_DEFAULT_VALUE) <<
@@ -361,8 +360,7 @@ HWTEST_F(WaterFlowModifierTest, setItemConstraintSizeTestItemConstraintSizeMaxWi
         WriteTo(inputValueItemConstraintSize).maxWidth = value;
         modifier_->setItemConstraintSize(node_, &inputValueItemConstraintSize);
         auto jsonValue = GetJsonValue(node_);
-        auto resultItemConstraintSize =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_NAME);
+        auto resultItemConstraintSize = GetAttrObject(jsonValue, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultItemConstraintSize, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MAX_WIDTH_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -406,8 +404,7 @@ HWTEST_F(WaterFlowModifierTest, setItemConstraintSizeTestItemConstraintSizeMaxWi
         WriteTo(inputValueItemConstraintSize).maxWidth = value;
         modifier_->setItemConstraintSize(node_, &inputValueItemConstraintSize);
         auto jsonValue = GetJsonValue(node_);
-        auto resultItemConstraintSize =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_NAME);
+        auto resultItemConstraintSize = GetAttrObject(jsonValue, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultItemConstraintSize, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MAX_WIDTH_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MAX_WIDTH_DEFAULT_VALUE) <<
@@ -446,8 +443,7 @@ HWTEST_F(WaterFlowModifierTest, setItemConstraintSizeTestItemConstraintSizeMinHe
         WriteTo(inputValueItemConstraintSize).minHeight = value;
         modifier_->setItemConstraintSize(node_, &inputValueItemConstraintSize);
         auto jsonValue = GetJsonValue(node_);
-        auto resultItemConstraintSize =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_NAME);
+        auto resultItemConstraintSize = GetAttrObject(jsonValue, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultItemConstraintSize, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MIN_HEIGHT_NAME);
         EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input <<
@@ -491,8 +487,7 @@ HWTEST_F(WaterFlowModifierTest, setItemConstraintSizeTestItemConstraintSizeMinHe
         WriteTo(inputValueItemConstraintSize).minHeight = value;
         modifier_->setItemConstraintSize(node_, &inputValueItemConstraintSize);
         auto jsonValue = GetJsonValue(node_);
-        auto resultItemConstraintSize =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_NAME);
+        auto resultItemConstraintSize = GetAttrObject(jsonValue, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultItemConstraintSize, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MIN_HEIGHT_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MIN_HEIGHT_DEFAULT_VALUE) <<
@@ -532,8 +527,7 @@ HWTEST_F(WaterFlowModifierTest, setItemConstraintSizeTestItemConstraintSizeMaxHe
         WriteTo(inputValueItemConstraintSize).maxHeight = value;
         modifier_->setItemConstraintSize(node_, &inputValueItemConstraintSize);
         auto jsonValue = GetJsonValue(node_);
-        auto resultItemConstraintSize =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_NAME);
+        auto resultItemConstraintSize = GetAttrObject(jsonValue, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultItemConstraintSize, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MAX_HEIGHT_NAME);
         EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input <<
@@ -577,8 +571,7 @@ HWTEST_F(WaterFlowModifierTest, setItemConstraintSizeTestItemConstraintSizeMaxHe
         WriteTo(inputValueItemConstraintSize).maxHeight = value;
         modifier_->setItemConstraintSize(node_, &inputValueItemConstraintSize);
         auto jsonValue = GetJsonValue(node_);
-        auto resultItemConstraintSize =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_NAME);
+        auto resultItemConstraintSize = GetAttrObject(jsonValue, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultItemConstraintSize, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MAX_HEIGHT_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_ITEM_CONSTRAINT_SIZE_I_MAX_HEIGHT_DEFAULT_VALUE) <<
@@ -600,10 +593,11 @@ HWTEST_F(WaterFlowModifierTest, setItemConstraintSizeTestItemConstraintSizeMaxHe
 HWTEST_F(WaterFlowModifierTest, DISABLED_setRowsTemplateTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ROWS_TEMPLATE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ROWS_TEMPLATE_DEFAULT_VALUE) << "Default value for attribute 'rowsTemplate'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ROWS_TEMPLATE_DEFAULT_VALUE)) <<
+        "Default value for attribute 'rowsTemplate'";
 }
 
 /*
@@ -626,7 +620,7 @@ HWTEST_F(WaterFlowModifierTest, setRowsTemplateTestRowsTemplateValidValues, Test
         modifier_->setRowsTemplate(node_, &inputValueRowsTemplate);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ROWS_TEMPLATE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setRowsTemplate, attribute: rowsTemplate";
     };
 
@@ -655,7 +649,7 @@ HWTEST_F(WaterFlowModifierTest, DISABLED_setRowsTemplateTestRowsTemplateInvalidV
         modifier_->setRowsTemplate(node_, &inputValueRowsTemplate);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ROWS_TEMPLATE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ROWS_TEMPLATE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ROWS_TEMPLATE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setRowsTemplate, attribute: rowsTemplate";
     };
 
@@ -671,10 +665,10 @@ HWTEST_F(WaterFlowModifierTest, DISABLED_setRowsTemplateTestRowsTemplateInvalidV
 HWTEST_F(WaterFlowModifierTest, setColumnsGapTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLUMNS_GAP_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_COLUMNS_GAP_DEFAULT_VALUE) << "Default value for attribute 'columnsGap'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_COLUMNS_GAP_DEFAULT_VALUE)) << "Default value for attribute 'columnsGap'";
 }
 
 /*
@@ -698,7 +692,7 @@ HWTEST_F(WaterFlowModifierTest, setColumnsGapTestColumnsGapValidValues, TestSize
         modifier_->setColumnsGap(node_, &inputValueColumnsGap);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLUMNS_GAP_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setColumnsGap, attribute: columnsGap";
     };
 
@@ -734,7 +728,7 @@ HWTEST_F(WaterFlowModifierTest, setColumnsGapTestColumnsGapInvalidValues, TestSi
         modifier_->setColumnsGap(node_, &inputValueColumnsGap);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLUMNS_GAP_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_COLUMNS_GAP_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_COLUMNS_GAP_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setColumnsGap, attribute: columnsGap";
     };
 
@@ -761,10 +755,10 @@ HWTEST_F(WaterFlowModifierTest, setColumnsGapTestColumnsGapInvalidValues, TestSi
 HWTEST_F(WaterFlowModifierTest, setRowsGapTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ROWS_GAP_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ROWS_GAP_DEFAULT_VALUE) << "Default value for attribute 'rowsGap'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ROWS_GAP_DEFAULT_VALUE)) << "Default value for attribute 'rowsGap'";
 }
 
 /*
@@ -788,7 +782,8 @@ HWTEST_F(WaterFlowModifierTest, setRowsGapTestRowsGapValidValues, TestSize.Level
         modifier_->setRowsGap(node_, &inputValueRowsGap);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ROWS_GAP_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setRowsGap, attribute: rowsGap";
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
+            "Input value is: " << input << ", method: setRowsGap, attribute: rowsGap";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
@@ -823,7 +818,7 @@ HWTEST_F(WaterFlowModifierTest, setRowsGapTestRowsGapInvalidValues, TestSize.Lev
         modifier_->setRowsGap(node_, &inputValueRowsGap);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ROWS_GAP_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ROWS_GAP_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ROWS_GAP_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setRowsGap, attribute: rowsGap";
     };
 
@@ -850,10 +845,11 @@ HWTEST_F(WaterFlowModifierTest, setRowsGapTestRowsGapInvalidValues, TestSize.Lev
 HWTEST_F(WaterFlowModifierTest, DISABLED_setLayoutDirectionTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LAYOUT_DIRECTION_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_LAYOUT_DIRECTION_DEFAULT_VALUE) << "Default value for attribute 'layoutDirection'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_LAYOUT_DIRECTION_DEFAULT_VALUE)) <<
+        "Default value for attribute 'layoutDirection'";
 }
 
 /*
@@ -877,7 +873,7 @@ HWTEST_F(WaterFlowModifierTest, DISABLED_setLayoutDirectionTestLayoutDirectionVa
         modifier_->setLayoutDirection(node_, &inputValueLayoutDirection);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LAYOUT_DIRECTION_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setLayoutDirection, attribute: layoutDirection";
     };
 
@@ -907,7 +903,7 @@ HWTEST_F(WaterFlowModifierTest, DISABLED_setLayoutDirectionTestLayoutDirectionIn
         modifier_->setLayoutDirection(node_, &inputValueLayoutDirection);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LAYOUT_DIRECTION_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_LAYOUT_DIRECTION_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_LAYOUT_DIRECTION_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setLayoutDirection, attribute: layoutDirection";
     };
 
@@ -924,10 +920,11 @@ HWTEST_F(WaterFlowModifierTest, DISABLED_setLayoutDirectionTestLayoutDirectionIn
 HWTEST_F(WaterFlowModifierTest, setCachedCount0TestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CACHED_COUNT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_CACHED_COUNT_DEFAULT_VALUE) << "Default value for attribute 'cachedCount'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_CACHED_COUNT_DEFAULT_VALUE)) <<
+        "Default value for attribute 'cachedCount'";
 }
 
 /*
@@ -950,7 +947,7 @@ HWTEST_F(WaterFlowModifierTest, setCachedCount0TestCachedCountValidValues, TestS
         modifier_->setCachedCount0(node_, &inputValueCachedCount);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CACHED_COUNT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setCachedCount0, attribute: cachedCount";
     };
 
@@ -979,7 +976,7 @@ HWTEST_F(WaterFlowModifierTest, setCachedCount0TestCachedCountInvalidValues, Tes
         modifier_->setCachedCount0(node_, &inputValueCachedCount);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CACHED_COUNT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_CACHED_COUNT_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_CACHED_COUNT_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setCachedCount0, attribute: cachedCount";
     };
 
@@ -998,16 +995,15 @@ HWTEST_F(WaterFlowModifierTest, setCachedCount0TestCachedCountInvalidValues, Tes
 HWTEST_F(WaterFlowModifierTest, DISABLED_setCachedCount1TestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultCachedCount =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CACHED_COUNT_NAME);
-    std::string resultStr;
+    std::unique_ptr<JsonValue> resultCachedCount = GetAttrObject(jsonValue, ATTRIBUTE_CACHED_COUNT_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(resultCachedCount, ATTRIBUTE_CACHED_COUNT_I_COUNT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_CACHED_COUNT_I_COUNT_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_CACHED_COUNT_I_COUNT_DEFAULT_VALUE)) <<
         "Default value for attribute 'cachedCount.count'";
 
     resultStr = GetAttrValue<std::string>(resultCachedCount, ATTRIBUTE_CACHED_COUNT_I_SHOW_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_CACHED_COUNT_I_SHOW_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_CACHED_COUNT_I_SHOW_DEFAULT_VALUE)) <<
         "Default value for attribute 'cachedCount.show'";
 }
 
@@ -1033,9 +1029,9 @@ HWTEST_F(WaterFlowModifierTest, DISABLED_setCachedCount1TestCachedCountCountVali
         inputValueCount = value;
         modifier_->setCachedCount1(node_, &inputValueCount, &inputValueShow);
         auto jsonValue = GetJsonValue(node_);
-        auto resultCachedCount = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CACHED_COUNT_NAME);
+        auto resultCachedCount = GetAttrObject(jsonValue, ATTRIBUTE_CACHED_COUNT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultCachedCount, ATTRIBUTE_CACHED_COUNT_I_COUNT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setCachedCount1, attribute: cachedCount.count";
     };
 
@@ -1066,9 +1062,9 @@ HWTEST_F(WaterFlowModifierTest, DISABLED_setCachedCount1TestCachedCountCountInva
         inputValueCount = value;
         modifier_->setCachedCount1(node_, &inputValueCount, &inputValueShow);
         auto jsonValue = GetJsonValue(node_);
-        auto resultCachedCount = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CACHED_COUNT_NAME);
+        auto resultCachedCount = GetAttrObject(jsonValue, ATTRIBUTE_CACHED_COUNT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultCachedCount, ATTRIBUTE_CACHED_COUNT_I_COUNT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_CACHED_COUNT_I_COUNT_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_CACHED_COUNT_I_COUNT_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setCachedCount1, attribute: cachedCount.count";
     };
 
@@ -1098,9 +1094,9 @@ HWTEST_F(WaterFlowModifierTest, DISABLED_setCachedCount1TestCachedCountShowValid
         inputValueShow = value;
         modifier_->setCachedCount1(node_, &inputValueCount, &inputValueShow);
         auto jsonValue = GetJsonValue(node_);
-        auto resultCachedCount = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CACHED_COUNT_NAME);
+        auto resultCachedCount = GetAttrObject(jsonValue, ATTRIBUTE_CACHED_COUNT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultCachedCount, ATTRIBUTE_CACHED_COUNT_I_SHOW_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setCachedCount1, attribute: cachedCount.show";
     };
 
@@ -1131,9 +1127,9 @@ HWTEST_F(WaterFlowModifierTest, DISABLED_setCachedCount1TestCachedCountShowInval
         inputValueShow = value;
         modifier_->setCachedCount1(node_, &inputValueCount, &inputValueShow);
         auto jsonValue = GetJsonValue(node_);
-        auto resultCachedCount = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CACHED_COUNT_NAME);
+        auto resultCachedCount = GetAttrObject(jsonValue, ATTRIBUTE_CACHED_COUNT_NAME);
         auto resultStr = GetAttrValue<std::string>(resultCachedCount, ATTRIBUTE_CACHED_COUNT_I_SHOW_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_CACHED_COUNT_I_SHOW_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_CACHED_COUNT_I_SHOW_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setCachedCount1, attribute: cachedCount.show";
     };
 

@@ -29,10 +29,10 @@ struct ImageExample064 {
         .fontWeight(FontWeight.Bold)
         .margin({ bottom: 20 })
 
-      Image(this.imageLoaded ? $r('app.media.png') : '')
+      Image(this.imageLoaded ? $r('app.media.startIcon') : '')
         .width(200)
         .height(200)
-        .alt(this.useAlt ? $r('app.media.app_icon') : undefined)
+        .alt(this.useAlt ? $r('app.media.startIcon') : undefined)
         .onComplete(() => {
           this.imageLoaded = true
         })

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@ import { StateMgmtTool } from '#stateMgmtTool';
 import { uiUtils } from '../base/uiUtilsImpl';
 import { IAniStorage, AniStorage, AreaMode } from './persistentStorage';
 import contextConstant from '@ohos.app.ability.contextConstant';
+import { ElementInfo } from '../utils';
 
 export type StorageDefaultCreator<T> = () => T;
 
@@ -168,6 +169,12 @@ class StoragePropertyV2<T extends object>
         }
         this.key = key;
         this.autoSave = autoSave;
+    }
+    getDFXInfo(): ElementInfo {
+        return {
+            elementName: this.key,
+            elementId: this.id
+        };
     }
 
     private isObservedInterface<T>(value: T): boolean {
@@ -418,7 +425,7 @@ export class PersistenceV2Impl {
         }
 
         if (this.entriesMap_.has(key)) {
-            StorageHelper.checkTypeByType(key, ttype, this.typeMap_.get(key)!);
+            StorageHelper.checkTypeByType<Any>(key, ttype, this.typeMap_.get(key)!);
             const existingValue = this.entriesMap_.get(key) as StoragePropertyV2<T>;
             return existingValue.get();
         }
@@ -471,7 +478,7 @@ export class PersistenceV2Impl {
 
         // In memory, return if globalEntriesMap_ exist
         if (this.globalEntriesMap_.has(key)) {
-            StorageHelper.checkTypeByType(key, connectOptions.type, this.typeMap_.get(key)!);
+            StorageHelper.checkTypeByType<Any>(key, connectOptions.type, this.typeMap_.get(key)!);
             const existingValue = this.globalEntriesMap_.get(key) as StoragePropertyV2<T>;
             return existingValue!.get() as T;
         }
@@ -513,7 +520,7 @@ export class PersistenceV2Impl {
             // add global path key
             for (let i = 0; i < this.globalKeysArr_.length; i++) {
                 if (!this.globalKeysArr_[i].size) {
-                    this.globalKeysArr_[i] = this.getKeysFromStorage(i as AreaMode);
+                    this.globalKeysArr_[i] = this.getKeysFromStorage(AreaMode.fromValue(i));
                 }
                 for (const key of this.globalKeysArr_[i]) {
                     allKeys.add(key);
@@ -530,7 +537,7 @@ export class PersistenceV2Impl {
     }
 
     public remove(keyOrType: string | Class): boolean {
-        let key = StorageHelper.getKeyOrTypeNameWithChecks(keyOrType);
+        let key = StorageHelper.getKeyOrTypeNameWithChecks<Any>(keyOrType);
         if (!key) {
             return false;
         }
@@ -539,7 +546,7 @@ export class PersistenceV2Impl {
     }
 
     public save(keyOrType: string | Class): boolean {
-        let key = StorageHelper.getKeyOrTypeNameWithChecks(keyOrType);
+        let key = StorageHelper.getKeyOrTypeNameWithChecks<Any>(keyOrType);
         if (!key) {
             return false;
         }
@@ -789,7 +796,7 @@ export class PersistenceV2Impl {
                 if ((property === undefined) || (property!.get() === undefined)) {
                     throw new Error("unable to create default value the key: " + key);
                 }
-                const newValueTuple = PersistenceV2Impl.fromJsonWithType(key, undefined, jsonElement, property!.get() as SerializableObject);
+                const newValueTuple = PersistenceV2Impl.fromJsonWithType<Object>(key, undefined, jsonElement, property!.get() as SerializableObject);
                 newObservedValue = property!.get();
             }
 
@@ -912,12 +919,12 @@ export class PersistenceV2Impl {
         let removeFlag = false;
         // first call for global path
         for (let i = 0; i < this.globalKeysArr_.length; i++) {
-            if (this.storageBackend_!.has(key, i as AreaMode)) {
+            if (this.storageBackend_!.has(key, AreaMode.fromValue(i))) {
                 removeFlag = true;
-                this.storageBackend_!.delete(key, i as AreaMode);
-                this.globalKeysArr_[i] = this.getKeysFromStorage(i as AreaMode);
+                this.storageBackend_!.delete(key, AreaMode.fromValue(i));
+                this.globalKeysArr_[i] = this.getKeysFromStorage(AreaMode.fromValue(i));
                 this.globalKeysArr_[i].delete(key);
-                this.storeKeysToStorage(this.globalKeysArr_[i], i as AreaMode);
+                this.storeKeysToStorage(this.globalKeysArr_[i], AreaMode.fromValue(i));
             }
         }
         return removeFlag;

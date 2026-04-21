@@ -19,13 +19,9 @@
 #include <functional>
 #include <list>
 #include <string>
+#include <tuple>
 
-#include "base/log/ace_scoring_log.h"
 #include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "core/components_ng/base/view_partial_update_model.h"
-#include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
-#include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_functions.h"
 
@@ -51,58 +47,12 @@ public:
     void GetInstanceId(const JSCallbackInfo& info);
     void GetMainInstanceId(const JSCallbackInfo& info);
 
-    void FireOnShow()
-    {
-        if (jsViewFunction_) {
-            ACE_SCORING_EVENT("OnShow");
-            jsViewFunction_->ExecuteShow();
-        }
-    }
-
-    void FireOnHide()
-    {
-        if (jsViewFunction_) {
-            ACE_SCORING_EVENT("OnHide");
-            jsViewFunction_->ExecuteHide();
-        }
-    }
-
-    bool FireOnBackPress()
-    {
-        if (jsViewFunction_) {
-            ACE_SCORING_EVENT("OnBackPress");
-            return jsViewFunction_->ExecuteOnBackPress();
-        }
-        return false;
-    }
-
-    std::string FireOnFormRecycle()
-    {
-        if (jsViewFunction_) {
-            ACE_SCORING_EVENT("OnFormRecycle");
-            return jsViewFunction_->ExecuteOnFormRecycle();
-        }
-        LOGE("jsViewFunction_ is null");
-        return "";
-    }
-
-    void FireOnFormRecover(const std::string &statusData)
-    {
-        if (jsViewFunction_) {
-            ACE_SCORING_EVENT("OnFormRecover");
-            return jsViewFunction_->ExecuteOnFormRecover(statusData);
-        }
-        LOGE("jsViewFunction_ is null");
-    }
-
-    void FireOnNewParam(const std::string &newParam)
-    {
-        if (jsViewFunction_) {
-            ACE_SCORING_EVENT("OnNewParam");
-            return jsViewFunction_->ExecuteOnNewParam(newParam);
-        }
-        TAG_LOGE(AceLogTag::ACE_ROUTER, "fire onNewParam failed, jsViewFunction_ is null!");
-    }
+    void FireOnShow();
+    void FireOnHide();
+    bool FireOnBackPress();
+    std::string FireOnFormRecycle();
+    void FireOnFormRecover(const std::string& statusData);
+    void FireOnNewParam(const std::string& newParam);
 
     virtual void RenderJSExecution();
 
@@ -170,6 +120,11 @@ public:
     int32_t GetInstanceId() const
     {
         return instanceId_;
+    }
+    
+    void SetInstanceId(int32_t id)
+    {
+        instanceId_ = id;
     }
 
     RefPtr<AceType> GetViewNode() const
@@ -462,6 +417,10 @@ public:
 
     void JSRegisterUpdateInstanceForEnvFunc(const JSCallbackInfo& info);
 
+    void JSRegisterUpdateJSInstanceCallback(const JSCallbackInfo& info);
+
+    void RegisterOnInstanceIdUpdateCallback(const JSRef<JSFunc>& onInstanceIdUpdateFunc);
+
     void SetLatestInstanceId(const int32_t instanceId);
 
     JSRef<JSVal> GetJsContext();
@@ -469,6 +428,8 @@ public:
     int32_t GetLatestInstanceId() const;
 private:
     void MarkNeedUpdate() override;
+
+    void RegisterCombinedCallbackToBackend();
 
     // indicates if the JSView has ever completed initial render
     // used for code branching in lambda given to ComposedComponent
@@ -481,7 +442,7 @@ private:
     <1> outmost wrapping Component
     <2> main Component
     */
-    std::list<UpdateTask> pendingUpdateTasks_;
+    std::list<std::tuple<int32_t, RefPtr<AceType>, RefPtr<AceType>>> pendingUpdateTasks_;
 
     // The C++ JSView object owns a reference to the JS Object
     // AssignNewView assigns the JS View
@@ -503,6 +464,11 @@ private:
     bool executedAboutToRender_ = false;
     bool executedOnRenderDone_ = false;
     bool executedRender_ = false;
+
+    // Save two independent instance update callbacks
+    std::function<void(int32_t)> updateInstanceForEnvCallback_;
+    std::function<void(int32_t)> updateJSInstanceCallback_;
+
     int32_t latestInstanceId_ = -1;
 };
 

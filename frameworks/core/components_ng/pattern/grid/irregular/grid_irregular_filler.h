@@ -259,6 +259,31 @@ private:
     int32_t FindItemTopRow(int32_t row, int32_t col) const;
 
     /**
+     * @brief Fill grid matrix and measure items until reaching targetIdx.
+     *
+     * @param params Fill parameters for measurement
+     * @param startIdx Starting item index (inclusive)
+     * @param endIdx Target item index (inclusive)
+     * @param outTargetLine Output parameter - line number where endIdx is located
+     * @return The last successfully processed index, or -1 if measurement failed
+     */
+    int32_t FillAndMeasureUntilIndex(
+        const FillParameters& params, int32_t startIdx, int32_t endIdx, int32_t& outTargetLine);
+
+    /**
+     * @brief Fill grid matrix and measure items until reaching endLine.
+     *
+     * Continues filling and measuring items until the current line (posY_)
+     * reaches or exceeds endLine, or all items are processed.
+     *
+     * @param params Fill parameters for measurement
+     * @param startIdx Starting item index (inclusive)
+     * @param endLine Target line number (exclusive upper bound)
+     * @return The last successfully processed index, or -1 if measurement failed
+     */
+    int32_t FillAndMeasureUntilLine(const FillParameters& params, int32_t startIdx, int32_t endLine);
+
+    /**
      * @brief Update item info to the newly filled GridItem.
      *
      * @param idx index of item in Grid

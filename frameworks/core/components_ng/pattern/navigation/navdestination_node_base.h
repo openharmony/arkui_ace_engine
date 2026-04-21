@@ -21,6 +21,7 @@
 
 #include "core/animation/page_transition_common.h"
 #include "core/common/display_info.h"
+#include "core/common/force_split/force_split_constants.h"
 #include "core/common/page_viewport_config.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/group_node.h"
@@ -199,6 +200,7 @@ public:
     bool CustomizeExpandSafeArea();
     void Measure(const std::optional<LayoutConstraintF>& parentConstraint) override;
     void Layout() override;
+    void SetNodeFreeze(bool isFreeze) override;
 
     void SetOrientation(const std::optional<Orientation>& ori)
     {
@@ -333,6 +335,38 @@ public:
     {
         return isHomeDestination_;
     }
+    void SetIsUserSetFreeze(bool isSet)
+    {
+        isUserSetFreeze_ = isSet;
+    }
+
+    void SetIsOnAnimation(bool isOnAnimation)
+    {
+        isOnAnimation_ = isOnAnimation;
+    }
+
+    bool IsOnAnimation() const
+    {
+        return isOnAnimation_;
+    }
+
+    //-------for force split------- begin------
+    ForceSplitAdjustConstraintType GetAdjustConstraintType() const
+    {
+        return adjustConstraintType_;
+    }
+    void SetAdjustConstraintType(ForceSplitAdjustConstraintType type)
+    {
+        adjustConstraintType_ = type;
+    }
+    virtual void SplitTransitionPushStart(ForceSplitTransitionType type) {}
+    virtual void SplitTransitionPushEnd(ForceSplitTransitionType type) {}
+    virtual void SplitTransitionPushFinish(int32_t animationId = -1) {}
+
+    virtual void SplitTransitionPopStart(ForceSplitTransitionType type) {}
+    virtual void SplitTransitionPopEnd(ForceSplitTransitionType type) {}
+    virtual void SplitTransitionPopFinish(int32_t animationId = -1) {}
+    //-------for force split------- end  ------
 
 protected:
     RectF CalcFullClipRectForTransition(const SizeF& frameSize);
@@ -380,7 +414,13 @@ protected:
     std::optional<bool> navigationIndicatorConfig_;
     std::optional<bool> preNavigationIndicatorConfig_;
     bool isSizeMatchNavigation_ = true;
+    bool isUserSetFreeze_ = false;
     NavDestinationType destType_ = NavDestinationType::DETAIL;
+    bool isOnAnimation_ = false;
+
+    //-------for force split------- begin------
+    ForceSplitAdjustConstraintType adjustConstraintType_ = ForceSplitAdjustConstraintType::NONE;
+    //-------for force split------- end  ------
 };
 } // namespace OHOS::Ace::NG
 

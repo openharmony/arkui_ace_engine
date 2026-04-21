@@ -218,6 +218,7 @@ void DialogManagerStatic::ShowDialogStatic(DialogProperties& dialogProps,
 
         auto dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProps, nullptr);
         CHECK_NULL_VOID(dialog);
+        ACE_UINODE_TRACE(dialog);
         if (dialogProps.isModal && !container->IsUIExtensionWindow()) {
             DialogProperties maskProps = {
                 .autoCancel = dialogProps.autoCancel,
@@ -275,6 +276,7 @@ void DialogManagerStatic::ShowActionMenuStatic(DialogProperties& dialogProps,
 
         RefPtr<NG::FrameNode> dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProps, nullptr);
         CHECK_NULL_VOID(dialog);
+        ACE_UINODE_TRACE(dialog);
         if (dialogProps.isModal && !container->IsUIExtensionWindow()) {
             DialogProperties maskProps = {
                 .autoCancel = dialogProps.autoCancel,
@@ -358,6 +360,7 @@ void DialogManagerStatic::CloseCustomDialogStatic(const int32_t dialogId, const 
         SubwindowManager::GetInstance()->CloseCustomDialogNG(dialogId);
     };
     auto dialogNode = FrameNode::GetFrameNodeOnly(V2::DIALOG_ETS_TAG, dialogId);
+    ACE_UINODE_TRACE(dialogNode);
     auto currentOverlay = GetEmbeddedOverlayWithNode(dialogNode);
     MainWindowOverlayStatic(std::move(task), "ArkUIOverlayCloseCustomDialog", currentOverlay, currentId);
 }

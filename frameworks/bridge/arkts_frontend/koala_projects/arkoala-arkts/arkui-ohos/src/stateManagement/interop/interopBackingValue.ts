@@ -1,4 +1,4 @@
-import { staticStateBindObservedObject } from '../../component/interop';
+import { staticStateBindObservedObject, enableCompatibleObservedV2ForStaticMeta } from '../../component/interop';
 import { DecoratorBackingValue } from '../base/backingValue';
 import { ObserveSingleton } from '../base/observeSingleton';
 import { IMutableStateMeta, STATE_MGMT_FACTORY } from '../decorator';
@@ -40,5 +40,30 @@ export class InteropDecoratorBackingValue<T> extends DecoratorBackingValue<T> {
             this.onTrackPropertyRead,
             this.onTrackPropertyChange
         )
+    }
+
+    public set(newValue: T): boolean {
+        const result = super.set(newValue);
+        if (result) {
+            staticStateBindObservedObject(
+                newValue,
+                () => this.fireChange(),
+                this.onTrackPropertyRead,
+                this.onTrackPropertyChange
+            )
+        }
+        return result;
+    }
+}
+
+export class InteropV2DecoratorBackingValue<T> extends DecoratorBackingValue<T> {
+    constructor(propertyName: string, initValue: T) {
+        super(propertyName, initValue);
+        enableCompatibleObservedV2ForStaticMeta(initValue);
+    }
+
+    public setNoCheck(newValue: T): void {
+        super.setNoCheck(newValue);
+        enableCompatibleObservedV2ForStaticMeta(newValue);
     }
 }

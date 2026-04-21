@@ -52,8 +52,6 @@ bool IsJsView(const Local<JSValueRef>& firstArg, panda::ecmascript::EcmaVM* vm)
 
 void PatternLockBridge::RegisterPatternLockAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
-    LOGE("Start RegisterPatternLockAttributes nativeModule");
-
     const char* functionNames[] = { "create", "setSideLength", "resetSideLength", "setAutoReset", "resetAutoReset",
         "setPathStrokeWidth", "resetPathStrokeWidth", "setRegularColor", "resetRegularColor", "setPathColor",
         "resetPathColor", "setActiveColor", "resetActiveColor", "setCircleRadius", "resetCircleRadius",
@@ -92,7 +90,6 @@ void PatternLockBridge::RegisterPatternLockAttributes(Local<panda::ObjectRef> ob
     auto patternlock =
         panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(functionNames), functionNames, funcValues);
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "patternlock"), patternlock);
-    LOGE("Finish RegisterPatternLockAttributes nativeModule");
 }
 
 ArkUINativeModuleValue PatternLockBridge::CreatePatternLock(ArkUIRuntimeCallInfo* runtimeCallInfo)

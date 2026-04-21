@@ -33,13 +33,13 @@ struct drawingLatticeTest {
       Column({ space: 10 }) {
         Text('Original Image').fontSize(20).fontWeight(700)
         Column({ space: 10 }) {
-          Image($r('app.media.mountain'))
+          Image($r('app.media.background'))
             .width(260).height(260)
         }.width('100%')
 
         Text('Resize by lattice').fontSize(20).fontWeight(700)
         Column({ space: 10 }) {
-          Image($r('app.media.mountain'))
+          Image($r('app.media.background'))
             .objectRepeat(ImageRepeat.X)
             .width(260)
             .height(260)

@@ -88,11 +88,11 @@ public:
 };
 
 /**
- * @tc.name: CtorTestFingers
+ * @tc.name: constructTestFingers
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PinchGestureInterfaceAccessorTest, CtorTestFingers, TestSize.Level1)
+HWTEST_F(PinchGestureInterfaceAccessorTest, constructTestFingers, TestSize.Level1)
 {
     const std::vector<std::pair<int32_t, int32_t>> TEST_PLAN = {
         { 1, DEFAULT_PINCH_FINGER },
@@ -134,11 +134,11 @@ HWTEST_F(PinchGestureInterfaceAccessorTest, CtorTestFingers, TestSize.Level1)
 }
 
 /**
- * @tc.name: CtorTestInvalid
+ * @tc.name: constructTestInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PinchGestureInterfaceAccessorTest, CtorTestInvalid, TestSize.Level1)
+HWTEST_F(PinchGestureInterfaceAccessorTest, constructTestInvalid, TestSize.Level1)
 {
     auto peer = accessor_->construct(nullptr);
     ASSERT_NE(peer, nullptr);
@@ -151,11 +151,11 @@ HWTEST_F(PinchGestureInterfaceAccessorTest, CtorTestInvalid, TestSize.Level1)
 }
 
 /**
- * @tc.name: CtorTestDistance
+ * @tc.name: constructTestDistance
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PinchGestureInterfaceAccessorTest, CtorTestDistance, TestSize.Level1)
+HWTEST_F(PinchGestureInterfaceAccessorTest, constructTestDistance, TestSize.Level1)
 {
     const std::vector<std::pair<double, double>> TEST_PLAN = {
         { -1.0, DEFAULT_PINCH_DISTANCE },
@@ -197,11 +197,11 @@ HWTEST_F(PinchGestureInterfaceAccessorTest, CtorTestDistance, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnActionStartTest
+ * @tc.name: onActionStartTest
  * @tc.desc: setOnActionStart test
  * @tc.type: FUNC
  */
-HWTEST_F(PinchGestureInterfaceAccessorTest, OnActionStartTest, TestSize.Level1)
+HWTEST_F(PinchGestureInterfaceAccessorTest, onActionStartTest, TestSize.Level1)
 {
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     auto testCallback = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_GestureEvent event) {
@@ -219,11 +219,11 @@ HWTEST_F(PinchGestureInterfaceAccessorTest, OnActionStartTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnActionUpdateTest
+ * @tc.name: onActionUpdateTest
  * @tc.desc: setOnActionUpdate test
  * @tc.type: FUNC
  */
-HWTEST_F(PinchGestureInterfaceAccessorTest, OnActionUpdateTest, TestSize.Level1)
+HWTEST_F(PinchGestureInterfaceAccessorTest, onActionUpdateTest, TestSize.Level1)
 {
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     auto testCallback = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_GestureEvent event) {
@@ -241,11 +241,11 @@ HWTEST_F(PinchGestureInterfaceAccessorTest, OnActionUpdateTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnActionCancel0Test
+ * @tc.name: onActionCancel0Test
  * @tc.desc: setOnActionCancel test
  * @tc.type: FUNC
  */
-HWTEST_F(PinchGestureInterfaceAccessorTest, OnActionCancel0Test, TestSize.Level1)
+HWTEST_F(PinchGestureInterfaceAccessorTest, onActionCancel0Test, TestSize.Level1)
 {
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     auto testCallback = [](const Ark_Int32 resourceId) {
@@ -262,11 +262,11 @@ HWTEST_F(PinchGestureInterfaceAccessorTest, OnActionCancel0Test, TestSize.Level1
 }
 
 /**
- * @tc.name: OnActionCancel1Test
+ * @tc.name: onActionCancel1Test
  * @tc.desc: setOnActionCancel test
  * @tc.type: FUNC
  */
-HWTEST_F(PinchGestureInterfaceAccessorTest, OnActionCancel1Test, TestSize.Level1)
+HWTEST_F(PinchGestureInterfaceAccessorTest, onActionCancel1Test, TestSize.Level1)
 {
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     auto testCallback = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_GestureEvent event) {
@@ -284,11 +284,11 @@ HWTEST_F(PinchGestureInterfaceAccessorTest, OnActionCancel1Test, TestSize.Level1
 }
 
 /**
- * @tc.name: OnActionEndTest
+ * @tc.name: onActionEndTest
  * @tc.desc: setOnActionEnd test
  * @tc.type: FUNC
  */
-HWTEST_F(PinchGestureInterfaceAccessorTest, OnActionEndTest, TestSize.Level1)
+HWTEST_F(PinchGestureInterfaceAccessorTest, onActionEndTest, TestSize.Level1)
 {
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     auto testCallback = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_GestureEvent event) {

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_ADAPTER_OHOS_CAPABILITY_FEATURE_CONFIG_FEATURE_PARAM_MANAGER_H
 #define FOUNDATION_ACE_ADAPTER_OHOS_CAPABILITY_FEATURE_CONFIG_FEATURE_PARAM_MANAGER_H
 
+#include <mutex>
 #include <string>
 
 #include "base/utils/singleton.h"
@@ -43,11 +44,16 @@ public:
     void SetUINodeGcEnabled(bool enabled);
     bool IsUINodeGcEnabled() const;
 
-    bool IsPageOverflowEnabled() const;
-    bool IsDialogCorrectionEnabled() const;
-    bool IsRnOverflowEnable() const;
+    bool IsPageOverflowEnabled();
+    bool IsDialogCorrectionEnabled();
+    bool IsRnOverflowEnable();
+    bool IsSmartLayoutEnabled() const;
     void SetUiCorrectionEnableParam(bool pageOverflowEnabled, bool dialogCorrectionEnabled);
     void SetUiCorrectionRnEnableParam(bool rnOverflowEnabled);
+    std::string GetArkWebAutoLayoutConfig();
+    void ParseArkUICorrectionConfigFromUIContent();
+    void ParseArkWebAutoLayoutConfigFromUIContent();
+    void SetSmartLayoutEnabled(bool enabled);
 private:
     void MetaDataParseEntry(std::vector<OHOS::AppExecFwk::Metadata>& metaData);
     void FeatureParamParseEntry(const std::string& bundleName);
@@ -57,6 +63,8 @@ private:
     static constexpr uint32_t MAX_TIMER_SIZE = 3; // 3 is max size for responseDeadline
     static constexpr uint32_t DEFAULT_SYNCLOAD_DEADLINE = 50; // 50ms default time
     static constexpr uint32_t MS_TO_NS = 1000000; // 1000000 change time form ms to ns
+    static std::mutex arkui_cloud_config_mutex_;
+    static std::mutex arkweb_cloud_config_mutex_;
 
     std::shared_ptr<ConfigParserBase> featureParser_ = nullptr;
     std::shared_ptr<ConfigParserBase> uiCorrectionParser_ = nullptr;
@@ -69,7 +77,14 @@ private:
     bool pageOverflowEnabled_ = false;
     bool dialogCorrectionEnabled_ = false;
     bool rnOverflowEnabled_ = false;
+    bool smartlayoutEnabled_ = false;
 
+    std::optional<bool> pageOverflowEnabledFromCloud_;
+    std::optional<bool> dialogCorrectionEnabledFromCloud_;
+    std::optional<bool> rnOverflowEnabledFromCloud_;
+    bool hasParseArkUICorrectionConfig_ {false};
+    bool hasParseArkWebAutoLayoutConfig_ {false};
+    std::string arkWebJsonConfigStr_ = "";
     friend class ConfigParserBase;
     friend class SyncLoadParser;
 };

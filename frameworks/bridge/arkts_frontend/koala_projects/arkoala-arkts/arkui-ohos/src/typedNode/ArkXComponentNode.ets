@@ -72,7 +72,7 @@ export class ArkXComponentNode extends ArkBaseNode implements XComponentAttribut
         return this;
     }
     hdrBrightness(value: number | undefined): this {
-        this.getPeer()?.setHdrBrightnessAttribute(value);
+        this.getPeer()?.setHdrBrightness0Attribute(value);
         return this;
     }
 }

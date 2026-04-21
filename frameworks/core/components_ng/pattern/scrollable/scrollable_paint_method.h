@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_PAINT_METHOD_H
 
-#include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/render/node_paint_method.h"
 
 namespace OHOS::Ace::NG {
@@ -54,6 +53,11 @@ public:
         needUpdateFadingEdge_ = needUpdate;
     }
 
+    void SetSafeAreaExpand(const std::optional<ExpandEdges>& expand)
+    {
+        safeAreaPad_ = expand;
+    }
+
 protected:
     void UpdateFadingGradient(const RefPtr<RenderContext>& renderContext);
     void UpdateOverlayFadingGradient();
@@ -78,6 +82,7 @@ private:
     float percentFading_ = 0.0f;
     float startPercent_ = 0.0f;
     float endPercent_ = 1.0f;
+    std::optional<ExpandEdges> safeAreaPad_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_PAINT_METHOD_H

@@ -79,6 +79,7 @@ public:
     }
 
     uint32_t GetOptionCount() const override;
+    uint32_t GetActualOptionCount() const override;
 
     void SetShowCount(const uint32_t showCount)
     {
@@ -154,7 +155,7 @@ public:
     
     void UpdateColumnButtonFocusState(bool haveFocus, bool needMarkDirty);
 
-    bool GetCanLoopFromLayoutProperty() const override;
+    bool GetCanLoopFromLayoutPropertyWithStartEnd() const override;
 
 private:
     void OnModifyDone() override;

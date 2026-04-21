@@ -18,6 +18,8 @@
 #include <string>
 #include "base/geometry/calc_dimension.h"
 #include "base/geometry/dimension.h"
+#include "base/utils/string_utils.h"
+#include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
@@ -42,6 +44,71 @@ constexpr int NUM_5 = 5;
 constexpr int NUM_6 = 6;
 constexpr int NUM_7 = 7;
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
+
+bool ParseFontVariations(EcmaVM* vm, const Local<JSValueRef>& jsValue, std::vector<std::string>& axisValues,
+    std::vector<ArkUIFontVariation>& fontVariations)
+{
+    if (!jsValue->IsArray(vm)) {
+        return false;
+    }
+    auto array = Local<panda::ArrayRef>(jsValue);
+    auto length = array->Length(vm);
+    axisValues.reserve(length);
+    fontVariations.reserve(length);
+    for (uint32_t i = 0; i < length; ++i) {
+        auto item = array->GetValueAt(vm, array, i);
+        if (!item->IsObject(vm)) {
+            continue;
+        }
+        auto itemObject = item->ToObject(vm);
+        auto axis = itemObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "axis"));
+        auto value = itemObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "value"));
+        auto isNormalized = itemObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "isNormalized"));
+        if (!axis->IsString(vm) || !value->IsNumber()) {
+            continue;
+        }
+        axisValues.emplace_back(axis->ToString(vm)->ToString(vm));
+        ArkUIOptionalBool normalized = { 0, false };
+        if (isNormalized->IsBoolean()) {
+            normalized.isSet = 1;
+            normalized.value = isNormalized->ToBoolean(vm)->Value();
+        }
+        fontVariations.push_back(
+            { axisValues.back().c_str(), static_cast<float>(value->ToNumber(vm)->Value()), normalized });
+    }
+    return !fontVariations.empty();
+}
+
+void SetSpanFontWeightValue(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUINodeHandle nativeNode,
+    const Local<JSValueRef>& secondArg, RefPtr<ResourceObject>& resObj)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    std::string weight = DEFAULT_FONT_WEIGHT;
+    int32_t variableFontWeight = DEFAULT_VARIABLE_FONT_WEIGHT;
+    FontWeight fontWeightEnum = FontWeight::NORMAL;
+
+    if (secondArg->IsNumber()) {
+        weight = std::to_string(secondArg->Int32Value(vm));
+        variableFontWeight = secondArg->Int32Value(vm);
+        fontWeightEnum = Framework::ConvertStrToFontWeight(weight);
+    } else if ((secondArg->IsString(vm) || secondArg->IsObject(vm))) {
+        if (!(ArkTSUtils::ParseJsString(vm, secondArg, weight, resObj))) {
+            return;
+        }
+        auto parseResult = Framework::ParseFontWeight(weight);
+        fontWeightEnum = parseResult.second;
+        if (parseResult.first) {
+            variableFontWeight = Framework::GetFontWeightNumericValue(parseResult.second);
+        } else {
+            variableFontWeight = StringUtils::IsNumber(weight) ?
+                StringUtils::StringToInt(weight, DEFAULT_VARIABLE_FONT_WEIGHT) : DEFAULT_VARIABLE_FONT_WEIGHT;
+        }
+    }
+    GetArkUINodeModifiers()->getSpanModifier()->setSpanFontWeight(nativeNode,
+        static_cast<ArkUI_Int32>(fontWeightEnum), AceType::RawPtr(resObj));
+    GetArkUINodeModifiers()->getSpanModifier()->setSpanVariableFontWeight(nativeNode,
+        variableFontWeight, AceType::RawPtr(resObj));
+}
 
 bool ParseTextShadow(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t length,
     std::vector<ArkUITextShadowStruct>& textShadowArray,
@@ -149,23 +216,9 @@ ArkUINativeModuleValue SpanBridge::SetFontWeight(ArkUIRuntimeCallInfo *runtimeCa
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
-    std::string weight = DEFAULT_FONT_WEIGHT;
-    int32_t variableFontWeight = DEFAULT_VARIABLE_FONT_WEIGHT;
     RefPtr<ResourceObject> resObj;
     if (!secondArg->IsNull() && !secondArg->IsUndefined()) {
-        if (secondArg->IsNumber()) {
-            weight = std::to_string(secondArg->Int32Value(vm));
-            variableFontWeight = secondArg->Int32Value(vm);
-        } else if ((secondArg->IsString(vm) || secondArg->IsObject(vm))) {
-            if (!(ArkTSUtils::ParseJsString(vm, secondArg, weight, resObj))) {
-                return panda::JSValueRef::Undefined(vm);
-            }
-            variableFontWeight = StringUtils::StringToInt(weight);
-        }
-        GetArkUINodeModifiers()->getSpanModifier()->setSpanFontWeight(nativeNode,
-            static_cast<ArkUI_Int32>(Framework::ConvertStrToFontWeight(weight)), AceType::RawPtr(resObj));
-        GetArkUINodeModifiers()->getSpanModifier()->setSpanVariableFontWeight(nativeNode,
-            variableFontWeight, AceType::RawPtr(resObj));
+        SetSpanFontWeightValue(runtimeCallInfo, nativeNode, secondArg, resObj);
     } else {
         GetArkUINodeModifiers()->getSpanModifier()->resetSpanFontWeight(nativeNode);
         GetArkUINodeModifiers()->getSpanModifier()->resetSpanVariableFontWeight(nativeNode);
@@ -544,6 +597,36 @@ ArkUINativeModuleValue SpanBridge::ResetFont(ArkUIRuntimeCallInfo *runtimeCallIn
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue SpanBridge::SetFontVariations(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    std::vector<std::string> axisValues;
+    std::vector<ArkUIFontVariation> fontVariations;
+    if (!ParseFontVariations(vm, secondArg, axisValues, fontVariations)) {
+        GetArkUINodeModifiers()->getSpanModifier()->resetFontVariations(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    GetArkUINodeModifiers()->getSpanModifier()->setFontVariations(
+        nativeNode, fontVariations.data(), fontVariations.size());
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SpanBridge::ResetFontVariations(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSpanModifier()->resetFontVariations(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue SpanBridge::SetTextBackgroundStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -718,13 +801,15 @@ ArkUINativeModuleValue SpanBridge::SetOnHover(ArkUIRuntimeCallInfo *runtimeCallI
             panda::TryCatch trycatch(vm);
             PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
 
-            auto obj = FrameNodeBridge::CreateHoverInfo(vm, info);
-            obj->SetNativePointerFieldCount(vm, 1);
-            obj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
+            // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+            // It is not allowed to hold this address elsewhere.
+            auto infoPtr = new HoverInfo(info);
+            auto obj = FrameNodeBridge::CreateHoverInfo(vm, infoPtr);
 
             panda::Local<panda::JSValueRef> params[NUM_2] = {
                 panda::BooleanRef::New(vm, isHover), obj };
             func->Call(vm, func.ToLocal(), params, NUM_2);
+            info.SetStopPropagation(infoPtr->IsStopPropagation());
         };
         GetArkUINodeModifiers()->getSpanModifier()->setSpanOnHover(nativeNode, reinterpret_cast<void*>(&callback));
     } else {

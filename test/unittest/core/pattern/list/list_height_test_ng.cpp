@@ -38,8 +38,8 @@ public:
 HWTEST_F(ListHeightTestNg, CalculateListItemGroup001, TestSize.Level1)
 {
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> listItemGroupPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     listItemGroupPattern->itemStartIndex_ = 2;
     RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm = AceType::MakeRefPtr<ListLayoutAlgorithm>(2);
     ListItemInfo listItemInfo { 2, 2.0f, 4.0f, false };
@@ -68,8 +68,8 @@ HWTEST_F(ListHeightTestNg, CalculateListItemGroup001, TestSize.Level1)
 HWTEST_F(ListHeightTestNg, CalculateListItemGroup002, TestSize.Level1)
 {
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> listItemGroupPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     listItemGroupPattern->itemStartIndex_ = 2;
     RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm = AceType::MakeRefPtr<ListLayoutAlgorithm>(2);
     ListItemInfo listItemInfo { 2, 2.0f, 4.0f, false };
@@ -96,8 +96,8 @@ HWTEST_F(ListHeightTestNg, CalculateListItemGroup002, TestSize.Level1)
 HWTEST_F(ListHeightTestNg, CalculateListItemGroup003, TestSize.Level1)
 {
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> listItemGroupPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     listItemGroupPattern->itemStartIndex_ = 2;
     RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm = AceType::MakeRefPtr<ListLayoutAlgorithm>(2);
     ListItemInfo listItemInfo { 2, 2.0f, 4.0f, false };
@@ -126,8 +126,8 @@ HWTEST_F(ListHeightTestNg, CalculateListItemGroup003, TestSize.Level1)
 HWTEST_F(ListHeightTestNg, CalculateListItemGroup004, TestSize.Level1)
 {
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> listItemGroupPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     listItemGroupPattern->itemStartIndex_ = 2;
     RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm = AceType::MakeRefPtr<ListLayoutAlgorithm>(2);
     ListItemInfo listItemInfo { 2, 2.0f, 4.0f, false };
@@ -214,8 +214,8 @@ HWTEST_F(ListHeightTestNg, GetPosMapEndIndex001, TestSize.Level1)
 HWTEST_F(ListHeightTestNg, GetLazyForEachIndexAverageHeight001, TestSize.Level1)
 {
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> listItemGroupPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     listItemGroupPattern->itemStartIndex_ = 2;
     RefPtr<UINode> node = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, listItemGroupPattern);
     ASSERT_NE(node, nullptr);

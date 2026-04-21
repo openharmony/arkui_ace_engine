@@ -15,13 +15,13 @@
 
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
-#include "test/mock/core/common/mock_udmf.h"
-#include "test/mock/core/render/mock_paragraph.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_udmf.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 
@@ -931,6 +931,40 @@ HWTEST_F(RichEditorDeleteTestNg, DeleteForwardOperation002, TestSize.Level0)
     richEditorPattern->caretPosition_ = 100;
     richEditorPattern->DeleteForwardOperation(length);
     EXPECT_TRUE(richEditorPattern->spans_.empty());
+}
+
+/**
+ * @tc.name: DeleteForwardOperation003
+ * @tc.desc: Test DeleteForwardOperation to cover the branch when textContent.length() != GetTextContentLength()
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDeleteTestNg, DeleteForwardOperation003, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto span1 = AceType::MakeRefPtr<SpanItem>();
+    span1->content = u"Hello ";
+    span1->rangeStart = 0;
+    span1->position = 6;
+    auto span2 = AceType::MakeRefPtr<SpanItem>();
+    span2->content = u"World";
+    span2->rangeStart = 6;
+    span2->position = 15;
+
+    richEditorPattern->spans_.clear();
+    richEditorPattern->spans_.push_back(span1);
+    richEditorPattern->spans_.push_back(span2);
+    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 15);
+
+    std::u16string textContent;
+    richEditorPattern->GetContentBySpans(textContent);
+    EXPECT_EQ(textContent.length(), 11);
+    richEditorPattern->caretPosition_ = 0;
+    int32_t length = 1;
+    auto ret = richEditorPattern->DeleteForwardOperation(length);
+    EXPECT_GE(ret.length(), 0);
 }
 
 /**

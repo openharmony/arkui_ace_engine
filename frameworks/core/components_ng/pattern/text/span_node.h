@@ -227,6 +227,7 @@ namespace OHOS::Ace::NG {
 using FONT_FEATURES_LIST = std::list<std::pair<std::string, int32_t>>;
 class InspectorFilter;
 class Paragraph;
+class TextPattern;
 
 struct PlaceholderStyle {
     double width = 0.0f;
@@ -260,7 +261,6 @@ enum class ChangeFlag {
 
 struct ACE_FORCE_EXPORT SpanItem : public AceType {
     DECLARE_ACE_TYPE(SpanItem, AceType);
-
 public:
     SpanItem() : nodeId_(ElementRegister::GetInstance()->MakeUniqueId()) {}
     virtual ~SpanItem()
@@ -316,6 +316,7 @@ public:
     bool CheckSpanNeedReCreate(int32_t index);
     void UpdateReLayoutTextStyle(
         TextStyle& spanTextStyle, const TextStyle& textStyle, bool isSymbol);
+    void UpdateReLayoutTextLineStyle(TextStyle& spanTextStyle, const TextStyle& textStyle);
     void UpdateReLayoutGradient(TextStyle& spanTextStyle, const TextStyle& textStyle);
     virtual void UpdateSymbolSpanColor(const RefPtr<FrameNode>& frameNode, TextStyle& symbolSpanStyle);
     virtual void UpdateTextStyleForAISpan(const std::u16string& content, const RefPtr<Paragraph>& builder,
@@ -327,15 +328,20 @@ public:
     virtual void GetIndex(int32_t& start, int32_t& end) const;
     virtual void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void ToJsonForFontStyle(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter,
+        const RefPtr<TextPattern>& textPattern) const;
     void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const;
     std::string GetFont() const;
+    std::string GetFontWeightConfigs() const;
     virtual void StartDrag(int32_t start, int32_t end);
     virtual void EndDrag();
     virtual bool IsDragging();
     virtual ResultObject GetSpanResultObject(int32_t start, int32_t end);
     virtual RefPtr<SpanItem> GetSameStyleSpanItem(bool isEncodeTlvS = false) const;
     void GetFontStyleSpanItem(RefPtr<SpanItem>& sameSpan) const;
+    void GetTextLineStyleSpanItem(RefPtr<SpanItem>& sameSpan) const;
     void CopySpanItemEvents(RefPtr<SpanItem>& spanItem) const;
+    void CopyBaseSpanItem(RefPtr<SpanItem> spanItem) const;
     std::optional<std::pair<int32_t, int32_t>> GetIntersectionInterval(std::pair<int32_t, int32_t> interval) const;
     std::optional<std::u16string> urlAddress;
     std::function<void()> urlOnRelease;
@@ -447,7 +453,7 @@ public:
     {
         return symbolId_;
     }
-    
+
     virtual void SpanDumpInfo();
     void SpanDumpInfoAdvance();
     void MarkDirty()
@@ -506,6 +512,26 @@ public:
 
     std::optional<TextStyle> textStyle_;
 
+    // 后续修改spanNode逻辑下沉到spanItem
+    void AddResObj(const std::string& key, const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&)>&& updateFunc);
+    void RemoveResObj(const std::string& key);
+    const RefPtr<PatternResourceManager>& GetResourceMgr()
+    {
+        return resourceMgr_;
+    }
+
+    // 用于属性字符串
+    struct SpanResourceUpdater {
+        RefPtr<ResourceObject> obj;
+        std::function<void(
+            const RefPtr<NG::SpanItem>&, const RefPtr<ResourceObject>&, const RefPtr<FrameNode>& frameNode)>
+            updateFunc;
+    };
+    void AddResourceObj(const std::string& key, const SpanResourceUpdater& resourceUpdater);
+    void RemoveResourceObj(const std::string& key);
+    const std::unordered_map<std::string, SpanResourceUpdater>& GetResMap() const; // end
+
     void AddResource(
         const std::string& key,
         const RefPtr<ResourceObject>& resObj,
@@ -534,24 +560,6 @@ public:
             resourceMgr_->ReloadResources();
         }
     }
-
-    // 后续修改spanNode逻辑下沉到spanItem
-    void AddResObj(const std::string& key, const RefPtr<ResourceObject>& resObj,
-        std::function<void(const RefPtr<ResourceObject>&)>&& updateFunc);
-    void RemoveResObj(const std::string& key);
-    const RefPtr<PatternResourceManager>& GetResourceMgr()
-    {
-        return resourceMgr_;
-    }
-
-    // 用于属性字符串
-    struct SpanResourceUpdater {
-        RefPtr<ResourceObject> obj;
-        std::function<void(const RefPtr<NG::SpanItem>&, const RefPtr<ResourceObject>&)> updateFunc;
-    };
-    void AddResourceObj(const std::string& key, const SpanResourceUpdater& resourceUpdater);
-    void RemoveResourceObj(const std::string& key);
-    const std::unordered_map<std::string, SpanResourceUpdater>& GetResMap() const; // end
 
 private:
     void EncodeFontStyleTlv(std::vector<uint8_t>& buff) const;
@@ -601,7 +609,7 @@ public:
         return resourceMgr_;
     }
 
-    void ParseResToObject(const RefPtr<ResourceObject>& resObj, RefPtr<PropertyValueBase> value);
+    bool ParseResToObject(const RefPtr<ResourceObject>& resObj, RefPtr<PropertyValueBase> value);
 
     virtual void UnregisterResource(const std::string& key)
     {
@@ -792,6 +800,7 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(ItalicFontStyle, Ace::FontStyle, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontWeight, FontWeight, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontFamily, std::vector<std::string>, ChangeFlag::RE_LAYOUT);
+    DEFINE_SPAN_FONT_STYLE_ITEM(FontVariations, FONT_VARIATIONS_LIST, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_FONT_STYLE_ITEM(StrokeWidth, Dimension, ChangeFlag::RE_CREATE);
     DEFINE_SPAN_FONT_STYLE_ITEM(StrokeColor, Color, ChangeFlag::RE_CREATE);
     DEFINE_SPAN_FONT_STYLE_ITEM(Superscript, SuperscriptStyle, ChangeFlag::RE_CREATE);
@@ -823,6 +832,7 @@ public:
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineBreakStrategy, LineBreakStrategy, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineSpacing, Dimension, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(OptimizeTrailingSpace, bool, ChangeFlag::RE_LAYOUT);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(OrphanCharOptimization, bool, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(CompressLeadingPunctuation, bool, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(HalfLeading, bool, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(ParagraphSpacing, Dimension, ChangeFlag::RE_CREATE);
@@ -888,6 +898,9 @@ public:
             RequestTextFlushDirty();
         }
     }
+
+    void SetDefaultFontColor(const RefPtr<PropertyValueBase>& value);
+    void OnAllowForceDarkUpdate(uint32_t colorMode) override;
 
 protected:
     void DumpInfo() override;

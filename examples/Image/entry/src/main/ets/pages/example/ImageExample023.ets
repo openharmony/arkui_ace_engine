@@ -45,21 +45,21 @@ struct Index {
       return;
     }
     // 创建普通DrawableDescriptor
-    let pixmapDescResult = resManager.getDrawableDescriptor($r('app.media.landscape').id);
+    let pixmapDescResult = resManager.getDrawableDescriptor($r('app.media.background').id);
     if (pixmapDescResult) {
       this.pixmapDesc = pixmapDescResult as DrawableDescriptor;
     }
     // 创建PixelMapDrawableDescriptor
-    const pixelMap = await this.getPixmapFromMedia($r('app.media.landscape'));
+    const pixelMap = await this.getPixmapFromMedia($r('app.media.background'));
     this.pixelMapDesc = new PixelMapDrawableDescriptor(pixelMap);
     // 创建分层图标
     const foreground = await this.getDrawableDescriptor($r('app.media.foreground'));
-    const background = await this.getDrawableDescriptor($r('app.media.landscape'));
+    const background = await this.getDrawableDescriptor($r('app.media.background'));
     this.layeredDesc = new LayeredDrawableDescriptor(foreground, background);
     // 创建动画图片（需加载多张图片）
-    const frame1 = await this.getPixmapFromMedia($r('app.media.sky'));
-    const frame2 = await this.getPixmapFromMedia($r('app.media.landscape'));
-    const frame3 = await this.getPixmapFromMedia($r('app.media.clouds'));
+    const frame1 = await this.getPixmapFromMedia($r('app.media.background'));
+    const frame2 = await this.getPixmapFromMedia($r('app.media.background'));
+    const frame3 = await this.getPixmapFromMedia($r('app.media.background'));
     if (frame1 && frame2 && frame3) {
       this.animatedDesc = new AnimatedDrawableDescriptor([frame1, frame2, frame3], this.animationOptions);
     }

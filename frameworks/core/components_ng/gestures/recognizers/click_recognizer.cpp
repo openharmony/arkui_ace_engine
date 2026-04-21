@@ -17,14 +17,16 @@
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/manager/event/json_child_report.h"
 #include "core/components_ng/manager/event/json_report.h"
-#include "core/common/click_effect/click_sound_effect_manager.h"
+#include "core/common/event_manager.h"
 #include "core/common/reporter/reporter.h"
 #include "core/components_ng/event/event_constants.h"
+#include "core/components_ng/property/accessibility_property.h"
 
 #include "base/ressched/ressched_click_optimizer.h"
 #include "base/ressched/ressched_report.h"
 #include "core/common/recorder/event_definition.h"
 #include "core/common/recorder/event_recorder.h"
+#include "frameworks/core/common/extra_modules/extra_modules_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -227,7 +229,6 @@ void ClickRecognizer::OnAccepted()
         remoteMessage_(info);
     }
     UpdateFingerListInfo();
-    PlayClickSoundEffect(localOffset);
     SendCallbackMsg(onAction_, GestureCallbackType::ACTION);
 
     int64_t overTime = GetSysTimestamp();
@@ -243,27 +244,6 @@ void ClickRecognizer::OnAccepted()
     }
     if (lastRefereeState != RefereeState::SUCCEED_BLOCKED) {
         ResetStateVoluntarily();
-    }
-}
-
-void ClickRecognizer::PlayClickSoundEffect(Offset clickPoint)
-{
-    auto frameNode = GetAttachedNode().Upgrade();
-    CHECK_NULL_VOID(frameNode);
-    if (frameNode->GetEnableClickSoundEffect()) {
-        if (!ClickSoundEffectManager::GetInstance().LoadProductPolicy()) {
-            return;
-        }
-        auto container = Container::GetContainer(Container::CurrentId());
-        CHECK_NULL_VOID(container);
-        auto taskExecutor = container->GetTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(
-            [clickPoint]() {
-                ClickSoundEffectManager::GetInstance().PlayClickSoundEffect(
-                    static_cast<int32_t>(clickPoint.GetX()), static_cast<int32_t>(clickPoint.GetY()));
-            },
-            TaskExecutor::TaskType::BACKGROUND, "ArkUIPlayClickSoundEffect");
     }
 }
 
@@ -553,8 +533,18 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
     }
     PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
     bool needPostEvent = isPostEventResult_ || touchPoint.passThrough;
+    auto frameNodeWeak = GetAttachedNode();
+    auto globalOffset = touchPoint.GetOffset();
     TransformForRecognizer(
         localPoint, GetAttachedNode(), false, needPostEvent, touchPoint.postEventNodeId);
+    auto localOffset = Offset(localPoint.GetX(), localPoint.GetY());
+    info.SetCurrentLocalLocationGetter([frameNodeWeak, needPostEvent, postEventNodeId = touchPoint.postEventNodeId,
+                                           globalOffset, localOffset]() {
+        CHECK_NULL_RETURN(frameNodeWeak.Upgrade(), localOffset);
+        PointF currentLocalPoint(globalOffset.GetX(), globalOffset.GetY());
+        NGGestureRecognizer::Transform(currentLocalPoint, frameNodeWeak, true, needPostEvent, postEventNodeId);
+        return Offset(currentLocalPoint.GetX(), currentLocalPoint.GetY());
+    });
     info.SetTimeStamp(touchPoint.time);
     info.SetScreenLocation(touchPoint.GetScreenOffset());
     info.SetGlobalLocation(touchPoint.GetOffset()).SetLocalLocation(Offset(localPoint.GetX(), localPoint.GetY()));
@@ -606,10 +596,42 @@ void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& o
         HandleGestureAccept(info, type, GestureListenerType::TAP);
         ACE_BENCH_MARK_TRACE("TapGesture_end");
         HandleReportClick(info);
+        auto node = GetAttachedNode().Upgrade();
+        if (node && node->GetEnableClickSoundEffect()) {
+            PlayClickSoundEffect();
+        }
         onActionFunction(info);
         HandleReports(info, type);
         RecordClickEventIfNeed(info);
     }
+    ReportToGestureDebugManager(type, GestureListenerType::TAP);
+}
+
+void ClickRecognizer::PlayClickSoundEffect()
+{
+#ifdef ENABLE_DEFAULT_CLICK_SOUND
+    if (!interactiveSoundEffectsFunc_) {
+        void* funcPtr = nullptr;
+        ErrCode errCode =
+            ExtraModulesManager::GetInstance().GetCapability("click_sound_effect", "InteractiveSoundEffects", &funcPtr);
+        if (errCode == ErrCode::SUCCESS) {
+            interactiveSoundEffectsFunc_ =  reinterpret_cast<InteractiveSoundEffectsFunc>(funcPtr);
+        } else {
+            return;
+        }
+    }
+    auto container = Container::GetContainer(Container::CurrentId());
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [interactiveSoundEffectsFunc = interactiveSoundEffectsFunc_]() {
+            if (interactiveSoundEffectsFunc) {
+                interactiveSoundEffectsFunc(0, 0, INT_MIN, INT_MIN);
+            }
+        },
+        TaskExecutor::TaskType::BACKGROUND, "ArkUIPlayClickSoundEffect");
+#endif
 }
 
 void ClickRecognizer::HandleReportClick(const GestureEvent& info)

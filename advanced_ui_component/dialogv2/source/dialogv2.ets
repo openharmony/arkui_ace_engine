@@ -106,6 +106,8 @@ export class AdvancedDialogV2Button {
   public defaultFocus?: boolean;
   @Trace
   public enabled?: boolean;
+  @Trace
+  public textAlign?: TextAlign;
   constructor(options: AdvancedDialogV2ButtonOptions) {
     this.content = options.content;
     this.action = options.action;
@@ -115,6 +117,7 @@ export class AdvancedDialogV2Button {
     this.role = options.role;
     this.defaultFocus = options.defaultFocus;
     this.enabled = options.enabled;
+    this.textAlign = options.textAlign;
   };
 }
 
@@ -127,6 +130,7 @@ export declare interface AdvancedDialogV2ButtonOptions {
   role?: ButtonRole;
   defaultFocus?: boolean;
   enabled?: boolean;
+  textAlign?: TextAlign;
 }
 
 @ComponentV2
@@ -207,7 +211,11 @@ export struct TipsDialogV2 {
           }
           .padding({ top: $r('sys.float.padding_level8') })
         } else {
-          this.checkBoxPart();
+          Column() {
+            if (this.checkTips !== null && this.checkTips !== undefined) {
+              this.checkBoxPart();
+            }
+          }
         }
       });
     }
@@ -232,6 +240,8 @@ export struct TipsDialogV2 {
           .focusable(false)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .fallbackLineSpacing(true)
+          .wordBreak(WordBreak.HYPHENATION)
+          .orphanCharOptimization(true)
       }
     }
     .accessibilityGroup(true)
@@ -301,6 +311,8 @@ export struct TipsDialogV2 {
               .textOverflow({ overflow: TextOverflow.Ellipsis })
               .width('100%')
               .fallbackLineSpacing(true)
+              .wordBreak(WordBreak.HYPHENATION)
+              .orphanCharOptimization(true)
           }
           .padding({ bottom: $r('sys.float.padding_level8') })
         }
@@ -323,6 +335,8 @@ export struct TipsDialogV2 {
                 }
               })
               .fallbackLineSpacing(true)
+              .wordBreak(WordBreak.HYPHENATION)
+              .orphanCharOptimization(true)
           }
         }
       }
@@ -514,6 +528,8 @@ export struct SelectDialogV2 {
               .fontColor(this.fontColorWithTheme)
               .textOverflow({ overflow: TextOverflow.Ellipsis })
               .fallbackLineSpacing(true)
+              .wordBreak(WordBreak.HYPHENATION)
+              .orphanCharOptimization(true)
           }.paddingContentStyle().width('100%')
         }
         List() {
@@ -529,6 +545,8 @@ export struct SelectDialogV2 {
                       .layoutWeight(1)
                       .direction(i18n.isRTL(i18n.System.getSystemLanguage()) ? Direction.Rtl : Direction.Ltr)
                       .fallbackLineSpacing(true)
+                      .wordBreak(WordBreak.HYPHENATION)
+                      .orphanCharOptimization(true)
                     Radio({ value: 'item.title', group: 'radioGroup' })
                       .size({ width: CHECKBOX_CONTAINER_LENGTH, height: CHECKBOX_CONTAINER_LENGTH })
                       .checked(this.selectedIndexInner === index)
@@ -753,6 +771,8 @@ export struct ConfirmDialogV2 {
             })
             .width('100%')
             .fallbackLineSpacing(true)
+            .wordBreak(WordBreak.HYPHENATION)
+            .orphanCharOptimization(true)
         }
         .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) })
         .width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`)
@@ -785,6 +805,8 @@ export struct ConfirmDialogV2 {
         .layoutWeight(1)
         .textOverflow({ overflow: TextOverflow.Ellipsis })
         .fallbackLineSpacing(true)
+        .wordBreak(WordBreak.HYPHENATION)
+        .orphanCharOptimization(true)
     }
     .accessibilityGroup(true)
     .accessibilityText(getCheckTipsAccessibilityText(this.getUIContext(), this.checkTips, this.checkedInner))
@@ -908,6 +930,8 @@ export struct AlertDialogV2 {
             }
           })
           .fallbackLineSpacing(true)
+          .wordBreak(WordBreak.HYPHENATION)
+          .orphanCharOptimization(true)
       }
       .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
       .width('100%')
@@ -1161,8 +1185,8 @@ struct CustomDialogContentComponent {
   aboutToAppear(): void {
     try {
       let uiContext: UIContext = this.getUIContext();
-      this.isFollowingSystemFontScale = uiContext?.isFollowingSystemFontScale();
-      this.appMaxFontScale = uiContext?.getMaxFontScale();
+      this.isFollowingSystemFontScale = uiContext?.isFollowingSystemFontScale() ?? false;
+      this.appMaxFontScale = uiContext?.getMaxFontScale() ?? 3.2;
     } catch (err) {
       let code: number = (err as BusinessError)?.code;
       let message: string = (err as BusinessError)?.message;
@@ -1277,6 +1301,8 @@ struct CustomDialogContentComponent {
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .width('100%')
           .fallbackLineSpacing(true)
+          .wordBreak(WordBreak.HYPHENATION)
+          .orphanCharOptimization(true)
       }
       .width('100%')
 
@@ -1297,6 +1323,8 @@ struct CustomDialogContentComponent {
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .width('100%')
           .fallbackLineSpacing(true)
+          .wordBreak(WordBreak.HYPHENATION)
+          .orphanCharOptimization(true)
       }
       .width('100%')
     }
@@ -1400,6 +1428,15 @@ struct CustomDialogContentComponent {
     };
   }
 
+  private getButtonLabelStyle(buttonOptions?: AdvancedDialogV2Button): LabelStyle {
+    return {
+      maxLines: 1,
+      maxFontSize: this.buttonMaxFontSize,
+      minFontSize: this.buttonMinFontSize,
+      textAlign: buttonOptions?.textAlign ?? TextAlign.Start
+    }
+  }
+
   @Builder
   buildSingleButton(index: number): void {
     if (this.isNewPropertiesHighPriority(index)) {
@@ -1408,7 +1445,7 @@ struct CustomDialogContentComponent {
           this.isAllFocusFalse, this.getDialogController())
         .role(this.buttons?.[index].role ?? ButtonRole.NORMAL)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
-        .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
+        .labelStyle(this.getButtonLabelStyle(this.buttons?.[index]))
     } else if (this.buttons?.[index].background !== undefined && this.buttons?.[index].fontColor !== undefined) {
       Button(this.buttons?.[index].content)
         .setButtonProperties(this.buttons?.[index], this.isHasDefaultFocus, 
@@ -1416,21 +1453,21 @@ struct CustomDialogContentComponent {
         .backgroundColor(this.buttons?.[index].background?.color)
         .fontColor(this.buttons?.[index].fontColor?.color)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
-        .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
+        .labelStyle(this.getButtonLabelStyle(this.buttons?.[index]))
     } else if (this.buttons?.[index].background !== undefined) {
       Button(this.buttons?.[index].content)
         .setButtonProperties(this.buttons?.[index], this.isHasDefaultFocus, 
           this.isAllFocusFalse, this.getDialogController())
         .backgroundColor(this.buttons?.[index].background?.color)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
-        .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
+        .labelStyle(this.getButtonLabelStyle(this.buttons?.[index]))
     } else {
       Button(this.buttons?.[index].content)
         .setButtonProperties(this.buttons?.[index], this.isHasDefaultFocus, 
           this.isAllFocusFalse, this.getDialogController())
         .fontColor(this.buttons?.[index]?.fontColor?.color)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
-        .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
+        .labelStyle(this.getButtonLabelStyle(this.buttons?.[index]))
     }
   }
 
@@ -1463,7 +1500,7 @@ struct CustomDialogContentComponent {
         ForEach(this.buttons.slice(0, VERTICAL_BUTTON_MAX_COUNT), (item: AdvancedDialogV2Button, index: number) => {
           this.buildButtonWithDivider(this.buttons?.length === HORIZON_BUTTON_MAX_COUNT ?
             HORIZON_BUTTON_MAX_COUNT - index - 1 : index);
-        }, (item: AdvancedDialogV2Button) => item.content.toString());
+        }, (item: AdvancedDialogV2Button) => item.content?.toString() ?? JSON.stringify(item));
       }
     }
   }
@@ -1627,7 +1664,16 @@ function isDefaultFocus(singleButton?: AdvancedDialogV2Button, isHasDefaultFocus
  */
 function getNumberByResourceId(resourceId: number, defaultValue: number, allowZero?: boolean): number {
   try {
-    let sourceValue: number = resourceManager.getSystemResourceManager().getNumber(resourceId);
+    let currentDeviceType: resourceManager.DeviceType | undefined = 
+      resourceManager.getSysResourceManager()?.getConfigurationSync()?.deviceType;
+    let systemConfiguration: resourceManager.Configuration =
+      resourceManager.getSystemResourceManager()?.getConfigurationSync();
+    if (currentDeviceType !== undefined && systemConfiguration !== undefined) {
+      systemConfiguration.deviceType = currentDeviceType;
+    }
+    let sourceValue: number = resourceManager.getSystemResourceManager()
+      ?.getOverrideResourceManager(systemConfiguration)
+      ?.getNumber(resourceId);
     if (sourceValue > 0 || allowZero) {
       return sourceValue;
     } else {
@@ -1782,6 +1828,8 @@ export struct LoadingDialogV2 {
           })
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .fallbackLineSpacing(true)
+          .wordBreak(WordBreak.HYPHENATION)
+          .orphanCharOptimization(true)
         LoadingProgress()
           .color(this.loadingProgressIconColorWithTheme)
           .width(LOADING_PROGRESS_WIDTH)
@@ -1861,35 +1909,6 @@ export struct PopoverDialogV2 {
   }
 }
 
-function toLengthString(value?: LengthMetrics): string | undefined {
-  if (!value) {
-    return undefined;
-  }
-  const length: number = value.value;
-  let lengthString: string = '';
-  switch (value.unit) {
-    case LengthUnit.PX:
-      lengthString = `${length}px`;
-      break;
-    case LengthUnit.FP:
-      lengthString = `${length}fp`;
-      break;
-    case LengthUnit.LPX:
-      lengthString = `${length}lpx`;
-      break;
-    case LengthUnit.PERCENT:
-      lengthString = `${length * 100}%`;
-      break;
-    case LengthUnit.VP:
-      lengthString = `${length}vp`;
-      break;
-    default:
-      lengthString = `${length}vp`;
-      break;
-  }
-  return lengthString;
-}
-
 function lengthMetricsToPX(value?: LengthMetrics): number {
   if (!value) {
     return 0;
@@ -1908,5 +1927,4 @@ function lengthMetricsToPX(value?: LengthMetrics): number {
       return 0;
   }
 }
-
 export declare interface PopoverDialogV2Options extends CustomPopupOptions {}

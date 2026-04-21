@@ -92,7 +92,7 @@ void SetScrollBarImpl(Ark_NativePointer node,
     ScrollableModelStatic::SetScrollBarMode(frameNode, convValue);
 }
 void SetScrollBarColorImpl(Ark_NativePointer node,
-                           const Opt_Union_Color_I32_String_Resource* value)
+                           const Opt_Union_arkui_component_enums_Color_I32_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -117,6 +117,14 @@ void SetScrollBarMarginImpl(Ark_NativePointer node,
     ScrollBarMargin scrollBarMargin;
     auto convValue = Converter::OptConvertPtr<ScrollBarMargin>(value);
     ScrollableModelStatic::SetScrollBarMargin(frameNode, convValue.value_or(scrollBarMargin));
+}
+void SetAutoAdjustScrollBarMargin(Ark_NativePointer node,
+                                  const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    ScrollableModelStatic::SetAutoAdjustScrollBarMargin(frameNode, convValue);
 }
 void SetNestedScrollImpl(Ark_NativePointer node,
                          const Opt_NestedScrollOptions* value)
@@ -254,8 +262,15 @@ void SetOnDidStopFlingImpl(Ark_NativePointer node,
     };
     ScrollableModelStatic::SetOnDidStopFling(frameNode, std::move(onEvent));
 }
+void SetEnableScrollWithMouse(Ark_NativePointer node, const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    ScrollableModelStatic::SetEnableScrollWithMouse(frameNode, *convValue);
+}
 void SetOnReachStartImpl(Ark_NativePointer node,
-                         const Opt_Callback_Void* value)
+                         const Opt_synthetic_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -270,7 +285,7 @@ void SetOnReachStartImpl(Ark_NativePointer node,
     ScrollableModelStatic::SetOnReachStart(frameNode, std::move(modelCallback));
 }
 void SetOnReachEndImpl(Ark_NativePointer node,
-                       const Opt_Callback_Void* value)
+                       const Opt_synthetic_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -285,7 +300,7 @@ void SetOnReachEndImpl(Ark_NativePointer node,
     ScrollableModelStatic::SetOnReachEnd(frameNode, std::move(modelCallback));
 }
 void SetOnScrollStartImpl(Ark_NativePointer node,
-                          const Opt_Callback_Void* value)
+                          const Opt_synthetic_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -300,7 +315,7 @@ void SetOnScrollStartImpl(Ark_NativePointer node,
     ScrollableModelStatic::SetOnScrollStart(frameNode, std::move(modelCallback));
 }
 void SetOnScrollStopImpl(Ark_NativePointer node,
-                         const Opt_Callback_Void* value)
+                         const Opt_synthetic_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -408,6 +423,7 @@ const GENERATED_ArkUIScrollableCommonMethodModifier* GetScrollableCommonMethodMo
         ScrollableCommonMethodModifier::SetScrollBarColorImpl,
         ScrollableCommonMethodModifier::SetScrollBarWidthImpl,
         ScrollableCommonMethodModifier::SetScrollBarMarginImpl,
+        ScrollableCommonMethodModifier::SetAutoAdjustScrollBarMargin,
         ScrollableCommonMethodModifier::SetNestedScrollImpl,
         ScrollableCommonMethodModifier::SetEnableScrollInteractionImpl,
         ScrollableCommonMethodModifier::SetFrictionImpl,
@@ -418,6 +434,7 @@ const GENERATED_ArkUIScrollableCommonMethodModifier* GetScrollableCommonMethodMo
         ScrollableCommonMethodModifier::SetOnDidStopDraggingImpl,
         ScrollableCommonMethodModifier::SetOnWillStartFlingImpl,
         ScrollableCommonMethodModifier::SetOnDidStopFlingImpl,
+        ScrollableCommonMethodModifier::SetEnableScrollWithMouse,
         ScrollableCommonMethodModifier::SetOnReachStartImpl,
         ScrollableCommonMethodModifier::SetOnReachEndImpl,
         ScrollableCommonMethodModifier::SetOnScrollStartImpl,

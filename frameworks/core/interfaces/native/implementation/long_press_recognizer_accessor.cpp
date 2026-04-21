@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "long_press_recognizer_peer.h"
@@ -45,6 +44,10 @@ Ark_Int32 GetDurationImpl(Ark_LongPressRecognizer peer)
     CHECK_NULL_RETURN(peer, errorValue);
     return Converter::ArkValue<Ark_Int32>(peer->GetDuration());
 }
+Ark_Float64 GetAllowableMovementImpl(Ark_LongPressRecognizer peer)
+{
+    return {};
+}
 } // LongPressRecognizerAccessor
 const GENERATED_ArkUILongPressRecognizerAccessor* GetLongPressRecognizerAccessor()
 {
@@ -54,6 +57,7 @@ const GENERATED_ArkUILongPressRecognizerAccessor* GetLongPressRecognizerAccessor
         LongPressRecognizerAccessor::GetFinalizerImpl,
         LongPressRecognizerAccessor::IsRepeatImpl,
         LongPressRecognizerAccessor::GetDurationImpl,
+        LongPressRecognizerAccessor::GetAllowableMovementImpl,
     };
     return &LongPressRecognizerAccessorImpl;
 }

@@ -43,6 +43,10 @@ declare class RepeatNative {
   static createNewChildFinish(id: string): void;
   static afterAddChild(): void;
   static onMove(handler: (from: number, to: number) => void, eventHandler?: ItemDragEventHandler);
+  static isAllowAnimation(): boolean;
+  static isImplicitAnimationOpen(): boolean;
+  static isChildInAnimation(fromIndex: number): boolean;
+  static getActiveRange(): ActiveRangeInfo;
 }
 
 // Repeat.virtualScroll maps to C++ RepeatVirtualScrollNode 
@@ -72,7 +76,7 @@ declare class RepeatVirtualScroll2Native {
     arrLen: number,
     totalCount: number,
     handlers: {
-      onGetRid4Index: (forIndex: number) => [number, number],
+      onGetRid4Index: (forIndex: number, isImplicitAnimationOpen: boolean) => [number, number],
       onRecycleItems: (fromIndex: number, toIndex: number) => void,
       onActiveRange: (fromIndex: number, toIndex: number, vStart: number, vEnd: number, isLoop: boolean) => void,
       onMoveFromTo: (moveFrom: number, moveTo: number) => void,
@@ -102,4 +106,8 @@ declare class RepeatVirtualScroll2Native {
   // drag and drop
   static onMove(repeatElmtId: number, handler: (from: number, to: number) => void, eventHandler?: ItemDragEventHandler);
   static setCreateByTemplate(isCreatedByTemplate: boolean): void;
+  static isAllowAnimation(repeatElmtId: number): boolean;
+  static isImplicitAnimationOpen(): boolean;
+  static isChildInAnimation(repeatElmtId: number, rid: number): boolean;
+  static isChildOnMainTree(repeatElmtId: number, rid: number): boolean;
 }

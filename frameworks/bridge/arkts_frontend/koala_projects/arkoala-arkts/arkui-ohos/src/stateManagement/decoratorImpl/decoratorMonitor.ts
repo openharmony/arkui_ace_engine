@@ -17,6 +17,7 @@ import { IBindingSource } from '../base/mutableStateMeta';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 import { ITrackedDecoratorRef } from '../base/mutableStateMeta';
 import { RenderIdType, IMonitorValue, IMonitorDecoratedVariable, IMonitor, IMonitorPathInfo, IVariableOwner, IDecoratorBaseRegistry } from '../decorator';
+import { ElementInfo } from '../utils';
 
 export class MonitorFunctionDecorator implements IMonitorDecoratedVariable, IMonitor, IDecoratorBaseRegistry {
     public static readonly MIN_MONITOR_ID: RenderIdType = 0x20000000;
@@ -27,10 +28,13 @@ export class MonitorFunctionDecorator implements IMonitorDecoratedVariable, IMon
     private readonly monitorFunction_: (m: IMonitor) => void;
     private readonly values_: MonitorValueInternal[] = new Array<MonitorValueInternal>();
     private readonly owningComponent_?: IVariableOwner;
+    public readonly functionName_?: string;
 
-    constructor(pathLambda: IMonitorPathInfo[], monitorFunction: (m: IMonitor) => void, owningView?: IVariableOwner, isSynchronous?: boolean) {
+    constructor(pathLambda: IMonitorPathInfo[], monitorFunction: (m: IMonitor) => void, owningView?: IVariableOwner, isSynchronous?: boolean,
+            functionName?: string) {
         this.monitorFunction_ = monitorFunction;
         this.owningComponent_ = owningView;
+        this.functionName_ = functionName;
         const isSync = isSynchronous ?? false;
 
         pathLambda.forEach((info: IMonitorPathInfo) => {
@@ -209,6 +213,16 @@ export class MonitorValueInternal implements IMonitorValue<Any>, ITrackedDecorat
     public reset(): void {
         this.before = this.now;
         this.dirty_ = false;
+    }
+
+    public getDFXInfo(): ElementInfo {
+        const functionName = this.monitor.functionName_;
+        const elementName = functionName ?
+            `@Monitor function: ${functionName}, path: ${this.path}` : `@Monitor function path: ${this.path}`;
+        return {
+            elementName: elementName,
+            elementId: this.id
+        };
     }
 }
 

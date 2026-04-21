@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,37 +19,22 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
-#include "core/components_ng/pattern/text/text_model.h"
 #include "core/common/ime/text_range.h"
+
+namespace OHOS::Ace {
+class SpanStringBase;
+}
+
 namespace OHOS::Ace::NG {
 class TextInsertValueInfo {
 public:
     TextInsertValueInfo() = default;
     ~TextInsertValueInfo() = default;
-    void SetSpanIndex(int32_t spanIndex)
-    {
-        spanIndex_ = spanIndex;
-    }
-
-    int32_t GetSpanIndex() const
-    {
-        return spanIndex_;
-    }
-
-    void SetOffsetInSpan(int32_t offsetInSpan)
-    {
-        offsetInSpan_ = offsetInSpan;
-    }
-
-    int32_t GetOffsetInSpan() const
-    {
-        return offsetInSpan_;
-    }
-
-    std::string ToString() const
-    {
-        return "spanIndex_: " + std::to_string(spanIndex_) + ", offsetInSpan_" + std::to_string(offsetInSpan_);
-    }
+    void SetSpanIndex(int32_t spanIndex);
+    int32_t GetSpanIndex() const;
+    void SetOffsetInSpan(int32_t offsetInSpan);
+    int32_t GetOffsetInSpan() const;
+    std::string ToString() const;
 
 private:
     int32_t spanIndex_ = 0;
@@ -146,31 +131,12 @@ public:
     double GetStrokeWidth() const;
     void SetStrokeColor(const std::string& strokeColor);
     const std::string& GetStrokeColor() const;
-    void SetBorderRadius(const std::string& borderRadius)
-    {
-        borderRadius_ = borderRadius;
-    }
-    const std::string& GetBorderRadius() const
-    {
-        return borderRadius_;
-    }
-    void SetMargin(const std::string& margin)
-    {
-        margin_ = margin;
-    }
-    const std::string& GetMargin() const
-    {
-        return margin_;
-    }
-    void SetFontStyle(OHOS::Ace::FontStyle fontStyle)
-    {
-        fontStyle_ = fontStyle;
-    }
-
-    OHOS::Ace::FontStyle GetFontStyle() const
-    {
-        return fontStyle_;
-    }
+    void SetBorderRadius(const std::string& borderRadius);
+    const std::string& GetBorderRadius() const;
+    void SetMargin(const std::string& margin);
+    const std::string& GetMargin() const;
+    void SetFontStyle(OHOS::Ace::FontStyle fontStyle);
+    OHOS::Ace::FontStyle GetFontStyle() const;
 
 private:
     TextStyleResult textStyle_;
@@ -269,17 +235,7 @@ public:
     TextRange GetRangeAfter() const;
 
     TextChangeReason GetChangeReason() const;
-
-    void reset()
-    {
-        originalSpans_.clear();
-        replacedSpans_.clear();
-        replacedImageSpans_.clear();
-        replacedSymbolSpans_.clear();
-        rangeBefore_ = TextRange();
-        rangeAfter_ = TextRange();
-        changeReason_ = TextChangeReason::UNKNOWN;
-    }
+    void reset();
 
 private:
     std::vector<RichEditorAbstractSpanResult> originalSpans_;
@@ -335,89 +291,35 @@ public:
     void SetOnDeleteComplete(std::function<void()>&& func);
     void FireOnDeleteComplete();
     std::string GetDragExtraParams(const std::string& extraInfo, const Point& point, DragEventType type) override;
-    void SetOnEditingChange(std::function<void(const bool&)> && func);
+    void SetOnEditingChange(std::function<void(const bool&)>&& func);
     void FireOnEditingChange(bool isEditing);
-    void SetOnSelect(std::function<void(const BaseEventInfo*)>&& func)
-    {
-        onSelect_ = std::move(func);
-    }
-
-    void FireOnSelect(BaseEventInfo* value)
-    {
-        if (onSelect_) {
-            onSelect_(value);
-        }
-    }
-
-    void SetOnSelectionChange(std::function<void(const BaseEventInfo*)>&& func)
-    {
-        OnSelectionChange_ = std::move(func);
-    }
-
-    void FireOnSelectionChange(BaseEventInfo* value)
-    {
-        if (OnSelectionChange_) {
-            OnSelectionChange_(value);
-        }
-    }
-
-    void SetTimestamp(long long timestamp)
-    {
-        timestamp_ = timestamp;
-    }
-
-    void SetOnPaste(std::function<void(NG::TextCommonEvent&)>&& func)
-    {
-        onPaste_ = std::move(func);
-    }
-
-    void FireOnPaste(NG::TextCommonEvent& value)
-    {
-        if (onPaste_) {
-            onPaste_(value);
-        }
-    }
-
-    void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func)
-    {
-        onSubmit_ = std::move(func);
-    }
-
-    void FireOnSubmit(int32_t value, NG::TextFieldCommonEvent& event)
-    {
-        if (onSubmit_) {
-            onSubmit_(value, event);
-        }
-    }
-
-    void SetOnWillAttachIME(IMEAttachCallback&& func)
-    {
-        onWillAttachIME_ = std::move(func);
-    }
-
-    void FireOnWillAttachIME(IMEClient& info)
-    {
-        if (onWillAttachIME_) {
-            onWillAttachIME_(info);
-        }
-    }
-
-    void SetOnWillChange(std::function<bool(const RichEditorChangeValue&)> && func);
+    void SetOnSelect(std::function<void(const BaseEventInfo*)>&& func);
+    void FireOnSelect(BaseEventInfo* value);
+    void SetOnSelectionChange(std::function<void(const BaseEventInfo*)>&& func);
+    void FireOnSelectionChange(BaseEventInfo* value);
+    void SetTimestamp(long long timestamp);
+    void SetOnPaste(std::function<void(NG::TextCommonEvent&)>&& func);
+    void FireOnPaste(NG::TextCommonEvent& value);
+    void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func);
+    void FireOnSubmit(int32_t value, NG::TextFieldCommonEvent& event);
+    void SetOnWillAttachIME(IMEAttachCallback&& func);
+    void FireOnWillAttachIME(IMEClient& info);
+    void SetOnWillChange(std::function<bool(const RichEditorChangeValue&)>&& func);
     bool FireOnWillChange(const RichEditorChangeValue& info);
     bool HasOnWillChange() const;
-    void SetOnDidChange(std::function<void(const RichEditorChangeValue&)> && func);
-    void FireOnDidChange(const RichEditorChangeValue& range);
+    void SetOnDidChange(std::function<void(const RichEditorChangeValue&)>&& func);
+    void FireOnDidChange(const RichEditorChangeValue& info);
     bool HasOnDidChange() const;
-    void SetOnCut(std::function<void(NG::TextCommonEvent&)> && func);
+    void SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func);
     void FireOnCut(NG::TextCommonEvent& value);
-    void SetOnCopy(std::function<void(NG::TextCommonEvent&)> && func);
+    void SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func);
     void FireOnCopy(NG::TextCommonEvent& value);
     void SetOnShare(std::function<void(NG::TextCommonEvent&)>&& func);
     void FireOnShare(NG::TextCommonEvent& value);
-    void SetOnStyledStringWillChange(std::function<bool(const StyledStringChangeValue&)> && func);
+    void SetOnStyledStringWillChange(std::function<bool(const StyledStringChangeValue&)>&& func);
     bool FireOnStyledStringWillChange(const StyledStringChangeValue& info);
     bool HasOnStyledStringWillChange() const;
-    void SetOnStyledStringDidChange(std::function<void(const StyledStringChangeValue&)> && func);
+    void SetOnStyledStringDidChange(std::function<void(const StyledStringChangeValue&)>&& func);
     void FireOnStyledStringDidChange(const StyledStringChangeValue& info);
     bool HasOnStyledStringDidChange() const;
 
@@ -432,8 +334,8 @@ private:
     std::function<void(const TextRange&)> onDidIMEInput_;
     std::function<bool(const RichEditorDeleteValue&)> aboutToDelete_;
     std::function<void()> onDeleteComplete_;
-    std::function<void(const bool&)> onEditingChange_;
     std::function<void(int32_t, NG::TextFieldCommonEvent&)> onSubmit_;
+    std::function<void(const bool&)> onEditingChange_;
     std::function<bool(const RichEditorChangeValue&)> onWillChange_;
     std::function<void(const RichEditorChangeValue&)> onDidChange_;
     std::function<void(NG::TextCommonEvent&)> onCut_;

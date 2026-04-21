@@ -16,6 +16,7 @@
 #include "base/i18n/localization.h"
 #include "core/components_ng/pattern/patternlock/patternlock_pattern.h"
 
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/calc_length.h"
@@ -53,6 +54,7 @@ void PatternLockPattern::OnModifyDone()
     InitTouchEvent(gestureHub, touchDownListener_);
     InitPatternLockController();
     InitFocusEvent();
+    UpdateFocusPaintFromTheme();
     InitMouseEvent();
     InitAccessibilityHoverEvent();
     InitSkipUnselectedPoint();
@@ -608,9 +610,7 @@ void PatternLockPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto patternLockTheme = pipelineContext->GetTheme<V2::PatternLockTheme>();
+    auto patternLockTheme = host->GetTheme<V2::PatternLockTheme>(true);
     CHECK_NULL_VOID(patternLockTheme);
     auto patternLockPaintProperty = host->GetPaintProperty<PatternLockPaintProperty>();
     CHECK_NULL_VOID(patternLockPaintProperty);
@@ -637,6 +637,21 @@ void PatternLockPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, foucusCircleRadius, foucusCircleRadius);
     paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS, foucusCircleRadius, foucusCircleRadius);
     paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS, foucusCircleRadius, foucusCircleRadius);
+}
+
+void PatternLockPattern::UpdateFocusPaintFromTheme()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    auto patternLockTheme = host->GetTheme<V2::PatternLockTheme>(true);
+    CHECK_NULL_VOID(patternLockTheme);
+
+    focusHub->SetPaintColor(patternLockTheme->GetFocusColor());
+    if (focusHub->IsCurrentFocus()) {
+        focusHub->PaintFocusState(false);
+    }
 }
 
 void PatternLockPattern::OnFocusClick()
@@ -819,9 +834,7 @@ void PatternLockPattern::HandleMouseEvent(const MouseInfo& info)
 void PatternLockPattern::StartModifierConnectedAnimate(int32_t x, int32_t y)
 {
     auto host = GetHost();
-    if (host) {
-        ACE_UINODE_TRACE(host);
-    }
+    ACE_UINODE_TRACE(host);
     CHECK_NULL_VOID(patternLockModifier_);
     patternLockModifier_->StartConnectedCircleAnimate(x, y);
     patternLockModifier_->StartConnectedLineAnimate(x, y);
@@ -836,9 +849,7 @@ void PatternLockPattern::StartModifierAddPassPointAnimate(int32_t x, int32_t y)
 void PatternLockPattern::StartModifierCanceledAnimate()
 {
     auto host = GetHost();
-    if (host) {
-        ACE_UINODE_TRACE(host);
-    }
+    ACE_UINODE_TRACE(host);
     CHECK_NULL_VOID(patternLockModifier_);
     if (isMoveEventValid_) {
         patternLockModifier_->StartCanceledAnimate();
@@ -913,7 +924,7 @@ void PatternLockPattern::UpdateSelectedColor(const Color& color, bool isFristLoa
     CHECK_NULL_VOID(pipelineContext);
     auto paintProperty = host->GetPaintProperty<PatternLockPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (pipelineContext->IsSystmColorChange() || isFristLoad) {
+    if (pipelineContext->IsSystemColorChange() || isFristLoad) {
         paintProperty->UpdateSelectedColor(color);
     }
     if (host->GetRerenderable()) {
@@ -929,7 +940,7 @@ void PatternLockPattern::UpdatePathColor(const Color& color, bool isFristLoad)
     CHECK_NULL_VOID(pipelineContext);
     auto paintProperty = host->GetPaintProperty<PatternLockPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (pipelineContext->IsSystmColorChange() || isFristLoad) {
+    if (pipelineContext->IsSystemColorChange() || isFristLoad) {
         paintProperty->UpdatePathColor(color);
     }
     if (host->GetRerenderable()) {
@@ -945,7 +956,7 @@ void PatternLockPattern::UpdateActiveColor(const Color& color, bool isFristLoad)
     CHECK_NULL_VOID(pipelineContext);
     auto paintProperty = host->GetPaintProperty<PatternLockPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (pipelineContext->IsSystmColorChange() || isFristLoad) {
+    if (pipelineContext->IsSystemColorChange() || isFristLoad) {
         paintProperty->UpdateActiveColor(color);
     }
     if (host->GetRerenderable()) {
@@ -961,7 +972,7 @@ void PatternLockPattern::UpdateRegularColor(const Color& color, bool isFristLoad
     CHECK_NULL_VOID(pipelineContext);
     auto paintProperty = host->GetPaintProperty<PatternLockPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (pipelineContext->IsSystmColorChange() || isFristLoad) {
+    if (pipelineContext->IsSystemColorChange() || isFristLoad) {
         paintProperty->UpdateRegularColor(color);
     }
     if (host->GetRerenderable()) {
@@ -977,7 +988,7 @@ void PatternLockPattern::UpdateCircleRadius(const CalcDimension& radius, bool is
     CHECK_NULL_VOID(pipelineContext);
     auto paintProperty = host->GetPaintProperty<PatternLockPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (pipelineContext->IsSystmColorChange() || isFristLoad) {
+    if (pipelineContext->IsSystemColorChange() || isFristLoad) {
         paintProperty->UpdateCircleRadius(radius);
     }
     if (host->GetRerenderable()) {
@@ -993,7 +1004,7 @@ void PatternLockPattern::UpdateSideLength(const CalcDimension& sideLength, bool 
     CHECK_NULL_VOID(pipelineContext);
     auto layoutProperty = host->GetLayoutProperty<PatternLockLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (pipelineContext->IsSystmColorChange() || isFristLoad) {
+    if (pipelineContext->IsSystemColorChange() || isFristLoad) {
         layoutProperty->UpdateSideLength(sideLength);
     }
     if (host->GetRerenderable()) {
@@ -1009,7 +1020,7 @@ void PatternLockPattern::UpdateActiveCircleColor(const Color& color, bool isFris
     CHECK_NULL_VOID(pipelineContext);
     auto paintProperty = host->GetPaintProperty<PatternLockPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (pipelineContext->IsSystmColorChange() || isFristLoad) {
+    if (pipelineContext->IsSystemColorChange() || isFristLoad) {
         paintProperty->UpdateActiveCircleColor(color);
     }
     if (host->GetRerenderable()) {
@@ -1023,9 +1034,7 @@ void PatternLockPattern::OnColorConfigurationUpdate()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<V2::PatternLockTheme>();
+    auto theme = host->GetTheme<V2::PatternLockTheme>(true);
     CHECK_NULL_VOID(theme);
     auto pops = host->GetPaintProperty<PatternLockPaintProperty>();
     CHECK_NULL_VOID(pops);
@@ -1044,9 +1053,10 @@ void PatternLockPattern::OnColorConfigurationUpdate()
         (pops->HasSelectedColorSetByUser() && !pops->GetSelectedColorSetByUserValue())) {
         UpdateSelectedColor(theme->GetSelectedColor());
     }
-    if (!pops->HasActiveCircleColorSetByUser() ||
-        (pops->HasActiveCircleColorSetByUser() && !pops->GetActiveCircleColorSetByUserValue())) {
+    if (!pops->HasActiveCircleColorSetByUser() || (pops->HasActiveCircleColorSetByUser() &&
+                                                   !pops->GetActiveCircleColorSetByUserValue())) {
         UpdateActiveCircleColor(Color::TRANSPARENT);
     }
+    UpdateFocusPaintFromTheme();
 }
 } // namespace OHOS::Ace::NG

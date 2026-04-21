@@ -46,32 +46,23 @@ ExtSurface::~ExtSurface()
     CHECK_NULL_VOID(context);
     auto resRegister = context->GetPlatformResRegister();
     CHECK_NULL_VOID(resRegister);
+    const auto onCreateHash = MakeEventHash(SURFACE_METHOD_ONCREATE);
+    const auto onChangedHash = MakeEventHash(SURFACE_METHOD_ONCHANGED);
+    const auto onDestroyedHash = MakeEventHash(SURFACE_METHOD_ONDESTROYED);
     auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::PLATFORM);
     if (platformTaskExecutor.IsRunOnCurrentThread()) {
-        resRegister->UnregisterEvent(MakeEventHash(SURFACE_METHOD_ONCREATE));
-        resRegister->UnregisterEvent(MakeEventHash(SURFACE_METHOD_ONCHANGED));
-        resRegister->UnregisterEvent(MakeEventHash(SURFACE_METHOD_ONDESTROYED));
+        resRegister->UnregisterEvent(onCreateHash);
+        resRegister->UnregisterEvent(onChangedHash);
+        resRegister->UnregisterEvent(onDestroyedHash);
     } else {
         WeakPtr<PlatformResRegister> weak = resRegister;
         platformTaskExecutor.PostTask(
-            [eventHash = MakeEventHash(SURFACE_METHOD_ONCREATE), weak] {
+            [weak, onCreateHash, onChangedHash, onDestroyedHash]() {
                 auto resRegister = weak.Upgrade();
                 CHECK_NULL_VOID(resRegister);
-                resRegister->UnregisterEvent(eventHash);
-            },
-            "ArkUIVideoExtSurfaceUnregisterEvent");
-        platformTaskExecutor.PostTask(
-            [eventHash = MakeEventHash(SURFACE_METHOD_ONCHANGED), weak] {
-                auto resRegister = weak.Upgrade();
-                CHECK_NULL_VOID(resRegister);
-                resRegister->UnregisterEvent(eventHash);
-            },
-            "ArkUIVideoExtSurfaceUnregisterEvent");
-        platformTaskExecutor.PostTask(
-            [eventHash = MakeEventHash(SURFACE_METHOD_ONDESTROYED), weak] {
-                auto resRegister = weak.Upgrade();
-                CHECK_NULL_VOID(resRegister);
-                resRegister->UnregisterEvent(eventHash);
+                resRegister->UnregisterEvent(onCreateHash);
+                resRegister->UnregisterEvent(onChangedHash);
+                resRegister->UnregisterEvent(onDestroyedHash);
             },
             "ArkUIVideoExtSurfaceUnregisterEvent");
     }

@@ -20,6 +20,10 @@
 #include <dlfcn.h>
 #endif
 
+#include "base/memory/referenced.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
+
 namespace OHOS::Ace::NG {
 
 class ExpandedMenuPluginLoader {

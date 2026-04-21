@@ -56,7 +56,7 @@ function checkSingleEvent(): boolean {
         return false
     }
 
-    const eventKind = deserializer.readInt32() as CallbackEventKind
+    const eventKind = CallbackEventKind.fromValue(deserializer.readInt32())
     switch (eventKind) {
         case CallbackEventKind.Event_CallCallback: {
             const apiKind = deserializer.readInt32()

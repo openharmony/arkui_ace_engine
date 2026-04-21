@@ -88,7 +88,7 @@ int32_t ParseTargetInfo(const Ark_TargetInfo* targetInfo, int32_t& targetId)
                     targetId = targetComponentIdNode->GetId();
                     return;
                 }
-                auto targetNode = NG::FrameNode::FindChildByName(targetComponentIdNode, targetIdString);
+                auto targetNode = NG::FrameNode::FindChildByNameUINode(targetComponentIdNode, targetIdString);
                 if (!targetNode) {
                     result = ERROR_CODE_TARGET_INFO_NOT_EXIST;
                     return;
@@ -339,6 +339,19 @@ auto g_bindMenuOptionsParam = [](const auto& menuOptions, MenuParam& menuParam) 
     auto material =
         OptConvert<UiMaterial*>(menuOptions.systemMaterial).value_or(AceType::RawPtr(menuParam.systemMaterial));
     menuParam.systemMaterial = material ? material->Copy() : nullptr;
+    auto scrollBarOpt = OptConvert<DisplayMode>(menuOptions.scrollBar);
+    if (scrollBarOpt.has_value()) {
+        menuParam.scrollBar = scrollBarOpt.value();
+    }
+    auto maxHeightOpt = OptConvert<Dimension>(menuOptions.maxHeight);
+    Validator::ValidateNonNegative(maxHeightOpt);
+    menuParam.maxHeight = maxHeightOpt;
+    auto colorModeOpt = GetOpt(menuOptions.colorMode);
+    if (colorModeOpt.has_value()) {
+        if (colorModeOpt.value() == ARK_ANCHORED_COLOR_MODE_FOLLOW_SYSTEM) {
+            menuParam.isColorModeFollowTarget = false;
+        }
+    }
     g_parsePreviewAnimationOptions(menuOptions, menuParam);
 };
 
@@ -477,6 +490,10 @@ void updatePopupCommonParamPart1(const Ark_PopupCommonOptions& src, RefPtr<Popup
     if (borderLinearGradientOpt.has_value()) {
         popupParam->SetInnerBorderLinearGradient(borderLinearGradientOpt.value());
     }
+    auto material = OptConvert<UiMaterial*>(src.systemMaterial);
+    if (material.has_value()) {
+        popupParam->SetSystemMaterial(material.value()->Copy());
+    }
 }
 
 void updatePopupCommonParamPart2(const Ark_PopupCommonOptions& src, RefPtr<PopupParam>& popupParam)
@@ -542,6 +559,46 @@ void updatePopupCommonParamPart2(const Ark_PopupCommonOptions& src, RefPtr<Popup
         .value_or(popupParam->EnableHoverMode()));
     popupParam->SetFollowTransformOfTarget(Converter::OptConvert<bool>(src.followTransformOfTarget)
         .value_or(popupParam->IsFollowTransformOfTarget()));
+
+    // Parse lifecycle callbacks
+    auto arkOnWillAppear = GetOpt(src.onWillAppear);
+    if (arkOnWillAppear.has_value()) {
+        auto onWillAppearCallback = [arkCallback = CallbackHelper(*arkOnWillAppear)]() {
+            arkCallback.InvokeSync();
+        };
+        popupParam->SetOnWillAppear(std::move(onWillAppearCallback));
+    }
+
+    auto arkOnDidAppear = GetOpt(src.onDidAppear);
+    if (arkOnDidAppear.has_value()) {
+        auto onDidAppearCallback = [arkCallback = CallbackHelper(*arkOnDidAppear)]() {
+            arkCallback.InvokeSync();
+        };
+        popupParam->SetOnDidAppear(std::move(onDidAppearCallback));
+    }
+
+    auto arkOnWillDisappear = GetOpt(src.onWillDisappear);
+    if (arkOnWillDisappear.has_value()) {
+        auto onWillDisappearCallback = [arkCallback = CallbackHelper(*arkOnWillDisappear)]() {
+            arkCallback.InvokeSync();
+        };
+        popupParam->SetOnWillDisappear(std::move(onWillDisappearCallback));
+    }
+
+    auto arkOnDidDisappear = GetOpt(src.onDidDisappear);
+    if (arkOnDidDisappear.has_value()) {
+        auto onDidDisappearCallback = [arkCallback = CallbackHelper(*arkOnDidDisappear)]() {
+            arkCallback.InvokeSync();
+        };
+        popupParam->SetOnDidDisappear(std::move(onDidDisappearCallback));
+    }
+
+    auto colorModeOpt = GetOpt(src.colorMode);
+    if (colorModeOpt.has_value()) {
+        if (colorModeOpt.value() == ARK_ANCHORED_COLOR_MODE_FOLLOW_SYSTEM) {
+            popupParam->SetColorMode(false);
+        }
+    }
 }
 
 void updatePopupCommonParam(const Ark_PopupCommonOptions& src, RefPtr<PopupParam>& popupParam)

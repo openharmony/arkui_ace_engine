@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_BASE_PROPERTIES_COLOR_H
 
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -48,6 +49,20 @@ union ColorParam {
 enum ColorSpace {
     SRGB = 0,
     DISPLAY_P3 = 1,
+    BT2020 = 2,
+};
+
+struct ColorWithHeadRoom {
+    float red = 0.f;
+    float green = 0.f;
+    float blue = 0.f;
+    float alpha = 1.f;
+    float headRoom = 1.f;
+    bool operator==(const ColorWithHeadRoom& other) const
+    {
+        return red == other.red && green == other.green && blue == other.blue &&
+               alpha == other.alpha && headRoom == other.headRoom;
+    }
 };
 
 // Predefined dynamic color placeholders. Backend render service resolves these into concrete colors.
@@ -58,6 +73,33 @@ enum class ColorPlaceholder : uint8_t {
     TEXT_CONTRAST = 3,
     ACCENT = 4,
     FOREGROUND = 5,
+    BRAND,
+    BRAND_FONT,
+    WARNING,
+    FONT_ON_PRIMARY,
+    FONT_PRIMARY,
+    FONT_SECONDARY,
+    FONT_TERTIARY,
+    FONT_FOURTH,
+    FONT_EMPHASIZE,
+    ICON_PRIMARY,
+    ICON_SECONDARY,
+    ICON_TERTIARY,
+    ICON_FOURTH,
+    ICON_EMPHASIZE,
+    ICON_SUB_EMPHASIZE,
+    COMP_BACKGROUND_PRIMARY_CONTRARY,
+    COMP_BACKGROUND_PRIMARY_CONTRARY_SECONDARY,
+    COMP_BACKGROUND_SECONDARY,
+    COMP_BACKGROUND_TERTIARY,
+    COMP_BACKGROUND_EMPHASIZE,
+    COMP_EMPHASIZE_SECONDARY,
+    COMP_EMPHASIZE_TERTIARY,
+    COMP_DIVIDER,
+    INTERACTIVE_HOVER,
+    INTERACTIVE_FOCUS,
+    INTERACTIVE_PRESSED,
+    MAX = INTERACTIVE_PRESSED
 };
 
 // Strategy used by dynamic color picker extraction.
@@ -78,6 +120,7 @@ public:
     constexpr explicit Color(uint32_t value, ColorSpace colorSpace)
         : colorValue_(ColorParam { .value = value }), colorSpace_(colorSpace)
     {}
+    explicit Color(ColorWithHeadRoom colorWithHeadRoom) : colorWithHeadRoom_(colorWithHeadRoom) {}
     ~Color() = default;
 
     static Color FromARGB(uint8_t alpha, uint8_t red, uint8_t green, uint8_t blue);
@@ -86,6 +129,7 @@ public:
     // Need to change the input parameters, it is more appropriate to use the passed value here.
     static Color FromString(std::string colorStr, uint32_t maskAlpha = COLOR_ALPHA_MASK,
         Color defaultColor = Color::BLACK);
+    static Color FromFloat(double red, double green, double blue, double opacity, double headRoom = 1.0f);
     static bool ParseColorString(std::string colorStr, Color& color, uint32_t maskAlpha = COLOR_ALPHA_MASK);
     static bool ParseColorString(const std::string& colorStr, Color& color, const Color& defaultColor,
         uint32_t maskAlpha = COLOR_ALPHA_MASK);
@@ -116,6 +160,11 @@ public:
     uint32_t GetValue() const
     {
         return colorValue_.value;
+    }
+
+    std::optional<ColorWithHeadRoom> GetHeadRoomColor() const
+    {
+        return colorWithHeadRoom_;
     }
 
     void SetColorSpace(ColorSpace colorSpace)
@@ -163,9 +212,11 @@ public:
     bool operator==(const Color& color) const
     {
         if (IsPlaceholder() || color.IsPlaceholder()) {
-            return placeholder_ == color.placeholder_ && colorSpace_ == color.colorSpace_;
+            return placeholder_ == color.placeholder_ && colorSpace_ == color.colorSpace_ &&
+                   colorValue_.value == color.GetValue() && colorWithHeadRoom_ == color.GetHeadRoomColor();
         }
-        return colorValue_.value == color.GetValue() && colorSpace_ == color.GetColorSpace();
+        return colorValue_.value == color.GetValue() && colorSpace_ == color.GetColorSpace() &&
+               colorWithHeadRoom_ == color.GetHeadRoomColor();
     }
 
     bool operator!=(const Color& color) const
@@ -182,6 +233,7 @@ public:
     Color operator/(double value) const;
 
     std::string ColorToString() const;
+    std::string ColorWithHdrToString() const;
     std::string ToSvgFillColorKey() const;
 
     static Color ColorFromString(const std::string& str);
@@ -214,6 +266,18 @@ public:
 
     std::string ToString() const;
 
+    /**
+     * @param resourceId If the resource ID is a special value, fill the placeholder value in the color object
+     * accordingly; otherwise, the placeholder remains unchanged.
+     */
+    void FillColorPlaceholderIfNeed(uint32_t resourceId);
+
+    /**
+     * @param name If the name is a special value, fill the placeholder value in the color object
+     * accordingly; otherwise, the placeholder remains unchanged.
+     */
+    void FillColorPlaceholderIfNeed(const std::string& name);
+
 private:
     constexpr explicit Color(ColorParam colorValue) : colorValue_(colorValue) {}
 
@@ -234,6 +298,7 @@ private:
 
     float CalculateBlend(float alphaLeft, float alphaRight, float valueLeft, float valueRight) const;
     ColorParam colorValue_ { .value = 0xff000000 };
+    std::optional<ColorWithHeadRoom> colorWithHeadRoom_;
     uint32_t resourceId_ = 0;
     ColorSpace colorSpace_ = ColorSpace::SRGB;
     ColorPlaceholder placeholder_ = ColorPlaceholder::NONE; // Dynamic placeholder kind, NONE means concrete color.

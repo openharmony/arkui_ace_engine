@@ -15,16 +15,32 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("image_test_ng") {
   type = "new"
-  module_name = "DialogSet-Toast"
+  module_name = "ImageSet-Image"
   sources = [
     "image_base.cpp",
-    "image_paint_method_test_ng.cpp",
+    "image_model_ng_test_ng.cpp",
     "image_model_static_test_ng.cpp",
+    "image_paint_method_test_ng.cpp",
+    "image_pattern_test_animation.cpp",
+    "image_pattern_test_branch_coverage.cpp",
+    "image_pattern_test_events_edge_cases.cpp",
+    "image_pattern_test_image_loading.cpp",
+    "image_pattern_test_layout_render.cpp",
+    "image_pattern_test_lifecycle.cpp",
+    "image_pattern_test_memory_callbacks.cpp",
     "image_pattern_test_ng.cpp",
+    "image_pattern_test_switch_cases.cpp",
     "image_pattern_test_tojson.cpp",
     "image_test_ng.cpp",
     "image_testone_ng.cpp",
     "image_testtwo_ng.cpp",
   ]
   defines = [ "ENABLE_ROSEN_BACKEND" ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "image_test_core.cpp" ]
+  } else {
+    sources += [ "image_test_core.cpp" ]
+  }
 }

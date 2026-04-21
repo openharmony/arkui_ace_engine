@@ -45,6 +45,7 @@ void MenuPreviewLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(menuWrapperPattern);
     auto menuNode = menuWrapperPattern->GetMenu();
     CHECK_NULL_VOID(menuNode);
+    ACE_UINODE_TRACE(menuNode);
     auto menuLayoutAlgorithmWrapper = menuNode->GetLayoutAlgorithm();
     CHECK_NULL_VOID(menuLayoutAlgorithmWrapper);
     auto menuLayoutAlgorithm = DynamicCast<MenuLayoutAlgorithm>(menuLayoutAlgorithmWrapper->GetLayoutAlgorithm());
@@ -90,6 +91,7 @@ void MenuPreviewLayoutAlgorithm::UpdateLayoutConstraintForPreview(LayoutWrapper*
     CHECK_NULL_VOID(menuWrapperPattern);
     auto menuNode = menuWrapperPattern->GetMenu();
     CHECK_NULL_VOID(menuNode);
+    ACE_UINODE_TRACE(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     auto menuParam = menuWrapperPattern->GetMenuParam();

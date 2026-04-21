@@ -38,7 +38,7 @@ struct ImageExample11 {
     this.moveImg.pop();
     this.moveImg.push('imageScanEffect');
     setTimeout(() => {
-      this.imgResource = $r('app.media.img');
+      this.imgResource = $r('app.media.startIcon');
     }, 3000);
     this.getUIContext()?.animateTo({
       duration: this.durationTime,

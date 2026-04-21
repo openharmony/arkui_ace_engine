@@ -107,6 +107,14 @@ void SetPointLightImpl(Ark_NativePointer node,
     }
 #endif
 }
+void SetSyncLoadImpl(Ark_NativePointer node,
+                     Ark_Boolean value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::Convert<bool>(value);
+    StackModelNG::SetSyncLoad(frameNode, convValue);
+}
 } // StackAttributeModifier
 const GENERATED_ArkUIStackModifier* GetStackModifier()
 {
@@ -114,6 +122,8 @@ const GENERATED_ArkUIStackModifier* GetStackModifier()
         StackModifier::ConstructImpl,
         StackInterfaceModifier::SetStackOptionsImpl,
         StackAttributeModifier::SetAlignContentImpl,
+        StackAttributeModifier::SetPointLightImpl,
+        StackAttributeModifier::SetSyncLoadImpl,
     };
     return &ArkUIStackModifierImpl;
 }

@@ -142,16 +142,18 @@ void MemoryManager::TrimMemRecycle()
         return;
     }
     TAG_LOGI(AceLogTag::ACE_IMAGE, "start recycle image from page");
-    for (auto iter = pageNodes_.begin(); iter != pageNodes_.end(); ++iter) {
+    for (auto iter = pageNodes_.begin(); iter != pageNodes_.end();) {
         auto frameNode = iter->Upgrade();
         if (!frameNode) {
             iter = pageNodes_.erase(iter);
             continue;
         }
         if (frameNode->IsVisible() || frameNode->IsTrimMemRecycle()) {
+            ++iter;
             continue;
         }
         RecycleImageByPage(frameNode);
+        ++iter;
     }
 }
 

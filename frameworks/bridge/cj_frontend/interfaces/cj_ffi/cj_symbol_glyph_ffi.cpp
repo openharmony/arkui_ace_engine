@@ -31,8 +31,7 @@ NG::SymbolModelNG* GetSymbolModel()
 {
     auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("SymbolGlyph");
     if (module == nullptr) {
-        LOGF("Can't find symbol dynamic module");
-        abort();
+        LOGF_ABORT("Can't find symbol dynamic module");
     }
     return reinterpret_cast<NG::SymbolModelNG *>(module->GetModel());
 }

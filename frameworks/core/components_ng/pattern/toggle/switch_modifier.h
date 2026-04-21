@@ -22,6 +22,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "core/animation/spring_curve.h"
 #include "core/common/container.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/radio/radio_modifier.h"
 #include "core/components_ng/pattern/toggle/switch_paint_property.h"
@@ -192,6 +193,38 @@ public:
         }
     }
 
+    void SetPointAlpha(float alpha)
+    {
+        pointAlpha_ = alpha;
+    }
+
+    float GetPointAlpha() const
+    {
+        return pointAlpha_;
+    }
+
+    void SetPointScale(float scale)
+    {
+        if (animatePointScale_) {
+            animatePointScale_->Set(scale);
+        }
+    }
+
+    float GetPointScale() const
+    {
+        return animatePointScale_ ? animatePointScale_->Get() : 1.0f;
+    }
+
+    void SetHasSystemMaterial(bool has)
+    {
+        hasSystemMaterial_ = has;
+    }
+
+    bool GetHasSystemMaterial() const
+    {
+        return hasSystemMaterial_;
+    }
+
     void SetFocusPointColor(Color color)
     {
         pointColor_ = color;
@@ -357,6 +390,9 @@ private:
     RefPtr<PropertyBool> useContentModifier_;
     RefPtr<PropertyFloat> animatePointRadius_;
     RefPtr<PropertyFloat> animateTrackRadius_;
+    RefPtr<AnimatablePropertyFloat> animatePointScale_;
+    float pointAlpha_ = 1.0f;
+    bool hasSystemMaterial_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SwitchModifier);
 };

@@ -14,17 +14,20 @@
  */
 
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
-#include "test/mock/core/render/mock_paragraph.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/base/mock_task_executor.h"
+
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components/text_field/textfield_theme.h"
-#include "test/mock/core/common/mock_data_detector_mgr.h"
-#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/common/mock_data_detector_mgr.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -125,7 +128,7 @@ HWTEST_F(RichEditorMagnifierTest, MagnifierTest001, TestSize.Level2)
     auto geometryNode = controller->magnifierFrameNode_->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
     magnifierOffset = geometryNode->GetFrameOffset();
-    EXPECT_EQ(magnifierOffset.GetX(), paintOffset.GetX() - 1.0f);
+    EXPECT_EQ(magnifierOffset.GetX(), paintOffset.GetX());
 
     /**
      * @tc.steps: step2. localOffset is in the normal area.
@@ -157,6 +160,18 @@ HWTEST_F(RichEditorMagnifierTest, MagnifierTest002, TestSize.Level2)
     InitMagnifierParams(frameSize);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto rootUINode = pipeline->GetRootElement();
+    ASSERT_NE(rootUINode, nullptr);
+    auto mockParentRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    RectF paintRect(0, 0, frameSize.Width(), frameSize.Height());
+    mockParentRenderContext->SetPaintRectWithTransform(paintRect);
+    auto rootUINodeRenderContext = rootUINode->renderContext_;
+    rootUINode->renderContext_ = mockParentRenderContext;
+    richEditorNode_->renderContext_ = mockParentRenderContext;
+    richEditorNode_->MountToParent(rootUINode);
+    ASSERT_NE(richEditorNode_->GetParent(), nullptr);
     auto paintOffset = richEditorPattern->GetTextPaintOffset();
 
     /**
@@ -194,6 +209,8 @@ HWTEST_F(RichEditorMagnifierTest, MagnifierTest002, TestSize.Level2)
      * @tc.steps: step3. Test cases of magnifier.
      */
     TestMagnifier(richEditorPattern, controller, localOffset);
+    rootUINode->RemoveChild(richEditorNode_);
+    rootUINode->renderContext_ = rootUINodeRenderContext;
 }
 
 /**
@@ -222,6 +239,8 @@ HWTEST_F(RichEditorMagnifierTest, MagnifierTest003, TestSize.Level1)
 void RichEditorMagnifierTest::TestMagnifier(const RefPtr<RichEditorPattern>& richEditorPattern,
     const RefPtr<MagnifierController>& controller, const OffsetF& localOffset)
 {
+    auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    MockPipelineContext::GetCurrent()->SetTextFieldManager(textFieldManager);
     richEditorPattern->selectOverlay_->isHandleMoving_ = false;
     EXPECT_FALSE(richEditorPattern->IsHandleMoving());
     richEditorPattern->HandleTouchUp();

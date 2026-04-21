@@ -1,0 +1,112 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "native_node_sample"
+    },
+    {
+      "name": "create_success",
+      "value": "创建成功"
+    },
+    {
+      "name": "create_failed",
+      "value": "创建失败"
+    },
+    {
+      "name": "not_set",
+      "value": "未设置"
+    },
+    {
+      "name": "native_node_example",
+      "value": "native_node功能示例"
+    },
+    {
+      "name": "native_button_example",
+      "value": "Button 功能示例"
+    },
+    {
+      "name": "native_slider_example",
+      "value": "Slider 功能示例"
+    },
+    {
+      "name": "native_radio_example",
+      "value": "Radio 功能示例"
+    },
+    {
+      "name": "native_checkbox_example",
+      "value": "Checkbox 功能示例"
+    },
+    {
+      "name": "native_toggle_example",
+      "value": "Toggle 功能示例"
+    },
+    {
+      "name": "select_node_type",
+      "value": "选择节点类型"
+    },
+    {
+      "name": "current_type",
+      "value": "当前类型: %s"
+    },
+    {
+      "name": "current_status",
+      "value": "当前状态: %s"
+    },
+    {
+      "name": "create",
+      "value": "创建"
+    },
+    {
+      "name": "remove",
+      "value": "清理"
+    },
+    {
+      "name": "select_node_attribute",
+      "value": "选择节点属性"
+    },
+    {
+      "name": "current_attribute_type",
+      "value": "当前属性类型: %s"
+    },
+    {
+      "name": "response",
+      "value": "返回值: %s"
+    },
+    {
+      "name": "return_error_num",
+      "value": "返回错误码: %s"
+    },
+    {
+      "name": "attribute_value",
+      "value": "属性值"
+    },
+    {
+      "name": "please_input_attribute_value",
+      "value": "请输入属性值"
+    },
+    {
+      "name": "set_attribute_value",
+      "value": "设置属性值"
+    },
+    {
+      "name": "get_attribute_value",
+      "value": "获取属性值"
+    },
+    {
+      "name": "reset_attribute_value",
+      "value": "重置属性值"
+    },
+    {
+      "name": "return_node",
+      "value": "<-"
+    }
+  ]
+}

@@ -15,12 +15,12 @@
 
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
-#include "test/mock/core/render/mock_paragraph.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_data_detector_mgr.h"
-#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_data_detector_mgr.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 
 using namespace testing;
@@ -223,6 +223,28 @@ HWTEST_F(RichEditorCursorTestNg, CursorMoveToParagraphEnd001, TestSize.Level0)
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->caretPosition_ = 0;
     EXPECT_FALSE(richEditorPattern->CursorMoveToParagraphEnd());
+}
+
+/**
+ * @tc.name: CursorMoveToParagraphEnd002
+ * @tc.desc: test CursorMoveToParagraphEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCursorTestNg, CursorMoveToParagraphEnd002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    AddSpan("First line\nSecond line\nThird line");
+    richEditorPattern->caretPosition_ = 10;
+    int32_t contentLength = richEditorPattern->GetTextContentLength();
+    EXPECT_GT(contentLength, 10);
+    EXPECT_LT(richEditorPattern->caretPosition_, contentLength);
+    bool result = richEditorPattern->CursorMoveToParagraphEnd();
+
+    EXPECT_TRUE(result);
+    EXPECT_NE(richEditorPattern->caretPosition_, 10);
 }
 
 /**

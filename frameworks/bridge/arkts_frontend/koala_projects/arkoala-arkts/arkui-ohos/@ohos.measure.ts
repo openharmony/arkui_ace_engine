@@ -18,6 +18,7 @@ import { SizeOptions } from 'arkui/framework'
 import { GlobalScope_ohos_measure_utils } from 'arkui/framework'
 import { Resource } from "global.resource"
 import { FontStyle, FontWeight, TextAlign, TextOverflow, TextCase, WordBreak } from 'arkui/framework'
+import { StyledString, TextLayoutOptions, Paragraph } from 'arkui/framework'
 
 export interface MeasureOptions {
     textContent: string | Resource;
@@ -43,5 +44,8 @@ export class MeasureText {
     }
     public static measureTextSize(options: MeasureOptions) : SizeOptions {
         return GlobalScope_ohos_measure_utils.measureTextSize(options);
+    }
+    public getParagraphs(styledString: StyledString, options?: TextLayoutOptions): Array<Paragraph> {
+        return GlobalScope_ohos_measure_utils.getParagraphs(styledString, options);
     }
 }

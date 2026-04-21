@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/menu/menu_model_static.h"
+#include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 #include "core/interfaces/native/implementation/symbol_glyph_modifier_peer.h"
@@ -78,7 +79,7 @@ void SetMenuOptionsImpl(Ark_NativePointer node)
 } // MenuInterfaceModifier
 namespace MenuAttributeModifier {
 void SetFontImpl(Ark_NativePointer node,
-                 const Opt_Font* value)
+                 const Opt_arkui_component_units_Font* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -119,6 +120,8 @@ void SetRadiusImpl(Ark_NativePointer node,
                 radiusPtr->radiusTopLeft, radiusPtr->radiusTopRight,
                 radiusPtr->radiusBottomLeft, radiusPtr->radiusBottomRight);
         }
+    } else {
+        MenuModelStatic::ResetBorderRadius(frameNode);
     }
 }
 

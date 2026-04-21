@@ -17,6 +17,7 @@
 
 // SORTED_SECTION
 #include "base/utils/string_utils.h"
+#include "core/components/image/image_event.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/interfaces/native/implementation/background_color_style_peer.h"
 #include "core/interfaces/native/implementation/base_gesture_event_peer.h"
@@ -39,6 +40,7 @@
 #include "core/interfaces/native/implementation/length_metrics_peer.h"
 #include "core/interfaces/native/implementation/letter_spacing_style_peer.h"
 #include "core/interfaces/native/implementation/line_height_style_peer.h"
+#include "core/interfaces/native/implementation/line_spacing_style_peer.h"
 #include "core/interfaces/native/implementation/nav_destination_context_peer.h"
 #include "core/interfaces/native/implementation/nav_path_info_peer_impl.h"
 #include "core/interfaces/native/implementation/nav_path_stack_peer_impl.h"
@@ -143,7 +145,7 @@ void AssignArkValue(Ark_DragEvent& dragEvent, const RefPtr<OHOS::Ace::DragEvent>
 void AssignArkValue(
     Ark_dragController_SpringLoadingContext& dst, const RefPtr<OHOS::Ace::DragSpringLoadingContext>& src)
 {
-    const auto peer = PeerUtils::CreatePeer<DragController_SpringLoadingContextPeer>();
+    const auto peer = PeerUtils::CreatePeer<dragController_SpringLoadingContextPeer>();
     peer->context = src;
     dst = peer;
 }
@@ -312,7 +314,8 @@ ACE_FORCE_EXPORT void AssignArkValue(Ark_ShadowOptions& dst, const Shadow& src, 
 {
     dst.radius = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(src.GetBlurRadius());
     dst.type = Converter::ArkValue<Opt_ShadowType>(src.GetShadowType());
-    dst.color = Converter::ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_String>(
+    dst.color = Converter::ArkUnion<
+        Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy, Ark_String>(
         src.GetColor().ColorToString(), ctx);
     auto offset = src.GetOffset();
     dst.offsetX = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(offset.GetX());
@@ -611,6 +614,7 @@ void AssignArkValue(Ark_Frame& dst, const RectF& src)
     dst.height = ArkValue<Ark_Float64>(src.Height());
 }
 
+namespace {
 template<typename PeerType, typename AceSpan>
 void CreateStylePeer(Ark_SpanStyle& dst, const RefPtr<OHOS::Ace::SpanBase>& src)
 {
@@ -618,6 +622,25 @@ void CreateStylePeer(Ark_SpanStyle& dst, const RefPtr<OHOS::Ace::SpanBase>& src)
     peer->span = AceType::DynamicCast<AceSpan>(src);
     dst.styledValue = Converter::ArkUnion<Ark_StyledStringValue, PeerType*>(peer);
 }
+void CreateCustomSpanWrapper(Ark_SpanStyle& dst, const RefPtr<OHOS::Ace::SpanBase>& src)
+{
+    static auto emptyFunc = [](int32_t) {};
+    static Ark_CallbackResource emtpyResource {
+        .resourceId {}, .hold {emptyFunc}, .release {emptyFunc}
+    };
+
+    CHECK_NULL_VOID(src);
+    auto custSpanPeer = AceType::DynamicCast<CustomSpanNativePeer>(src);
+    CHECK_NULL_VOID(custSpanPeer);
+    Ark_CustomSpanWrapper custSpanWrap {
+        .managed {custSpanPeer->GetObject()},
+        .nativeObj {},
+        .onMeasure_callback {.resource {emtpyResource}, .call {}, .callSync {}},
+        .onDraw_callback {.resource {emtpyResource}, .call {}, .callSync {}},
+    };
+    dst.styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_CustomSpanWrapper>(custSpanWrap);
+}
+} // namespace
 
 void AssignArkValue(Ark_SpanStyle& dst, const RefPtr<OHOS::Ace::SpanBase>& src)
 {
@@ -643,6 +666,9 @@ void AssignArkValue(Ark_SpanStyle& dst, const RefPtr<OHOS::Ace::SpanBase>& src)
         case Ace::SpanType::LineHeight:
             CreateStylePeer<LineHeightStylePeer, OHOS::Ace::LineHeightSpan>(dst, src);
             break;
+        case Ace::SpanType::LineSpacing:
+            CreateStylePeer<LineSpacingStylePeer, OHOS::Ace::LineSpacingSpan>(dst, src);
+            break;
         case Ace::SpanType::BackgroundColor:
             CreateStylePeer<BackgroundColorStylePeer, OHOS::Ace::BackgroundColorSpan>(dst, src);
             break;
@@ -659,7 +685,7 @@ void AssignArkValue(Ark_SpanStyle& dst, const RefPtr<OHOS::Ace::SpanBase>& src)
             CreateStylePeer<ImageAttachmentPeer, OHOS::Ace::ImageSpan>(dst, src);
             break;
         case Ace::SpanType::CustomSpan:
-            CreateStylePeer<CustomSpanPeer, OHOS::Ace::NG::CustomSpanImpl>(dst, src);
+            CreateCustomSpanWrapper(dst, src);
             break;
         case Ace::SpanType::ExtSpan: {
             auto userDataSpanHolder = AceType::DynamicCast<UserDataSpanHolder>(src);
@@ -726,6 +752,13 @@ void AssignArkValue(Ark_TouchObject& dst, const OHOS::Ace::TouchLocationInfo& sr
     dst.x = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
     dst.y = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
 
+    // Handle globalDisplayX/Y
+    Offset globalDisplayOffset = src.GetGlobalDisplayLocation();
+    dst.globalDisplayX = ArkValue<Opt_Float64>(
+        PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetX()));
+    dst.globalDisplayY = ArkValue<Opt_Float64>(
+        PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetY()));
+
     dst.pressedTime = ArkValue<Opt_Int64>(static_cast<int64_t>(src.GetPressedTime().time_since_epoch().count()));
     dst.pressure = ArkValue<Opt_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.GetForce()));
 
@@ -743,12 +776,25 @@ void AssignArkValue(Ark_HistoricalPoint& dst, const OHOS::Ace::TouchLocationInfo
     dst.timestamp = ArkValue<Ark_Int64>(static_cast<int64_t>(src.GetTimeStamp().time_since_epoch().count()));
 }
 
+void AssignArkValue(Ark_MouseHistoricalPoint& dst, const OHOS::Ace::MouseHistoricalPoint& src)
+{
+    dst.x = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.localLocation.GetX()));
+    dst.y = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.localLocation.GetY()));
+    dst.displayX = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.screenLocation.GetX()));
+    dst.displayY = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.screenLocation.GetY()));
+    dst.windowX = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.globalLocation.GetX()));
+    dst.windowY = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.globalLocation.GetY()));
+    dst.globalDisplayX = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.globalDisplayLocation.GetX()));
+    dst.globalDisplayY = ArkValue<Ark_Float64>(PipelineBase::Px2VpWithCurrentDensity(src.globalDisplayLocation.GetY()));
+    dst.timestamp = ArkValue<Ark_Int64>(static_cast<int64_t>(src.time.time_since_epoch().count()));
+}
+
 void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src)
 {
     dst.componentWidth = Converter::ArkValue<Ark_Int32>(src.GetComponentWidth());
     dst.componentHeight = Converter::ArkValue<Ark_Int32>(src.GetComponentHeight());
     dst.message = Converter::ArkValue<Ark_String>(src.GetErrorMessage());
-    dst.error = ArkValue<Opt_BusinessError>(std::nullopt);
+    dst.error = ArkValue<Opt_BusinessErrorInterface_Void>(std::nullopt);
 }
 
 void AssignArkValue(Ark_ImageLoadResult& dst, const LoadImageSuccessEvent& src)
@@ -802,7 +848,7 @@ void AssignArkValue(Ark_RadialGradientOptions& dst, const NG::Gradient& src, Con
         center.value1 = ArkUnion<Ark_Length, Ark_Float64>(50.0); // default center y: 50%
     }
     dst.center = center;
-    
+
     // Set radius
     if (radialGradient->radialHorizontalSize.has_value()) {
         AssignArkValue(dst.radius, radialGradient->radialHorizontalSize.value(), ctx);
@@ -811,7 +857,7 @@ void AssignArkValue(Ark_RadialGradientOptions& dst, const NG::Gradient& src, Con
     } else {
         dst.radius = ArkUnion<Ark_Length, Ark_Float64>(50.0); // default radius: 50%
     }
-    
+
     // Set colors
     std::vector<Ark_Tuple_ResourceColor_F64> colorStops;
     const auto& colors = src.GetColors();
@@ -824,7 +870,7 @@ void AssignArkValue(Ark_RadialGradientOptions& dst, const NG::Gradient& src, Con
         colorStops.push_back(colorStop);
     }
     dst.colors = Converter::ArkValue<Array_Tuple_ResourceColor_F64>(colorStops, ctx);
-    
+
     // Set repeating
     dst.repeating = Converter::ArkValue<Opt_Boolean>(src.GetRepeat(), ctx);
 }
@@ -839,10 +885,10 @@ void AssignArkValue(Ark_LinearGradientOptions& dst, const NG::Gradient& src, Con
     } else {
         dst.angle = Converter::ArkUnion<Opt_Union_F64_String>(Ark_Empty());
     }
-    
+
     // Set direction
     dst.direction = Converter::ArkValue<Opt_GradientDirection>(Ark_Empty());
-    
+
     // Set colors
     std::vector<Ark_Tuple_ResourceColor_F64> colorStops;
     const auto& colors = src.GetColors();
@@ -855,7 +901,7 @@ void AssignArkValue(Ark_LinearGradientOptions& dst, const NG::Gradient& src, Con
         colorStops.push_back(colorStop);
     }
     dst.colors = Converter::ArkValue<Array_Tuple_ResourceColor_F64>(colorStops, ctx);
-    
+
     // Set repeating
     dst.repeating = Converter::ArkValue<Opt_Boolean>(src.GetRepeat(), ctx);
 }
@@ -952,10 +998,10 @@ std::optional<OHOS::Ace::NG::BorderRadiusProperty> ParseBorderRadiusString(const
 
 ACE_FORCE_EXPORT void AssignArkValue(Ark_RichEditorLayoutStyle& dst, const ImageStyleResult& src)
 {
-    dst.margin = ArkUnion<Opt_Union_Dimension_Margin>(Ark_Empty());
+    dst.margin = ArkUnion<Opt_Union_Dimension_Padding>(Ark_Empty());
     if (auto marginProp = ParseMarginString(src.margin)) {
         auto arkMargin = ArkValue<Ark_Padding>(marginProp.value(), Converter::FC);
-        dst.margin = ArkUnion<Opt_Union_Dimension_Margin, Ark_Padding>(arkMargin, Converter::FC);
+        dst.margin = ArkUnion<Opt_Union_Dimension_Padding, Ark_Padding>(arkMargin, Converter::FC);
     }
     dst.borderRadius = ArkUnion<Opt_Union_Dimension_BorderRadiuses>(Ark_Empty());
     auto borderRadius = ParseBorderRadiusString(src.borderRadius);
@@ -1108,6 +1154,13 @@ void AssignArkValue(Ark_NavPathInfo& dst, const OHOS::Ace::NG::GeneratedModifier
     dst = peer;
 }
 
+void AssignArkValue(Ark_NavPathStack& dst, const RefPtr<GeneratedModifier::NavigationContext::NavigationStack>& src)
+{
+    const auto peer = PeerUtils::CreatePeer<NavPathStackPeer>();
+    peer->SetNavigationStack(src);
+    dst = peer;
+}
+
 void AssignArkValue(Ark_NativeEmbedParamItem& dst, const NativeEmbedParamItem& src)
 {
     dst.status = Converter::ArkValue<Ark_NativeEmbedParamStatus>(src.status);
@@ -1189,5 +1242,15 @@ void AssignArkValue(Ark_InnerGestureTriggerInfo& dst, const GestureTriggerInfo& 
 
     // Set gesture action phase (enum value, not optional)
     dst.currentPhase = static_cast<Ark_GestureActionPhase>(src.currentPhase);
+}
+
+void AssignArkValue(Ark_ResourceStr &dst, const char *src, ConvContext *ctx)
+{
+    dst = ArkUnion<Ark_ResourceStr, Ark_String>(src, ctx);
+}
+
+void AssignArkValue(Ark_ResourceStr &dst, const std::string& src, ConvContext *ctx)
+{
+    dst = ArkUnion<Ark_ResourceStr, Ark_String>(src, ctx);
 }
 } // namespace OHOS::Ace::NG::Converter

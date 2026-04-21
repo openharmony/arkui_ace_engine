@@ -1,0 +1,33 @@
+{
+  "name": "capi-test-naming-verifier",
+  "version": "1.0.0",
+  "description": "Verify that all C API unit test names follow the standardized naming convention: methodNameTestScenario and that method names correspond to actual methods tested",
+  "trigger_keywords": [
+    "verify C API test naming",
+    "check test naming convention",
+    "validate test names",
+    "C API test naming compliance",
+    "test naming verification",
+    "ensure test naming consistency",
+    "audit test names",
+    "review test naming"
+  ],
+  "author": "Claude Code",
+  "entry_point": "scripts/verify_naming.py",
+  "dependencies": [
+    "capi-test-fixer"
+  ],
+  "capabilities": [
+    "scan_test_files",
+    "validate_naming_pattern",
+    "verify_method_calls",
+    "generate_compliance_report",
+    "identify_naming_violations",
+    "suggest_corrections"
+  ],
+  "supported_patterns": [
+    "methodNameTestScenario",
+    "DISABLED_methodNameTestScenario",
+    "utility_test_naming"
+  ]
+}

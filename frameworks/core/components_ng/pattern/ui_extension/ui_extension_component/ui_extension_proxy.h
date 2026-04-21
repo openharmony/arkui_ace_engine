@@ -20,6 +20,7 @@
 #include "base/want/want_wrap.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
+#include "frameworks/base/utils/delay_task.h"
 
 namespace OHOS::Ace::NG {
 class UIExtensionProxy : public AceType {
@@ -27,6 +28,7 @@ class UIExtensionProxy : public AceType {
 
 public:
     UIExtensionProxy(const RefPtr<SessionWrapper>& sessionWrapper, const RefPtr<UIExtensionPattern>& pattern);
+    ~UIExtensionProxy() override;
     void SendData(const RefPtr<WantParamsWrap>& params);
     int32_t SendDataSync(const RefPtr<WantParamsWrap>& wantParams, AAFwk::WantParams& reWantParams);
     RefPtr<UIExtensionPattern> GetPattern() const;
@@ -37,6 +39,8 @@ public:
 private:
     RefPtr<SessionWrapper> sessionWrapper_;
     WeakPtr<UIExtensionPattern> pattern_;
+    TaskTimeRecord taskTimeForComeIn_;
+    TaskTimeRecord taskTimeForExit_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_PROXY_H

@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text/span/mutable_span_string.h"
+#include "core/components_ng/pattern/text/span_node.h"
 
 #include "core/text/text_emoji_processor.h"
 

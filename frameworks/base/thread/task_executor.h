@@ -23,7 +23,6 @@
 #include "base/thread/cancelable_callback.h"
 #include "base/utils/noncopyable.h"
 #include "base/log/log.h"
-#include "base/utils/system_properties.h"
 
 namespace OHOS::Ace {
 
@@ -40,6 +39,15 @@ enum class PriorityType : int32_t {
     LOW,
     // Event that should be distributed only if no other event right now.
     IDLE,
+};
+
+enum class VsyncBarrierOption : int32_t {
+    // Not required handling the designated task before handling the vsync.
+    NO_BARRIER = 0,
+    // Required handling the designated task before handling vsync when it is sended by the main thread itself.
+    NEED_BARRIER = 1,
+    // Required handling the designated task before handling vsync for all situations.
+    FORCE_BARRIER = 2,
 };
 
 class TaskExecutor : public AceType {
@@ -69,12 +77,14 @@ public:
      * @param task Task which need execution.
      * @param type FrontendType of task, used to specify the thread.
      * @param name Name of the task.
+     * @param barrierOption Vsync barrier option.
      * @return Returns 'true' whether task has been post successfully.
      */
     bool PostTask(
-        Task&& task, TaskType type, const std::string& name, PriorityType priorityType = PriorityType::LOW) const
+        Task&& task, TaskType type, const std::string& name, PriorityType priorityType = PriorityType::LOW,
+        VsyncBarrierOption barrierOption = VsyncBarrierOption::NO_BARRIER) const
     {
-        return PostDelayedTask(std::move(task), type, 0, name, priorityType);
+        return OnPostTask(std::move(task), type, 0, name, priorityType, barrierOption);
     }
 
     /**
@@ -83,12 +93,14 @@ public:
      * @param task Task which need execution.
      * @param type FrontendType of task, used to specify the thread.
      * @param name Name of the task.
+     * @param barrierOption Vsync barrier option.
      * @return Returns 'true' if task has been posted successfully.
      */
     bool PostTask(const Task& task, TaskType type, const std::string& name,
-        PriorityType priorityType = PriorityType::LOW) const
+        PriorityType priorityType = PriorityType::LOW,
+        VsyncBarrierOption barrierOption = VsyncBarrierOption::NO_BARRIER) const
     {
-        return PostDelayedTask(task, type, 0, name, priorityType);
+        return OnPostTask(Task(task), type, 0, name, priorityType, barrierOption);
     }
 
     /**
@@ -131,14 +143,8 @@ public:
      * @param name Name of the task.
      * @return Returns 'true' if task has been posted successfully.
      */
-    bool PostDelayedTask(Task&& task, TaskType type, uint32_t delayTime, const std::string& name,
-        PriorityType priorityType = PriorityType::LOW) const
-    {
-        if (delayTime > 0 && type == TaskType::BACKGROUND) {
-            return false;
-        }
-        return OnPostTask(std::move(task), type, delayTime, name, priorityType);
-    }
+    ACE_FORCE_EXPORT bool PostDelayedTask(Task&& task, TaskType type, uint32_t delayTime, const std::string& name,
+        PriorityType priorityType = PriorityType::LOW) const;
 
     /**
      * Post a delayed task to the specified thread.
@@ -165,17 +171,8 @@ public:
      * @param name Name of the task.
      * @return Returns 'true' whether task has been executed.
      */
-    bool PostSyncTask(
-        Task&& task, TaskType type, const std::string& name, PriorityType priorityType = PriorityType::IMMEDIATE) const
-    {
-        if (!task || type == TaskType::BACKGROUND) {
-            return false;
-        } else if (WillRunOnCurrentThread(type)) {
-            task();
-            return true;
-        }
-        return PostTaskAndWait(CancelableTask(std::move(task)), type, name, 0ms, priorityType);
-    }
+    ACE_FORCE_EXPORT bool PostSyncTask(
+        Task&& task, TaskType type, const std::string& name, PriorityType priorityType = PriorityType::IMMEDIATE) const;
 
     /**
      * Post a task to the specified thread and wait until finished executing.
@@ -187,17 +184,7 @@ public:
      * @param name Name of the task.
      * @return Returns 'true' whether task has been executed.
      */
-    bool PostSyncTaskTimeout(const Task& task, TaskType type, uint32_t timeoutMs, const std::string& name) const
-    {
-        if (!task || type == TaskType::BACKGROUND) {
-            return false;
-        } else if (WillRunOnCurrentThread(type)) {
-            task();
-            return true;
-        }
-        return PostTaskAndWait(
-            CancelableTask(std::move(task)), type, name, std::chrono::milliseconds(timeoutMs));
-    }
+    bool PostSyncTaskTimeout(const Task& task, TaskType type, uint32_t timeoutMs, const std::string& name) const;
 
     /**
      * Post a task to the specified thread and wait until finished executing.
@@ -222,17 +209,7 @@ public:
      * @param name Name of the task.
      * @return Returns 'true' whether task has been executed.
      */
-    bool PostSyncTask(CancelableTask&& task, TaskType type, const std::string& name) const
-    {
-        if (!task || type == TaskType::BACKGROUND) {
-            return false;
-        } else if (WillRunOnCurrentThread(type)) {
-            CancelableTask avatar(task);
-            task();
-            return avatar.WaitUntilComplete();
-        }
-        return PostTaskAndWait(std::move(task), type, name, 0ms);
-    }
+    bool PostSyncTask(CancelableTask&& task, TaskType type, const std::string& name) const;
 
     /**
      * Post a cancelable task to the specified thread and wait until finished executing.
@@ -261,13 +238,7 @@ public:
      * @return Returns 'true' if task has been posted successfully.
      */
     bool PostDelayedTaskWithoutTraceId(Task&& task, TaskType type, uint32_t delayTime, const std::string& name,
-        PriorityType priorityType = PriorityType::LOW) const
-    {
-        if (delayTime > 0 && type == TaskType::BACKGROUND) {
-            return false;
-        }
-        return OnPostTaskWithoutTraceId(std::move(task), type, delayTime, name, priorityType);
-    }
+        PriorityType priorityType = PriorityType::LOW) const;
 
     virtual void AddTaskObserver(Task&& callback) = 0;
     virtual void RemoveTaskObserver() = 0;
@@ -284,18 +255,15 @@ public:
         return 0;
     }
 
-    static PriorityType GetPriorityTypeWithCheck(
-        PriorityType priorityType, PriorityType defaultPriority = PriorityType::LOW)
-    {
-        // Temporary interface, used to control whether priority adjustment takes effect.
-        return SystemProperties::GetTaskPriorityAdjustmentEnable() ? priorityType : defaultPriority;
-    }
+    static ACE_FORCE_EXPORT PriorityType GetPriorityTypeWithCheck(
+        PriorityType priorityType, PriorityType defaultPriority = PriorityType::LOW);
 
 protected:
     TaskExecutor() = default;
 
     virtual bool OnPostTask(Task&& task, TaskType type, uint32_t delayTime, const std::string& name,
-        PriorityType priorityType = PriorityType::LOW) const = 0;
+        PriorityType priorityType = PriorityType::LOW,
+        VsyncBarrierOption barrierOption = VsyncBarrierOption::NO_BARRIER) const = 0;
     virtual Task WrapTaskWithTraceId(Task&& task, int32_t id) const = 0;
     virtual bool OnPostTaskWithoutTraceId(Task&& task, TaskType type, uint32_t delayTime, const std::string& name,
         PriorityType priorityType = PriorityType::LOW) const = 0;
@@ -310,19 +278,7 @@ protected:
 
 private:
     bool PostTaskAndWait(CancelableTask&& task, TaskType type, const std::string& name,
-        std::chrono::milliseconds timeoutMs = 0ms, PriorityType priorityType = PriorityType::IMMEDIATE) const
-    {
-#ifdef ACE_DEBUG
-        bool result = false;
-        if (OnPreSyncTask(type)) {
-            result = OnPostTask(Task(task), type, 0, name, priorityType) && task.WaitUntilComplete(timeoutMs);
-            OnPostSyncTask();
-        }
-        return result;
-#else
-        return OnPostTask(Task(task), type, 0, name, priorityType) && task.WaitUntilComplete(timeoutMs);
-#endif
-    }
+        std::chrono::milliseconds timeoutMs = 0ms, PriorityType priorityType = PriorityType::IMMEDIATE) const;
 };
 
 class TaskWrapper {
@@ -365,11 +321,14 @@ public:
      *
      * @param task Task which need execution.
      * @param name Name of the task.
+     * @param barrierOption Vsync barrier option.
      * @return Returns 'true' whether task has been post successfully.
      */
-    bool PostTask(Task&& task, const std::string& name) const
+    bool PostTask(Task&& task, const std::string& name,
+        VsyncBarrierOption barrierOption = VsyncBarrierOption::NO_BARRIER) const
     {
-        return taskExecutor_ ? taskExecutor_->PostTask(std::move(task), type_, name) : false;
+        return taskExecutor_ ? taskExecutor_->PostTask(std::move(task), type_, name,
+            PriorityType::LOW, barrierOption) : false;
     }
 
     /**
@@ -378,11 +337,14 @@ public:
      * @param task Task which need execution.
      * @param name Name of the task.
      * @param priorityType Priority of the task.
+     * @param barrierOption Vsync barrier option.
      * @return Returns 'true' whether task has been post successfully.
      */
-    bool PostTask(Task&& task, const std::string& name, PriorityType priorityType) const
+    bool PostTask(Task&& task, const std::string& name, PriorityType priorityType,
+        VsyncBarrierOption barrierOption = VsyncBarrierOption::NO_BARRIER) const
     {
-        return taskExecutor_ ? taskExecutor_->PostTask(std::move(task), type_, name, priorityType) : false;
+        return taskExecutor_ ? taskExecutor_->PostTask(std::move(task), type_, name, priorityType, barrierOption)
+                             : false;
     }
 
     /**
@@ -390,11 +352,14 @@ public:
      *
      * @param task Task which need execution.
      * @param name Name of the task.
+     * @param barrierOption Vsync barrier option.
      * @return Returns 'true' whether task has been post successfully.
      */
-    bool PostTask(const Task& task, const std::string& name) const
+    bool PostTask(const Task& task, const std::string& name,
+        VsyncBarrierOption barrierOption = VsyncBarrierOption::NO_BARRIER) const
     {
-        return taskExecutor_ ? taskExecutor_->PostTask(task, type_, name) : false;
+        return taskExecutor_ ? taskExecutor_->PostTask(task, type_, name,
+            PriorityType::LOW, barrierOption) : false;
     }
 
     /**

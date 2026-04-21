@@ -29,6 +29,7 @@
 #include "core/components_v2/inspector/utils.h"
 
 #include "frameworks/core/components/common/layout/constants.h"
+#include "frameworks/core/common/statistic_event_reporter.h"
 namespace OHOS::AAFwk {
 class Want;
 class WantParams;
@@ -41,6 +42,15 @@ class TextPattern;
 class RichEditorPattern;
 class TextFieldPattern;
 }
+
+static const std::unordered_map<TextDataDetectType, StatisticEventType> REPORT_TYPE_MAP = {
+    { TextDataDetectType::PHONE_NUMBER, StatisticEventType::CLICK_AI_MENU_PHONE_NUMBER },
+    { TextDataDetectType::URL, StatisticEventType::CLICK_AI_MENU_URL },
+    { TextDataDetectType::EMAIL, StatisticEventType::CLICK_AI_MENU_EMAIL },
+    { TextDataDetectType::ADDRESS, StatisticEventType::CLICK_AI_MENU_ADDRESS },
+    { TextDataDetectType::DATE_TIME, StatisticEventType::CLICK_AI_MENU_DATE_TIME },
+    { TextDataDetectType::ASK_CELIA, StatisticEventType::CLICK_AI_MENU_ASK_CELIA },
+};
 
 struct AISpan {
     int32_t start = 0;

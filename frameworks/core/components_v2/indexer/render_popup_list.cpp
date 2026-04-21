@@ -15,6 +15,8 @@
 
 #include "core/components_v2/indexer/render_popup_list.h"
 
+#include "core/components/scroll/scroll_spring_effect.h"
+#include "core/event/ace_event_helper.h"
 #include "core/components/scroll/render_single_child_scroll.h"
 
 namespace OHOS::Ace::V2 {

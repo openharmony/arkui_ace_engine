@@ -15,6 +15,7 @@
 
 #include "base/utils/system_properties.h"
 
+#include "base/log/log_wrapper.h"
 #include "base/utils/layout_break_point.h"
 
 #include <regex>
@@ -28,6 +29,7 @@
 
 #include "adapter/ohos/osal/window_utils.h"
 #include "core/common/ace_application_info.h"
+#include "core/components/common/properties/ui_material.h"
 
 #ifdef OHOS_STANDARD_SYSTEM
 #include "systemcapability.h"
@@ -47,8 +49,11 @@ constexpr char PROPERTY_DEVICE_TYPE_WEARABLE[] = "wearable";
 constexpr char PROPERTY_FOLD_TYPE[] = "const.window.foldscreen.type";
 constexpr char ENABLE_DEBUG_AUTOUI_KEY[] = "persist.ace.debug.autoui.enabled";
 constexpr char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
+constexpr char ENABLE_GESTURE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.gesture.boundary.enabled";
 constexpr char ENABLE_DOWNLOAD_BY_NETSTACK_KEY[] = "persist.ace.download.netstack.enabled";
 constexpr char ENABLE_RECYCLE_IMAGE_KEY[] = "persist.ace.recycle.image.enabled";
+constexpr char ENABLE_IMAGE_RELEASE_MANAGE_OBJECT_KEY[] = "persist.ace.image.releasemanageobject.enabled";
+constexpr char ENABLE_IMAGE_AUTO_RESIZE_KEY[] = "persist.ace.image.autoresize.enabled";
 constexpr char ENABLE_DEBUG_OFFSET_LOG_KEY[] = "persist.ace.scrollable.log.enabled";
 constexpr char ANIMATION_SCALE_KEY[] = "persist.sys.arkui.animationscale";
 constexpr char CUSTOM_TITLE_KEY[] = "persist.sys.arkui.customtitle";
@@ -77,7 +82,9 @@ constexpr char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_size_anima
 constexpr int32_t CONVERT_ASTC_THRESHOLD = 2;
 constexpr int32_t FOLD_TYPE_TWO = 2;
 constexpr int32_t FOLD_TYPE_FOUR = 4;
+constexpr int32_t FOLD_TYPE_SEVEN = 7;
 constexpr float DEFAULT_SCROLL_COEFFICEIENT = 2.0f;
+constexpr int32_t DEFAULT_FORM_TASK_PRIORITY = 2;
 
 bool IsOpIncEnabled()
 {
@@ -106,6 +113,11 @@ bool IsDebugBoundaryEnabled()
     return system::GetParameter(ENABLE_DEBUG_BOUNDARY_KEY, "false") == "true";
 }
 
+bool IsGestureDebugBoundaryEnabled()
+{
+    return system::GetParameter(ENABLE_GESTURE_DEBUG_BOUNDARY_KEY, "false") == "true";
+}
+
 bool IsDownloadByNetworkDisabled()
 {
     return system::GetParameter(ENABLE_DOWNLOAD_BY_NETSTACK_KEY, "true") == "true";
@@ -114,6 +126,11 @@ bool IsDownloadByNetworkDisabled()
 bool IsRecycleImageEnabled()
 {
     return system::GetParameter(ENABLE_RECYCLE_IMAGE_KEY, "false") == "true";
+}
+
+bool IsImageReleaseManageObjectEnabled()
+{
+    return system::GetBoolParameter(ENABLE_IMAGE_RELEASE_MANAGE_OBJECT_KEY, false);
 }
 
 bool IsSvgTraceEnabled()
@@ -415,12 +432,6 @@ bool IsUseMemoryMonitor()
     return (system::GetParameter("persist.ace.memorymonitor.enabled", "0") == "1");
 }
 
-int32_t ReadComponentLoadNumber()
-{
-    return system::GetIntParameter(
-        "persist.ace.componentload.number", 1); // Number of components loaded in 100 milliseconds.
-}
-
 bool IsExtSurfaceEnabled()
 {
 #ifdef EXT_SURFACE_ENABLE
@@ -542,10 +553,19 @@ int32_t ReadTouchAccelarateMode()
     return system::GetIntParameter("debug.ace.touch.accelarate", 0);
 }
 
-int32_t ReadPageLoadTimeThreshold()
+UiMaterialLevel ReadUiMaterialLevel()
 {
-    return system::GetIntParameter(
-        "const.arkui.pageload.timethreshold", 1500); // page load max timethreshold is 1500ms.
+    UiMaterialLevel result = UiMaterialLevel::DEFAULT;
+    if (MaterialUtils::GetGlobalMaterialLevel(result)) {
+        return result;
+    }
+    int32_t level =
+        system::GetIntParameter("const.immersive_material_level", static_cast<int32_t>(UiMaterialLevel::DEFAULT));
+    if (level >= static_cast<int32_t>(UiMaterialLevel::EXQUISITE) &&
+        level <= static_cast<int32_t>(UiMaterialLevel::MAX)) {
+        result = static_cast<UiMaterialLevel>(level);
+    }
+    return result;
 }
 
 bool IsAscending(const std::vector<double>& nums)
@@ -726,9 +746,11 @@ std::atomic<bool> SystemProperties::unZipHap_(true);
 ACE_WEAK_SYM bool SystemProperties::rosenBackendEnabled_ = IsRosenBackendEnabled();
 ACE_WEAK_SYM bool SystemProperties::isHookModeEnabled_ = IsHookModeEnabled();
 std::atomic<bool> SystemProperties::debugBoundaryEnabled_(IsDebugBoundaryEnabled() && developerModeOn_);
+bool SystemProperties::gestureDebugBoundaryEnabled_ = IsGestureDebugBoundaryEnabled();
 bool SystemProperties::debugAutoUIEnabled_ = IsDebugAutoUIEnabled();
 bool SystemProperties::downloadByNetworkEnabled_ = IsDownloadByNetworkDisabled();
 bool SystemProperties::recycleImageEnabled_ = IsRecycleImageEnabled();
+bool SystemProperties::imageReleaseManageObjectEnabled_ = IsImageReleaseManageObjectEnabled();
 bool SystemProperties::debugOffsetLogEnabled_ = IsDebugOffsetLogEnabled();
 ACE_WEAK_SYM bool SystemProperties::windowAnimationEnabled_ = IsWindowAnimationEnabled();
 ACE_WEAK_SYM bool SystemProperties::debugEnabled_ = IsDebugEnabled();
@@ -773,7 +795,6 @@ double SystemProperties::scrollableDistance_ = ReadScrollableDistance();
 bool SystemProperties::taskPriorityAdjustmentEnable_ = IsTaskPriorityAdjustmentEnable();
 int32_t SystemProperties::dragDropFrameworkStatus_ = ReadDragDropFrameworkStatus();
 int32_t SystemProperties::touchAccelarate_ = ReadTouchAccelarateMode();
-int32_t SystemProperties::pageLoadTimethreshold_ = ReadPageLoadTimeThreshold();
 bool SystemProperties::pageTransitionFrzEnabled_ = false;
 bool SystemProperties::forcibleLandscapeEnabled_ = false;
 bool SystemProperties::softPagetransition_ = false;
@@ -791,6 +812,7 @@ bool SystemProperties::prebuildInMultiFrameEnabled_ = IsPrebuildInMultiFrameEnab
 bool SystemProperties::isOpenYuvDecode_ = false;
 bool SystemProperties::isPCMode_ = false;
 bool SystemProperties::isAutoFillSupport_ = false;
+bool SystemProperties::autoResizeEnabled_ = false;
 
 std::once_flag SystemProperties::getSysPropertiesFlag_;
 
@@ -945,10 +967,12 @@ void SystemProperties::ReadSystemParametersCallOnce()
         canvasDebugMode_ = ReadCanvasDebugMode();
         safeRefactorMode_ = ReadSafeRefactorMode();
         isHookModeEnabled_ = IsHookModeEnabled();
+        gestureDebugBoundaryEnabled_ = IsGestureDebugBoundaryEnabled();
         debugAutoUIEnabled_ = IsDebugAutoUIEnabled();
         debugOffsetLogEnabled_ = IsDebugOffsetLogEnabled();
         downloadByNetworkEnabled_ = IsDownloadByNetworkDisabled();
         recycleImageEnabled_ = IsRecycleImageEnabled();
+        imageReleaseManageObjectEnabled_ = IsImageReleaseManageObjectEnabled();
         pageTransitionFrzEnabled_ = system::GetBoolParameter("const.arkui.pagetransitionfreeze", false);
         forcibleLandscapeEnabled_ = system::GetBoolParameter("const.settings.forcible_landscape_enable", false);
         softPagetransition_ = system::GetBoolParameter("const.arkui.softPagetransition", false);
@@ -974,6 +998,7 @@ void SystemProperties::ReadSystemParametersCallOnce()
         previewStatus_ = system::GetIntParameter<int32_t>("const.arkui.previewStatus", -1);
         isPCMode_ = system::GetParameter("persist.sceneboard.ispcmode", "false") == "true";
         isAutoFillSupport_ = system::GetBoolParameter("const.arkui.autoFillSupport", false);
+        autoResizeEnabled_ = system::GetBoolParameter(ENABLE_IMAGE_AUTO_RESIZE_KEY, false);
         isOpenYuvDecode_ = ReadIsOpenYuvDecode();
 
         // watch animation scale
@@ -1102,12 +1127,6 @@ ACE_WEAK_SYM bool SystemProperties::GetIsUseMemoryMonitor()
 {
     static bool isUseMemoryMonitor = IsUseMemoryMonitor();
     return isUseMemoryMonitor;
-}
-
-ACE_WEAK_SYM int32_t SystemProperties::GetComponentLoadNumber()
-{
-    static int32_t componentLoadNumber = ReadComponentLoadNumber();
-    return componentLoadNumber;
 }
 
 bool SystemProperties::IsFormAnimationLimited()
@@ -1338,6 +1357,13 @@ ACE_WEAK_SYM bool SystemProperties::IsSmallFoldProduct()
     return foldScreenType_ == FoldScreenType::SMALL_FOLDER;
 }
 
+ACE_WEAK_SYM bool SystemProperties::IsPortraitFoldProduct()
+{
+    InitFoldScreenTypeBySystemProperty();
+    return foldScreenType_ == FoldScreenType::SMALL_FOLDER ||
+        foldScreenType_ == FoldScreenType::PORTRAIT_FOLDER;
+}
+
 ACE_WEAK_SYM bool SystemProperties::IsBigFoldProduct()
 {
     InitFoldScreenTypeBySystemProperty();
@@ -1355,7 +1381,7 @@ void SystemProperties::InitFoldScreenTypeBySystemProperty()
         auto index = foldTypeProp.find_first_of(',');
         auto foldScreenTypeStr = foldTypeProp.substr(0, index);
         auto type = StringUtils::StringToInt(foldScreenTypeStr);
-        if (type == FOLD_TYPE_FOUR) {
+        if (type == FOLD_TYPE_FOUR || type == FOLD_TYPE_SEVEN) {
             type = FOLD_TYPE_TWO;
         }
         foldScreenType_ = static_cast<FoldScreenType>(type);
@@ -1440,11 +1466,6 @@ int32_t SystemProperties::GetTouchAccelarate()
     return touchAccelarate_;
 }
 
-int32_t SystemProperties::GetPageLoadTimethreshold()
-{
-    return pageLoadTimethreshold_;
-}
-
 bool SystemProperties::IsSuperFoldDisplayDevice()
 {
     InitFoldScreenTypeBySystemProperty();
@@ -1469,6 +1490,12 @@ bool SystemProperties::IsFormSkeletonBlurEnabled()
 int32_t SystemProperties::getFormSharedImageCacheThreshold()
 {
     return formSharedImageCacheThreshold_;
+}
+
+bool SystemProperties::IsFormSkeletonRSTransactionEnabled()
+{
+    static bool enabled = system::GetBoolParameter("const.form.skeleton_animation.rs_transaction_enabled", true);
+    return enabled;
 }
 
 bool SystemProperties::IsWhiteBlockEnabled()
@@ -1555,5 +1582,18 @@ void SystemProperties::SetStateManagerEnabled(bool stateManagerEnable)
 void SystemProperties::SetFaultInjectEnabled(bool faultInjectEnable)
 {
     faultInjectEnabled_ = faultInjectEnable;
+}
+
+UiMaterialLevel SystemProperties::GetUiMaterialLevel()
+{
+    static auto uiMaterialLevel = ReadUiMaterialLevel();
+    return uiMaterialLevel;
+}
+
+int32_t SystemProperties::GetFormTaskPriority()
+{
+    static auto formTaskPriority = system::GetIntParameter<int32_t>("const.form.task_priority",
+	                                                                DEFAULT_FORM_TASK_PRIORITY);
+    return formTaskPriority;
 }
 } // namespace OHOS::Ace

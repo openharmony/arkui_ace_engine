@@ -15,7 +15,7 @@ import("//build/config/components/ets_frontend/ets2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
-node_version = "v16.20.2"
+node_version = "v18.20.1"
 host_arch = "${host_os}-${host_cpu}"
 
 action("incremental_install") {

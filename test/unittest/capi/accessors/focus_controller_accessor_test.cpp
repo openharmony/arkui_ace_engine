@@ -43,11 +43,11 @@ public:
 };
 
 /**
- * @tc.name: RequestFocusTest
+ * @tc.name: requestFocusTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FocusControllerAccessorTest, RequestFocusTest, TestSize.Level1)
+HWTEST_F(FocusControllerAccessorTest, requestFocusTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->requestFocus, nullptr);
     const std::string expectedKey = "123";

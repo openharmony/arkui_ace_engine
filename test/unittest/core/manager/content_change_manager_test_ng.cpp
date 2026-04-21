@@ -19,8 +19,8 @@
 #define private public
 #define protected public
 
-#include "test/mock/adapter/mock_ui_session_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/interfaces/inner_api/ui_session/mock_ui_session_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -36,6 +36,7 @@ constexpr int32_t INITIAL_NODE_SIZE = 5;
 constexpr int32_t INITIAL_NODE_SIZE_PLUS_ONE = INITIAL_NODE_SIZE + 1;
 constexpr int32_t NORMAL_NODE_ID = 0;
 constexpr int32_t TEST_SCROLLING_NODE_ID = 100;
+constexpr int32_t TEST_TRANSITIONING_NODE_ID = 200;
 constexpr int32_t NEVER_ONCE = 0;
 constexpr int32_t AT_LEAST_ONCE = 1;
 
@@ -125,6 +126,22 @@ void ResetChangedSwiperNodes()
         contentChangeMgr->changedSwiperNodes_.clear();
     }
 }
+
+void SetTransitioningNodes()
+{
+    auto contentChangeMgr = GetContentChangeManager();
+    if (contentChangeMgr) {
+        contentChangeMgr->transitioningNodes_.emplace(TEST_TRANSITIONING_NODE_ID);
+    }
+}
+
+void ResetTransitioningNodes()
+{
+    auto contentChangeMgr = GetContentChangeManager();
+    if (contentChangeMgr) {
+        contentChangeMgr->transitioningNodes_.clear();
+    }
+}
 } // namespace
 
 class ContentChangeManagerTestNg : public testing::Test {
@@ -148,7 +165,7 @@ void ContentChangeManagerTestNg::TearDownTestCase()
  * @tc.desc: Test config.textContentRatio validity
  * @tc.type: FUNC
  */
-HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest001, TestSize.Level1)
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. test whether can get content change manager.
@@ -226,7 +243,7 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest002, TestSize.Level
      */
     auto contentChangeMgr = GetContentChangeManager();
     ASSERT_NE(contentChangeMgr, nullptr);
-    const float DEFAULT_TEXT_MIN_REPORT_TIME = contentChangeMgr->DEFAULT_TEXT_MIN_REPORT_TIME;
+    const float DEFAULT_COMPONENT_MIN_REPORT_TIME = contentChangeMgr->DEFAULT_COMPONENT_MIN_REPORT_TIME;
     const uint64_t NS_PER_MS = contentChangeMgr->NS_PER_MS;
 
     /**
@@ -238,8 +255,8 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest002, TestSize.Level
     contentChangeMgr->StartContentChangeReport(config);
     std::optional<ContentChangeConfig> currentConfig = contentChangeMgr->currentContentChangeConfig_;
     ASSERT_TRUE(currentConfig.has_value());
-    EXPECT_EQ(currentConfig->minReportTime, DEFAULT_TEXT_MIN_REPORT_TIME);
-    EXPECT_EQ(contentChangeMgr->textContentInterval_, DEFAULT_TEXT_MIN_REPORT_TIME * NS_PER_MS);
+    EXPECT_EQ(currentConfig->minReportTime, DEFAULT_COMPONENT_MIN_REPORT_TIME);
+    EXPECT_EQ(contentChangeMgr->componentReportInterval_, DEFAULT_COMPONENT_MIN_REPORT_TIME * NS_PER_MS);
 
     /**
      * @tc.steps: step3. call StartContentChangeReport when minReportTime is valid.
@@ -250,7 +267,7 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest002, TestSize.Level
     currentConfig = contentChangeMgr->currentContentChangeConfig_;
     ASSERT_TRUE(currentConfig.has_value());
     EXPECT_EQ(currentConfig->minReportTime, 200);
-    EXPECT_EQ(contentChangeMgr->textContentInterval_, 200 * NS_PER_MS);
+    EXPECT_EQ(contentChangeMgr->componentReportInterval_, 200 * NS_PER_MS);
 
     /**
      * @tc.steps: step4. reset.
@@ -397,19 +414,11 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest005, TestSize.Level
         .Times(NEVER_ONCE);
     contentChangeMgr->OnPageTransitionEnd(nullptr);
 
-    SetScrollingNodes();
-    EXPECT_TRUE(contentChangeMgr->IsScrolling());
-    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(_, _))
-        .Times(NEVER_ONCE);
-    contentChangeMgr->OnPageTransitionEnd(node);
-    ResetScrollingNodes();
-
     /**
      * @tc.steps: step3. call OnPageTransitionEnd under normal conditions.
      * @tc.expected: ReportContentChangeEvent called once.
      */
     EXPECT_TRUE(contentChangeMgr->IsContentChangeDetectEnable());
-    EXPECT_FALSE(contentChangeMgr->IsScrolling());
     EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(ChangeType::PAGE, simpleTree))
         .Times(AtLeast(AT_LEAST_ONCE));
     contentChangeMgr->OnPageTransitionEnd(node);
@@ -516,18 +525,11 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest007, TestSize.Level
     contentChangeMgr->OnSwiperChangeEnd(nullptr, false);
     EXPECT_TRUE(contentChangeMgr->changedSwiperNodes_.empty());
 
-    SetScrollingNodes();
-    EXPECT_TRUE(contentChangeMgr->IsScrolling());
-    contentChangeMgr->OnSwiperChangeEnd(node, false);
-    ResetScrollingNodes();
-    EXPECT_TRUE(contentChangeMgr->changedSwiperNodes_.empty());
-
     /**
      * @tc.steps: step3. call OnSwiperChangeEnd under normal conditions.
      * @tc.expected: changedSwiperNodes_ is not empty.
      */
     EXPECT_TRUE(contentChangeMgr->IsContentChangeDetectEnable());
-    EXPECT_FALSE(contentChangeMgr->IsScrolling());
     contentChangeMgr->OnSwiperChangeEnd(node, false);
     EXPECT_FALSE(contentChangeMgr->changedSwiperNodes_.empty());
 
@@ -576,19 +578,11 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest008, TestSize.Level
         .Times(NEVER_ONCE);
     contentChangeMgr->OnDialogChangeEnd(nullptr, true);
 
-    SetScrollingNodes();
-    EXPECT_TRUE(contentChangeMgr->IsScrolling());
-    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(_, _))
-        .Times(NEVER_ONCE);
-    contentChangeMgr->OnDialogChangeEnd(node, true);
-    ResetScrollingNodes();
-
     /**
      * @tc.steps: step3. call OnDialogChangeEnd under normal conditions.
      * @tc.expected: ReportContentChangeEvent called once.
      */
     EXPECT_TRUE(contentChangeMgr->IsContentChangeDetectEnable());
-    EXPECT_FALSE(contentChangeMgr->IsScrolling());
     EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(ChangeType::DIALOG, showSimpleTree))
         .Times(AtLeast(AT_LEAST_ONCE));
     contentChangeMgr->OnDialogChangeEnd(node, true);
@@ -933,11 +927,12 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest015, TestSize.Level
     EXPECT_TRUE(contentChangeMgr->IsContentChangeDetectEnable());
     EXPECT_FALSE(contentChangeMgr->textCollecting_);
     EXPECT_FALSE(contentChangeMgr->IsScrolling());
-    contentChangeMgr->lastTextReportTime_ = GetSysTimestamp();
-    EXPECT_TRUE(GetSysTimestamp() - contentChangeMgr->lastTextReportTime_ < contentChangeMgr->textContentInterval_);
+    contentChangeMgr->lastComponentReportTime_ = GetSysTimestamp();
+    EXPECT_TRUE(GetSysTimestamp() - contentChangeMgr->lastComponentReportTime_ <
+        contentChangeMgr->componentReportInterval_);
     contentChangeMgr->StartTextAABBCollecting();
     EXPECT_FALSE(contentChangeMgr->textCollecting_);
-    contentChangeMgr->lastTextReportTime_ = 0;
+    contentChangeMgr->lastComponentReportTime_ = 0;
 
     /**
      * @tc.steps: step3. call StartTextAABBCollecting under normal conditions.
@@ -946,7 +941,8 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest015, TestSize.Level
     EXPECT_TRUE(contentChangeMgr->IsContentChangeDetectEnable());
     EXPECT_FALSE(contentChangeMgr->textCollecting_);
     EXPECT_FALSE(contentChangeMgr->IsScrolling());
-    EXPECT_FALSE(GetSysTimestamp() - contentChangeMgr->lastTextReportTime_ < contentChangeMgr->textContentInterval_);
+    EXPECT_FALSE(GetSysTimestamp() - contentChangeMgr->lastComponentReportTime_ <
+        contentChangeMgr->componentReportInterval_);
     contentChangeMgr->StartTextAABBCollecting();
     EXPECT_TRUE(contentChangeMgr->textCollecting_);
 
@@ -1055,7 +1051,7 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest017, TestSize.Level
     EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(_, _))
         .Times(NEVER_ONCE);
     contentChangeMgr->StopTextAABBCollecting(rootRect);
-    EXPECT_EQ(contentChangeMgr->lastTextReportTime_, 0);
+    EXPECT_EQ(contentChangeMgr->lastComponentReportTime_, 0);
     EXPECT_TRUE(contentChangeMgr->textAABB_.IsEmpty());
     EXPECT_FALSE(contentChangeMgr->textCollecting_);
 
@@ -1065,11 +1061,13 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest017, TestSize.Level
      */
     contentChangeMgr->textContentRatio_ = 0.0f;
     contentChangeMgr->textAABB_ = intersectRect;
+    contentChangeMgr->componentReportDelayTime_ = 0;
     EXPECT_FALSE(contentChangeMgr->textAABB_.IsEmpty());
+    EXPECT_FALSE(contentChangeMgr->IsInTransitionDelayWindow());
     EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(ChangeType::TEXT, ""))
         .Times(AtLeast(AT_LEAST_ONCE));
     contentChangeMgr->StopTextAABBCollecting(rootRect);
-    EXPECT_NE(contentChangeMgr->lastTextReportTime_, 0);
+    EXPECT_NE(contentChangeMgr->lastComponentReportTime_, 0);
     EXPECT_TRUE(contentChangeMgr->textAABB_.IsEmpty());
     EXPECT_FALSE(contentChangeMgr->textCollecting_);
 
@@ -1386,6 +1384,13 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest0
      */
     uint32_t mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [\"scrollTo\"]}");
     EXPECT_EQ(mask, ContentChangeManager::SCROLL_TO);
+
+    /**
+     * @tc.steps: step3. call GetIgnoreEventMask with "scrollToIndex" event.
+     * @tc.expected: returns SCROLL_TO_INDEX mask.
+     */
+    mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [\"scrollToIndex\"]}");
+    EXPECT_EQ(mask, ContentChangeManager::SCROLL_TO_INDEX);
 }
 
 /**
@@ -1408,6 +1413,13 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest0
      */
     uint32_t mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [\"scrollTo\", \"scrollTo\"]}");
     EXPECT_EQ(mask, ContentChangeManager::SCROLL_TO);
+
+    /**
+     * @tc.steps: step3. call GetIgnoreEventMask with duplicate "scrollToIndex" events.
+     * @tc.expected: returns SCROLL_TO_INDEX mask (OR operation with same value).
+     */
+    mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [\"scrollToIndex\", \"scrollToIndex\"]}");
+    EXPECT_EQ(mask, ContentChangeManager::SCROLL_TO_INDEX);
 }
 
 /**
@@ -1440,6 +1452,16 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest0
 
     mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [\"SCROLLTO\"]}");
     EXPECT_EQ(mask, ContentChangeManager::NONE);
+
+    /**
+     * @tc.steps: step4. call GetIgnoreEventMask with invalid case for scrollToIndex.
+     * @tc.expected: returns 0 (NONE) - case sensitive.
+     */
+    mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [\"ScrollToIndex\"]}");
+    EXPECT_EQ(mask, ContentChangeManager::NONE);
+
+    mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [\"SCROLLTOINDEX\"]}");
+    EXPECT_EQ(mask, ContentChangeManager::NONE);
 }
 
 /**
@@ -1469,6 +1491,20 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest0
      */
     mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [\"\", \"scrollTo\", null, \"unknown\"]}");
     EXPECT_EQ(mask, ContentChangeManager::SCROLL_TO);
+
+    /**
+     * @tc.steps: step4. call GetIgnoreEventMask with scrollToIndex in mixed events.
+     * @tc.expected: returns SCROLL_TO_INDEX mask.
+     */
+    mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [\"unknown1\", \"scrollToIndex\", \"unknown2\"]}");
+    EXPECT_EQ(mask, ContentChangeManager::SCROLL_TO_INDEX);
+
+    /**
+     * @tc.steps: step5. call GetIgnoreEventMask with both scrollTo and scrollToIndex.
+     * @tc.expected: returns SCROLL_TO | SCROLL_TO_INDEX mask.
+     */
+    mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [\"scrollTo\", \"scrollToIndex\"]}");
+    EXPECT_EQ(mask, ContentChangeManager::SCROLL_TO | ContentChangeManager::SCROLL_TO_INDEX);
 }
 
 /**
@@ -1529,11 +1565,14 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest0
     ASSERT_NE(contentChangeMgr, nullptr);
 
     /**
-     * @tc.steps: step2. test ConvertEventStringToEnum with "scrollTo".
-     * @tc.expected: returns SCROLL_TO.
+     * @tc.steps: step2. test ConvertEventStringToEnum with "scrollTo" and "scrollToIndex".
+     * @tc.expected: returns SCROLL_TO and SCROLL_TO_INDEX respectively.
      */
     uint32_t eventType = contentChangeMgr->ConvertEventStringToEnum("scrollTo");
     EXPECT_EQ(eventType, ContentChangeManager::SCROLL_TO);
+
+    eventType = contentChangeMgr->ConvertEventStringToEnum("scrollToIndex");
+    EXPECT_EQ(eventType, ContentChangeManager::SCROLL_TO_INDEX);
 
     /**
      * @tc.steps: step3. test ConvertEventStringToEnum with unknown string.
@@ -1573,6 +1612,7 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest0
      */
     EXPECT_EQ(ContentChangeManager::NONE, 0);
     EXPECT_EQ(ContentChangeManager::SCROLL_TO, 1 << 0);
+    EXPECT_EQ(ContentChangeManager::SCROLL_TO_INDEX, 1 << 1);
 
     /**
      * @tc.steps: step2. verify bit operations.
@@ -1584,6 +1624,9 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest0
 
     mask |= ContentChangeManager::SCROLL_TO;
     EXPECT_EQ(mask, 1); // OR with same value should not change
+
+    mask |= ContentChangeManager::SCROLL_TO_INDEX;
+    EXPECT_EQ(mask, 3); // 1 | 2 = 3
 }
 
 /**
@@ -1619,5 +1662,126 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest0
     })";
     mask = contentChangeMgr->GetIgnoreEventMask(jsonStr);
     EXPECT_EQ(mask, ContentChangeManager::SCROLL_TO);
+}
+
+/**
+ * @tc.name: ContentChangeManagerTest020
+ * @tc.desc: Test OnTransitionAdded
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest020, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. test whether can get content change manager.
+     * @tc.expected: contentChangeMgr is not nullptr.
+     */
+    auto contentChangeMgr = GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+
+    /**
+     * @tc.steps: step2. call OnTransitionAdded when content change detect is disabled.
+     * @tc.expected: transitioningNodes_ is empty.
+     */
+    EXPECT_FALSE(contentChangeMgr->IsContentChangeDetectEnable());
+    contentChangeMgr->OnTransitionAdded(NORMAL_NODE_ID);
+    EXPECT_TRUE(contentChangeMgr->transitioningNodes_.empty());
+
+    /**
+     * @tc.steps: step3. call OnTransitionAdded under normal conditions.
+     * @tc.expected: transitioningNodes_ is not empty and contains the node id.
+     */
+    ContentChangeConfig config;
+    contentChangeMgr->currentContentChangeConfig_ = config;
+    EXPECT_TRUE(contentChangeMgr->IsContentChangeDetectEnable());
+    contentChangeMgr->OnTransitionAdded(NORMAL_NODE_ID);
+    EXPECT_FALSE(contentChangeMgr->transitioningNodes_.empty());
+    EXPECT_EQ(static_cast<int32_t>(contentChangeMgr->transitioningNodes_.count(NORMAL_NODE_ID)), 1);
+    auto size = static_cast<int32_t>(contentChangeMgr->transitioningNodes_.size());
+    EXPECT_EQ(size, 1);
+
+    /**
+     * @tc.steps: step4. call OnTransitionAdded when transitioningNodes_ already has nodes.
+     * @tc.expected: transitioningNodes_ size increases and contains both node ids.
+     */
+    SetTransitioningNodes();
+    size = static_cast<int32_t>(contentChangeMgr->transitioningNodes_.size());
+    EXPECT_EQ(size, 2);
+    EXPECT_EQ(static_cast<int32_t>(contentChangeMgr->transitioningNodes_.count(NORMAL_NODE_ID)), 1);
+    EXPECT_EQ(static_cast<int32_t>(contentChangeMgr->transitioningNodes_.count(TEST_TRANSITIONING_NODE_ID)), 1);
+
+    /**
+     * @tc.steps: step5. call OnTransitionAdded with existing node id (duplicate test).
+     * @tc.expected: transitioningNodes_ size remains unchanged (set deduplication).
+     */
+    contentChangeMgr->OnTransitionAdded(NORMAL_NODE_ID);
+    size = static_cast<int32_t>(contentChangeMgr->transitioningNodes_.size());
+    EXPECT_EQ(size, 2);
+
+    /**
+     * @tc.steps: step6. reset.
+     */
+    contentChangeMgr->currentContentChangeConfig_.reset();
+    EXPECT_FALSE(contentChangeMgr->IsContentChangeDetectEnable());
+    ResetTransitioningNodes();
+    EXPECT_TRUE(contentChangeMgr->transitioningNodes_.empty());
+}
+
+/**
+ * @tc.name: ContentChangeManagerTest021
+ * @tc.desc: Test OnTransitionRemoved
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest021, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. test whether can get content change manager.
+     * @tc.expected: contentChangeMgr is not nullptr.
+     */
+    auto contentChangeMgr = GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+    constexpr int32_t TEST_NODE_ID_NOT_EXIST = 999;
+
+    /**
+     * @tc.steps: step2. call OnTransitionRemoved when node does not exist.
+     * @tc.expected: transitioningNodes_ remains empty.
+     */
+    EXPECT_TRUE(contentChangeMgr->transitioningNodes_.empty());
+    contentChangeMgr->OnTransitionRemoved(TEST_NODE_ID_NOT_EXIST);
+    EXPECT_TRUE(contentChangeMgr->transitioningNodes_.empty());
+
+    /**
+     * @tc.steps: step3. add some nodes and then remove a non-existent node.
+     * @tc.expected: transitioningNodes_ size remains unchanged.
+     */
+    contentChangeMgr->transitioningNodes_.emplace(NORMAL_NODE_ID);
+    contentChangeMgr->transitioningNodes_.emplace(TEST_TRANSITIONING_NODE_ID);
+    auto size = static_cast<int32_t>(contentChangeMgr->transitioningNodes_.size());
+    EXPECT_EQ(size, 2);
+    contentChangeMgr->OnTransitionRemoved(TEST_NODE_ID_NOT_EXIST);
+    size = static_cast<int32_t>(contentChangeMgr->transitioningNodes_.size());
+    EXPECT_EQ(size, 2);
+
+    /**
+     * @tc.steps: step4. remove an existing node.
+     * @tc.expected: transitioningNodes_ size decreases by 1.
+     */
+    contentChangeMgr->OnTransitionRemoved(NORMAL_NODE_ID);
+    size = static_cast<int32_t>(contentChangeMgr->transitioningNodes_.size());
+    EXPECT_EQ(size, 1);
+    EXPECT_EQ(static_cast<int32_t>(contentChangeMgr->transitioningNodes_.count(NORMAL_NODE_ID)), 0);
+    EXPECT_EQ(static_cast<int32_t>(contentChangeMgr->transitioningNodes_.count(TEST_TRANSITIONING_NODE_ID)), 1);
+
+    /**
+     * @tc.steps: step5. remove the last existing node.
+     * @tc.expected: transitioningNodes_ is empty.
+     */
+    contentChangeMgr->OnTransitionRemoved(TEST_TRANSITIONING_NODE_ID);
+    EXPECT_TRUE(contentChangeMgr->transitioningNodes_.empty());
+
+    /**
+     * @tc.steps: step6. reset.
+     */
+    ResetTransitioningNodes();
+    EXPECT_TRUE(contentChangeMgr->transitioningNodes_.empty());
 }
 } // namespace OHOS::Ace::NG

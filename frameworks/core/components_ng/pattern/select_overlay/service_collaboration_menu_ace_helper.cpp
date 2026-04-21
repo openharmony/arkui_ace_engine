@@ -29,6 +29,7 @@
 #include "base/utils/system_properties.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/select/select_theme.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components/divider/divider_theme.h"
 #include "core/components/theme/shadow_theme.h"
@@ -46,6 +47,7 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text/text_styles.h"
+#include "core/pipeline/pipeline_base.h"
 #include "frameworks/core/pipeline/base/element_register.h"
 #include "frameworks/base/thread/cancelable_callback.h"
 #include "core/components/common/properties/popup_param.h"
@@ -798,11 +800,12 @@ void ServiceCollaborationAceCallback::RemovePopupNode()
     CHECK_NULL_VOID(overlay);
     CHECK_NULL_VOID(info_);
     CHECK_NULL_VOID(info_->pattern.Upgrade());
-    CHECK_NULL_VOID(info_->pattern.Upgrade()->GetHost());
+    auto host = info_->pattern.Upgrade()->GetHost();
+    CHECK_NULL_VOID(host);
     auto pattern = AceType::DynamicCast<RichEditorPattern>(info_->pattern.Upgrade());
     CHECK_NULL_VOID(pattern);
-    pattern->RegisterCaretChangeListener(nullptr);
-    auto targetId = info_->pattern.Upgrade()->GetHost()->GetId();
+    pattern->RegisiterCaretChangeListener(nullptr);
+    auto targetId = host->GetId();
     auto popupInfo = overlay->GetPopupInfo(targetId);
     popupInfo.markNeedUpdate = true;
     overlay->HidePopup(targetId, popupInfo);
@@ -862,16 +865,20 @@ int32_t ServiceCollaborationAceCallback::OnEvent(uint32_t code, uint32_t eventId
                 callback->info_ = nullptr;
             }
         };
-        pattern->RegisterCaretChangeListener(std::move(func));
+        pattern->RegisiterCaretChangeListener(std::move(func));
         auto row = CreateCustomPopUpNode(category, "");
         CHECK_NULL_RETURN(row, -1);
-        ViewAbstract::BindPopup(popupParam, info_->pattern.Upgrade()->GetHost(), row);
+        auto host = info_->pattern.Upgrade()->GetHost();
+        CHECK_NULL_RETURN(host, -1);
+        ViewAbstract::BindPopup(popupParam, host, row);
         return 0;
     }
     if (code == PHOTO_SENDING) {
         auto popupParam = GetPopupParam(true, onStateChange_);
         auto row = CreateCustomPopUpNode(category, "");
-        ViewAbstract::BindPopup(popupParam, info_->pattern.Upgrade()->GetHost(), row);
+        auto host = info_->pattern.Upgrade()->GetHost();
+        CHECK_NULL_RETURN(host, -1);
+        ViewAbstract::BindPopup(popupParam, host, row);
         return 0;
     }
     if (code == MULTI_PHOTO_SENDING_BACK) {
@@ -892,7 +899,11 @@ int32_t ServiceCollaborationAceCallback::OnEvent(uint32_t code, uint32_t eventId
     CHECK_NULL_RETURN(toastPipeline, -1);
     auto overlay = toastPipeline->GetOverlayManager();
     CHECK_NULL_RETURN(overlay, -1);
-    overlay->ShowToast({ .message = category, .duration = TOAST_DURATION, .alignment = -1 }, nullptr);
+    auto toastInfo = NG::ToastInfo { .message = category,
+        .duration = TOAST_DURATION,
+        .alignment = -1
+    };
+    overlay->ShowToast(toastInfo, nullptr);
     info_ = nullptr;
     return 0;
 }
@@ -998,8 +1009,7 @@ int32_t ServiceCollaborationAceCallback::OnDataCallback(uint32_t code, uint32_t 
     });
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, -1);
-    taskExecutor->PostTask(caretTwinklingTask, TaskExecutor::TaskType::UI, "ArkUIRichEditorAddImageSpan",
-                           PriorityType::VIP);
+    taskExecutor->PostTask(caretTwinklingTask, TaskExecutor::TaskType::UI, "ArkUIRichEditorAddImageSpan");
     return 0;
 }
 } // namespace OHOS::Ace::NG

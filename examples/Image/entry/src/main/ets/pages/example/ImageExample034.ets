@@ -29,19 +29,19 @@ struct Index {
           .width(120)
 
         // None
-        Image($r('app.media.sky'))
+        Image($r('app.media.background'))
           .copyOption(CopyOptions.None)
           .height(200)
           .width(200)
 
         // InApp
-        Image($r('app.media.sky'))
+        Image($r('app.media.background'))
           .copyOption(CopyOptions.InApp)
           .height(200)
           .width(200)
 
         // LocalDevice
-        Image($r('app.media.sky'))
+        Image($r('app.media.background'))
           .copyOption(CopyOptions.LocalDevice)
           .height(200)
           .width(200)
@@ -54,19 +54,19 @@ struct Index {
           .width(120)
 
         // Low
-        Image($r('app.media.sky'))
+        Image($r('app.media.background'))
           .interpolation(ImageInterpolation.Low)
           .height(200)
           .width(200)
 
         // High
-        Image($r('app.media.sky'))
+        Image($r('app.media.background'))
           .interpolation(ImageInterpolation.High)
           .height(200)
           .width(200)
 
         // Medium
-        Image($r('app.media.sky'))
+        Image($r('app.media.background'))
           .interpolation(ImageInterpolation.Medium)
           .height(200)
           .width(200)
@@ -104,13 +104,13 @@ struct Index {
           .width(120)
 
         // true
-        Image($r('app.media.sky'))
+        Image($r('app.media.background'))
           .autoResize(true)
           .height(100)
           .width(100)
 
         // false
-        Image($r('app.media.sky'))
+        Image($r('app.media.background'))
           .autoResize(false)
           .height(100)
           .width(100)
@@ -123,13 +123,13 @@ struct Index {
           .width(120)
 
         // true
-        Image($r('app.media.sky'))
+        Image($r('app.media.background'))
           .syncLoad(true)
           .height(100)
           .width(100)
 
         // false
-        Image($r('app.media.sky'))
+        Image($r('app.media.background'))
           .syncLoad(false)
           .height(100)
           .width(100)
@@ -142,19 +142,19 @@ struct Index {
           .width(120)
 
         // STANDARD
-        Image($r('app.media.sky'))
+        Image($r('app.media.background'))
           .dynamicRangeMode(DynamicRangeMode.STANDARD)
           .height(100)
           .width(100)
 
         // HIGH
-        Image($r('app.media.sky'))
+        Image($r('app.media.background'))
           .dynamicRangeMode(DynamicRangeMode.HIGH)
           .height(100)
           .width(100)
 
         // CONSTRAINT
-        Image($r('app.media.sky'))
+        Image($r('app.media.background'))
           .dynamicRangeMode(DynamicRangeMode.CONSTRAINT)
           .height(100)
           .width(100)

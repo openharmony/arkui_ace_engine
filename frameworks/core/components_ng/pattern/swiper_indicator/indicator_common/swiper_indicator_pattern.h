@@ -120,6 +120,7 @@ public:
         paintMethod->SetIsHover(isHover_);
         paintMethod->SetIsPressed(isPressed_);
         paintMethod->SetHoverPoint(hoverPoint_);
+        paintMethod->SetIsLongPressed(isLongPressed_);
         if (mouseClickIndex_) {
             mouseClickIndex_ = swiperPattern->GetLoopIndex(mouseClickIndex_.value());
         }
@@ -201,9 +202,9 @@ public:
     FocusPattern GetFocusPattern() const override
     {
         FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
-        auto pipelineContext = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipelineContext, FocusPattern());
-        auto swiperTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, FocusPattern());
+        auto swiperTheme = host->GetTheme<SwiperIndicatorTheme>(true);
         CHECK_NULL_RETURN(swiperTheme, FocusPattern());
         FocusPaintParam paintParam;
         paintParam.SetPaintWidth(swiperTheme->GetFocusedBorderWidth());
@@ -216,6 +217,8 @@ public:
         focusPattern.SetStyleType(focusStyleType);
         return focusPattern;
     }
+
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
     void SetChangeIndexWithAnimation(bool withAnimation)
     {

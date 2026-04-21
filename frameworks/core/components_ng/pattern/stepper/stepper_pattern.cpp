@@ -172,6 +172,7 @@ void StepperPattern::CreateLeftButtonNode()
     buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(buttonLayoutProperty);
+    buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
     buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_CONTENT);
     buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(stepperTheme->GetRadius()));
@@ -327,6 +328,7 @@ void StepperPattern::CreateArrowRightButtonNode(int32_t index, bool isDisabled)
         buttonPattern->SetFocusBorderColor(stepperTheme->GetFocusColor());
         buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
         auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+        buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
         CHECK_NULL_VOID(buttonLayoutProperty);
         buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
         buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_CONTENT);

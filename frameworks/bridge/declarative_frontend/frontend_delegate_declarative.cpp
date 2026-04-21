@@ -242,6 +242,9 @@ void FrontendDelegateDeclarative::RunPage(
         [delegate = Claim(this), weakPtr = WeakPtr<NG::PageRouterManager>(pageRouterManager_), content, params]() {
             auto pageRouterManager = weakPtr.Upgrade();
             CHECK_NULL_VOID(pageRouterManager);
+            if (delegate) {
+                NG::AppBarView::BuildAppbar(delegate->GetPipelineContext());
+            }
             pageRouterManager->RunPage(content, params);
             auto pipeline = delegate->GetPipelineContext();
         },
@@ -1911,7 +1914,7 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
         .levelOrder = dialogAttr.levelOrder,
         .dialogLevelMode = dialogAttr.dialogLevelMode,
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
-        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode
+        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode, .systemMaterial = dialogAttr.systemMaterial
     };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {
@@ -2037,7 +2040,8 @@ DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const Prom
         .focusable = dialogAttr.focusable,
         .dialogLevelMode = dialogAttr.dialogLevelMode,
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
-        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode
+        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
+        .systemMaterial = dialogAttr.systemMaterial
     };
     ParsePartialPropertiesFromAttr(dialogProperties, dialogAttr);
     return dialogProperties;
@@ -2307,6 +2311,7 @@ void FrontendDelegateDeclarative::ShowActionMenu(const PromptDialogAttr& dialogA
         .dialogLevelMode = dialogAttr.dialogLevelMode,
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
         .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
+        .systemMaterial = dialogAttr.systemMaterial,
     };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {
@@ -2645,7 +2650,8 @@ void FrontendDelegateDeclarative::OnDrawCompleted(const std::string& componentId
         TaskExecutor::TaskType::JS, "ArkUIInspectorDrawCompleted");
 }
 
-void FrontendDelegateDeclarative::OnDrawChildrenCompleted(const std::string& componentId)
+void FrontendDelegateDeclarative::OnDrawChildrenCompleted(const std::string& componentId,
+    const std::vector<int32_t>& childIds)
 {
     auto engine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_VOID(engine);
@@ -2654,12 +2660,12 @@ void FrontendDelegateDeclarative::OnDrawChildrenCompleted(const std::string& com
     }
 
     taskExecutor_->PostTask(
-        [weak = AceType::WeakClaim(this), componentId] {
+        [weak = AceType::WeakClaim(this), componentId, childIds] {
             auto delegate = weak.Upgrade();
             if (!delegate) {
                 return;
             }
-            delegate->drawChildrenInspectorCallback_(componentId);
+            delegate->drawChildrenInspectorCallback_(componentId, childIds);
         },
         TaskExecutor::TaskType::JS, "ArkUIInspectorDrawChildrenCompleted");
 }
@@ -3849,6 +3855,15 @@ void FrontendDelegateDeclarative::GetSnapshotWithRange(const NG::NodeIdentity& s
 {
 #ifdef ENABLE_ROSEN_BACKEND
     NG::ComponentSnapshot::GetWithRange(startID, endID, isStartRect, std::move(callback), options);
+#endif
+}
+
+NG::SnapshotSizeLimitation FrontendDelegateDeclarative::GetSizeLimitation()
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    return NG::ComponentSnapshot::GetSizeLimitation();
+#else
+    return {};
 #endif
 }
 

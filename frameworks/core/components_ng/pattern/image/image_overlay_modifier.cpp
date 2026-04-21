@@ -48,4 +48,22 @@ void ImageOverlayModifier::onDraw(DrawingContext& drawingContext)
     canvas.Restore();
 }
 
+void ImageOverlayModifier::SetIsSelected(bool isSelected)
+{
+    CHECK_NULL_VOID(isSelected_);
+    isSelected_->Set(isSelected);
+}
+
+void ImageOverlayModifier::SetSize(const SizeF& size)
+{
+    CHECK_NULL_VOID(size_);
+    size_->Set(size);
+}
+
+void ImageOverlayModifier::SetOffset(const OffsetF& offset)
+{
+    CHECK_NULL_VOID(offset_);
+    offset_->Set(offset);
+}
+
 } // namespace OHOS::Ace::NG

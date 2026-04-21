@@ -5,6 +5,20 @@
     "pages/ArcButton/ArcButtonExample002",
     "pages/ArcButton/ArcButtonExample003",
     "pages/ArcButton/ArcButtonExample004",
-    "pages/ArcButton/ArcButtonExample005"
+    "pages/ArcButton/ArcButtonExample005",
+    "pages/ArcButton/ArcButtonExample006",
+    "pages/ArcButton/ArcButtonExample007",
+    "pages/ArcButton/ArcButtonExample008",
+    "pages/ArcButton/ArcButtonExample009",
+    "pages/ArcButton/ArcButtonExample010",
+    "pages/ArcButton/ArcButtonExample011",
+    "pages/ArcButton/ArcButtonExample012",
+    "pages/ArcSlider/ArcSliderExample001",
+    "pages/ArcSlider/ArcSliderExample002",
+    "pages/ArcSlider/ArcSliderExample003",
+    "pages/ArcSlider/ArcSliderExample004",
+    "pages/ArcSlider/ArcSliderExample005",
+    "pages/ArcSlider/ArcSliderExample006",
+    "pages/ArcSlider/ArcSliderExample007"
   ]
 }

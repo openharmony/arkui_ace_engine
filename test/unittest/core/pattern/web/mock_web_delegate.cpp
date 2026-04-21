@@ -399,6 +399,8 @@ void ContextMenuResultOhos::Paste() const {}
 void ContextMenuResultOhos::Cut() const {}
 void ContextMenuResultOhos::RequestPasswordAutoFill() const {}
 void ContextMenuResultOhos::SelectAll() const {}
+void ContextMenuResultOhos::SaveImage() const {}
+
 void WebWindowNewHandlerOhos::SetWebController(int32_t id) {}
 bool WebWindowNewHandlerOhos::IsFrist() const
 {
@@ -691,6 +693,7 @@ bool WebDelegate::GetForceDarkMode()
 void WebDelegate::UpdateDarkMode(const WebDarkMode& mode) {}
 void WebDelegate::UpdateDarkModeAuto(RefPtr<WebDelegate> delegate, std::shared_ptr<OHOS::NWeb::NWebPreference> setting)
 {}
+void WebDelegate::UpdateKeyboardAppearanceMode(const WebKeyboardAppearanceMode& mode) {}
 void WebDelegate::UpdateForceDarkAccess(const bool& access) {}
 void WebDelegate::UpdateAudioResumeInterval(const int32_t& resumeInterval) {}
 void WebDelegate::UpdateAudioSessionType(const WebAudioSessionType& audioSessionType) {}
@@ -730,7 +733,7 @@ void WebDelegate::UpdateNativeEmbedRuleType(const std::string& type) {}
 void WebDelegate::UpdateScrollBarColor(const std::string& colorValue) {}
 void WebDelegate::LoadUrl() {}
 void WebDelegate::OnInactive() {}
-void WebDelegate::SetOfflineWebActiveStatus(int32_t webId, bool isActive) {}
+void WebDelegate::SetOfflineWebActiveStatus(bool isActive) {}
 void WebDelegate::OnActive() {}
 void WebDelegate::OnWebviewHide() {}
 void WebDelegate::OnWebviewShow() {}
@@ -1197,6 +1200,10 @@ bool WebDelegate::OnNestedScroll(float& x, float& y, float& xVelocity, float& yV
 {
     return false;
 }
+bool WebDelegate::OnNestedScrollV2(float& x, float& y)
+{
+    return false;
+}
 void WebDelegate::OnRootLayerChanged(int width, int height) {}
 bool WebDelegate::FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity)
 {
@@ -1394,6 +1401,10 @@ void SetComponentType(const std::string& type)
 {
     g_setComponentType = type;
 }
+int WebDelegate::SendCommandActionToNWeb(const std::shared_ptr<OHOS::NWeb::NWebCommandAction>& simulatedAction)
+{
+    return -1;
+}
 void WebDelegate::UpdateLayoutMode(OHOS::Ace::WebLayoutMode mode) {}
 void WebDelegate::SetTransformHint(uint32_t rotation) {}
 void WebDelegate::RegisterNativeArkJSFunction(const std::string& objName,
@@ -1480,8 +1491,11 @@ bool WebDelegate::HideMagnifier() { return false; }
 void WebDelegate::SetTouchHandleExistState(bool touchHandleExist) {}
 void WebDelegate::SetBorderRadiusFromWeb(double borderRadiusTopLeft, double borderRadiusTopRight,
     double borderRadiusBottomLeft, double borderRadiusBottomRight) {}
+void WebDelegate::SetScrollbarLayoutPolicy(ScrollbarLayoutPolicy policy) {}
+void WebDelegate::SetIsSystemRtlEnable(bool enable) {}
 void WebDelegate::SetForceEnableZoom(bool isEnabled) {}
 void WebDelegate::SetEnableAutoFill(bool isEnabled) {}
+void WebDelegate::SetEnableDrag(bool isEnabled) {}
 void WebDelegate::OnStatusBarClick() {}
 bool WebDelegate::IsQuickMenuShow() { return false; }
 void WebDelegate::WebScrollStopFling() {}

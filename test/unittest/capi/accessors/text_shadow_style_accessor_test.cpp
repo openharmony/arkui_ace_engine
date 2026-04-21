@@ -43,11 +43,11 @@ public:
 };
 
 /**
- * @tc.name: CtorAndGetTextShadowTest
+ * @tc.name: constructTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextShadowStyleAccessorTest, CtorAndGetTextShadowTest, TestSize.Level1)
+HWTEST_F(TextShadowStyleAccessorTest, constructTest, TestSize.Level1)
 {
     Shadow expected(TEST_BLUR_RADIUS, Offset(TEST_OFFSET_X, TEST_OFFSET_Y),
         Color::FromRGB(0, 0, 0xff), ShadowStyle::None);

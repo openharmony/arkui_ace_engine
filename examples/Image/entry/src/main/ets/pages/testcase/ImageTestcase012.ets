@@ -32,9 +32,20 @@ interface IntegrationTest {
 interface GestureTest {
   gesture: string
   detected: boolean
-  coordinates?: { x: number, y: number }
+  coordinates?: Coordinates
   scale?: number
   rotation?: number
+}
+
+interface Coordinates {
+  x: number
+  y: number
+}
+
+interface TestScenario {
+  name: string
+  category: string
+  testFunction: () => void
 }
 
 @Entry
@@ -44,74 +55,74 @@ struct ImageIntegrationTestCase {
   @State gestureTests: GestureTest[] = []
   @State currentScale: number = 1.0
   @State currentRotation: number = 0
-  @State currentPosition: { x: number, y: number } = { x: 0, y: 0 }
+  @State currentPosition: Coordinates = { x: 0, y: 0 }
   @State testAnimatedImage: boolean = false
   @State parallaxOffset: number = 0
   @State blurAmount: number = 0
   @State currentTabIndex: number = 0
-  @State imageInGrid: number[] = Array.from({ length: 20 }, (_, i) => i)
+  @State imageInGrid: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
 
-  private readonly INTEGRATION_TEST_SCENARIOS = [
+  private readonly INTEGRATION_TEST_SCENARIOS: TestScenario[] = [
     {
       name: 'List容器中的图片',
       category: '容器集成',
       testFunction: () => this.testImageInList()
-    },
+    } as TestScenario,
     {
       name: 'Grid容器中的图片',
       category: '容器集成',
       testFunction: () => this.testImageInGrid()
-    },
+    } as TestScenario,
     {
       name: 'Stack容器中的图片',
       category: '容器集成',
       testFunction: () => this.testImageInStack()
-    },
+    } as TestScenario,
     {
       name: 'Tabs组件中的图片',
       category: '容器集成',
       testFunction: () => this.testImageInTabs()
-    },
+    } as TestScenario,
     {
       name: '图片缩放动画',
       category: '动画集成',
       testFunction: () => this.testScaleAnimation()
-    },
+    } as TestScenario,
     {
       name: '图片旋转动画',
       category: '动画集成',
       testFunction: () => this.testRotationAnimation()
-    },
+    } as TestScenario,
     {
       name: '图片淡入淡出',
       category: '动画集成',
       testFunction: () => this.testFadeAnimation()
-    },
+    } as TestScenario,
     {
       name: '滑动切换图片',
       category: '手势集成',
       testFunction: () => this.testSwipeGesture()
-    },
+    } as TestScenario,
     {
       name: '捏合缩放手势',
       category: '手势集成',
       testFunction: () => this.testPinchGesture()
-    },
+    } as TestScenario,
     {
       name: '拖拽移动手势',
       category: '手势集成',
       testFunction: () => this.testDragGesture()
-    },
+    } as TestScenario,
     {
       name: '图片滤镜效果',
       category: '效果集成',
       testFunction: () => this.testFilterEffects()
-    },
+    } as TestScenario,
     {
       name: '图片遮罩效果',
       category: '效果集成',
       testFunction: () => this.testMaskEffects()
-    }
+    } as TestScenario
   ]
 
   aboutToAppear() {
@@ -135,7 +146,7 @@ struct ImageIntegrationTestCase {
         await scenario.testFunction()
         test.status = 'passed'
         test.endTime = Date.now()
-        test.details = '测试通过"
+        test.details = '测试通过'
       } catch (error) {
         test.status = 'failed'
         test.endTime = Date.now()
@@ -232,9 +243,9 @@ struct ImageIntegrationTestCase {
   private async testDragGesture(): Promise<void> {
     // 检测拖拽手势
     this.gestureTests.find(g => g.gesture === 'Pan')!.detected = true
-    this.currentPosition = { x: 50, y: 50 }
+    this.currentPosition = { x: 50, y: 50 } as Coordinates
     await this.delay(500)
-    this.currentPosition = { x: 0, y: 0 }
+    this.currentPosition = { x: 0, y: 0 } as Coordinates
   }
 
   // 效果集成测试
@@ -348,7 +359,7 @@ struct ImageIntegrationTestCase {
           }
           .layoutWeight(1)
         }
-        .margin({ vertical: 16 })
+        .margin({ top: 16, bottom: 16 })
 
         Divider()
 
@@ -379,7 +390,7 @@ struct ImageIntegrationTestCase {
               Text(test.status.toUpperCase())
                 .fontSize(12)
                 .fontColor(test.status === 'passed' ? Color.Green : Color.Red)
-                .padding({ horizontal: 8, vertical: 4 })
+                .padding({ left: 8, right: 8, top: 4, bottom: 4 })
                 .backgroundColor(test.status === 'passed' ? '#E8F5E8' : '#FFEBEE')
                 .borderRadius(4)
             }
@@ -407,7 +418,7 @@ struct ImageIntegrationTestCase {
         Text('缩放动画')
           .fontSize(14)
           .margin({ bottom: 8 })
-        Image($r('app.media.icon'))
+        Image($r('app.media.startIcon'))
           .width(80)
           .height(80)
           .scale({ x: this.currentScale, y: this.currentScale })
@@ -420,7 +431,7 @@ struct ImageIntegrationTestCase {
         Text('旋转动画')
           .fontSize(14)
           .margin({ bottom: 8 })
-        Image($r('app.media.icon'))
+        Image($r('app.media.startIcon'))
           .width(80)
           .height(80)
           .rotate({ angle: this.currentRotation })
@@ -433,11 +444,10 @@ struct ImageIntegrationTestCase {
         Text('淡入淡出动画')
           .fontSize(14)
           .margin({ bottom: 8 })
-        Image($r('app.media.icon'))
+        Image($r('app.media.startIcon'))
           .width(80)
           .height(80)
           .opacity(this.testAnimatedImage ? 1 : 0.3)
-          .animate({ duration: 1000, curve: Curve.EaseInOut })
           .borderRadius(8)
       }
       .layoutWeight(1)
@@ -477,14 +487,14 @@ struct ImageIntegrationTestCase {
         .columnsGap(8)
 
         Divider()
-          .margin({ vertical: 16 })
+          .margin({ top: 16, bottom: 16 })
 
         // 交互式图片区域
         Text('交互式图片 - 支持手势操作')
           .fontSize(14)
           .margin({ bottom: 8 })
         
-        Image($r('app.media.icon'))
+        Image($r('app.media.startIcon'))
           .width(120)
           .height(120)
           .scale({ x: this.currentScale, y: this.currentScale })

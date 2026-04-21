@@ -45,6 +45,7 @@ public:
     static napi_value CreateLazyTextListExample(napi_env env, napi_callback_info info);
     static napi_value CreateListItemGroupExample(napi_env env, napi_callback_info info);
     static napi_value DestroyListExample(napi_env env, napi_callback_info info);
+    static napi_value CreateGridNativeNodeDragEvent(napi_env env, napi_callback_info info);
 
 private:
     static Manager manager_;

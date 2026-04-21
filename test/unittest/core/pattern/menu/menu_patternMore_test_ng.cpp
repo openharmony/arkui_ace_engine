@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,12 +19,12 @@
 #define private public
 #define protected public
 
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/rosen/testing_canvas.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/rosen/testing_canvas.h"
 
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/grid_system_manager.h"
@@ -108,6 +108,7 @@ void MenuPattern2TestNg::SetUp()
     MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
 }
 
@@ -1132,11 +1133,11 @@ HWTEST_F(MenuPattern2TestNg, GetMenuOffset002, TestSize.Level1)
 }
 
 /**
- * @tc.name:  IsSelectOverlayDefaultModeRightClickMenu001
- * @tc.desc: Test  IsSelectOverlayDefaultModeRightClickMenu
+ * @tc.name:  IsSelectOverlayShowInSubWindow001
+ * @tc.desc: Test  IsSelectOverlayShowInSubWindow
  * @tc.type: FUNC
  */
-HWTEST_F(MenuPattern2TestNg, IsSelectOverlayDefaultModeRightClickMenu001, TestSize.Level1)
+HWTEST_F(MenuPattern2TestNg, IsSelectOverlayShowInSubWindow001, TestSize.Level1)
 {
     auto menuWrapperNode =
         FrameNode::GetOrCreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
@@ -1156,8 +1157,8 @@ HWTEST_F(MenuPattern2TestNg, IsSelectOverlayDefaultModeRightClickMenu001, TestSi
 
     menuWrapperPattern->SetIsSelectOverlaySubWindowWrapper(false);
 
-    bool res = menuPattern->IsSelectOverlayDefaultModeRightClickMenu();
-    EXPECT_TRUE(res);
+    bool res = menuPattern->IsSelectOverlayShowInSubWindow();
+    EXPECT_FALSE(res);
 }
 
 /**
@@ -1398,5 +1399,99 @@ HWTEST_F(MenuPattern2TestNg, GetLastMenuItem001, TestSize.Level1)
  
     auto menuPattern = outterMenuNode->GetPattern<MenuPattern>();
     EXPECT_EQ(menuPattern->GetLastMenuItem(), menuItemNode);
+}
+
+/**
+ * @tc.name: ApplyScrollBarToScrollNode001
+ * @tc.desc: Test ApplyScrollBarToScrollNode Function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, ApplyScrollBarToScrollNode001, TestSize.Level1)
+{
+    auto menuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+        []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->SetScrollBar(DisplayMode::ON);
+
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), "CustomNode");
+    customNode->MountToParent(menuNode);
+
+    menuPattern->ApplyScrollBarToScrollNode();
+    EXPECT_EQ(AceType::DynamicCast<FrameNode>(customNode), nullptr);
+}
+
+/**
+ * @tc.name: ApplyScrollBarToScrollNode002
+ * @tc.desc: Test ApplyScrollBarToScrollNode Function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, ApplyScrollBarToScrollNode002, TestSize.Level1)
+{
+    auto menuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+        []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    menuPattern->SetScrollBar(DisplayMode::ON);
+
+    auto scrollNode = FrameNode::CreateFrameNode(
+        V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
+    scrollNode->MountToParent(menuNode);
+
+    menuPattern->ApplyScrollBarToScrollNode();
+
+    auto scrollPaintProperty = scrollNode->GetPaintProperty<ScrollablePaintProperty>();
+    ASSERT_NE(scrollPaintProperty, nullptr);
+    EXPECT_EQ(scrollPaintProperty->GetScrollBarMode().value(), DisplayMode::ON);
+
+    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+}
+
+/**
+ * @tc.name: ApplyScrollBarToScrollNode003
+ * @tc.desc: Test ApplyScrollBarToScrollNode Function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, ApplyScrollBarToScrollNode003, TestSize.Level1)
+{
+    auto menuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+        []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    menuPattern->SetScrollBar(DisplayMode::ON);
+
+    auto dummyScrollNode = FrameNode::CreateFrameNode(
+        V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    dummyScrollNode->MountToParent(menuNode);
+
+    menuPattern->ApplyScrollBarToScrollNode();
+
+    auto paintProperty = dummyScrollNode->GetPaintProperty<ScrollablePaintProperty>();
+    EXPECT_EQ(paintProperty, nullptr);
+
+    auto scrollPattern = dummyScrollNode->GetPattern<ScrollablePattern>();
+    EXPECT_EQ(scrollPattern, nullptr);
+}
+
+/**
+ * @tc.name: ApplyScrollBarToScrollNode004
+ * @tc.desc: Test ApplyScrollBarToScrollNode Function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, ApplyScrollBarToScrollNode004, TestSize.Level1)
+{
+    auto menuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+        []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    menuPattern->SetScrollBar(DisplayMode::ON);
+
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    textNode->MountToParent(menuNode);
+
+    menuPattern->ApplyScrollBarToScrollNode();
+
+    auto paintProperty = textNode->GetPaintProperty<ScrollablePaintProperty>();
+    EXPECT_EQ(paintProperty, nullptr);
 }
 } // namespace OHOS::Ace::NG

@@ -26,7 +26,8 @@ public:
     MockTaskRunnerAdapter() = default;
     ~MockTaskRunnerAdapter() = default;
 
-    void PostTask(std::function<void()> task, const std::string& name, PriorityType priorityType = PriorityType::LOW)
+    void PostTask(std::function<void()> task, const std::string& name, PriorityType priorityType = PriorityType::LOW,
+        VsyncBarrierOption barrierOption = VsyncBarrierOption::NO_BARRIER)
     {
         task();
     }

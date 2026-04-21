@@ -20,8 +20,14 @@
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/components/box/box_component_helper.h"
+#include "core/components/coverage/coverage_component.h"
+#include "core/components/gesture_listener/gesture_listener_component.h"
+#include "core/components/menu/menu_component.h"
+#include "core/components/touch_listener/touch_listener_component.h"
+#include "core/components_v2/inspector/inspector_composed_component.h"
 #include "core/components_ng/pattern/grid_container/grid_container_model.h"
 #include "core/gestures/long_press_gesture.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 
 // avoid windows build error about macro defined in winuser.h
 #ifdef GetMessage
@@ -1274,7 +1280,8 @@ void ViewAbstractModelImpl::SetOnVisibleChange(
 }
 
 void ViewAbstractModelImpl::SetOnAreaChanged(
-    std::function<void(const Rect&, const Offset&, const Rect&, const Offset&)>&& onAreaChanged)
+    std::function<void(const Rect&, const Offset&, const Rect&, const Offset&)>&& onAreaChanged,
+    int32_t minInterval)
 {
     auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
     boxComponent->GetEventExtensions()->GetOnAreaChangeExtension()->AddOnAreaChangeEvent(std::move(onAreaChanged));

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@
 #include "interfaces/native/event/ui_input_event_impl.h"
 #include "interfaces/native/ui_input_event.h"
 
+#include "adapter/ohos/entrance/aps_monitor_impl.h"
 #include "base/display_manager/display_manager.h"
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/size_t.h"
@@ -41,6 +42,8 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_controller_ng.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_resolution_config.h"
+#include "core/components_ng/property/accessibility_property.h"
 #include "core/event/axis_event.h"
 #ifdef NG_BUILD
 #include "bridge/declarative_frontend/ng/declarative_frontend_ng.h"
@@ -132,6 +135,7 @@ XComponentPattern::XComponentPattern(const std::optional<std::string>& id, XComp
         InitNativeXComponent();
     }
     RegisterSurfaceCallbackModeEvent();
+    UpdateSdrRatioIfNeed();
 }
 
 void XComponentPattern::AdjustNativeWindowSize(float width, float height)
@@ -302,6 +306,15 @@ void XComponentPattern::Initialize()
 void XComponentPattern::OnAttachToMainTree()
 {
     auto host = GetHost();
+    if (type_ == XComponentType::SURFACE) {
+        CHECK_NULL_VOID(host);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        CHECK_NULL_VOID(handlingSurfaceRenderContext_);
+        auto bkColor = renderContext->GetBackgroundColor().value_or(Color::BLACK);
+        handlingSurfaceRenderContext_->UpdateBackgroundColor(
+            (bkColor.GetAlpha() < UINT8_MAX) ? Color::TRANSPARENT : bkColor);
+    }
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree, host);
     SendStatisticEvent(host, statisticEventTypes_);
     TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] AttachToMainTree", GetId().c_str());
@@ -498,12 +511,18 @@ void XComponentPattern::RegisterRenderContextCallBack()
     };
     renderContextForSurface_->AddUpdateCallBack(OnUpdateCallBack);
 
-#ifdef IOS_PLATFORM
+#if defined(CROSS_PLATFORM)
     auto OnInitTypeCallback = [weak = WeakClaim(this)](int32_t& type) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (pattern->renderSurface_) {
+#if defined(IOS_PLATFORM)
             pattern->renderSurface_->GetTextureIsVideo(type);
+#elif defined(ANDROID_PLATFORM)
+            if (OHOS::Rosen::RSSystemProperties::IsUseVulkan()) {
+                pattern->renderSurface_->AddInitTypeCallBack(type);
+            }
+#endif
         }
     };
     renderContextForSurface_->AddInitTypeCallBack(OnInitTypeCallback);
@@ -579,7 +598,11 @@ void XComponentPattern::AddLayoutTask()
 
     surfaceOffset_.SetX((overlapWidth - surfaceSize_.Width()) / 2.0f + overlapOffsetX);
     surfaceOffset_.SetY((overlapHeight - surfaceSize_.Height()) / 2.0f + overlapOffsetY);
-    paintRect_ = { surfaceOffset_, surfaceSize_ };
+    RectF newPaintRect = { surfaceOffset_, surfaceSize_ };
+    if (paintRect_ == newPaintRect) {
+        return;
+    }
+    paintRect_ = newPaintRect;
     CHECK_NULL_VOID(handlingSurfaceRenderContext_);
     handlingSurfaceRenderContext_->SetBounds(
         paintRect_.GetX(), paintRect_.GetY(), paintRect_.Width(), paintRect_.Height());
@@ -884,6 +907,12 @@ void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& conf
             static_cast<int32_t>(transformRelativeOffset.GetX() + localPosition_.GetX()),
             static_cast<int32_t>(transformRelativeOffset.GetY() + localPosition_.GetY()),
             static_cast<int32_t>(drawSize_.Width()), static_cast<int32_t>(drawSize_.Height()));
+#if defined(ANDROID_PLATFORM)
+        if (OHOS::Rosen::RSSystemProperties::IsUseVulkan() &&
+            !nativeWindow_ && drawSize_.IsPositive() && !isXComponentSizeInit_) {
+            XComponentSizeInit();
+        }
+#endif
         if (handlingSurfaceRenderContext_) {
             handlingSurfaceRenderContext_->SetBounds(
                 paintRect_.GetX(), paintRect_.GetY(), paintRect_.Width(), paintRect_.Height());
@@ -894,6 +923,9 @@ void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& conf
         AddAfterLayoutTaskForExportTexture();
     }
     host->MarkNeedSyncRenderTree();
+    if (context->GetXComponentDisplayConstraintEnabled()) {
+        AddLayoutTask();
+    }
 }
 
 void XComponentPattern::DumpInfo()
@@ -966,10 +998,26 @@ void XComponentPattern::InitNativeWindow(float textureWidth, float textureHeight
 #endif
     if (renderSurface_->IsSurfaceValid() && (type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE)) {
         float viewScale = context->GetViewScale();
+#if defined(ANDROID_PLATFORM)
+        if (OHOS::Rosen::RSSystemProperties::IsUseVulkan() && type_ == XComponentType::TEXTURE) {
+            if (isInitializingNativeWindow_) {
+                return;
+            }
+            isInitializingNativeWindow_ = true;
+            uint32_t w = static_cast<uint32_t>(textureWidth * viewScale);
+            uint32_t h = static_cast<uint32_t>(textureHeight * viewScale);
+            renderSurface_->SetExtSurfaceBoundsSync(0, 0, w, h);
+        }
+#endif
         renderSurface_->CreateNativeWindow();
         renderSurface_->AdjustNativeWindowSize(
             static_cast<uint32_t>(textureWidth * viewScale), static_cast<uint32_t>(textureHeight * viewScale));
         nativeWindow_ = renderSurface_->GetNativeWindow();
+#if defined(ANDROID_PLATFORM)
+        if (OHOS::Rosen::RSSystemProperties::IsUseVulkan() && type_ == XComponentType::TEXTURE) {
+            isInitializingNativeWindow_ = false;
+        }
+#endif
     }
 }
 
@@ -1354,7 +1402,7 @@ void XComponentPattern::InitOnTouchIntercept(const RefPtr<GestureEventHub>& gest
         CHECK_NULL_RETURN(onTouchInterceptCallback, hostNode->GetHitTestMode());
         auto event = touchEvent.ConvertToTouchEvent();
         ArkUI_UIInputEvent uiEvent { ARKUI_UIINPUTEVENT_TYPE_TOUCH, TOUCH_EVENT_ID, &event, false,
-            Container::GetCurrentApiTargetVersion() };
+            Container::GetCurrentApiTargetVersion(), hostNode->GetId(), .usePXUnit = true };
         return static_cast<NG::HitTestMode>(onTouchInterceptCallback(pattern->nativeXComponent_.get(), &uiEvent));
     });
 }
@@ -1398,14 +1446,15 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
     if (touchInfoList.empty()) {
         return;
     }
+    UpdateSdrRatioIfNeed();
     const auto& touchInfo = touchInfoList.front();
     const auto& screenOffset = touchInfo.GetGlobalLocation();
     const auto& localOffset = touchInfo.GetLocalLocation();
     touchEventPoint_.id = touchInfo.GetFingerId();
-    touchEventPoint_.screenX = static_cast<float>(screenOffset.GetX());
-    touchEventPoint_.screenY = static_cast<float>(screenOffset.GetY());
-    touchEventPoint_.x = static_cast<float>(localOffset.GetX());
-    touchEventPoint_.y = static_cast<float>(localOffset.GetY());
+    touchEventPoint_.screenX = static_cast<float>(screenOffset.GetX() * xcomponentTouchSdrRatio_);
+    touchEventPoint_.screenY = static_cast<float>(screenOffset.GetY() * xcomponentTouchSdrRatio_);
+    touchEventPoint_.x = static_cast<float>(localOffset.GetX() * xcomponentTouchSdrRatio_);
+    touchEventPoint_.y = static_cast<float>(localOffset.GetY() * xcomponentTouchSdrRatio_);
     touchEventPoint_.size = touchInfo.GetSize();
     touchEventPoint_.force = touchInfo.GetForce();
     touchEventPoint_.deviceId = touchInfo.GetTouchDeviceId();
@@ -1489,7 +1538,7 @@ void XComponentPattern::NativeXComponentDispatchAxisEvent(AxisEvent* axisEvent)
     const auto callback = nativeXComponentImpl_->GetUIAxisEventCallback();
     CHECK_NULL_VOID(callback);
     ArkUI_UIInputEvent uiEvent { ARKUI_UIINPUTEVENT_TYPE_AXIS, AXIS_EVENT_ID, axisEvent, false,
-        Container::GetCurrentApiTargetVersion() };
+        Container::GetCurrentApiTargetVersion(), GetHost()->GetId(), .usePXUnit = true };
     callback(nativeXComponent_.get(), &uiEvent, ArkUI_UIInputEvent_Type::ARKUI_UIINPUTEVENT_TYPE_AXIS);
 }
 
@@ -1502,6 +1551,7 @@ void XComponentPattern::SetTouchPoint(
     uint32_t index = 0;
     for (auto iterator = touchInfoList.begin(); iterator != touchInfoList.end() && index < OH_MAX_TOUCH_POINTS_NUMBER;
          iterator++) {
+        UpdateSdrRatioIfNeed();
         OH_NativeXComponent_TouchPoint ohTouchPoint;
         const auto& pointTouchInfo = *iterator;
         const auto& pointWindowOffset = pointTouchInfo.GetGlobalLocation();
@@ -1509,10 +1559,10 @@ void XComponentPattern::SetTouchPoint(
         const auto& pointDisplayOffset = pointTouchInfo.GetScreenLocation();
         ohTouchPoint.id = pointTouchInfo.GetFingerId();
         // screenX and screenY implementation wrong but should not modify for maintaining compatibility
-        ohTouchPoint.screenX = static_cast<float>(pointWindowOffset.GetX());
-        ohTouchPoint.screenY = static_cast<float>(pointWindowOffset.GetY());
-        ohTouchPoint.x = static_cast<float>(pointLocalOffset.GetX());
-        ohTouchPoint.y = static_cast<float>(pointLocalOffset.GetY());
+        ohTouchPoint.screenX = static_cast<float>(pointWindowOffset.GetX() * xcomponentTouchSdrRatio_);
+        ohTouchPoint.screenY = static_cast<float>(pointWindowOffset.GetY() * xcomponentTouchSdrRatio_);
+        ohTouchPoint.x = static_cast<float>(pointLocalOffset.GetX() * xcomponentTouchSdrRatio_);
+        ohTouchPoint.y = static_cast<float>(pointLocalOffset.GetY() * xcomponentTouchSdrRatio_);
         ohTouchPoint.type = XComponentUtils::ConvertNativeXComponentTouchEvent(touchType);
         ohTouchPoint.size = pointTouchInfo.GetSize();
         ohTouchPoint.force = pointTouchInfo.GetForce();
@@ -1523,8 +1573,8 @@ void XComponentPattern::SetTouchPoint(
         XComponentTouchPoint xcomponentTouchPoint;
         xcomponentTouchPoint.tiltX = pointTouchInfo.GetTiltX().value_or(0.0f);
         xcomponentTouchPoint.tiltY = pointTouchInfo.GetTiltY().value_or(0.0f);
-        xcomponentTouchPoint.windowX = static_cast<float>(pointWindowOffset.GetX());
-        xcomponentTouchPoint.windowY = static_cast<float>(pointWindowOffset.GetY());
+        xcomponentTouchPoint.windowX = static_cast<float>(pointWindowOffset.GetX() * xcomponentTouchSdrRatio_);
+        xcomponentTouchPoint.windowY = static_cast<float>(pointWindowOffset.GetY() * xcomponentTouchSdrRatio_);
         xcomponentTouchPoint.displayX = static_cast<float>(pointDisplayOffset.GetX());
         xcomponentTouchPoint.displayY = static_cast<float>(pointDisplayOffset.GetY());
         xcomponentTouchPoint.sourceToolType =
@@ -1979,8 +2029,9 @@ void XComponentPattern::OnSurfaceCreated()
     if (isNativeXComponent_) {
         CHECK_NULL_VOID(nativeXComponentImpl_);
         CHECK_NULL_VOID(nativeXComponent_);
-        nativeXComponentImpl_->SetXComponentWidth(static_cast<int32_t>(width));
-        nativeXComponentImpl_->SetXComponentHeight(static_cast<int32_t>(height));
+        UpdateSdrRatioIfNeed();
+        nativeXComponentImpl_->SetXComponentWidth(static_cast<int32_t>(width * xcomponentSizeSdrRatio_));
+        nativeXComponentImpl_->SetXComponentHeight(static_cast<int32_t>(height * xcomponentSizeSdrRatio_));
         nativeXComponentImpl_->SetSurface(nativeWindow_);
         const auto* callback = nativeXComponentImpl_->GetCallback();
         CHECK_NULL_VOID(callback);
@@ -2005,14 +2056,29 @@ void XComponentPattern::OnSurfaceChanged(const RectF& surfaceRect, bool needResi
     CHECK_NULL_VOID(host);
     auto width = surfaceRect.Width();
     auto height = surfaceRect.Height();
+#if defined(ANDROID_PLATFORM)
+    if (type_ == XComponentType::TEXTURE && OHOS::Rosen::RSSystemProperties::IsUseVulkan() &&
+        isInitializingNativeWindow_) {
+        return;
+    }
+    if (type_ == XComponentType::TEXTURE && OHOS::Rosen::RSSystemProperties::IsUseVulkan() && !nativeWindow_) {
+        InitNativeWindow(width, height);
+    }
+#endif
     if (needResizeNativeWindow) {
         AdjustNativeWindowSize(width, height);
     }
     if (isNativeXComponent_) {
         CHECK_NULL_VOID(nativeXComponent_);
         CHECK_NULL_VOID(nativeXComponentImpl_);
-        nativeXComponentImpl_->SetXComponentWidth(static_cast<int32_t>(width));
-        nativeXComponentImpl_->SetXComponentHeight(static_cast<int32_t>(height));
+        UpdateSdrRatioIfNeed();
+        nativeXComponentImpl_->SetXComponentWidth(static_cast<int32_t>(width * xcomponentSizeSdrRatio_));
+        nativeXComponentImpl_->SetXComponentHeight(static_cast<int32_t>(height * xcomponentSizeSdrRatio_));
+#if defined(ANDROID_PLATFORM)
+        if (OHOS::Rosen::RSSystemProperties::IsUseVulkan()) {
+            nativeXComponentImpl_->SetSurface(nativeWindow_);
+        }
+#endif
         auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
         const auto* callback = nativeXComponentImpl_->GetCallback();
         CHECK_NULL_VOID(callback);
@@ -2424,6 +2490,17 @@ void XComponentPattern::HdrBrightness(float hdrBrightness)
     hdrBrightness_ = std::clamp(hdrBrightness, 0.0f, 1.0f);
 }
 
+void XComponentPattern::HdrBrightness(float hdrBrightness, HdrType hdrType)
+{
+    if (type_ != XComponentType::SURFACE) {
+        return;
+    }
+    CHECK_NULL_VOID(renderContextForSurface_);
+    renderContextForSurface_->SetHDRBrightness(std::clamp(hdrBrightness, 0.0f, 1.0f), static_cast<uint32_t>(hdrType));
+    hdrBrightness_ = std::clamp(hdrBrightness, 0.0f, 1.0f);
+    hdrType_ = hdrType;
+}
+
 void XComponentPattern::EnableTransparentLayer(bool isTransparentLayer)
 {
     if (type_ != XComponentType::SURFACE) {
@@ -2518,4 +2595,28 @@ void XComponentPattern::SetSurfaceIsOpaque(bool isOpaque)
         renderSurface_->SetSurfaceBufferOpaque(isOpaque);
     }
 }
+
+void XComponentPattern::UpdateSdrRatioIfNeed()
+{
+    if (xcomponentTouchSdrRatio_ < std::numeric_limits<float>::epsilon() &&
+        xcomponentSizeSdrRatio_ < std::numeric_limits<float>::epsilon()) {
+        std::lock_guard<std::mutex> lock(SDR_RATIOS_MUTEX);
+        if (SDR_RATIOS.empty()) {
+            xcomponentTouchSdrRatio_ = static_cast<float>(NG::RatioValue::RATIO_DEFAULT);
+            xcomponentSizeSdrRatio_ = static_cast<float>(NG::RatioValue::RATIO_DEFAULT);
+        }
+        xcomponentTouchSdrRatio_ = SDR_RATIOS[static_cast<int32_t>(NG::IndexForUsingClient::XCOMPONENT_TOUCH) - 1] <
+            std::numeric_limits<float>::epsilon() ?
+            static_cast<float>(NG::RatioValue::RATIO_DEFAULT) :
+            SDR_RATIOS[static_cast<int32_t>(NG::IndexForUsingClient::XCOMPONENT_TOUCH) - 1];
+        xcomponentSizeSdrRatio_ = SDR_RATIOS[static_cast<int32_t>(NG::IndexForUsingClient::XCOMPONENT_SIZE) - 1] <
+            std::numeric_limits<float>::epsilon() ?
+            static_cast<float>(NG::RatioValue::RATIO_DEFAULT) :
+            SDR_RATIOS[static_cast<int32_t>(NG::IndexForUsingClient::XCOMPONENT_SIZE) - 1];
+        TAG_LOGD(AceLogTag::ACE_XCOMPONENT,
+            "XComponentPattern[UpdateSdrRatioIfNeed] touchSdrRatio_:%{public}f, sizeSdrRatio_:%{public}f",
+            xcomponentTouchSdrRatio_, xcomponentSizeSdrRatio_);
+    }
+}
+
 } // namespace OHOS::Ace::NG

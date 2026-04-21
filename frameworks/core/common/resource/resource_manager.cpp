@@ -45,11 +45,12 @@ RefPtr<ResourceAdapter> ResourceManager::GetOrCreateResourceAdapter(const RefPtr
     }
 #endif
     if (resourceAdapter == nullptr) {
-        resourceAdapter = ResourceAdapter::CreateNewResourceAdapter(bundleName, moduleName);
+        int32_t actualInstanceId = instanceId;
+        resourceAdapter = ResourceAdapter::CreateNewResourceAdapter(bundleName, moduleName, actualInstanceId);
         if (!resourceAdapter) {
             return GetResourceAdapter(DEFAULT_BUNDLE_NAME, DEFAULT_MODULE_NAME, instanceId);
         }
-        AddResourceAdapter(bundleName, moduleName, instanceId, resourceAdapter);
+        AddResourceAdapter(bundleName, moduleName, actualInstanceId, resourceAdapter);
     }
     return resourceAdapter;
 }

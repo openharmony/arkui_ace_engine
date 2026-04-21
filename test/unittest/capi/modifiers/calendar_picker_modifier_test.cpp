@@ -156,18 +156,18 @@ HWTEST_F(CalendarPickerModifierTest, setEdgeAlignTest, TestSize.Level1)
 
         auto fullJson = GetJsonValue(node_);
 
-        auto edgeAlignJson = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_EDGE_ALIGN_TYPE_NAME);
+        auto edgeAlignJson = GetAttrObject(fullJson, ATTRIBUTE_EDGE_ALIGN_TYPE_NAME);
         ASSERT_NE(edgeAlignJson, nullptr);
 
         auto alignTypeStr = GetAttrValue<std::string>(edgeAlignJson, ATTRIBUTE_EDGE_ALIGN_ALIGN_TYPE_NAME);
-        EXPECT_EQ(alignTypeStr, data.expectedCalendarAlignType);
+        EXPECT_THAT(alignTypeStr, Eq(data.expectedCalendarAlignType));
 
-        auto offsetJson = GetAttrValue<std::unique_ptr<JsonValue>>(edgeAlignJson, ATTRIBUTE_EDGE_ALIGN_OFFSET_NAME);
+        auto offsetJson = GetAttrObject(edgeAlignJson, ATTRIBUTE_EDGE_ALIGN_OFFSET_NAME);
         ASSERT_NE(offsetJson, nullptr);
         auto actualDx = GetAttrValue<std::string>(offsetJson, "dX");
         auto actualDy = GetAttrValue<std::string>(offsetJson, "dY");
-        EXPECT_EQ(actualDx, data.expectedDx);
-        EXPECT_EQ(actualDy, data.expectedDy);
+        EXPECT_THAT(actualDx, Eq(data.expectedDx));
+        EXPECT_THAT(actualDy, Eq(data.expectedDy));
     };
 }
 
@@ -204,11 +204,11 @@ const std::vector<OptLengthTestStep> FONT_SIZE_TEST_PLAN = {
 };
 
 /*
- * @tc.name: setTextStyleColorTest
+ * @tc.name: setTextStyleTestColor
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarPickerModifierTest, setTextStyleColorTest, TestSize.Level1)
+HWTEST_F(CalendarPickerModifierTest, setTextStyleTestColor, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
     Ark_Font font = {
@@ -226,18 +226,18 @@ HWTEST_F(CalendarPickerModifierTest, setTextStyleColorTest, TestSize.Level1)
         auto optPickerStyle = Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
         modifier_->setTextStyle(node_, &optPickerStyle);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
+        auto styleObject = GetAttrObject(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
         auto checkColor = GetAttrValue<std::string>(styleObject, ATTRIBUTE_TEXT_STYLE_COLOR_NAME);
-        EXPECT_EQ(checkColor, color.second);
+        EXPECT_THAT(checkColor, Eq(color.second));
     }
 }
 
 /*
- * @tc.name: setTextStyleFontWeightTest
+ * @tc.name: setTextStyleTestFontWeight
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarPickerModifierTest, DISABLED_setTextStyleFontWeightTest, TestSize.Level1)
+HWTEST_F(CalendarPickerModifierTest, DISABLED_setTextStyleTestFontWeight, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
     Ark_Font font = {
@@ -256,21 +256,21 @@ HWTEST_F(CalendarPickerModifierTest, DISABLED_setTextStyleFontWeightTest, TestSi
         auto optPickerStyle = Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
         modifier_->setTextStyle(node_, &optPickerStyle);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
-        auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_TEXT_STYLE_FONT_NAME);
+        auto styleObject = GetAttrObject(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrObject(styleObject, ATTRIBUTE_TEXT_STYLE_FONT_NAME);
         auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
         auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkWeight, weight.second);
+        EXPECT_THAT(checkSize, Eq(sizeStr));
+        EXPECT_THAT(checkWeight, Eq(weight.second));
     }
 }
 
 /*
- * @tc.name: setTextStyleFontSizeTest
+ * @tc.name: setTextStyleTestFontSize
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarPickerModifierTest, DISABLED_setTextStyleFontSizeTest, TestSize.Level1)
+HWTEST_F(CalendarPickerModifierTest, DISABLED_setTextStyleTestFontSize, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
     Ark_Font font = {
@@ -289,25 +289,25 @@ HWTEST_F(CalendarPickerModifierTest, DISABLED_setTextStyleFontSizeTest, TestSize
         auto optPickerStyle = Converter::ArkValue<Opt_PickerTextStyle>(pickerStyle);
         modifier_->setTextStyle(node_, &optPickerStyle);
         auto fullJson = GetJsonValue(node_);
-        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
-        auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_TEXT_STYLE_FONT_NAME);
+        auto styleObject = GetAttrObject(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrObject(styleObject, ATTRIBUTE_TEXT_STYLE_FONT_NAME);
         auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
         auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
-        EXPECT_EQ(checkSize, size.second);
-        EXPECT_EQ(checkWeight, weightStr);
+        EXPECT_THAT(checkSize, Eq(size.second));
+        EXPECT_THAT(checkWeight, Eq(weightStr));
     }
 }
 
-typedef std::pair<Ark_Union_Number_Resource, PickerDate> OptionsArgsStepTest;
+typedef std::pair<Opt_Union_F64_Resource, PickerDate> OptionsArgsStepTest;
 typedef std::pair<std::string, std::string> PickerOptionsStringStepTest;
 typedef std::pair<OptionsArgsStepTest, PickerOptionsStringStepTest> PickerDateOptionsStepTest;
 const std::vector<PickerDateOptionsStepTest> OPTIONS_TEST_PLAN = {
-    { { {.selector = 0, .value0 = Converter::ArkValue<Ark_Number>(0.7) }, PickerDate(2023, 7, 21) },
+    { { Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(0.7), PickerDate(2023, 7, 21) },
         { "0.7", "2023-7-21" } }
 };
 
 /*
- * @tc.name: setDatePickerOptionsTest
+ * @tc.name: setCalendarPickerOptionsTest
  * @tc.desc: Check the functionality of CalendarPickerModifier.SetCalendarPickerOptionsImpl
  * @tc.type: FUNC
  */
@@ -317,7 +317,7 @@ HWTEST_F(CalendarPickerModifierTest, DISABLED_setCalendarPickerOptionsTest, Test
 
     for (const auto& [actual, expected] : OPTIONS_TEST_PLAN) {
         Ark_CalendarOptions arkOptions = {
-            .hintRadius = Converter::ArkValue<Opt_Union_Number_Resource>(std::get<0>(actual)),
+            .hintRadius = Converter::ArkValue<Opt_Union_F64_Resource>(std::get<0>(actual)),
             .selected = Converter::ArkValue<Opt_Date>(std::get<1>(actual)),
         };
         auto optOptions = Converter::ArkValue<Opt_CalendarOptions>(arkOptions);
@@ -325,8 +325,8 @@ HWTEST_F(CalendarPickerModifierTest, DISABLED_setCalendarPickerOptionsTest, Test
         auto fullJson = GetJsonValue(node_);
         auto checkHintRadius = GetAttrValue<std::string>(fullJson, ATTRIBUTE_HINT_RADIUS_NAME);
         auto checkSelected = GetAttrValue<std::string>(fullJson, ATTRIBUTE_SELECTED_NAME);
-        EXPECT_EQ(checkHintRadius, std::get<0>(expected));
-        EXPECT_EQ(checkSelected, std::get<1>(expected));
+        EXPECT_THAT(checkHintRadius, Eq(std::get<0>(expected)));
+        EXPECT_THAT(checkSelected, Eq(std::get<1>(expected)));
     }
 }
 
@@ -386,10 +386,10 @@ HWTEST_F(CalendarPickerModifierTest, setOnChangeTest, TestSize.Level1)
 HWTEST_F(CalendarPickerModifierTest, setMarkTodayTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MARK_TODAY_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MARK_TODAY_DEFAULT_VALUE) << "Default value for attribute 'markToday'";
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_MARK_TODAY_DEFAULT_VALUE)) << "Default value for attribute 'markToday'";
 }
 
 /*
@@ -412,7 +412,7 @@ HWTEST_F(CalendarPickerModifierTest, setMarkTodayTestMarkTodayValidValues, TestS
         modifier_->setMarkToday(node_, &inputValueMarkToday);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MARK_TODAY_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Eq(expectedStr)) <<
             "Input value is: " << input << ", method: setMarkToday, attribute: markToday";
     };
 

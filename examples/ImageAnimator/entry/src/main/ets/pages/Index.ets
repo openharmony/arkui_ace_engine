@@ -17,7 +17,7 @@ import { router } from '@kit.ArkUI';
 @Entry
 @Component
 struct Index {
-  @State message: string = 'Image Example';
+  @State message: string = 'ImageAnimator Example';
 
   build() {
     RelativeContainer() {
@@ -38,6 +38,47 @@ struct Index {
             console.log('router ImageAnimatorExample003');
             router.pushUrl({ url: 'pages/example/ImageAnimatorExample003' })
           })
+
+          Button('router ImageAnimatorExample014').onClick(() => {
+            console.log('router ImageAnimatorExample014');
+            router.pushUrl({ url: 'pages/example/ImageAnimatorExample014' })
+          })
+
+          Button('router ImageAnimatorExample015').onClick(() => {
+            console.log('router ImageAnimatorExample015');
+            router.pushUrl({ url: 'pages/example/ImageAnimatorExample015' })
+          })
+
+          Button('router ImageAnimatorExample016').onClick(() => {
+            console.log('router ImageAnimatorExample016');
+            router.pushUrl({ url: 'pages/example/ImageAnimatorExample016' })
+          })
+
+          Button('router ImageAnimatorExample017').onClick(() => {
+            console.log('router ImageAnimatorExample017');
+            router.pushUrl({ url: 'pages/example/ImageAnimatorExample017' })
+          })
+
+          Button('router ImageAnimatorExample018').onClick(() => {
+            console.log('router ImageAnimatorExample018');
+            router.pushUrl({ url: 'pages/example/ImageAnimatorExample018' })
+          })
+
+          Button('router ImageAnimatorTest010').onClick(() => {
+            console.log('router ImageAnimatorTest010');
+            router.pushUrl({ url: 'pages/example/ImageAnimatorTest010' })
+          })
+
+          Button('router ImageAnimatorTest011').onClick(() => {
+            console.log('router ImageAnimatorTest011');
+            router.pushUrl({ url: 'pages/example/ImageAnimatorTest011' })
+          })
+
+          Button('router ImageAnimatorTest012').onClick(() => {
+            console.log('router ImageAnimatorTest012');
+            router.pushUrl({ url: 'pages/example/ImageAnimatorTest012' })
+          })
+
         }
       }
     }

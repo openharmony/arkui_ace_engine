@@ -1,7 +1,4 @@
 {
-    "include": [
-        "../state_mgmt/src/lib/sdk/i_data_source.d.ts"
-    ],
     "files": [
         "src/BasicPrefetcher.ts",
         "src/IDataSourcePrefetching.ts",
@@ -20,16 +17,18 @@
         "src/utils/ScrollDirection.ts",
         "src/utils/AssertNever.ts",
     ],
+    "include": [
+        "../state_mgmt/src/lib/sdk/i_data_source.d.ts"
+    ],
     "compilerOptions": {
-        "module": "None",
-        "moduleResolution": "Node",
+        "module": "none",
         "target": "ES2020",
-        "rootDir": "./src",
-        "outDir": ".ohos",
-        "outFile": ".ohos/jsPrefetcher.js",
+        "outDir": "dist",
+        "outFile": "dist/jsPrefetcher.js",
+        "rootDir": "src",
+        "declaration": true,
         "noEmitOnError": true,
         "experimentalDecorators": true,
-        "allowJs": true,
         "lib": [
             "ES2020"
         ],

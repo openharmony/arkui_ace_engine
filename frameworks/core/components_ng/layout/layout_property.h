@@ -196,6 +196,13 @@ public:
 
     void ResetGeometryTransition();
 
+    void SetGeometryTransitionInfo(const std::string& id,
+        bool followWithoutTransition = false, bool doRegisterSharedTransition = true);
+    std::tuple<std::string, bool, bool> GetGeometryTransitionInfo() const
+    {
+        return geometryTransitionInfo_;
+    }
+
     void UpdateAspectRatio(float ratio);
     void ResetAspectRatio();
 
@@ -218,6 +225,16 @@ public:
     void UpdateCalcLayoutProperty(const MeasureProperty& constraint);
 
     void UpdateUserDefinedIdealSize(const CalcSize& value);
+
+    void MarkUserDefinedHeightConfigured()
+    {
+        userDefinedHeightConfigured_ = true;
+    }
+
+    bool HasUserDefinedHeightConfig() const
+    {
+        return userDefinedHeightConfigured_;
+    }
 
     void UpdateLayoutPolicyProperty(const LayoutCalPolicy layoutPolicy, bool isWidth);
 
@@ -530,6 +547,8 @@ private:
 
     WeakPtr<GeometryTransition> geometryTransition_;
 
+    std::tuple<std::string, bool, bool> geometryTransitionInfo_ = std::make_tuple("", false, true);
+
     WeakPtr<FrameNode> host_;
 
     bool usingPosition_ = true;
@@ -548,6 +567,7 @@ private:
     bool isUserSetVisibility_ = false;
 
     bool isUserSetBackgroundColor_ = false;
+    bool userDefinedHeightConfigured_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutProperty);
 };

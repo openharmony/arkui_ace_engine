@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -112,9 +112,9 @@ ProgressModifier::ProgressModifier(const WeakPtr<FrameNode>& host,
     AttachProperty(progressUpdate_);
     AttachProperty(capsuleBorderRadius_);
 
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<ProgressTheme>(GetThemeScopeId());
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto theme = frameNode->GetTheme<ProgressTheme>(true);
     CHECK_NULL_VOID(theme);
 
     pressBlendColor_ = theme->GetClickEffect();
@@ -315,7 +315,7 @@ void ProgressModifier::SetInVisibleArea(bool value)
     CHECK_NULL_VOID(inVisibleArea_ != value);
     inVisibleArea_ = value;
     if (progressStatus_->Get() != static_cast<int32_t>(ProgressStatus::LOADING)) {
-        ProcessSweepingAnimation(ProgressType(progressType_->Get()), value_->Get());
+        ProcessSweepingAnimation(ProgressType(progressType_->Get()), valueBackup_);
     } else {
         if (value) {
             StartRingLoadingAnimation();
@@ -325,6 +325,7 @@ void ProgressModifier::SetInVisibleArea(bool value)
         }
     }
 }
+
 
 void ProgressModifier::StopAllLoopAnimation()
 {
@@ -707,7 +708,7 @@ void ProgressModifier::SetValue(float value)
     CHECK_NULL_VOID(value_);
     AnimationOption option = AnimationOption();
     if (smoothEffect_->Get()) {
-        if (isVisible_) {
+        if (inVisibleArea_) {
             auto motion =
                 AceType::MakeRefPtr<ResponsiveSpringMotion>(SPRING_MOTION_RESPONSE, SPRING_MOTION_DAMPING_FRACTION);
             option.SetCurve(motion);
@@ -1135,9 +1136,9 @@ std::vector<GradientColor> ProgressModifier::GetRingProgressGradientColors() con
     // Fault protection processing, if gradientColors is empty, set to default colors.
 
     if (gradientColors.empty()) {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipeline, gradientColors);
-        auto theme = pipeline->GetTheme<ProgressTheme>(GetThemeScopeId());
+        auto host = host_.Upgrade();
+        CHECK_NULL_RETURN(host, gradientColors);
+        auto theme = host->GetTheme<ProgressTheme>(true);
         CHECK_NULL_RETURN(theme, gradientColors);
         GradientColor endColor;
         GradientColor beginColor;
@@ -2370,11 +2371,5 @@ void ProgressModifier::PaintVerticalCapsuleForApiNine(
     }
     canvas.DrawPath(path);
     canvas.DetachBrush();
-}
-
-uint32_t ProgressModifier::GetThemeScopeId() const
-{
-    auto host = host_.Upgrade();
-    return host ? host->GetThemeScopeId() : 0;
 }
 } // namespace OHOS::Ace::NG

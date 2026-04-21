@@ -29,7 +29,6 @@
 #include "compatible/components/text_field/textfield_declaration.h"
 #include "core/components/image/image_component.h"
 #include "compatible/components/text_field/text_field_controller.h"
-#include "core/components/text_overlay/text_overlay_manager.h"
 #include "core/event/ace_event_handler.h"
 #include "core/pipeline/base/render_component.h"
 #include "compatible/components/input/dom_input.h"

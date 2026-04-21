@@ -224,6 +224,44 @@
       "last_updated": "2026-02-03"
     },
     {
+      "name": "Grid",
+      "name_cn": "网格布局组件",
+      "category": "container",
+      "type": "component",
+      "keywords": [
+        "网格",
+        "grid",
+        "网格布局",
+        "行列布局",
+        "columnsTemplate",
+        "rowsTemplate",
+        "不规则布局",
+        "跨行列",
+        "自适应布局",
+        "可滚动网格",
+        "layoutOptions",
+        "虚拟滚动",
+        "GridItem"
+      ],
+      "aliases": [
+        "Grid组件",
+        "网格布局",
+        "网格容器"
+      ],
+      "file_path": "pattern/grid/Grid_Knowledge_Base.md",
+      "source_paths": {
+        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/grid/grid_pattern.cpp",
+        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/grid/grid_model_ng.cpp",
+        "layout_info": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/grid/grid_layout_info.cpp",
+        "property": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/grid/grid_layout_property.cpp"
+      },
+      "api_paths": {
+        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/grid.static.d.ets",
+        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/GridModifier.d.ts"
+      },
+      "last_updated": "2026-02-07"
+    },
+    {
       "name": "Badge",
       "name_cn": "徽标组件",
       "category": "data_display",
@@ -743,6 +781,311 @@
         "all": "OpenHarmony/interface/sdk-js/api/arkui/"
       },
       "last_updated": "2026-02-04"
+    },
+    {
+      "name": "Component API",
+      "name_cn": "ArkUI 组件 API 知识库",
+      "category": "sdk",
+      "type": "sdk",
+      "keywords": [
+        "组件API",
+        "Component API",
+        "@internal",
+        "类型定义",
+        "type definition",
+        "接口定义",
+        "interface",
+        "组件类型",
+        "component type",
+        "JSDoc",
+        "版本兼容",
+        "version compatibility",
+        "动态导入",
+        "dynamic import",
+        "内部类型定义",
+        "internal type",
+        "类型声明",
+        "type declaration"
+      ],
+      "aliases": [
+        "组件API",
+        "Component API",
+        "内部接口",
+        "@internal API",
+        "组件类型定义",
+        "类型定义文档"
+      ],
+      "file_path": "sdk/Component_API_Knowledge_Base_CN.md",
+      "source_paths": {
+        "internal": "OpenHarmony/interface/sdk-js/api/@internal/component/ets/"
+      },
+      "api_paths": {
+        "all": "OpenHarmony/interface/sdk-js/api/@internal/component/ets/"
+      },
+      "last_updated": "2026-02-09"
+    },
+    {
+      "name": "ThemeManager",
+      "name_cn": "主题管理器",
+      "category": "sdk",
+      "type": "feature",
+      "keywords": [
+        "主题系统",
+        "ThemeManager",
+        "主题管理",
+        "深浅色模式",
+        "颜色模式",
+        "Token主题",
+        "ThemeWrapper",
+        "ThemeConstants",
+        "ResourceAdapter",
+        "主题缓存",
+        "主题构建器",
+        "ThemeBuilder",
+        "WithTheme",
+        "局部主题",
+        "ThemeScopeId"
+      ],
+      "aliases": [
+        "主题管理器",
+        "主题系统",
+        "ThemeManager",
+        "深浅色模式"
+      ],
+      "file_path": "architecture/ThemeManager_Architecture_CN.md",
+      "source_paths": {
+        "manager": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components/theme/theme_manager_impl.cpp",
+        "constants": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components/theme/theme_constants.h",
+        "storage": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/token_theme/token_theme_storage.cpp",
+        "wrapper": "OpenHarmony/interfaces/inner_api/ace_kit/include/ui/view/theme/token_theme_wrapper.h"
+      },
+      "api_paths": {},
+      "last_updated": "2026-02-07"
+    },
+    {
+      "name": "Layout Framework",
+      "name_cn": "布局框架",
+      "category": "system",
+      "type": "feature",
+      "keywords": [
+        "布局框架",
+        "layout framework",
+        "布局流程",
+        "UITaskScheduler",
+        "FrameNode",
+        "Measure",
+        "Layout",
+        "geometry sync",
+        "safe area",
+        "pipeline"
+      ],
+      "aliases": [
+        "布局系统",
+        "Layout Flow",
+        "布局机制"
+      ],
+      "file_path": "layout/Layout_Framework_Knowledge_Base.md",
+      "source_paths": {
+        "scheduler": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/pipeline_ng/ui_task_scheduler.cpp",
+        "frame_node": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/base/frame_node.cpp",
+        "layout_wrapper": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/layout/layout_wrapper.cpp",
+        "layout_algorithm": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/layout/layout_algorithm.cpp"
+      },
+      "api_paths": {},
+      "last_updated": "2026-02-26"
+    },
+    {
+      "name": "Safe Area Mechanism",
+      "name_cn": "安全区域机制",
+      "category": "system",
+      "type": "feature",
+      "keywords": [
+        "safe area",
+        "安全区域",
+        "safeAreaPadding",
+        "accumulatedSafeAreaExpand",
+        "expandSafeArea",
+        "ignoreLayoutSafeArea",
+        "SafeAreaManager",
+        "layout wrapper",
+        "键盘避让",
+        "刘海屏"
+      ],
+      "aliases": [
+        "SafeArea",
+        "安全区机制",
+        "安全区避让"
+      ],
+      "file_path": "layout/Safe_Area_Mechanism_Knowledge_Base.md",
+      "source_paths": {
+        "safe_area_manager": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/manager/safe_area/safe_area_manager.cpp",
+        "layout_wrapper": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/layout/layout_wrapper.cpp",
+        "layout_property": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/layout/layout_property.cpp",
+        "js_api": "OpenHarmony/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/jsview/js_view_abstract.cpp"
+      },
+      "api_paths": {},
+      "last_updated": "2026-02-26"
+    },
+    {
+      "name": "Ignore Layout Safe Area",
+      "name_cn": "忽略布局安全区机制",
+      "category": "system",
+      "type": "feature",
+      "keywords": [
+        "ignoreLayoutSafeArea",
+        "忽略布局安全区",
+        "PreMeasure",
+        "PostponedTaskForIgnore",
+        "FlushPostponedLayoutTask",
+        "TraverseForIgnore",
+        "延迟布局",
+        "后抛任务",
+        "MEASURE_FOR_IGNORE",
+        "LAYOUT_FOR_IGNORE"
+      ],
+      "aliases": [
+        "IgnoreLayoutSafeArea",
+        "忽略安全区布局",
+        "Ignore Safe Area"
+      ],
+      "file_path": "layout/Ignore_Layout_Safe_Area_Knowledge_Base.md",
+      "source_paths": {
+        "frame_node": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/base/frame_node.cpp",
+        "ui_task_scheduler": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/pipeline_ng/ui_task_scheduler.cpp",
+        "layout_wrapper": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/layout/layout_wrapper.cpp",
+        "layout_property": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/layout/layout_property.cpp"
+      },
+      "api_paths": {},
+      "last_updated": "2026-02-26"
+    },
+    {
+      "name": "Gesture",
+      "name_cn": "手势系统",
+      "category": "system",
+      "type": "feature",
+      "keywords": [
+        "手势识别",
+        "gesture",
+        "gesture recognizer",
+        "点击",
+        "click",
+        "轻敲",
+        "tap",
+        "长按",
+        "long press",
+        "滑动",
+        "pan",
+        "快速滑动",
+        "swipe",
+        "捏合",
+        "pinch",
+        "旋转",
+        "rotation",
+        "手势组合",
+        "parallel gesture",
+        "sequence gesture",
+        "exclusive gesture",
+        "手势仲裁",
+        "gesture referee",
+        "velocity tracker",
+        "速度追踪",
+        "手势状态机",
+        "gesture state machine",
+        "手势识别器",
+        "gesture recognizer",
+        "多指手势",
+        "multi-finger gesture",
+        "手势回调",
+        "gesture callback"
+      ],
+      "aliases": [
+        "手势系统",
+        "手势识别",
+        "Gesture System",
+        "手势识别器"
+      ],
+      "file_path": "common/interaction/Gesture_Knowledge_Base_CN.md",
+      "source_paths": {
+        "gesture_base": "frameworks/core/components_ng/gestures/gesture_info.h",
+        "recognizer": "frameworks/core/components_ng/gestures/recognizers/gesture_recognizer.h",
+        "referee": "frameworks/core/components_ng/gestures/gesture_referee.h",
+        "click_recognizer": "frameworks/core/components_ng/gestures/recognizers/click_recognizer.h",
+        "pan_recognizer": "frameworks/core/components_ng/gestures/recognizers/pan_recognizer.h",
+        "pinch_recognizer": "frameworks/core/components_ng/gestures/recognizers/pinch_recognizer.h",
+        "long_press_recognizer": "frameworks/core/components_ng/gestures/recognizers/long_press_recognizer.h",
+        "swipe_recognizer": "frameworks/core/components_ng/gestures/recognizers/swipe_recognizer.h",
+        "rotation_recognizer": "frameworks/core/components_ng/gestures/recognizers/rotation_recognizer.h",
+        "velocity_tracker": "frameworks/core/gestures/velocity_tracker.h",
+        "gesture_model": "frameworks/core/components_ng/pattern/gesture/gesture_model_ng.cpp"
+      },
+      "api_paths": {},
+      "last_updated": "2026-02-11",
+      "related_docs": [
+        "DragDrop"
+      ]
+    },
+    {
+      "name": "DragDrop",
+      "name_cn": "拖拽系统",
+      "category": "system",
+      "type": "feature",
+      "keywords": [
+        "拖拽",
+        "drag",
+        "drop",
+        "拖拽系统",
+        "drag drop",
+        "拖拽预览",
+        "drag preview",
+        "拖拽状态机",
+        "drag state machine",
+        "拖拽管理器",
+        "drag drop manager",
+        "拖拽代理",
+        "drag drop proxy",
+        "UDMF",
+        "统一数据格式",
+        "跨应用拖拽",
+        "cross-app drag",
+        "拖拽数据",
+        "drag data",
+        "拖拽动画",
+        "drag animation",
+        "Spring Loading",
+        "弹性加载",
+        "拖拽启动",
+        "drag start",
+        "拖拽移动",
+        "drag move",
+        "拖拽释放",
+        "drag drop",
+        "onDragStart",
+        "onDragMove",
+        "onDrop",
+        "draggable",
+        "拖拽预览窗口",
+        "drag overlay window"
+      ],
+      "aliases": [
+        "拖拽系统",
+        "DragDrop",
+        "拖拽功能",
+        "Drag & Drop"
+      ],
+      "file_path": "common/interaction/Drag_Drop_Knowledge_Base_CN.md",
+      "source_paths": {
+        "drag_drop_manager": "frameworks/core/components_ng/manager/drag_drop/drag_drop_manager.h",
+        "drag_drop_proxy": "frameworks/core/components_ng/manager/drag_drop/drag_drop_proxy.h",
+        "drag_drop_state_machine": "frameworks/core/components_ng/manager/drag_drop/drag_drop_initiating/drag_drop_initiating_state_machine.h",
+        "drag_drop_spring_loading": "frameworks/core/components_ng/manager/drag_drop/drag_drop_spring_loading/",
+        "text_drag": "frameworks/core/components_ng/pattern/text_drag/",
+        "udmf_client": "frameworks/core/common/udmf/udmf_client.h"
+      },
+      "api_paths": {},
+      "last_updated": "2026-02-11",
+      "prerequisites": [
+        "Gesture"
+      ]
     }
   ],
   "categories": {
@@ -759,6 +1102,7 @@
       "description": "用于组织和布局其他组件的容器",
       "components": [
         "Flex",
+        "Grid",
         "Scroll",
         "LazyGrid",
         "WaterFlow"
@@ -818,7 +1162,19 @@
       "name": "SDK API",
       "description": "ArkUI SDK API 文档",
       "components": [
-        "ArkUI SDK API"
+        "ArkUI SDK API",
+        "Component API"
+      ]
+    },
+    "system": {
+      "name": "系统功能",
+      "description": "ArkUI 系统级功能",
+      "components": [
+        "Gesture",
+        "DragDrop",
+        "Layout Framework",
+        "Safe Area Mechanism",
+        "Ignore Layout Safe Area"
       ]
     }
   }

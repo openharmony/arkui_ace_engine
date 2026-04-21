@@ -21,6 +21,9 @@
 #include "core/components_ng/render/canvas_image.h"
 
 namespace OHOS::Ace::NG {
+
+DECLARE_PROP_TYPED_CLASS(PropertyCanvasImageModifierWrapper, NormalProperty, CanvasImageModifierWrapper);
+
 class ImagePattern;
 class ImageContentModifier : public ContentModifier {
     DECLARE_ACE_TYPE(ImageContentModifier, ContentModifier);
@@ -32,30 +35,17 @@ public:
 
     void onDraw(DrawingContext& drawingContext) override;
 
-    void SetSensitive(bool sensitive)
-    {
-        CHECK_NULL_VOID(sensitive_);
-        sensitive_->Set(sensitive);
-    }
-
-    void SetSize(const SizeF& size)
-    {
-        CHECK_NULL_VOID(size_);
-        size_->Set(size);
-    }
-
-    void SetCanvasImageWrapper(const CanvasImageModifierWrapper& wrapper)
-    {
-        CHECK_NULL_VOID(canvasImageWrapper_);
-        canvasImageWrapper_->Set(wrapper);
-    }
+    void SetSensitive(bool sensitive);
+    void SetSize(const SizeF& size);
+    void SetCanvasImageWrapper(const CanvasImageModifierWrapper& wrapper);
 
     ContentTransitionType GetContentTransitionParam() override;
 
 private:
     // The same svg resource has only one copy of SVGDOM in the object cache. Therefore
     // the value of fill color must be changed on the modifier berfore the onDraw method
-    static void UpdateSvgColorFilter(const RefPtr<CanvasImage>& canvasImage);
+    void UpdateSvgColorFilter(const RefPtr<CanvasImage>& canvasImage);
+    void UpdateSvgHDRHeadroom(const std::optional<Color>& svgFillColor);
 
     WeakPtr<ImagePattern> pattern_;
     RefPtr<PropertyBool> sensitive_;

@@ -24,3 +24,11 @@ ace_unittest("ignore_layout_safe_area_test_ng") {
   module_name = "CommonProperties-LayoutAndBorder"
   sources = [ "ignore_layout_safe_area_test_ng.cpp" ]
 }
+
+ace_unittest("ignore_layout_safe_area_scheduling_test_ng") {
+  type = "new"
+  module_name = "Pipeline"
+  sources = [
+    "ignore_layout_safe_area_scheduling_test_ng.cpp",
+  ]
+}

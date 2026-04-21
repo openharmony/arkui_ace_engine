@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,68 +16,67 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { default as common2D } from "@ohos.graphics.common2D"
-import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { TypeChecker } from "#components"
-import { CallbackTransformer } from "./../CallbackTransformer"
+import { default as common2D } from '@ohos.graphics.common2D'
+import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { CallbackTransformer } from './../CallbackTransformer'
 export class common2D_Color_serializer {
     public static write(buffer: SerializerBase, value: common2D.Color): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForAlpha  = value.alpha
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForAlpha = value.alpha
         valueSerializer.writeInt32(valueHolderForAlpha)
-        const valueHolderForRed  = value.red
+        const valueHolderForRed = value.red
         valueSerializer.writeInt32(valueHolderForRed)
-        const valueHolderForGreen  = value.green
+        const valueHolderForGreen = value.green
         valueSerializer.writeInt32(valueHolderForGreen)
-        const valueHolderForBlue  = value.blue
+        const valueHolderForBlue = value.blue
         valueSerializer.writeInt32(valueHolderForBlue)
     }
     public static read(buffer: DeserializerBase): common2D.Color {
-        let valueDeserializer : DeserializerBase = buffer
-        const alphaTmpResult : int32 = valueDeserializer.readInt32()
-        const redTmpResult : int32 = valueDeserializer.readInt32()
-        const greenTmpResult : int32 = valueDeserializer.readInt32()
-        const blueTmpResult : int32 = valueDeserializer.readInt32()
-        let value : common2D.Color = ({alpha: alphaTmpResult, red: redTmpResult, green: greenTmpResult, blue: blueTmpResult} as common2D.Color)
+        let valueDeserializer: DeserializerBase = buffer
+        const alphaTmpResult: int32 = valueDeserializer.readInt32()
+        const redTmpResult: int32 = valueDeserializer.readInt32()
+        const greenTmpResult: int32 = valueDeserializer.readInt32()
+        const blueTmpResult: int32 = valueDeserializer.readInt32()
+        let value: common2D.Color = ({alpha: alphaTmpResult, red: redTmpResult, green: greenTmpResult, blue: blueTmpResult} as common2D.Color)
         return value
     }
 }
 export class common2D_Point_serializer {
     public static write(buffer: SerializerBase, value: common2D.Point): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForX  = value.x
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForX = value.x
         valueSerializer.writeFloat64(valueHolderForX)
-        const valueHolderForY  = value.y
+        const valueHolderForY = value.y
         valueSerializer.writeFloat64(valueHolderForY)
     }
     public static read(buffer: DeserializerBase): common2D.Point {
-        let valueDeserializer : DeserializerBase = buffer
-        const xTmpResult : double = valueDeserializer.readFloat64()
-        const yTmpResult : double = valueDeserializer.readFloat64()
-        let value : common2D.Point = ({x: xTmpResult, y: yTmpResult} as common2D.Point)
+        let valueDeserializer: DeserializerBase = buffer
+        const xTmpResult: double = valueDeserializer.readFloat64()
+        const yTmpResult: double = valueDeserializer.readFloat64()
+        let value: common2D.Point = ({x: xTmpResult, y: yTmpResult} as common2D.Point)
         return value
     }
 }
 export class common2D_Rect_serializer {
     public static write(buffer: SerializerBase, value: common2D.Rect): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForLeft  = value.left
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForLeft = value.left
         valueSerializer.writeFloat64(valueHolderForLeft)
-        const valueHolderForTop  = value.top
+        const valueHolderForTop = value.top
         valueSerializer.writeFloat64(valueHolderForTop)
-        const valueHolderForRight  = value.right
+        const valueHolderForRight = value.right
         valueSerializer.writeFloat64(valueHolderForRight)
-        const valueHolderForBottom  = value.bottom
+        const valueHolderForBottom = value.bottom
         valueSerializer.writeFloat64(valueHolderForBottom)
     }
     public static read(buffer: DeserializerBase): common2D.Rect {
-        let valueDeserializer : DeserializerBase = buffer
-        const leftTmpResult : double = valueDeserializer.readFloat64()
-        const topTmpResult : double = valueDeserializer.readFloat64()
-        const rightTmpResult : double = valueDeserializer.readFloat64()
-        const bottomTmpResult : double = valueDeserializer.readFloat64()
-        let value : common2D.Rect = ({left: leftTmpResult, top: topTmpResult, right: rightTmpResult, bottom: bottomTmpResult} as common2D.Rect)
+        let valueDeserializer: DeserializerBase = buffer
+        const leftTmpResult: double = valueDeserializer.readFloat64()
+        const topTmpResult: double = valueDeserializer.readFloat64()
+        const rightTmpResult: double = valueDeserializer.readFloat64()
+        const bottomTmpResult: double = valueDeserializer.readFloat64()
+        let value: common2D.Rect = ({left: leftTmpResult, top: topTmpResult, right: rightTmpResult, bottom: bottomTmpResult} as common2D.Rect)
         return value
     }
 }

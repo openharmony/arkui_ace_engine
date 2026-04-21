@@ -29,6 +29,14 @@ RefPtr<FrameNode> PatternLockModelStatic::CreateFrameNode(int32_t nodeId)
     return frameNode;
 }
 
+const RefPtr<V2::PatternLockController> PatternLockModelStatic::GetController(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<PatternLockPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetPatternLockController();
+}
+
 void PatternLockModelStatic::SetActiveColor(FrameNode* frameNode, const std::optional<Color>& activeColor)
 {
     if (activeColor.has_value()) {
@@ -155,11 +163,4 @@ void PatternLockModelStatic::SetSkipUnselectedPoint(FrameNode* frameNode, const 
     }
 }
 
-const RefPtr<V2::PatternLockController> PatternLockModelStatic::GetController(FrameNode* frameNode)
-{
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<PatternLockPattern>();
-    CHECK_NULL_RETURN(pattern, nullptr);
-    return pattern->GetPatternLockController();
-}
 } // namespace OHOS::Ace::NG

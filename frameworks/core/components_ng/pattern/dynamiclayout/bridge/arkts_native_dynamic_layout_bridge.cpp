@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/dynamiclayout/algorithm_param_base.h"
 #include "core/components_ng/layout/utils.h"
 #include "core/components_ng/pattern/dynamiclayout/bridge/arkts_native_dynamic_layout_bridge.h"
+#include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -25,6 +26,7 @@ constexpr inline int32_t COLUMN_LAYOUT = 2;
 constexpr inline int32_t ROW_LAYOUT = 3;
 constexpr inline int32_t STACK_LAYOUT = 4;
 constexpr inline int32_t CUSTOM_LAYOUT = 1;
+constexpr inline int32_t GRID_LAYOUT = 5;
 constexpr inline int32_t PARAMS_NUM_TWO = 2;
 
 using ParsingParamFunc = std::function<void(EcmaVM*, const Local<panda::ObjectRef>&, RefPtr<AlgorithmParamBase>&)>;
@@ -80,10 +82,10 @@ void ParseLinearAlgorithmOption(
     auto alignItemVal = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "alignItems"));
     auto spaceVal = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "space"));
     auto reverseVal = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "isReverse"));
-    FlexAlign crossAxisAlign = FlexAlign::FLEX_START;
+    FlexAlign crossAxisAlign = FlexAlign::CENTER;
     FlexAlign justifyContent = FlexAlign::FLEX_START;
     CalcDimension space;
-    bool isRevserse = false;
+    bool isReverse = false;
     ParseLinearCrossAxisAlignment(vm, alignItemVal, crossAxisAlign);
     ParseLinearMainAxisAlignment(vm, justifyVal, justifyContent);
     ParseSpace(vm, spaceVal, space);
@@ -91,9 +93,9 @@ void ParseLinearAlgorithmOption(
     params->SetMainAxisAlign(justifyContent);
     params->SetCrossAxisAlign(crossAxisAlign);
     if (reverseVal->IsBoolean()) {
-        isRevserse = reverseVal->ToBoolean(vm)->Value();
+        isReverse = reverseVal->ToBoolean(vm)->Value();
     }
-    params->SetIsReverse(isRevserse);
+    params->SetIsReverse(isReverse);
 }
 
 void ParseColumnAlgorithmOption(
@@ -120,6 +122,59 @@ void ParseStackAlgorithmOption(EcmaVM*vm, const Local<panda::ObjectRef>& jsObj, 
     auto stackParams = AceType::MakeRefPtr<StackLayoutAlgorithmParam>();
     stackParams->SetAlignContent(alignContent);
     params = stackParams;
+}
+
+PresetFillType ParseFillTypeFromObject(EcmaVM* vm, const Local<panda::ObjectRef>& columnsTemplateObj)
+{
+    auto fillTypeParam = columnsTemplateObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "fillType"));
+    // Return default if fillType is undefined or null
+    if (fillTypeParam->IsUndefined() || fillTypeParam->IsNull()) {
+        return PresetFillType::BREAKPOINT_DEFAULT;
+    }
+
+    // Return default if fillType is not a number
+    if (!fillTypeParam->IsNumber()) {
+        return PresetFillType::BREAKPOINT_DEFAULT;
+    }
+
+    int32_t fillTypeValue = fillTypeParam->Int32Value(vm);
+    // Validate range: BREAKPOINT_DEFAULT(0) to BREAKPOINT_SM2MD3LG5(2)
+    if (fillTypeValue >= static_cast<int32_t>(PresetFillType::BREAKPOINT_DEFAULT) &&
+        fillTypeValue <= static_cast<int32_t>(PresetFillType::BREAKPOINT_SM2MD3LG5)) {
+        return static_cast<PresetFillType>(fillTypeValue);
+    }
+
+    return PresetFillType::BREAKPOINT_DEFAULT;
+}
+
+void ParseGridLayoutOption(EcmaVM*vm, const Local<panda::ObjectRef>& jsObj, RefPtr<AlgorithmParamBase>& params)
+{
+    auto gridParams = AceType::MakeRefPtr<GridLayoutAlgorithmParam>();
+
+    // Parse columnsTemplate (string | object with fillType)
+    auto columnsTemplateVal = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "columnsTemplate"));
+    if (columnsTemplateVal->IsString(vm)) {
+        auto columnsTemplate = columnsTemplateVal->ToString(vm)->ToString(vm);
+        gridParams->SetColumnsTemplate(columnsTemplate);
+    } else if (columnsTemplateVal->IsObject(vm)) {
+        auto columnsTemplateObj = columnsTemplateVal->ToObject(vm);
+        auto fillType = ParseFillTypeFromObject(vm, columnsTemplateObj);
+        gridParams->SetItemFillPolicy(fillType);
+    }
+
+    // Parse rowsGap (CalcDimension)
+    auto rowsGapVal = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "rowsGap"));
+    CalcDimension rowsGap;
+    ArkTSUtils::ParseJsLengthMetrics(vm, rowsGapVal, rowsGap);
+    gridParams->SetRowsGap(rowsGap);
+
+    // Parse columnsGap (CalcDimension)
+    auto columnsGapVal = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "columnsGap"));
+    CalcDimension columnsGap;
+    ArkTSUtils::ParseJsLengthMetrics(vm, columnsGapVal, columnsGap);
+    gridParams->SetColumnsGap(columnsGap);
+
+    params = gridParams;
 }
 
 struct ExtensionLayoutConstraint {
@@ -193,11 +248,10 @@ Local<panda::ObjectRef> GetFrameNode(int32_t nodeId, panda::ecmascript::EcmaVM* 
 
 std::function<void(LayoutWrapper*)> PrepareMeasureSizeFunc(EcmaVM* vm, const Local<panda::ObjectRef>& jsObj)
 {
-    return [vm = vm, object = NG::JsWeak(panda::CopyableGlobal(vm, jsObj))]
+    return [vm = vm, obj = panda::CopyableGlobal(vm, jsObj)]
         (LayoutWrapper* layoutWrapper) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        auto obj = object.Lock();
         CHECK_NULL_VOID(!obj.IsEmpty());
         CHECK_NULL_VOID(obj->IsObject(vm));
         auto funcObj = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "onMeasure"));
@@ -221,11 +275,10 @@ std::function<void(LayoutWrapper*)> PrepareMeasureSizeFunc(EcmaVM* vm, const Loc
 
 std::function<void(LayoutWrapper*)> PreparePlaceChildrenFunc(EcmaVM* vm, const Local<panda::ObjectRef>& jsObj)
 {
-    return [vm = vm, object = NG::JsWeak(panda::CopyableGlobal(vm, jsObj))]
+    return [vm = vm, obj = panda::CopyableGlobal(vm, jsObj)]
         (LayoutWrapper* layoutWrapper) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        auto obj = object.Lock();
         CHECK_NULL_VOID(!obj.IsEmpty());
         CHECK_NULL_VOID(obj->IsObject(vm));
         auto funcObj = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "onLayout"));
@@ -251,13 +304,13 @@ std::function<void(LayoutWrapper*)> PreparePlaceChildrenFunc(EcmaVM* vm, const L
     };
 }
 
-bool ParseCustomLayoutAlgorithmOption(
+void ParseCustomLayoutAlgorithmOption(
     EcmaVM* vm, const Local<panda::ObjectRef>& jsObj, RefPtr<AlgorithmParamBase>& params)
 {
     auto jsMeasureSizeFunc = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "onMeasure"));
     auto jsOnLayoutFunc = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "onLayout"));
     if (!jsMeasureSizeFunc->IsFunction(vm) && !jsOnLayoutFunc->IsFunction(vm)) {
-        return false;
+        return;
     }
     auto customParams = AceType::MakeRefPtr<CustomLayoutAlgorithmParam>();
     if (jsMeasureSizeFunc->IsFunction(vm)) {
@@ -269,7 +322,6 @@ bool ParseCustomLayoutAlgorithmOption(
         customParams->SetOnPlaceChildren(std::move(onPlaceChildrenFunc));
     }
     params = customParams;
-    return true;
 }
 
 std::unordered_map<int32_t, ParsingParamFunc> parsingParamFuncMap = {
@@ -277,6 +329,7 @@ std::unordered_map<int32_t, ParsingParamFunc> parsingParamFuncMap = {
     { ROW_LAYOUT, &ParseRowAlgorithmOption },
     { STACK_LAYOUT, &ParseStackAlgorithmOption },
     { CUSTOM_LAYOUT, &ParseCustomLayoutAlgorithmOption},
+    { GRID_LAYOUT, &ParseGridLayoutOption},
 };
 
 bool ParseLayoutAlgorithmOption(
@@ -313,7 +366,7 @@ ArkUINativeModuleValue DynamicLayoutBridge::CreateDynamicLayout(ArkUIRuntimeCall
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    if (!firstArg->IsObject(vm)) {
+    if (firstArg.IsEmpty() || !firstArg->IsObject(vm)) {
         nodeModifiers->getDynamicLayoutModifier()->createDynamicLayout(
             nullptr, NG::DynamicLayoutType::DEFAULT_LAYOUT);
         return panda::JSValueRef::Undefined(vm);

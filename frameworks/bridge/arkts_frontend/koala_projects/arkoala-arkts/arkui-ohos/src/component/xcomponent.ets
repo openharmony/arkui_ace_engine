@@ -14,7 +14,6 @@
  */
 
 
-import { TypeChecker } from "#components"
 import { ArkUIAniModule } from "arkui.ani";
 
 export interface XComponentControllerCallbackInternal {

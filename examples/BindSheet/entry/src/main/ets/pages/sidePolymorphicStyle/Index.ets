@@ -32,6 +32,7 @@ struct Index {
     { title: this.resourceToString($r('app.string.SideSheet3')), utl: 'pages/sidePolymorphicStyle/SideSheet2' },
     { title: this.resourceToString($r('app.string.SideSheet4')), utl: 'pages/sidePolymorphicStyle/SideSheetCallback' },
     { title: this.resourceToString($r('app.string.SideSheet5')), utl: 'pages/sidePolymorphicStyle/SideSheet3' },
+    { title: this.resourceToString($r('app.string.SideSheet9')), utl: 'pages/sidePolymorphicStyle/SideSheet4' },
   ]
 
   build() {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,6 +47,9 @@ private:
 
     static bool ApplyTheme(bool isLabelButton)
     {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            return false;
+        }
         auto themeColors = JSThemeUtils::GetThemeColors();
         if (!themeColors) {
             // no need to apply custom theme colors
@@ -56,9 +59,9 @@ private:
         // normal
         ViewStackModel::GetInstance()->SetVisualState(VisualState::NORMAL);
         if (isLabelButton) {
-            ButtonModel::GetInstance()->SetFontColor(JSButtonTheme::FontColor(themeColors));
+            ButtonModel::GetInstance()->SetFontColorDefault(JSButtonTheme::FontColor(themeColors));
         }
-        ButtonModel::GetInstance()->BackgroundColor(JSButtonTheme::BackgroundColor(themeColors, false), true);
+        ButtonModel::GetInstance()->BackgroundColorDefault(JSButtonTheme::BackgroundColor(themeColors, false));
 
         // clear state
         ViewStackModel::GetInstance()->ClearVisualState();

@@ -35,8 +35,7 @@ NG::MenuModelNG* GetMenuModel()
     if (model == nullptr) {
         auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Menu");
         if (module == nullptr) {
-            LOGF("Can't find Menu dynamic module");
-            abort();
+            LOGF_ABORT("Can't find Menu dynamic module");
         }
         model = reinterpret_cast<NG::MenuModelNG*>(module->GetModel());
     }

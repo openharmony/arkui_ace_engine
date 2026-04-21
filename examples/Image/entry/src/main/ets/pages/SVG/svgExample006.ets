@@ -87,7 +87,7 @@ struct svgExample006 {
           .fontSize(16)
           .fontWeight(FontWeight.Medium)
 
-        Image($r('app.media.icon'))
+        Image($r('app.media.startIcon'))
           .width(100)
           .height(100)
           .translate({ x: this.translateX, y: 0 })

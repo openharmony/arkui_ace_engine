@@ -97,72 +97,13 @@ public:
 
 const int32_t INDEX_1 = 1;
 const int32_t INDEX_2 = 2;
-const int32_t INDEX_8 = 8;
-const int32_t INDEX_9 = 9;
 const int32_t TOTAL_COUNT = 10;
 const int32_t CACHED_COUNT = 2;
 
-/**
- * @tc.name: ArkoalaLazyNodeTest001
- * @tc.desc: Test ArkoalaLazyNode GetFrameChildByIndex.
- * @tc.type: FUNC
- */
-TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest001)
-{
-    /**
-     * @tc.steps: step1. Test LazyForEach node GetFrameChildByIndex
-     */
-    auto lazyNode = AceType::MakeRefPtr<ArkoalaLazyNode>(GetNextId());
-    EXPECT_EQ(lazyNode->GetTag(), V2::JS_LAZY_FOR_EACH_ETS_TAG);
-    lazyNode->SetCallbacks([](int32_t idx) { return ColumnModelNG::CreateFrameNode(-1); },
-        [](int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool isLoop) {
-            EXPECT_EQ(start, INDEX_8);
-            EXPECT_EQ(end, INDEX_8);
-            EXPECT_EQ(cacheStart, 0);
-            EXPECT_EQ(cacheEnd, 0);
-            EXPECT_FALSE(isLoop);
-        });
-    lazyNode->SetTotalCount(TOTAL_COUNT);
-    EXPECT_EQ(lazyNode->FrameCount(), TOTAL_COUNT);
-
-    EXPECT_FALSE(lazyNode->GetChildByIndex(INDEX_9));
-    EXPECT_FALSE(lazyNode->GetFrameChildByIndex(INDEX_9, false, false, false));
-
-    /**
-     * @tc.steps: step1.1 Test LazyForEach node GetFrameChildByIndex with needBuild = true
-     */
-    RefPtr<UINode> childNode = lazyNode->GetFrameChildByIndex(INDEX_9, true, false, true);
-    EXPECT_TRUE(childNode);
-    EXPECT_TRUE(lazyNode->GetChildByIndex(INDEX_9));
-    EXPECT_TRUE(AceType::DynamicCast<FrameNode>(childNode)->IsActive());
-
-    /**
-     * @tc.steps: step1.2 Create node for index 8
-     */
-    childNode = lazyNode->GetFrameChildByIndex(INDEX_8, true, false, true);
-    EXPECT_TRUE(childNode);
-
-    /**
-     * @tc.steps: step1.3 Test LazyForEach node DoSetActiveChildRange to activate childNode
-     */
-    lazyNode->DoSetActiveChildRange(INDEX_8, INDEX_8, 0, 0, false);
-    EXPECT_FALSE(lazyNode->GetChildByIndex(INDEX_9));
-    EXPECT_TRUE(AceType::DynamicCast<FrameNode>(childNode)->IsActive());
-
-    /**
-     * @tc.steps: step2. Test GetParent for Repeat node
-     */
-    auto repeatNode = CreateRepeatNode(GetNextId());
-    EXPECT_EQ(repeatNode->GetTag(), V2::JS_REPEAT_ETS_TAG);
-    CreateChildren(repeatNode, TOTAL_COUNT);
-    auto retNode = repeatNode->GetFrameChildByIndex(INDEX_1, true, false, true);
-    EXPECT_TRUE(retNode);
-    EXPECT_EQ(retNode->GetParent()->GetParent(), repeatNode);
-}
 
 /**
  * @tc.name: ArkoalaLazyNodeTest002
- * @tc.desc: Test ArkoalaLazyNode GetChildByIndex.
+ * @tc.desc: Test ArkoalaLazyNode GetChildByIndex
  * @tc.type: FUNC
  */
 TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest002)
@@ -202,7 +143,7 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest002)
 
 /**
  * @tc.name: ArkoalaLazyNodeTest003
- * @tc.desc: Test ArkoalaLazyNode GetFrameNode.
+ * @tc.desc: Test ArkoalaLazyNode GetFrameNode
  * @tc.type: FUNC
  */
 TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest003)
@@ -222,7 +163,7 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest003)
 
 /**
  * @tc.name: ArkoalaLazyNodeTest004
- * @tc.desc: Test ArkoalaLazyNode DumpInfo.
+ * @tc.desc: Test ArkoalaLazyNode DumpInfo
  * @tc.type: FUNC
  */
 TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest004)
@@ -246,7 +187,7 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest004)
 
 /**
  * @tc.name: ArkoalaLazyNodeTest005
- * @tc.desc: Test ArkoalaLazyNode OnDataChange.
+ * @tc.desc: Test ArkoalaLazyNode OnDataChange
  * @tc.type: FUNC
  */
 TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest005)
@@ -255,6 +196,18 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest005)
     CreateChildren(lazyNode, TOTAL_COUNT);
     lazyNode->OnDataChange(0, TOTAL_COUNT, UINode::NotificationType::START_CHANGE_POSITION);
     EXPECT_EQ(lazyNode->node4Index_.Size(), 0);
+}
+
+/**
+ * @tc.name: ArkoalaLazyNodeTest006
+ * @tc.desc: Test ArkoalaLazyNode OnDataChange
+ * @tc.type: FUNC
+ */
+TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest006)
+{
+    auto repeatNode = CreateRepeatNode(GetNextId());
+    EXPECT_NE(repeatNode, nullptr);
+    repeatNode->OnDataChange(0, TOTAL_COUNT, UINode::NotificationType::START_CHANGE_POSITION);
 }
 
 /**
@@ -292,25 +245,6 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest008)
     EXPECT_EQ(repeatNode->recycleNodeIds_.size(), 1);
     repeatNode->UpdateIsCache(frameNode, true, true);
     EXPECT_EQ(repeatNode->recycleNodeIds_.size(), 0);
-}
-
-/**
- * @tc.name: ArkoalaLazyNodeTest009
- * @tc.desc: Test ArkoalaLazyNode DoSetActiveChildRange.
- * @tc.type: FUNC
- */
-TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest009)
-{
-    auto lazyNode = CreateLazyForEachNode(GetNextId());
-    CreateChildren(lazyNode, TOTAL_COUNT);
-    int32_t index_11 = 11;
-    lazyNode->DoSetActiveChildRange(index_11, index_11, 0, CACHED_COUNT, false);
-    EXPECT_EQ(lazyNode->node4Index_.Size(), 0);
-
-    CreateChildren(lazyNode, TOTAL_COUNT);
-    lazyNode->DoSetActiveChildRange(INDEX_1, INDEX_1, CACHED_COUNT, CACHED_COUNT, false);
-    int32_t result_size = 4;
-    EXPECT_EQ(lazyNode->node4Index_.Size(), result_size);
 }
 
 /**
@@ -392,41 +326,6 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest014)
 }
 
 /**
- * @tc.name: RebuildCache001
- * @tc.desc: Test Rebuild Cache for LazyForEach and Repeat node.
- * @tc.type: FUNC
- */
-TEST_F(ArkoalaLazyNodeTest, RebuildCache001)
-{
-    int32_t total_4 = 4;
-    int32_t total_8 = 8;
-    int32_t cache = 4;
-    /**
-     * @tc.steps: step1. Test Rebuild Cache for LazyForEach node
-     */
-    auto lazyNode = CreateLazyForEachNode(GetNextId());
-    CreateChildren(lazyNode, TOTAL_COUNT);
-    lazyNode->DoSetActiveChildRange(1, total_4, cache, cache, false);
-    lazyNode->GetChildren();
-    EXPECT_EQ(lazyNode->children_.size(), total_4);
-    lazyNode->DoSetActiveChildRange(1, total_8, cache, cache, false);
-    lazyNode->GetChildren();
-    EXPECT_EQ(lazyNode->children_.size(), total_8);
-
-    /**
-     * @tc.steps: step2. Test Rebuild Cache for Repeat node
-     */
-    auto repeatNode = CreateRepeatNode(GetNextId());
-    CreateChildren(repeatNode, TOTAL_COUNT);
-    repeatNode->DoSetActiveChildRange(1, total_4, 0, 0, false);
-    repeatNode->GetChildren();
-    EXPECT_EQ(repeatNode->children_.size(), total_4);
-    repeatNode->DoSetActiveChildRange(1, total_8, cache, cache, false);
-    repeatNode->GetChildren();
-    EXPECT_EQ(repeatNode->children_.size(), total_4);
-}
-
-/**
  * @tc.name: ArkoalaLazyNodeTest015
  * @tc.desc: Test ArkoalaLazyNode PostIdleTask.
  * @tc.type: FUNC
@@ -461,31 +360,6 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest016)
 }
 
 /**
- * @tc.name: ArkoalaLazyNodeTest017
- * @tc.desc: Test ArkoalaLazyNode attached nodes for LazyForEach and Repeat node.
- * @tc.type: FUNC
- */
-TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest017)
-{
-    int32_t totalCount = 50;
-    auto lazyNode = CreateLazyForEachNode(GetNextId());
-    CreateChildren(lazyNode, totalCount);
-    int32_t cachedCount = 1;
-    lazyNode->DoSetActiveChildRange(INDEX_1, INDEX_9, cachedCount, cachedCount, false);
-    int32_t result_size = INDEX_9 - INDEX_1 + 1 + cachedCount * 2;
-    EXPECT_EQ(static_cast<int32_t>(lazyNode->node4Index_.Size()), result_size);
-    int32_t children_size = INDEX_9 - INDEX_1 + 1;
-    EXPECT_EQ(static_cast<int32_t>(lazyNode->GetChildren().size()), children_size);
-
-    auto repeatNode = CreateRepeatNode(GetNextId());
-    CreateChildren(repeatNode, totalCount);
-    repeatNode->DoSetActiveChildRange(INDEX_1, INDEX_9, cachedCount, cachedCount, false);
-    int32_t result_size_2 = INDEX_9 - INDEX_1 + 1 + cachedCount * 2;
-    EXPECT_EQ(static_cast<int32_t>(repeatNode->node4Index_.Size()), result_size_2);
-    EXPECT_EQ(static_cast<int32_t>(repeatNode->GetChildren().size()), result_size_2);
-}
-
-/**
  * @tc.name: ArkoalaLazyNodeTest018
  * @tc.desc: Test ArkoalaLazyNode ForEachL1NodeWithOnMove.
  * @tc.type: FUNC
@@ -499,6 +373,20 @@ TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest018)
         ret.push_back(node);
     });
     EXPECT_EQ(ret.size(), TOTAL_COUNT);
+}
+
+/**
+ * @tc.name: ArkoalaLazyNodeTest019
+ * @tc.desc: Test ArkoalaLazyNode BuildAllChildren.
+ * @tc.type: FUNC
+ */
+TEST_F(ArkoalaLazyNodeTest, ArkoalaLazyNodeTest019)
+{
+    auto lazyNode = CreateLazyForEachNode(GetNextId());
+    int32_t totalCount = 50;
+    CreateChildren(lazyNode, totalCount);
+    lazyNode->BuildAllChildren();
+    EXPECT_EQ(lazyNode->children_.size(), totalCount);
 }
 
 /**

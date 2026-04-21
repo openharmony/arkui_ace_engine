@@ -1110,13 +1110,14 @@ void FrontendDelegateDeclarativeNG::OnDrawCompleted(const std::string& component
         TaskExecutor::TaskType::JS, "ArkUIDrawCompleted");
 }
 
-void FrontendDelegateDeclarativeNG::OnDrawChildrenCompleted(const std::string& componentId)
+void FrontendDelegateDeclarativeNG::OnDrawChildrenCompleted(const std::string& componentId,
+    const std::vector<int32_t>& childIds)
 {
     taskExecutor_->PostTask(
-        [weak = AceType::WeakClaim(this), componentId] {
+        [weak = AceType::WeakClaim(this), componentId, childIds] {
             auto delegate = weak.Upgrade();
             if (delegate && delegate->drawChildrenInspectorCallback_) {
-                delegate->drawChildrenInspectorCallback_(componentId);
+                delegate->drawChildrenInspectorCallback_(componentId, childIds);
             }
         },
         TaskExecutor::TaskType::JS, "ArkUIDrawChildrenCompleted");
@@ -1413,6 +1414,15 @@ void FrontendDelegateDeclarativeNG::GetSnapshotWithRange(const NG::NodeIdentity&
 {
 #ifdef ENABLE_ROSEN_BACKEND
     NG::ComponentSnapshot::GetWithRange(startID, endID, isStartRect, std::move(callback), options);
+#endif
+}
+
+NG::SnapshotSizeLimitation FrontendDelegateDeclarativeNG::GetSizeLimitation()
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    return NG::ComponentSnapshot::GetSizeLimitation();
+#else
+    return {};
 #endif
 }
 

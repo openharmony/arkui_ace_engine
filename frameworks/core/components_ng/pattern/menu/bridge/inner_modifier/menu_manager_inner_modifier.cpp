@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_manager_inner_modifier.h"
 
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/menu/menu_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 
@@ -368,7 +369,7 @@ std::function<void(const MenuLifeCycleEvent&)>& GetMenuLifeCycleCallback(const R
     return manager->GetMenuLifeCycleCallback(targetId);
 }
 
-RefPtr<AceType> GetMenuManager(const RefPtr<FrameNode>& rootNode)
+RefPtr<AceType> GetMenuManager(const RefPtr<UINode>& rootNode)
 {
     CHECK_NULL_RETURN(rootNode, nullptr);
     return AceType::MakeRefPtr<MenuManager>(rootNode);

@@ -60,6 +60,7 @@ void RichEditorBaseController::SetTypingStyle(std::optional<struct UpdateSpanSty
     auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(richEditorPattern);
     richEditorPattern->SetTypingStyle(typingStyle, textStyle);
+    richEditorPattern->ForceTriggerAvoidOnCaretChange();
 }
 
 std::optional<struct UpdateSpanStyle> RichEditorBaseController::GetTypingStyle()
@@ -75,6 +76,15 @@ void RichEditorBaseController::SetTypingParagraphStyle(std::optional<struct Upda
     CHECK_NULL_VOID(richEditorPattern);
     richEditorPattern->SetTypingParagraphStyle(typingParagraphStyle);
     richEditorPattern->ForceTriggerAvoidOnCaretChange();
+}
+
+void RichEditorBaseController::SetPlaceholderStyledString(const RefPtr<SpanStringBase>& value)
+{
+    auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(richEditorPattern);
+    auto spanString = AceType::DynamicCast<SpanString>(value);
+    CHECK_NULL_VOID(spanString);
+    richEditorPattern->SetPlaceholderStyledString(spanString);
 }
 
 void RichEditorBaseController::CloseSelectionMenu()
@@ -119,20 +129,5 @@ const PreviewTextInfo RichEditorBaseController::GetPreviewTextInfo() const
     auto richEditorPattern = pattern_.Upgrade();
     CHECK_NULL_RETURN(richEditorPattern, PreviewTextInfo());
     return richEditorPattern->GetPreviewTextInfo();
-}
-
-ColorMode RichEditorBaseController::GetColorMode()
-{
-    auto richEditorPattern = pattern_.Upgrade();
-    CHECK_NULL_RETURN(richEditorPattern, ColorMode::COLOR_MODE_UNDEFINED);
-    return richEditorPattern->GetColorMode();
-}
-
-RefPtr<NG::RichEditorTheme> RichEditorBaseController::GetTheme()
-{
-    auto richEditorPattern = pattern_.Upgrade();
-    CHECK_NULL_RETURN(richEditorPattern, {});
-    auto theme = richEditorPattern->GetTheme<NG::RichEditorTheme>();
-    return theme;
 }
 } // namespace OHOS::Ace::NG

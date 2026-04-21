@@ -32,6 +32,7 @@ public:
     virtual void SetDensity() = 0;
     virtual void SetCanvasPattern(const RefPtr<AceType>& canvas) = 0;
     virtual void SetInstanceId(int32_t id) = 0;
+    virtual int32_t GetInstanceId() = 0;
 
     bool IsBuiltIn() const
     {

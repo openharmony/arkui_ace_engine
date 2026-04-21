@@ -293,7 +293,7 @@ HWTEST_F(RichEditorBaseControllerAccessorTest, setSelectionTest, TestSize.Level1
     auto end = Converter::ArkValue<Ark_Int32>(TEST_END);
     Opt_SelectionOptions optsOpt;
     optsOpt.value.menuPolicy.value = Ark_MenuPolicy::ARK_MENU_POLICY_SHOW;
-    accessor_->setSelection(peer_, &start, &end, &optsOpt);
+    accessor_->setSelection(peer_, start, end, &optsOpt);
 }
 
 /**
@@ -335,11 +335,11 @@ HWTEST_F(RichEditorBaseControllerAccessorTest, getTypingStyleTest, TestSize.Leve
 }
 
 /**
- * @tc.name: GetPreviewTextTest
+ * @tc.name: getPreviewTextTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorBaseControllerAccessorTest, GetPreviewTextTest, TestSize.Level1)
+HWTEST_F(RichEditorBaseControllerAccessorTest, getPreviewTextTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getPreviewText, nullptr);
     PreviewTextInfo previewText = {.offset = 1, .value = u"info"};
@@ -349,11 +349,11 @@ HWTEST_F(RichEditorBaseControllerAccessorTest, GetPreviewTextTest, TestSize.Leve
 }
 
 /**
- * @tc.name: GetLayoutManagerTest
+ * @tc.name: getLayoutManagerTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorBaseControllerAccessorTest, GetLayoutManagerTest, TestSize.Level1)
+HWTEST_F(RichEditorBaseControllerAccessorTest, getLayoutManagerTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getLayoutManager, nullptr);
     auto layoutInfo = OHOS::Ace::NG::LayoutInfoInterface();
@@ -367,11 +367,11 @@ HWTEST_F(RichEditorBaseControllerAccessorTest, GetLayoutManagerTest, TestSize.Le
 }
 
 /**
- * @tc.name: GetCaretRectTest
+ * @tc.name: getCaretRectTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorBaseControllerAccessorTest, GetCaretRectTest, TestSize.Level1)
+HWTEST_F(RichEditorBaseControllerAccessorTest, getCaretRectTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getCaretRect, nullptr);
     auto rectF = OHOS::Ace::NG::RectF(0.45f, 1.37f, 53.3f, 657.6f);

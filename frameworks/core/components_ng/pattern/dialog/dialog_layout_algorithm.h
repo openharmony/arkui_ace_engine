@@ -23,15 +23,13 @@
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/grid_layout_info.h"
 #include "core/components/common/layout/grid_system_manager.h"
-#include "core/components/common/properties/border.h"
-#include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_property.h"
-#include "core/components_ng/pattern/overlay/overlay_manager.h"
 
 namespace OHOS::Ace::NG {
+class OverlayManager;
 enum class TouchingBoundaryType {
     NotTouchBoundary = 0,
     TouchBottomBoundary,
@@ -124,12 +122,16 @@ private:
     bool isShowInSubWindow_ = false;
     bool isSuitableForElderly_ = false;
     bool isSuitOldMeasure_ = false;
+    bool needAdaptForceSplitMode_ = false;
+    float forceSplitRatio_ = 0.5f;
     float dialogMaxHeight_ = 0.0f;
     int32_t gridCount_ = -1;
     int32_t subWindowId_ = -1;
     DimensionOffset dialogOffset_;
     DialogAlignment alignment_ = DialogAlignment::DEFAULT;
     TouchingBoundaryType touchingBoundaryFlag_ = TouchingBoundaryType::NotTouchBoundary;
+
+    RefPtr<DialogTheme> dialogTheme_ = nullptr;
 
     bool expandDisplay_ = false;
     double expandDisplayValidHeight_ = 0.0;

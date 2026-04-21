@@ -14,7 +14,7 @@
  */
 import { NavPathStack, NavigationOperation, NavBar, ResourceStr, Resource, NavDestinationMode,
 HeightBreakpoint, WidthBreakpoint, Axis } from "@ohos.arkui.component"
-import { UIContext } from "@ohos.arkui.UIContext"
+import { UIContext, SwiperContentInfo } from "@ohos.arkui.UIContext"
 import UIAbilityContext from 'application.UIAbilityContext';
 import transfer from '@ohos.transfer';
 import type { Callback } from '@ohos.base';
@@ -158,6 +158,11 @@ import { Size } from '@ohos.arkui.node'
         public native offTextChange(callback?: Callback<TextChangeEventInfo>): void;
         public native onTextChange(identity: ObserverOptions, callback: Callback<TextChangeEventInfo>): void;
         public native offTextChange(identity: ObserverOptions, callback?: Callback<TextChangeEventInfo>): void;
+
+        public native onSwiperContentUpdate(callback: Callback<SwiperContentInfo>): void;
+        public native offSwiperContentUpdate(callback?: Callback<SwiperContentInfo>): void;
+        public native onSwiperContentUpdate(config: ObserverOptions, callback: Callback<SwiperContentInfo>): void;
+        public native offSwiperContentUpdate(config: ObserverOptions, callback?: Callback<SwiperContentInfo>): void;
     }
 
     export interface NavigationInfo {
@@ -188,10 +193,9 @@ import { Size } from '@ohos.arkui.node'
             if (navPathStack.typeOf() !== 'undefined' && navPathStack.typeOf() !== 'null')  {
                 // pathStack needs analysis to static NavPathStack
             }
-            let uniqueId =dynamicValue.getProperty('uniqueId');
+            let uniqueId = dynamicValue.getProperty('uniqueId');
             if (uniqueId.typeOf() !== 'undefined' && uniqueId.typeOf() !== 'null' && uniqueId.isNumber()) {
-                let id = uniqueId.toNumber();
-                staticValue.uniqueId = Double.toInt(id);
+                staticValue.uniqueId = uniqueId.toNumber().toInt();
             }
             return staticValue;
         }
@@ -322,7 +326,7 @@ import { Size } from '@ohos.arkui.node'
 
             let index = dynamicValue.getProperty("index");
             if (index.isNumber()) {
-                staticValue.index = index.toNumber() as int;
+                staticValue.index = index.toNumber().toInt();
             }
 
             let param = dynamicValue.getProperty("param");
@@ -337,7 +341,7 @@ import { Size } from '@ohos.arkui.node'
 
             let uniqueId = dynamicValue.getProperty("uniqueId");
             if (uniqueId.isNumber()) {
-                staticValue.uniqueId = uniqueId.toNumber() as int;
+                staticValue.uniqueId = uniqueId.toNumber().toInt();
             }
 
             let mode = dynamicValue.getProperty("mode");
@@ -426,7 +430,7 @@ import { Size } from '@ohos.arkui.node'
 
             let index = dynamicValue.getProperty('index');
             if (index.isNumber()) {
-                staticValue.index = index.toNumber() as int;
+                staticValue.index = index.toNumber().toInt();
             }
 
             let name = dynamicValue.getProperty('name');
@@ -534,7 +538,7 @@ import { Size } from '@ohos.arkui.node'
             if (!uniqueId.isNumber()) {
                 throw Error("uniqueId in ScrollEventInfo type Error");
             }
-            staticValue.uniqueId = Double.toInt(uniqueId.toNumber());
+            staticValue.uniqueId = uniqueId.toNumber().toInt();
 
             let scrollEvent = dynamicValue.getProperty("scrollEvent");
             if (!scrollEvent.isNumber()) {
@@ -639,5 +643,4 @@ import { Size } from '@ohos.arkui.node'
         uniqueId: int;
         content: string;
     }
-
  }

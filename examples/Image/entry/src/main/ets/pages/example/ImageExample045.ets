@@ -20,7 +20,7 @@ struct ChangeWidth {
 
   build() {
     Column({ space: 10 }) {
-      Image("https://cp1.douguo.com/upload/caiku/d/e/b/600_de930a0bd7492906df26a297856dde1b.jpeg")
+      Image("https://xxx") // 使用占位符而非真实网络URL
         .height(200)
         .width(this.wh)
         .alt($r("app.media.startIcon")) // 图片加载失败时显示的替代资源

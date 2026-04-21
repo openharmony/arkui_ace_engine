@@ -23,6 +23,7 @@ import {
 import { PeerNode } from "./PeerNode"
 import { Theme } from '@ohos/arkui/theme';
 import { int32 } from '@koalaui/common';
+import { CustomComponentLifecycle } from './component/customComponent';
 
 /**
  * This is basically the CustomComponent
@@ -38,6 +39,9 @@ export interface ArkCustomComponent {
     aboutToDisappear(): void;
     onDidBuild(): void;
     onCleanup(): void;
+
+    // New Life cycle
+    __getLifecycle__Internal(): CustomComponentLifecycle;
 
     // Page life cycle
     onPageShow(): void
@@ -63,5 +67,7 @@ export interface ArkCustomComponent {
     // dump info
     onDumpInspector(): string;
 
+    // dfx
+    getName(): string;
     readonly isCustomLayout: boolean;
 }

@@ -20,8 +20,11 @@
 #include <iterator>
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/layout/utils.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/property/position_property.h"
 #include "core/components_ng/property/templates_parser.h"
+#include "core/components/common/properties/alignment.h"
 
 namespace OHOS::Ace::NG {
 
@@ -48,6 +51,19 @@ void LazyGridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     UpdateGridItemConstraint(contentIdealSize, childLayoutConstraint);
+
+    // DynamicLayout branch: non-lazy loading mode =====
+    if (isDynamicLayout_) {
+        if (totalItemCount_ == 0) {
+            layoutInfo_->SetTotalItemCount(0);
+            totalMainSize_ = 0.0f;
+        } else {
+            // DynamicLayout: measure all child nodes (non-lazy loading)
+            MeasureGridItemAll(layoutWrapper);
+            SetFrameSize(layoutWrapper, contentIdealSize, padding);
+        }
+        return;
+    }
 
     if (layoutInfo_->deadline_) {
         return;
@@ -125,6 +141,13 @@ void LazyGridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto top = padding.top.value_or(0.0f);
     auto paddingOffset = OffsetF(left, top);
     float crossSize = GetCrossAxisSize(size, axis_);
+
+    if (isDynamicLayout_) {
+        // DynamicLayout: layout all child nodes + handle alignment
+        LayoutGridItems(layoutWrapper, crossSize, paddingOffset);
+        return;
+    }
+
     if (layoutInfo_->deadline_) {
         PredictLayoutForward(layoutWrapper, crossSize, paddingOffset);
         PredictLayoutBackward(layoutWrapper, crossSize, paddingOffset);
@@ -166,8 +189,19 @@ void LazyGridLayoutAlgorithm::UpdateGap(const RefPtr<LazyGridLayoutProperty>& la
         laneGutter_ = rowGap;
     }
     auto columnsTemplate = layoutProperty->GetColumnsTemplate().value_or("");
+    auto itemFillPolicy = layoutProperty->GetItemFillPolicy();
+
     auto crossPercentRefer = GetCrossAxisSize(contentConstraint.percentReference, axis_);
     crossSize_ = selfIdealSize.CrossSize(axis_).value_or(crossPercentRefer);
+
+    // If ItemFillPolicy is set, use standard function BuildItemFillPolicyColumns to calculate column template
+    if (itemFillPolicy.has_value()) {
+        columnsTemplate = BuildItemFillPolicyColumns(
+            itemFillPolicy.value(),
+            crossSize_,
+            contentConstraint.scaleProperty.vpScale)
+            .value_or("");
+    }
     auto cross = ParseTemplateArgs(columnsTemplate, crossSize_, laneGutter_, totalItemCount_);
     laneGutter_ = cross.second;
     if (cross.first.empty()) {
@@ -219,7 +253,7 @@ std::optional<ViewPosReference> LazyGridLayoutAlgorithm::GetReferencePos(RefPtr<
     CHECK_NULL_RETURN(frameNode, std::nullopt);
     if (frameNode->GetTag() != V2::COMMON_VIEW_ETS_TAG && frameNode->GetTag() != V2::NODE_CONTAINER_ETS_TAG &&
         frameNode->GetTag() != "BuilderProxyNode" && frameNode->GetTag() != V2::FLOW_ITEM_ETS_TAG &&
-        frameNode->GetTag() != V2::LAZY_V_GRID_LAYOUT_ETS_TAG) {
+        frameNode->GetTag() != V2::LAZY_V_GRID_LAYOUT_ETS_TAG && frameNode->GetTag() != V2::LIST_ETS_TAG) {
         return std::nullopt;
     }
     auto geometry = frameNode->GetGeometryNode();
@@ -513,6 +547,26 @@ void LazyGridLayoutAlgorithm::MeasureBackward(LayoutWrapper* layoutWrapper, int3
 void LazyGridLayoutAlgorithm::LayoutGridItems(LayoutWrapper* layoutWrapper, float crossSize,
     const OffsetF& paddingOffset)
 {
+    // DynamicLayout mode: pre-calculate alignment parameters
+    bool needAlign = false;
+    Alignment align = Alignment::TOP_CENTER;
+
+    if (isDynamicLayout_) {
+        auto layoutProperty = AceType::DynamicCast<LazyGridLayoutProperty>(layoutWrapper->GetLayoutProperty());
+        CHECK_NULL_VOID(layoutProperty);
+        needAlign = true;
+
+        // Get alignment mode (common property, from PositionProperty)
+        align = axis_ == Axis::VERTICAL ? Alignment::TOP_CENTER : Alignment::CENTER_LEFT;
+        if (layoutProperty->GetPositionProperty()) {
+            if (layoutProperty->GetPositionProperty()->HasLocalizedAlignment()) {
+                align = ConvertStringToAlignment(layoutProperty->GetPositionProperty()->GetLocalizedAlignmentValue());
+            } else {
+                align = layoutProperty->GetPositionProperty()->GetAlignment().value_or(align);
+            }
+        }
+    }
+
     // layout items.
     auto iter = layoutInfo_->posMap_.find(layoutInfo_->startIndex_);
     for (; iter != layoutInfo_->posMap_.end() && iter->first <= layoutInfo_->endIndex_; iter++) {
@@ -520,7 +574,17 @@ void LazyGridLayoutAlgorithm::LayoutGridItems(LayoutWrapper* layoutWrapper, floa
         if (!wrapper) {
             continue;
         }
-        SetItemOffset(wrapper, iter->second, crossSize, paddingOffset);
+
+        // DynamicLayout: get actual row height from posMap_ (endPos - startPos)
+        float currentRowHeight = 0.0f;
+        if (needAlign) {
+            currentRowHeight = iter->second.endPos - iter->second.startPos;
+        }
+
+        // Call SetItemOffset uniformly, handle alignment internally
+        SetItemOffset(wrapper, iter->second, crossSize, paddingOffset, needAlign, currentRowHeight, align);
+
+        // Execute Layout or SyncGeometry
         if (wrapper->CheckNeedForceMeasureAndLayout()) {
             wrapper->Layout();
         } else {
@@ -530,11 +594,13 @@ void LazyGridLayoutAlgorithm::LayoutGridItems(LayoutWrapper* layoutWrapper, floa
 }
 
 void LazyGridLayoutAlgorithm::SetItemOffset(RefPtr<LayoutWrapper>& wrapper, const GridItemMainPos& pos,
-    float crossSize, const OffsetF& paddingOffset)
+    float crossSize, const OffsetF& paddingOffset,
+    bool needAlign, float rowHeight, Alignment align)
 {
     auto offset = paddingOffset;
     float laneWidth = crossSize / lanes_;
-    if (layoutDirection_ == TextDirection::RTL) {
+    bool isRtl = (layoutDirection_ == TextDirection::RTL);
+    if (isRtl) {
         if (axis_ == Axis::VERTICAL) {
             auto size = wrapper->GetGeometryNode()->GetMarginFrameSize();
             float laneOffset = crossPos_[pos.laneIdx];
@@ -549,6 +615,31 @@ void LazyGridLayoutAlgorithm::SetItemOffset(RefPtr<LayoutWrapper>& wrapper, cons
             offset = offset + OffsetF(pos.startPos, crossPos_[pos.laneIdx]);
         }
     }
+
+    // DynamicLayout: apply alignment offset
+    if (needAlign) {
+        float cellHeight = rowHeight;
+        // Calculate alignment offset
+        SizeF cellSize = SizeF(crossLens_[pos.laneIdx], cellHeight, axis_);
+        auto childSize = wrapper->GetGeometryNode()->GetFrameSize();
+        if (!isRtl) {
+            auto alignPosition = Alignment::GetAlignPosition(cellSize, childSize, align);
+            // Apply alignment offset
+            offset = offset + alignPosition;
+        } else {
+            if (align.GetHorizontal() > 0) {    // Right
+                auto alignPosition = Alignment::GetAlignPosition(cellSize, childSize, align);
+                alignPosition.SetX(0.0f);
+                offset = offset + alignPosition;
+            } else {    // Left or Center
+                auto alignPosition = Alignment::GetAlignPositionWithDirection(cellSize, childSize, align,
+                    layoutDirection_);
+                alignPosition.SetY(-alignPosition.GetY());
+                offset = offset - alignPosition;
+            }
+        }
+    }
+
     wrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
 }
 

@@ -83,7 +83,6 @@ bool IsDrawable(const JSRef<JSVal>& jsValue);
 RefPtr<PixelMap> GetDrawablePixmap(JSRef<JSVal> obj);
 RefPtr<PixelMap> CreatePixelMapFromNapiValue(const JSRef<JSVal>& obj, NativeEngine* localNativeEngine = nullptr);
 RefPtr<DrawingColorFilter> CreateDrawingColorFilter(JSRef<JSVal> obj);
-RefPtr<DrawingLattice> CreateDrawingLattice(JSRef<JSVal> obj);
 bool CheckRegexValid(const std::string& pattern);
 napi_env GetCurrentEnv();
 void* UnwrapNapiValue(const JSRef<JSVal>& obj);

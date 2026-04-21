@@ -97,7 +97,7 @@ export class AppStorageV2Impl {
         }
 
         let obj = this.memorizedValues_.get(key!);
-        StorageHelper.checkTypeByType(key!, ttype, Class.of(obj!));
+        StorageHelper.checkTypeByType<Any>(key!, ttype, Class.of(obj!));
         return obj as T;
     }
 
@@ -106,7 +106,7 @@ export class AppStorageV2Impl {
     }
 
     public remove(keyOrType: string | Class): void {
-        const key = StorageHelper.getKeyOrTypeNameWithChecks(keyOrType);
+        const key = StorageHelper.getKeyOrTypeNameWithChecks<Any>(keyOrType);
         if (!key) {
             return;
         }
@@ -137,7 +137,7 @@ export class AppStorageV2Impl {
     }
 
     public removeByInterop(keyOrType: string | Class): boolean {
-        const key = StorageHelper.getKeyOrTypeNameWithChecks(keyOrType);
+        const key = StorageHelper.getKeyOrTypeNameWithChecks<Any>(keyOrType);
         if (!key) {
             return false;
         }

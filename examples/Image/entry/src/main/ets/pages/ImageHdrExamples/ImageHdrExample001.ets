@@ -61,7 +61,7 @@ struct ImageHDRTest {
         Text(this.parmDynamicRangeModeStr[this.idx1])
           .fontWeight(FontWeight.Bolder)
         Divider()
-        Image($r('app.media.JPEGVividSingle'))
+        Image($r('app.media.background'))
           .height(this.het)
           .width(this.wid)
           .dynamicRangeMode(this.parmDynamicRangeMode[this.idx1])

@@ -70,7 +70,15 @@ public:
             return theme;
         }
 
-    private:
+    protected:
+        void Parse(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<MenuTheme>& theme) const
+        {
+            theme->symbolId_ = themeConstants->GetSymbolByName("sys.symbol.checkmark");
+            theme->embeddedExpandIconId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_down");
+            theme->stackExpandIconId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_forward");
+            theme->textRightClickMenuEndIconId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_right");
+        }
+
         void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<MenuTheme>& theme) const
         {
             if (!themeStyle) {

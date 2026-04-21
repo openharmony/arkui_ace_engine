@@ -20,11 +20,19 @@ import { UIUtils } from '../utils';
 import { DecoratedV2VariableBase } from './decoratorBase';
 import { uiUtils } from '../base/uiUtilsImpl';
 import { StateMgmtDFX } from '../tools/stateMgmtDFX';
+import { isDynamicObject, getV2ObservedObject } from '../../component/interop';
 export class ParamDecoratedVariable<T> extends DecoratedV2VariableBase<T> implements IParamDecoratedVariable<T> {
     public readonly backing_: IBackingValue<T>;
     constructor(owningView: IVariableOwner | undefined, varName: string, initValue: T) {
         super('@Param', owningView, varName);
-        this.backing_ = FactoryInternal.mkDecoratorValue(varName, initValue);
+        if (isDynamicObject(initValue)) {
+            initValue = getV2ObservedObject(initValue);
+            this.backing_ = FactoryInternal.mkInteropV2DecoratorValue(varName, initValue);
+        } else {
+            this.backing_ = FactoryInternal.mkDecoratorValue(varName, initValue);
+        }
+        // Register the relationship between this Param variable and the observed object it uses
+        this.registerToObservedObject(initValue);
     }
 
     get(): T {
@@ -33,6 +41,7 @@ export class ParamDecoratedVariable<T> extends DecoratedV2VariableBase<T> implem
         const value = this.backing_.get(shouldAddRef);
         if (shouldAddRef) {
             uiUtils.builtinContainersAddRefLength(value);
+            this.selfTrack();
         }
         return value;
     }
@@ -43,8 +52,13 @@ export class ParamDecoratedVariable<T> extends DecoratedV2VariableBase<T> implem
         if (value === newValue) {
             return;
         }
+        const processedNewValue = isDynamicObject(newValue)
+            ? getV2ObservedObject(newValue)
+            : (uiUtils.autoProxyObject(newValue) as T);
         StateUpdateLoop.add(() => {
-            this.backing_.setNoCheck(uiUtils.autoProxyObject(newValue) as T);
+            // Update ObservedObjectRegistry registration before setting the new value
+            this.updateObservedObjectRegistration(value, processedNewValue);
+            this.backing_.setNoCheck(processedNewValue);
         });
     }
 
@@ -53,6 +67,20 @@ export class ParamDecoratedVariable<T> extends DecoratedV2VariableBase<T> implem
         if (value === newValue) {
             return;
         }
-        this.backing_.setNoCheck(uiUtils.autoProxyObject(newValue) as T);
+        const processedNewValue = isDynamicObject(newValue)
+            ? getV2ObservedObject(newValue)
+            : (uiUtils.autoProxyObject(newValue) as T);
+        // Update ObservedObjectRegistry registration before setting the new value
+        this.updateObservedObjectRegistration(value, processedNewValue);
+        this.backing_.setNoCheck(processedNewValue);
+    }
+
+    public aboutToBeDeletedInternal(): void {
+        // Unregister from the observed object before deletion
+        const currentValue = this.backing_.get(false);
+        this.unregisterFromObservedObject(currentValue);
+
+        // Call parent's cleanup
+        super.aboutToBeDeletedInternal();
     }
 }

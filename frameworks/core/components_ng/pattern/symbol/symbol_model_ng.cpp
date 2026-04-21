@@ -169,7 +169,7 @@ void SymbolModelNG::RegisterSymbolFontColorResource(FrameNode* frameNode, const 
             auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(layoutProperty);
             Color fontColor;
-            ResourceParseUtils::ParseResColor(resObj, fontColor);
+            ResourceParseUtils::ParseResColor(resObj, fontColor, true);
             auto colorVec = layoutProperty->GetSymbolColorList();
             if (colorVec.has_value() && GreatNotEqual(colorVec.value().size(), resObjIndex)) {
                 auto colorVecArr = colorVec.value();

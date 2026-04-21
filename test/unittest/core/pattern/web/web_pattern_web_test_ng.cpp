@@ -24,7 +24,7 @@
 #define private public
 #include "foundation/arkui/ace_engine/frameworks/core/common/ai/image_analyzer_manager.h"
 #include "foundation/arkui/ace_engine/interfaces/inner_api/ace/ai/image_analyzer.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
@@ -41,6 +41,8 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/utils/system_properties.h"
 #include "arkweb_utils.h"
+#include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -447,8 +449,9 @@ HWTEST_F(WebPatternWebTest, ProcessVirtualKeyBoardShow, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_HIDE;
     webPattern->drawSizeCache_.SetHeight(50.00);
-    ASSERT_TRUE(webPattern->ProcessVirtualKeyBoardShow(0, 0, 100.00, true));
     webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    ASSERT_TRUE(webPattern->ProcessVirtualKeyBoardShow(0, 0, 100.00, true));
     webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_SHOW;
     webPattern->drawSizeCache_.SetHeight(50.00);
     EXPECT_FALSE(webPattern->ProcessVirtualKeyBoardShow(0, 0, 0.00, true));
@@ -713,6 +716,120 @@ HWTEST_F(WebPatternWebTest, OnAttachContext, TestSize.Level1)
     webPattern->renderContextForSurface_ = nullptr;
     webPattern->OnAttachContext(Referenced::RawPtr(pipelineContext));
     ASSERT_NE(pipelineContext->GetDragDropManager(), nullptr);
+#endif
+}
+
+/**
+ * @tc.name: RemoveOfflineWebWindowStateChangedCallbackIfNeed
+ * @tc.desc: RemoveOfflineWebWindowStateChangedCallbackIfNeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, RemoveOfflineWebWindowStateChangedCallbackIfNeed, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    webPattern->RemoveOfflineWebWindowStateChangedCallbackIfNeed(pipelineContext, nodeId);
+    auto pipeline = webPattern->offlineWebPipelineContext_.Upgrade();
+    ASSERT_EQ(pipeline, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: RemoveOfflineWebWindowStateChangedCallbackIfNeed001
+ * @tc.desc: RemoveOfflineWebWindowStateChangedCallbackIfNeed001
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, RemoveOfflineWebWindowStateChangedCallbackIfNeed001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    webPattern->offlineWebInited_ = true;
+    RefPtr<MockPipelineContext> pipelineContext = nullptr;
+    webPattern->RemoveOfflineWebWindowStateChangedCallbackIfNeed(pipelineContext, nodeId);
+    auto pipeline = webPattern->offlineWebPipelineContext_.Upgrade();
+    ASSERT_EQ(pipeline, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: RemoveOfflineWebWindowStateChangedCallbackIfNeed002
+ * @tc.desc: RemoveOfflineWebWindowStateChangedCallbackIfNeed002
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, RemoveOfflineWebWindowStateChangedCallbackIfNeed002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    webPattern->offlineWebInited_ = true;
+    auto pipelineContextNew = AceType::MakeRefPtr<MockPipelineContext>();
+    ASSERT_NE(pipelineContextNew, nullptr);
+    webPattern->RemoveOfflineWebWindowStateChangedCallbackIfNeed(pipelineContextNew, nodeId);
+    auto pipeline = webPattern->offlineWebPipelineContext_.Upgrade();
+    ASSERT_EQ(pipeline, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: RemoveOfflineWebWindowStateChangedCallbackIfNeed003
+ * @tc.desc: RemoveOfflineWebWindowStateChangedCallbackIfNeed003
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, RemoveOfflineWebWindowStateChangedCallbackIfNeed003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    webPattern->offlineWebInited_ = true;
+    auto pipelineContextCur = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContextCur, nullptr);
+    pipelineContextCur->instanceId_ = 0;
+    webPattern->offlineWebPipelineContext_ = AceType::WeakClaim(AceType::RawPtr(pipelineContextCur));
+    auto pipelineContextNew = AceType::MakeRefPtr<MockPipelineContext>();
+    ASSERT_NE(pipelineContextNew, nullptr);
+    pipelineContextNew->instanceId_ = 0;
+    webPattern->RemoveOfflineWebWindowStateChangedCallbackIfNeed(pipelineContextNew, nodeId);
+    auto pipeline = webPattern->offlineWebPipelineContext_.Upgrade();
+    ASSERT_NE(pipeline, nullptr);
+    ASSERT_NE(pipeline, pipelineContextNew);
+
+    pipelineContextNew->instanceId_ = 1;
+    webPattern->RemoveOfflineWebWindowStateChangedCallbackIfNeed(pipelineContextNew, nodeId);
+    pipeline = webPattern->offlineWebPipelineContext_.Upgrade();
+    ASSERT_NE(pipeline, nullptr);
+    ASSERT_EQ(pipeline->GetInstanceId(), pipelineContextNew->GetInstanceId());
 #endif
 }
 
@@ -1254,13 +1371,12 @@ HWTEST_F(WebPatternWebTest, HandleTouchCancel, TestSize.Level1)
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
     ASSERT_NE(stack, nullptr);
+    std::string surfaceId = "123";
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
-    webPattern->OnModifyDone();
     RefPtr<UINode> son = frameNode;
     RefPtr<UINode> parent =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
@@ -1269,9 +1385,14 @@ HWTEST_F(WebPatternWebTest, HandleTouchCancel, TestSize.Level1)
     parent->exportTextureInfo_ = AceType::MakeRefPtr<ExportTextureInfo>();
     grandParent->exportTextureInfo_ = AceType::MakeRefPtr<ExportTextureInfo>();
     parent->exportTextureInfo_->SetCurrentRenderType(NodeRenderType::RENDER_TYPE_DISPLAY);
+    parent->exportTextureInfo_->SetSurfaceId(surfaceId);
     grandParent->exportTextureInfo_->SetCurrentRenderType(NodeRenderType::RENDER_TYPE_TEXTURE);
+    grandParent->exportTextureInfo_->SetSurfaceId(surfaceId);
     son->SetParent(parent);
     parent->SetParent(grandParent);
+    ASSERT_NE(webPattern, nullptr);
+    NG::SameLayerSurface::SetSameLayerSurfaceId(surfaceId);
+    webPattern->OnModifyDone();
     TouchEventInfo info("info");
     webPattern->HandleTouchCancel(info);
     EXPECT_TRUE(webPattern->isTouchUpEvent_);
@@ -1538,6 +1659,58 @@ HWTEST_F(WebPatternWebTest, OnForceEnableZoomUpdate, TestSize.Level1)
     OHOS::ArkWeb::setActiveWebEngineVersion(OHOS::ArkWeb::ArkWebEngineVersion::M132);
     webPattern->delegate_ = nullptr;
     webPattern->OnForceEnableZoomUpdate(value);
+#endif
+}
+
+/**
+ * @tc.name: OnScrollbarLayoutPolicyUpdate
+ * @tc.desc: OnScrollbarLayoutPolicyUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, OnScrollbarLayoutPolicyUpdate, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    webPattern->OnScrollbarLayoutPolicyUpdate(ScrollbarLayoutPolicy::CONTENT);
+    EXPECT_EQ(webPattern->scrollbarLayoutPolicy_, ScrollbarLayoutPolicy::CONTENT);
+
+    webPattern->OnScrollbarLayoutPolicyUpdate(ScrollbarLayoutPolicy::SYSTEM);
+    EXPECT_EQ(webPattern->scrollbarLayoutPolicy_, ScrollbarLayoutPolicy::SYSTEM);
+#endif
+}
+
+/**
+ * @tc.name: OnKeyboardAppearanceModeUpdate
+ * @tc.desc: OnKeyboardAppearanceModeUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, OnKeyboardAppearanceModeUpdate, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    webPattern->OnKeyboardAppearanceModeUpdate(WebKeyboardAppearanceMode::DARK_IMMERSIVE);
 #endif
 }
 } // namespace OHOS::Ace::NG

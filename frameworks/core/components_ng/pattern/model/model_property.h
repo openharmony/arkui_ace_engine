@@ -43,9 +43,7 @@ private:                                                                \
 public:                                                                                       \
     void On##name##Update(const type& value)                                                  \
     {                                                                                         \
-        do {                                                                                  \
-            UpdateNeeds##trigger##Setup(true);                                                \
-        } while (false);                                                                      \
+        UpdateNeeds##trigger##Setup(true);                                                    \
     }
 } // namespace OHOS::Ace::NG
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "core/components/common/layout/constants.h"
 #include "core/components/image/image_component.h"
 #include "core/components/image/image_theme.h"
@@ -26,6 +27,9 @@
 #include "core/interfaces/native/implementation/content_transition_effect_peer_impl.h"
 #include "core/interfaces/native/implementation/drawing_color_filter_peer.h"
 #include "core/interfaces/native/implementation/drawing_lattice_peer.h"
+#include "core/drawable/drawable_descriptor.h"
+
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -103,7 +107,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 } // ImageModifier
 namespace ImageInterfaceModifier {
 void SetImageOptionsImpl(Ark_NativePointer node,
-                         const Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent* src,
+                         const Opt_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent* src,
                          const Opt_ImageAIOptions* imageAIOptions)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -131,7 +135,8 @@ void SetImageOptionsImpl(Ark_NativePointer node,
 }
 } // ImageInterfaceModifier
 namespace ImageAttributeModifier {
-void SetAltImpl(Ark_NativePointer node, const Opt_Union_String_Resource_PixelMap_ImageAlt* value)
+void SetAltImpl(Ark_NativePointer node,
+                const Opt_Union_String_Resource_image_PixelMap_ImageAlt* value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -179,7 +184,7 @@ void SetFitOriginalSizeImpl(Ark_NativePointer node,
     ImageModelNG::SetFitOriginSize(frameNode, *convValue);
 }
 void SetFillColorImpl(Ark_NativePointer node,
-                      const Opt_Union_ResourceColor_ColorContent_ColorMetrics* value)
+                      const Opt_Union_ResourceColor_ColorContent_ColorMetricsExt* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -285,7 +290,7 @@ void SetSyncLoadImpl(Ark_NativePointer node,
     ImageModelNG::SetSyncMode(frameNode, *convValue);
 }
 void SetColorFilterImpl(Ark_NativePointer node,
-                        const Opt_Union_ColorFilter_DrawingColorFilter* value)
+                        const Opt_Union_ColorFilter_drawing_ColorFilter* value)
 {
     ImageCommonMethods::ApplyColorFilterValues(node, value);
 }
@@ -396,7 +401,7 @@ void SetOnErrorImpl(Ark_NativePointer node,
     ImageModelNG::SetOnError(frameNode, std::move(onError));
 }
 void SetOnFinishImpl(Ark_NativePointer node,
-                     const Opt_Callback_Void* value)
+                     const Opt_VoidCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -500,7 +505,8 @@ void SetContentTransitionImpl(Ark_NativePointer node, const Opt_ContentTransitio
         ImageModelStatic::SetContentTransition(frameNode, peer->type_);
     }
 }
-void SetAntialiasedImpl(Ark_NativePointer node, const Opt_Boolean* value)
+void SetAntialiasedImpl(Ark_NativePointer node,
+                        const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

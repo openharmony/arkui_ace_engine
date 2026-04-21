@@ -14,10 +14,10 @@
  */
 
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
-#include "test/mock/core/render/mock_paragraph.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 
@@ -1115,6 +1115,8 @@ HWTEST_F(RichEditorChangeCallbackTestNg, HandleOnEditChanged001, TestSize.Level0
      */
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
+    auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    MockPipelineContext::GetCurrent()->SetTextFieldManager(textFieldManager);
 
     richEditorPattern->HandleFocusEvent();
     EXPECT_TRUE(richEditorController->IsEditing());
@@ -1179,6 +1181,8 @@ HWTEST_F(RichEditorChangeCallbackTestNg, HandleOnEditChanged004, TestSize.Level0
      */
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
+    auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    MockPipelineContext::GetCurrent()->SetTextFieldManager(textFieldManager);
 
     GestureEvent info;
     info.SetSourceDevice(SourceType::MOUSE);

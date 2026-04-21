@@ -24,7 +24,7 @@ struct ImageExample{
       Flex({ direction: FlexDirection.Column, alignItems: ItemAlign.Start }) {
         Row() {
           // 加载png格式图片
-          Image($r('app.media.sky'))
+          Image($r('app.media.background'))
             .width(110).height(110).margin(15)
             .overlay('png', { align: Alignment.Bottom, offset: { x: 0, y: 20 } })
             .border({ width: 2, color: Color.Pink })
@@ -44,7 +44,7 @@ struct ImageExample{
             .border({ width: 2, color: Color.Pink })
             .objectFit(ImageFit.TOP_END)
           // 加载jpg格式图片
-          Image($r('app.media.jpg'))
+          Image($r('app.media.startIcon'))
             .width(110).height(110).margin(15)
             .overlay('jpg', { align: Alignment.Bottom, offset: { x: 0, y: 20 } })
             .border({ width: 2, color: Color.Pink })

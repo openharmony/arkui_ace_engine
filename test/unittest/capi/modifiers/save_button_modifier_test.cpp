@@ -375,7 +375,7 @@ HWTEST_F(SaveButtonModifierTest, setOnClickTest, TestSize.Level1)
 {
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     auto checkCallback = [](Ark_VMContext, Ark_Int32 resourceId, Ark_ClickEvent peer,
-            Ark_SaveButtonOnClickResult result, Opt_BusinessError error) {
+            Ark_SaveButtonOnClickResult result, Opt_BusinessErrorInterface_Void error) {
         ASSERT_NE(peer, nullptr);
         auto accessor = GeneratedModifier::GetClickEventAccessor();
         checkEvent = {

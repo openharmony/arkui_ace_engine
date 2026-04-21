@@ -97,6 +97,7 @@ window_scene_support = true
 dynamic_component_support = true
 vsync_timeout_check = true
 state_mgmt_use_aot = true
+relaxed_interaction_support = true
 
 if (defined(preview_support) && preview_support) {
   defines += [ "PREVIEW" ]
@@ -109,6 +110,8 @@ if (defined(image_components_support) && image_components_support) {
 if (defined(video_components_support) && video_components_support) {
   defines += [ "VIDEO_SUPPORTED" ]
 }
+
+defines += [ "NAPI_SCOPE_ERROR_HIVEW_REPORT" ]
 
 if (defined(video_support_jsstack) && video_support_jsstack) {
   defines += [ "SUPPORT_JSSTACK" ]
@@ -211,6 +214,10 @@ if (vsync_timeout_check) {
 
 if (defined(state_mgmt_use_aot) && state_mgmt_use_aot) {
   defines += [ "STATE_MGMT_USE_AOT" ]
+}
+
+if (defined(relaxed_interaction_support) && relaxed_interaction_support) {
+  defines += [ "RELAXED_INTERACTION_SUPPORT" ]
 }
 
 cflags_cc = [

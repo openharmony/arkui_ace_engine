@@ -61,7 +61,7 @@ constexpr double DEFAULT_MAX_ROTATION_ANGLE = 360.0;
 } // namespace
 namespace GestureOpsAccessor {
 Ark_NativePointer CreateTapGestureImpl(const Ark_Number* fingers, const Ark_Number* count,
-    const Ark_Float64 distanceThreshold, Ark_Boolean isFingerCountLimited)
+    Ark_Float64 distanceThreshold, Ark_Boolean isFingerCountLimited)
 {
     int32_t fingerValue = Converter::Convert<int32_t>(*fingers);
     if (fingerValue > DEFAULT_MAX_FINGERS || fingerValue < DEFAULT_TAP_FINGER) {
@@ -184,7 +184,8 @@ Ark_NativePointer CreateGestureGroupImpl(Ark_GestureMode mode)
     gestureGroupObject->IncRefCount();
     return AceType::RawPtr(gestureGroupObject);
 }
-void SetOnActionImpl(Ark_NativePointer gesture, const Callback_GestureEvent_Void* onAction)
+void SetOnActionImpl(Ark_NativePointer gesture,
+                     const GestureEventHandler* onAction)
 {
     auto* gesturePtr = reinterpret_cast<Gesture*>(gesture);
     CHECK_NULL_VOID(gesturePtr);
@@ -194,7 +195,8 @@ void SetOnActionImpl(Ark_NativePointer gesture, const Callback_GestureEvent_Void
     };
     gesturePtr->SetOnActionId(onActionEvent);
 }
-void SetOnActionStartImpl(Ark_NativePointer gesture, const Callback_GestureEvent_Void* onActionStart)
+void SetOnActionStartImpl(Ark_NativePointer gesture,
+                          const GestureEventHandler* onActionStart)
 {
     auto* gesturePtr = reinterpret_cast<Gesture*>(gesture);
     CHECK_NULL_VOID(gesturePtr);
@@ -204,7 +206,8 @@ void SetOnActionStartImpl(Ark_NativePointer gesture, const Callback_GestureEvent
     };
     gesturePtr->SetOnActionStartId(onActionStartEvent);
 }
-void SetOnActionUpdateImpl(Ark_NativePointer gesture, const Callback_GestureEvent_Void* onActionUpdate)
+void SetOnActionUpdateImpl(Ark_NativePointer gesture,
+                           const GestureEventHandler* onActionUpdate)
 {
     auto* gesturePtr = reinterpret_cast<Gesture*>(gesture);
     CHECK_NULL_VOID(gesturePtr);
@@ -214,7 +217,8 @@ void SetOnActionUpdateImpl(Ark_NativePointer gesture, const Callback_GestureEven
     };
     gesturePtr->SetOnActionUpdateId(onActionUpdateEvent);
 }
-void SetOnActionEndImpl(Ark_NativePointer gesture, const Callback_GestureEvent_Void* onActionEnd)
+void SetOnActionEndImpl(Ark_NativePointer gesture,
+                        const GestureEventHandler* onActionEnd)
 {
     auto* gesturePtr = reinterpret_cast<Gesture*>(gesture);
     CHECK_NULL_VOID(gesturePtr);
@@ -224,7 +228,8 @@ void SetOnActionEndImpl(Ark_NativePointer gesture, const Callback_GestureEvent_V
     };
     gesturePtr->SetOnActionEndId(onActionEndEvent);
 }
-void SetOnActionCancelImpl(Ark_NativePointer gesture, const Callback_GestureEvent_Void* onActionCancel)
+void SetOnActionCancelImpl(Ark_NativePointer gesture,
+                           const GestureEventHandler* onActionCancel)
 {
     auto* gesturePtr = reinterpret_cast<Gesture*>(gesture);
     CHECK_NULL_VOID(gesturePtr);
@@ -234,7 +239,8 @@ void SetOnActionCancelImpl(Ark_NativePointer gesture, const Callback_GestureEven
     };
     gesturePtr->SetOnActionCancelId(onActionCancelEvent);
 }
-void SetOnCancelImpl(Ark_NativePointer gesture, const Callback_Void* onCancel)
+void SetOnCancelImpl(Ark_NativePointer gesture,
+                     const synthetic_Callback_Void* onCancel)
 {
     auto* gesturePtr = reinterpret_cast<Gesture*>(gesture);
     CHECK_NULL_VOID(gesturePtr);

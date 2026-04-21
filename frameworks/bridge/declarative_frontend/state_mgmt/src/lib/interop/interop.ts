@@ -15,12 +15,102 @@
 
 
 function isStaticProxy<T extends Object>(obj: T): boolean {
+    const proto = Object.getPrototypeOf(obj);
+    if (proto && proto._isStaticProxy === true) {
+        return true;
+    }
     const prototype = obj?.constructor?.prototype;
     if (prototype === null || prototype === undefined) {
         return false;
     }
     return Object.prototype.hasOwnProperty.call(prototype, '_isStaticProxy') &&
             prototype._isStaticProxy === true;
+}
+
+function isStaticArrayProxy(obj: Object): boolean {
+    const proto = Object.getPrototypeOf(obj);
+    if (proto && Object.prototype.hasOwnProperty.call(proto, 'isStaticArrayProxy_')) {
+        return true;
+    }
+    const prototype = obj?.constructor?.prototype;
+    if (prototype === null || prototype === undefined) {
+        return false;
+    }
+    return Object.prototype.hasOwnProperty.call(prototype, 'isStaticArrayProxy_');
+}
+
+function isStaticMapProxy(obj: Object): boolean {
+    const proto = Object.getPrototypeOf(obj);
+    if (proto && Object.prototype.hasOwnProperty.call(proto, 'isStaticMapProxy_')) {
+        return true;
+    }
+    const prototype = obj?.constructor?.prototype;
+    if (prototype === null || prototype === undefined) {
+        return false;
+    }
+    return Object.prototype.hasOwnProperty.call(prototype, 'isStaticMapProxy_');
+}
+
+function isStaticSetProxy(obj: Object): boolean {
+      const proto = Object.getPrototypeOf(obj);
+    if (proto && Object.prototype.hasOwnProperty.call(proto, 'isStaticSetProxy_')) {
+        return true;
+    }
+    const prototype = obj?.constructor?.prototype;
+    if (prototype === null || prototype === undefined) {
+        return false;
+    }
+    return Object.prototype.hasOwnProperty.call(prototype, 'isStaticSetProxy_');
+}
+
+function deepCopyStaticProxy(
+    obj: any,
+    recursiveCopy: (value: any) => any,
+    copiedObjects: Map<Object, Object>
+): any {
+    if (!isStaticProxy(obj)) {
+        return undefined;
+    }
+
+    let copy: any;
+
+    if (isStaticArrayProxy(obj)) {
+        copy = [];
+        copiedObjects.set(obj, copy);
+        obj.forEach((item: any, index: number) => {
+            copy[index] = recursiveCopy(item);
+        });
+    } else if (isStaticMapProxy(obj)) {
+        copy = new Map<any, any>();
+        copiedObjects.set(obj, copy);
+        obj.forEach((mapValue: any, mapKey: any) => {
+            copy.set(mapKey, recursiveCopy(mapValue));
+        });
+    } else if (isStaticSetProxy(obj)) {
+        copy = new Set<any>();
+        copiedObjects.set(obj, copy);
+        obj.forEach((setValue: any) => {
+            copy.add(recursiveCopy(setValue));
+        });
+    } else {
+        try {
+            if (InteropExtractorModule.isCloneableObject?.(obj)) {
+                copy = InteropExtractorModule.cloneCloneableObject?.(obj);
+                copiedObjects.set(obj, copy);
+                return copy;
+            }
+            copy = {};
+            copiedObjects.set(obj, copy);
+            Object.keys(JSON.parse(globalThis.Panda?.STValue?.toJSON?.(obj))).forEach(
+                (objKey: any) => {
+                    copy[objKey] = recursiveCopy(obj[objKey]);
+                }
+            );
+        } catch (e) {
+            throw new Error(`Illegal usage of Static object assignment to @Prop is not allowed.`);
+        }
+    }
+    return copy;
 }
 
 class SubscribeInterop implements ISinglePropertyChangeSubscriber<Object>{
@@ -59,10 +149,9 @@ class SubscribeInterop implements ISinglePropertyChangeSubscriber<Object>{
 type setValue<T> = (value: T) => void;
 type WatchFuncType = (propertyName: string) => void;
 
-function createStateVariable<T>(staticState: Object, value: T, setValueCallback: setValue<T>, notifyCallback: () => void): ObservedPropertyPU<T> {
+function createStateVariable<T>(staticState: Object, value: T, setValueCallback: setValue<T>): ObservedPropertyPU<T> {
     const proxy = new ObservedPropertyPU(value, undefined, 'proxy');
     proxy._setInteropValueForStaticState = setValueCallback;
-    proxy._notifyInteropFireChange = notifyCallback;
     proxy.setProxy(staticState);
     return proxy;
 }
@@ -71,9 +160,6 @@ function updateSetValueCallback(observedProperty, setValueCallback): void {
     observedProperty._setInteropValueForStaticState = setValueCallback;
 }
 
-function updateNotifyCallback(observedProperty, notifyCallback): void {
-    observedProperty._notifyInteropFireChange = notifyCallback;
-}
 
 function viewPUCreate(component: ViewPU): void {
     ViewPU.create(component);
@@ -182,6 +268,21 @@ function createObservedObject(value: Object): Object {
     return value;
 }
 
+function createV2ObservedObject(value: Object): Object {
+    if (!ObserveV2.IsObservedObjectV2(value) && !ObserveV2.IsMakeObserved(value) && !ObserveV2.IsProxiedObservedV2(value)) {
+        value = ObserveV2.autoProxyObject({ interopV2Value: value }, 'interopV2Value');
+    }
+    return value;
+}
+
 function invokeObserveFireChange(target: Object, key: string): void {
     ObserveV2.getObserve().fireChange(RefInfo.get(UIUtilsImpl.instance().getTarget(target)), key);
+}
+
+function createMutableBinding(getter: () => Object, setter: (newValue: Object) => void): MutableBinding<Object> {
+    return UIUtilsImpl.instance().makeBinding(getter, setter);
+}
+
+function createBinding(getter: () => Object): Binding<Object> {
+    return UIUtilsImpl.instance().makeBinding(getter);
 }

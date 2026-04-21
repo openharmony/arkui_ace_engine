@@ -17,11 +17,12 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_FOCUS_HANDLER_H
 
 #include "focus_state.h"
-#include "core/event/focus_axis_event.h"
 #include "core/event/crown_event.h"
 #include "core/event/key_event.h"
 #include "core/gestures/gesture_event.h"
 namespace OHOS::Ace::NG {
+struct FocusAxisEvent;
+
 #define ACE_DEFINE_FOCUS_EVENT(func, type, name)                               \
 public:                                                                        \
     void Set##func(type&& (name))                                              \

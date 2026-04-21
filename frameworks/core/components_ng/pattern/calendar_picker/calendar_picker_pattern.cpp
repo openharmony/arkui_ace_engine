@@ -62,6 +62,9 @@ void CalendarPickerPattern::OnModifyDone()
     pipelineContext->AddWindowSizeChangeCallback(host->GetId());
     UpdateEntryButtonColor();
     UpdateEntryButtonBorderWidth();
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        UpdateHostEntryBorderColor();
+    }
     UpdateAccessibilityText();
 }
 
@@ -120,9 +123,7 @@ void CalendarPickerPattern::UpdateEntryButtonColor()
     auto buttonFlexNode = host->GetLastChild();
     CHECK_NULL_VOID(buttonFlexNode);
 
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    RefPtr<CalendarTheme> theme = host->GetTheme<CalendarTheme>(true);
     CHECK_NULL_VOID(theme);
 
     int32_t buttonIndex = 0;
@@ -162,9 +163,7 @@ void CalendarPickerPattern::UpdateEntryButtonBorderWidth()
     CHECK_NULL_VOID(host);
     auto buttonFlexNode = host->GetLastChild();
     CHECK_NULL_VOID(buttonFlexNode);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    RefPtr<CalendarTheme> theme = host->GetTheme<CalendarTheme>(true);
     CHECK_NULL_VOID(theme);
 
     auto addButtonNode = AceType::DynamicCast<FrameNode>(buttonFlexNode->GetChildAtIndex(ADD_BUTTON_INDEX));
@@ -190,6 +189,19 @@ void CalendarPickerPattern::UpdateEntryButtonBorderWidth()
     subButtonNode->GetLayoutProperty()->UpdateBorderWidth(subBorderWidth);
     addButtonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     subButtonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void CalendarPickerPattern::UpdateHostEntryBorderColor()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    RefPtr<CalendarTheme> theme = host->GetTheme<CalendarTheme>(true);
+    CHECK_NULL_VOID(theme);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    BorderColorProperty borderColor;
+    borderColor.SetColor(theme->GetEntryBorderColor());
+    renderContext->UpdateBorderColor(borderColor);
 }
 
 void CalendarPickerPattern::UpdateEdgeAlign()
@@ -404,9 +416,7 @@ void CalendarPickerPattern::ResetTextStateByNode(const RefPtr<FrameNode>& textFr
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<CalendarPickerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    RefPtr<CalendarTheme> calendarTheme = pipeline->GetTheme<CalendarTheme>();
+    RefPtr<CalendarTheme> calendarTheme = host->GetTheme<CalendarTheme>(true);
     CHECK_NULL_VOID(calendarTheme);
     textFrameNode->GetRenderContext()->UpdateForegroundColor(
         layoutProperty->GetColor().value_or(calendarTheme->GetEntryFontColor()));
@@ -462,7 +472,10 @@ bool CalendarPickerPattern::ReportChangeEvent(const std::string& compName,
 
 void CalendarPickerPattern::FireChangeEvents(const std::string& info)
 {
-    ReportChangeEvent("CalendarPicker", "onChange", info);
+    if (!IsDialogShow()) {
+        ReportChangeEvent("CalendarPicker", "onChange", info);
+    }
+
     auto eventHub = GetEventHub<CalendarPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->UpdateInputChangeEvent(info);
@@ -933,9 +946,7 @@ void CalendarPickerPattern::HandleTextFocusEvent(int32_t index)
     CHECK_NULL_VOID(contentNode);
     auto textFrameNode = DynamicCast<FrameNode>(contentNode->GetChildAtIndex(index));
     CHECK_NULL_VOID(textFrameNode);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    RefPtr<CalendarTheme> theme = host->GetTheme<CalendarTheme>(true);
     CHECK_NULL_VOID(theme);
     textFrameNode->GetRenderContext()->UpdateBackgroundColor(theme->GetSelectBackgroundColor());
     textFrameNode->GetRenderContext()->UpdateForegroundColor(Color::WHITE);
@@ -956,9 +967,7 @@ void CalendarPickerPattern::HandleTextHoverEvent(bool state, int32_t index)
     CHECK_NULL_VOID(contentNode);
     auto textFrameNode = DynamicCast<FrameNode>(contentNode->GetChildAtIndex(index));
     CHECK_NULL_VOID(textFrameNode);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    RefPtr<CalendarTheme> theme = host->GetTheme<CalendarTheme>(true);
     CHECK_NULL_VOID(theme);
     if (state) {
         textFrameNode->GetRenderContext()->UpdateBackgroundColor(theme->GetBackgroundHoverColor());
@@ -978,9 +987,7 @@ void CalendarPickerPattern::FlushAddAndSubButton()
     auto buttonFlexNode = AceType::DynamicCast<FrameNode>(host->GetLastChild());
     CHECK_NULL_VOID(buttonFlexNode);
 
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    RefPtr<CalendarTheme> theme = host->GetTheme<CalendarTheme>(true);
     CHECK_NULL_VOID(theme);
     int32_t buttonIndex = 0;
     for (const auto& child : buttonFlexNode->GetChildren()) {
@@ -1038,9 +1045,7 @@ void CalendarPickerPattern::HandleButtonTouchEvent(bool isPressed, int32_t index
     CHECK_NULL_VOID(buttonFlexNode);
     auto buttonFrameNode = DynamicCast<FrameNode>(buttonFlexNode->GetChildAtIndex(index));
     CHECK_NULL_VOID(buttonFrameNode);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    RefPtr<CalendarTheme> theme = host->GetTheme<CalendarTheme>(true);
     CHECK_NULL_VOID(theme);
     if (isPressed) {
         buttonFrameNode->GetRenderContext()->UpdateBackgroundColor(theme->GetBackgroundPressColor());
@@ -1199,7 +1204,7 @@ OffsetF CalendarPickerPattern::CalculateDialogOffset()
 
     auto pipelineContext = host->GetContext();
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
-    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    RefPtr<CalendarTheme> theme = host->GetTheme<CalendarTheme>(true);
     CHECK_NULL_RETURN(theme, OffsetF());
 
     float dialogHeight = pipelineContext->GetRootHeight();
@@ -1270,24 +1275,40 @@ void CalendarPickerPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(host);
     auto pickerProperty = host->GetLayoutProperty<CalendarPickerLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto calendarTheme = pipelineContext->GetTheme<CalendarTheme>(host->GetThemeScopeId());
+    auto calendarTheme = host->GetTheme<CalendarTheme>(true);
     CHECK_NULL_VOID(calendarTheme);
     if (!pickerProperty->GetNormalTextColorSetByUser().value_or(false)) {
         pickerProperty->UpdateColor(calendarTheme->GetEntryFontColor());
     }
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    BorderColorProperty borderColor;
-    borderColor.SetColor(calendarTheme->GetEntryBorderColor());
-    renderContext->UpdateBorderColor(borderColor);
+    UpdateHostEntryBorderColor();
 
     if (IsDialogShow()) {
         return;
     }
     selected_ = CalendarPickerSelectedType::OTHER;
     ResetTextState();
+}
+
+bool CalendarPickerPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return false;
+    }
+    auto layoutProperty = host->GetLayoutProperty<CalendarPickerLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    host->SetNeedCallChildrenUpdate(false);
+    // Host entry border is only applied in OnColorConfigurationUpdate; FrameNode::OnThemeScopeUpdate does not
+    // call it, so WithTheme scope changes left the outer border stale (often transparent Color() from wrong scope).
+    OnColorConfigurationUpdate();
+    if (!layoutProperty->GetNormalTextColorSetByUser().value_or(false)) {
+        OnModifyDone();
+    } else {
+        UpdateEntryButtonColor();
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+    return true;
 }
 
 std::string CalendarPickerPattern::GetEntryDateInfo()
@@ -1496,12 +1517,12 @@ void CalendarPickerPattern::UpdateTextStyle(const PickerTextStyle& textStyle)
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto calendarTheme = pipelineContext->GetTheme<CalendarTheme>(host->GetThemeScopeId());
+    auto calendarTheme = host->GetTheme<CalendarTheme>(true);
     CHECK_NULL_VOID(calendarTheme);
     auto pickerProperty = host->GetLayoutProperty<CalendarPickerLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
 
-    if (pipelineContext->IsSystmColorChange()) {
+    if (pipelineContext->IsSystemColorChange()) {
         Color defaultColor = pickerProperty->GetColor().value_or(calendarTheme->GetEntryFontColor());
         pickerProperty->UpdateColor(textStyle.textColor.value_or(defaultColor));
 

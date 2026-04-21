@@ -14,16 +14,10 @@
  */
 
 // SORTED_SECTION
-#include "core/common/container.h"
-#include "core/components/common/properties/text_layout_info.h"
-#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/view_abstract_model_static.h"
-#include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_model_static.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -81,7 +75,7 @@ void SetPaddingImpl(Ark_NativePointer node, const Opt_Union_Padding_Length_Local
         TextFieldModelStatic::SetPadding(frameNode, NG::PaddingProperty(), true);
     }
 }
-void SetMarginImpl(Ark_NativePointer node, const Opt_Union_Margin_Length_LocalizedMargin* value)
+void SetMarginImpl(Ark_NativePointer node, const Opt_Union_Padding_Length_LocalizedPadding* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -171,7 +165,7 @@ void SetBorderRadiusImpl(Ark_NativePointer node, const Opt_Union_Length_BorderRa
     ViewAbstractModelStatic::SetBorderRadius(frameNode, radiuses.value());
     TextFieldModelStatic::SetBackBorder(frameNode);
 }
-void SetBackgroundColorImpl(Ark_NativePointer node, const Opt_Union_ResourceColor_ColorMetrics* value)
+void SetBackgroundColorImpl(Ark_NativePointer node, const Opt_Union_ResourceColor_ColorMetricsExt* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

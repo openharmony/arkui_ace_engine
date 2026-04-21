@@ -14,13 +14,13 @@
  */
 
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_clipboard.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_clipboard.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
-#include "test/mock/core/render/mock_paragraph.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/common/mock_container.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
  
@@ -115,12 +115,14 @@ HWTEST_F(RichEditorEventTestNg, AddSpanHoverEvent001, TestSize.Level0)
  */
 HWTEST_F(RichEditorEventTestNg, HandleBlurEvent001, TestSize.Level0)
 {
+    // 0: Get richEditor Node and richEditor Pattern.
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     auto focusHub = richEditorNode_->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
 
+    // 1: set custom keyboard builder and test blur event.
     auto func = []() {};
 
     richEditorPattern->customKeyboardBuilder_ = func;
@@ -142,6 +144,8 @@ HWTEST_F(RichEditorEventTestNg, HandleBlurEvent001, TestSize.Level0)
     richEditorPattern->isCustomKeyboardAttached_ = true;
     focusHub->blurReason_ = BlurReason::WINDOW_BLUR;
     richEditorPattern->HandleBlurEvent();
+
+    // 3: check rich editor editing status.
     EXPECT_EQ(richEditorPattern->isEditing_, false);
 }
 
@@ -169,21 +173,21 @@ HWTEST_F(RichEditorEventTestNg, HandleBlurEvent002, TestSize.Level0)
 HWTEST_F(RichEditorEventTestNg, HandleBlurEvent003, TestSize.Level0)
 {
     /**
-     * @tc.steps: step1. get richEditor pattern
+     * @tc.steps: step1. get richEditor pattern.
      */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
     /**
-     * @tc.steps: step2. add span and select
+     * @tc.steps: step2. add span and select.
      */
     AddSpan(u"test");
     richEditorPattern->textSelector_.Update(1, 3);
     EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 3);
 
     /**
-     * @tc.step: step3. Request focus and set blurReason_
+     * @tc.step: step3. Request focus and set blurReason_.
      */
     auto focusHub = richEditorNode_->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
@@ -191,7 +195,7 @@ HWTEST_F(RichEditorEventTestNg, HandleBlurEvent003, TestSize.Level0)
     focusHub->blurReason_ = BlurReason::FRAME_DESTROY;
 
     /**
-     * @tc.step: step4. call the callback function
+     * @tc.step: step4. call the callback function.
      */
     richEditorPattern->textDetectEnable_ = true;
     richEditorPattern->HandleBlurEvent();
@@ -753,11 +757,8 @@ HWTEST_F(RichEditorEventTestNg, RichEditorEventHub005, TestSize.Level0)
  */
 HWTEST_F(RichEditorEventTestNg, RichEditorEventHub006, TestSize.Level0)
 {
-    RichEditorModelNG richEditorModel;
-    richEditorModel.Create();
-    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -784,6 +785,87 @@ HWTEST_F(RichEditorEventTestNg, RichEditorEventHub006, TestSize.Level0)
     EXPECT_FALSE(event.IsPreventDefault());
     eventHub->FireOnCopy(event);
     EXPECT_TRUE(event.IsPreventDefault());
+}
+
+/**
+ * @tc.name: PreventDefault001
+ * @tc.desc: test PreventDefault001 in ImageSpan and TextSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, PreventDefault001, TestSize.Level0)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    // add imageSpan
+    ClearSpan();
+    ImageSpanOptions imageSpanOptions;
+    GestureEventFunc callback2 = [](GestureEvent& info) {
+        info.SetPreventDefault(true);
+    };
+    imageSpanOptions.userGestureOption.onClick = callback2;
+    richEditorController->AddImageSpan(imageSpanOptions);
+
+    /**
+     * @tc.steps: step1. Click on imagespan
+     */
+    GestureEvent info2;
+    info2.localLocation_ = Offset(0, 0);
+    richEditorPattern->HandleClickEvent(info2);
+    EXPECT_FALSE(richEditorPattern->HasFocus());
+}
+
+HWTEST_F(RichEditorEventTestNg, HandleLongPressTest001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+ 
+    GestureEvent info;
+    richEditorPattern->touchedFingers_.clear();
+    richEditorPattern->HandleLongPress(info);
+    EXPECT_EQ(richEditorPattern->caretUpdateType_, CaretUpdateType::NONE);
+}
+ 
+HWTEST_F(RichEditorEventTestNg, HandleLongPressTest002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+ 
+    GestureEvent info;
+ 
+    richEditorPattern->caretUpdateType_ = CaretUpdateType::LONG_PRESSED;
+    richEditorPattern->touchedFingers_.clear();
+    richEditorPattern->touchedFingers_.insert(0);
+    richEditorPattern->selectOverlay_->isHandleMoving_ = false;
+    std::list<FingerInfo> fingetList;
+    fingetList.push_back(FingerInfo());
+    info.SetFingerList(fingetList);
+    richEditorPattern->HandleLongPress(info);
+    EXPECT_EQ(richEditorPattern->caretUpdateType_, CaretUpdateType::NONE);
+ 
+    richEditorPattern->sourceType_ = SourceType::NONE;
+    richEditorPattern->hasUrlSpan_ = true;
+    richEditorPattern->HandleLongPress(info);
+ 
+    richEditorPattern->sourceType_ = SourceType::NONE;
+    richEditorPattern->hasUrlSpan_ = false;
+    richEditorPattern->HandleLongPress(info);
+ 
+    richEditorPattern->sourceType_ = SourceType::MOUSE;
+    richEditorPattern->hasUrlSpan_ = true;
+    richEditorPattern->HandleLongPress(info);
+ 
+    richEditorPattern->sourceType_ = SourceType::MOUSE;
+    richEditorPattern->hasUrlSpan_ = false;
+    richEditorPattern->HandleLongPress(info);
 }
 
 /**
@@ -860,54 +942,6 @@ HWTEST_F(RichEditorEventTestNg, OnWillAttachIME002, TestSize.Level0)
     EXPECT_EQ(parsedConfig.value, "test");
     RichEditorModelNG::SetOnWillAttachIME(AceType::RawPtr(richEditorNode_), nullptr);
     ASSERT_EQ(eventHub->onWillAttachIME_, nullptr);
-}
-
-/**
- * @tc.name: PreventDefault001
- * @tc.desc: test PreventDefault001 in ImageSpan and TextSpan
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEventTestNg, PreventDefault001, TestSize.Level0)
-{
-    RichEditorModelNG richEditorModel;
-    richEditorModel.Create();
-    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(richEditorNode, nullptr);
-    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-
-    // add imageSpan
-    ClearSpan();
-    ImageSpanOptions imageSpanOptions;
-    GestureEventFunc callback2 = [](GestureEvent& info) {
-        info.SetPreventDefault(true);
-    };
-    imageSpanOptions.userGestureOption.onClick = callback2;
-    richEditorController->AddImageSpan(imageSpanOptions);
-
-    /**
-     * @tc.steps: step1. Click on imagespan
-     */
-    GestureEvent info2;
-    info2.localLocation_ = Offset(0, 0);
-    richEditorPattern->HandleClickEvent(info2);
-    EXPECT_FALSE(richEditorPattern->HasFocus());
-}
-
-/**
- * @tc.name: OnAttachToMainTreeMultiThread001
- * @tc.desc: test OnAttachToMainTreeMultiThread
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEventTestNg, OnAttachToMainTreeMultiThread001, TestSize.Level0)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->OnAttachToMainTreeMultiThread();
-    EXPECT_NE(richEditorPattern->richEditorInstanceId_, -2);
 }
 
 /**

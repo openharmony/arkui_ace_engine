@@ -14,7 +14,7 @@
  */
 
 /**
- * 测试LayeredDrawableDescriptor
+ * 测试 LayeredDrawableDescriptor
  */
 import { DrawableDescriptor, LayeredDrawableDescriptor, PixelMapDrawableDescriptor } from '@kit.ArkUI'
 import { image } from '@kit.ImageKit'
@@ -35,9 +35,9 @@ struct DrawableTestCase1 {
   async aboutToAppear() {
     this.fore = await this.getPixmapFromMedia($r('app.media.foreground'))
     this.back = await this.getPixmapFromMedia($r('app.media.background'))
-    this.maskPixel = await this.getPixmapFromMedia($r('app.media.mask'))
+    this.maskPixel = await this.getPixmapFromMedia($r('app.media.foreground'))
 
-    // 使用PixelMapDrawableDescriptor创建LayeredDrawableDescriptor
+    // 使用 PixelMapDrawableDescriptor 创建 LayeredDrawableDescriptor
     this.foregroundDraw = new PixelMapDrawableDescriptor(this.fore)
     this.backgroundDraw = new PixelMapDrawableDescriptor(this.back)
     this.maskDraw = new PixelMapDrawableDescriptor(this.maskPixel)
@@ -81,9 +81,13 @@ struct DrawableTestCase1 {
     .backgroundColor(Color.Pink)
   }
 
-  // 根据资源，通过图片框架获取pixelMap
+  // 根据资源，通过图片框架获取 pixelMap
   private async getPixmapFromMedia(resource: Resource) {
-    let unit8Array = await getContext(this)?.resourceManager?.getMediaContent({
+    let context = this.getUIContext().getHostContext();
+    if (!context) {
+      return undefined;
+    }
+    let unit8Array = await context.resourceManager.getMediaContent({
       bundleName: resource.bundleName,
       moduleName: resource.moduleName,
       id: resource.id
@@ -96,4 +100,3 @@ struct DrawableTestCase1 {
     return createPixelMap
   }
 }
-

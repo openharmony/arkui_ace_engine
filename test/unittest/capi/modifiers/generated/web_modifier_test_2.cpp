@@ -37,7 +37,7 @@ HWTEST_F(WebModifierTest, setPinchSmoothTestPinchSmoothValidValues, TestSize.Lev
         modifier_->setPinchSmooth(node_, inputValuePinchSmooth);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PINCH_SMOOTH_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setPinchSmooth, attribute: pinchSmooth";
     };
 
@@ -54,10 +54,10 @@ HWTEST_F(WebModifierTest, setPinchSmoothTestPinchSmoothValidValues, TestSize.Lev
 HWTEST_F(WebModifierTest, setAllowWindowOpenMethodTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ALLOW_WINDOW_OPEN_METHOD_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ALLOW_WINDOW_OPEN_METHOD_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ALLOW_WINDOW_OPEN_METHOD_DEFAULT_VALUE)) <<
         "Default value for attribute 'allowWindowOpenMethod'";
 }
 
@@ -81,7 +81,7 @@ HWTEST_F(WebModifierTest, setAllowWindowOpenMethodTestAllowWindowOpenMethodValid
         modifier_->setAllowWindowOpenMethod(node_, inputValueAllowWindowOpenMethod);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ALLOW_WINDOW_OPEN_METHOD_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setAllowWindowOpenMethod, attribute: allowWindowOpenMethod";
     };
 
@@ -98,10 +98,10 @@ HWTEST_F(WebModifierTest, setAllowWindowOpenMethodTestAllowWindowOpenMethodValid
 HWTEST_F(WebModifierTest, DISABLED_setJavaScriptOnDocumentStartTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_JAVA_SCRIPT_ON_DOCUMENT_START_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_JAVA_SCRIPT_ON_DOCUMENT_START_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_JAVA_SCRIPT_ON_DOCUMENT_START_DEFAULT_VALUE)) <<
         "Default value for attribute 'javaScriptOnDocumentStart'";
 }
 
@@ -123,10 +123,10 @@ HWTEST_F(WebModifierTest, DISABLED_setJavaScriptOnDocumentStartTestValidValues, 
 HWTEST_F(WebModifierTest, DISABLED_setJavaScriptOnDocumentEndTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_JAVA_SCRIPT_ON_DOCUMENT_END_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_JAVA_SCRIPT_ON_DOCUMENT_END_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_JAVA_SCRIPT_ON_DOCUMENT_END_DEFAULT_VALUE)) <<
         "Default value for attribute 'javaScriptOnDocumentEnd'";
 }
 
@@ -148,10 +148,10 @@ HWTEST_F(WebModifierTest, DISABLED_setJavaScriptOnDocumentEndTestValidValues, Te
 HWTEST_F(WebModifierTest, setLayoutModeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LAYOUT_MODE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_LAYOUT_MODE_DEFAULT_VALUE) << "Default value for attribute 'layoutMode'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_LAYOUT_MODE_DEFAULT_VALUE)) << "Default value for attribute 'layoutMode'";
 }
 
 /*
@@ -174,7 +174,7 @@ HWTEST_F(WebModifierTest, setLayoutModeTestLayoutModeValidValues, TestSize.Level
         modifier_->setLayoutMode(node_, inputValueLayoutMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LAYOUT_MODE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setLayoutMode, attribute: layoutMode";
     };
 
@@ -203,7 +203,7 @@ HWTEST_F(WebModifierTest, setLayoutModeTestLayoutModeInvalidValues, TestSize.Lev
         modifier_->setLayoutMode(node_, inputValueLayoutMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LAYOUT_MODE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_LAYOUT_MODE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_LAYOUT_MODE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setLayoutMode, attribute: layoutMode";
     };
 
@@ -220,32 +220,31 @@ HWTEST_F(WebModifierTest, setLayoutModeTestLayoutModeInvalidValues, TestSize.Lev
 HWTEST_F(WebModifierTest, DISABLED_setNestedScrollTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultNestedScroll =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
-    std::string resultStr;
+    std::unique_ptr<JsonValue> resultNestedScroll = GetAttrObject(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_FORWARD_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_FORWARD_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_NESTED_SCROLL_I_SCROLL_FORWARD_DEFAULT_VALUE)) <<
         "Default value for attribute 'nestedScroll.NestedScrollOptions.scrollForward'";
 
     resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_BACKWARD_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_BACKWARD_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_NESTED_SCROLL_I_SCROLL_BACKWARD_DEFAULT_VALUE)) <<
         "Default value for attribute 'nestedScroll.NestedScrollOptions.scrollBackward'";
 
     resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_UP_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_UP_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_NESTED_SCROLL_I_SCROLL_UP_DEFAULT_VALUE)) <<
         "Default value for attribute 'nestedScroll.NestedScrollOptionsExt.scrollUp'";
 
     resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_DOWN_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_DOWN_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_NESTED_SCROLL_I_SCROLL_DOWN_DEFAULT_VALUE)) <<
         "Default value for attribute 'nestedScroll.NestedScrollOptionsExt.scrollDown'";
 
     resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_RIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_RIGHT_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_NESTED_SCROLL_I_SCROLL_RIGHT_DEFAULT_VALUE)) <<
         "Default value for attribute 'nestedScroll.NestedScrollOptionsExt.scrollRight'";
 
     resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_LEFT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_LEFT_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_NESTED_SCROLL_I_SCROLL_LEFT_DEFAULT_VALUE)) <<
         "Default value for attribute 'nestedScroll.NestedScrollOptionsExt.scrollLeft'";
 }
 
@@ -272,9 +271,9 @@ HWTEST_F(WebModifierTest, DISABLED_setNestedScrollTestNestedScrollNestedScrollOp
         WriteToUnion<Ark_NestedScrollOptions>(inputValueNestedScroll).scrollForward = value;
         modifier_->setNestedScroll(node_, &inputValueNestedScroll);
         auto jsonValue = GetJsonValue(node_);
-        auto resultNestedScroll = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
+        auto resultNestedScroll = GetAttrObject(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
         auto resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_FORWARD_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input
             << ", method: setNestedScroll, attribute: nestedScroll.NestedScrollOptions.scrollForward";
     };
@@ -307,9 +306,9 @@ HWTEST_F(WebModifierTest, DISABLED_setNestedScrollTestNestedScrollNestedScrollOp
         WriteToUnion<Ark_NestedScrollOptions>(inputValueNestedScroll).scrollForward = value;
         modifier_->setNestedScroll(node_, &inputValueNestedScroll);
         auto jsonValue = GetJsonValue(node_);
-        auto resultNestedScroll = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
+        auto resultNestedScroll = GetAttrObject(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
         auto resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_FORWARD_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_FORWARD_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_NESTED_SCROLL_I_SCROLL_FORWARD_DEFAULT_VALUE)) <<
             "Input value is: " << input
             << ", method: setNestedScroll, attribute: nestedScroll.NestedScrollOptions.scrollForward";
     };
@@ -342,9 +341,9 @@ HWTEST_F(WebModifierTest, DISABLED_setNestedScrollTestNestedScrollNestedScrollOp
         WriteToUnion<Ark_NestedScrollOptions>(inputValueNestedScroll).scrollBackward = value;
         modifier_->setNestedScroll(node_, &inputValueNestedScroll);
         auto jsonValue = GetJsonValue(node_);
-        auto resultNestedScroll = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
+        auto resultNestedScroll = GetAttrObject(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
         auto resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_BACKWARD_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input
             << ", method: setNestedScroll, attribute: nestedScroll.NestedScrollOptions.scrollBackward";
     };
@@ -377,9 +376,9 @@ HWTEST_F(WebModifierTest, DISABLED_setNestedScrollTestNestedScrollNestedScrollOp
         WriteToUnion<Ark_NestedScrollOptions>(inputValueNestedScroll).scrollBackward = value;
         modifier_->setNestedScroll(node_, &inputValueNestedScroll);
         auto jsonValue = GetJsonValue(node_);
-        auto resultNestedScroll = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
+        auto resultNestedScroll = GetAttrObject(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
         auto resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_BACKWARD_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_BACKWARD_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_NESTED_SCROLL_I_SCROLL_BACKWARD_DEFAULT_VALUE)) <<
             "Input value is: " << input
             << ", method: setNestedScroll, attribute: nestedScroll.NestedScrollOptions.scrollBackward";
     };
@@ -415,9 +414,9 @@ HWTEST_F(WebModifierTest, setNestedScrollTestNestedScrollNestedScrollOptionsExtS
         WriteToUnion<Ark_NestedScrollOptionsExt>(inputValueNestedScroll).scrollUp = value;
         modifier_->setNestedScroll(node_, &inputValueNestedScroll);
         auto jsonValue = GetJsonValue(node_);
-        auto resultNestedScroll = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
+        auto resultNestedScroll = GetAttrObject(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
         auto resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_UP_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input
             << ", method: setNestedScroll, attribute: nestedScroll.NestedScrollOptionsExt.scrollUp";
     };
@@ -453,9 +452,9 @@ HWTEST_F(WebModifierTest, setNestedScrollTestNestedScrollNestedScrollOptionsExtS
         WriteToUnion<Ark_NestedScrollOptionsExt>(inputValueNestedScroll).scrollUp = value;
         modifier_->setNestedScroll(node_, &inputValueNestedScroll);
         auto jsonValue = GetJsonValue(node_);
-        auto resultNestedScroll = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
+        auto resultNestedScroll = GetAttrObject(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
         auto resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_UP_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_UP_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_NESTED_SCROLL_I_SCROLL_UP_DEFAULT_VALUE)) <<
             "Input value is: " << input
             << ", method: setNestedScroll, attribute: nestedScroll.NestedScrollOptionsExt.scrollUp";
     };
@@ -491,9 +490,9 @@ HWTEST_F(WebModifierTest, setNestedScrollTestNestedScrollNestedScrollOptionsExtS
         WriteToUnion<Ark_NestedScrollOptionsExt>(inputValueNestedScroll).scrollDown = value;
         modifier_->setNestedScroll(node_, &inputValueNestedScroll);
         auto jsonValue = GetJsonValue(node_);
-        auto resultNestedScroll = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
+        auto resultNestedScroll = GetAttrObject(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
         auto resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_DOWN_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input
             << ", method: setNestedScroll, attribute: nestedScroll.NestedScrollOptionsExt.scrollDown";
     };
@@ -529,9 +528,9 @@ HWTEST_F(WebModifierTest, setNestedScrollTestNestedScrollNestedScrollOptionsExtS
         WriteToUnion<Ark_NestedScrollOptionsExt>(inputValueNestedScroll).scrollDown = value;
         modifier_->setNestedScroll(node_, &inputValueNestedScroll);
         auto jsonValue = GetJsonValue(node_);
-        auto resultNestedScroll = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
+        auto resultNestedScroll = GetAttrObject(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
         auto resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_DOWN_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_DOWN_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_NESTED_SCROLL_I_SCROLL_DOWN_DEFAULT_VALUE)) <<
             "Input value is: " << input
             << ", method: setNestedScroll, attribute: nestedScroll.NestedScrollOptionsExt.scrollDown";
     };
@@ -567,9 +566,9 @@ HWTEST_F(WebModifierTest, setNestedScrollTestNestedScrollNestedScrollOptionsExtS
         WriteToUnion<Ark_NestedScrollOptionsExt>(inputValueNestedScroll).scrollRight = value;
         modifier_->setNestedScroll(node_, &inputValueNestedScroll);
         auto jsonValue = GetJsonValue(node_);
-        auto resultNestedScroll = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
+        auto resultNestedScroll = GetAttrObject(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
         auto resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_RIGHT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input
             << ", method: setNestedScroll, attribute: nestedScroll.NestedScrollOptionsExt.scrollRight";
     };
@@ -606,9 +605,9 @@ HWTEST_F(
         WriteToUnion<Ark_NestedScrollOptionsExt>(inputValueNestedScroll).scrollRight = value;
         modifier_->setNestedScroll(node_, &inputValueNestedScroll);
         auto jsonValue = GetJsonValue(node_);
-        auto resultNestedScroll = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
+        auto resultNestedScroll = GetAttrObject(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
         auto resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_RIGHT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_RIGHT_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_NESTED_SCROLL_I_SCROLL_RIGHT_DEFAULT_VALUE)) <<
             "Input value is: " << input
             << ", method: setNestedScroll, attribute: nestedScroll.NestedScrollOptionsExt.scrollRight";
     };
@@ -644,9 +643,9 @@ HWTEST_F(WebModifierTest, setNestedScrollTestNestedScrollNestedScrollOptionsExtS
         WriteToUnion<Ark_NestedScrollOptionsExt>(inputValueNestedScroll).scrollLeft = value;
         modifier_->setNestedScroll(node_, &inputValueNestedScroll);
         auto jsonValue = GetJsonValue(node_);
-        auto resultNestedScroll = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
+        auto resultNestedScroll = GetAttrObject(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
         auto resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_LEFT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input
             << ", method: setNestedScroll, attribute: nestedScroll.NestedScrollOptionsExt.scrollLeft";
     };
@@ -682,9 +681,9 @@ HWTEST_F(WebModifierTest, setNestedScrollTestNestedScrollNestedScrollOptionsExtS
         WriteToUnion<Ark_NestedScrollOptionsExt>(inputValueNestedScroll).scrollLeft = value;
         modifier_->setNestedScroll(node_, &inputValueNestedScroll);
         auto jsonValue = GetJsonValue(node_);
-        auto resultNestedScroll = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
+        auto resultNestedScroll = GetAttrObject(jsonValue, ATTRIBUTE_NESTED_SCROLL_NAME);
         auto resultStr = GetAttrValue<std::string>(resultNestedScroll, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_LEFT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_NESTED_SCROLL_I_SCROLL_LEFT_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_NESTED_SCROLL_I_SCROLL_LEFT_DEFAULT_VALUE)) <<
             "Input value is: " << input
             << ", method: setNestedScroll, attribute: nestedScroll.NestedScrollOptionsExt.scrollLeft";
     };
@@ -702,10 +701,10 @@ HWTEST_F(WebModifierTest, setNestedScrollTestNestedScrollNestedScrollOptionsExtS
 HWTEST_F(WebModifierTest, setEnableNativeEmbedModeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_NATIVE_EMBED_MODE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_NATIVE_EMBED_MODE_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ENABLE_NATIVE_EMBED_MODE_DEFAULT_VALUE)) <<
         "Default value for attribute 'enableNativeEmbedMode'";
 }
 
@@ -729,7 +728,7 @@ HWTEST_F(WebModifierTest, setEnableNativeEmbedModeTestEnableNativeEmbedModeValid
         modifier_->setEnableNativeEmbedMode(node_, inputValueEnableNativeEmbedMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_NATIVE_EMBED_MODE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setEnableNativeEmbedMode, attribute: enableNativeEmbedMode";
     };
 
@@ -746,10 +745,11 @@ HWTEST_F(WebModifierTest, setEnableNativeEmbedModeTestEnableNativeEmbedModeValid
 HWTEST_F(WebModifierTest, setCopyOptionsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COPY_OPTIONS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_COPY_OPTIONS_DEFAULT_VALUE) << "Default value for attribute 'copyOptions'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_COPY_OPTIONS_DEFAULT_VALUE)) <<
+        "Default value for attribute 'copyOptions'";
 }
 
 /*
@@ -772,7 +772,7 @@ HWTEST_F(WebModifierTest, setCopyOptionsTestCopyOptionsValidValues, TestSize.Lev
         modifier_->setCopyOptions(node_, inputValueCopyOptions);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COPY_OPTIONS_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setCopyOptions, attribute: copyOptions";
     };
 
@@ -801,7 +801,7 @@ HWTEST_F(WebModifierTest, setCopyOptionsTestCopyOptionsInvalidValues, TestSize.L
         modifier_->setCopyOptions(node_, inputValueCopyOptions);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COPY_OPTIONS_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_COPY_OPTIONS_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_COPY_OPTIONS_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setCopyOptions, attribute: copyOptions";
     };
 
@@ -818,10 +818,11 @@ HWTEST_F(WebModifierTest, setCopyOptionsTestCopyOptionsInvalidValues, TestSize.L
 HWTEST_F(WebModifierTest, setTextAutosizingTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_AUTOSIZING_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_AUTOSIZING_DEFAULT_VALUE) << "Default value for attribute 'textAutosizing'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_TEXT_AUTOSIZING_DEFAULT_VALUE)) <<
+        "Default value for attribute 'textAutosizing'";
 }
 
 /*
@@ -844,7 +845,7 @@ HWTEST_F(WebModifierTest, setTextAutosizingTestTextAutosizingValidValues, TestSi
         modifier_->setTextAutosizing(node_, inputValueTextAutosizing);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_AUTOSIZING_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setTextAutosizing, attribute: textAutosizing";
     };
 
@@ -862,8 +863,8 @@ HWTEST_F(WebModifierTest, setEnableNativeMediaPlayerTestDefaultValues, TestSize.
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::unique_ptr<JsonValue> resultEnableNativeMediaPlayer =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ENABLE_NATIVE_MEDIA_PLAYER_NAME);
-    std::string resultStr;
+        GetAttrObject(jsonValue, ATTRIBUTE_ENABLE_NATIVE_MEDIA_PLAYER_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr =
         GetAttrValue<std::string>(resultEnableNativeMediaPlayer, ATTRIBUTE_ENABLE_NATIVE_MEDIA_PLAYER_I_ENABLE_NAME);
@@ -872,7 +873,7 @@ HWTEST_F(WebModifierTest, setEnableNativeMediaPlayerTestDefaultValues, TestSize.
 
     resultStr = GetAttrValue<std::string>(
         resultEnableNativeMediaPlayer, ATTRIBUTE_ENABLE_NATIVE_MEDIA_PLAYER_I_SHOULD_OVERLAY_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_NATIVE_MEDIA_PLAYER_I_SHOULD_OVERLAY_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ENABLE_NATIVE_MEDIA_PLAYER_I_SHOULD_OVERLAY_DEFAULT_VALUE)) <<
         "Default value for attribute 'enableNativeMediaPlayer.shouldOverlay'";
 }
 
@@ -896,11 +897,10 @@ HWTEST_F(WebModifierTest, setEnableNativeMediaPlayerTestEnableNativeMediaPlayerE
         inputValueEnableNativeMediaPlayer.enable = value;
         modifier_->setEnableNativeMediaPlayer(node_, &inputValueEnableNativeMediaPlayer);
         auto jsonValue = GetJsonValue(node_);
-        auto resultEnableNativeMediaPlayer =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ENABLE_NATIVE_MEDIA_PLAYER_NAME);
+        auto resultEnableNativeMediaPlayer = GetAttrObject(jsonValue, ATTRIBUTE_ENABLE_NATIVE_MEDIA_PLAYER_NAME);
         auto resultStr = GetAttrValue<std::string>(
             resultEnableNativeMediaPlayer, ATTRIBUTE_ENABLE_NATIVE_MEDIA_PLAYER_I_ENABLE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input
             << ", method: setEnableNativeMediaPlayer, attribute: enableNativeMediaPlayer.enable";
     };
@@ -931,11 +931,10 @@ HWTEST_F(
         inputValueEnableNativeMediaPlayer.shouldOverlay = value;
         modifier_->setEnableNativeMediaPlayer(node_, &inputValueEnableNativeMediaPlayer);
         auto jsonValue = GetJsonValue(node_);
-        auto resultEnableNativeMediaPlayer =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ENABLE_NATIVE_MEDIA_PLAYER_NAME);
+        auto resultEnableNativeMediaPlayer = GetAttrObject(jsonValue, ATTRIBUTE_ENABLE_NATIVE_MEDIA_PLAYER_NAME);
         auto resultStr = GetAttrValue<std::string>(
             resultEnableNativeMediaPlayer, ATTRIBUTE_ENABLE_NATIVE_MEDIA_PLAYER_I_SHOULD_OVERLAY_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input
             << ", method: setEnableNativeMediaPlayer, attribute: enableNativeMediaPlayer.shouldOverlay";
     };
@@ -953,10 +952,10 @@ HWTEST_F(
 HWTEST_F(WebModifierTest, DISABLED_setSelectionMenuOptionsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTION_MENU_OPTIONS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SELECTION_MENU_OPTIONS_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SELECTION_MENU_OPTIONS_DEFAULT_VALUE)) <<
         "Default value for attribute 'selectionMenuOptions'";
 }
 
@@ -978,10 +977,10 @@ HWTEST_F(WebModifierTest, DISABLED_setSelectionMenuOptionsTestValidValues, TestS
 HWTEST_F(WebModifierTest, setKeyboardAvoidModeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_KEYBOARD_AVOID_MODE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_KEYBOARD_AVOID_MODE_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_KEYBOARD_AVOID_MODE_DEFAULT_VALUE)) <<
         "Default value for attribute 'keyboardAvoidMode'";
 }
 
@@ -1005,7 +1004,7 @@ HWTEST_F(WebModifierTest, setKeyboardAvoidModeTestKeyboardAvoidModeValidValues, 
         modifier_->setKeyboardAvoidMode(node_, inputValueKeyboardAvoidMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_KEYBOARD_AVOID_MODE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setKeyboardAvoidMode, attribute: keyboardAvoidMode";
     };
 
@@ -1035,7 +1034,7 @@ HWTEST_F(WebModifierTest, setKeyboardAvoidModeTestKeyboardAvoidModeInvalidValues
         modifier_->setKeyboardAvoidMode(node_, inputValueKeyboardAvoidMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_KEYBOARD_AVOID_MODE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_KEYBOARD_AVOID_MODE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_KEYBOARD_AVOID_MODE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setKeyboardAvoidMode, attribute: keyboardAvoidMode";
     };
 
@@ -1052,10 +1051,10 @@ HWTEST_F(WebModifierTest, setKeyboardAvoidModeTestKeyboardAvoidModeInvalidValues
 HWTEST_F(WebModifierTest, setEnableHapticFeedbackTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE)) <<
         "Default value for attribute 'enableHapticFeedback'";
 }
 
@@ -1079,7 +1078,7 @@ HWTEST_F(WebModifierTest, setEnableHapticFeedbackTestEnableHapticFeedbackValidVa
         modifier_->setEnableHapticFeedback(node_, inputValueEnableHapticFeedback);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setEnableHapticFeedback, attribute: enableHapticFeedback";
     };
 
@@ -1096,10 +1095,10 @@ HWTEST_F(WebModifierTest, setEnableHapticFeedbackTestEnableHapticFeedbackValidVa
 HWTEST_F(WebModifierTest, DISABLED_setOptimizeParserBudgetTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OPTIMIZE_PARSER_BUDGET_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_OPTIMIZE_PARSER_BUDGET_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_OPTIMIZE_PARSER_BUDGET_DEFAULT_VALUE)) <<
         "Default value for attribute 'optimizeParserBudget'";
 }
 
@@ -1123,7 +1122,7 @@ HWTEST_F(WebModifierTest, DISABLED_setOptimizeParserBudgetTestOptimizeParserBudg
         modifier_->setOptimizeParserBudget(node_, inputValueOptimizeParserBudget);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OPTIMIZE_PARSER_BUDGET_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setOptimizeParserBudget, attribute: optimizeParserBudget";
     };
 
@@ -1140,10 +1139,10 @@ HWTEST_F(WebModifierTest, DISABLED_setOptimizeParserBudgetTestOptimizeParserBudg
 HWTEST_F(WebModifierTest, DISABLED_setEnableFollowSystemFontWeightTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_FOLLOW_SYSTEM_FONT_WEIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_FOLLOW_SYSTEM_FONT_WEIGHT_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ENABLE_FOLLOW_SYSTEM_FONT_WEIGHT_DEFAULT_VALUE)) <<
         "Default value for attribute 'enableFollowSystemFontWeight'";
 }
 
@@ -1168,7 +1167,7 @@ HWTEST_F(WebModifierTest, DISABLED_setEnableFollowSystemFontWeightTestEnableFoll
         modifier_->setEnableFollowSystemFontWeight(node_, inputValueEnableFollowSystemFontWeight);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_FOLLOW_SYSTEM_FONT_WEIGHT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input
             << ", method: setEnableFollowSystemFontWeight, attribute: enableFollowSystemFontWeight";
     };
@@ -1186,10 +1185,10 @@ HWTEST_F(WebModifierTest, DISABLED_setEnableFollowSystemFontWeightTestEnableFoll
 HWTEST_F(WebModifierTest, DISABLED_setEnableWebAVSessionTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_WEB_AVSESSION_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_WEB_AVSESSION_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ENABLE_WEB_AVSESSION_DEFAULT_VALUE)) <<
         "Default value for attribute 'enableWebAVSession'";
 }
 
@@ -1213,7 +1212,7 @@ HWTEST_F(WebModifierTest, DISABLED_setEnableWebAVSessionTestEnableWebAVSessionVa
         modifier_->setEnableWebAVSession(node_, inputValueEnableWebAVSession);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_WEB_AVSESSION_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setEnableWebAVSession, attribute: enableWebAVSession";
     };
 
@@ -1230,10 +1229,10 @@ HWTEST_F(WebModifierTest, DISABLED_setEnableWebAVSessionTestEnableWebAVSessionVa
 HWTEST_F(WebModifierTest, DISABLED_setRunJavaScriptOnDocumentStartTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RUN_JAVA_SCRIPT_ON_DOCUMENT_START_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_RUN_JAVA_SCRIPT_ON_DOCUMENT_START_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_RUN_JAVA_SCRIPT_ON_DOCUMENT_START_DEFAULT_VALUE)) <<
         "Default value for attribute 'runJavaScriptOnDocumentStart'";
 }
 
@@ -1255,10 +1254,10 @@ HWTEST_F(WebModifierTest, DISABLED_setRunJavaScriptOnDocumentStartTestValidValue
 HWTEST_F(WebModifierTest, DISABLED_setRunJavaScriptOnDocumentEndTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RUN_JAVA_SCRIPT_ON_DOCUMENT_END_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_RUN_JAVA_SCRIPT_ON_DOCUMENT_END_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_RUN_JAVA_SCRIPT_ON_DOCUMENT_END_DEFAULT_VALUE)) <<
         "Default value for attribute 'runJavaScriptOnDocumentEnd'";
 }
 
@@ -1280,10 +1279,10 @@ HWTEST_F(WebModifierTest, DISABLED_setRunJavaScriptOnDocumentEndTestValidValues,
 HWTEST_F(WebModifierTest, DISABLED_setRunJavaScriptOnHeadEndTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RUN_JAVA_SCRIPT_ON_HEAD_END_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_RUN_JAVA_SCRIPT_ON_HEAD_END_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_RUN_JAVA_SCRIPT_ON_HEAD_END_DEFAULT_VALUE)) <<
         "Default value for attribute 'runJavaScriptOnHeadEnd'";
 }
 
@@ -1305,13 +1304,12 @@ HWTEST_F(WebModifierTest, DISABLED_setRunJavaScriptOnHeadEndTestValidValues, Tes
 HWTEST_F(WebModifierTest, DISABLED_setNativeEmbedOptionsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultNativeEmbedOptions =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NATIVE_EMBED_OPTIONS_NAME);
-    std::string resultStr;
+    std::unique_ptr<JsonValue> resultNativeEmbedOptions = GetAttrObject(jsonValue, ATTRIBUTE_NATIVE_EMBED_OPTIONS_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(
         resultNativeEmbedOptions, ATTRIBUTE_NATIVE_EMBED_OPTIONS_I_SUPPORT_DEFAULT_INTRINSIC_SIZE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_NATIVE_EMBED_OPTIONS_I_SUPPORT_DEFAULT_INTRINSIC_SIZE_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_NATIVE_EMBED_OPTIONS_I_SUPPORT_DEFAULT_INTRINSIC_SIZE_DEFAULT_VALUE)) <<
         "Default value for attribute 'nativeEmbedOptions.supportDefaultIntrinsicSize'";
 }
 
@@ -1336,11 +1334,10 @@ HWTEST_F(WebModifierTest, DISABLED_setNativeEmbedOptionsTestNativeEmbedOptionsSu
         WriteTo(inputValueNativeEmbedOptions).supportDefaultIntrinsicSize = value;
         modifier_->setNativeEmbedOptions(node_, &inputValueNativeEmbedOptions);
         auto jsonValue = GetJsonValue(node_);
-        auto resultNativeEmbedOptions =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NATIVE_EMBED_OPTIONS_NAME);
+        auto resultNativeEmbedOptions = GetAttrObject(jsonValue, ATTRIBUTE_NATIVE_EMBED_OPTIONS_NAME);
         auto resultStr = GetAttrValue<std::string>(
             resultNativeEmbedOptions, ATTRIBUTE_NATIVE_EMBED_OPTIONS_I_SUPPORT_DEFAULT_INTRINSIC_SIZE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input
             << ", method: setNativeEmbedOptions, attribute: nativeEmbedOptions.supportDefaultIntrinsicSize";
     };
@@ -1371,13 +1368,13 @@ HWTEST_F(WebModifierTest, DISABLED_setNativeEmbedOptionsTestNativeEmbedOptionsSu
         WriteTo(inputValueNativeEmbedOptions).supportDefaultIntrinsicSize = value;
         modifier_->setNativeEmbedOptions(node_, &inputValueNativeEmbedOptions);
         auto jsonValue = GetJsonValue(node_);
-        auto resultNativeEmbedOptions =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_NATIVE_EMBED_OPTIONS_NAME);
+        auto resultNativeEmbedOptions = GetAttrObject(jsonValue, ATTRIBUTE_NATIVE_EMBED_OPTIONS_NAME);
         auto resultStr = GetAttrValue<std::string>(
             resultNativeEmbedOptions, ATTRIBUTE_NATIVE_EMBED_OPTIONS_I_SUPPORT_DEFAULT_INTRINSIC_SIZE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_NATIVE_EMBED_OPTIONS_I_SUPPORT_DEFAULT_INTRINSIC_SIZE_DEFAULT_VALUE) <<
-            "Input value is: " << input
-            << ", method: setNativeEmbedOptions, attribute: nativeEmbedOptions.supportDefaultIntrinsicSize";
+        EXPECT_THAT(resultStr,
+            Optional(ATTRIBUTE_NATIVE_EMBED_OPTIONS_I_SUPPORT_DEFAULT_INTRINSIC_SIZE_DEFAULT_VALUE)) <<
+            "Input value is: " << input <<
+            ", method: setNativeEmbedOptions, attribute: nativeEmbedOptions.supportDefaultIntrinsicSize";
     };
 
     // Check empty optional
@@ -1393,8 +1390,8 @@ HWTEST_F(WebModifierTest, setRegisterNativeEmbedRuleTestDefaultValues, TestSize.
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::unique_ptr<JsonValue> resultRegisterNativeEmbedRule =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_REGISTER_NATIVE_EMBED_RULE_NAME);
-    std::string resultStr;
+        GetAttrObject(jsonValue, ATTRIBUTE_REGISTER_NATIVE_EMBED_RULE_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr =
         GetAttrValue<std::string>(resultRegisterNativeEmbedRule, ATTRIBUTE_REGISTER_NATIVE_EMBED_RULE_I_TAG_NAME);
@@ -1429,8 +1426,7 @@ HWTEST_F(WebModifierTest, setRegisterNativeEmbedRuleTestRegisterNativeEmbedRuleT
         inputValueTag = value;
         modifier_->setRegisterNativeEmbedRule(node_, &inputValueTag, &inputValueType);
         auto jsonValue = GetJsonValue(node_);
-        auto resultRegisterNativeEmbedRule =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_REGISTER_NATIVE_EMBED_RULE_NAME);
+        auto resultRegisterNativeEmbedRule = GetAttrObject(jsonValue, ATTRIBUTE_REGISTER_NATIVE_EMBED_RULE_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultRegisterNativeEmbedRule, ATTRIBUTE_REGISTER_NATIVE_EMBED_RULE_I_TAG_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -1465,8 +1461,7 @@ HWTEST_F(WebModifierTest, setRegisterNativeEmbedRuleTestRegisterNativeEmbedRuleT
         inputValueType = value;
         modifier_->setRegisterNativeEmbedRule(node_, &inputValueTag, &inputValueType);
         auto jsonValue = GetJsonValue(node_);
-        auto resultRegisterNativeEmbedRule =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_REGISTER_NATIVE_EMBED_RULE_NAME);
+        auto resultRegisterNativeEmbedRule = GetAttrObject(jsonValue, ATTRIBUTE_REGISTER_NATIVE_EMBED_RULE_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultRegisterNativeEmbedRule, ATTRIBUTE_REGISTER_NATIVE_EMBED_RULE_I_TYPE_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<

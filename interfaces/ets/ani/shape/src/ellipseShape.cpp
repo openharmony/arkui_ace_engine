@@ -20,26 +20,6 @@ namespace {
 const char* ANI_SHAPE_NAME = "@ohos.arkui.shape.EllipseShape";
 } // namespace
 
-void ANICreateEllipseShape(ani_env* env, [[maybe_unused]] ani_object object)
-{
-    ani_class cls;
-    ani_status status;
-    if ((status = env->FindClass(ANI_SHAPE_NAME, &cls)) != ANI_OK) {
-        LOGE("Not find EllipseShape class, status:%{public}d", status);
-        return;
-    }
-    EllipsePeer* shapePeer = new EllipsePeer();
-    auto ellipse = AceType::MakeRefPtr<Ellipse>();
-    shapePeer->ellipseShape = ellipse;
-
-    if ((status = env->Object_SetPropertyByName_Long(
-             object, "basicShapeResult", reinterpret_cast<ani_long>(shapePeer))) != ANI_OK) {
-        LOGE("EllipseShape set addr failed, status:%{public}d", status);
-        delete shapePeer;
-        return;
-    }
-}
-
 void ANICreateEllipseShapeWithParam(
     ani_env* env, [[maybe_unused]] ani_object object, [[maybe_unused]] ani_object aniOption)
 {
@@ -228,7 +208,6 @@ ani_status EllipseShape::BindEllipseShape(ani_env* env)
     }
 
     std::array methods = {
-        ani_native_function { "<ctor>", ":", reinterpret_cast<void*>(ANICreateEllipseShape) },
         ani_native_function {
             "<ctor>", "C{@ohos.arkui.shape.ShapeSize}:", reinterpret_cast<void*>(ANICreateEllipseShapeWithParam) },
         ani_native_function { "width", nullptr, reinterpret_cast<void*>(ANIEllipseShapeWidth) },

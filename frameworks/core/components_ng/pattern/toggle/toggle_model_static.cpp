@@ -34,6 +34,17 @@ bool IsToggleCheckboxPattern(FrameNode* frameNode)
 } // namespace
 RefPtr<FrameNode> ToggleModelStatic::CreateFrameNode(int32_t nodeId, ToggleType toggleType)
 {
+    auto childFrameNode = FrameNode::GetFrameNode(V2::TOGGLE_ETS_TAG, nodeId);
+    if (childFrameNode) {
+        auto pattern = childFrameNode->GetPattern();
+        auto toggleTypeNotChange =
+            (AceType::InstanceOf<SwitchPattern>(pattern) && toggleType == ToggleType::SWITCH) ||
+            (IsToggleCheckboxPattern(AceType::RawPtr(childFrameNode)) && toggleType == ToggleType::CHECKBOX) ||
+            (AceType::InstanceOf<ToggleButtonPattern>(pattern) && toggleType == ToggleType::BUTTON);
+        if (toggleTypeNotChange) {
+            return childFrameNode;
+        }
+    }
     switch (toggleType) {
         case ToggleType::SWITCH: {
             return FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, nodeId, AceType::MakeRefPtr<SwitchPattern>());

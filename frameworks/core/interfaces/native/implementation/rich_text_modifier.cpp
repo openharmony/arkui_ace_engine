@@ -52,7 +52,7 @@ void SetRichTextOptionsImpl(Ark_NativePointer node,
 } // RichTextInterfaceModifier
 namespace RichTextAttributeModifier {
 void SetOnStartImpl(Ark_NativePointer node,
-                    const Opt_Callback_Void* value)
+                    const Opt_synthetic_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -69,7 +69,7 @@ void SetOnStartImpl(Ark_NativePointer node,
 #endif
 }
 void SetOnCompleteImpl(Ark_NativePointer node,
-                       const Opt_Callback_Void* value)
+                       const Opt_synthetic_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

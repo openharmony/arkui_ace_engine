@@ -57,6 +57,7 @@ export interface RepeatAttribute<T> extends DynamicNode {
         return this;
     }
     applyAttributesFinish(): void{}
+    debugLine(sourceLine: string, moduleName?: string): this;
 }
 
 export class ArkRepeatComponent<T> implements RepeatAttribute<T> {
@@ -88,6 +89,9 @@ export class ArkRepeatComponent<T> implements RepeatAttribute<T> {
     }
     applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
+    }
+    public debugLine(sourceLine: string, moduleName?: string): this {
+        return this;
     }
 }
 

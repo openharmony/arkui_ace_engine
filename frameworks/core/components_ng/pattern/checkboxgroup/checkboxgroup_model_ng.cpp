@@ -365,6 +365,11 @@ void CheckBoxGroupModelNG::ResetComponentColor(FrameNode* frameNode, const Check
             color = theme->GetInactiveColor();
             ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupUnSelectedColor, color, frameNode);
             break;
+        case CheckBoxGroupColorType::STROKE_COLOR:
+            ResetCheckMarkColor(frameNode);
+            color = theme->GetPointColor();
+            ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupCheckMarkColor, color, frameNode);
+            break;
         default:
             break;
     }
@@ -380,6 +385,9 @@ void CheckBoxGroupModelNG::UpdateComponentColor(
             break;
         case CheckBoxGroupColorType::UN_SELECTED_COLOR:
             SetUnSelectedColor(frameNode, color);
+            break;
+        case CheckBoxGroupColorType::STROKE_COLOR:
+            SetCheckMarkColor(frameNode, color);
             break;
         default:
             break;

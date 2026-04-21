@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/relative_container/relative_container_layout_algorithm.h"
 #include "core/components_ng/pattern/relative_container/relative_container_layout_property.h"
+#include "core/components_ng/property/flex_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -142,6 +143,7 @@ public:
 
     void BeforeCreateLayoutWrapper() override
     {
+        std::lock_guard<std::mutex> lock(relativeContainerPatternMutex_);
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         for (const auto& child : host->GetAllChildrenWithBuild()) {
@@ -164,6 +166,7 @@ private:
     std::string topologicalResult_;
     std::optional<std::string> loopDependentNodes_;
     std::optional<std::list<std::string>> topologicalResultList_;
+    std::mutex relativeContainerPatternMutex_;
 };
 
 } // namespace OHOS::Ace::NG

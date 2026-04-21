@@ -15,6 +15,8 @@
 
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
+#include "core/components/common/properties/text_style.h"
+
 namespace OHOS::Ace {
 namespace {
 constexpr uint8_t UINT32_LEFT_SHIFT_24 = 24;
@@ -24,7 +26,9 @@ constexpr uint8_t UINT32_LEFT_SHIFT_8 = 8;
 ACE_FORCE_EXPORT RSColor ToRSColor(const Color& color)
 {
     if (ACE_UNLIKELY(color.IsPlaceholder())) {
-        return RSColor(static_cast<RSColorPlaceholder>(color.GetPlaceholder()));
+        RSColor rsColor { color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha() };
+        rsColor.SetPlaceholder(static_cast<RSColorPlaceholder>(color.GetPlaceholder()));
+        return rsColor;
     }
     return RSColor(color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha());
 }

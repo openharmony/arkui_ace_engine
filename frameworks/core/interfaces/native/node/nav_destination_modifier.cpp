@@ -205,6 +205,9 @@ void UpdateNavDestinationTitlebarOptions(FrameNode* frameNode, ArkUINavigationTi
         if (options.enableHoverMode.isSet) {
             finalOptions.enableHoverMode = options.enableHoverMode.value;
         }
+        if (options.enableCustomTitlePaddingCheck.isSet) {
+            finalOptions.enableCustomTitlePaddingCheck = options.enableCustomTitlePaddingCheck.value;
+        }
         auto localFinalOptions = finalOptions;
         auto frameNode = wekNode.Upgrade();
         CHECK_NULL_VOID(frameNode);
@@ -215,6 +218,35 @@ void UpdateNavDestinationTitlebarOptions(FrameNode* frameNode, ArkUINavigationTi
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     pattern->AddResObj("navDestination.titlebarOptions", resObj, std::move(updateFunc));
+}
+
+void SetNavigationTitlebarOptions(NG::NavigationTitlebarOptions& finalOptions, ArkUINavigationTitlebarOptions& options)
+{
+    if (options.colorValue.isSet) {
+        finalOptions.bgOptions.color = Color(options.colorValue.value);
+    }
+    if (options.blurStyle.isSet) {
+        BlurStyleOption blurStyleOption;
+        blurStyleOption.blurStyle = static_cast<BlurStyle>(options.blurStyle.value);
+        finalOptions.bgOptions.blurStyleOption = blurStyleOption;
+    }
+    if (options.barStyle.isSet) {
+        finalOptions.brOptions.barStyle = static_cast<NG::BarStyle>(options.barStyle.value);
+    }
+    if (options.paddingStart.isSet) {
+        finalOptions.brOptions.paddingStart = CalcDimension(static_cast<double>(options.paddingStart.dimension.value),
+            static_cast<DimensionUnit>(options.paddingStart.dimension.units));
+    }
+    if (options.paddingEnd.isSet) {
+        finalOptions.brOptions.paddingEnd = CalcDimension(static_cast<double>(options.paddingEnd.dimension.value),
+            static_cast<DimensionUnit>(options.paddingEnd.dimension.units));
+    }
+    if (options.enableHoverMode.isSet) {
+        finalOptions.enableHoverMode = options.enableHoverMode.value;
+    }
+    if (options.enableCustomTitlePaddingCheck.isSet) {
+        finalOptions.enableCustomTitlePaddingCheck = options.enableCustomTitlePaddingCheck.value;
+    }
 }
 
 void SetTitle(ArkUINodeHandle node, ArkUINavigationTitleInfo titleInfo, ArkUINavigationTitlebarOptions options,
@@ -242,28 +274,7 @@ void SetTitle(ArkUINodeHandle node, ArkUINavigationTitleInfo titleInfo, ArkUINav
         NavDestinationModelNG::ParseCommonTitle(frameNode, ngTitleInfo);
     }
     NG::NavigationTitlebarOptions finalOptions;
-    if (options.colorValue.isSet) {
-        finalOptions.bgOptions.color = Color(options.colorValue.value);
-    }
-    if (options.blurStyle.isSet) {
-        BlurStyleOption blurStyleOption;
-        blurStyleOption.blurStyle = static_cast<BlurStyle>(options.blurStyle.value);
-        finalOptions.bgOptions.blurStyleOption = blurStyleOption;
-    }
-    if (options.barStyle.isSet) {
-        finalOptions.brOptions.barStyle = static_cast<NG::BarStyle>(options.barStyle.value);
-    }
-    if (options.paddingStart.isSet) {
-        finalOptions.brOptions.paddingStart = CalcDimension(static_cast<double>(options.paddingStart.dimension.value),
-            static_cast<DimensionUnit>(options.paddingStart.dimension.units));
-    }
-    if (options.paddingEnd.isSet) {
-        finalOptions.brOptions.paddingEnd = CalcDimension(static_cast<double>(options.paddingEnd.dimension.value),
-            static_cast<DimensionUnit>(options.paddingEnd.dimension.units));
-    }
-    if (options.enableHoverMode.isSet) {
-        finalOptions.enableHoverMode = options.enableHoverMode.value;
-    }
+    SetNavigationTitlebarOptions(finalOptions, options);
     NavDestinationModelNG::SetTitlebarOptions(frameNode, std::move(finalOptions));
     if (SystemProperties::ConfigChangePerform()) {
         UpdateNavDestinationTitlebarOptions(frameNode, options);
@@ -471,8 +482,15 @@ void SetNavDestinationTitlebarOptions(ArkUINodeHandle node, ArkUINavigationTitle
     if (opts.barStyle.isSet) {
         finalOptions.brOptions.barStyle = static_cast<NG::BarStyle>(opts.barStyle.value);
     }
+    if (opts.paddingEnd.isSet) {
+        finalOptions.brOptions.paddingEnd = CalcDimension(static_cast<double>(opts.paddingEnd.dimension.value),
+            static_cast<DimensionUnit>(opts.paddingEnd.dimension.units));
+    }
     if (opts.enableHoverMode.isSet) {
         finalOptions.enableHoverMode = opts.enableHoverMode.value;
+    }
+    if (opts.enableCustomTitlePaddingCheck.isSet) {
+        finalOptions.enableCustomTitlePaddingCheck = opts.enableCustomTitlePaddingCheck.value;
     }
     NavDestinationModelNG::SetTitlebarOptions(frameNode, std::move(finalOptions));
 }

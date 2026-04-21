@@ -33,18 +33,18 @@
 #include "core/components_ng/pattern/select/select_layout_property.h"
 #include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_ng/pattern/select/select_paint_property.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/pattern/select/select_model_ng.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 }
 
 namespace OHOS::Ace {
+class IconTheme;
 class SelectTheme;
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
+class TextLayoutProperty;
 
 class SelectPattern : public Pattern {
     DECLARE_ACE_TYPE(SelectPattern, Pattern);
@@ -165,13 +165,19 @@ public:
     bool IsValidIndex(int32_t index);
     void GetSelectedValue(int32_t index, std::string& value);
     void ShowOptions(int32_t index);
-    bool ParseCommand(const std::string& command, int32_t& targetIndex);
+    bool ParseCommand(const std::string& command, int32_t& targetIndex, std::string& targetValue);
     int32_t OnInjectionEvent(const std::string& command) override;
+    bool FindOptionIndexByValue(const std::string& value, int32_t& index);
+    void ReportInjectResult(const std::string& event, bool success, const std::string& reason = "");
     bool ReportOnSelectEvent(int32_t index, const std::string& value);
     // Get functions for unit tests
     const std::vector<RefPtr<FrameNode>>& GetOptions();
 
     FocusPattern GetFocusPattern() const override;
+
+    bool IsDefaultResponseRegionExpandingNeeded(SourceType sourceType) const override;
+
+    RectF ExpandDefaultResponseRegion(RectF& rect) override;
 
     // update selected option props
     void UpdateSelectedProps(int32_t index);
@@ -276,6 +282,12 @@ public:
     void SetMenuBackgroundColorByUser(const Color& color, const RefPtr<SelectPaintProperty>& props);
     void SetModifierByUser(const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props);
     void SetOptionBgColorByUser(const Color& color, const RefPtr<SelectPaintProperty>& props);
+    void SetSpinnerColorByUser(const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props);
+    void SetOptionFontColorByUser(const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props);
+    SelectDivider GetDivider() const;
+    std::optional<DividerMode> GetDividerMode() const;
+    void RestoreDividerToDefault(const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props);
+    void SetSelectedOptionFontColorByUser(const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props);
 
 private:
     void OnAttachToFrameNode() override;
@@ -442,6 +454,8 @@ private:
     std::function<void(WeakPtr<NG::FrameNode>)> textOptionApply_ = nullptr;
     std::function<void(WeakPtr<NG::FrameNode>)> textSelectOptionApply_ = nullptr;
     std::optional<Color> menuBackgroundColor_;
+    SelectDivider divider_;
+    std::optional<DividerMode> dividerMode_;
 };
 
 class SelectJsonUtil {
@@ -463,6 +477,24 @@ public:
         result->Put("params", params);
         return result;
     };
+    
+    static std::shared_ptr<InspectorJsonValue> BuildInjectResult(
+        int32_t nodeId, const std::string& event, bool success, const std::string& reason = "")
+    {
+        auto root = InspectorJsonUtil::CreateObject();
+        CHECK_NULL_RETURN(root, nullptr);
+        
+        auto selectResult = InspectorJsonUtil::CreateObject();
+        CHECK_NULL_RETURN(selectResult, nullptr);
+        
+        selectResult->Put("nodeId", nodeId);
+        selectResult->Put("event", event.c_str());
+        selectResult->Put("result", success ? "success" : "failure");
+        selectResult->Put("reason", reason.c_str());
+        
+        root->Put("SelectResult", selectResult);
+        return root;
+    }
 
     static SelectJsonUtil FromJson(const std::unique_ptr<JsonValue>& json)
     {
@@ -470,10 +502,14 @@ public:
         if (json && json->IsValid() && json->GetString("cmd") == "onSelect") {
             auto child = json->GetValue("params");
             if (child && child->IsObject()) {
-                util.index = child->GetInt("index", -1);
+                if (child->Contains("index")) {
+                    util.index = child->GetInt("index", -1);
+                }
+                if (child->Contains("value")) {
+                    util.value = child->GetString("value");
+                }
             }
         }
-
         return util;
     }
 };

@@ -15,6 +15,7 @@
 
 #include "core/gestures/gesture_group.h"
 
+#include "base/log/log_wrapper.h"
 #include "core/gestures/exclusive_recognizer.h"
 #include "core/gestures/parallel_recognizer.h"
 #include "core/gestures/sequenced_recognizer.h"

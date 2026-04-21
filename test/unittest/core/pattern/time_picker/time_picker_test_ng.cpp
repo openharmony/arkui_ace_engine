@@ -23,12 +23,12 @@
 
 #define private public
 #define protected public
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/common/mock_theme_default.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/base/mock_system_properties.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/common/mock_theme_default.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/time_picker/timepicker_dialog_view.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
+#include "core/components/button/button_theme.h"
 #undef private
 #undef protected
 
@@ -216,7 +217,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetDisappearTextStyle001, Tes
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     EXPECT_TRUE(pickerProperty->HasDisappearFontSize());
-    EXPECT_FALSE(pickerProperty->HasDisappearColor());
+    EXPECT_TRUE(pickerProperty->HasDisappearColor());
     EXPECT_TRUE(pickerProperty->HasDisappearWeight());
 }
 
@@ -311,7 +312,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetNormalTextStyle001, TestSi
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     EXPECT_TRUE(pickerProperty->HasFontSize());
-    EXPECT_FALSE(pickerProperty->HasColor());
+    EXPECT_TRUE(pickerProperty->HasColor());
     EXPECT_TRUE(pickerProperty->HasWeight());
 }
 
@@ -392,7 +393,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetSelectedTextStyle001, Test
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     EXPECT_TRUE(pickerProperty->HasSelectedFontSize());
-    EXPECT_FALSE(pickerProperty->HasSelectedColor());
+    EXPECT_TRUE(pickerProperty->HasSelectedColor());
     EXPECT_TRUE(pickerProperty->HasSelectedWeight());
 }
 
@@ -668,7 +669,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerWheelMode001, TestSize.Level0)
     ASSERT_NE(hourColumn, nullptr);
     auto hourColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
     ASSERT_NE(hourColumnPattern, nullptr);
-    EXPECT_EQ(hourColumnPattern->GetCanLoopFromLayoutProperty(), false);
+    EXPECT_EQ(hourColumnPattern->GetCanLoopFromLayoutPropertyWithStartEnd(), false);
 }
 
 /**
@@ -692,7 +693,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerWheelMode002, TestSize.Level0)
     ASSERT_NE(hourColumn, nullptr);
     auto hourColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
     ASSERT_NE(hourColumnPattern, nullptr);
-    EXPECT_EQ(hourColumnPattern->GetCanLoopFromLayoutProperty(), true);
+    EXPECT_EQ(hourColumnPattern->GetCanLoopFromLayoutPropertyWithStartEnd(), true);
 }
 
 /**
@@ -773,7 +774,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerWheelMode005, TestSize.Level0)
     PickerTime endTime = PickerTime(22, 58, 58);
     timePickerRowPattern->SetStartTime(startTime);
     timePickerRowPattern->SetEndTime(endTime);
-    EXPECT_EQ(hourColumnPattern->GetCanLoopFromLayoutProperty(), false);
+    EXPECT_EQ(hourColumnPattern->GetCanLoopFromLayoutPropertyWithStartEnd(), false);
 }
 
 /**
@@ -798,7 +799,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAlgorithmTest001, TestSize.Level0)
     frameNode->MarkModifyDone();
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
     auto layoutConstraint = LayoutConstraintF();
-    layoutConstraint.selfIdealSize.SetWidth(20);
+    layoutConstraint.parentIdealSize.SetWidth(20);
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_TRUE(timePickerRowPattern);
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
@@ -825,6 +826,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAlgorithmTest001, TestSize.Level0)
      * @tc.step: step2. initialize TimePickerColumnLayoutAlgorithm and call Measure
      *                  and Layout function.
      */
+    timePickerRowPattern->isWindowFullscreen_ = true;
+    timePickerRowPattern->SetColumn(minuteColumn);
     TimePickerColumnLayoutAlgorithm timePickerColumnLayoutAlgorithm;
     timePickerColumnLayoutAlgorithm.Measure(&layoutWrapper);
     timePickerColumnLayoutAlgorithm.Layout(&layoutWrapper);

@@ -37,6 +37,7 @@ common_napi_libs = [
   "router",
   "animator",
   "atomic_service_bar",
+  "luminance_sampler",
   "graphics/display_sync",
 ]
 

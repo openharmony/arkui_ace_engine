@@ -17,6 +17,7 @@
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_static.h"
+#include "core/components_ng/pattern/waterflow/water_flow_sections.h"
 #include "core/interfaces/ani/ani_api.h"
 #include "core/interfaces/native/ani/frame_node_peer_impl.h"
 #include "core/interfaces/native/implementation/water_flow_scroller_peer_impl.h"

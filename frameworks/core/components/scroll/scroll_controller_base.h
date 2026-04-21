@@ -23,10 +23,7 @@
 #include "base/geometry/rect.h"
 #include "base/memory/ace_type.h"
 #include "core/animation/curve.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/scrollable/scroller_observer_manager.h"
-#include "core/event/ace_events.h"
 
 namespace OHOS::Ace {
 
@@ -135,6 +132,11 @@ public:
     virtual NG::SizeF ContentSize() const
     {
         return NG::SizeF();
+    }
+
+    virtual int32_t GetBindingFrameNodeId() const
+    {
+        return -1;
     }
 
     virtual Rect GetItemRectInGroup(int32_t index, int32_t indexInGroup) const

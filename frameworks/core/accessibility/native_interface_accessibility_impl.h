@@ -437,6 +437,16 @@ struct ArkUI_AccessibilityElementInfo {
         return hitTestBehavior;
     }
 
+    void SetComponentIdentifier(const std::string& componentIdentifier)
+    {
+        this->componentIdentifier = componentIdentifier;
+    }
+
+    std::string GetComponentIdentifier() const
+    {
+        return componentIdentifier;
+    }
+
 private:
     int32_t pageId = 0;
     int32_t textBeginSelected = 0;
@@ -487,6 +497,7 @@ private:
     std::string backgroundImage;
     std::string blur;
     std::string hitTestBehavior;
+    std::string componentIdentifier;
 };
 
 struct ArkUI_AccessibilityEventInfo {

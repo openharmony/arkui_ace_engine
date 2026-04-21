@@ -28,9 +28,11 @@ void TaskRunnerAdapterImpl::Initialize(bool useCurrentEventRunner, const std::st
     eventHandler_ = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner_);
 }
 
-void TaskRunnerAdapterImpl::PostTask(std::function<void()> task, const std::string& name, PriorityType priorityType)
+void TaskRunnerAdapterImpl::PostTask(std::function<void()> task, const std::string& name, PriorityType priorityType,
+    VsyncBarrierOption barrierOption)
 {
-    eventHandler_->PostTask(std::move(task), name, 0, ConvertPriority(priorityType));
+    eventHandler_->PostTaskAtTail(std::move(task), name, ConvertPriority(priorityType),
+        {}, ConvertBarrierOption(barrierOption));
 }
 
 void TaskRunnerAdapterImpl::PostTaskForTime(std::function<void()> task, uint32_t targetTime, const std::string& caller)
@@ -70,6 +72,21 @@ AppExecFwk::EventQueue::Priority TaskRunnerAdapterImpl::ConvertPriority(Priority
         default:
             LOGW("unknown priority type");
             return AppExecFwk::EventQueue::Priority::LOW;
+    }
+}
+
+AppExecFwk::VsyncBarrierOption TaskRunnerAdapterImpl::ConvertBarrierOption(VsyncBarrierOption barrierOption)
+{
+    switch (barrierOption) {
+        case VsyncBarrierOption::NO_BARRIER:
+            return AppExecFwk::VsyncBarrierOption::NO_BARRIER;
+        case VsyncBarrierOption::NEED_BARRIER:
+            return AppExecFwk::VsyncBarrierOption::NEED_BARRIER;
+        case VsyncBarrierOption::FORCE_BARRIER:
+            return AppExecFwk::VsyncBarrierOption::FORCE_BARRIER;
+        default:
+            LOGW("unknown barrier option");
+            return AppExecFwk::VsyncBarrierOption::NO_BARRIER;
     }
 }
 } // namespace OHOS::Ace

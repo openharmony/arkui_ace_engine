@@ -30,11 +30,11 @@ class EventTargetInfoAccessorTest : public AccessorTestBase<GENERATED_ArkUIEvent
 };
 
 /**
- * @tc.name: ctorTest
+ * @tc.name: constructTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(EventTargetInfoAccessorTest, ctorTest, TestSize.Level1)
+HWTEST_F(EventTargetInfoAccessorTest, constructTest, TestSize.Level1)
 {
     auto peer1 = reinterpret_cast<EventTargetInfoPeer*>(this->accessor_->construct());
     auto peer2 = reinterpret_cast<EventTargetInfoPeer*>(this->accessor_->construct());

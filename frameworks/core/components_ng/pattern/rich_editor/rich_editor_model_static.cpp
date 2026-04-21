@@ -119,6 +119,14 @@ void RichEditorModelStatic::SetOnPaste(FrameNode* frameNode, std::function<void(
     eventHub->SetOnPaste(std::move(func));
 }
 
+void RichEditorModelStatic::SetOnWillAttachIME(FrameNode* frameNode, IMEAttachCallback&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillAttachIME(std::move(func));
+}
+
 void RichEditorModelStatic::SetEnterKeyType(FrameNode* frameNode, const std::optional<TextInputAction>& action)
 {
     if (action) {

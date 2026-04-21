@@ -19,11 +19,13 @@
 #include "base/ressched/ressched_report.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
+#include "core/common/event_manager.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_advanced_register.h"
 #include "core/components_ng/pattern/stage/page_node.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #if !defined(PREVIEW)
 #include "core/components_ng/syntax/static/detached_free_root_proxy_node.h"
@@ -94,7 +96,6 @@ void RegisterPageCallback(const RefPtr<FrameNode>& frameNode, void* jsViewNode)
 #else
     jsNode->MountToParent(curPageNode);
 #endif
-    curPageNode->MarkDirtyNode();
 }
 
 void ExitToDesktop()

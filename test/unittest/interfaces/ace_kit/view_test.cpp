@@ -278,5 +278,38 @@ HWTEST_F(ViewTest, ScaleTest001, TestSize.Level1)
     EXPECT_EQ(res.x, 1.0f);
     EXPECT_EQ(res.y, 1.0f);
 }
+
+/**
+ * @tc.name: AddOnTouchTest001
+ * @tc.desc: Test AddOnTouch of view
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewTest, AddOnTouchTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize View.
+     * @tc.expected: All pointer is non-null.
+     */
+    View view;
+    auto node = AbstractViewFactory::CreateFrameNode("test", 0, AceType::MakeRefPtr<MockAceKitPattern>());
+    EXPECT_NE(node, nullptr);
+    view.node_ = node;
+ 
+    /**
+     * @tc.steps: Initialize TouchEventFunc parameter and SetOnTouch.
+     */
+    TouchEventFunc touchEventFunc;
+    auto touchEventPtr = Ace::AceType::MakeRefPtr<Ace::NG::TouchEventImpl>(touchEventFunc);
+    view.AddOnTouch(touchEventPtr);
+ 
+    /**
+     * @tc.steps: call gesture eventHub to verify touch event is setted.
+     */
+    auto frameNode = reinterpret_cast<AceNode*>(node->GetHandle());
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    auto touchEventList = gestureHub->touchEventActuator_->touchEvents_;
+    EXPECT_NE(touchEventList.size(), 0);
+}
 }
 

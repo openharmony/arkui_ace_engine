@@ -17,6 +17,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
 #include "core/components_ng/pattern/picker/picker_theme.h"
@@ -83,8 +84,11 @@ static void SetupColumnNode(RefPtr<DatePickerPattern>& datePickerPattern,
 
 static void ApplyCircleDialStyle(const RefPtr<FrameNode>& dateNode, const RefPtr<PickerTheme>& pickerTheme)
 {
+    CHECK_NULL_VOID(dateNode);
+    CHECK_NULL_VOID(pickerTheme);
     if (pickerTheme->IsCircleDial()) {
         auto renderContext = dateNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
         renderContext->UpdateBackgroundColor(pickerTheme->GetBackgroundColor());
     }
 }

@@ -116,7 +116,7 @@ public:
 
     void OnLayoutCompleted(const std::string& componentId) override;
     void OnDrawCompleted(const std::string& componentId) override;
-    void OnDrawChildrenCompleted(const std::string& componentId) override;
+    void OnDrawChildrenCompleted(const std::string& componentId, const std::vector<int32_t>& childIds) override;
     bool IsDrawChildrenCallbackFuncExist(const std::string& componentId) override;
 
     void DumpFrontend() const override;

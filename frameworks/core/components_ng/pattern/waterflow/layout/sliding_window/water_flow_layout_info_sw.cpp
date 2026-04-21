@@ -41,10 +41,7 @@ void WaterFlowLayoutInfoSW::Sync(int32_t itemCnt, float mainSize, const std::vec
 
     prevItemStart_ = itemStart_;
     itemStart_ = startIndex_ == 0 && NonNegative(startPos_ - TopMargin() - contentStartOffset_);
-    itemEnd_ = endIndex_ == itemCnt - 1;
-    if (footerIndex_ == 0) {
-        itemEnd_ &= LessOrEqualCustomPrecision(endPos_, mainSize + expandHeight_, 0.1f);
-    }
+    HandleItemEnd(itemCnt, mainSize);
 
     if (itemEnd_) {
         knowTotalHeight_ = true;
@@ -1095,5 +1092,41 @@ float WaterFlowLayoutInfoSW::CalcMaxHeight(int itemCnt)
     }
     const float contentEnd = EndPos() + footerHeight + BotMargin();
     return std::max(-totalOffset_ + contentEnd, maxHeight_);
+}
+
+void WaterFlowLayoutInfoSW::HandleItemEnd(int32_t itemCnt, float mainSize)
+{
+    // Check if endIdx is already the last item
+    if (endIndex_ >= itemCnt - 1) {
+        itemEnd_ = true;
+        if (footerIndex_ == 0) {
+            itemEnd_ &= LessOrEqualCustomPrecision(endPos_, mainSize + expandHeight_, 0.1f);
+        }
+        return;
+    }
+
+    int32_t zeroHeightCount = 0;
+    // Check items after endIdx to count zero-height items
+    for (int32_t i = endIndex_ + 1; i < itemCnt; i++) {
+        auto height = GetCachedHeight(i);
+        if (!height) {
+            break;
+        }
+        if (!NearZero(*height)) {
+            break;
+        }
+        zeroHeightCount++;
+    }
+
+    // Set itemEnd_ based on whether all remaining items are zero-height
+    itemEnd_ = (zeroHeightCount > 0 && endIndex_ + zeroHeightCount >= itemCnt - 1);
+    if (itemEnd_ && footerIndex_ == 0) {
+        itemEnd_ &= LessOrEqualCustomPrecision(endPos_, mainSize + expandHeight_, 0.1f);
+    }
+
+    // Adjust endIndex_ to include zero-height trailing items
+    if (itemEnd_ && zeroHeightCount > 0) {
+        endIndex_ = itemCnt - 1;
+    }
 }
 } // namespace OHOS::Ace::NG

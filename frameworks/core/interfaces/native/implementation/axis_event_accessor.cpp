@@ -14,9 +14,7 @@
  */
 
 #include "arkoala_api_generated.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/implementation/axis_event_peer.h"
-#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
@@ -73,6 +71,10 @@ Ark_Float64 GetVerticalAxisValueImpl(Ark_AxisEvent peer)
     double value = event->GetVerticalAxis();
     return Converter::ArkValue<Ark_Float64>(value);
 }
+Ark_Float64 GetPinchAxisScaleValueImpl(Ark_AxisEvent peer)
+{
+    return {};
+}
 Ark_Boolean HasAxisImpl(Ark_AxisEvent peer,
                         Ark_AxisType axisType)
 {
@@ -80,6 +82,10 @@ Ark_Boolean HasAxisImpl(Ark_AxisEvent peer,
     AxisInfo* event = peer->GetEventInfo();
     CHECK_NULL_RETURN(event, false);
     return Converter::ArkValue<Ark_Boolean>(event->HasAxis(static_cast<AxisType>(axisType)));
+}
+Ark_Coordinate2D GetCurrentLocalPositionImpl(Ark_AxisEvent peer)
+{
+    return {};
 }
 Ark_AxisAction GetActionImpl(Ark_AxisEvent peer)
 {
@@ -253,6 +259,14 @@ void SetScrollStepImpl(Ark_AxisEvent peer,
         info->SetScrollStep(value.value());
     }
 }
+Opt_Int32 GetEventHandleIdImpl(Ark_AxisEvent peer)
+{
+    return {};
+}
+void SetEventHandleIdImpl(Ark_AxisEvent peer,
+                          const Opt_Int32* eventHandleId)
+{
+}
 void PropagationImpl(Ark_AxisEvent peer)
 {
     CHECK_NULL_VOID(peer);
@@ -311,9 +325,12 @@ const GENERATED_ArkUIAxisEventAccessor* GetAxisEventAccessor()
         AxisEventAccessor::DestroyPeerImpl,
         AxisEventAccessor::ConstructImpl,
         AxisEventAccessor::GetFinalizerImpl,
+        AxisEventAccessor::PropagationImpl,
         AxisEventAccessor::GetHorizontalAxisValueImpl,
         AxisEventAccessor::GetVerticalAxisValueImpl,
+        AxisEventAccessor::GetPinchAxisScaleValueImpl,
         AxisEventAccessor::HasAxisImpl,
+        AxisEventAccessor::GetCurrentLocalPositionImpl,
         AxisEventAccessor::GetActionImpl,
         AxisEventAccessor::SetActionImpl,
         AxisEventAccessor::GetDisplayXImpl,
@@ -330,7 +347,8 @@ const GENERATED_ArkUIAxisEventAccessor* GetAxisEventAccessor()
         AxisEventAccessor::SetYImpl,
         AxisEventAccessor::GetScrollStepImpl,
         AxisEventAccessor::SetScrollStepImpl,
-        AxisEventAccessor::PropagationImpl,
+        AxisEventAccessor::GetEventHandleIdImpl,
+        AxisEventAccessor::SetEventHandleIdImpl,
         AxisEventAccessor::GetGlobalDisplayXImpl,
         AxisEventAccessor::SetGlobalDisplayXImpl,
         AxisEventAccessor::GetGlobalDisplayYImpl,

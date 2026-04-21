@@ -26,7 +26,7 @@
 #define protected public
 #include "mock_lazy_for_each_actuator.h"
 #include "mock_lazy_for_each_builder.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
@@ -1498,6 +1498,29 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxRecycleItemsTest001, TestSize.Lev
     lazyForEachNode->builder_ = nullptr;
     lazyForEachNode->RecycleItems(0, 6);
     EXPECT_TRUE(lazyForEachNode->ids_.empty());
+}
+
+/**
+ * @tc.name: LazyForEachNodeGetChildrenTest001
+ * @tc.desc: Create LazyForEach, Add a child to the children list
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachNodeGetChildrenTest001, TestSize.Level1)
+{
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+    
+    // Initially, children should be empty
+    const auto& children = lazyForEachNode->GetChildren();
+    EXPECT_TRUE(children.empty());
+    
+    // Add a child to the children list
+    auto testNode = CreateNode(V2::TEXT_ETS_TAG);
+    lazyForEachNode->children_.push_back(testNode);
+    
+    // Get children again
+    const auto& children2 = lazyForEachNode->GetChildren();
+    EXPECT_EQ(children2.size(), 1);
 }
 
 } // namespace OHOS::Ace::NG

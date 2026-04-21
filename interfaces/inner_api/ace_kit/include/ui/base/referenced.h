@@ -103,8 +103,8 @@ public:
     }
 
 protected:
-    explicit Referenced(bool threadSafe = true)
-        : refCounter_(threadSafe ? ThreadSafeRef::Create() : ThreadUnsafeRef::Create())
+    explicit Referenced()
+        : refCounter_(RefCounter::Create())
     {
         if (MemoryMonitor::IsEnable()) {
             MemoryMonitor::GetInstance().Add(this);

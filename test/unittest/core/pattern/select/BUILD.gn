@@ -30,4 +30,16 @@ ace_unittest("select_test_ng") {
     "select_test_ng.cpp",
     "select_two_test_ng.cpp",
   ]
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "select_test_min.cpp",
+      "select_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "select_test_min.cpp",
+      "select_test_core.cpp",
+    ]
+  }
 }

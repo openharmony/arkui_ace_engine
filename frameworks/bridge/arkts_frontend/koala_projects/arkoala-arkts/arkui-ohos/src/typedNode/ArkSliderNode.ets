@@ -80,12 +80,12 @@ export class ArkSliderNode extends ArkBaseNode implements SliderAttribute {
         this.markDirty();
         return this;
     }
-    prefix(content: ComponentContent | undefined, options?: SliderPrefixOptions| undefined): this {
+    prefix(content: ComponentContent<Object> | undefined, options?: SliderPrefixOptions| undefined): this {
         hookSliderSetPrefixMethod(this.getPeer(), content, options);
         this.markDirty();
         return this;
     }
-    suffix(content: ComponentContent | undefined, options?: SliderSuffixOptions| undefined): this {
+    suffix(content: ComponentContent<Object> | undefined, options?: SliderSuffixOptions| undefined): this {
         hookSliderSetSuffixMethod(this.getPeer(), content, options);
          this.markDirty();
          return this;

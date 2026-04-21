@@ -16,7 +16,6 @@
 #include <unordered_set>
 
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/click_event_peer.h"
 
@@ -215,6 +214,10 @@ void PreventDefaultImpl(Ark_ClickEvent peer)
     CHECK_NULL_VOID(info);
     info->SetPreventDefault(true);
 }
+Ark_Coordinate2D GetCurrentLocalPositionImpl(Ark_ClickEvent peer)
+{
+    return {};
+}
 Opt_Float64 GetGlobalDisplayXImpl(Ark_ClickEvent peer)
 {
     CHECK_NULL_RETURN(peer, INVALID_OPT_FLOAT64);
@@ -266,6 +269,8 @@ const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor()
         ClickEventAccessor::DestroyPeerImpl,
         ClickEventAccessor::ConstructImpl,
         ClickEventAccessor::GetFinalizerImpl,
+        ClickEventAccessor::PreventDefaultImpl,
+        ClickEventAccessor::GetCurrentLocalPositionImpl,
         ClickEventAccessor::GetDisplayXImpl,
         ClickEventAccessor::SetDisplayXImpl,
         ClickEventAccessor::GetDisplayYImpl,
@@ -280,7 +285,6 @@ const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor()
         ClickEventAccessor::SetYImpl,
         ClickEventAccessor::GetHandImpl,
         ClickEventAccessor::SetHandImpl,
-        ClickEventAccessor::PreventDefaultImpl,
         ClickEventAccessor::GetGlobalDisplayXImpl,
         ClickEventAccessor::SetGlobalDisplayXImpl,
         ClickEventAccessor::GetGlobalDisplayYImpl,

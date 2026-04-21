@@ -13,6 +13,7 @@
 
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/build/ace_controller.gni")
 
 component_modules = [
   "dynamiclayout",
@@ -20,6 +21,7 @@ component_modules = [
   "data_panel",
   "gauge",
   "hyperlink",
+  "text_clock",
   "checkbox",
   "patternlock",
   "qrcode",
@@ -40,8 +42,8 @@ component_modules = [
   "menu",
 ]
 
-if (!ace_engine_feature_wearable) { 
-    component_modules += [ "folder_stack", ] 
+if (!ace_engine_feature_wearable) {
+    component_modules += [ "folder_stack", ]
 }
 
 component_modules_libs = []
@@ -97,7 +99,7 @@ group("ace_packages") {
 
   deps += [ "$ace_root/frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native:arkoala_native_ani" ]
 
-  if (is_asan) {
+  if (is_asan || !ace_engine_feature_enable_libace) {
     deps -= [ "$ace_root/build:libace" ]
   }
   deps += component_modules_libs

@@ -29,7 +29,7 @@ public:
     class Builder {
     public:
         Builder() = default;
-        ~Builder() = default;
+        virtual ~Builder() = default;
 
         RefPtr<DataPanelTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
@@ -41,7 +41,7 @@ public:
             return theme;
         }
 
-    private:
+    protected:
         void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<DataPanelTheme>& theme) const
         {
             RefPtr<ThemeStyle> dataPanelPattern = themeConstants->GetPatternByName(THEME_PATTERN_DATA_PANEL);
@@ -149,13 +149,13 @@ public:
     {
         return trackShadowOffsetY_;
     }
-
 protected:
+        Color backgroundColor_ = Color(Color::TRANSPARENT);
+        std::vector<std::pair<Color, Color>> percentageColors_;
+
 private:
-    std::vector<std::pair<Color, Color>> percentageColors_;
     std::pair<Color, Color> loadingColors_;
     std::pair<Color, Color> progressColors_;
-    Color backgroundColor_;
     Dimension defaultHeight_;
     Dimension defaultWidth_;
     Dimension defaultBorderRadius_;

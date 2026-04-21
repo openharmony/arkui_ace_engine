@@ -22,11 +22,12 @@
 
 #define private public
 #define protected public
-#include "test/mock/base/mock_subwindow.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "core/components/common/layout/grid_column_info.h"
+#include "test/mock/frameworks/base/subwindow/mock_subwindow.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/error/error_code.h"
 #include "base/geometry/dimension.h"
@@ -64,8 +65,11 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/toast/toast_layout_property.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
+#include "core/components_ng/pattern/toast/toast_view.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -77,6 +81,37 @@ const std::string BOTTOMSTRING = "test";
 constexpr int32_t DURATION = 2;
 constexpr double DOUBLEONE = 1.0f;
 constexpr int32_t CALLBACK_COUNT = 3;
+
+// System material test constants
+constexpr int32_t MATERIAL_TYPE_NONE = static_cast<int32_t>(MaterialType::NONE);
+constexpr int32_t MATERIAL_TYPE_SEMI_TRANSPARENT = static_cast<int32_t>(MaterialType::SEMI_TRANSPARENT);
+constexpr int32_t INVALID_MATERIAL_TYPE_NEGATIVE = -1;
+constexpr int32_t INVALID_MATERIAL_TYPE_TOO_LARGE = 200;
+
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == DragBarTheme::TypeId()) {
+        return AceType::MakeRefPtr<DragBarTheme>();
+    } else if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == DialogTheme::TypeId()) {
+        return AceType::MakeRefPtr<DialogTheme>();
+    } else if (type == PickerTheme::TypeId()) {
+        return AceType::MakeRefPtr<PickerTheme>();
+    } else if (type == SelectTheme::TypeId()) {
+        return AceType::MakeRefPtr<SelectTheme>();
+    } else if (type == MenuTheme::TypeId()) {
+        return AceType::MakeRefPtr<MenuTheme>();
+    } else if (type == ToastTheme::TypeId()) {
+        return AceType::MakeRefPtr<ToastTheme>();
+    } else if (type == SheetTheme::TypeId()) {
+        return AceType::MakeRefPtr<SheetTheme>();
+    } else if (type == TextTheme::TypeId()) {
+        return AceType::MakeRefPtr<TextTheme>();
+    } else {
+        return nullptr;
+    }
+}
 } // namespace
 class OverlayManagerToastTestNg : public testing::Test {
 public:
@@ -104,29 +139,10 @@ void OverlayManagerToastTestNg::SetUpTestCase()
     EXPECT_CALL(*AceType::DynamicCast<MockPipelineContext>(MockPipelineContext::GetCurrentContext()),
         GetSafeAreaWithoutProcess())
         .WillRepeatedly(Return(SafeAreaInsets {}));
-    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(nullptr));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-        if (type == DragBarTheme::TypeId()) {
-            return AceType::MakeRefPtr<DragBarTheme>();
-        } else if (type == IconTheme::TypeId()) {
-            return AceType::MakeRefPtr<IconTheme>();
-        } else if (type == DialogTheme::TypeId()) {
-            return AceType::MakeRefPtr<DialogTheme>();
-        } else if (type == PickerTheme::TypeId()) {
-            return AceType::MakeRefPtr<PickerTheme>();
-        } else if (type == SelectTheme::TypeId()) {
-            return AceType::MakeRefPtr<SelectTheme>();
-        } else if (type == MenuTheme::TypeId()) {
-            return AceType::MakeRefPtr<MenuTheme>();
-        } else if (type == ToastTheme::TypeId()) {
-            return AceType::MakeRefPtr<ToastTheme>();
-        } else if (type == SheetTheme::TypeId()) {
-            return AceType::MakeRefPtr<SheetTheme>();
-        } else if (type == TextTheme::TypeId()) {
-            return AceType::MakeRefPtr<TextTheme>();
-        } else {
-            return nullptr;
-        }
+        return GetTheme(type);
     });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
@@ -669,7 +685,7 @@ HWTEST_F(OverlayManagerToastTestNg, GetTextLayoutConstraint, TestSize.Level1)
     RefPtr<LayoutWrapperNode> layoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(toastNode, geometryNode, toastNode->GetLayoutProperty());
 
-    
+
     layoutAlgorithm->GetTextLayoutConstraint(AceType::RawPtr(layoutWrapper));
     EXPECT_FALSE(toastPattern->IsDefaultToast());
 }
@@ -2182,4 +2198,1224 @@ HWTEST_F(OverlayManagerToastTestNg, OnDetachFromMainTreeMultiThread001, TestSize
     MultiThreadBuildManager::SetIsThreadSafeNodeScope(false);
     EXPECT_NE(pattern->rowKeyboardCallbackId_, 0);
 }
+
+/**
+ * @tc.name: CalculateTitleBarHeightForTopAlignment001
+ * @tc.desc: Test DEFAULT mode - always avoid title bar
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, CalculateTitleBarHeightForTopAlignment001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create toast node and get ToastPattern.
+     * @tc.expected: Toast node and pattern are created successfully.
+     */
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE, .duration = DURATION };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto toastPattern = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(toastPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Prepare safeAreaTop, pipelineContext and toast layout property.
+     * @tc.expected: All required parameters are valid.
+     */
+    float safeAreaTop = 0.0f;
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto layoutWrapper = toastNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto toastProp = AceType::DynamicCast<ToastLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    ASSERT_NE(toastProp, nullptr);
+
+    /**
+     * @tc.steps: step3. Set container modal title height in mock pipeline.
+     * @tc.expected: Title bar height is configured successfully.
+     */
+    auto mockPipeline = AceType::DynamicCast<MockPipelineContext>(pipelineContext);
+    ASSERT_NE(mockPipeline, nullptr);
+    const int32_t titleBarHeight = 50;
+    mockPipeline->SetContainerModalTitleHeight(titleBarHeight);
+
+    /**
+     * @tc.steps: step4. Set showMode to DEFAULT and call CalculateTitleBarHeightForTopAlignment.
+     * @tc.expected: safeAreaTop increases by title bar height.
+     */
+    toastProp->UpdateShowMode(ToastShowMode::DEFAULT);
+    toastPattern->CalculateTitleBarHeightForTopAlignment(safeAreaTop, pipelineContext, toastProp);
+    EXPECT_FLOAT_EQ(safeAreaTop, static_cast<float>(titleBarHeight));
+}
+
+/**
+ * @tc.name: CalculateTitleBarHeightForTopAlignment002
+ * @tc.desc: Test TOP_MOST mode - always avoid title bar
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, CalculateTitleBarHeightForTopAlignment002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create toast node and get ToastPattern.
+     * @tc.expected: Toast node and pattern are created successfully.
+     */
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE, .duration = DURATION };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto toastPattern = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(toastPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Prepare safeAreaTop, pipelineContext and toast layout property.
+     * @tc.expected: All required parameters are valid.
+     */
+    float safeAreaTop = 0.0f;
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto layoutWrapper = toastNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto toastProp = AceType::DynamicCast<ToastLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    ASSERT_NE(toastProp, nullptr);
+
+    /**
+     * @tc.steps: step3. Set container modal title height in mock pipeline.
+     * @tc.expected: Title bar height is configured successfully.
+     */
+    auto mockPipeline = AceType::DynamicCast<MockPipelineContext>(pipelineContext);
+    ASSERT_NE(mockPipeline, nullptr);
+    const int32_t titleBarHeight = 50;
+    mockPipeline->SetContainerModalTitleHeight(titleBarHeight);
+
+    /**
+     * @tc.steps: step4. Set showMode to TOP_MOST and call CalculateTitleBarHeightForTopAlignment.
+     * @tc.expected: safeAreaTop increases by title bar height.
+     */
+    toastProp->UpdateShowMode(ToastShowMode::TOP_MOST);
+    toastPattern->CalculateTitleBarHeightForTopAlignment(safeAreaTop, pipelineContext, toastProp);
+    EXPECT_FLOAT_EQ(safeAreaTop, static_cast<float>(titleBarHeight));
+}
+
+/**
+ * @tc.name: CalculateTitleBarHeightForTopAlignment003
+ * @tc.desc: Test SYSTEM_TOP_MOST with same origin
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, CalculateTitleBarHeightForTopAlignment003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create toast node and get ToastPattern.
+     * @tc.expected: Toast node and pattern are created successfully.
+     */
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE, .duration = DURATION };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto toastPattern = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(toastPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Prepare safeAreaTop, pipelineContext and toast layout property.
+     * @tc.expected: All required parameters are valid.
+     */
+    float safeAreaTop = 0.0f;
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto layoutWrapper = toastNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto toastProp = AceType::DynamicCast<ToastLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    ASSERT_NE(toastProp, nullptr);
+
+    /**
+     * @tc.steps: step3. Set container modal title height in mock pipeline.
+     * @tc.expected: Title bar height is configured successfully.
+     */
+    auto mockPipeline = AceType::DynamicCast<MockPipelineContext>(pipelineContext);
+    ASSERT_NE(mockPipeline, nullptr);
+    const int32_t titleBarHeight = 50;
+    mockPipeline->SetContainerModalTitleHeight(titleBarHeight);
+
+    /**
+     * @tc.steps: step4. Set showMode to SYSTEM_TOP_MOST and mock a system toast subwindow
+     * with the same origin as the parent window.
+     * @tc.expected: needAvoidTitleBar becomes true and safeAreaTop increases by title bar height.
+     */
+    toastProp->UpdateShowMode(ToastShowMode::SYSTEM_TOP_MOST);
+    MockContainer::UpdateCurrent(0);
+
+    auto mockSubwindow = AceType::MakeRefPtr<MockSubwindow>();
+    ASSERT_NE(mockSubwindow, nullptr);
+    Rect parentRect(0, 0, 100, 100);
+    EXPECT_CALL(*mockSubwindow, GetParentWindowRect()).WillRepeatedly(Return(parentRect));
+    EXPECT_CALL(*mockSubwindow, GetWindowRect()).WillRepeatedly(Return(NG::RectF(0, 0, 100, 100)));
+    SubwindowManager::GetInstance()->AddSystemToastWindow(0, mockSubwindow);
+
+    toastPattern->CalculateTitleBarHeightForTopAlignment(safeAreaTop, pipelineContext, toastProp);
+    EXPECT_FLOAT_EQ(safeAreaTop, static_cast<float>(titleBarHeight));
+
+    /**
+     * @tc.steps: step5. Clear mock subwindow state and restore container id.
+     * @tc.expected: Global test state is restored.
+     */
+    SubwindowManager::GetInstance()->ClearToastInSystemSubwindow();
+    MockContainer::UpdateCurrent(-1);
+}
+
+/**
+ * @tc.name: CalculateTitleBarHeightForTopAlignment004
+ * @tc.desc: Test SYSTEM_TOP_MOST with different origin
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, CalculateTitleBarHeightForTopAlignment004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create toast node and get ToastPattern.
+     * @tc.expected: Toast node and pattern are created successfully.
+     */
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE, .duration = DURATION };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto toastPattern = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(toastPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Prepare safeAreaTop, pipelineContext and toast layout property.
+     * @tc.expected: All required parameters are valid.
+     */
+    float safeAreaTop = 0.0f;
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+
+    auto mockPipeline = AceType::DynamicCast<MockPipelineContext>(pipelineContext);
+    ASSERT_NE(mockPipeline, nullptr);
+    mockPipeline->SetContainerModalTitleHeight(50);
+
+    auto layoutWrapper = toastNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto toastProp = AceType::DynamicCast<ToastLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    ASSERT_NE(toastProp, nullptr);
+    toastProp->UpdateShowMode(ToastShowMode::SYSTEM_TOP_MOST);
+
+    constexpr int32_t testContainerId = 1;
+    ASSERT_LT(testContainerId, MIN_SUBCONTAINER_ID);
+
+    /**
+     * @tc.steps: step3. Mock a system toast subwindow whose origin is different from parent window.
+     * @tc.expected: The fetched subwindow is valid and its origin differs from parentRect.
+     */
+    SubwindowManager::GetInstance()->ClearToastInSystemSubwindow();
+    MockContainer::UpdateCurrent(testContainerId);
+
+    auto mockSubwindow = AceType::MakeRefPtr<MockSubwindow>();
+    ASSERT_NE(mockSubwindow, nullptr);
+    Rect parentRect(0, 0, 100, 100);
+    EXPECT_CALL(*mockSubwindow, GetParentWindowRect()).WillRepeatedly(Return(parentRect));
+    EXPECT_CALL(*mockSubwindow, GetWindowRect()).WillRepeatedly(Return(NG::RectF(0, 10, 100, 100)));
+    SubwindowManager::GetInstance()->AddSystemToastWindow(testContainerId, mockSubwindow);
+
+    auto fetchedSubwindow = SubwindowManager::GetInstance()->GetSystemToastWindow(testContainerId);
+    ASSERT_EQ(fetchedSubwindow, mockSubwindow);
+    auto fetchedParentRect = fetchedSubwindow->GetParentWindowRect();
+    auto fetchedToastRect = fetchedSubwindow->GetWindowRect();
+    ASSERT_FALSE(NearEqual(fetchedToastRect.Left(), fetchedParentRect.Left()) &&
+        NearEqual(fetchedToastRect.Top(), fetchedParentRect.Top()));
+
+    /**
+     * @tc.steps: step4. Call CalculateTitleBarHeightForTopAlignment.
+     * @tc.expected: safeAreaTop remains unchanged because title bar should not be avoided.
+     */
+    toastPattern->CalculateTitleBarHeightForTopAlignment(safeAreaTop, pipelineContext, toastProp);
+    EXPECT_FLOAT_EQ(safeAreaTop, 0.0f);
+
+    /**
+     * @tc.steps: step5. Clear mock subwindow state and restore container id.
+     * @tc.expected: Global test state is restored.
+     */
+    SubwindowManager::GetInstance()->ClearToastInSystemSubwindow();
+    MockContainer::UpdateCurrent(0);
+}
+
+/**
+ * @tc.name: CalculateTitleBarHeightForTopAlignment005
+ * @tc.desc: Test SYSTEM_TOP_MOST with Left not equal but Top equal
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, CalculateTitleBarHeightForTopAlignment005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create toast node and get ToastPattern.
+     * @tc.expected: Toast node and pattern are created successfully.
+     */
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE, .duration = DURATION };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto toastPattern = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(toastPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Prepare safeAreaTop, pipelineContext and toast layout property.
+     * @tc.expected: All required parameters are valid.
+     */
+    float safeAreaTop = 0.0f;
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto layoutWrapper = toastNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto toastProp = AceType::DynamicCast<ToastLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    ASSERT_NE(toastProp, nullptr);
+
+    /**
+     * @tc.steps: step3. Set title bar height and configure SYSTEM_TOP_MOST mode.
+     * @tc.expected: Mock pipeline and toast property are configured successfully.
+     */
+    auto mockPipeline = AceType::DynamicCast<MockPipelineContext>(pipelineContext);
+    ASSERT_NE(mockPipeline, nullptr);
+    mockPipeline->SetContainerModalTitleHeight(50);
+
+    constexpr int32_t testContainerId = 3;
+    ASSERT_LT(testContainerId, MIN_SUBCONTAINER_ID);
+
+    toastProp->UpdateShowMode(ToastShowMode::SYSTEM_TOP_MOST);
+    SubwindowManager::GetInstance()->ClearToastInSystemSubwindow();
+    MockContainer::UpdateCurrent(testContainerId);
+    ASSERT_EQ(MockContainer::CurrentId(), testContainerId);
+
+    /**
+     * @tc.steps: step4. Mock a subwindow with different left and same top.
+     * @tc.expected: The stored subwindow is valid and origin comparison returns false.
+     */
+    auto mockSubwindow = AceType::MakeRefPtr<MockSubwindow>();
+    ASSERT_NE(mockSubwindow, nullptr);
+    Rect parentRect(0, 0, 100, 100);
+    EXPECT_CALL(*mockSubwindow, GetParentWindowRect()).WillRepeatedly(Return(parentRect));
+    EXPECT_CALL(*mockSubwindow, GetWindowRect()).WillRepeatedly(Return(NG::RectF(10, 0, 100, 100)));
+    SubwindowManager::GetInstance()->AddSystemToastWindow(testContainerId, mockSubwindow);
+
+    auto fetchedSubwindow = SubwindowManager::GetInstance()->GetSystemToastWindow(testContainerId);
+    ASSERT_EQ(fetchedSubwindow, mockSubwindow);
+    auto fetchedParentRect = fetchedSubwindow->GetParentWindowRect();
+    auto fetchedToastRect = fetchedSubwindow->GetWindowRect();
+    ASSERT_FALSE(NearEqual(fetchedToastRect.Left(), fetchedParentRect.Left()) &&
+        NearEqual(fetchedToastRect.Top(), fetchedParentRect.Top()));
+
+    /**
+     * @tc.steps: step5. Call CalculateTitleBarHeightForTopAlignment.
+     * @tc.expected: safeAreaTop remains unchanged.
+     */
+    toastPattern->CalculateTitleBarHeightForTopAlignment(safeAreaTop, pipelineContext, toastProp);
+    EXPECT_FLOAT_EQ(safeAreaTop, 0.0f);
+
+    /**
+     * @tc.steps: step6. Clear mock subwindow state and restore container id.
+     * @tc.expected: Global test state is restored.
+     */
+    SubwindowManager::GetInstance()->ClearToastInSystemSubwindow();
+    MockContainer::UpdateCurrent(0);
+}
+
+/**
+ * @tc.name: CalculateTitleBarHeightForTopAlignment006
+ * @tc.desc: Test SYSTEM_TOP_MOST with toastSubwindow is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, CalculateTitleBarHeightForTopAlignment006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create toast node and get ToastPattern.
+     * @tc.expected: Toast node and pattern are created successfully.
+     */
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE, .duration = DURATION };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto toastPattern = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(toastPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Prepare safeAreaTop, pipelineContext and toast layout property.
+     * @tc.expected: All required parameters are valid.
+     */
+    float safeAreaTop = 0.0f;
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto layoutWrapper = toastNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto toastProp = AceType::DynamicCast<ToastLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    ASSERT_NE(toastProp, nullptr);
+
+    /**
+     * @tc.steps: step3. Set title bar height and configure SYSTEM_TOP_MOST mode with nullptr subwindow.
+     * @tc.expected: Current container id is valid and GetSystemToastWindow returns nullptr.
+     */
+    auto mockPipeline = AceType::DynamicCast<MockPipelineContext>(pipelineContext);
+    ASSERT_NE(mockPipeline, nullptr);
+    mockPipeline->SetContainerModalTitleHeight(50);
+
+    constexpr int32_t testContainerId = 5;
+    ASSERT_LT(testContainerId, MIN_SUBCONTAINER_ID);
+
+    toastProp->UpdateShowMode(ToastShowMode::SYSTEM_TOP_MOST);
+    SubwindowManager::GetInstance()->ClearToastInSystemSubwindow();
+    MockContainer::UpdateCurrent(testContainerId);
+    ASSERT_EQ(MockContainer::CurrentId(), testContainerId);
+    ASSERT_EQ(SubwindowManager::GetInstance()->GetSystemToastWindow(testContainerId), nullptr);
+
+    /**
+     * @tc.steps: step4. Call CalculateTitleBarHeightForTopAlignment.
+     * @tc.expected: safeAreaTop remains unchanged.
+     */
+    toastPattern->CalculateTitleBarHeightForTopAlignment(safeAreaTop, pipelineContext, toastProp);
+    EXPECT_FLOAT_EQ(safeAreaTop, 0.0f);
+
+    /**
+     * @tc.steps: step5. Restore container id.
+     * @tc.expected: Global test state is restored.
+     */
+    MockContainer::UpdateCurrent(0);
+}
+
+/**
+ * @tc.name: CalculateTitleBarHeightForTopAlignment007
+ * @tc.desc: Test with nullptr pipelineContext
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, CalculateTitleBarHeightForTopAlignment007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create toast node and get ToastPattern.
+     * @tc.expected: Toast node and pattern are created successfully.
+     */
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE, .duration = DURATION };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto toastPattern = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(toastPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Prepare nullptr pipelineContext and valid toast layout property.
+     * @tc.expected: pipelineContext is nullptr and toastProp is valid.
+     */
+    float safeAreaTop = 0.0f;
+    RefPtr<PipelineContext> pipelineContextNull = nullptr;
+    auto layoutWrapper = toastNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto toastProp = AceType::DynamicCast<ToastLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    ASSERT_NE(toastProp, nullptr);
+
+    /**
+     * @tc.steps: step3. Call CalculateTitleBarHeightForTopAlignment with nullptr pipelineContext.
+     * @tc.expected: Function returns directly and safeAreaTop remains unchanged.
+     */
+    toastProp->propShowMode_ = ToastShowMode::DEFAULT;
+    toastPattern->CalculateTitleBarHeightForTopAlignment(safeAreaTop, pipelineContextNull, toastProp);
+    EXPECT_FLOAT_EQ(safeAreaTop, 0.0f);
+}
+
+/**
+ * @tc.name: CalculateTitleBarHeightForTopAlignment008
+ * @tc.desc: Test with nullptr toastProp
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, CalculateTitleBarHeightForTopAlignment008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create toast node and get ToastPattern.
+     * @tc.expected: Toast node and pattern are created successfully.
+     */
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE, .duration = DURATION };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto toastPattern = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(toastPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Prepare valid pipelineContext and nullptr toastProp.
+     * @tc.expected: pipelineContext is valid and toastProp is nullptr.
+     */
+    float safeAreaTop = 0.0f;
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    RefPtr<ToastLayoutProperty> toastPropNull = nullptr;
+
+    /**
+     * @tc.steps: step3. Call CalculateTitleBarHeightForTopAlignment with nullptr toastProp.
+     * @tc.expected: Function returns directly and safeAreaTop remains unchanged.
+     */
+    toastPattern->CalculateTitleBarHeightForTopAlignment(safeAreaTop, pipelineContext, toastPropNull);
+    EXPECT_FLOAT_EQ(safeAreaTop, 0.0f);
+}
+
+/**
+ * @tc.name: CalculateTitleBarHeightForTopAlignment009
+ * @tc.desc: Test SYSTEM_TOP_MOST with currentId < 0 and container is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, CalculateTitleBarHeightForTopAlignment009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create toast node and get ToastPattern.
+     * @tc.expected: Toast node and pattern are created successfully.
+     */
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE, .duration = DURATION };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto toastPattern = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(toastPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Prepare safeAreaTop, pipelineContext and toast layout property.
+     * @tc.expected: pipelineContext and toastProp are valid.
+     */
+    float safeAreaTop = 0.0f;
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto layoutWrapper = toastNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto toastProp = AceType::DynamicCast<ToastLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    ASSERT_NE(toastProp, nullptr);
+
+    /**
+     * @tc.steps: step3. Set SYSTEM_TOP_MOST mode, make currentId invalid and clear active container.
+     * @tc.expected: Function falls back safely when container is nullptr.
+     */
+    toastProp->UpdateShowMode(ToastShowMode::SYSTEM_TOP_MOST);
+    MockContainer::UpdateCurrent(-1);
+    auto oldContainer = MockContainer::container_;
+    MockContainer::container_ = nullptr;
+
+    /**
+     * @tc.steps: step4. Call CalculateTitleBarHeightForTopAlignment.
+     * @tc.expected: safeAreaTop remains unchanged.
+     */
+    toastPattern->CalculateTitleBarHeightForTopAlignment(safeAreaTop, pipelineContext, toastProp);
+    EXPECT_FLOAT_EQ(safeAreaTop, 0.0f);
+
+    /**
+     * @tc.steps: step5. Restore container and current id.
+     * @tc.expected: Global test state is restored.
+     */
+    MockContainer::container_ = oldContainer;
+    MockContainer::UpdateCurrent(0);
+}
+
+/**
+ * @tc.name: CalculateTitleBarHeightForTopAlignment010
+ * @tc.desc: Test SYSTEM_TOP_MOST in subcontainer with different origin
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, CalculateTitleBarHeightForTopAlignment010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create toast node and get ToastPattern.
+     * @tc.expected: Toast node and pattern are created successfully.
+     */
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE, .duration = DURATION };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto toastPattern = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(toastPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Prepare safeAreaTop, pipelineContext and toast layout property.
+     * @tc.expected: pipelineContext and toastProp are valid.
+     */
+    float safeAreaTop = 0.0f;
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto layoutWrapper = toastNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto toastProp = AceType::DynamicCast<ToastLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    ASSERT_NE(toastProp, nullptr);
+
+    /**
+     * @tc.steps: step3. Set SYSTEM_TOP_MOST and configure title bar height.
+     * @tc.expected: Mock pipeline and toast property are configured successfully.
+     */
+    auto mockPipeline = AceType::DynamicCast<MockPipelineContext>(pipelineContext);
+    ASSERT_NE(mockPipeline, nullptr);
+    const int32_t titleBarHeight = 50;
+    mockPipeline->SetContainerModalTitleHeight(titleBarHeight);
+    toastProp->UpdateShowMode(ToastShowMode::SYSTEM_TOP_MOST);
+
+    /**
+     * @tc.steps: step4. Build subcontainer path and mock a system toast subwindow
+     * whose origin is different from parent window.
+     * @tc.expected: The function fetches subwindow by parentContainerId and does not avoid title bar.
+     */
+    constexpr int32_t subContainerId = MIN_SUBCONTAINER_ID + 10;
+    constexpr int32_t parentContainerId = 100;
+
+    SubwindowManager::GetInstance()->ClearToastInSystemSubwindow();
+    SubwindowManager::GetInstance()->AddParentContainerId(subContainerId, parentContainerId);
+    MockContainer::UpdateCurrent(subContainerId);
+
+    auto mockSubwindow = AceType::MakeRefPtr<MockSubwindow>();
+    ASSERT_NE(mockSubwindow, nullptr);
+    Rect parentRect(0, 0, 100, 100);
+    EXPECT_CALL(*mockSubwindow, GetParentWindowRect()).WillRepeatedly(Return(parentRect));
+    EXPECT_CALL(*mockSubwindow, GetWindowRect()).WillRepeatedly(Return(NG::RectF(10, 10, 100, 100)));
+    SubwindowManager::GetInstance()->AddSystemToastWindow(parentContainerId, mockSubwindow);
+
+    auto fetchedSubwindow = SubwindowManager::GetInstance()->GetSystemToastWindow(parentContainerId);
+    ASSERT_NE(fetchedSubwindow, nullptr);
+
+    /**
+     * @tc.steps: step5. Call CalculateTitleBarHeightForTopAlignment.
+     * @tc.expected: safeAreaTop remains unchanged.
+     */
+    toastPattern->CalculateTitleBarHeightForTopAlignment(safeAreaTop, pipelineContext, toastProp);
+    EXPECT_FLOAT_EQ(safeAreaTop, 0.0f);
+
+    /**
+     * @tc.steps: step6. Clear mock state and restore current id.
+     * @tc.expected: Global test state is restored.
+     */
+    SubwindowManager::GetInstance()->ClearToastInSystemSubwindow();
+    MockContainer::UpdateCurrent(0);
+}
+
+/**
+ * @tc.name: CalculateTitleBarHeightForTopAlignment011
+ * @tc.desc: Test fallback to custom title height when container modal title height is invalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, CalculateTitleBarHeightForTopAlignment011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create toast node and get ToastPattern.
+     * @tc.expected: Toast node and pattern are created successfully.
+     */
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE, .duration = DURATION };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto toastPattern = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(toastPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Prepare safeAreaTop, pipelineContext and toast layout property.
+     * @tc.expected: All required parameters are valid.
+     */
+    float safeAreaTop = 0.0f;
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto layoutWrapper = toastNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto toastProp = AceType::DynamicCast<ToastLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    ASSERT_NE(toastProp, nullptr);
+
+    /**
+     * @tc.steps: step3. Set DEFAULT mode to ensure title bar avoidance is needed.
+     * Configure container modal title height as invalid.
+     * @tc.expected: Fallback branch uses custom title height.
+     */
+    auto mockPipeline = AceType::DynamicCast<MockPipelineContext>(pipelineContext);
+    ASSERT_NE(mockPipeline, nullptr);
+    toastProp->UpdateShowMode(ToastShowMode::DEFAULT);
+    mockPipeline->SetContainerModalTitleHeight(0);
+
+    auto expectedHeight = pipelineContext->GetCustomTitleHeight().ConvertToPx();
+
+    /**
+     * @tc.steps: step4. Call CalculateTitleBarHeightForTopAlignment.
+     * @tc.expected: safeAreaTop increases by custom title height.
+     */
+    toastPattern->CalculateTitleBarHeightForTopAlignment(safeAreaTop, pipelineContext, toastProp);
+    EXPECT_FLOAT_EQ(safeAreaTop, expectedHeight);
+}
+
+/**
+ * @tc.name: CalculateTitleBarHeightForTopAlignment012
+ * @tc.desc: Test SYSTEM_TOP_MOST in subcontainer with same origin
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, CalculateTitleBarHeightForTopAlignment012, TestSize.Level1)
+{
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE, .duration = DURATION };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto toastPattern = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(toastPattern, nullptr);
+
+    float safeAreaTop = 0.0f;
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto layoutWrapper = toastNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto toastProp = AceType::DynamicCast<ToastLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    ASSERT_NE(toastProp, nullptr);
+
+    auto mockPipeline = AceType::DynamicCast<MockPipelineContext>(pipelineContext);
+    ASSERT_NE(mockPipeline, nullptr);
+    const int32_t titleBarHeight = 50;
+    mockPipeline->SetContainerModalTitleHeight(titleBarHeight);
+    toastProp->UpdateShowMode(ToastShowMode::SYSTEM_TOP_MOST);
+
+    constexpr int32_t subContainerId = MIN_SUBCONTAINER_ID;
+    constexpr int32_t parentContainerId = 0;
+
+    SubwindowManager::GetInstance()->ClearToastInSystemSubwindow();
+    SubwindowManager::GetInstance()->AddParentContainerId(subContainerId, parentContainerId);
+    MockContainer::UpdateCurrent(subContainerId);
+
+    auto mockSubwindow = AceType::MakeRefPtr<MockSubwindow>();
+    ASSERT_NE(mockSubwindow, nullptr);
+    Rect parentRect(0, 0, 100, 100);
+    EXPECT_CALL(*mockSubwindow, GetParentWindowRect()).WillRepeatedly(Return(parentRect));
+    EXPECT_CALL(*mockSubwindow, GetWindowRect()).WillRepeatedly(Return(NG::RectF(0, 0, 100, 100)));
+    SubwindowManager::GetInstance()->AddSystemToastWindow(parentContainerId, mockSubwindow);
+
+    toastPattern->CalculateTitleBarHeightForTopAlignment(safeAreaTop, pipelineContext, toastProp);
+    EXPECT_FLOAT_EQ(safeAreaTop, static_cast<float>(titleBarHeight));
+
+    SubwindowManager::GetInstance()->ClearToastInSystemSubwindow();
+    MockContainer::UpdateCurrent(0);
+}
+
+/**
+ * @tc.name: SetToastSystemMaterial_NullToastNode
+ * @tc.desc: Test SetToastSystemMaterial when toastNode is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, SetToastSystemMaterial_NullToastNode, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create valid ToastInfo with systemMaterial
+     */
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(MATERIAL_TYPE_SEMI_TRANSPARENT);
+
+    ToastInfo toastInfo;
+    toastInfo.message = MESSAGE;
+    toastInfo.duration = DURATION;
+    toastInfo.systemMaterial = material;
+
+    /**
+     * @tc.steps: step2. Call SetToastSystemMaterial with nullptr toastNode
+     * @tc.expected: Should return without crash or setting any properties
+     */
+    RefPtr<FrameNode> nullToastNode = nullptr;
+    ToastView::SetToastSystemMaterial(nullToastNode, toastInfo);
+
+    // Verify no crash occurred - if we reach here, test passes
+    EXPECT_EQ(nullToastNode, nullptr);
+}
+
+/**
+ * @tc.name: SetToastSystemMaterial_NullSystemMaterial
+ * @tc.desc: Test SetToastSystemMaterial when systemMaterial in ToastInfo is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, SetToastSystemMaterial_NullSystemMaterial, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create toast node without systemMaterial
+     */
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE, .duration = DURATION };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto renderContext = toastNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    /**
+     * @tc.steps: step2. Reset BackBlurStyle to clean state
+     */
+    renderContext->ResetBackBlurStyle();
+
+    /**
+     * @tc.steps: step3. Create ToastInfo with null systemMaterial
+     */
+    ToastInfo toastInfoWithNullMaterial;
+    toastInfoWithNullMaterial.message = MESSAGE;
+    toastInfoWithNullMaterial.systemMaterial = nullptr;
+
+    /**
+     * @tc.steps: step4. Call SetToastSystemMaterial
+     * @tc.expected: Should return without calling SetSystemMaterial
+     */
+    ToastView::SetToastSystemMaterial(toastNode, toastInfoWithNullMaterial);
+
+    // Verify no material was set
+    auto material = renderContext->GetSystemMaterial();
+    EXPECT_EQ(material, nullptr);
+}
+
+/**
+ * @tc.name: SetToastSystemMaterial_ValidMaterialTypeNone
+ * @tc.desc: Test SetToastSystemMaterial with valid MaterialType::NONE
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, SetToastSystemMaterial_ValidMaterialTypeNone, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create toast node and prepare test environment
+     */
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE, .duration = DURATION };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto renderContext = toastNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    /**
+     * @tc.steps: step2. Reset BackBlurStyle to clean state before calling target method
+     */
+    renderContext->ResetBackBlurStyle();
+
+    /**
+     * @tc.steps: step3. Create ToastInfo with MaterialType::NONE
+     */
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(MATERIAL_TYPE_NONE);
+
+    ToastInfo toastInfoWithMaterial;
+    toastInfoWithMaterial.message = MESSAGE;
+    toastInfoWithMaterial.systemMaterial = material;
+
+    /**
+     * @tc.steps: step4. Call SetToastSystemMaterial directly
+     * @tc.expected: Should call SetSystemMaterial with valid material
+     */
+    ToastView::SetToastSystemMaterial(toastNode, toastInfoWithMaterial);
+
+    /**
+     * @tc.steps: step5. Verify the method executed successfully
+     * @tc.expected: Toast node should remain valid
+     */
+    EXPECT_NE(toastNode, nullptr);
+}
+
+/**
+ * @tc.name: SetToastSystemMaterial_ValidMaterialTypeSemiTransparent
+ * @tc.desc: Test SetToastSystemMaterial with valid MaterialType::SEMI_TRANSPARENT
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, SetToastSystemMaterial_ValidMaterialTypeSemiTransparent, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create toast node and prepare test environment
+     */
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE, .duration = DURATION };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto renderContext = toastNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    /**
+     * @tc.steps: step2. Reset BackBlurStyle to clean state before calling target method
+     */
+    renderContext->ResetBackBlurStyle();
+
+    /**
+     * @tc.steps: step3. Create ToastInfo with MaterialType::SEMI_TRANSPARENT
+     */
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(MATERIAL_TYPE_SEMI_TRANSPARENT);
+
+    ToastInfo toastInfoWithMaterial;
+    toastInfoWithMaterial.message = MESSAGE;
+    toastInfoWithMaterial.systemMaterial = material;
+
+    /**
+     * @tc.steps: step4. Call SetToastSystemMaterial directly
+     * @tc.expected: Should call SetSystemMaterial with valid material
+     */
+    ToastView::SetToastSystemMaterial(toastNode, toastInfoWithMaterial);
+
+    /**
+     * @tc.steps: step5. Verify the method executed successfully
+     * @tc.expected: Toast node should remain valid
+     */
+    EXPECT_NE(toastNode, nullptr);
+}
+
+/**
+ * @tc.name: SetToastSystemMaterial_InvalidMaterialTypeNegative
+ * @tc.desc: Test SetToastSystemMaterial with invalid negative material type
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, SetToastSystemMaterial_InvalidMaterialTypeNegative, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create toast node and prepare test environment
+     */
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE, .duration = DURATION };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto renderContext = toastNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    /**
+     * @tc.steps: step2. Reset BackBlurStyle to clean state
+     */
+    renderContext->ResetBackBlurStyle();
+
+    /**
+     * @tc.steps: step3. Create ToastInfo with invalid negative material type
+     */
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(INVALID_MATERIAL_TYPE_NEGATIVE);
+
+    ToastInfo toastInfoWithInvalidMaterial;
+    toastInfoWithInvalidMaterial.message = MESSAGE;
+    toastInfoWithInvalidMaterial.systemMaterial = material;
+
+    /**
+     * @tc.steps: step4. Call SetToastSystemMaterial
+     * @tc.expected: Should not call SetSystemMaterial due to invalid type
+     */
+    ToastView::SetToastSystemMaterial(toastNode, toastInfoWithInvalidMaterial);
+
+    /**
+     * @tc.steps: step5. Verify system material was not set
+     * @tc.expected: RenderContext should not have system material set
+     */
+    auto resultMaterial = renderContext->GetSystemMaterial();
+    EXPECT_EQ(resultMaterial, nullptr);
+}
+
+/**
+ * @tc.name: SetToastSystemMaterial_InvalidMaterialTypeTooLarge
+ * @tc.desc: Test SetToastSystemMaterial with material type larger than MAX
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, SetToastSystemMaterial_InvalidMaterialTypeTooLarge, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create toast node and prepare test environment
+     */
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE, .duration = DURATION };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto renderContext = toastNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    /**
+     * @tc.steps: step2. Reset BackBlurStyle to clean state
+     */
+    renderContext->ResetBackBlurStyle();
+
+    /**
+     * @tc.steps: step3. Create ToastInfo with material type exceeding MAX
+     */
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(INVALID_MATERIAL_TYPE_TOO_LARGE);
+
+    ToastInfo toastInfoWithInvalidMaterial;
+    toastInfoWithInvalidMaterial.message = MESSAGE;
+    toastInfoWithInvalidMaterial.systemMaterial = material;
+
+    /**
+     * @tc.steps: step4. Call SetToastSystemMaterial
+     * @tc.expected: Should not call SetSystemMaterial due to type exceeding MAX
+     */
+    ToastView::SetToastSystemMaterial(toastNode, toastInfoWithInvalidMaterial);
+
+    /**
+     * @tc.steps: step5. Verify system material was not set
+     * @tc.expected: RenderContext should not have system material set
+     */
+    auto resultMaterial = renderContext->GetSystemMaterial();
+    EXPECT_EQ(resultMaterial, nullptr);
+}
+
+/**
+ * @tc.name: SetToastSystemMaterial_BackBlurStyleReset
+ * @tc.desc: Test that SetToastSystemMaterial resets BackBlurStyle before setting material
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, SetToastSystemMaterial_BackBlurStyleReset, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create toast node and set initial BackBlurStyle
+     */
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE, .duration = DURATION };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto renderContext = toastNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    /**
+     * @tc.steps: step2. Set initial BackBlurStyle
+     */
+    BlurStyleOption initialBlurStyle;
+    initialBlurStyle.blurStyle = BlurStyle::COMPONENT_THICK;
+    initialBlurStyle.policy = BlurStyleActivePolicy::ALWAYS_ACTIVE;
+    renderContext->UpdateBackBlurStyle(initialBlurStyle);
+
+    /**
+     * @tc.steps: step3. Create ToastInfo with valid systemMaterial
+     */
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(MATERIAL_TYPE_SEMI_TRANSPARENT);
+
+    ToastInfo toastInfoWithMaterial;
+    toastInfoWithMaterial.message = MESSAGE;
+    toastInfoWithMaterial.systemMaterial = material;
+
+    /**
+     * @tc.steps: step4. Call SetToastSystemMaterial
+     * @tc.expected: Should reset BackBlurStyle to nullopt before setting material
+     */
+    ToastView::SetToastSystemMaterial(toastNode, toastInfoWithMaterial);
+
+    /**
+     * @tc.steps: step5. Verify the method completed successfully
+     * @tc.expected: Toast node should remain valid after material is set
+     */
+    EXPECT_NE(toastNode, nullptr);
+}
+
+/**
+ * @tc.name: SetToastSystemMaterial_DefaultMaterial_ApiVersion26
+ * @tc.desc: Test SetToastSystemMaterial sets default material via GetInitMaterial when API >= 26 and no custom styles
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, SetToastSystemMaterial_DefaultMaterial_ApiVersion26, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create toast node and set API version to VERSION_TWENTY_SIX
+     */
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE, .duration = DURATION };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto renderContext = toastNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->ResetBackBlurStyle();
+
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    int32_t backupApiVersion = container->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    EXPECT_TRUE(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX));
+
+    /**
+     * @tc.steps: step2. Create ToastInfo without systemMaterial and no custom styles
+     */
+    ToastInfo toastInfoNoCustom;
+    toastInfoNoCustom.message = MESSAGE;
+    toastInfoNoCustom.duration = DURATION;
+    toastInfoNoCustom.systemMaterial = nullptr;
+
+    /**
+     * @tc.steps: step3. Call SetToastSystemMaterial
+     * @tc.expected: Default material should be applied via GetInitMaterial(THICK)
+     */
+    ToastView::SetToastSystemMaterial(toastNode, toastInfoNoCustom);
+
+    EXPECT_NE(toastNode, nullptr);
+
+    container->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: SetToastSystemMaterial_DefaultMaterial_ApiVersionBelow26
+ * @tc.desc: Test SetToastSystemMaterial does not set default material when API < VERSION_TWENTY_SIX
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, SetToastSystemMaterial_DefaultMaterial_ApiVersionBelow26, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create toast node and set API version below VERSION_TWENTY_SIX
+     */
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE, .duration = DURATION };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto renderContext = toastNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->ResetBackBlurStyle();
+
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    int32_t backupApiVersion = container->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    EXPECT_FALSE(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX));
+
+    /**
+     * @tc.steps: step2. Create ToastInfo without systemMaterial and no custom styles
+     */
+    ToastInfo toastInfoNoCustom;
+    toastInfoNoCustom.message = MESSAGE;
+    toastInfoNoCustom.duration = DURATION;
+    toastInfoNoCustom.systemMaterial = nullptr;
+
+    /**
+     * @tc.steps: step3. Call SetToastSystemMaterial
+     * @tc.expected: No default material should be set since API < 26
+     */
+    ToastView::SetToastSystemMaterial(toastNode, toastInfoNoCustom);
+
+    auto resultMaterial = renderContext->GetSystemMaterial();
+    EXPECT_EQ(resultMaterial, nullptr);
+
+    container->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: SetToastSystemMaterial_CustomBackgroundColorPreventsDefault
+ * @tc.desc: Test that custom backgroundColor prevents default material even when API >= 26
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, SetToastSystemMaterial_CustomBackgroundColorPreventsDefault, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create toast node and set API version to VERSION_TWENTY_SIX
+     */
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE, .duration = DURATION };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto renderContext = toastNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->ResetBackBlurStyle();
+
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    int32_t backupApiVersion = container->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    EXPECT_TRUE(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX));
+
+    /**
+     * @tc.steps: step2. Create ToastInfo with custom backgroundColor (no systemMaterial)
+     */
+    ToastInfo toastInfoWithBgColor;
+    toastInfoWithBgColor.message = MESSAGE;
+    toastInfoWithBgColor.duration = DURATION;
+    toastInfoWithBgColor.systemMaterial = nullptr;
+    toastInfoWithBgColor.backgroundColor = Color::RED;
+
+    /**
+     * @tc.steps: step3. Call SetToastSystemMaterial
+     * @tc.expected: Default material should NOT be set due to custom backgroundColor
+     */
+    ToastView::SetToastSystemMaterial(toastNode, toastInfoWithBgColor);
+
+    auto resultMaterial = renderContext->GetSystemMaterial();
+    EXPECT_EQ(resultMaterial, nullptr);
+
+    container->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: SetToastSystemMaterial_CustomShadowPreventsDefault
+ * @tc.desc: Test that custom shadow prevents default material even when API >= 26
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, SetToastSystemMaterial_CustomShadowPreventsDefault, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create toast node and set API version to VERSION_TWENTY_SIX
+     */
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE, .duration = DURATION };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto renderContext = toastNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->ResetBackBlurStyle();
+
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    int32_t backupApiVersion = container->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    EXPECT_TRUE(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX));
+
+    /**
+     * @tc.steps: step2. Create ToastInfo with custom shadow (no systemMaterial)
+     */
+    ToastInfo toastInfoWithShadow;
+    toastInfoWithShadow.message = MESSAGE;
+    toastInfoWithShadow.duration = DURATION;
+    toastInfoWithShadow.systemMaterial = nullptr;
+    toastInfoWithShadow.shadow = ShadowConfig::DefaultShadowL;
+
+    /**
+     * @tc.steps: step3. Call SetToastSystemMaterial
+     * @tc.expected: Default material should NOT be set due to custom shadow
+     */
+    ToastView::SetToastSystemMaterial(toastNode, toastInfoWithShadow);
+
+    auto resultMaterial = renderContext->GetSystemMaterial();
+    EXPECT_EQ(resultMaterial, nullptr);
+
+    container->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: SetToastSystemMaterial_CustomBlurStylePreventsDefault
+ * @tc.desc: Test that custom backgroundBlurStyle prevents default material even when API >= 26
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, SetToastSystemMaterial_CustomBlurStylePreventsDefault, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create toast node and set API version to VERSION_TWENTY_SIX
+     */
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE, .duration = DURATION };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto renderContext = toastNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->ResetBackBlurStyle();
+
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    int32_t backupApiVersion = container->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    EXPECT_TRUE(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX));
+
+    /**
+     * @tc.steps: step2. Create ToastInfo with custom backgroundBlurStyle (no systemMaterial)
+     */
+    ToastInfo toastInfoWithBlur;
+    toastInfoWithBlur.message = MESSAGE;
+    toastInfoWithBlur.duration = DURATION;
+    toastInfoWithBlur.systemMaterial = nullptr;
+    toastInfoWithBlur.backgroundBlurStyle = static_cast<int32_t>(BlurStyle::COMPONENT_THICK);
+
+    /**
+     * @tc.steps: step3. Call SetToastSystemMaterial
+     * @tc.expected: Default material should NOT be set due to custom backgroundBlurStyle
+     */
+    ToastView::SetToastSystemMaterial(toastNode, toastInfoWithBlur);
+
+    auto resultMaterial = renderContext->GetSystemMaterial();
+    EXPECT_EQ(resultMaterial, nullptr);
+
+    container->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: SetToastSystemMaterial_SimplifiedCheck_ValidSystemMaterial
+ * @tc.desc: Test that simplified check (just if systemMaterial) accepts material with IMMERSIVE type
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, SetToastSystemMaterial_SimplifiedCheck_ValidSystemMaterial, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create toast node
+     */
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE, .duration = DURATION };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto renderContext = toastNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->ResetBackBlurStyle();
+
+    /**
+     * @tc.steps: step2. Create ToastInfo with IMMERSIVE type systemMaterial
+     * The new code uses simplified check (just checks if systemMaterial is non-null),
+     * so IMMERSIVE type should be accepted without type range validation.
+     */
+    constexpr int32_t MATERIAL_TYPE_IMMERSIVE = static_cast<int32_t>(Ace::MaterialType::IMMERSIVE);
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(MATERIAL_TYPE_IMMERSIVE);
+    ImmersiveOptions options {};
+    options.style = UiMaterialStyle::THICK;
+    material->SetImmersiveOptions(options);
+
+    ToastInfo toastInfoWithImmersive;
+    toastInfoWithImmersive.message = MESSAGE;
+    toastInfoWithImmersive.systemMaterial = material;
+
+    /**
+     * @tc.steps: step3. Call SetToastSystemMaterial
+     * @tc.expected: Should process material without type range rejection
+     */
+    ToastView::SetToastSystemMaterial(toastNode, toastInfoWithImmersive);
+
+    EXPECT_NE(toastNode, nullptr);
+}
+
 } // namespace OHOS::Ace::NG

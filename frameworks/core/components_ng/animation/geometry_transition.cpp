@@ -554,6 +554,8 @@ void GeometryTransition::RecordAnimationOption(const WeakPtr<FrameNode>& trigger
             animationOption_ = pipeline->GetSyncAnimationOption();
         }
     }
+    // Clear onFinishEvent to avoid prevent Destructor Error.
+    animationOption_.SetOnFinishEvent(nullptr);
 }
 
 void GeometryTransition::AnimateWithSandBox(const OffsetF& inNodeParentPos, bool inNodeParentHasScales,

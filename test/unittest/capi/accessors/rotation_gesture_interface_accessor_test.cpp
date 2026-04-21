@@ -81,11 +81,11 @@ public:
 };
 
 /**
- * @tc.name: CtorTestFingers
+ * @tc.name: constructTestFingers
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RotationGestureInterfaceAccessorTest, CtorTestFingers, TestSize.Level1)
+HWTEST_F(RotationGestureInterfaceAccessorTest, constructTestFingers, TestSize.Level1)
 {
     const std::vector<std::pair<int32_t, int32_t>> TEST_PLAN = {
         { -10, DEFAULT_FINGERS },
@@ -133,11 +133,11 @@ HWTEST_F(RotationGestureInterfaceAccessorTest, CtorTestFingers, TestSize.Level1)
 }
 
 /**
- * @tc.name: CtorTestAngle
+ * @tc.name: constructTestAngle
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RotationGestureInterfaceAccessorTest, CtorTestAngle, TestSize.Level1)
+HWTEST_F(RotationGestureInterfaceAccessorTest, constructTestAngle, TestSize.Level1)
 {
     const std::vector<std::pair<double, double>> TEST_PLAN = {
         { -10.0, DEFAULT_ANGLE },
@@ -183,11 +183,11 @@ HWTEST_F(RotationGestureInterfaceAccessorTest, CtorTestAngle, TestSize.Level1)
 }
 
 /**
- * @tc.name: CtorTestInvalid
+ * @tc.name: constructTestInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RotationGestureInterfaceAccessorTest, CtorTestInvalid, TestSize.Level1)
+HWTEST_F(RotationGestureInterfaceAccessorTest, constructTestInvalid, TestSize.Level1)
 {
     auto peer = accessor_->construct(nullptr);
     ASSERT_NE(peer, nullptr);

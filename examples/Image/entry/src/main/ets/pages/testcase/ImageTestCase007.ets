@@ -12,14 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { $r } from '@ohos.arkui.component.Common';
+
 
 /**
  * 验证Image的基础功能
  */
 @Entry
 @Component
-struct ImageExample {
+struct ImageExample007 {
   @State imageSource: ResourceStr | undefined = undefined;
   @State imageFits: ImageFit[] = [];
   @State imageFitIndex: number = 0;
@@ -146,7 +146,7 @@ struct ImageExample {
     Column() {
       Flex({ direction: FlexDirection.Column, alignItems: ItemAlign.Start }) {
         Row() {
-          Image($r('app.media.sky'))
+          Image($r('app.media.background'))
             .width(120)
             .height(140)
             .margin(17)
@@ -185,7 +185,7 @@ struct ImageExample {
           .height('40%')
 
           // 加载base64格式图片
-          Image($r('app.media.base64'))
+          Image($r('app.media.startIcon'))
             .width(110)
             .height(110)
             .margin(15)

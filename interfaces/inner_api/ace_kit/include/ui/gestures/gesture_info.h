@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_GESTURES_GESTURE_INFO_H
 #define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_GESTURES_GESTURE_INFO_H
 
+#include <functional>
 #include "ui/base/geometry/point.h"
 #include "ui/base/geometry/offset.h"
 #include "ui/gestures/velocity.h"
@@ -64,6 +65,7 @@ struct FingerInfo {
     Offset globalDisplayLocation_;
     SourceType sourceType_ = SourceType::NONE;
     SourceTool sourceTool_ = SourceTool::UNKNOWN;
+    std::function<Offset()> currentLocalLocation_ = nullptr;
 };
 } // namespace OHOS::Ace
 

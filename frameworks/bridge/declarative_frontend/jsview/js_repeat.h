@@ -40,7 +40,12 @@ public:
     static void CreateNewChildFinish(const JSCallbackInfo& info);
     static void AfterAddChild();
     static void OnMove(const JSCallbackInfo& info);
-    static void JsParseItemDragEventHandler(const JsiExecutionContext& context, const JSRef<JSObject>& itemDragEventObj);
+    static void JsParseItemDragEventHandler(
+        const JsiExecutionContext& context, const JSRef<JSObject>& itemDragEventObj);
+    static void IsAllowAnimation(const JSCallbackInfo& info);
+    static void IsImplicitAnimationOpen(const JSCallbackInfo& info);
+    static void IsChildInAnimation(const JSCallbackInfo& info);
+    static void GetActiveRange(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

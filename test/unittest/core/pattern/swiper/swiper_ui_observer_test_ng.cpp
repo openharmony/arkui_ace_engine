@@ -16,6 +16,8 @@
 #include "gtest/gtest.h"
 #include "swiper_test_ng.h"
 
+#include "core/components_ng/base/observer_handler.h"
+
 namespace OHOS::Ace::NG {
 class SwiperUIObserverTestNg : public SwiperTestNg {};
 

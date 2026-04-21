@@ -17,7 +17,7 @@
 
 #include "compatible/components/picker/timepicker_model_impl.h"
 
-#include "bridge/arkts_frontend/koala_projects/arkoala-arkts/framework/native/src/generated/arkoala_api_generated.h"
+#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 #include "core/common/dynamic_module.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/time_picker/bridge/arkts_native_timepickerdialog_bridge.h"
@@ -43,7 +43,9 @@ const ArkUITimePickerDialogModifier* GetTimePickerDialogStaticModifier();
 } // namespace TimePickerUtil
 namespace GeneratedModifier {
 #ifdef INCLUDE_GENERATED_SOURCES
+#ifdef WRONG_GEN_v140
 GENERATED_ArkUITimePickerDialogAccessor* GetTimePickerDialogStaticAccessor();
+#endif // WRONG_GEN_v140
 #endif
 } // namespace GeneratedModifier
 } // namespace NG
@@ -81,7 +83,11 @@ const void* TimePickerDialogDynamicModule::GetCustomModifier(const std::string& 
     }
 #ifdef INCLUDE_GENERATED_SOURCES
     if (name == "configurationAccessor") {
+#ifdef WRONG_GEN_v140
         return NG::GeneratedModifier::GetTimePickerDialogStaticAccessor();
+#else // WRONG_GEN_v140
+    return nullptr;
+#endif // WRONG_GEN_v140
     }
 #else
     return nullptr;

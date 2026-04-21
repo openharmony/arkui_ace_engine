@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,12 @@
  * limitations under the License.
  */
 
+#if defined(NAPI_SCOPE_ERROR_HIVEW_REPORT)
+#include <dlfcn.h>
+#endif
+
 #include "core/common/container_scope.h"
+
 #include "core/common/container_consts.h"
 
 namespace OHOS::Ace {
@@ -32,6 +37,32 @@ thread_local int32_t currentId_(DEFAULT_ID);
 std::atomic<int32_t> recentActiveId_(DEFAULT_ID);
 std::atomic<int32_t> recentForegroundId_(DEFAULT_ID);
 }
+#if defined(NAPI_SCOPE_ERROR_HIVEW_REPORT)
+void* ContainerScope::registerHandler_ = nullptr;
+ContainerScope::ReportScopeErrorFun ContainerScope::reportScopeError_ = nullptr;
+
+void ContainerScope::ReportScopeError()
+{
+    if (reportScopeError_ != nullptr) {
+        reportScopeError_();
+        return;
+    }
+    registerHandler_ = dlopen("libace_compatible.z.so", RTLD_LAZY);
+    reportScopeError_ = (ReportScopeErrorFun)dlsym(registerHandler_, "OHOS_ACE_ScopeErrorHivewReport");
+    reportScopeError_();
+}
+
+void ContainerScope::CheckIdChange(int32_t id)
+{
+    if (id < 0) {
+        return;
+    }
+    auto safeId = SafelyId();
+    if (id != safeId) {
+        ReportScopeError();
+    }
+}
+#endif
 
 int32_t ContainerScope::CurrentId()
 {
@@ -76,6 +107,26 @@ int32_t ContainerScope::RecentForegroundId()
     return recentForegroundId_.load(std::memory_order_relaxed);
 }
 
+int32_t ContainerScope::SafelyId()
+{
+    uint32_t containerCount = ContainerCount();
+    if (containerCount == 0) {
+        return INSTANCE_ID_UNDEFINED;
+    }
+    if (containerCount == 1) {
+        return SingletonId();
+    }
+    int32_t currentId = RecentActiveId();
+    if (currentId >= 0) {
+        return currentId;
+    }
+    currentId = RecentForegroundId();
+    if (currentId >= 0) {
+        return currentId;
+    }
+    return DefaultId();
+}
+
 std::pair<int32_t, InstanceIdGenReason> ContainerScope::CurrentIdWithReason()
 {
     int32_t currentId = CurrentId();
@@ -98,6 +149,26 @@ std::pair<int32_t, InstanceIdGenReason> ContainerScope::CurrentIdWithReason()
         return { currentId, InstanceIdGenReason::FOREGROUND };
     }
     return { ContainerScope::DefaultId(), InstanceIdGenReason::DEFAULT };
+}
+
+const std::string ContainerScope::ReasonToDescription(InstanceIdGenReason reason)
+{
+    switch (reason) {
+        case InstanceIdGenReason::SCOPE:
+            return "The instance is determined by the caller";
+        case InstanceIdGenReason::ACTIVE:
+            return "No specific instance was specified, so the most recently active instance was retrieved";
+        case InstanceIdGenReason::DEFAULT:
+            return "No specific instance was specified, using default";
+        case InstanceIdGenReason::SINGLETON:
+            return "No specific instance was specified, return the only remaining instance";
+        case InstanceIdGenReason::FOREGROUND:
+            return "No specific instance was specified, return the foreground instance";
+        case InstanceIdGenReason::UNDEFINED:
+            return "No valid instance exists";
+        default:
+            return "Unknown reason";
+    }
 }
 
 const std::set<int32_t> ContainerScope::GetAllUIContexts()
@@ -148,5 +219,4 @@ void ContainerScope::RemoveAndCheck(int32_t id)
         UpdateRecentForeground(INSTANCE_ID_UNDEFINED);
     }
 }
-
 } // namespace OHOS::Ace

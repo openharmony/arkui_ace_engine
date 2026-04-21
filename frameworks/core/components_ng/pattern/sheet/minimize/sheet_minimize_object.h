@@ -17,6 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHEET_MINIMIZE_SHEET_MINIMIZE_OBJECT_H
 
 #include "core/components_ng/pattern/sheet/sheet_object.h"
+#include "base/geometry/ng/vector.h"
+#include "core/components_ng/pattern/sheet/image_generator_style.h"
 
 namespace OHOS::Ace::NG {
 
@@ -62,7 +64,7 @@ public:
 
     uint32_t GetPanDirection() const override
     {
-        return PanDirection::HORIZONTAL;
+        return PanDirection::ALL;
     }
 
     bool CheckIfNeedSetOuterBorderProp() const override
@@ -92,6 +94,18 @@ public:
 
     void FireHeightDidChange() override;
 
+    void InitDragDropEvent();
+    void HandleDragStartAnimation();
+    void HandleOnDragEnd(const GestureEvent& info);
+    void HandleOnDragCancel();
+    void HandleTransformScale();
+    void HandleEndPosition();
+    void HandleDragEndAnimation();
+    void HandleDragEndResumeAurora();
+    SheetPositionInfo GetSheetPositionInfo();
+    OffsetF CalcDragAdsorbePosition();
+    OffsetF CalcDragOutOfBoundsPosition();
+
 private:
     void UpdateMinimizePosition();
     void UpdateDragBarStatus();
@@ -104,6 +118,11 @@ private:
     void DecreaseScrollHeightInMinimizeSheet(uint32_t decreaseHeight);
 
     float resizeDecreasedHeight_ = 0.0f;
+
+    RefPtr<PanEvent> panEvent_;
+    VectorF prevScale_{ 1.f, 1.f };
+    OffsetF dragStartOffset_;
+    OffsetF dragOffsetAddUp_;
 };
 } // namespace OHOS::Ace::NG
 

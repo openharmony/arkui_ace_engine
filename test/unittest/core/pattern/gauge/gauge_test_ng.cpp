@@ -19,10 +19,10 @@
 
 #define private public
 #define protected public
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/rosen/testing_canvas.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/rosen/testing_canvas.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
 #include "base/geometry/offset.h"
@@ -39,6 +39,7 @@
 #include "core/components_ng/pattern/gauge/gauge_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -121,9 +122,11 @@ void GaugeTestNg::SetUpTestSuite()
     auto themeConstants = CreateThemeConstants(THEME_PATTERN_PROGRESS);
     auto progressTheme = ProgressTheme::Builder().Build(themeConstants);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(progressTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(progressTheme));
 
     auto gaugeTheme = GaugeTheme::Builder().Build(themeConstants);
     EXPECT_CALL(*themeManager, GetTheme(GaugeTheme::TypeId())).WillRepeatedly(Return(gaugeTheme));
+    EXPECT_CALL(*themeManager, GetTheme(GaugeTheme::TypeId(), _)).WillRepeatedly(Return(gaugeTheme));
 }
 
 void GaugeTestNg::TearDownTestSuite()
@@ -326,6 +329,7 @@ HWTEST_F(GaugeTestNg, GaugeMeasureTest001, TestSize.Level1)
     auto progressTheme = AceType::MakeRefPtr<ProgressTheme>();
     progressTheme->trackWidth_ = WIDTH;
     EXPECT_CALL(*themeManager, GetTheme(ProgressTheme::TypeId())).WillRepeatedly(Return(progressTheme));
+    EXPECT_CALL(*themeManager, GetTheme(ProgressTheme::TypeId(), _)).WillRepeatedly(Return(progressTheme));
 
     LayoutConstraintF layoutConstraintHeightInvalid;
     layoutConstraintHeightInvalid.maxSize = MAX_SIZE;
@@ -353,6 +357,7 @@ HWTEST_F(GaugeTestNg, GaugeMeasureTest001, TestSize.Level1)
      */
     progressTheme = AceType::MakeRefPtr<ProgressTheme>();
     EXPECT_CALL(*themeManager, GetTheme(ProgressTheme::TypeId())).WillRepeatedly(Return(progressTheme));
+    EXPECT_CALL(*themeManager, GetTheme(ProgressTheme::TypeId(), _)).WillRepeatedly(Return(progressTheme));
 
     LayoutConstraintF layoutConstraintWidth;
     layoutConstraintWidth.selfIdealSize.SetWidth(WIDTH.ConvertToPx());
@@ -412,6 +417,7 @@ HWTEST_F(GaugeTestNg, GaugeMeasureTest002, TestSize.Level1)
     auto progressTheme = AceType::MakeRefPtr<ProgressTheme>();
     progressTheme->trackWidth_ = 500.0_vp;
     EXPECT_CALL(*themeManager, GetTheme(ProgressTheme::TypeId())).WillRepeatedly(Return(progressTheme));
+    EXPECT_CALL(*themeManager, GetTheme(ProgressTheme::TypeId(), _)).WillRepeatedly(Return(progressTheme));
 
     LayoutConstraintF layoutConstraintSmallWidth;
     layoutConstraintSmallWidth.maxSize = SizeF(SMALL_WIDTH, MAX_HEIGHT);
@@ -456,6 +462,7 @@ HWTEST_F(GaugeTestNg, GaugeLayoutPropertyTest001, TestSize.Level0)
     ASSERT_NE(themeManager, nullptr);
     auto progressTheme = AceType::MakeRefPtr<ProgressTheme>();
     EXPECT_CALL(*themeManager, GetTheme(ProgressTheme::TypeId())).WillRepeatedly(Return(progressTheme));
+    EXPECT_CALL(*themeManager, GetTheme(ProgressTheme::TypeId(), _)).WillRepeatedly(Return(progressTheme));
     Create(VALUE, MIN, MAX);
 
     /**

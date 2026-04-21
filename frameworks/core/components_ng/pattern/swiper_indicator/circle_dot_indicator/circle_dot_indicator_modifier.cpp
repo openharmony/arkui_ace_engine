@@ -20,6 +20,7 @@
 #include "base/utils/utils.h"
 #include "core/animation/spring_curve.h"
 #include "core/components_ng/render/animation_utils.h"
+#include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/pipeline/base/constants.h"
 
@@ -70,6 +71,7 @@ constexpr int32_t MAX_INDICATOR_DOT_COUNT = 15;
 constexpr float HALF_DIVISOR = 2.0f;
 constexpr float PADDING_DIFF = ITEM_DILATE_PADDING - ITEM_DILATE_FADE_PADDING;
 constexpr float MAX_DIFF = 0.01f;
+constexpr float INDICATOR_WIDTH_OFFSET = 1.0f;
 } // namespace
 
 CircleDotIndicatorModifier::CircleDotIndicatorModifier()
@@ -407,7 +409,8 @@ void CircleDotIndicatorModifier::PaintSelectedIndicator(RSCanvas& canvas, Conten
     }
     RSPen pen;
     pen.SetAntiAlias(true);
-    pen.SetWidth(itemSelectWidth);
+    // Fix visual gap by adding 1px offset for selected indicator
+    pen.SetWidth(itemSelectWidth + INDICATOR_WIDTH_OFFSET);
     pen.SetColor(selectedColor_->Get().GetValue());
     pen.SetCapStyle(ToRSCapStyle(LineCap::ROUND));
 

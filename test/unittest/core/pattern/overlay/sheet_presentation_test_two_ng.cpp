@@ -21,10 +21,10 @@
 #define private public
 #define protected public
 
-#include "test/mock/base/mock_foldable_window.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/window/mock_foldable_window.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
@@ -36,6 +36,7 @@
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -63,6 +64,8 @@ void SheetPresentationTestTwoNg::SetUpTestCase()
 {
     MockPipelineContext::SetUp();
     MockContainer::SetUp();
+    auto safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
+    MockPipelineContext::GetCurrent()->safeAreaManager_ = safeAreaManager;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
         if (type == SheetTheme::TypeId()) {
@@ -195,6 +198,52 @@ HWTEST_F(SheetPresentationTestTwoNg, SetSheetType001, TestSize.Level1)
 
     SheetPresentationTestTwoNg::SetSheetType(sheetPattern, SheetType::SHEET_POPUP);
     EXPECT_EQ(sheetPattern->GetSheetType(), SheetType::SHEET_POPUP);
+    SheetPresentationTestTwoNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: IsBreakpointMatch001
+ * @tc.desc: Increase the coverage of SheetPresentationPattern::IsBreakpointMatch function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, IsBreakpointMatch001, TestSize.Level1)
+{
+    SheetPresentationTestTwoNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto host = sheetPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto pipeline = host->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto windowManager = pipeline->GetWindowManager();
+    ASSERT_NE(windowManager, nullptr);
+
+    windowManager->SetHeightBreakpointCallback(
+        []() -> HeightBreakpoint {
+        return HeightBreakpoint::HEIGHT_MD;
+    });
+    windowManager->SetWidthBreakpointCallback(
+        []() -> WidthBreakpoint {
+        return WidthBreakpoint::WIDTH_SM;
+    });
+
+    bool retFirst = sheetPattern->IsBreakpointMatch();
+    EXPECT_FALSE(retFirst);
+
+    windowManager->SetHeightBreakpointCallback(
+        []() -> HeightBreakpoint {
+        return HeightBreakpoint::HEIGHT_SM;
+    });
+    windowManager->SetWidthBreakpointCallback(
+        []() -> WidthBreakpoint {
+        return WidthBreakpoint::WIDTH_MD;
+    });
+
+    bool retSecond = sheetPattern->IsBreakpointMatch();
+    EXPECT_TRUE(retSecond);
     SheetPresentationTestTwoNg::TearDownTestCase();
 }
 

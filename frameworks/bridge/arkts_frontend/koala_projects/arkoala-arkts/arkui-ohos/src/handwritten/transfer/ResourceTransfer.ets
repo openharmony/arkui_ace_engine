@@ -43,10 +43,10 @@ export class ResourceTransfer {
         let type: int32 | undefined = undefined;
         let id: long = -1;
         if (ESValue.wrap(input).hasProperty('type')) {
-            type = ESValue.wrap(input).getProperty('type').toNumber() as int32;
+            type = ESValue.wrap(input).getProperty('type').toNumber().toInt();
         }
         if (ESValue.wrap(input).hasProperty('id')) {
-            id = ESValue.wrap(input).getProperty('id').toNumber() as long;
+            id = ESValue.wrap(input).getProperty('id').toNumber().toLong();
         }
         let resource = new ArkResource(id, type, bundleName, moduleName);
         resource.params = paramsArray;

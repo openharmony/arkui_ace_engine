@@ -39,6 +39,7 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/aps_monitor_impl.cpp",
       "$ace_root/adapter/ohos/entrance/capability_registry.cpp",
       "$ace_root/adapter/ohos/entrance/data_ability_helper_standard.cpp",
+      "$ace_root/adapter/ohos/entrance/data_share_observer_helper.cpp",
       "$ace_root/adapter/ohos/entrance/dialog_container.cpp",
       "$ace_root/adapter/ohos/entrance/dialog_container_static.cpp",
       "$ace_root/adapter/ohos/entrance/event_pass_through_subscriber.cpp",
@@ -54,6 +55,8 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/plugin_utils_impl.cpp",
       "$ace_root/adapter/ohos/entrance/reporter_impl.cpp",
       "$ace_root/adapter/ohos/entrance/rs_adapter.cpp",
+      "$ace_root/adapter/ohos/entrance/setting_data_manager_impl.cpp",
+      "$ace_root/adapter/ohos/entrance/setting_data_observer.cpp",
       "$ace_root/adapter/ohos/entrance/subwindow/subwindow_ohos.cpp",
       "$ace_root/adapter/ohos/entrance/subwindow/subwindow_ohos_static.cpp",
       "$ace_root/adapter/ohos/entrance/touch_event_convertor.cpp",
@@ -62,6 +65,7 @@ template("ace_ohos_standard_source_set") {
 
       # innerkits impl
       "$ace_root/adapter/ohos/entrance/ui_content_impl.cpp",
+      "$ace_root/adapter/ohos/entrance/ui_event_tracker.cpp",
       "$ace_root/adapter/ohos/entrance/ui_event_impl.cpp",
       "$ace_root/adapter/ohos/entrance/utils.cpp",
 
@@ -86,6 +90,14 @@ template("ace_ohos_standard_source_set") {
       # AudioHaptic
       "$ace_root/adapter/ohos/entrance/picker/picker_haptic_factory.cpp",
     ]
+
+    if (ace_engine_feature_enable_event_extra_handling) {
+      sources += [
+        "$ace_root/adapter/ohos/entrance/event_compatible/compatible_interface.cpp",
+        "$ace_root/adapter/ohos/entrance/event_compatible/compatible_manager_ext.cpp",
+        "$ace_root/adapter/ohos/entrance/event_convertor/event_info_convertor.cpp",
+      ]
+    }
 
     if (enable_audio_framework && enable_player_framework) {
       sources += [
@@ -114,7 +126,8 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/interfaces/inner_api/ui_session:ui_session",
     ]
 
-    external_deps = [
+    external_deps = [ "cJSON:cjson" ]
+    external_deps += [
       "ability_base:base",
       "ability_base:configuration",
       "ability_base:extractortool",
@@ -140,6 +153,7 @@ template("ace_ohos_standard_source_set") {
       "graphic_2d:2d_graphics",
       "graphic_2d:librender_service_client",
       "graphic_2d:rosen_text",
+      "hilog:libsandboxlog",
       "i18n:intl_util",
       "input:libmmi-client",
       "ipc:ipc_core",
@@ -152,6 +166,7 @@ template("ace_ohos_standard_source_set") {
       "resource_management:global_resmgr",
       "safwk:system_ability_fwk",
       "samgr:samgr_proxy",
+      "udmf:udmf_client",
       "window_manager:libdm",
       "window_manager:libwm",
       "window_manager:libwsutils",
@@ -174,7 +189,9 @@ template("ace_ohos_standard_source_set") {
       external_deps += [
         "form_fwk:fmskit_native",
         "form_fwk:fmskit_provider_client",
-        "form_fwk:form_manager",
+        "form_fwk:form_render_info",
+        "form_fwk:form_common_info",
+        "form_fwk:form_utils",
       ]
     }
 

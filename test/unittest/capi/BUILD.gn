@@ -17,7 +17,7 @@ native_root = "${ace_root}/frameworks/core/interfaces/native"
 import("$native_root/common_sources.gni")
 import("$native_root/generated/interface/node_interface.gni")
 
-group("linux_capi_unittest") {
+group("capi_unittest") {
   testonly = true
   deps = [
     "accessors:capi_accessors_unittest",
@@ -113,6 +113,7 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
     "$ace_root/frameworks/bridge/js_frontend/engine/common/js_constants.cpp",
     "$ace_root/frameworks/core/accessibility/static/accessibility_static_utils.cpp",
     "$ace_root/frameworks/core/animation/animation_pub.cpp",
+    "$ace_root/frameworks/core/common/input_event_monitor_manager.cpp",
     "$ace_root/frameworks/core/components/checkable/checkable_theme.cpp",
     "$ace_root/frameworks/core/components_ng/manager/form_event/form_event_manager.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/app_bar/atomic_service_layout_algorithm.cpp",
@@ -186,17 +187,19 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
     "$ace_root/frameworks/core/components_ng/pattern/tabs/tab_content_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/tabs/tabs_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_clock/text_clock_model_static.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/text_picker/textpicker_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/time_picker/timepicker_model_static.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/toolbaritem/toolbaritem_model_static.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/union_effect_container/union_effect_container_model_static.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/waterflow/bridge/flowitem/water_flow_item_static_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/waterflow/bridge/waterflow/water_flow_static_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/ani/richtext_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/ani/web_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/root/root_scene_model.cpp",
-    "$ace_root/test/mock/adapter/mock_want_wrap.cpp",
-    "$ace_root/test/mock/core/render/mock_canvas_rendering_context_2d_model_ng.cpp",
-    "$ace_root/test/mock/core/render/mock_drawing_painter.cpp",
-    "$ace_root/test/mock/core/render/mock_matrix2d.cpp",
-    "$ace_root/test/mock/core/render/mock_offscreen_canvas_rendering_context_2d_model_ng.cpp",
+    "$ace_root/test/mock/frameworks/base/want/mock_want_wrap.cpp",
+    "$ace_root/test/mock/frameworks/core/components_ng/pattern/canvas/mock_canvas_rendering_context_2d_model_ng.cpp",
+    "$ace_root/test/mock/frameworks/core/components_ng/render/adapter/mock_drawing_painter.cpp",
+    "$ace_root/test/mock/frameworks/core/components_ng/render/adapter/mock_matrix2d.cpp",
+    "$ace_root/test/mock/frameworks/core/components_ng/pattern/canvas/mock_offscreen_canvas_rendering_context_2d_model_ng.cpp",
     "$ace_root/test/unittest/core/pattern/particle/mock/mock_rosen_particle_context.cpp",
     "$ace_root/test/mock/interfaces/mock_node_modifiers.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/checkbox/bridge/checkbox_static_modifier.cpp",
@@ -205,11 +208,12 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
     "$ace_root/frameworks/core/components_ng/pattern/linear_split/bridge/column_split_static_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/side_bar/bridge/side_bar_container_static_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/radio/bridge/radio_static_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/symbol/bridge/symbol_glyph_static_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/slider/bridge/slider_static_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/folder_stack/bridge/folder_stack_static_modifier.cpp",
-    "$ace_root/test/mock/core/modifier/mock_timepicker_modifier.cpp",
+    "$ace_root/test/mock/frameworks/core/components_ng/pattern/time_picker/bridge/mock_timepicker_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/time_picker/bridge/timepicker_static_modifier.cpp",
-    "$ace_root/test/mock/core/modifier/mock_calendar_picker_modifier.cpp",
+    "$ace_root/test/mock/frameworks/core/interfaces/native/node/mock_calendar_picker_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/calendar_picker/bridge/calendar_picker_static_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/indexer/bridge/indexer_static_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/calendar_picker/bridge/calendar_picker_dialog_static_modifier.cpp",
@@ -221,13 +225,27 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
     "$ace_root/frameworks/core/interfaces/native/node/menu_modifier.cpp",
     "$ace_root/frameworks/core/interfaces/native/node/menu_item_modifier.cpp",
     "$ace_root/frameworks/core/interfaces/native/node/menu_item_group_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/counter/bridge/counter_static_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/hyperlink/bridge/hyperlink_static_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/marquee/bridge/marquee_static_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/rating/bridge/rating_static_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/gauge/bridge/gauge_static_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/search/bridge/search_static_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/text_clock/bridge/text_clock_static_modifier.cpp",
   ]
   sources += rebased_common_sources
   sources += rebased_generated_sources
   deps = [
     ":capi_qrcode_dep",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
+    "../../../frameworks/bridge/arkts_frontend/arkoala_generator:idlize_gen"
   ]
+
+  if (current_os == "linux") {
+    sources += [
+      "$ace_root/frameworks/core/common/visual_effect/transparency_utils.cpp",
+    ]
+  }
 
   external_deps = [
     "googletest:gmock_main",
@@ -261,6 +279,7 @@ ohos_source_set("capi_qrcode_dep") {
     ":capi_unittest_config",
   ]
   sources = [
+    "$ace_root/frameworks/core/components_ng/pattern/qrcode/bridge/qrcode_static_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/qrcode/qrcode_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/qrcode/qrcode_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/qrcode/qrcode_model_static.cpp",

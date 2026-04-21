@@ -158,6 +158,7 @@ void MenuItemGroupView::SetHeader(FrameNode* frameNode, const std::string& heade
     content->MountToParent(row);
     auto layoutProps = content->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(layoutProps);
+    layoutProps->UpdateEnableSmallLanguageTruncation(true);
     layoutProps->UpdateContent(headerStr);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -218,6 +219,7 @@ void MenuItemGroupView::SetFooter(FrameNode* frameNode, const std::string& foote
     content->MountToParent(row);
     auto layoutProps = content->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(layoutProps);
+    layoutProps->UpdateEnableSmallLanguageTruncation(true);
     layoutProps->UpdateContent(footerStr);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);

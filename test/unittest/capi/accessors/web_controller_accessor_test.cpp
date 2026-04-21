@@ -323,7 +323,7 @@ HWTEST_F(WebControllerAccessorTest, loadDataTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: DISABLED_loadUrlTest
+ * @tc.name: loadUrlTest
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -351,7 +351,7 @@ HWTEST_F(WebControllerAccessorTest, DISABLED_loadUrlTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: DISABLED_runJavaScriptTest
+ * @tc.name: runJavaScriptTest
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -413,11 +413,11 @@ HWTEST_F(WebControllerAccessorTest, deleteJavaScriptRegisterTest, TestSize.Level
 }
 
 /**
- * @tc.name: getHitTest
+ * @tc.name: getHitTestTestGetHit
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebControllerAccessorTest, getHitTest, TestSize.Level1)
+HWTEST_F(WebControllerAccessorTest, getHitTestTestGetHit, TestSize.Level1)
 {
     int hitTestType = 1;
 

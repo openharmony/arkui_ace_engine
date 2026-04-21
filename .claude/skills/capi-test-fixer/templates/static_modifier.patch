@@ -1,0 +1,41 @@
+# Template patch for adding ARKUI_CAPI_UNITTEST support to modifier files
+# Replace {COMPONENT} with actual component name (e.g., SymbolGlyph, Radio, etc.)
+
+--- a/frameworks/core/interfaces/native/implementation/{COMPONENT_LOWER}_modifier.cpp
++++ b/frameworks/core/interfaces/native/implementation/{COMPONENT_LOWER}_modifier.cpp
+@@ -1,5 +1,9 @@
+ #include "core/common/dynamic_module_helper.h"
+
++namespace OHOS::Ace::NG::GeneratedModifier {
++#ifdef ARKUI_CAPI_UNITTEST
++const GENERATED_ArkUI{COMPONENT}Modifier* Get{COMPONENT}StaticModifier();
++#endif
+ const GENERATED_ArkUI{COMPONENT}Modifier* Get{COMPONENT}Modifier()
+ {
+     static const GENERATED_ArkUI{COMPONENT}Modifier* cachedModifier = nullptr;
+@@ -7,12 +11,16 @@ const GENERATED_ArkUI{COMPONENT}Modifier* Get{COMPONENT}Modifier()
+     if (cachedModifier == nullptr) {
++#ifdef ARKUI_CAPI_UNITTEST
++        cachedModifier = GeneratedModifier::Get{COMPONENT}StaticModifier();
++#else
+         auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("{COMPONENT}");
+         CHECK_NULL_RETURN(module, nullptr);
+         cachedModifier = reinterpret_cast<const GENERATED_ArkUI{COMPONENT}Modifier*>(module->GetStaticModifier());
++#endif
+     }
+
+     return cachedModifier;
+ }
++}
+
+--- a/test/unittest/capi/BUILD.gn
++++ b/test/unittest/capi/BUILD.gn
+@@ -XXX, +XXX @@ sources = [
+     "$ace_root/frameworks/core/components_ng/pattern/radio/bridge/radio_static_modifier.cpp",
++    "$ace_root/frameworks/core/components_ng/pattern/{COMPONENT_LOWER}/bridge/{COMPONENT_LOWER}_static_modifier.cpp",
+
+# Usage instructions:
+# 1. Replace {COMPONENT} with component name (e.g., SymbolGlyph)
+# 2. Replace {COMPONENT_LOWER} with lowercase component name (e.g., symbol_glyph)
+# 3. Apply patch using: git apply --whitespace=nowarn static_modifier.patch
+# 4. Verify the static modifier file exists at the specified path

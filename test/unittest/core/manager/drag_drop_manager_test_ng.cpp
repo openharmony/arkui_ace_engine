@@ -14,8 +14,10 @@
  */
 
 #include "test/unittest/core/manager/drag_drop_manager_test_ng.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
+#include "core/components_ng/gestures/recognizers/click_recognizer.h"
 
-#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -2078,7 +2080,7 @@ HWTEST_F(DragDropManagerTestNg, HandleSyncOnDragStart002, TestSize.Level1)
     EXPECT_EQ(
         DragDropGlobalController::GetInstance().GetDragStartRequestStatus(),
         DragStartRequestStatus::WAITING);
-    
+
     bool callbackCalled = false;
     auto callback = [&callbackCalled]() { callbackCalled = true; };
     DragDropGlobalController::GetInstance().SetAsyncDragCallback(callback);
@@ -2087,7 +2089,7 @@ HWTEST_F(DragDropManagerTestNg, HandleSyncOnDragStart002, TestSize.Level1)
     EXPECT_EQ(
         DragDropGlobalController::GetInstance().GetDragStartRequestStatus(),
         DragStartRequestStatus::READY);
-  
+
     DragDropGlobalController::GetInstance().SetAsyncDragCallback(nullptr);
     DragDropGlobalController::GetInstance().SetDragStartRequestStatus(DragStartRequestStatus::WAITING);
     dragDropManager->HandleSyncOnDragStart(DragStartRequestStatus::READY);
@@ -2125,7 +2127,7 @@ HWTEST_F(DragDropManagerTestNg, ResetDraggingStatus001, TestSize.Level1)
     auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
     ASSERT_NE(dragDropManager, nullptr);
     TouchEvent touchPoint;
-  
+
     touchPoint.id = 1;
     dragDropManager->currentPointerId_ = 1;
     dragDropManager->draggingPressedState_ = true;

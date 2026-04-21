@@ -19,6 +19,7 @@
 #include <mutex>
 #endif
 
+#include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
 #include "core/common/ace_application_info.h"
 

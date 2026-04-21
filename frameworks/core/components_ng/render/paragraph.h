@@ -16,9 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_PAPAGRAPH_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_PAPAGRAPH_H
 
+#include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
+#include "core/common/ime/constant.h"
+#include "core/common/ime/text_range.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/text_layout_info.h"
@@ -26,10 +29,13 @@
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/font_collection.h"
 #include "core/components_v2/inspector/utils.h"
-#include "core/pipeline_ng/pipeline_context.h"
+
+#ifndef USE_ROSEN_DRAWING
+class SkCanvas;
+#endif
 
 namespace OHOS::Ace::NG {
-
+struct DrawingContext;
 enum RectHeightPolicy {
     COVER_TEXT,
     COVER_LINE
@@ -191,6 +197,7 @@ struct ParagraphStyle {
     bool isFirstParagraphLineSpacing = true;
     bool optimizeTrailingSpace = false;
     bool enableAutoSpacing = false;
+    bool orphanCharOptimization = false;
     bool compressLeadingPunctuation = false;
     bool includeFontPadding = false;
     bool fallbackLineSpacing = false;
@@ -205,6 +212,7 @@ struct ParagraphStyle {
                halfLeading == others.halfLeading && indent == others.indent &&
                paragraphSpacing == others.paragraphSpacing && isOnlyBetweenLines == others.isOnlyBetweenLines &&
                enableAutoSpacing == others.enableAutoSpacing &&
+               orphanCharOptimization == others.orphanCharOptimization &&
                compressLeadingPunctuation == others.compressLeadingPunctuation &&
                includeFontPadding == others.includeFontPadding && fallbackLineSpacing == others.fallbackLineSpacing;
     }
@@ -236,6 +244,8 @@ struct ParagraphStyle {
         result += indent.ToString();
         result += ", enableAutoSpacing: ";
         result += enableAutoSpacing;
+        result += ", orphanCharOptimization: ";
+        result += orphanCharOptimization;
         result += ", compressLeadingPunctuation: ";
         result += compressLeadingPunctuation;
         result += ", includeFontPadding: ";
@@ -331,6 +341,21 @@ public:
         PositionWithAffinity finalResult(0, TextAffinity::UPSTREAM);
         return finalResult;
     }
+    virtual PositionWithAffinity GetCharacterPositionAtCoordinate(const Offset& offset)
+    {
+        PositionWithAffinity finalResult(0, TextAffinity::UPSTREAM);
+        return finalResult;
+    }
+    virtual std::pair<TextRange, TextRange> GetGlyphRangeForCharacterRange(int32_t start, int32_t end)
+    {
+        std::pair<TextRange, TextRange> ranges;
+        return ranges;
+    }
+    virtual std::pair<TextRange, TextRange> GetCharacterRangeForGlyphRange(int32_t start, int32_t end)
+    {
+        std::pair<TextRange, TextRange> ranges;
+        return ranges;
+    }
     virtual void GetRectsForRange(int32_t start, int32_t end, std::vector<RectF>& selectedRects) = 0;
     virtual std::pair<size_t, size_t> GetEllipsisTextRange() = 0;
     virtual void GetTightRectsForRange(int32_t start, int32_t end, std::vector<RectF>& selectedRects) = 0;
@@ -381,6 +406,10 @@ public:
     virtual std::optional<void*> GetRawParagraph()
     {
         return std::nullopt;
+    }
+    virtual int32_t GetPlaceholderCnt() const
+    {
+        return 0;
     }
 };
 } // namespace OHOS::Ace::NG

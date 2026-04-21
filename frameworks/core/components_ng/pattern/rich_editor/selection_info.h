@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,20 +18,18 @@
 
 #include <list>
 
-#include "base/geometry/offset.h"
-#include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "core/common/resource/resource_object.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/event/ace_events.h"
 #include "core/event/axis_event.h"
-
 namespace OHOS::Ace::NG {
 struct SpanItem;
 }
+
 namespace OHOS::Ace {
+class ResourceObject;
+class PixelMap;
 namespace {
 Color DEFAULT_SYMBOL_COLOR = Color::BLACK;
 }
@@ -81,44 +79,9 @@ struct SymbolSpanStyle {
     int32_t effectStrategy = 0;
 
     SymbolSpanStyle() {}
-    SymbolSpanStyle(const TextStyle& style)
-    {
-        fontSize = style.GetFontSize().ConvertToVp();
-        lineHeight = style.GetLineHeight().ConvertToPx();
-        letterSpacing = style.GetLetterSpacing().ConvertToPx();
-        lineSpacing = style.GetLineSpacing().ConvertToPx();
-
-        for (const auto& color : style.GetSymbolColorList()) {
-            symbolColor += color.ColorToString() + ",";
-        }
-        if (symbolColor.size() > 0) {
-            symbolColor = symbolColor.substr(0, symbolColor.size() - 1);
-        }
-        symbolColor = symbolColor.empty() ? DEFAULT_SYMBOL_COLOR.ColorToString() : symbolColor;
-
-        fontFeature = style.GetFontFeatures();
-        fontWeight = static_cast<int32_t>(style.GetFontWeight());
-        renderingStrategy = style.GetRenderStrategy();
-        effectStrategy = style.GetEffectStrategy();
-    }
-
-    bool operator==(const SymbolSpanStyle& rhs) const
-    {
-        return fontSize == rhs.fontSize
-            && lineHeight == rhs.lineHeight
-            && letterSpacing == rhs.letterSpacing
-            && lineSpacing == rhs.lineSpacing
-            && symbolColor == rhs.symbolColor
-            && fontFeature == rhs.fontFeature
-            && fontWeight == rhs.fontWeight
-            && renderingStrategy == rhs.renderingStrategy
-            && effectStrategy == rhs.effectStrategy;
-    }
-
-    bool operator!=(const SymbolSpanStyle& rhs) const
-    {
-        return !operator==(rhs);
-    }
+    SymbolSpanStyle(const TextStyle& style);
+    bool operator==(const SymbolSpanStyle& rhs) const;
+    bool operator!=(const SymbolSpanStyle& rhs) const;
 };
 
 struct TextStyleResult {
@@ -140,13 +103,14 @@ struct TextStyleResult {
     std::vector<TextDecoration> decorationTypes;
     std::string decorationColor;
     int32_t decorationStyle = 0;
-    int32_t textAlign = 0;
     int32_t wordBreak = static_cast<int32_t>(WordBreak::BREAK_WORD);
     int32_t lineBreakStrategy = static_cast<int32_t>(LineBreakStrategy::GREEDY);
+    int32_t textAlign = 0;
     std::string leadingMarginSize[2] = { "0.00px", "0.00px" };
     std::vector<Shadow> textShadows;
     std::optional<TextBackgroundStyle> textBackgroundStyle;
     float lineThicknessScale = 1.0f;
+    bool orphanCharOptimization = false;
     bool compressLeadingPunctuation = false;
     double strokeWidth = 0.0;
     std::string strokeColor;
@@ -182,40 +146,18 @@ struct Selection {
     std::list<ResultObject> resultObjects;
 };
 
-class SelectionInfo : public BaseEventInfo {
+class ACE_FORCE_EXPORT SelectionInfo : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(SelectionInfo, BaseEventInfo);
 
 public:
     SelectionInfo() : BaseEventInfo("SelectionInfo") {}
 
     ~SelectionInfo() = default;
-
-    Selection GetSelection() const
-    {
-        return selection_;
-    }
-
-    Selection& GetSelectionRef()
-    {
-        return selection_;
-    }
-
-    void SetSelectionStart(int32_t start)
-    {
-        selection_.selection[RichEditorSpanRange::RANGESTART] = start;
-    }
-
-    void SetSelectionEnd(int32_t end)
-    {
-        selection_.selection[RichEditorSpanRange::RANGEEND] = end;
-    }
-
-    void SetResultObjectList(const std::list<ResultObject>& resultObjectList)
-    {
-        for (auto& resultObject : resultObjectList) {
-            selection_.resultObjects.emplace_back(resultObject);
-        }
-    }
+    ACE_FORCE_EXPORT Selection GetSelection() const;
+    Selection& GetSelectionRef();
+    ACE_FORCE_EXPORT void SetSelectionStart(int32_t start);
+    ACE_FORCE_EXPORT void SetSelectionEnd(int32_t end);
+    ACE_FORCE_EXPORT void SetResultObjectList(const std::list<ResultObject>& resultObjectList);
 
 private:
     Selection selection_;
@@ -226,23 +168,11 @@ class SelectionRangeInfo : public BaseEventInfo {
 
 public:
     SelectionRangeInfo(int32_t start, int32_t end) : BaseEventInfo("SelectionRangeInfo"), start_(start), end_(end) {};
-
     ~SelectionRangeInfo() = default;
-
     int32_t start_;
-
     int32_t end_;
-
-    void reset()
-    {
-        start_ = -1;
-        end_ = -1;
-    }
-
-    bool operator==(const SelectionRangeInfo& rhs) const
-    {
-        return start_ == rhs.start_ && end_ == rhs.end_;
-    }
+    void reset();
+    bool operator==(const SelectionRangeInfo& rhs) const;
 };
 
 struct ParagraphInfo {
@@ -256,7 +186,6 @@ struct ParagraphInfo {
     std::optional<double> paragraphSpacing;
     std::optional<int32_t> textVerticalAlign;
     std::optional<int32_t> textDirection;
-
     std::pair<int32_t, int32_t> range;
 };
 } // namespace OHOS::Ace

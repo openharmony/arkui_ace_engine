@@ -17,8 +17,20 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_UI_MATERIAL_NAPI_H
  
 #include "core/components_ng/common_napi_utils/common_napi_utils.h"
+
+namespace OHOS::Ace {
+struct ImmersiveOptions;
+class UiMaterial;
+} // namespace OHOS::Ace
+
 namespace OHOS::Ace::Napi {
- 
+
+// Type tag for napi_wrap_s/napi_unwrap_s type safety
+constexpr napi_type_tag UI_MATERIAL_TYPE_TAG = {
+    .lower = 0x8E4F9C3D7A2B6E5F,
+    .upper = 0x2C7B8D4E9A3F1E6D,
+};
+
 class UiMaterialNapi {
 public:
     UiMaterialNapi() = default;
@@ -26,13 +38,23 @@ public:
     static napi_value Init(napi_env env, napi_value exports);
 
 private:
-    static napi_value JsEnumIntInit(napi_env env, napi_value exports);
+    static napi_status EnumMaterialTypeInit(napi_env env, napi_value exports);
+    static napi_status EnumImmersiveStyleInit(napi_env env, napi_value exports);
+    static napi_status EnumImmersiveLevelInit(napi_env env, napi_value exports);
+    static napi_status EnumMaterialStateInit(napi_env env, napi_value exports);
+    static napi_status ImmersiveMaterialInit(napi_env env, napi_value exports, napi_value baseCtr);
+    static napi_value JSGetImmersiveLevel(napi_env env, napi_callback_info info);
+    static napi_value JSGetMaterialInfo(napi_env env, napi_callback_info info);
+    static napi_value JSGetEmpty(napi_env env, napi_callback_info info);
     static napi_value GetNamedProperty(napi_env env, napi_value object, const std::string& propertyName);
     static int32_t GetCInt32(napi_value value, napi_env env);
     static napi_valuetype GetValueType(napi_env env, napi_value value);
-    static napi_value Constructor(napi_env env, napi_callback_info info);
+    static napi_value MaterialConstructor(napi_env env, napi_callback_info info);
+    static napi_value ImmersiveMaterialConstructor(napi_env env, napi_callback_info info);
     static void Destructor(napi_env env, void* nativeObject, void* finalize);
-    static void WrapMaterialObject(napi_env env, napi_value jsThis, int32_t materialType);
+    static UiMaterial* WrapMaterialObject(napi_env env, napi_value jsThis, int32_t materialType);
+    static UiMaterial* WrapImmersiveMaterialObject(napi_env env, napi_value jsThis, const ImmersiveOptions& options);
+    static ImmersiveOptions ParseImmersiveOptions(napi_env env, napi_value value);
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_UI_MATERIAL_NAPI_H

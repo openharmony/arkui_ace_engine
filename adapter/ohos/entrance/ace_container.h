@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,6 +57,7 @@ class AccessibilityElementInfo;
 
 namespace OHOS::Ace {
 class FontManager;
+class UIEventTracker;
 }
 
 namespace OHOS::AppExecFwk {
@@ -194,6 +195,11 @@ public:
     RefPtr<TaskExecutor> GetTaskExecutor() const override
     {
         return taskExecutor_;
+    }
+
+    const std::shared_ptr<UIEventTracker>& GetUIEventTracker() const
+    {
+        return uiEventTracker_;
     }
 
     void SetAssetManager(const RefPtr<AssetManager>& assetManager)
@@ -411,13 +417,6 @@ public:
         }
     }
 
-    void OnOpenLinkOnMapSearch(const std::string& address)
-    {
-        if (linkOnMapSearch_) {
-            linkOnMapSearch_(address);
-        }
-    }
-
     void OnStartAbilityOnCalendar(const std::map<std::string, std::string>& params)
     {
         if (abilityOnCalendar_) {
@@ -529,11 +528,6 @@ public:
         abilityOnJumpBrowser_ = std::move(callback);
     }
 
-    void SetOpenLinkOnMapSearch(AbilityOnQueryCallback&& callback)
-    {
-        linkOnMapSearch_ = std::move(callback);
-    }
-
     void SetAbilityOnCalendar(AbilityOnCalendarCallback&& callback)
     {
         abilityOnCalendar_ = std::move(callback);
@@ -597,7 +591,7 @@ public:
         windowName_ = name;
     }
 
-    std::string& GetWindowName()
+    std::string GetWindowName() const override
     {
         return windowName_;
     }
@@ -883,14 +877,6 @@ public:
         return uiWindow_->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING;
     }
 
-    bool IsFloatingWindowStatus() const override
-    {
-        CHECK_NULL_RETURN(uiWindow_, false);
-        auto windowStatus = Rosen::WindowStatus::WINDOW_STATUS_UNDEFINED;
-        uiWindow_->GetWindowStatus(windowStatus);
-        return windowStatus == Rosen::WindowStatus::WINDOW_STATUS_FLOATING;
-    }
-
     void SetSingleHandTransform(const SingleHandTransform& singleHandTransform)
     {
         singleHandTransform_ = singleHandTransform;
@@ -967,12 +953,15 @@ public:
             return FrontendType::ARK_TS;
         }
     }
+    void RegisterTerminateUIExtension(AbilityRuntimeContextCallback&& callback) override;
+    void TerminateUIExtensionInner(int32_t code) override;
 
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();
     void InitializeCallback();
     void InitializeTask(std::shared_ptr<TaskWrapper> taskWrapper = nullptr);
+    void InitializeUIEventTracker();
     void InitWindowCallback();
 
     void AttachView(std::shared_ptr<Window> window, const RefPtr<AceView>& view, double density, float width,
@@ -1017,14 +1006,12 @@ private:
     void InitializeDynamicHybridStatic(std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility);
     void NotifyArkoalaConfigurationChange(const ConfigurationChange& configurationChange);
 
-    void LoadCompleteManagerStartCollect(const std::string& url) override;
-    void LoadCompleteManagerStopCollect() override;
-
     void InitForceSplitManager();
 
     int32_t instanceId_ = 0;
     RefPtr<AceView> aceView_;
     RefPtr<TaskExecutor> taskExecutor_;
+    std::shared_ptr<UIEventTracker> uiEventTracker_;
     RefPtr<AssetManager> assetManager_;
     RefPtr<PlatformResRegister> resRegister_;
     RefPtr<PipelineBase> pipelineContext_;
@@ -1086,7 +1073,6 @@ private:
     AbilityOnQueryCallback abilityOnQueryCallback_ = nullptr;
     AbilityOnQueryCallback abilityOnInstallAppInStore_ = nullptr;
     AbilityOnQueryCallback abilityOnJumpBrowser_ = nullptr;
-    AbilityOnQueryCallback linkOnMapSearch_ = nullptr;
     AbilityOnCalendarCallback abilityOnCalendar_ = nullptr;
 
     std::atomic_flag isDumping_ = ATOMIC_FLAG_INIT;

@@ -61,6 +61,7 @@ void AlertDialogModelNG::SetShowDialog(const DialogProperties& arg)
             }
             ContainerScope scope(currentId);
             RefPtr<NG::FrameNode> dialog;
+            ACE_UINODE_TRACE(dialog);
             auto pipelineContext = container->GetPipelineContext();
             CHECK_NULL_VOID(pipelineContext);
             auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);

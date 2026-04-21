@@ -95,7 +95,7 @@ class ACE_EXPORT RepeatVirtualScroll2Node : public ForEachBaseNode {
 
 public:
     static RefPtr<RepeatVirtualScroll2Node> GetOrCreateRepeatNode(int32_t nodeId, uint32_t arrLen, uint32_t totalCount,
-        const std::function<std::pair<RIDType, uint32_t>(IndexType)>& onGetRid4Index,
+        const std::function<std::pair<RIDType, uint32_t>(IndexType, bool)>& onGetRid4Index,
         const std::function<void(IndexType, IndexType)>& onRecycleItems,
         const std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)>& onActiveRange,
         const std::function<void(IndexType, IndexType)>& onMoveFromTo,
@@ -103,7 +103,7 @@ public:
         const std::function<void()>& onUpdateDirty);
 
     RepeatVirtualScroll2Node(int32_t nodeId, uint32_t arrLen, int32_t totalCount,
-        const std::function<std::pair<RIDType, uint32_t>(IndexType)>& onGetRid4Index,
+        const std::function<std::pair<RIDType, uint32_t>(IndexType, bool)>& onGetRid4Index,
         const std::function<void(IndexType, IndexType)>& onRecycleItems,
         const std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)>& onActiveRange,
         const std::function<void(IndexType, IndexType)>& onMoveFromTo,
@@ -221,6 +221,10 @@ public:
 
     void SetJSViewActive(bool active = true, bool isLazyForEachNode = false, bool isReuse = false) override;
     void PaintDebugBoundaryTreeAll(bool flag) override;
+
+    bool IsAllowAnimation();
+    bool IsChildInAnimation(uint32_t rid);
+    bool IsChildOnMainTree(uint32_t rid);
 
     void RemoveNode(RIDType rid)
     {

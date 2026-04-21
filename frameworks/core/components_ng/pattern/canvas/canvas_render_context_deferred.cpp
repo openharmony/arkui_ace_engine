@@ -57,6 +57,7 @@ void CanvasRenderContextDeferred::ResetStates()
 {
     std::vector<RSMatrix>().swap(matrixStates_);
     std::vector<LineDashParam>().swap(lineDashStates_);
+    std::vector<std::optional<bool>>().swap(antialiasExtStates_);
 }
 
 TransformParam CanvasRenderContextDeferred::GetTransform() const
@@ -75,6 +76,7 @@ void CanvasRenderContextDeferred::SaveProperties()
 {
     matrixStates_.push_back(matrix_);
     lineDashStates_.push_back(lineDash_);
+    antialiasExtStates_.emplace_back(antialiasExt_);
 }
 
 void CanvasRenderContextDeferred::RestoreProperties()
@@ -86,6 +88,10 @@ void CanvasRenderContextDeferred::RestoreProperties()
     if (!lineDashStates_.empty()) {
         lineDash_ = lineDashStates_.back();
         lineDashStates_.pop_back();
+    }
+    if (!antialiasExtStates_.empty()) {
+        antialiasExt_ = antialiasExtStates_.back();
+        antialiasExtStates_.pop_back();
     }
 }
 
@@ -142,5 +148,20 @@ void CanvasRenderContextDeferred::SetLineDashParam(const std::vector<double>& se
 LineDashParam CanvasRenderContextDeferred::GetLineDash() const
 {
     return lineDash_;
+}
+
+std::optional<bool> CanvasRenderContextDeferred::GetAntialiasExt() const
+{
+    return antialiasExt_;
+}
+
+void CanvasRenderContextDeferred::SetAntialiasExtParam(std::optional<bool> isEnabled)
+{
+    antialiasExt_ = isEnabled;
+}
+
+void CanvasRenderContextDeferred::ResetAntialiasExt()
+{
+    antialiasExt_.reset();
 }
 } // namespace OHOS::Ace::NG

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,9 @@
  */
 
 #include "adapter/ohos/entrance/ace_container.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
+
+#include <chrono>
 
 #include "auto_fill_manager.h"
 #include "bundlemgr/bundle_mgr_proxy.h"
@@ -26,16 +29,20 @@
 #include "system_ability_definition.h"
 #include "wm_common.h"
 #include "form_ashmem.h"
+#include "pointer_event.h"
 
 #include "base/utils/layout_break_point.h"
 #include "adapter/ohos/entrance/ace_view_ohos.h"
+#include "core/image/image_cache.h"
 #include "adapter/ohos/entrance/cj_utils/cj_utils.h"
 #include "adapter/ohos/entrance/data_ability_helper_standard.h"
+#include "adapter/ohos/entrance/data_share_observer_helper.h"
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "adapter/ohos/entrance/hap_asset_provider_impl.h"
 #include "adapter/ohos/entrance/high_contrast_observer.h"
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "adapter/ohos/entrance/ui_content_impl.h"
+#include "adapter/ohos/entrance/ui_event_tracker.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "adapter/ohos/osal/page_viewport_config_ohos.h"
 #include "adapter/ohos/osal/resource_adapter_impl_v2.h"
@@ -59,18 +66,21 @@
 #include "core/common/plugin_manager.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_wrapper.h"
+#include "core/common/statistic_event_reporter.h"
 #include "core/common/task_executor_impl.h"
 #include "core/common/text_field_manager.h"
 #include "core/common/transform/input_compatible_manager.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/image_provider/image_decoder.h"
-#include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/components_ng/render/adapter/form_render_window.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
+#include "core/event/crown_event.h"
 #include "frameworks/core/common/dynamic_module_helper.h"
 
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
@@ -314,12 +324,16 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     if (context && context->GetResourceManager()) {
         resourceAdapter = AceType::MakeRefPtr<ResourceAdapterImplV2>(context->GetResourceManager(), resourceInfo);
+        resourceAdapter->SetBundleName(bundleName);
+        resourceAdapter->SetModuleName(moduleName);
     } else if (ResourceManager::GetInstance().IsResourceAdapterRecord(bundleName, moduleName, instanceId)) {
         resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(bundleName, moduleName, instanceId);
     }
 
     if (resourceAdapter == nullptr) {
         resourceAdapter = ResourceAdapter::CreateV2();
+        resourceAdapter->SetBundleName(bundleName);
+        resourceAdapter->SetModuleName(moduleName);
         resourceAdapter->Init(resourceInfo);
     }
 
@@ -332,6 +346,8 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
     themeManager->LoadResourceThemes();
 
     if (clearCache) {
+        LOGI("[%{public}s][%{public}s][%{public}d] Clear resource cache when init.", bundleName.c_str(),
+            moduleName.c_str(), pipelineContext->GetInstanceId());
         ResourceManager::GetInstance().Reset();
     }
 
@@ -417,6 +433,8 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type, std::shared_pt
     : instanceId_(instanceId), type_(type), aceAbility_(aceAbility), useCurrentEventRunner_(useCurrentEventRunner)
 {
     ACE_DCHECK(callback);
+    // Record container creation timestamp for enhanced error messages
+    createTime_ = GetCurrentTimestamp();
     if (useNewPipeline) {
         SetUseNewPipeline();
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
@@ -442,6 +460,8 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
       isSubContainer_(isSubAceContainer)
 {
     ACE_DCHECK(callback);
+    // Record container creation timestamp for enhanced error messages
+    createTime_ = GetCurrentTimestamp();
     if (useNewPipeline) {
         SetUseNewPipeline();
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
@@ -466,6 +486,8 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
       isSubContainer_(isSubAceContainer)
 {
     ACE_DCHECK(callback);
+    // Record container creation timestamp for enhanced error messages
+    createTime_ = GetCurrentTimestamp();
     if (useNewPipeline) {
         SetUseNewPipeline();
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
@@ -513,6 +535,14 @@ void AceContainer::InitializeTask(std::shared_ptr<TaskWrapper> taskWrapper)
     } else {
         taskExecutorImpl->InitJsThread();
     }
+}
+
+void AceContainer::InitializeUIEventTracker()
+{
+    if (uiEventTracker_ || !taskExecutor_) {
+        return;
+    }
+    uiEventTracker_ = std::make_shared<UIEventTracker>(instanceId_, WeakPtr<TaskExecutor>(taskExecutor_));
 }
 
 bool AceContainer::IsKeyboard()
@@ -953,6 +983,12 @@ void AceContainer::OnShow(int32_t instanceId)
         CHECK_NULL_VOID(pipelineBase);
         pipelineBase->OnShow();
         pipelineBase->SetForegroundCalled(true);
+        if (container->GetFrontendType() == FrontendType::JS) {
+            pipelineBase->GetStatisticEventReporter()->SendEvent(StatisticEventType::WEB_LIKE_FRONTEND);
+        }
+        if (container->GetFrontendType() == FrontendType::JS_CARD) {
+            pipelineBase->GetStatisticEventReporter()->SendEvent(StatisticEventType::JS_CARD_FRONTEND);
+        }
     };
 
     // stege model needn't post task when already run on UI
@@ -1282,12 +1318,14 @@ void AceContainer::InitializeCallback()
     ACE_FUNCTION_TRACE();
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
     auto touchPassMode = AceApplicationInfo::GetInstance().GetTouchEventPassMode();
+    auto mousePassMode = AceApplicationInfo::GetInstance().GetMouseEventPassMode();
     int32_t debugMode = SystemProperties::GetTouchAccelarate();
     if (debugMode != static_cast<int32_t>(touchPassMode)) {
         TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "Debug touch pass mode %{public}d", debugMode);
         touchPassMode = static_cast<TouchPassMode>(debugMode);
         AceApplicationInfo::GetInstance().SetTouchEventPassMode(touchPassMode);
     }
+    pipelineContext_->SetMousePassThrough(mousePassMode == MousePassMode::PASS_THROUGH);
     pipelineContext_->SetTouchAccelarate(touchPassMode == TouchPassMode::ACCELERATE);
     pipelineContext_->SetTouchPassThrough(touchPassMode == TouchPassMode::PASS_THROUGH);
     auto&& touchEventCallback = [context = pipelineContext_, id = instanceId_](const TouchEvent& event,
@@ -1586,11 +1624,13 @@ void AceContainer::DestroyContainer(int32_t instanceId, const std::function<void
     SubwindowManager::GetInstance()->CloseDialog(instanceId);
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostSyncTask([] { LOGI("Wait UI thread before destroy..."); },
+        TaskExecutor::TaskType::UI, "ArkUIWaitLog");
     container->Destroy();
     // unregister watchdog before stop thread to avoid UI_BLOCK report
     AceEngine::Get().UnRegisterFromWatchDog(instanceId);
-    auto taskExecutor = container->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
 
     taskExecutor->PostSyncTask([] { LOGI("Wait UI thread..."); }, TaskExecutor::TaskType::UI, "ArkUIWaitLog");
     taskExecutor->PostSyncTask([] { LOGI("Wait JS thread..."); }, TaskExecutor::TaskType::JS, "ArkUIWaitLog");
@@ -1721,16 +1761,11 @@ UIContentErrorCode AceContainer::RunPage(
         !CheckUrlValid(content, container->GetHapPath())) {
         return UIContentErrorCode::INVALID_URL;
     }
-    container->LoadCompleteManagerStartCollect(content);
     if (isNamedRouter) {
-        auto result = front->RunPageByNamedRouter(content, params);
-        container->LoadCompleteManagerStopCollect();
-        return result;
+        return front->RunPageByNamedRouter(content, params);
     }
 
-    auto result = front->RunPage(content, params);
-    container->LoadCompleteManagerStopCollect();
-    return result;
+    return front->RunPage(content, params);
 }
 
 UIContentErrorCode AceContainer::RunPage(
@@ -1741,10 +1776,7 @@ UIContentErrorCode AceContainer::RunPage(
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     CHECK_NULL_RETURN(front, UIContentErrorCode::NULL_POINTER);
-    container->LoadCompleteManagerStartCollect(params);
-    auto result = front->RunPage(content, params);
-    container->LoadCompleteManagerStopCollect();
-    return result;
+    return front->RunPage(content, params);
 }
 
 bool AceContainer::RunDynamicPage(
@@ -2087,7 +2119,6 @@ void AceContainer::FillAutoFillViewData(const RefPtr<NG::FrameNode>& node, RefPt
             if (nodeInfoWrap && nodeInfoWrap->GetAutoFillType() == AceAutoFillType::ACE_NEW_PASSWORD) {
                 nodeInfoWrap->SetValue(autoFillNewPassword);
                 pattern->SetAutoFillNewPassword("");
-                break;
             }
         }
     }
@@ -2509,7 +2540,9 @@ void AceContainer::DumpSimplifyTreeWithParamConfig(
     std::shared_ptr<JsonValue>& root, ParamConfig config, bool isInSubWindow)
 {
     CHECK_NULL_VOID(pipelineContext_);
-    pipelineContext_->GetComponentOverlayInspector(root, config, isInSubWindow);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->GetComponentOverlayInspector(root, pipelineContext->GetRootElement(), config, isInSubWindow);
 }
 
 void AceContainer::TriggerGarbageCollection()
@@ -2700,8 +2733,6 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
             front->SetJsMessageDispatcher(AceType::Claim(this));
             front->SetAssetManager(assetManager_);
         }
-    } else if (type_ != FrontendType::JS_CARD) {
-        aceView_->SetCreateTime(createTime_);
     }
     resRegister_ = aceView_->GetPlatformResRegister();
     auto uiTranslateManager = std::make_shared<UiTranslateManagerImpl>(taskExecutor_);
@@ -2772,6 +2803,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     pipelineContext_->SetIsRightToLeft(AceApplicationInfo::GetInstance().IsRightToLeft());
     pipelineContext_->SetWindowId(windowId);
     pipelineContext_->SetWindowModal(windowModal_);
+    InitializeUIEventTracker();
     if (uiWindow_) {
         bool isAppWindow = uiWindow_->IsAppWindow();
         bool isSystemWindow = uiWindow_->IsSystemWindow();
@@ -2885,24 +2917,6 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     };
     if (fontManager) {
         fontManager->SetStartAbilityOnJumpBrowserHandler(startAbilityOnJumpBrowserHandler);
-    }
-
-    auto&& openLinkOnMapSearchHandler = [weak = WeakClaim(this), instanceId](const std::string& address) {
-        auto container = weak.Upgrade();
-        CHECK_NULL_VOID(container);
-        ContainerScope scope(instanceId);
-        auto context = container->GetPipelineContext();
-        CHECK_NULL_VOID(context);
-        context->GetTaskExecutor()->PostTask(
-            [weak = WeakPtr<AceContainer>(container), address]() {
-                auto container = weak.Upgrade();
-                CHECK_NULL_VOID(container);
-                container->OnOpenLinkOnMapSearch(address);
-            },
-            TaskExecutor::TaskType::PLATFORM, "ArkUIHandleOpenLinkOnMapSearch");
-    };
-    if (fontManager) {
-        fontManager->SetOpenLinkOnMapSearchHandler(openLinkOnMapSearchHandler);
     }
 
     auto&& startAbilityOnCalendar = [weak = WeakClaim(this), instanceId](
@@ -3060,7 +3074,15 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
                                      useStageModel = useStageModel_]() {
         return AceType::MakeRefPtr<DataAbilityHelperStandard>(ability.lock(), runtimeContext.lock(), useStageModel);
     };
-    auto dataProviderManager = MakeRefPtr<DataProviderManagerStandard>(dataAbilityHelperImpl);
+    auto dataShareObserverHelperImpl = [runtimeContext = runtimeContext_,
+                                          container = WeakClaim(this),
+                                          useStageModel = useStageModel_]() {
+        return AceType::MakeRefPtr<DataShareObserverHelper>(runtimeContext.lock(),
+            container.Upgrade(), useStageModel);
+    };
+
+    auto dataProviderManager = MakeRefPtr<DataProviderManagerStandard>(
+        dataAbilityHelperImpl, dataShareObserverHelperImpl);
     pipelineContext_->SetDataProviderManager(dataProviderManager);
 
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
@@ -3317,6 +3339,13 @@ void AceContainer::InitWindowCallback()
                     isFullScreen ? "yes" : "no");
                 window->NotifyIsFullScreenInForceSplitMode(isFullScreen);
             }
+    });
+
+    windowManager->SetUpdateForceSplitRatioCallback(
+        [window = uiWindow_](float ratio) {
+            CHECK_NULL_VOID(window);
+            window->NotifySplitRatioChanged(ratio);
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "will notify window force split ratio to %{public}f", ratio);
     });
 
     pipelineContext_->SetGetWindowRectImpl([window = uiWindow_, weak = WeakClaim(this)]() -> Rect {
@@ -3788,7 +3817,8 @@ void AceContainer::NotifyConfigurationChange(bool needReloadTransition, const Co
                 }
                 container->FlushReloadTask(needReloadTransition, configurationChange);
                 },
-            TaskExecutor::TaskType::UI, "ArkUINotifyConfigurationChange");
+            TaskExecutor::TaskType::UI, "ArkUINotifyConfigurationChange",
+            PriorityType::LOW, VsyncBarrierOption::NEED_BARRIER);
         return;
     }
     taskExecutor->PostTask(
@@ -3810,9 +3840,11 @@ void AceContainer::NotifyConfigurationChange(bool needReloadTransition, const Co
                     CHECK_NULL_VOID(container);
                     container->FlushReloadTask(needReloadTransition, configurationChange);
                 },
-                TaskExecutor::TaskType::UI, "ArkUIFlushReloadTransition");
+                TaskExecutor::TaskType::UI, "ArkUIFlushReloadTransition",
+                PriorityType::LOW, VsyncBarrierOption::NEED_BARRIER);
         },
-        TaskExecutor::TaskType::JS, "ArkUINotifyConfigurationChange");
+        TaskExecutor::TaskType::JS, "ArkUINotifyConfigurationChange",
+        PriorityType::LOW, VsyncBarrierOption::NEED_BARRIER);
 }
 
 void AceContainer::HotReload()
@@ -4899,11 +4931,21 @@ void AceContainer::RegisterAvoidInfoCallback()
     CHECK_NULL_VOID(avoidInfoMgr);
     auto uiExtMgr = pipeline->GetUIExtensionManager();
     CHECK_NULL_VOID(uiExtMgr);
-    auto checkTask = [weakMgr = WeakPtr(uiExtMgr)]() {
-        auto mgr = weakMgr.Upgrade();
-        CHECK_NULL_VOID(mgr);
-        mgr->NotifyUECProviderIfNeedded();
+    auto checkTask = [uiExtMgr](auto notifyFunc) {
+        return [weakMgr = WeakPtr(uiExtMgr), notifyFunc]() {
+            auto mgr = weakMgr.Upgrade();
+            CHECK_NULL_VOID(mgr);
+            notifyFunc(mgr);
+        };
     };
+
+    if (IsUIExtensionWindow()) {
+        pipeline->AddPersistAfterLayoutTask(checkTask(
+            [](auto mgr) { mgr->NotifyNestedUECProvidersIfNeeded(); }));
+    } else {
+        pipeline->AddPersistAfterLayoutTask(checkTask(
+            [](auto mgr) { mgr->NotifyUECProviderIfNeedded(); }));
+    }
     auto registerCallback = [weakMgr = WeakPtr(uiExtMgr)](NG::UECAvoidInfoConsumer&& consumer) {
         auto mgr = weakMgr.Upgrade();
         CHECK_NULL_VOID(mgr);
@@ -4916,7 +4958,6 @@ void AceContainer::RegisterAvoidInfoCallback()
         mgr->SendBusinessToHost(
             NG::UIContentBusinessCode::GET_AVOID_INFO, std::move(want), NG::BusinessDataSendType::ASYNC);
     };
-    pipeline->AddPersistAfterLayoutTask(std::move(checkTask));
     avoidInfoMgr->SetRegisterUECAvoidInfoConsumerCallback(std::move(registerCallback));
     avoidInfoMgr->SetRequestAvoidInfoCallback(std::move(requestCallback));
 #endif
@@ -5164,17 +5205,26 @@ void AceContainer::NotifyArkoalaConfigurationChange(const ConfigurationChange& c
     }
 }
 
-void AceContainer::LoadCompleteManagerStartCollect(const std::string& url)
+void AceContainer::RegisterTerminateUIExtension(AbilityRuntimeContextCallback&& callback)
 {
-    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->GetLoadCompleteManager()->StartCollect(url);
+    if (!IsUIExtensionWindow()) {
+        return;
+    }
+    auto sharedContext = runtimeContext_.lock();
+    auto uiExtensionContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::UIExtensionContext>(sharedContext);
+    CHECK_NULL_VOID(uiExtensionContext);
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "RegisterTerminateUIExtension success");
+    uiExtensionContext->RegisterTerminateSelfWithAnimation(std::move(callback));
 }
 
-void AceContainer::LoadCompleteManagerStopCollect()
+void AceContainer::TerminateUIExtensionInner(int32_t code)
 {
-    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->GetLoadCompleteManager()->StopCollect();
+    if (!IsUIExtensionWindow()) {
+        return;
+    }
+    auto sharedContext = runtimeContext_.lock();
+    auto uiExtensionContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::UIExtensionContext>(sharedContext);
+    CHECK_NULL_VOID(uiExtensionContext);
+    uiExtensionContext->TerminateSelfInner(code);
 }
 } // namespace OHOS::Ace::Platform

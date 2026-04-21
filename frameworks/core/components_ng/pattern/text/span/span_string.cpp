@@ -220,7 +220,11 @@ void AddSpanItemToParagraph(RefPtr<NG::Paragraph>& paragraph, const RefPtr<NG::S
         auto fontSize = theme->GetTextStyle().GetFontSize().ConvertToVp() * context->GetFontScale();
         if (customSpanItem->onMeasure.has_value()) {
             auto onMeasure = customSpanItem->onMeasure.value();
-            CustomSpanMetrics customSpanMetrics = onMeasure({ fontSize });
+            auto customSpanMeasureInfo = CustomSpanMeasureInfo { .fontSize = fontSize };
+            if (maxWidth.has_value()) {
+                customSpanMeasureInfo.maxWidth = static_cast<float>(maxWidth.value());
+            }
+            CustomSpanMetrics customSpanMetrics = onMeasure(customSpanMeasureInfo);
             run.width = static_cast<float>(customSpanMetrics.width * context->GetDipScale());
             run.height = static_cast<float>(
                 customSpanMetrics.height.value_or(fontSize / context->GetFontScale()) * context->GetDipScale());
@@ -390,12 +394,14 @@ void SpanString::SplitInterval(std::list<RefPtr<SpanBase>>& spans, std::pair<int
         auto oldStart = (*it)->GetStartIndex();
         auto oldEnd = (*it)->GetEndIndex();
         if (intersection->first == oldStart && intersection->second == oldEnd) {
+            (*it)->ClearSpecialData();
             it = spans.erase(it);
             continue;
         }
         if (oldStart < intersection->first && intersection->second < oldEnd) {
             newSpans.emplace_back((*it)->GetSubSpan(oldStart, intersection->first));
             newSpans.emplace_back((*it)->GetSubSpan(intersection->second, oldEnd));
+            (*it)->ClearSpecialData();
             it = spans.erase(it);
             continue;
         }
@@ -676,8 +682,9 @@ void SpanString::AddSpan(const RefPtr<SpanBase>& span, bool processMultiDecorati
         spansMap_[span->GetSpanType()].emplace_back(span);
         ApplyToSpans(span, { start, end }, SpanOperation::ADD);
         return;
-    } else if (span->GetSpanType() == SpanType::Font && isFromHtml) {
-        // If the span type is Font and the span is from HTML, directly add it to the spansMap_ and apply it.
+    }
+    // If the span type is Font and the span is from HTML, directly add it to the spansMap_ and apply it.
+    else if (span->GetSpanType() == SpanType::Font && isFromHtml) {
         spansMap_[span->GetSpanType()].emplace_back(span);
         ApplyToSpans(span, { start, end }, SpanOperation::ADD);
         return;
@@ -751,6 +758,8 @@ RefPtr<SpanBase> SpanString::GetDefaultSpan(SpanType type)
             return MakeRefPtr<ParagraphStyleSpan>();
         case SpanType::LineHeight:
             return MakeRefPtr<LineHeightSpan>();
+        case SpanType::LineSpacing:
+            return MakeRefPtr<LineSpacingSpan>();
         case SpanType::ExtSpan:
             return MakeRefPtr<ExtSpan>();
         case SpanType::BackgroundColor:
@@ -1076,6 +1085,7 @@ void SpanString::RemoveSpecialSpan(int32_t start, int32_t end, SpanType type)
         if ((*iter)->GetStartIndex() >= start && (*iter)->GetStartIndex() < end - count) {
             text_.erase((*iter)->GetStartIndex(), 1);
             UpdateSpanMapWithOffset((*iter)->GetStartIndex(), -1);
+            (*iter)->ClearSpecialData();
             iter = spans.erase(iter);
             ++count;
             continue;
@@ -1327,6 +1337,7 @@ void SpanString::UpdateSpansMap()
                 ToGestureSpan(spanItem, start, end),
                 ToParagraphStyleSpan(spanItem, start, end),
                 ToLineHeightSpan(spanItem, start, end),
+                ToLineSpacingSpan(spanItem, start, end),
                 ToBackgroundColorSpan(spanItem, start, end),
                 ToUrlSpan(spanItem, start, end) };
         for (auto& spanBase : spanBases) {
@@ -1375,6 +1386,7 @@ RefPtr<FontSpan> SpanString::ToFontSpan(const RefPtr<NG::SpanItem>& spanItem, in
     font.variableFontWeight = spanItem->fontStyle->GetVariableFontWeight();
     font.enableVariableFontWeight = spanItem->fontStyle->GetEnableVariableFontWeight();
     font.enableDeviceFontWeightCategory = spanItem->fontStyle->GetEnableDeviceFontWeightCategory();
+    font.fontSizeScale = spanItem->fontStyle->GetFontSizeScale();
     return AceType::MakeRefPtr<FontSpan>(font, start, end);
 }
 
@@ -1464,7 +1476,27 @@ RefPtr<LineHeightSpan> SpanString::ToLineHeightSpan(const RefPtr<NG::SpanItem>& 
     if (spanItem->textLineStyle->GetLineHeight().has_value()) {
         lineHeight.SetValue(spanItem->textLineStyle->GetLineHeightValue().ConvertToVp());
     }
-    return AceType::MakeRefPtr<LineHeightSpan>(lineHeight, start, end);
+    std::optional<double> lineHeightMultiple;
+    if (spanItem->textLineStyle->GetLineHeightMultiply().has_value()) {
+        lineHeightMultiple = spanItem->textLineStyle->GetLineHeightMultiplyValue();
+    }
+    return AceType::MakeRefPtr<LineHeightSpan>(lineHeight, lineHeightMultiple, start, end);
+}
+
+RefPtr<LineSpacingSpan> SpanString::ToLineSpacingSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end)
+{
+    CHECK_NULL_RETURN(spanItem && spanItem->textLineStyle, nullptr);
+    Dimension lineSpacing;
+    if (spanItem->textLineStyle->GetLineSpacing().has_value()) {
+        lineSpacing.SetValue(spanItem->textLineStyle->GetLineSpacingValue().ConvertToVp());
+    }
+    std::optional<LineSpacingOptions> options;
+    if (spanItem->textLineStyle->GetIsOnlyBetweenLines().has_value()) {
+        LineSpacingOptions optionObject;
+        optionObject.onlyBetweenLines = spanItem->textLineStyle->GetIsOnlyBetweenLinesValue();
+        options = optionObject;
+    }
+    return AceType::MakeRefPtr<LineSpacingSpan>(lineSpacing, options, start, end);
 }
 
 RefPtr<BackgroundColorSpan> SpanString::ToBackgroundColorSpan(

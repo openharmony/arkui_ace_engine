@@ -16,25 +16,17 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_GRID_FOCUS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_GRID_FOCUS_H
 
+#include <optional>
 #include <unordered_set>
+#include <utility>
 
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/event/focus_hub.h"
-#include "core/components_ng/pattern/grid/grid_layout_info.h"
+#include "core/components_ng/pattern/grid/grid_item_constants.h"
 
 namespace OHOS::Ace::NG {
-struct GridItemIndexInfo {
-    int32_t mainIndex = -1;
-    int32_t crossIndex = -1;
-    int32_t mainSpan = -1;
-    int32_t crossSpan = -1;
-    int32_t mainStart = -1;
-    int32_t mainEnd = -1;
-    int32_t crossStart = -1;
-    int32_t crossEnd = -1;
-};
-
 class GridPattern;
+struct GridLayoutInfo;
 
 // helper class to handle focus-related tasks for Grid
 class GridFocus {

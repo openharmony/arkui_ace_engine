@@ -18,33 +18,47 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/point.h"
 #include "base/log/dump_log.h"
-#include "base/log/log_wrapper.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
-#include "base/ressched/ressched_report.h"
 #include "base/utils/multi_thread.h"
-#include "base/utils/utils.h"
 #include "base/utils/system_properties.h"
+#include "core/animation/bezier_variable_velocity_motion.h"
+#include "core/animation/select_motion.h"
+#include "core/animation/velocity_motion.h"
 #include "core/common/container.h"
-#include "core/common/recorder/event_definition.h"
+#include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/observer_handler.h"
-#include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
+#include "core/components_ng/event/input_event_hub.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_scroll_notifier.h"
+#include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.h"
+#include "core/components_ng/pattern/navigation/navdestination_pattern_base.h"
+#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
+#include "core/components_ng/pattern/navrouter/navdestination_event_hub.h"
+#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
+#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
+#include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
-#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/pattern/scrollable/scrollable_layout_property.h"
+#include "core/components_ng/pattern/scrollable/scrollable_paint_method.h"
+#include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
+#include "core/components_ng/pattern/scrollable/scrollable_theme.h"
+#include "core/components_ng/pattern/scrollable/refresh_coordination.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/syntax/arkoala_lazy_node.h"
 #include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
+#include "core/event/mouse_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "core/components_ng/syntax/arkoala_parallelize_ui_adapter_node.h"
@@ -72,6 +86,49 @@ const std::string SCROLLABLE_MOTION_SCENE = "scrollable_motion_scene";
 const std::string SCROLLABLE_MULTI_TASK_SCENE = "scrollable_multi_task_scene";
 const std::string SCROLL_IN_HOTZONE_SCENE = "scroll_in_hotzone_scene";
 const std::string CUSTOM_SCROLL_BAR_SCENE = "custom_scroll_bar_scene";
+
+bool IsScrollable(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto tag = frameNode->GetTag();
+    if (tag == V2::LIST_ETS_TAG || tag == V2::SCROLL_ETS_TAG || tag == V2::WATERFLOW_ETS_TAG ||
+        tag == V2::GRID_ETS_TAG) {
+        auto pattern = frameNode->GetPattern<ScrollablePattern>();
+        CHECK_NULL_RETURN(pattern, false);
+        if ((pattern->IsAtBottom() && pattern->IsAtTop()) || !pattern->IsScrollable()) {
+            return false;
+        }
+        return true;
+    }
+    return false;
+}
+
+RefPtr<FrameNode> FindParentScrollable(const RefPtr<FrameNode>& child)
+{
+    CHECK_NULL_RETURN(child, nullptr);
+    CHECK_RUN_ON(UI);
+    auto parentFrameNode = child->GetAncestorNodeOfFrame(true);
+    while (parentFrameNode) {
+        if (IsScrollable(parentFrameNode)) {
+            return parentFrameNode;
+        }
+        parentFrameNode = parentFrameNode->GetAncestorNodeOfFrame(true);
+    }
+    return nullptr;
+}
+
+bool UpdateCurrentOffsetByTargetId(int32_t targetId)
+{
+    auto targetNode = OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(targetId);
+    CHECK_NULL_RETURN(targetNode, false);
+    auto target = AceType::DynamicCast<FrameNode>(targetNode);
+    CHECK_NULL_RETURN(target, false);
+    auto scrollable = FindParentScrollable(target);
+    CHECK_NULL_RETURN(scrollable, false);
+
+    ScrollablePattern::ScrollToTarget(scrollable, target, 0.0f, ScrollAlign::NONE);
+    return true;
+}
 } // namespace
 using std::chrono::high_resolution_clock;
 using std::chrono::milliseconds;
@@ -81,6 +138,15 @@ ScrollablePattern::ScrollablePattern() = default;
 ScrollablePattern::ScrollablePattern(EdgeEffect edgeEffect, bool alwaysEnabled)
     : edgeEffect_(edgeEffect), edgeEffectAlwaysEnabled_(alwaysEnabled)
 {}
+
+void ScrollablePattern::CreateRefreshCoordination()
+{
+    if (!refreshCoordination_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        refreshCoordination_ = AceType::MakeRefPtr<RefreshCoordination>(host);
+    }
+}
 
 ScrollablePattern::~ScrollablePattern()
 {
@@ -238,6 +304,7 @@ void ScrollablePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     nestedScrollOptions->Put("scrollForward", nestedScroll.GetNestedScrollModeStr(nestedScroll.forward).c_str());
     nestedScrollOptions->Put("scrollBackward", nestedScroll.GetNestedScrollModeStr(nestedScroll.backward).c_str());
     json->PutExtAttr("nestedScroll", nestedScrollOptions, filter);
+    json->PutExtAttr("enableScrollWithMouse", GetIsAllowMouse(), filter);
     if (NearEqual(GetFriction(), -1.0) && scrollableEvent_) {
         auto scrollable = scrollableEvent_->GetScrollable();
         CHECK_NULL_VOID(scrollable);
@@ -1014,6 +1081,35 @@ void ScrollablePattern::OnTouchDown(const TouchEventInfo& info)
     }
 }
 
+void ScrollablePattern::OnTouchpadInteraction(PointF point)
+{
+    CHECK_NULL_VOID(scrollableEvent_);
+    auto scrollable = scrollableEvent_->GetScrollable();
+    CHECK_NULL_VOID(scrollable);
+    scrollable->HandleTouchDown(true);
+    if (GetNestedScrolling() && !NearZero(GetNestedScrollVelocity())) {
+        auto child = GetScrollOriginChild();
+        CHECK_NULL_VOID(child);
+        child->StopScrollAnimation();
+    }
+    if (scrollBar_) {
+        scrollBar_->StopFlingAnimation();
+    }
+    if (scrollBarProxy_) {
+        scrollBarProxy_->StopScrollBarAnimator(false);
+    }
+    if (isBackToTopRunning_) {
+        if (animator_ && !animator_->IsStopped()) {
+            animator_->Stop();
+        }
+        if (!isAnimationStop_) {
+            StopAnimation(springAnimation_);
+            StopAnimation(curveAnimation_);
+        }
+        isBackToTopRunning_ = false;
+    }
+}
+
 void ScrollablePattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     if (GetAxis() == Axis::FREE) {
@@ -1058,15 +1154,12 @@ void ScrollablePattern::RegisterTouchpadInteractionCallback()
     CHECK_NULL_VOID(host);
     auto inputEventHub = host->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputEventHub);
-    inputEventHub->AddTouchpadInteractionListenerInner([weak = WeakClaim(this)]() {
+    inputEventHub->AddTouchpadInteractionListenerInner([weak = WeakClaim(this)](PointF point) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        if (pattern->GetNestedScrolling() && !NearZero(pattern->GetNestedScrollVelocity())) {
-            auto child = pattern->GetScrollOriginChild();
-            CHECK_NULL_VOID(child);
-            child->StopScrollAnimation();
+        if (pattern->IsInComponent(point)) {
+            pattern->OnTouchpadInteraction(point);
         }
-        pattern->StopAnimate();
     });
 }
 
@@ -1077,6 +1170,16 @@ void ScrollablePattern::RegisterWindowStateChangedCallback()
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     context->AddWindowStateChangedCallback(host->GetId());
+}
+
+bool ScrollablePattern::IsInComponent(PointF point)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto wholeRect = geometryNode->GetFrameRect();
+    return wholeRect.IsInRegion(point);
 }
 
 void ScrollablePattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -1095,6 +1198,12 @@ void ScrollablePattern::OnDetachFromMainTree()
     auto host = GetHost();
     // call OnDetachFromMainTreeMultiThread() by multi thread
     THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
+    if (!scrollStop_) {
+        auto parent = GetNestedScrollParent();
+        if (parent) {
+            parent->OnScrollEndRecursive(GetVelocity());
+        }
+    }
 }
 
 void ScrollablePattern::OnWindowHide()
@@ -1283,6 +1392,80 @@ void ScrollablePattern::RegisterScrollBarEventTask()
     RegisterScrollBarOverDragEventTask();
 }
 
+void ScrollablePattern::RegisterScrollBarMarginCallback()
+{
+    CHECK_NULL_VOID(scrollBar_);
+    scrollBar_->SetGetAvoidScrollBarMargin([weak = WeakClaim(this)]() -> std::pair<double, double> {
+        std::pair<double, double> result = { 0.0, 0.0 };
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, result);
+        return pattern->GetAutoAdjustAvoidOffset();
+    });
+}
+
+std::pair<double, double> ScrollablePattern::GetAutoAdjustAvoidOffset()
+{
+    std::pair<double, double> result = { 0.0, 0.0 };
+    auto layoutProperty = GetLayoutProperty<ScrollableLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, result);
+    auto isRtl = IsRTL();
+    result.first += GetContentStartOffset();
+    result.second += GetContentEndOffset();
+    if (IsReverse()) {
+        std::swap(result.first, result.second);
+    }
+    CalcPaddingAvoidDistByMainAxis(layoutProperty->GetPaddingProperty(), result, isRtl);
+    CalcPaddingAvoidDistByMainAxis(layoutProperty->GetSafeAreaPaddingProperty(), result, isRtl);
+    CalcBorderWidthAvoidDistByMainAxis(layoutProperty->GetBorderWidthProperty(), result, isRtl);
+    return result;
+}
+
+void ScrollablePattern::CalcPaddingAvoidDistByMainAxis(
+    const std::unique_ptr<PaddingProperty>& property, std::pair<double, double>& offset, bool isRtl)
+{
+    CHECK_NULL_VOID(property);
+    if (axis_ == Axis::HORIZONTAL) {
+        if (property->start || property->end) {
+            auto startPadding = property->start.value_or(CalcLength()).GetDimension().ConvertToPx();
+            auto endPadding = property->end.value_or(CalcLength()).GetDimension().ConvertToPx();
+            if (isRtl) {
+                std::swap(startPadding, endPadding);
+            }
+            offset.first += startPadding;
+            offset.second += endPadding;
+        } else {
+            offset.first += property->left.value_or(CalcLength()).GetDimension().ConvertToPx();
+            offset.second += property->right.value_or(CalcLength()).GetDimension().ConvertToPx();
+        }
+    } else {
+        offset.first += property->top.value_or(CalcLength()).GetDimension().ConvertToPx();
+        offset.second += property->bottom.value_or(CalcLength()).GetDimension().ConvertToPx();
+    }
+}
+
+void ScrollablePattern::CalcBorderWidthAvoidDistByMainAxis(
+    const std::unique_ptr<BorderWidthProperty>& property, std::pair<double, double>& offset, bool isRtl)
+{
+    CHECK_NULL_VOID(property);
+    if (axis_ == Axis::HORIZONTAL) {
+        if (property->startDimen || property->endDimen) {
+            auto startBorder = property->startDimen.value_or(Dimension()).ConvertToPx();
+            auto endBorder = property->endDimen.value_or(Dimension()).ConvertToPx();
+            if (isRtl) {
+                std::swap(startBorder, endBorder);
+            }
+            offset.first += startBorder;
+            offset.second += endBorder;
+        } else {
+            offset.first += property->leftDimen.value_or(Dimension()).ConvertToPx();
+            offset.second += property->rightDimen.value_or(Dimension()).ConvertToPx();
+        }
+    } else {
+        offset.first += property->topDimen.value_or(Dimension()).ConvertToPx();
+        offset.second += property->bottomDimen.value_or(Dimension()).ConvertToPx();
+    }
+}
+
 bool ScrollablePattern::CanOverScrollWithDelta(double delta, bool isNestScroller)
 {
     if (isNestScroller && GetNestedScroll().NeedParent()) {
@@ -1405,6 +1588,7 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
         scrollBar_ = CreateScrollBar();
         CHECK_NULL_VOID(scrollBar_);
         RegisterScrollBarEventTask();
+        RegisterScrollBarMarginCallback();
     } else {
         oldDisplayMode = scrollBar_->GetDisplayMode();
     }
@@ -1484,6 +1668,12 @@ void ScrollablePattern::SetScrollBar(const std::unique_ptr<ScrollBarProperty>& p
                 scrollBar_->SetScrollBarMargin(scrollableBarMargin.value());
                 scrollBar_->FlushBarWidth();
             }
+        } else if (scrollBar_->GetAutoAdjustScrollBarMargin() != property->GetAutoAdjustScrollBarMargin()) {
+            scrollBar_->SetAutoAdjustScrollBarMargin(property->GetAutoAdjustScrollBarMargin());
+            scrollBar_->FlushBarWidth();
+        }
+        if (scrollBar_->GetAutoAdjustScrollBarMargin().value_or(false)) {
+            scrollBar_->NeedUpdateAutoAdjustScrollBarMargin();
         }
     }
 }
@@ -1684,9 +1874,6 @@ void ScrollablePattern::HandleScrollBarOutBoundary(float scrollBarOutBoundaryExt
 
 void ScrollablePattern::SetFriction(double friction)
 {
-    auto host = GetHost();
-    // call ScrollPageMultiThread by multi thread
-    FREE_NODE_CHECK(host, SetFriction, friction);
     if (LessOrEqual(friction, 0.0)) {
         friction =
             Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? API11_FRICTION : FRICTION;
@@ -1819,7 +2006,7 @@ void ScrollablePattern::StopAnimate()
         scrollBar_->StopFlingAnimation();
     }
     if (scrollBarProxy_) {
-        scrollBarProxy_->StopScrollBarAnimator();
+        scrollBarProxy_->StopScrollBarAnimator(false);
     }
 }
 
@@ -3579,6 +3766,7 @@ void ScrollablePattern::FireOnScrollStop(const OnScrollStopEvent& onScrollStop,
     ACE_SCOPED_TRACE("OnScrollStop, id:%d, tag:%s", static_cast<int32_t>(host->GetAccessibilityId()),
         host->GetTag().c_str());
     ReportOnItemStopEvent();
+    ReportOnItemScrollStop("OnScrollStop");
     if (onScrollStop) {
         onScrollStop();
     }
@@ -4194,27 +4382,7 @@ void ScrollablePattern::GetPaintPropertyDumpInfo()
 {
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     if (paintProperty) {
-        switch (paintProperty->GetScrollBarMode().value_or(DisplayMode::OFF)) {
-            case DisplayMode::OFF: {
-                DumpLog::GetInstance().AddDesc("innerScrollBarState: OFF");
-                break;
-            }
-            case DisplayMode::AUTO: {
-                DumpLog::GetInstance().AddDesc("innerScrollBarState: AUTO");
-                break;
-            }
-            case DisplayMode::ON: {
-                DumpLog::GetInstance().AddDesc("innerScrollBarState: ON");
-                break;
-            }
-            default: {
-                break;
-            }
-        }
-        auto scrollBarWidth = paintProperty->GetScrollBarWidth();
-        scrollBarWidth.has_value() ? DumpLog::GetInstance().AddDesc(std::string("scrollBarWidth: ")
-            .append(paintProperty->GetScrollBarWidth().value().ToString()))
-            : DumpLog::GetInstance().AddDesc("scrollBarWidth: None");
+        paintProperty->DumpInfo();
     }
 }
 
@@ -4306,10 +4474,16 @@ void ScrollablePattern::DumpAdvanceInfo()
     GetAxisDumpInfo();
     GetPanDirectionDumpInfo();
     GetPaintPropertyDumpInfo();
+    backToTop_ ? DumpLog::GetInstance().AddDesc("backToTop: true")
+            : DumpLog::GetInstance().AddDesc("backToTop: false");
     GetScrollEnabled() ? DumpLog::GetInstance().AddDesc("enableScrollInteraction: true")
                        : DumpLog::GetInstance().AddDesc("enableScrollInteraction: false");
     DumpLog::GetInstance().AddDesc(std::string("friction: ").append(std::to_string(friction_)));
     DumpLog::GetInstance().AddDesc(std::string("flingSpeedLimit: ").append(std::to_string(GetMaxFlingVelocity())));
+    auto layoutProperty = GetLayoutProperty<ScrollableLayoutProperty>();
+    if (layoutProperty) {
+        layoutProperty->DumpInfo();
+    }
     DumpLog::GetInstance().AddDesc("==========================eventsFiredInfos==============================");
     for (const auto& info : eventsFiredInfos_) {
         DumpLog::GetInstance().AddDesc(info.ToString());
@@ -4428,26 +4602,7 @@ void ScrollablePattern::GetPaintPropertyDumpInfo(std::unique_ptr<JsonValue>& jso
 {
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     if (paintProperty) {
-        switch (paintProperty->GetScrollBarMode().value_or(DisplayMode::OFF)) {
-            case DisplayMode::OFF: {
-                json->Put("innerScrollBarState", "OFF");
-                break;
-            }
-            case DisplayMode::AUTO: {
-                json->Put("innerScrollBarState", "AUTO");
-                break;
-            }
-            case DisplayMode::ON: {
-                json->Put("innerScrollBarState", "ON");
-                break;
-            }
-            default: {
-                break;
-            }
-        }
-        auto scrollBarWidth = paintProperty->GetScrollBarWidth();
-        json->Put("scrollBarWidth",
-            scrollBarWidth.has_value() ? paintProperty->GetScrollBarWidth().value().ToString().c_str() : "None");
+        paintProperty->DumpInfo(json);
     }
 }
 
@@ -4576,10 +4731,14 @@ void ScrollablePattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     GetAxisDumpInfo(json);
     GetPanDirectionDumpInfo(json);
     GetPaintPropertyDumpInfo(json);
+    json->Put("backToTop", backToTop_);
     json->Put("enableScrollInteraction", GetScrollEnabled());
     json->Put("friction", friction_);
     json->Put("flingSpeedLimit", std::to_string(GetMaxFlingVelocity()).c_str());
-    json->Put("eventsFiredInfos", friction_);
+    auto layoutProperty = GetLayoutProperty<ScrollableLayoutProperty>();
+    if (layoutProperty) {
+        layoutProperty->DumpInfo(json);
+    }
     std::unique_ptr<JsonValue> children = JsonUtil::CreateArray(true);
     for (const auto& info : eventsFiredInfos_) {
         std::unique_ptr<JsonValue> child = JsonUtil::Create(true);
@@ -5046,17 +5205,24 @@ void ScrollablePattern::ContentChangeOnScrollStart(const RefPtr<FrameNode>& keyN
     mgr->OnScrollChangeStart(keyNode);
 }
 
-std::string ScrollablePattern::ParseCommand(
-    const std::string& command, int& reportEventId, float& moveRatio, bool& isScrollByRatio)
+std::string ScrollablePattern::ParseCommand(const std::string& command, ScrollOnInjectionEventInfo& info)
 {
     auto json = JsonUtil::ParseJsonString(command);
     if (!json || json->IsNull()) {
         return std::string("");
     }
-    isScrollByRatio = json->Contains("ratio") && json->Contains("eventId");
-    if (isScrollByRatio) {
-        reportEventId = json->GetInt("eventId");
-        moveRatio = json->GetDouble("ratio");
+    if (json->Contains("eventId")) {
+        info.reportEventId = json->GetInt("eventId");
+        if (json->Contains("ratio")) {
+            info.isScrollByRatio = true;
+            info.ratio = json->GetDouble("ratio");
+        } else if (json->Contains("offset")) {
+            info.isScrollByOffset = true;
+            info.scrollOffset = json->GetDouble("offset");
+        } else if (json->Contains("targetId")) {
+            info.isScrollByTargetId = true;
+            info.targetId = json->GetInt("targetId");
+        }
     }
     return json->GetString("cmd");
 }
@@ -5109,23 +5275,64 @@ void ScrollablePattern::ReportOnItemStopEvent()
         ComponentEventType::COMPONENT_EVENT_SCROLL);
 }
 
+void ScrollablePattern::ReportOnItemScrollStop(const std::string& event)
+{
+    if (!UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    std::string scrollEvent = "";
+    scrollEvent = host->GetHostTag() + "." + event;
+    auto params = JsonUtil::Create();
+    CHECK_NULL_VOID(params);
+    FillReportOnItemStopParams(params);
+    params->Put("isInjection", lastScrollFromInjection_);
+    auto eventData = JsonUtil::Create();
+    CHECK_NULL_VOID(eventData);
+    eventData->Put("name", scrollEvent.c_str());
+    eventData->Put("params", params);
+
+    auto json = JsonUtil::Create();
+    CHECK_NULL_VOID(json);
+    json->Put("nodeId", host->GetId());
+    json->Put("event", eventData);
+
+    auto result = JsonUtil::Create();
+    CHECK_NULL_VOID(result);
+    result->Put("result", json);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString(),
+        ComponentEventType::COMPONENT_EVENT_SCROLL);
+    lastScrollFromInjection_ = false;
+}
+
+void ScrollablePattern::FillReportOnItemStopParams(std::unique_ptr<JsonValue>& params)
+{
+    auto index = GetFirstIndex();
+    params->Put("topIndex", index);
+    return;
+}
+
 int32_t ScrollablePattern::OnInjectionEventByRatio(const std::string& command)
 {
-    int reportEventId = 0;
-    float ratio = 0.0f;
-    bool isScrollByRatio = false;
-    std::string ret = ParseCommand(command, reportEventId, ratio, isScrollByRatio);
+    ScrollOnInjectionEventInfo info;
+    std::string ret = ParseCommand(command, info);
+    lastScrollFromInjection_ = true;
 
-    if (LessNotEqual(ratio, 0.0f) || GreatNotEqual(ratio, 1.0f)) {
-        ReportScroll(false, ScrollError::SCROLL_ERROR_OTHER, reportEventId);
+    if (LessNotEqual(info.ratio, 0.0f) || GreatNotEqual(info.ratio, 1.0f)) {
+        ReportScroll(false, ScrollError::SCROLL_ERROR_OTHER, info.reportEventId);
         return RET_FAILED;
     }
     if (ret == "scrollForward") {
-        HandleScrollByRatio(isScrollByRatio, true, ratio, reportEventId);
+        HandleScrollByRatio(info.isScrollByRatio, true, info.ratio, info.reportEventId);
     } else if (ret == "scrollBackward") {
-        HandleScrollByRatio(isScrollByRatio, false, ratio, reportEventId);
+        HandleScrollByRatio(info.isScrollByRatio, false, info.ratio, info.reportEventId);
+    } else if (ret == "scrollByOffset") {
+        HandleScrollByOffset(info.scrollOffset, info.reportEventId);
+    } else if (ret == "scrollByTargetId") {
+        HandleScrollByTargetId(info.targetId, info.reportEventId);
     } else {
-        ReportScroll(false, ScrollError::SCROLL_ERROR_OTHER, reportEventId);
+        ReportScroll(false, ScrollError::SCROLL_ERROR_OTHER, info.reportEventId);
         return RET_FAILED;
     }
     return RET_SUCCESS;
@@ -5167,6 +5374,33 @@ void ScrollablePattern::HandleScrollByRatio(bool isScrollByRatio, bool reverse, 
         }
     } else {
         ScrollPage(reverse);
+    }
+}
+
+void ScrollablePattern::HandleScrollByOffset(double scrollOffset, int reportEventId)
+{
+    SetIsOverScroll(false);
+    StopAnimate();
+    if ((IsAtBottom() && scrollOffset > 0) || (IsAtTop() && scrollOffset < 0) || !IsScrollable()) {
+        ReportScroll(false, ScrollError::SCROLL_NOT_SCROLLABLE_ERROR, reportEventId);
+        return;
+    }
+    auto position = GetTotalOffset() + scrollOffset;
+    AnimateTo(position, -1, nullptr, true, false, false);
+    ReportScroll(true, ScrollError::SCROLL_NO_ERROR, reportEventId);
+}
+void ScrollablePattern::HandleScrollByTargetId(int32_t targetId, int reportEventId)
+{
+    SetIsOverScroll(false);
+    StopAnimate();
+    if (!IsScrollable()) {
+        ReportScroll(false, ScrollError::SCROLL_NOT_SCROLLABLE_ERROR, reportEventId);
+        return;
+    }
+    if (UpdateCurrentOffsetByTargetId(targetId)) {
+        ReportScroll(true, ScrollError::SCROLL_NO_ERROR, reportEventId);
+    } else {
+        ReportScroll(false, ScrollError::SCROLL_ERROR_OTHER, reportEventId);
     }
 }
 } // namespace OHOS::Ace::NG

@@ -17,6 +17,7 @@
 
 #include "ani_callback_info.h"
 #include "../utils/ani_utils.h"
+#include "base/log/ace_trace.h"
 #include "base/log/log_wrapper.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_model_static.h"

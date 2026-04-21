@@ -15,11 +15,11 @@
 
 #include "scrollable_nested_test_ng.h"
 
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/animation/mock_animation_manager.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/animation/mock_animation_manager.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #define protected public
 #define private public
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1145,6 +1146,67 @@ HWTEST_F(ScrollableNestedTestNg, BackToTopNestedScrollTest005, TestSize.Level1)
     listPattern->SetBackToTop(true);
     FlushUITasks(listNode);
     EXPECT_EQ(proxy->GetStatusBarClickListener().size(), 1);
+}
+
+/**
+ * @tc.name: BackToTopNestedScrollTest006
+ * @tc.desc: Set backToTop for scroll nested List, touchpad stop animation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableNestedTestNg, BackToTopNestedScrollTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Scroll nested List
+     */
+    auto rootNode = CreatScrollNestedList(EdgeEffect::SPRING, EdgeEffect::NONE,
+        NestedScrollOptions {
+            .forward = NestedScrollMode::PARALLEL,
+            .backward = NestedScrollMode::PARALLEL,
+        });
+    FlushUITasks(rootNode);
+
+    auto colNode = GetChildFrameNode(rootNode, 0);
+    auto listNode = GetChildFrameNode(colNode, 1);
+    auto listPattern = listNode->GetPattern<ListPattern>();
+    auto scrollPattern = rootNode->GetPattern<ScrollPattern>();
+    auto scrollScrollable = GetScrollable(rootNode);
+    auto listScrollable = GetScrollable(listNode);
+
+    bool listOnScrollStop = false;
+    bool scrollOnScrollStop = false;
+    ListModelNG::SetOnScrollStop(AceType::RawPtr(listNode), [&listOnScrollStop]() { listOnScrollStop = true; });
+    ScrollModelNG::SetOnScrollStop(AceType::RawPtr(rootNode), [&scrollOnScrollStop]() { scrollOnScrollStop = true; });
+
+    /**
+     * @tc.steps: step2. When scroll back to top, touch touchpad trigger animate stop.
+     * @tc.expected: Scroll and list stop animation.
+     */
+    DragStart(listScrollable);
+    DragUpdate(listScrollable, -200);
+    listScrollable->lastMainDelta_ = 0.0;
+    DragEnd(listScrollable, 0);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
+    listPattern->backToTop_ = true;
+    scrollPattern->backToTop_ = true;
+    listPattern->isBackToTopRunning_ = true;
+    scrollPattern->isBackToTopRunning_ = true;
+    scrollPattern->OnStatusBarClick();
+    listPattern->OnStatusBarClick();
+
+    RefPtr<Animator> animator = AceType::MakeRefPtr<Animator>();
+    scrollPattern->animator_ = animator;
+    scrollPattern->isAnimationStop_ = false;
+    scrollPattern->scrollBarProxy_ = AceType::MakeRefPtr<NG::ScrollBarProxy>();
+    scrollPattern->nestedScrollVelocity_ = 200.0f;
+    scrollPattern->nestedScrollTimestamp_ = static_cast<uint64_t>(GetSysTimestamp());
+    PointF point(100.0f, 200.0f);
+    scrollPattern->OnTouchpadInteraction(point);
+    listPattern->OnTouchpadInteraction(point);
+    FlushUITasks(rootNode);
+    FlushUITasks(listNode);
+    EXPECT_TRUE(listOnScrollStop);
+    EXPECT_TRUE(scrollOnScrollStop);
 }
 
 /**

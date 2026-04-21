@@ -19,6 +19,7 @@
 
 #include "base/log/log.h"
 #include "base/utils/time_util.h"
+#include "base/utils/system_properties.h"
 #include "frameworks/core/common/ace_application_info.h"
 #include "frameworks/core/event/event_info_convertor.h"
 
@@ -46,7 +47,7 @@ InputCompatibleManager::~InputCompatibleManager()
 
 void InputCompatibleManager::LoadProductCompatiblePolicy()
 {
-    if (transformSoLoaded_ && libraryHandle_ != nullptr && productPolicy_ != nullptr) {
+    if (libraryHandle_ != nullptr && productPolicy_ != nullptr) {
         return;
     }
     libraryHandle_ = dlopen(TRANSFORM_SO_PATH.c_str(), RTLD_LAZY);
@@ -64,8 +65,6 @@ void InputCompatibleManager::LoadProductCompatiblePolicy()
         return;
     }
     productPolicy_ = getInputCompatiblePolicyInstance();
-    transformSoLoaded_ = true;
-    Close();
     return;
 }
 
@@ -74,7 +73,6 @@ void InputCompatibleManager::UnloadProductCompatiblePolicy()
     Close();
     libraryHandle_ = nullptr;
     productPolicy_ = nullptr;
-    transformSoLoaded_ = false;
 }
 
 void InputCompatibleManager::Close()

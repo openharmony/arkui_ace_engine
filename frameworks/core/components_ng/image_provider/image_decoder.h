@@ -56,7 +56,8 @@ private:
         const RefPtr<ImageObject>& obj, std::shared_ptr<RSData> data, const ImageDecoderConfig& imageDecoderConfig);
     static void SwapDecodeSize(const RefPtr<ImageObject>& obj, int32_t& width, int32_t& height);
     static void HandleDecodeFormat(
-        const RefPtr<ImageObject>& obj, const RefPtr<ImageSource>& imageSource, PixelMapConfig& config);
+        const RefPtr<ImageObject>& obj, const RefPtr<ImageSource>& imageSource, PixelMapConfig& config,
+        int32_t width, int32_t height);
 
     static RefPtr<CanvasImage> QueryCompressedCache(
         const RefPtr<ImageObject>& obj, std::shared_ptr<RSData> data, const ImageDecoderConfig& imageDecoderConfig);

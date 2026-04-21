@@ -59,6 +59,8 @@ public:
             theme->hideSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.eye_slash");
             theme->cancelSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.xmark");
             theme->micSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.mic");
+            theme->micIconColor_ = themeConstants->GetColorByName("sys.color.icon_emphasize");
+            theme->micIconActiveBgColor_ = themeConstants->GetColorByName("sys.color.comp_emphasize_secondary");
             theme->autoFillSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.security_shield");
             auto themeStyle = themeConstants->GetThemeStyle();
             if (!themeStyle || !theme) {
@@ -264,6 +266,7 @@ public:
             theme->iconOffsetPadding_ = pattern->GetAttr<Dimension>("text_input_icon_offset_padding", 0.0_vp);
             theme->iconFocusPadding_ = pattern->GetAttr<Dimension>("text_input_icon_focus_padding", 0.0_vp);
             theme->errorUnderlineWidth_ = pattern->GetAttr<Dimension>("error_under_line_width", 0.0_vp);
+            theme->voiceButtonText_ = pattern->GetAttr<std::string>("voice_button_text", "");
         }
     };
 
@@ -497,6 +500,16 @@ public:
     const Dimension& GetMicIconSize() const
     {
         return micIconSize_;
+    }
+
+    const Color& GetMicIconColor() const
+    {
+        return micIconColor_;
+    }
+
+    const Color& GetMicIconActiveBgColor() const
+    {
+        return micIconActiveBgColor_;
     }
 
     bool ShowEllipsis() const
@@ -981,6 +994,17 @@ protected:
     Color symbolColor_;
     Color textColorDisable_;
     Dimension cursorHeight_;
+    Color selectedColor_;
+    Color focusPlaceholderColor_;
+    Color disableTextColor_;
+    Color hoverColor_;
+    Color pressColor_;
+    TextStyle countTextStyle_;
+    TextStyle overCountTextStyle_;
+    Color overCountBorderColor_;
+    Color overCounterColor_;
+    Color previewUnderlineColor_;
+    Color previewBoardColor_;
 
 private:
     Edge padding_;
@@ -993,20 +1017,14 @@ private:
     Radius borderRadius_;
 
     Radius borderRadiusSize_;
-    Color focusPlaceholderColor_;
     Color focusTextColor_;
-    Color disableTextColor_;
     Color underlineActivedColor_;
     Color underlineTypingColor_;
-    Color selectedColor_;
-    Color hoverColor_;
-    Color pressColor_;
     Color disabledIconFillColor_;
     Dimension errorSpacing_;
     bool errorIsInner_ = false;
     Dimension errorBorderWidth_;
     Color errorBorderColor_;
-    Color overCountBorderColor_;
     Color errorUnderlineColor_;
     Color underlineColor_;
     Color disableUnderlineColor_;
@@ -1016,16 +1034,13 @@ private:
     Color passwordErrorBorderColor_;
     Color passwordErrorLableColor_;
     TextStyle errorTextStyle_;
-    TextStyle countTextStyle_;
     TextStyle overCountStyle_;
     TextStyle countTextStyleOuter_;
     TextStyle overCountStyleOuter_;
-    TextStyle overCountTextStyle_;
     Color inlineTextColor_;
     Radius inlineRadiusSize_;
     Color inlineBorderColor_;
     Color defaultCounterColor_;
-    Color overCounterColor_;
     Color glassOutlinePrimaryColor_;
     Color glassOutlineSecondaryColor_;
     Color glassMaskPrimaryColor_;
@@ -1063,7 +1078,9 @@ private:
     uint32_t micSymbolId_ = 0;
     Dimension micSize_ = 32.0_vp;
     Dimension micPadding_ = 4.0_vp;
-    Dimension micIconSize_ = 20.0_vp;
+    Dimension micIconSize_ = 20.0_fp;
+    Color micIconColor_;
+    Color micIconActiveBgColor_;
 
     Dimension avoidKeyboardOffset_ = 24.0_vp;
 
@@ -1078,8 +1095,6 @@ private:
     // cancelButton
     Color cancelButtonIconColor_;
     CancelButtonStyle cancelButtonStyle_ = CancelButtonStyle::INPUT;
-    Color previewUnderlineColor_;
-    Color previewBoardColor_;
 
     bool textFadeoutEnabled_ = false;
     Dimension textInputBorderWidth_ = 0.0_vp;

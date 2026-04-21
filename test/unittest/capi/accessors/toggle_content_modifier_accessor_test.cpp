@@ -41,11 +41,11 @@ static constexpr bool TEST_DEFAULT_ENABLED = true;
 static constexpr bool TEST_DEFAULT_IS_ON = false;
 
 /**
- * @tc.name: ToggleContentModifierHelperAccessor
+ * @tc.name: contentModifierToggleTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ToggleContentModifierHelperAccessor, ToggleContentModifierHelperAccessorTest, TestSize.Level1)
+HWTEST_F(ToggleContentModifierHelperAccessor, contentModifierToggleTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->contentModifierToggle, nullptr);
 

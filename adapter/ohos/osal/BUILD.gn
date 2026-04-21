@@ -60,7 +60,6 @@ template("ace_osal_ohos_source_set") {
       "ai_write_adapter.cpp",
       "anr_thread.cpp",
       "app_bar_helper_impl.cpp",
-      "click_sound_effect_manager.cpp",
       "cpu_boost.cpp",
       "data_detector_adapter.cpp",
       "data_detector_loader.cpp",
@@ -109,7 +108,12 @@ template("ace_osal_ohos_source_set") {
       "websocket_manager.cpp",
       "window_utils.cpp",
     ]
-
+    if (defined(config.enable_standard_input) &&
+        config.enable_standard_input) {
+      sources += [
+      "ime_extra_config_ohos.cpp",
+      ]
+    }
     external_deps += [
       "ability_runtime:app_manager",
       "hicollie:libhicollie",
@@ -211,7 +215,6 @@ template("ace_osal_ohos_source_set") {
       "device_config.cpp",
       "display_manager_ohos.cpp",
       "drawing_color_filter_ohos.cpp",
-      "drawing_lattice_ohos.cpp",
       "file_uri_helper_ohos.cpp",
       "image_packer_ohos.cpp",
       "image_source_ohos.cpp",

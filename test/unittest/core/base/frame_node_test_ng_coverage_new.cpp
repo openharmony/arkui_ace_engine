@@ -13,18 +13,31 @@
  * limitations under the License.
  */
 #include "test/unittest/core/base/frame_node_test_ng.h"
+#include "test/unittest/core/event/mock_touch_event_target.h"
 
 #include "base/geometry/calc_dimension_rect.h"
 #include "core/event/touch_event.h"
 #include "core/common/recorder/exposure_processor.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components/common/properties/border_image.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-namespace {} // namespace
+namespace {
+RefPtr<TouchEventTarget> CreateTouchTarget()
+{
+    return AceType::MakeRefPtr<MockTouchEventTarget>();
+}
+
+RefPtr<NGGestureRecognizer> CreateResponseLinkRecognizer()
+{
+    return AceType::MakeRefPtr<ClickRecognizer>();
+}
+} // namespace
 
 /**
  * @tc.name: FrameNodeOnGenerateOneDepthVisibleFrameWithOffset01
@@ -260,7 +273,7 @@ HWTEST_F(FrameNodeTestNg, TriggerShouldParallelInnerWithTest01, TestSize.Level1)
     /**
      * @tc.steps: step2. call the function TriggerShouldParallelInnerWith.
      */
-    frameNode->TriggerShouldParallelInnerWith(currentRecognizers, responseLinkRecognizers);
+    gestureHub->TriggerShouldParallelInnerWith(currentRecognizers, responseLinkRecognizers);
     EXPECT_FALSE(recognizer->IsBridgeMode());
 }
 
@@ -396,6 +409,249 @@ HWTEST_F(FrameNodeTestNg, TriggerOnTouchInterceptTest, TestSize.Level1)
     touchEvent.tiltX = 10.0;
     touchEvent.tiltY = 10.0;
     EXPECT_EQ(frameNode->TriggerOnTouchIntercept(touchEvent), HitTestMode::HTMBLOCK);
+}
+
+/**
+ * @tc.name: ApplyGestureCollectInterventionTest001
+ * @tc.desc: Indirectly test the function ApplyGestureCollectIntervention via HandleGestureCollectIntervention.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, ApplyGestureCollectInterventionTest001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto gestureHub = frameNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
+    auto childTarget = CreateTouchTarget();
+    auto selfTarget = CreateTouchTarget();
+    auto responseLinkRecognizer = CreateResponseLinkRecognizer();
+    auto truncatedRecognizer = CreateResponseLinkRecognizer();
+    auto newResponseLinkRecognizer = CreateResponseLinkRecognizer();
+
+    TouchTestResult childSnapshot;
+    childSnapshot.emplace_back(childTarget);
+    TouchTestResult newComingTargets;
+    newComingTargets.emplace_back(selfTarget);
+    ResponseLinkResult responseLinkResult;
+    responseLinkResult.emplace_back(responseLinkRecognizer);
+    responseLinkResult.emplace_back(truncatedRecognizer);
+    ResponseLinkResult newComingResponseLinkTargets;
+    newComingResponseLinkTargets.emplace_back(newResponseLinkRecognizer);
+
+    bool preventBubbling = true;
+    bool blockHierarchy = true;
+    bool consumed = true;
+    HitTestResult testResult = HitTestResult::BUBBLING;
+    GestureCollectInterventionContext context { newComingTargets, responseLinkResult, newComingResponseLinkTargets,
+        childSnapshot, 1, HitTestResult::STOP_BUBBLING, false, false, preventBubbling, blockHierarchy, consumed,
+        testResult };
+
+    gestureHub->HandleGestureCollectIntervention(GestureCollectIntervention::DISCARD_HIGHER, context);
+
+    EXPECT_EQ(testResult, HitTestResult::OUT_OF_REGION);
+    EXPECT_TRUE(newComingTargets.empty());
+    EXPECT_EQ(responseLinkResult.size(), 1);
+    EXPECT_EQ(responseLinkResult.front().Upgrade(), responseLinkRecognizer);
+    EXPECT_TRUE(newComingResponseLinkTargets.empty());
+    EXPECT_FALSE(preventBubbling);
+    EXPECT_FALSE(blockHierarchy);
+    EXPECT_FALSE(consumed);
+}
+
+/**
+ * @tc.name: ApplyGestureCollectInterventionTest002
+ * @tc.desc: Indirectly test the function ApplyGestureCollectIntervention via HandleGestureCollectIntervention.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, ApplyGestureCollectInterventionTest002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto gestureHub = frameNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
+    auto childTarget = CreateTouchTarget();
+    auto selfTarget = CreateTouchTarget();
+    auto responseLinkRecognizer = CreateResponseLinkRecognizer();
+    auto newResponseLinkRecognizer = CreateResponseLinkRecognizer();
+
+    TouchTestResult childSnapshot;
+    childSnapshot.emplace_back(childTarget);
+    TouchTestResult newComingTargets;
+    newComingTargets.emplace_back(selfTarget);
+    ResponseLinkResult responseLinkResult;
+    responseLinkResult.emplace_back(responseLinkRecognizer);
+    ResponseLinkResult newComingResponseLinkTargets;
+    newComingResponseLinkTargets.emplace_back(newResponseLinkRecognizer);
+
+    bool preventBubbling = false;
+    bool blockHierarchy = false;
+    bool consumed = true;
+    HitTestResult testResult = HitTestResult::OUT_OF_REGION;
+    GestureCollectInterventionContext context { newComingTargets, responseLinkResult, newComingResponseLinkTargets,
+        childSnapshot, 0, HitTestResult::STOP_BUBBLING, true, true, preventBubbling, blockHierarchy, consumed,
+        testResult };
+
+    gestureHub->HandleGestureCollectIntervention(GestureCollectIntervention::DISCARD_SELF, context);
+
+    EXPECT_EQ(testResult, HitTestResult::STOP_BUBBLING);
+    EXPECT_EQ(newComingTargets.size(), 1);
+    EXPECT_EQ(newComingTargets.front(), childTarget);
+    EXPECT_EQ(responseLinkResult.size(), 1);
+    EXPECT_TRUE(newComingResponseLinkTargets.empty());
+    EXPECT_TRUE(preventBubbling);
+    EXPECT_TRUE(blockHierarchy);
+    EXPECT_FALSE(consumed);
+}
+
+/**
+ * @tc.name: ApplyGestureCollectInterventionTest003
+ * @tc.desc: Indirectly test the function ApplyGestureCollectIntervention via HandleGestureCollectIntervention.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, ApplyGestureCollectInterventionTest003, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto gestureHub = frameNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
+    auto target = CreateTouchTarget();
+
+    TouchTestResult childSnapshot;
+    TouchTestResult newComingTargets;
+    newComingTargets.emplace_back(target);
+    ResponseLinkResult responseLinkResult;
+    ResponseLinkResult newComingResponseLinkTargets;
+
+    bool preventBubbling = false;
+    bool blockHierarchy = false;
+    bool consumed = true;
+    HitTestResult testResult = HitTestResult::BUBBLING;
+    GestureCollectInterventionContext context { newComingTargets, responseLinkResult, newComingResponseLinkTargets,
+        childSnapshot, 0, HitTestResult::STOP_BUBBLING, false, false, preventBubbling, blockHierarchy, consumed,
+        testResult };
+
+    gestureHub->HandleGestureCollectIntervention(GestureCollectIntervention::DISCARD_LOWER, context);
+    EXPECT_EQ(testResult, HitTestResult::BLOCK_HIERARCHY);
+    EXPECT_TRUE(blockHierarchy);
+
+    consumed = true;
+    gestureHub->HandleGestureCollectIntervention(GestureCollectIntervention::DISCARD_LOWER_PRIORITY_SIBLINGS, context);
+    EXPECT_EQ(testResult, HitTestResult::STOP_SIBLINGS);
+    EXPECT_FALSE(consumed);
+
+    testResult = HitTestResult::STOP_BUBBLING;
+    gestureHub->HandleGestureCollectIntervention(GestureCollectIntervention::CONTINUE, context);
+    EXPECT_EQ(testResult, HitTestResult::STOP_BUBBLING);
+}
+
+/**
+ * @tc.name: HandleGestureCollectInterventionTest001
+ * @tc.desc: Test the function HandleGestureCollectIntervention.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, HandleGestureCollectInterventionTest001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto gestureHub = frameNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
+    auto target = CreateTouchTarget();
+    auto existingRecognizer = CreateResponseLinkRecognizer();
+    auto appendedRecognizer = CreateResponseLinkRecognizer();
+
+    TouchTestResult childSnapshot;
+    TouchTestResult newComingTargets;
+    newComingTargets.emplace_back(target);
+    ResponseLinkResult responseLinkResult;
+    responseLinkResult.emplace_back(existingRecognizer);
+    ResponseLinkResult newComingResponseLinkTargets;
+    newComingResponseLinkTargets.emplace_back(appendedRecognizer);
+
+    bool preventBubbling = false;
+    bool blockHierarchy = false;
+    bool consumed = false;
+    HitTestResult testResult = HitTestResult::OUT_OF_REGION;
+    GestureCollectInterventionContext context { newComingTargets, responseLinkResult, newComingResponseLinkTargets,
+        childSnapshot, 0, HitTestResult::BUBBLING, false, false, preventBubbling, blockHierarchy, consumed,
+        testResult };
+
+    gestureHub->HandleGestureCollectIntervention(GestureCollectIntervention::CONTINUE, context);
+
+    EXPECT_EQ(testResult, HitTestResult::OUT_OF_REGION);
+    EXPECT_EQ(responseLinkResult.size(), 2);
+    EXPECT_TRUE(newComingResponseLinkTargets.empty());
+}
+
+/**
+ * @tc.name: HandleGestureCollectInterventionTest002
+ * @tc.desc: Test the function HandleGestureCollectIntervention.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, HandleGestureCollectInterventionTest002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto gestureHub = frameNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
+    auto target = CreateTouchTarget();
+    auto existingRecognizer = CreateResponseLinkRecognizer();
+    auto appendedRecognizer = CreateResponseLinkRecognizer();
+
+    TouchTestResult childSnapshot;
+    TouchTestResult newComingTargets;
+    newComingTargets.emplace_back(target);
+    ResponseLinkResult responseLinkResult;
+    responseLinkResult.emplace_back(existingRecognizer);
+    ResponseLinkResult newComingResponseLinkTargets;
+    newComingResponseLinkTargets.emplace_back(appendedRecognizer);
+
+    bool preventBubbling = false;
+    bool blockHierarchy = false;
+    bool consumed = true;
+    HitTestResult testResult = HitTestResult::OUT_OF_REGION;
+    GestureCollectInterventionContext context { newComingTargets, responseLinkResult, newComingResponseLinkTargets,
+        childSnapshot, 0, HitTestResult::BUBBLING, false, false, preventBubbling, blockHierarchy, consumed,
+        testResult };
+
+    gestureHub->HandleGestureCollectIntervention(GestureCollectIntervention::DISCARD_LOWER, context);
+
+    EXPECT_EQ(testResult, HitTestResult::BLOCK_HIERARCHY);
+    EXPECT_TRUE(blockHierarchy);
+    EXPECT_EQ(responseLinkResult.size(), 2);
+    EXPECT_TRUE(newComingResponseLinkTargets.empty());
+}
+
+/**
+ * @tc.name: HandleGestureCollectInterventionTest003
+ * @tc.desc: Test the function HandleGestureCollectIntervention.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, HandleGestureCollectInterventionTest003, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto gestureHub = frameNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
+    auto target = CreateTouchTarget();
+    auto keptRecognizer = CreateResponseLinkRecognizer();
+    auto truncatedRecognizer = CreateResponseLinkRecognizer();
+    auto newResponseLinkRecognizer = CreateResponseLinkRecognizer();
+
+    TouchTestResult childSnapshot;
+    TouchTestResult newComingTargets;
+    newComingTargets.emplace_back(target);
+    ResponseLinkResult responseLinkResult;
+    responseLinkResult.emplace_back(keptRecognizer);
+    responseLinkResult.emplace_back(truncatedRecognizer);
+    ResponseLinkResult newComingResponseLinkTargets;
+    newComingResponseLinkTargets.emplace_back(newResponseLinkRecognizer);
+
+    bool preventBubbling = true;
+    bool blockHierarchy = true;
+    bool consumed = true;
+    HitTestResult testResult = HitTestResult::BUBBLING;
+    GestureCollectInterventionContext context { newComingTargets, responseLinkResult, newComingResponseLinkTargets,
+        childSnapshot, 1, HitTestResult::STOP_BUBBLING, false, false, preventBubbling, blockHierarchy, consumed,
+        testResult };
+
+    gestureHub->HandleGestureCollectIntervention(GestureCollectIntervention::DISCARD_HIGHER, context);
+
+    EXPECT_EQ(testResult, HitTestResult::OUT_OF_REGION);
+    EXPECT_TRUE(newComingTargets.empty());
+    EXPECT_EQ(responseLinkResult.size(), 1);
+    EXPECT_EQ(responseLinkResult.front().Upgrade(), keptRecognizer);
+    EXPECT_TRUE(newComingResponseLinkTargets.empty());
+    EXPECT_FALSE(preventBubbling);
+    EXPECT_FALSE(blockHierarchy);
+    EXPECT_FALSE(consumed);
 }
 
 /**
@@ -2045,5 +2301,58 @@ HWTEST_F(FrameNodeTestNg, FrameNodeSetEnableClickSoundEffect001, TestSize.Level1
     frameNode->SetEnableClickSoundEffect(true);
     enable = frameNode->GetEnableClickSoundEffect();
     EXPECT_EQ(enable, true);
+}
+
+/**
+ * @tc.name: FrameNodeUpdateBackground005
+ * @tc.desc: Test UpdateBackground with various branch conditions
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeUpdateBackground005, TestSize.Level1)
+{
+    struct TestCase {
+        bool hasBuilderBackgroundFlag;
+        bool isBuilderBackground;
+        bool hasBuilderFunc;
+        bool isNeedRefresh;
+        bool builderFuncReturnsValid;
+        uint32_t refreshCallbackId;
+        bool expectedIsNeedRefreshAfterCall;
+    };
+
+    std::vector<TestCase> testCases = {
+        { false, false, false, false, false, 0, false },
+        { true, false, false, false, false, 0, false },
+        { true, true, false, true, false, 0, true },
+        { true, true, true, false, false, 0, false },
+        { true, true, true, false, false, 0, false },
+        { true, true, true, true, 0, false },
+        { true, true, true, true, 123, false }
+    };
+
+    for (const auto& testCase : testCases) {
+        auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+        ASSERT_NE(frameNode, nullptr);
+        auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(frameNode->GetRenderContext());
+        ASSERT_NE(mockRenderContext, nullptr);
+
+        if (testCase.hasBuilderBackgroundFlag) {
+            mockRenderContext->UpdateBuilderBackgroundFlag(testCase.isBuilderBackground);
+        }
+
+        frameNode->builderFunc_ = nullptr;
+        if (testCase.hasBuilderFunc && testCase.builderFuncReturnsValid) {
+            frameNode->builderFunc_ = []() -> RefPtr<UINode> {
+                return FrameNode::CreateFrameNode("builderNode", 100, AceType::MakeRefPtr<Pattern>(), true);
+            };
+        }
+        if (testCase.hasBuilderFunc && !testCase.builderFuncReturnsValid) {
+            frameNode->builderFunc_ = []() -> RefPtr<UINode> { return nullptr; };
+        }
+        frameNode->isNeedRefreshBackgroundBuilder_ = testCase.isNeedRefresh;
+        frameNode->refreshBackgroundBuilderId_ = testCase.refreshCallbackId;
+        frameNode->UpdateBackground();
+        EXPECT_EQ(frameNode->isNeedRefreshBackgroundBuilder_, testCase.expectedIsNeedRefreshAfterCall);
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -20,7 +20,7 @@
 @Component
 struct ImageContentExample {
   @State imageSrcIndex: number = 0;
-  @State imageSrcList: (ResourceStr | ImageContent)[] = [$r('app.media.app_icon'), ImageContent.EMPTY];
+  @State imageSrcList: (ResourceStr | ImageContent)[] = [$r('app.media.startIcon'), ImageContent.EMPTY];
 
   build() {
     Column({ space: 10 }) {

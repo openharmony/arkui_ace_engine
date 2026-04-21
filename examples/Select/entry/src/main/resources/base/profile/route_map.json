@@ -11,11 +11,6 @@
       "buildFunction": "SelectIndexBuilder"
     },
     {
-      "name": "SelectIndexStatic",
-      "pageSourceFile": "src/main/ets/pages/components/select_static/Index.ets",
-      "buildFunction": "SelectIndexStaticBuilder"
-    },
-    {
       "name": "SelectDivider",
       "pageSourceFile": "src/main/ets/pages/components/select/selectDivider.ets",
       "buildFunction": "SelectDividerBuilder"
@@ -76,19 +71,9 @@
       "buildFunction": "SelectArrowBuilder"
     },
     {
-      "name": "SelectArrowModifierStatic",
-      "pageSourceFile": "src/main/ets/pages/components/select_static/selectArrowModifier.ets",
-      "buildFunction": "SelectArrowModifierStaticBuilder"
-    },
-    {
       "name": "SelectOptionTextModifier",
       "pageSourceFile": "src/main/ets/pages/components/select/selectModifier.ets",
       "buildFunction": "SelectOptionTextModifierBuilder"
-    },
-    {
-      "name": "SelectOptionTextModifierStatic",
-      "pageSourceFile": "src/main/ets/pages/components/select_static/selectOptionTextModifier.ets",
-      "buildFunction": "SelectOptionTextModifierStaticBuilder"
     },
     {
       "name": "SelectSelectedOptionTextModifier",
@@ -96,19 +81,9 @@
       "buildFunction": "SelectSelectedOptionTextModifierBuilder"
     },
     {
-      "name": "SelectSelectedOptionTextModifierStatic",
-      "pageSourceFile": "src/main/ets/pages/components/select_static/selectOptionTextModifier.ets",
-      "buildFunction": "SelectSelectedOptionTextModifierStaticBuilder"
-    },
-    {
       "name": "SelectShowDefaultSelectedIcon",
       "pageSourceFile": "src/main/ets/pages/components/select/selectShowDefaultSelectedIcon.ets",
       "buildFunction": "SelectShowDefaultSelectedIconBuilder"
-    },
-    {
-      "name": "SelectShowDefaultSelectedIconStatic",
-      "pageSourceFile": "src/main/ets/pages/components/select_static/selectShowDefaultSelectedIcon.ets",
-      "buildFunction": "SelectShowDefaultSelectedIconStaticBuilder"
     },
     {
       "name": "SelectShowInSubWindow",
@@ -116,19 +91,9 @@
       "buildFunction": "SelectShowInSubWindowBuilder"
     },
     {
-      "name": "SelectShowInSubWindowStatic",
-      "pageSourceFile": "src/main/ets/pages/components/select_static/selectShowInSubWindow.ets",
-      "buildFunction": "SelectShowInSubWindowStaticBuilder"
-    },
-    {
       "name": "SelectTextModifier",
       "pageSourceFile": "src/main/ets/pages/components/select/selectTextModifier.ets",
       "buildFunction": "SelectTextModifierBuilder"
-    },
-    {
-      "name": "SelectTextModifierStatic",
-      "pageSourceFile": "src/main/ets/pages/components/select_static/selectTextModifier.ets",
-      "buildFunction": "SelectTextModifierStaticBuilder"
     },
     {
       "name": "SelectLevel00",
@@ -176,9 +141,9 @@
       "buildFunction": "SelectMenuOutlineBuilder"
     },
     {
-      "name": "SelectMenuOutlineStatic",
-      "pageSourceFile": "src/main/ets/pages/components/select_static/selectMenuOutline.ets",
-      "buildFunction": "SelectMenuOutlineStaticBuilder"
+      "name": "SelectLevel8",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectLevel8.ets",
+      "buildFunction": "SelectLevel8Builder"
     },
     {
       "name": "ButtonIndex",
@@ -282,8 +247,18 @@
     },
     {
       "name": "ToggleIndex",
-      "pageSourceFile": "src/main/ets/pages/components/toggle/index.ets",
+      "pageSourceFile": "src/main/ets/pages/components/toggle/Index.ets",
       "buildFunction": "ToggleIndexBuilder"
+    },
+    {
+      "name": "ButtonLevel12",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonLevel12.ets",
+      "buildFunction": "ButtonLevel12Builder"
+    },
+    {
+      "name": "ToggleMultiTestLevel6",
+      "pageSourceFile": "src/main/ets/pages/components/toggle/toggleMultiTestLevel6.ets",
+      "buildFunction": "ToggleMultiTestLevel6Builder"
     },
     {
       "name": "ToggleWithDialog",
@@ -446,14 +421,14 @@
       "buildFunction": "CheckboxLevel4Builder"
     },
     {
+      "name": "CheckboxLevel5",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxLevel5.ets",
+      "buildFunction": "CheckboxLevel5Builder"
+    },
+    {
       "name": "RatingIndex",
       "pageSourceFile": "src/main/ets/pages/components/rating/Index.ets",
       "buildFunction": "RatingIndexBuilder"
-    },
-    {
-      "name": "RatingIndexStatic",
-      "pageSourceFile": "src/main/ets/pages/components/rating_static/Index.ets",
-      "buildFunction": "RatingIndexStaticBuilder"
     },
     {
       "name": "RatingNormal",
@@ -464,11 +439,6 @@
       "name": "RatingStarStyle",
       "pageSourceFile": "src/main/ets/pages/components/rating/ratingStarStyle.ets",
       "buildFunction": "RatingStarStyleBuilder"
-    },
-    {
-      "name": "RatingStarStyleStatic",
-      "pageSourceFile": "src/main/ets/pages/components/rating_static/ratingStarStyle.ets",
-      "buildFunction": "RatingStarStyleStaticBuilder"
     },
     {
       "name": "RatingCustom",
@@ -491,24 +461,19 @@
       "buildFunction": "RatingLevel2Builder"
     },
     {
+      "name": "RatingLevel3",
+      "pageSourceFile": "src/main/ets/pages/components/rating/ratingLevel3.ets",
+      "buildFunction": "RatingLevel3Builder"
+    },
+    {
       "name": "SliderIndex",
       "pageSourceFile": "src/main/ets/pages/components/slider/Index.ets",
       "buildFunction": "SliderIndexBuilder"
     },
     {
-      "name": "SliderIndexStatic",
-      "pageSourceFile": "src/main/ets/pages/components/slider_static/Index.ets",
-      "buildFunction": "SliderIndexStaticBuilder"
-    },
-    {
       "name": "SliderBlockColor",
       "pageSourceFile": "src/main/ets/pages/components/slider/sliderBlockColor.ets",
       "buildFunction": "SliderBlockColorBuilder"
-    },
-    {
-      "name": "SliderBlockColorStatic",
-      "pageSourceFile": "src/main/ets/pages/components/slider_static/sliderBlockColor.ets",
-      "buildFunction": "SliderBlockColorStaticBuilder"
     },
     {
       "name": "SliderStyle",
@@ -576,14 +541,14 @@
       "buildFunction": "SliderLevel15Builder"
     },
     {
-      "name": "SliderPrefixSuffix",
-      "pageSourceFile": "src/main/ets/pages/components/slider/SliderPrefixSuffix.ets",
-      "buildFunction": "SliderPrefixSuffixBuilder"
+      "name": "SliderLevel16",
+      "pageSourceFile": "src/main/ets/pages/components/slider/sliderLevel16.ets",
+      "buildFunction": "SliderLevel16Builder"
     },
     {
-      "name": "SliderPrefixSuffixStatic",
-      "pageSourceFile": "src/main/ets/pages/components/slider_static/SliderPrefixSuffix.ets",
-      "buildFunction": "SliderPrefixSuffixStaticBuilder"
+      "name": "SliderPrefixSuffix",
+      "pageSourceFile": "src/main/ets/pages/components/slider/sliderPrefixSuffix.ets",
+      "buildFunction": "SliderPrefixSuffixBuilder"
     },
     {
       "name": "SliderShowSteps",
@@ -591,9 +556,9 @@
       "buildFunction": "SliderShowStepsBuilder"
     },
     {
-      "name": "SliderShowStepsStatic",
-      "pageSourceFile": "src/main/ets/pages/components/slider_static/sliderShowSteps.ets",
-      "buildFunction": "SliderShowStepsStaticBuilder"
+      "name": "SliderTrackColorMetrics",
+      "pageSourceFile": "src/main/ets/pages/components/slider/sliderTrackColorMetrics.ets",
+      "buildFunction": "SliderTrackColorMetricsBuilder"
     },
     {
       "name": "RadioIndex",
@@ -644,6 +609,36 @@
       "name": "RadioLevel4",
       "pageSourceFile": "src/main/ets/pages/components/radio/radioLevel4.ets",
       "buildFunction": "RadioLevel4Builder"
+    },
+    {
+      "name": "RadioLevel5",
+      "pageSourceFile": "src/main/ets/pages/components/radio/radioLevel5.ets",
+      "buildFunction": "RadioLevel5Builder"
+    },
+    {
+      "name": "RadioWithTheme1",
+      "pageSourceFile": "src/main/ets/pages/components/radio/radioWithTheme1.ets",
+      "buildFunction": "RadioWithTheme1Builder"
+    },
+    {
+      "name": "RadioWithTheme2",
+      "pageSourceFile": "src/main/ets/pages/components/radio/radioWithTheme2.ets",
+      "buildFunction": "RadioWithTheme2Builder"
+    },
+    {
+      "name": "RadioWithTheme3",
+      "pageSourceFile": "src/main/ets/pages/components/radio/radioWithTheme3.ets",
+      "buildFunction": "RadioWithTheme3Builder"
+    },
+    {
+      "name": "RadioWithTheme4",
+      "pageSourceFile": "src/main/ets/pages/components/radio/radioWithTheme4.ets",
+      "buildFunction": "RadioWithTheme4Builder"
+    },
+    {
+      "name": "RadioWithTheme5",
+      "pageSourceFile": "src/main/ets/pages/components/radio/radioWithTheme5.ets",
+      "buildFunction": "RadioWithTheme5Builder"
     },
     {
       "name": "FormIndex",

@@ -15,6 +15,7 @@
 
 #include "core/components/scroll/scroll_fade_controller.h"
 
+#include "core/animation/curve_animation.h"
 #include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {

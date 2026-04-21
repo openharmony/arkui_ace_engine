@@ -124,6 +124,22 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   private activeChangeListenerForInterop_: Set<(active: boolean) => void> = new Set<(active: boolean) => void>();
 
   protected __isEntryValue__Internal = false;
+  protected readonly ___reusePool?: __ReusePool;
+  protected static preRenderingPool_: __ReusePool | undefined;
+  protected preRenderedChildren_?: Map<string, PUV2ViewBase>;
+  public isPreRendered: boolean = false;
+  public __isGlobalPoolActive : boolean = false;
+  static preRenderCounter: number = 0;
+
+  static beginPreRender(pool: __ReusePool): void {
+    PUV2ViewBase.preRenderingPool_ = pool;
+  }
+  static endPreRender(): void {
+    PUV2ViewBase.preRenderingPool_ = undefined;
+  }
+  static getCurrentPreRenderPool(): __ReusePool | undefined {
+    return PUV2ViewBase.preRenderingPool_;
+  }
 
   constructor(parent: IView, elmtId: number = UINodeRegisterProxy.notRecordingDependencies, extraInfo: ExtraInfo = undefined) {
     super(true);
@@ -164,6 +180,22 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     stateMgmtConsole.debug(`${this.debugInfo__()}: constructor: done`);
   }
 
+  /**
+   * Attempts to mount a pre-rendered child component instead of creating a new one.
+   * Returns true if a pre-rendered child was found and mounted, false otherwise.
+  */
+  protected mountPreRenderedChild(reuseId: string): boolean {
+    const preRenderedChild = this.preRenderedChildren_?.get(reuseId);
+    if (!preRenderedChild) {
+        return false;
+    }
+
+    this.preRenderedChildren_.delete(reuseId);
+    preRenderedChild.isPreRendered = false;
+    PUV2ViewBase.createRecycle(preRenderedChild, false, reuseId, () => {});
+    return true;
+  }
+
   public __triggerLifecycle__Internal(eventId: LifeCycleEvent): boolean {
     if (this['__newLifecycleNeedWork__Internal']) {
       return this.__getLifecycle__Internal()?.handleEvent(eventId);
@@ -185,10 +217,15 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   public __customComponentExecuteInit__Internal(): void {
     let watchProp = Symbol.for('INIT_INTERNAL_FUNCTION' + this.constructor.name);
     const componentInitFunctions = this[watchProp];
-    if (componentInitFunctions instanceof Array) {
+    try {
+      if (componentInitFunctions instanceof Array) {
         componentInitFunctions.forEach((componentInitFunction) => {
             componentInitFunction.call(this);
-        })
+        });
+      }
+    } catch (e) {
+      stateMgmtConsole.frequentApplicationError(`Lifecycle ComponentInit error, ${this.debugInfo__()}, ${e.message} ${e.stack}`);
+      throw e;
     }
   }
 
@@ -299,6 +336,12 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     return this.nativeViewPartialUpdate.registerUpdateInstanceForEnvFunc(updateInstanceIdForEnvFun);
   }
 
+  // Callback handler when instanceId changes in backend
+  protected __onJSInstanceIdUpdate__Internal(): void {
+    stateMgmtConsole.debug(`${this.debugInfo__()}: instanceId changed, clearing dirtDescendantElementIds_`);
+    this.dirtDescendantElementIds_.clear();
+  }
+
   public __isV2__Internal(): boolean {
     return this instanceof ViewV2;
   }
@@ -366,6 +409,32 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     this.isDeleting_ = true;
   }
 
+  /**
+  * Determines whether the child components of this component should be deleted recursively.
+  *
+  * Rules:
+  * 1. Non-reusable components are always deleted.
+  * 2. If the component is reusable but its reuse pool has no associated owner, delete as a fail-safe.
+  * 3. For reusable components with a pool owner, delete recursively only if the pool owner itself is being deleted.
+ */
+  public shouldDeleteRecursively(): boolean {
+
+    // Not reusable -> normal behavior
+    if (!this.isReusable_) {
+      return true;
+    }
+
+    const pool = this.getReusePoolInternal();
+
+    // Reusable but no pool -> fail-safe delete
+    if (!pool) {
+      return true;
+    }
+
+    // Reusable + pool inactive -> delete
+    return !pool.isActive();
+  }
+
   public setDeleteStatusRecursively(): void {
     if (!this.childrenWeakrefMap_.size) {
       return;
@@ -373,7 +442,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     stateMgmtConsole.debug(`${this.debugInfo__()}: set as deleting (${this.childrenWeakrefMap_.size} children)`);
     this.childrenWeakrefMap_.forEach((value: WeakRef<IView>) => {
       let child: IView = value.deref();
-      if (child) {
+      if (child && child.shouldDeleteRecursively()) {
         child.setDeleting();
         child.setDeleteStatusRecursively();
       }
@@ -575,9 +644,12 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
 
   // clear all cached node
   public __ClearAllRecyle__PUV2ViewBase__Internal(): void {
+    const globalPool = this.getReusePoolInternal();
     if (this instanceof ViewPU) {
+      globalPool && globalPool.purgeAllCachedRecycleNode();
       this.hasRecycleManager() && this.getRecycleManager().purgeAllCachedRecycleNode();
     } else if (this instanceof ViewV2) {
+      globalPool && globalPool.purgeAllCachedRecycleElmtIds();
       this.hasRecyclePool() && this.getRecyclePool().purgeAllCachedRecycleElmtIds();
     } else {
       stateMgmtConsole.error(`clearAllRecycle: this no instanceof ViewPU or ViewV2, error!`);
@@ -591,6 +663,46 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
         childView.__ClearAllRecyle__PUV2ViewBase__Internal();
       }
     }
+  }
+
+  /**
+   * @function getReusePoolInternal
+   * @description
+   * Returns the current reuse pool for this component, following this order:
+   * 1. If an attached pool exists on this component, return it.
+   * 2. If the internal `___reusePool` exists, return it.
+   * 3. If a legacy per-instance pool exists, return it.
+   * 4. Otherwise, search up the ancestor hierarchy for the nearest accepting pool.
+   *
+   * @returns {__ReusePool | undefined} The `__ReusePool` instance for managing component recycling.
+  */
+  getReusePoolInternal(componentClass?: new (...args: PUV2ViewBase[]) => PUV2ViewBase): __ReusePool | undefined {
+    const cls = componentClass ?? (this.constructor as new (...args: PUV2ViewBase[]) => PUV2ViewBase);
+    let current: PUV2ViewBase | IView | undefined = this;
+
+    while (current) {
+        const pool: __ReusePool | undefined = (current as PUV2ViewBase).___reusePool;
+        if (pool && pool.acceptsComponent(cls)) {
+            return pool;
+        }
+        current = current.getParent?.();
+    }
+    stateMgmtConsole.debug(`getReusePoolInternal: No Global pool found for ${cls.name} in ancestor chain — component will use legacy RecyclePool or be destroyed`);
+    return undefined;
+  }
+
+  /**
+   * @function getReusePool
+   * @description
+   * Returns the current reuse pool for this component
+   * API exposed to the application
+   * @returns {__ReusePool | undefined} The `__ReusePool` instance for managing component recycling.
+  */
+  getReusePool(): IReusePool | undefined {
+    if(this.___reusePool) {
+      return this.___reusePool;
+    }
+    return this.getReusePoolInternal();
   }
 
   /**

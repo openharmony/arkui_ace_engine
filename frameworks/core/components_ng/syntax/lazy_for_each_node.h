@@ -174,6 +174,12 @@ public:
         }
     }
 
+    void RegisterBuilderListenerHandler()
+    {
+        CHECK_NULL_VOID(builder_);
+        builder_->RegisterDataChangeListenerHandler();
+    }
+
     void SetItemDragHandler(std::function<void(int32_t)>&& onLongPress, std::function<void(int32_t)>&& onDragStart,
         std::function<void(int32_t, int32_t)>&& onMoveThrough, std::function<void(int32_t)>&& onDrop);
     void SetOnMove(std::function<void(int32_t, int32_t)>&& onMove);
@@ -201,6 +207,19 @@ public:
     void ParseOperations(const std::list<V2::Operation>& dataOperations);
 
     void EnablePreBuild(bool enable);
+
+    LazyForEachCustomComponentFreezeMode GetEnableCustomComponentFreeze() const
+    {
+        return builder_ ? builder_->GetEnableCustomComponentFreeze(): LazyForEachCustomComponentFreezeMode::AUTO;
+    }
+
+    LazyForEachReleaseStrategy GetLazyForEachReleaseStrategy() const
+    {
+        return builder_? builder_->GetLazyForEachReleaseStrategy(): LazyForEachReleaseStrategy::BATCH;
+    }
+
+    bool hasRegisterLazyForEachToCustomNode = false;
+
 protected:
     void UpdateChildrenFreezeState(bool isFreeze, bool isForceUpdateFreezeVaule = false) override;
     void DumpInfo() override;

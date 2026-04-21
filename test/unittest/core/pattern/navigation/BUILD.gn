@@ -18,9 +18,10 @@ ace_unittest("navigation_test_ng") {
   type = "new"
   sources = [
     "$ace_root/frameworks/core/components_ng/pattern/navigation/navigation_model_static.cpp",
-    "$ace_root/test/mock/core/common/mock_window.cpp",
+    "$ace_root/test/mock/frameworks/core/common/mock_window.cpp",
     "bar_item_test_ng.cpp",
     "bar_style_test_ng.cpp",
+    "complex_function_test_ng.cpp",
     "mock_navigation_stack.cpp",
     "nav_bar_test_ng.cpp",
     "navdestination_base_test_ng.cpp",
@@ -33,6 +34,7 @@ ace_unittest("navigation_test_ng") {
     "navigation_drag_bar_test_ng.cpp",
     "navigation_focus_test.cpp",
     "navigation_group_node_test_ng.cpp",
+    "navigation_layout_algorithm_test.cpp",
     "navigation_layout_test_ng.cpp",
     "navigation_layout_util_test.cpp",
     "navigation_lifecycle_test_ng.cpp",
@@ -47,6 +49,7 @@ ace_unittest("navigation_test_ng") {
     "navigation_pattern_test_six_ng.cpp",
     "navigation_pattern_test_three_ng.cpp",
     "navigation_pattern_test_two_ng.cpp",
+    "navigation_stack_test_ng.cpp",
     "navigation_sync_stack_test_ng.cpp",
     "navigation_system_bar_style_test_ng.cpp",
     "navigation_test_ng.cpp",
@@ -54,4 +57,17 @@ ace_unittest("navigation_test_ng") {
     "title_bar_test_ng.cpp",
     "tool_bar_test_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "navigation_test_min.cpp",
+      "navigation_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "navigation_test_min.cpp",
+      "navigation_test_core.cpp",
+    ]
+  }
 }

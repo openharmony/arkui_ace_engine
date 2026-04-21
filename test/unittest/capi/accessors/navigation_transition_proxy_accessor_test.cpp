@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
+#include "base/utils/utils.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/interfaces/native/implementation/navigation_transition_proxy_peer.h"
 #include "accessor_test_base.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "test/mock/core/render/mock_animation_utils.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_animation_utils.h"
 
 #include "gmock/gmock.h"
 
@@ -35,22 +36,22 @@ class NavigationTransitionProxyAccessorTest : public AccessorTestBase<
 };
 
 /**
- * @tc.name: initialStateTest
+ * @tc.name: getIsInteractiveTestInitialState
  * @tc.desc: Check the functionality of NavigationTransitionProxyAccessor
  * @tc.type: FUNC
  */
-HWTEST_F(NavigationTransitionProxyAccessorTest, initialStateTest, TestSize.Level1)
+HWTEST_F(NavigationTransitionProxyAccessorTest, getIsInteractiveTestInitialState, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getIsInteractive, nullptr);
     EXPECT_EQ(Converter::GetOpt(accessor_->getIsInteractive(peer_)), std::nullopt);
 }
 
 /**
- * @tc.name: nothingHandlerStateTest
+ * @tc.name: getIsInteractiveTestNothingHandlerState
  * @tc.desc: Check the functionality of NavigationTransitionProxyAccessor
  * @tc.type: FUNC
  */
-HWTEST_F(NavigationTransitionProxyAccessorTest, nothingHandlerStateTest, TestSize.Level1)
+HWTEST_F(NavigationTransitionProxyAccessorTest, getIsInteractiveTestNothingHandlerState, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getIsInteractive, nullptr);
     peer_->SetHandler(nullptr);
@@ -58,11 +59,11 @@ HWTEST_F(NavigationTransitionProxyAccessorTest, nothingHandlerStateTest, TestSiz
 }
 
 /**
- * @tc.name: settersGettersTest
+ * @tc.name: getIsInteractiveTestSettersGetters
  * @tc.desc: Check the functionality of NavigationTransitionProxyAccessor
  * @tc.type: FUNC
  */
-HWTEST_F(NavigationTransitionProxyAccessorTest, settersGettersTest, TestSize.Level1)
+HWTEST_F(NavigationTransitionProxyAccessorTest, getIsInteractiveTestSettersGetters, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getIsInteractive, nullptr);
 
@@ -74,11 +75,11 @@ HWTEST_F(NavigationTransitionProxyAccessorTest, settersGettersTest, TestSize.Lev
 }
 
 /**
- * @tc.name: finishTransactionTest
+ * @tc.name: finishTransitionTest
  * @tc.desc: Check the functionality of NavigationTransitionProxyAccessor
  * @tc.type: FUNC
  */
-HWTEST_F(NavigationTransitionProxyAccessorTest, finishTransactionTest, TestSize.Level1)
+HWTEST_F(NavigationTransitionProxyAccessorTest, finishTransitionTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->finishTransition, nullptr);
 

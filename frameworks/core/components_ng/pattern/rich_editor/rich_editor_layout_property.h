@@ -46,12 +46,6 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
         PlaceholderFontStyle, FontFamily, PlaceholderFontFamily, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
-    {
-        TextLayoutProperty::ToJsonValue(json, filter);
-        json->PutExtAttr("fontColor", GetTextColor().value_or(Color::BLACK).ColorToString().c_str(), filter);
-    }
-
     void UpdateScrollBarColor(const std::optional<Color>& color)
     {
         if (color.has_value()) {
@@ -59,7 +53,7 @@ public:
             auto hasColor = propScrollBarColor_.has_value();
             auto scrollBarColor = propScrollBarColor_.value_or(Color());
             CHECK_NULL_VOID(!hasColor || scrollBarColor != value ||
-                scrollBarColor.GetResourceId() != value.GetResourceId());
+                !NearEqual(scrollBarColor.GetResourceId(), value.GetResourceId()));
             propScrollBarColor_ = value;
             UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);
             return;

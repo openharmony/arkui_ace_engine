@@ -24,8 +24,8 @@
 #include "core/common/udmf/data_load_params.h"
 #include "core/common/udmf/unified_data.h"
 #include "core/event/ace_events.h"
-#include "core/gestures/gesture_info.h"
 #include "core/gestures/drag_constants.h"
+#include "core/gestures/gesture_info.h"
 #include "core/gestures/velocity.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 
@@ -39,53 +39,11 @@ public:
     PasteData() = default;
     ~PasteData() override = default;
 
-    void SetPlainText(const std::string& plainText)
-    {
-        plainText_ = plainText;
-    }
-
-    const std::string& GetPlainText() const
-    {
-        return plainText_;
-    }
+    void SetPlainText(const std::string& plainText);
+    const std::string& GetPlainText() const;
 
 private:
     std::string plainText_;
-};
-
-enum class DragDropInitiatingStatus : int32_t {
-    IDLE = 0,
-    READY,
-    PRESS,
-    LIFTING,
-    MOVING,
-};
-
-enum class DragSpringLoadingState {
-    BEGIN = 0,
-    UPDATE,
-    END,
-    CANCEL,
-};
-
-enum class DragRet {
-    DRAG_DEFAULT = -1,
-    DRAG_SUCCESS = 0,
-    DRAG_FAIL,
-    DRAG_CANCEL,
-    ENABLE_DROP,
-    DISABLE_DROP,
-};
-
-enum class DragStartRequestStatus : int32_t {
-    WAITING = 0,
-    READY
-};
-
-enum class DragBehavior {
-    UNKNOWN = -1,
-    COPY = 0,
-    MOVE = 1,
 };
 
 class ACE_FORCE_EXPORT DragEvent : public AceType {
@@ -95,341 +53,107 @@ public:
     DragEvent() = default;
     ~DragEvent() override = default;
 
-    void SetPasteData(const RefPtr<PasteData>& pasteData)
-    {
-        pasteData_ = pasteData;
-    }
+    void SetPasteData(const RefPtr<PasteData>& pasteData);
+    RefPtr<PasteData> GetPasteData() const;
 
-    RefPtr<PasteData> GetPasteData() const
-    {
-        return pasteData_;
-    }
+    double GetScreenX() const;
+    double GetScreenY() const;
+    void SetScreenX(double x);
+    void SetScreenY(double y);
 
-    double GetScreenX() const
-    {
-        return screenX_;
-    }
+    double GetX() const;
+    double GetY() const;
+    void SetX(double x);
+    void SetY(double y);
 
-    double GetScreenY() const
-    {
-        return screenY_;
-    }
+    double GetDisplayX() const;
+    double GetDisplayY() const;
+    void SetDisplayX(double x);
+    void SetDisplayY(double y);
 
-    void SetScreenX(double x)
-    {
-        screenX_ = x;
-    }
+    double GetGlobalDisplayX() const;
+    double GetGlobalDisplayY() const;
+    void SetGlobalDisplayX(double x);
+    void SetGlobalDisplayY(double y);
 
-    void SetScreenY(double y)
-    {
-        screenY_ = y;
-    }
+    void SetDescription(const std::string& description);
+    const std::string& GetDescription() const;
 
-    double GetX() const
-    {
-        return x_;
-    }
+    void SetPixmap(const RefPtr<PixelMap>& pixelMap);
+    RefPtr<PixelMap> GetPixmap() const;
 
-    double GetY() const
-    {
-        return y_;
-    }
+    void SetSummary(std::map<std::string, int64_t>& summary);
+    std::map<std::string, int64_t>& GetSummary();
 
-    void SetX(double x)
-    {
-        x_ = x;
-    }
+    void SetResult(DragRet dragRet);
+    DragRet GetResult();
 
-    void SetY(double y)
-    {
-        y_ = y;
-    }
+    Rect GetPreviewRect();
+    void SetPreviewRect(Rect previewRect);
 
-    double GetDisplayX() const
-    {
-        return displayX_;
-    }
+    void UseCustomAnimation(bool useCustomAnimation);
+    bool IsUseCustomAnimation();
 
-    double GetDisplayY() const
-    {
-        return displayY_;
-    }
+    void SetCopy(bool copy);
+    bool IsCopy();
 
-    void SetDisplayX(double x)
-    {
-        displayX_ = x;
-    }
+    void SetDragBehavior(DragBehavior dragBehavior);
+    DragBehavior GetDragBehavior() const;
 
-    void SetDisplayY(double y)
-    {
-        displayY_ = y;
-    }
+    void SetAutoHideComponentUniqueIds(const std::vector<int32_t>& autoHideComponentUniqueIds);
+    const std::vector<int32_t>& GetAutoHideComponentUniqueIds() const;
 
-    double GetGlobalDisplayX() const
-    {
-        return globalDisplayX_;
-    }
+    void SetUdKey(const std::string& udKey);
+    const std::string& GetUdKey();
 
-    double GetGlobalDisplayY() const
-    {
-        return globalDisplayY_;
-    }
-
-    void SetGlobalDisplayX(double x)
-    {
-        globalDisplayX_ = x;
-    }
-
-    void SetGlobalDisplayY(double y)
-    {
-        globalDisplayY_ = y;
-    }
-
-    void SetDescription(const std::string& description)
-    {
-        description_ = description;
-    }
-
-    const std::string& GetDescription() const
-    {
-        return description_;
-    }
-
-    void SetPixmap(const RefPtr<PixelMap>& pixelMap)
-    {
-        pixelMap_ = pixelMap;
-    }
-
-    RefPtr<PixelMap> GetPixmap() const
-    {
-        return pixelMap_;
-    }
-
-    void SetSummary(std::map<std::string, int64_t>& summary)
-    {
-        summary_ = summary;
-    }
-
-    std::map<std::string, int64_t>& GetSummary()
-    {
-        return summary_;
-    }
-
-    void SetResult(DragRet dragRet)
-    {
-        dragRet_ = dragRet;
-    }
-
-    DragRet GetResult()
-    {
-        return dragRet_;
-    }
-
-    Rect GetPreviewRect()
-    {
-        return previewRect_;
-    }
-
-    void SetPreviewRect(Rect previewRect)
-    {
-        previewRect_ = previewRect;
-    }
-
-    void UseCustomAnimation(bool useCustomAnimation)
-    {
-        useCustomAnimation_ = useCustomAnimation;
-    }
-
-    bool IsUseCustomAnimation()
-    {
-        return useCustomAnimation_;
-    }
-
-    void SetCopy(bool copy)
-    {
-        copy_ = copy;
-    }
-
-    bool IsCopy()
-    {
-        return copy_;
-    }
-
-    void SetDragBehavior(DragBehavior dragBehavior)
-    {
-        dragBehavior_ = dragBehavior;
-    }
-
-    DragBehavior GetDragBehavior() const
-    {
-        return dragBehavior_;
-    }
-
-    void SetUdKey(const std::string& udKey)
-    {
-        udKey_ = udKey;
-    }
-
-    const std::string& GetUdKey()
-    {
-        return udKey_;
-    }
-
-    void SetIsGetDataSuccess(bool isGetDataSuccess)
-    {
-        isGetDataSuccess_ = isGetDataSuccess;
-    }
-
-    bool IsGetDataSuccess()
-    {
-        return isGetDataSuccess_;
-    }
+    void SetIsGetDataSuccess(bool isGetDataSuccess);
+    bool IsGetDataSuccess();
 
     void SetData(const RefPtr<UnifiedData>& unifiedData);
-
     RefPtr<UnifiedData>& GetData();
 
     void SetDragInfo(const RefPtr<UnifiedData>& dragInfo);
-
     RefPtr<UnifiedData>& GetDragInfo();
-    void SetVelocity(const Velocity& velocity)
-    {
-        velocity_ = velocity;
-    }
 
-    const Velocity& GetVelocity() const
-    {
-        return velocity_;
-    }
+    void SetVelocity(const Velocity& velocity);
+    const Velocity& GetVelocity() const;
 
-    void SetSourceTool(SourceTool sourceTool)
-    {
-        sourceTool_ = sourceTool;
-    }
+    void SetSourceTool(SourceTool sourceTool);
+    SourceTool GetSourceTool() const;
 
-    SourceTool GetSourceTool() const
-    {
-        return sourceTool_;
-    }
+    const std::vector<KeyCode>& GetPressedKeyCodes() const;
+    void SetPressedKeyCodes(const std::vector<KeyCode>& pressedKeyCodes);
 
-    const std::vector<KeyCode>& GetPressedKeyCodes() const
-    {
-        return pressedKeyCodes_;
-    }
+    void SetCapi(bool isCapi);
+    bool IsCapi();
 
-    void SetPressedKeyCodes(const std::vector<KeyCode>& pressedKeyCodes)
-    {
-        pressedKeyCodes_ = pressedKeyCodes;
-    }
+    void SetDropAnimation(std::function<void()>&& executeDropAnimation);
+    bool HasDropAnimation() const;
+    void ExecuteDropAnimation();
 
-    void SetCapi(bool isCapi)
-    {
-        isCapi_ = isCapi;
-    }
+    void SetIsDragEndPending(bool isDragEndPending);
+    bool IsDragEndPending() const;
 
-    bool IsCapi()
-    {
-        return isCapi_;
-    }
+    void SetRequestIdentify(int32_t requestId);
+    int32_t GetRequestIdentify() const;
 
-    void SetDropAnimation(std::function<void()>&& executeDropAnimation)
-    {
-        executeDropAnimation_ = std::move(executeDropAnimation);
-    }
+    void SetDisplayId(int32_t displayId);
+    int32_t GetDisplayId() const;
 
-    bool HasDropAnimation() const
-    {
-        return (executeDropAnimation_ != nullptr);
-    }
+    void SetDragSource(const std::string& bundleName);
+    const std::string& GetDragSource() const;
 
-    void ExecuteDropAnimation()
-    {
-        if (executeDropAnimation_) {
-            auto executeDropAnimation = executeDropAnimation_;
-            executeDropAnimation();
-        }
-    }
+    void SetRemoteDev(bool isRemoteDev);
+    bool isRemoteDev() const;
 
-    void SetIsDragEndPending(bool isDragEndPending)
-    {
-        isDragEndPending_ = isDragEndPending;
-    }
+    void SetNeedDoInternalDropAnimation(bool needDoInternalDropAnimation);
+    bool GetNeedDoInternalDropAnimation() const;
 
-    bool IsDragEndPending() const
-    {
-        return isDragEndPending_;
-    }
+    void SetDataLoadParams(const RefPtr<DataLoadParams>& dataLoadParams);
+    RefPtr<DataLoadParams> GetDataLoadParams() const;
 
-    void SetRequestIdentify(int32_t requestId)
-    {
-        requestId_ = requestId;
-    }
-
-    int32_t GetRequestIdentify() const
-    {
-        return requestId_;
-    }
-
-    void SetDisplayId(int32_t displayId)
-    {
-        displayId_ = displayId;
-    }
-
-    int32_t GetDisplayId() const
-    {
-        return displayId_;
-    }
-
-    void SetDragSource(const std::string& bundleName)
-    {
-        bundleName_ = bundleName;
-    }
-
-    const std::string& GetDragSource() const
-    {
-        return bundleName_;
-    }
-
-
-    void SetRemoteDev(bool isRemoteDev)
-    {
-        isRemoteDev_ = isRemoteDev;
-    }
-
-    bool isRemoteDev() const
-    {
-        return isRemoteDev_;
-    }
-
-    void SetNeedDoInternalDropAnimation(bool needDoInternalDropAnimation)
-    {
-        needDoInternalDropAnimation_ = needDoInternalDropAnimation;
-    }
-
-    bool GetNeedDoInternalDropAnimation() const
-    {
-        return needDoInternalDropAnimation_;
-    }
-
-    void SetDataLoadParams(const RefPtr<DataLoadParams>& dataLoadParams)
-    {
-        dataLoadParams_ = dataLoadParams;
-    }
-
-    RefPtr<DataLoadParams> GetDataLoadParams() const
-    {
-        return dataLoadParams_;
-    }
-
-    void SetUseDataLoadParams(bool useDataLoadParams)
-    {
-        useDataLoadParams_ = useDataLoadParams;
-    }
-
-    bool IsUseDataLoadParams() const
-    {
-        return useDataLoadParams_;
-    }
+    void SetUseDataLoadParams(bool useDataLoadParams);
+    bool IsUseDataLoadParams() const;
 
     // only use for ArkTs1.2 begin
     RefPtr<PixelMap> GetDragDropInfoPixelMap() const;
@@ -461,6 +185,7 @@ private:
     bool isGetDataSuccess_ = false;
     bool copy_ = true;
     DragBehavior dragBehavior_ = DragBehavior::UNKNOWN;
+    std::vector<int32_t> autoHideComponentUniqueIds_;
     RefPtr<UnifiedData> unifiedData_;
     RefPtr<UnifiedData> dragInfo_;
     Velocity velocity_;
@@ -485,7 +210,7 @@ class NotifyDragEvent : public DragEvent {
 
 public:
     NotifyDragEvent() = default;
-    ~NotifyDragEvent() = default;
+    ~NotifyDragEvent() override = default;
 };
 
 class ItemDragInfo : public BaseEventInfo {
@@ -537,66 +262,24 @@ public:
     explicit DragSpringLoadingContext() = default;
     ~DragSpringLoadingContext() override = default;
 
-    void SetState(DragSpringLoadingState state)
-    {
-        state_ = state;
-    }
+    void SetState(DragSpringLoadingState state);
+    DragSpringLoadingState GetState() const;
 
-    DragSpringLoadingState GetState() const
-    {
-        return state_;
-    }
+    void SetCurrentNotifySequence(int32_t currentNotifySequence);
+    int32_t GetCurrentNotifySequence() const;
 
-    void SetCurrentNotifySequence(int32_t currentNotifySequence)
-    {
-        currentNotifySequence_ = currentNotifySequence;
-    }
+    void SetExtraInfos(std::string_view extraInfos);
+    const std::string& GetExtraInfos() const;
 
-    int32_t GetCurrentNotifySequence() const
-    {
-        return currentNotifySequence_;
-    }
+    void SetSummary(const std::map<std::string, int64_t>& summary);
+    const std::map<std::string, int64_t>& GetSummary() const;
 
-    void SetExtraInfos(std::string_view extraInfos)
-    {
-        extraInfos_ = extraInfos.data();
-    }
+    void SetSpringLoadingAborted();
+    bool IsSpringLoadingAborted() const;
 
-    const std::string& GetExtraInfos() const
-    {
-        return extraInfos_;
-    }
-
-    void SetSummary(const std::map<std::string, int64_t>& summary)
-    {
-        summary_ = summary;
-    }
-
-    const std::map<std::string, int64_t>& GetSummary() const
-    {
-        return summary_;
-    }
-
-    void SetSpringLoadingAborted()
-    {
-        isSpringLoadingAborted_ = true;
-    }
-
-    bool IsSpringLoadingAborted() const
-    {
-        return isSpringLoadingAborted_;
-    }
-
-    const RefPtr<NG::DragSpringLoadingConfiguration>& GetDragSpringLoadingConfiguration() const
-    {
-        return DragSpringLoadingConfiguration_;
-    }
-
+    const RefPtr<NG::DragSpringLoadingConfiguration>& GetDragSpringLoadingConfiguration() const;
     void SetDragSpringLoadingConfiguration(
-        const RefPtr<NG::DragSpringLoadingConfiguration>& dragSpringLoadingConfiguration)
-    {
-        DragSpringLoadingConfiguration_ = dragSpringLoadingConfiguration;
-    }
+        const RefPtr<NG::DragSpringLoadingConfiguration>& dragSpringLoadingConfiguration);
 
 private:
     DragSpringLoadingState state_;

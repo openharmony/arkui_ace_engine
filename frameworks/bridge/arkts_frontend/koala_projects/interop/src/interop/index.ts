@@ -27,11 +27,11 @@ import {
 
 export { registerCallback, setCallbackRegistry } from '#common/wrappers/Callback'
 
-export { Access, Exec } from './arrays'
+export { Access } from './arrays'
 export { Finalizable, NativeThunk, resourceFinalizerRegister } from './Finalizable'
 export { nullable } from './nullable'
 export { getPtr, isNullPtr, nullptr, ptrEqual, Wrapper, ptrToBits, bitsToPtr } from './Wrapper'
-
+export type { Exec } from './arrays'
 export {
     decodeToString,
     encodeToData,

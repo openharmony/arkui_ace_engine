@@ -42,6 +42,15 @@ void LazyGridLayoutModel::SetColumnGap(const Dimension& columnGap)
     ACE_UPDATE_LAYOUT_PROPERTY(LazyGridLayoutProperty, ColumnGap, columnGap);
 }
 
+void LazyGridLayoutModel::SetOnVisibleIndexesChange(VisibleIndexesChangeEvent&& onVisibleIndexesChange)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<LazyGridLayoutPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnVisibleIndexesChange(std::move(onVisibleIndexesChange));
+}
+
 void LazyVGridLayoutModel::SetColumnsTemplate(const std::string& value)
 {
     if (value.empty()) {
@@ -59,6 +68,15 @@ void LazyGridLayoutModel::SetRowGap(FrameNode* frameNode, const Dimension& rowGa
 void LazyGridLayoutModel::SetColumnGap(FrameNode* frameNode, const Dimension& columnGap)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LazyGridLayoutProperty, ColumnGap, columnGap, frameNode);
+}
+
+void LazyGridLayoutModel::SetOnVisibleIndexesChange(
+    FrameNode* frameNode, VisibleIndexesChangeEvent&& onVisibleIndexesChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<LazyGridLayoutPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnVisibleIndexesChange(std::move(onVisibleIndexesChange));
 }
 
 void LazyVGridLayoutModel::SetColumnsTemplate(FrameNode* frameNode, const std::string& value)

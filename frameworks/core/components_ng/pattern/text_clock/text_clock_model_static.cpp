@@ -56,11 +56,21 @@ void TextClockModelStatic::SetHoursWest(FrameNode* frameNode, const std::optiona
 
 void TextClockModelStatic::SetFontColor(FrameNode* frameNode,  const std::optional<Color>& color)
 {
+    CHECK_NULL_VOID(frameNode);
     if (color.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, TextColor, color.value(), frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, color.value(), frameNode);
         ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+        auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
+        CHECK_NULL_VOID(textNode);
+        CHECK_NULL_VOID(textNode->GetTag() == V2::TEXT_ETS_TAG);
+        auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateTextColorByRender(color.value());
+        auto textPattern = textNode->GetPattern<TextPattern>();
+        CHECK_NULL_VOID(textPattern);
+        textPattern->UpdateFontColor(color.value());
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextClockLayoutProperty, TextColor, PROPERTY_UPDATE_RENDER, frameNode);
         ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);

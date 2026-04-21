@@ -14,12 +14,27 @@
  */
 
 #include "core/components_ng/pattern/stage/force_split/parallel_page_pattern.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
 
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/pattern/stage/force_split/parallel_stage_manager.h"
 #include "core/components_ng/pattern/stage/force_split/parallel_stage_pattern.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+bool IsVirtualStackBasedSplit(const PipelineContext* context)
+{
+    CHECK_NULL_RETURN(context, false);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_RETURN(forceSplitMgr, false);
+    return forceSplitMgr->CanPushPageToPrimary();
+}
+
+bool IsSplitExitTransition(PageTransitionType type)
+{
+    return type == PageTransitionType::EXIT_PUSH || type == PageTransitionType::EXIT_POP;
+}
+}
 
 void ParallelPagePattern::OnShow(bool isAppStateChange)
 {
@@ -73,11 +88,13 @@ void ParallelPagePattern::InitOnTouchEvent()
         CHECK_NULL_VOID(pipeline);
         auto stageManager = AceType::DynamicCast<ParallelStageManager>(pipeline->GetStageManager());
         CHECK_NULL_VOID(stageManager);
-        if (RouterPageType::PRIMARY_PAGE == pattern->GetPageType()) {
-            stageManager->SetPrimaryPageTouched(true);
-        } else {
-            stageManager->SetPrimaryPageTouched(false);
+        if (IsVirtualStackBasedSplit(pipeline)) {
+            stageManager->SetTouchedPrimaryColumnPage(
+                stageManager->GetTopPrimaryColumnPage() == host ? host : nullptr);
+            stageManager->SetTouchedSecondaryColumnPage(
+                stageManager->GetTopSecondaryColumnPage() == host ? host : nullptr);
         }
+        stageManager->SetHomePageTouched(pattern->GetPageType() == RouterPageType::HOME_PAGE);
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
     gesture->AddTouchEvent(touchListener_);
@@ -94,6 +111,205 @@ void ParallelPagePattern::RemoveOnTouchEvent()
     CHECK_NULL_VOID(gesture);
     gesture->RemoveTouchEvent(touchListener_);
     touchListener_ = nullptr;
+}
+
+void ParallelPagePattern::PrepareSplitTransition(int32_t animationId, PageTransitionType type)
+{
+    auto host = AceType::DynamicCast<FrameNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    CaptureSplitTransitionVisualState();
+    UpdateSplitTransitionState(type, SplitTransitionPhase::START);
+    auto eventHub = host->GetEventHub<EventHub>();
+    if (eventHub && (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) ||
+        type == PageTransitionType::EXIT_POP)) {
+        eventHub->SetEnabled(false);
+    }
+    SetPageInTransition(true);
+    SetAnimationId(animationId);
+}
+
+void ParallelPagePattern::UpdateSplitTransitionState(PageTransitionType type, SplitTransitionPhase phase)
+{
+    splitTransitionType_ = type;
+    splitTransitionPhase_ = phase;
+}
+
+void ParallelPagePattern::OnSplitTransitionStart(PageTransitionType type)
+{
+    HandleSplitTransitionStage(type, true);
+}
+
+void ParallelPagePattern::OnSplitTransitionEnd(PageTransitionType type)
+{
+    HandleSplitTransitionStage(type, false);
+}
+
+bool ParallelPagePattern::OnSplitTransitionFinish(int32_t animationId, PageTransitionType type)
+{
+    auto host = AceType::DynamicCast<FrameNode>(GetHost());
+    CHECK_NULL_RETURN(host, false);
+    if (!GetPageInTransition() || GetAnimationId() != animationId) {
+        return false;
+    }
+    auto renderContext = host->GetRenderContext();
+    if (renderContext) {
+        renderContext->UpdateTranslateInXY(OffsetF());
+    }
+    auto eventHub = host->GetEventHub<EventHub>();
+    if (eventHub) {
+        eventHub->SetEnabled(true);
+    }
+    SetPageInTransition(false);
+    splitTransitionType_ = PageTransitionType::NONE;
+    splitTransitionPhase_ = SplitTransitionPhase::NONE;
+    hasSplitTransitionVisualOffset_ = false;
+    if (IsSplitExitTransition(type)) {
+        if (type == PageTransitionType::EXIT_POP) {
+            host->SetChildrenInDestroying();
+            auto parent = host->GetParent();
+            CHECK_NULL_RETURN(parent, false);
+            auto context = host->GetContext();
+            parent->RemoveChild(host);
+            parent->RebuildRenderContextTree();
+            CHECK_NULL_RETURN(context, true);
+            auto stageManager = AceType::DynamicCast<ParallelStageManager>(context->GetStageManager());
+            if (stageManager) {
+                stageManager->OnStageNodeStructureChanged();
+            }
+            context->RequestFrame();
+            return true;
+        }
+        ProcessHideState();
+    }
+    auto context = host->GetContext();
+    if (context) {
+        context->MarkNeedFlushMouseEvent();
+    }
+    return true;
+}
+
+void ParallelPagePattern::AbortSplitTransition()
+{
+    auto host = AceType::DynamicCast<FrameNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    if (renderContext) {
+        renderContext->UpdateTranslateInXY(OffsetF());
+    }
+    auto eventHub = host->GetEventHub<EventHub>();
+    if (eventHub) {
+        eventHub->SetEnabled(true);
+    }
+    SetPageInTransition(false);
+    splitTransitionType_ = PageTransitionType::NONE;
+    splitTransitionPhase_ = SplitTransitionPhase::NONE;
+    auto context = host->GetContext();
+    if (context) {
+        context->MarkNeedFlushMouseEvent();
+    }
+    hasSplitTransitionVisualOffset_ = false;
+}
+
+bool ParallelPagePattern::IsInSplitTransitionLayout() const
+{
+    return GetPageInTransition() && GetSplitTransitionColumnType() != ForceSplitPageColumnType::NONE;
+}
+
+ForceSplitPageColumnType ParallelPagePattern::GetSplitTransitionColumnType() const
+{
+    if (splitTransitionPhase_ == SplitTransitionPhase::NONE) {
+        return ForceSplitPageColumnType::NONE;
+    }
+    switch (splitTransitionType_) {
+        case PageTransitionType::EXIT_PUSH:
+        case PageTransitionType::ENTER_POP:
+            return ForceSplitPageColumnType::PRIMARY;
+        case PageTransitionType::ENTER_PUSH:
+        case PageTransitionType::EXIT_POP:
+            return ForceSplitPageColumnType::SECONDARY;
+        case PageTransitionType::MOVE_PUSH:
+            return splitTransitionPhase_ == SplitTransitionPhase::START ? ForceSplitPageColumnType::SECONDARY
+                                                                        : ForceSplitPageColumnType::PRIMARY;
+        case PageTransitionType::MOVE_POP:
+            return splitTransitionPhase_ == SplitTransitionPhase::START ? ForceSplitPageColumnType::PRIMARY
+                                                                        : ForceSplitPageColumnType::SECONDARY;
+        default:
+            return ForceSplitPageColumnType::NONE;
+    }
+}
+
+void ParallelPagePattern::CaptureSplitTransitionVisualState()
+{
+    auto host = AceType::DynamicCast<FrameNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    auto geometry = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometry);
+    auto renderContext = host->GetRenderContext();
+    OffsetF currentVisualOffset = geometry->GetMarginFrameOffset();
+    if (renderContext) {
+        currentVisualOffset += renderContext->GetTranslateXYProperty();
+    }
+    splitTransitionVisualOffset_ = currentVisualOffset;
+    hasSplitTransitionVisualOffset_ = true;
+}
+
+void ParallelPagePattern::HandleSplitTransitionStage(PageTransitionType type, bool isStart)
+{
+    auto host = AceType::DynamicCast<FrameNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto hostGeometry = host->GetGeometryNode();
+    CHECK_NULL_VOID(hostGeometry);
+    float translateX = 0.0f;
+    const auto width = hostGeometry->GetFrameSize().Width();
+    const bool rtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    auto calcPreservedVisualTranslate = [&]() -> float {
+        if (!hasSplitTransitionVisualOffset_) {
+            return 0.0f;
+        }
+        return splitTransitionVisualOffset_.GetX() - hostGeometry->GetMarginFrameOffset().GetX();
+    };
+
+    switch (type) {
+        case PageTransitionType::ENTER_PUSH:
+            if (isStart) {
+                translateX = rtl ? -width : width;
+            }
+            break;
+        case PageTransitionType::ENTER_POP:
+            if (isStart) {
+                translateX = rtl ? width : -width;
+            }
+            break;
+        case PageTransitionType::EXIT_PUSH:
+            if (isStart) {
+                translateX = calcPreservedVisualTranslate();
+                break;
+            }
+            if (!isStart) {
+                translateX = rtl ? width : -width;
+            }
+            break;
+        case PageTransitionType::EXIT_POP:
+            if (isStart) {
+                translateX = calcPreservedVisualTranslate();
+                break;
+            }
+            if (!isStart) {
+                translateX = rtl ? -width : width;
+            }
+            break;
+        case PageTransitionType::MOVE_PUSH:
+        case PageTransitionType::MOVE_POP:
+            if (isStart) {
+                translateX = calcPreservedVisualTranslate();
+            }
+            break;
+        default:
+            break;
+    }
+    renderContext->UpdateTranslateInXY(OffsetF(translateX, 0.0f));
 }
 
 void ParallelPagePattern::BeforeCreateLayoutWrapper()
@@ -114,21 +330,34 @@ void ParallelPagePattern::BeforeCreateLayoutWrapper()
     if (!stagePattern->GetIsSplit()) {
         return;
     }
-    auto primaryPage = stagePattern->GetPrimaryPage();
-    if (!primaryPage) {
-        return;
-    }
 
     auto props = host->GetLayoutProperty();
     CHECK_NULL_VOID(props);
     const auto& safeArea = props->GetSafeAreaInsets();
     CHECK_NULL_VOID(safeArea);
     SafeAreaInsets newSafeArea(*safeArea);
-
-    if (type_ == RouterPageType::PRIMARY_PAGE) {
-        newSafeArea.right_.end = newSafeArea.right_.start;
+    if (IsVirtualStackBasedSplit(context)) {
+        auto stageManager = AceType::DynamicCast<ParallelStageManager>(context->GetStageManager());
+        CHECK_NULL_VOID(stageManager);
+        auto primaryColumnPage = stageManager->GetTopPrimaryColumnPage();
+        if (!primaryColumnPage) {
+            return;
+        }
+        if (primaryColumnPage == host) {
+            newSafeArea.right_.end = newSafeArea.right_.start;
+        } else {
+            newSafeArea.left_.start = newSafeArea.left_.end;
+        }
     } else {
-        newSafeArea.left_.start = newSafeArea.left_.end;
+        auto homePage = stagePattern->GetHomePage();
+        if (!homePage) {
+            return;
+        }
+        if (type_ == RouterPageType::HOME_PAGE) {
+            newSafeArea.right_.end = newSafeArea.right_.start;
+        } else {
+            newSafeArea.left_.start = newSafeArea.left_.end;
+        }
     }
     props->UpdateSafeAreaInsets(newSafeArea);
 }

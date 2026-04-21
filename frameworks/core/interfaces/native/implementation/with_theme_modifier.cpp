@@ -32,18 +32,31 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 } // WithThemeModifier
 namespace WithThemeInterfaceModifier {
 void SetWithThemeOptionsImpl(Ark_NativePointer node,
-                             const Ark_WithThemeOptions* options)
+                             const Opt_WithThemeOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
 }
 } // WithThemeInterfaceModifier
+namespace WithThemeAttributeModifier {
+void SetDebugLineImpl(Ark_NativePointer node,
+                      const Ark_String* sourceLine,
+                      const Opt_String* moduleName)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(sourceLine);
+    //auto convValue = Converter::OptConvert<type>(sourceLine); // for enums
+    // WithThemeModelNG::SetSetDebugLine(frameNode, convValue);
+}
+} // WithThemeAttributeModifier
 const GENERATED_ArkUIWithThemeModifier* GetWithThemeModifier()
 {
     static const GENERATED_ArkUIWithThemeModifier ArkUIWithThemeModifierImpl {
         WithThemeModifier::ConstructImpl,
         WithThemeInterfaceModifier::SetWithThemeOptionsImpl,
+        WithThemeAttributeModifier::SetDebugLineImpl,
     };
     return &ArkUIWithThemeModifierImpl;
 }

@@ -20,7 +20,7 @@
 #include "core/interfaces/native/node/node_content_modifier.h"
 #define private public
 #include "interfaces/native/native_node.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/ui_node.h"
@@ -97,20 +97,20 @@ HWTEST_F(ContentSlotSyntaxTestNg, ContentSlotSyntaxTest001, TestSize.Level1)
     const auto* contentModifier = NodeModifier::GetNodeContentModifier();
     auto childFrameNode1 = FrameNode::CreateFrameNode("frameNode1", -1, AceType::MakeRefPtr<Pattern>());
     contentModifier->addChild(reinterpret_cast<ArkUINodeContentHandle>(nodeContent),
-        reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(childFrameNode1)));
+        reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(childFrameNode1)), nullptr);
     auto children = contentSlotNode->GetChildren();
     EXPECT_TRUE(children.size() == NUM_1 && children.front()->GetTag() == "frameNode1");
 
     auto childFrameNode2 = FrameNode::CreateFrameNode("frameNode2", -1, AceType::MakeRefPtr<Pattern>());
     contentModifier->insertChild(reinterpret_cast<ArkUINodeContentHandle>(nodeContent),
-        reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(childFrameNode2)), 0);
+        reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(childFrameNode2)), 0, nullptr);
     children = contentSlotNode->GetChildren();
     EXPECT_TRUE(children.size() == NUM_2 && children.front()->GetTag() == "frameNode2");
 
     contentModifier->removeChild(reinterpret_cast<ArkUINodeContentHandle>(nodeContent),
-        reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(childFrameNode1)));
+        reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(childFrameNode1)), nullptr);
     contentModifier->removeChild(reinterpret_cast<ArkUINodeContentHandle>(nodeContent),
-        reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(childFrameNode2)));
+        reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(childFrameNode2)), nullptr);
     children = contentSlotNode->GetChildren();
     EXPECT_TRUE(children.size() == 0);
 }
@@ -138,7 +138,7 @@ HWTEST_F(ContentSlotSyntaxTestNg, ContentSlotSyntaxTest002, TestSize.Level1)
      */
     const auto* contentModifier = NodeModifier::GetNodeContentModifier();
     auto* userData = new int32_t(NODE_CONTENT_INIT_STATUS);
-    contentModifier->setUserData(reinterpret_cast<ArkUINodeContentHandle>(nodeContent), userData);
+    contentModifier->setUserData(reinterpret_cast<ArkUINodeContentHandle>(nodeContent), userData, nullptr);
     auto callback = [](ArkUINodeContentEvent* event) {
         auto* nodeContent = event->nodeContent;
         const auto* contentModifier = NodeModifier::GetNodeContentModifier();
@@ -148,17 +148,18 @@ HWTEST_F(ContentSlotSyntaxTestNg, ContentSlotSyntaxTest002, TestSize.Level1)
             EXPECT_EQ(*userData, NODE_CONTENT_INIT_STATUS);
             delete userData;
             userData = new int32_t(NODE_CONTENT_ATTACH_TO_TREE);
-            contentModifier->setUserData(reinterpret_cast<ArkUINodeContentHandle>(nodeContent), userData);
+            contentModifier->setUserData(reinterpret_cast<ArkUINodeContentHandle>(nodeContent), userData, nullptr);
         } else if (event->type == 1) {
             int32_t* userData = reinterpret_cast<int32_t*>(
                 contentModifier->getUserData(reinterpret_cast<ArkUINodeContentHandle>(nodeContent)));
             EXPECT_EQ(*userData, NODE_CONTENT_ATTACH_TO_TREE);
             delete userData;
             userData = new int32_t(NODE_CONTENT_DETACH_FROM_TREE);
-            contentModifier->setUserData(reinterpret_cast<ArkUINodeContentHandle>(nodeContent), userData);
+            contentModifier->setUserData(reinterpret_cast<ArkUINodeContentHandle>(nodeContent), userData, nullptr);
         }
     };
-    contentModifier->registerEvent(reinterpret_cast<ArkUINodeContentHandle>(nodeContent), nullptr, std::move(callback));
+    contentModifier->registerEvent(
+        reinterpret_cast<ArkUINodeContentHandle>(nodeContent), nullptr, std::move(callback), nullptr);
     nodeContent->OnAttachToMainTree();
     EXPECT_TRUE(nodeContent->onMainTree_);
     nodeContent->OnDetachFromMainTree();
@@ -396,6 +397,73 @@ HWTEST_F(ContentSlotSyntaxTestNg, OnAttachToMainTree001, TestSize.Level1)
     nodeContent->SetDetachFromMainTreeCallback(move(detachcallback));
     nodeContent->OnDetachFromMainTree();
     EXPECT_TRUE(detachcallbackRet);
+    EXPECT_FALSE(nodeContent->onMainTree_);
+}
+
+/**
+ * @tc.name: OnAttachToMainTreeDuplicate001
+ * @tc.desc: Test for duplicate OnAttachToMainTree calls
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentSlotSyntaxTestNg, OnAttachToMainTreeDuplicate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Call OnAttachToMainTree first time
+     * @tc.expected: callback executed once
+     */
+    auto nodeContent = AceType::RawPtr(nodeContentPtr_);
+    ASSERT_NE(nodeContent, nullptr);
+    ContentSlotModel::Create(nodeContent);
+    int32_t attachCallbackCount = 0;
+    std::function<void()> attachcallback = [&attachCallbackCount]() { attachCallbackCount++; };
+    nodeContent->SetAttachToMainTreeCallback(move(attachcallback));
+    nodeContent->OnAttachToMainTree();
+    EXPECT_EQ(attachCallbackCount, 1);
+    EXPECT_TRUE(nodeContent->onMainTree_);
+
+    /**
+     * @tc.steps: step2. Call OnAttachToMainTree second time (duplicate)
+     * @tc.expected: callback not executed again
+     */
+    nodeContent->OnAttachToMainTree();
+    EXPECT_EQ(attachCallbackCount, 1);
+    EXPECT_TRUE(nodeContent->onMainTree_);
+}
+
+/**
+ * @tc.name: OnDetachFromMainTreeDuplicate001
+ * @tc.desc: Test for duplicate OnDetachFromMainTree calls
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentSlotSyntaxTestNg, OnDetachFromMainTreeDuplicate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Attach to main tree first
+     * @tc.expected: attached successfully
+     */
+    auto nodeContent = AceType::RawPtr(nodeContentPtr_);
+    ASSERT_NE(nodeContent, nullptr);
+    ContentSlotModel::Create(nodeContent);
+    nodeContent->OnAttachToMainTree();
+    EXPECT_TRUE(nodeContent->onMainTree_);
+
+    /**
+     * @tc.steps: step2. Call OnDetachFromMainTree first time
+     * @tc.expected: callback executed once
+     */
+    int32_t detachCallbackCount = 0;
+    std::function<void()> detachcallback = [&detachCallbackCount]() { detachCallbackCount++; };
+    nodeContent->SetDetachFromMainTreeCallback(move(detachcallback));
+    nodeContent->OnDetachFromMainTree();
+    EXPECT_EQ(detachCallbackCount, 1);
+    EXPECT_FALSE(nodeContent->onMainTree_);
+
+    /**
+     * @tc.steps: step3. Call OnDetachFromMainTree second time (duplicate)
+     * @tc.expected: callback not executed again
+     */
+    nodeContent->OnDetachFromMainTree();
+    EXPECT_EQ(detachCallbackCount, 1);
     EXPECT_FALSE(nodeContent->onMainTree_);
 }
 } // namespace OHOS::Ace::NG

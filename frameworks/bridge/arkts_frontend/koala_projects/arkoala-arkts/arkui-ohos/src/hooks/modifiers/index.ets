@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,10 +18,8 @@
 
 import { AttributeModifier } from "#handwritten"
 import { ArkAlphabetIndexerComponent, AlphabetIndexerAttribute } from "./../../component/alphabetIndexer"
-import { ArkCommonMethodStyle, CommonMethod, ArkCommonShapeMethodStyle, CommonShapeMethod, ArkScrollableCommonMethodStyle, ScrollableCommonMethod } from "./../../component/common"
+import { CommonMethod, CommonShapeMethod, ScrollableCommonMethod } from "./../../component/common"
 import { AlphabetIndexerModifier } from "./../../AlphabetIndexerModifier"
-import { ArkAnimatorComponent, AnimatorAttribute } from "./../../component/animator"
-import { AnimatorModifier } from "./../../AnimatorModifier"
 import { ArkBadgeComponent, BadgeAttribute } from "./../../component/badge"
 import { BadgeModifier } from "./../../BadgeModifier"
 import { ArkBlankComponent, BlankAttribute } from "./../../component/blank"
@@ -91,7 +89,7 @@ import { ImageModifier } from "./../../ImageModifier"
 import { ArkImageAnimatorComponent, ImageAnimatorAttribute } from "./../../component/imageAnimator"
 import { ImageAnimatorModifier } from "./../../ImageAnimatorModifier"
 import { ArkImageSpanComponent, ImageSpanAttribute } from "./../../component/imageSpan"
-import { ArkBaseSpanStyle, BaseSpan } from "./../../component/span"
+import { BaseSpan } from "./../../component/span"
 import { ImageSpanModifier } from "./../../ImageSpanModifier"
 import { ArkLazyVGridLayoutComponent, LazyVGridLayoutAttribute, LazyGridLayoutAttribute } from "./../../component/lazyGridLayout"
 import { LazyVGridLayoutModifier } from "./../../LazyVGridLayoutModifier"
@@ -99,8 +97,6 @@ import { ArkIndicatorComponentComponent, IndicatorComponentAttribute } from "./.
 import { IndicatorComponentModifier } from "./../../IndicatorComponentModifier"
 import { ArkLineComponent, LineAttribute,ArkLinePeer,LineOptions} from './../../component/line';
 import { LineModifier } from "./../../LineModifier"
-import { ArkLinearIndicatorComponent, LinearIndicatorAttribute } from "./../../component/linearindicator"
-import { LinearIndicatorModifier } from "./../../LinearIndicatorModifier"
 import { ArkListComponent, ListAttribute } from "./../../component/list"
 import { ListModifier } from "./../../ListModifier"
 import { ArkListItemComponent, ListItemAttribute } from "./../../component/listItem"
@@ -112,7 +108,7 @@ import { LoadingProgressModifier } from "./../../LoadingProgressModifier"
 import { ArkMarqueeComponent, MarqueeAttribute } from "./../../component/marquee"
 import { MarqueeModifier } from "./../../MarqueeModifier"
 import { ArkMediaCachedImageComponent, MediaCachedImageAttribute } from "./../../component/mediaCachedImage"
-import { ArkImageStyle, ImageAttribute } from "./../../component/image"
+import { ImageAttribute } from "./../../component/image"
 import { MediaCachedImageModifier } from "./../../MediaCachedImageModifier"
 import { ArkMenuComponent, MenuAttribute } from "./../../component/menu"
 import { MenuModifier } from "./../../MenuModifier"
@@ -186,10 +182,6 @@ import { BaseSpanModifier } from "./../../BaseSpanModifier"
 import { SpanModifier } from "./../../SpanModifier"
 import { ArkStackComponent, StackAttribute } from "./../../component/stack"
 import { StackModifier } from "./../../StackModifier"
-import { ArkStepperComponent, StepperAttribute } from "./../../component/stepper"
-import { StepperModifier } from "./../../StepperModifier"
-import { ArkStepperItemComponent, StepperItemAttribute } from "./../../component/stepperItem"
-import { StepperItemModifier } from "./../../StepperItemModifier"
 import { ArkSwiperComponent, SwiperAttribute } from "./../../component/swiper"
 import { SwiperModifier } from "./../../SwiperModifier"
 import { ArkSymbolGlyphComponent, SymbolGlyphAttribute } from "./../../component/symbolglyph"
@@ -266,6 +258,9 @@ import { ArkUIAniModule } from 'arkui.ani';
 import { KPointer } from '@koalaui/interop';
 import { ArkParticleComponent, ParticleAttribute } from './../../component/particle';
 import { ParticleModifier } from './../../ParticleModifier';
+import { ArkLazyGridLayoutAttributeComponent } from '#generated';
+import { ArkUnionEffectContainerComponent, UnionEffectContainerAttribute } from './../../component/unionEffectContainer';
+import { UnionEffectContainerModifier } from './../../UnionEffectContainerModifier';
 
 export function hookAlphabetIndexerAttributeModifier(component: ArkAlphabetIndexerComponent, modifier: AttributeModifier<AlphabetIndexerAttribute> | AttributeModifier<CommonMethod> | undefined):void {
      if (modifier === undefined) {
@@ -278,14 +273,14 @@ export function hookAlphabetIndexerAttributeModifier(component: ArkAlphabetIndex
     }
     let attributeSet = (): AlphabetIndexerModifier => {
         let isAlphabetIndexerModifier: boolean = modifier instanceof AlphabetIndexerModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new AlphabetIndexerModifier();
+        let initModifier = component.getPeer().alphabetIndexerAttributeSet ? component.getPeer().alphabetIndexerAttributeSet! : new AlphabetIndexerModifier();
         if (isAlphabetIndexerModifier) {
             let AlphabetIndexerModifier = modifier as object as AlphabetIndexerModifier;
             initModifier.mergeModifier(AlphabetIndexerModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().alphabetIndexerAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().alphabetIndexerAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -298,7 +293,6 @@ export function hookAlphabetIndexerAttributeModifier(component: ArkAlphabetIndex
     };
     applyAttributeModifierBase(modifier as Object as AttributeModifier<AlphabetIndexerAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
 }
-export function hookAnimatorAttributeModifier(componenet: ArkAnimatorComponent, value: AttributeModifier<AnimatorAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
 export function hookBadgeAttributeModifier(componenet: ArkBadgeComponent, value: AttributeModifier<BadgeAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
 export function hookCanvasAttributeModifier(component: ArkCanvasComponent, modifier: AttributeModifier<CanvasAttribute> | AttributeModifier<CommonMethod> | undefined):void {
     if (modifier === undefined) {
@@ -311,14 +305,14 @@ export function hookCanvasAttributeModifier(component: ArkCanvasComponent, modif
     }
     let attributeSet = (): CanvasModifier => {
         let isCanvasModifier: boolean = modifier instanceof CanvasModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new CanvasModifier();
+        let initModifier = component.getPeer().canvasAttributeSet ? component.getPeer().canvasAttributeSet! : new CanvasModifier();
         if (isCanvasModifier) {
             let canvasModifier = modifier as object as CanvasModifier;
             initModifier.mergeModifier(canvasModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().canvasAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().canvasAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -360,14 +354,14 @@ export function hookCircleAttributeModifier(component: ArkCircleComponent, modif
     }
     let attributeSet = (): CircleModifier => {
         let isCircleModifier: boolean = modifier instanceof CircleModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new CircleModifier();
+        let initModifier = component.getPeer().circleAttributeSet ? component.getPeer().circleAttributeSet! : new CircleModifier();
         if (isCircleModifier) {
             let circleModifier = modifier as object as CircleModifier;
             initModifier.mergeModifier(circleModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().circleAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().circleAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -404,14 +398,14 @@ export function hookComponent3DAttributeModifier(component: ArkComponent3DCompon
     }
     let attributeSet = (): Component3DModifier => {
         let isComponent3DModifier: boolean = modifier instanceof Component3DModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new Component3DModifier();
+        let initModifier = component.getPeer().component3DAttributeSet ? component.getPeer().component3DAttributeSet! : new Component3DModifier();
         if (isComponent3DModifier) {
             let component3DModifier = modifier as object as Component3DModifier;
             initModifier.mergeModifier(component3DModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().component3DAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().component3DAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -437,14 +431,14 @@ export function hookEllipseAttributeModifier(component: ArkEllipseComponent, mod
     }
     let attributeSet = (): EllipseModifier => {
         let isEllipseModifier: boolean = modifier instanceof EllipseModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new EllipseModifier();
+        let initModifier = component.getPeer().ellipseAttributeSet ? component.getPeer().ellipseAttributeSet! : new EllipseModifier();
         if (isEllipseModifier) {
             let ellipseModifier = modifier as object as EllipseModifier;
             initModifier.mergeModifier(ellipseModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().ellipseAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().ellipseAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -482,14 +476,14 @@ export function hookLineAttributeModifier(component: ArkLineComponent, modifier:
     }
     let attributeSet = (): LineModifier => {
         let isLineModifier: boolean = modifier instanceof LineModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new LineModifier();
+        let initModifier = component.getPeer().lineAttributeSet ? component.getPeer().lineAttributeSet! : new LineModifier();
         if (isLineModifier) {
             let lineModifier = modifier as object as LineModifier;
             initModifier.mergeModifier(lineModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().lineAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().lineAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -513,7 +507,6 @@ export function hookLineAttributeModifier(component: ArkLineComponent, modifier:
     applyAttributeModifierBase(modifier as Object as AttributeModifier<LineAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
 }
 
-export function hookLinearIndicatorAttributeModifier(componenet: ArkLinearIndicatorComponent, value: AttributeModifier<LinearIndicatorAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
 export function hookMediaCachedImageAttributeModifier(componenet: ArkMediaCachedImageComponent, value: AttributeModifier<MediaCachedImageAttribute> | AttributeModifier<ImageAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
 export function hookNavDestinationAttributeModifier(component: ArkNavDestinationComponent, modifier: AttributeModifier<NavDestinationAttribute> | AttributeModifier<CommonMethod> | undefined):void {
         if (modifier === undefined) {
@@ -526,14 +519,14 @@ export function hookNavDestinationAttributeModifier(component: ArkNavDestination
     }
     let attributeSet = (): NavDestinationModifier => {
         let isNavDestinationModifier: boolean = modifier instanceof NavDestinationModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new NavDestinationModifier();
+        let initModifier = component.getPeer().navDestinationAttributeSet ? component.getPeer().navDestinationAttributeSet! : new NavDestinationModifier();
         if (isNavDestinationModifier) {
             let navDestinationModifier = modifier as object as NavDestinationModifier;
             initModifier.mergeModifier(navDestinationModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().navDestinationAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().navDestinationAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -557,14 +550,14 @@ export function hookNavigationAttributeModifier(component: ArkNavigationComponen
     }
     let attributeSet = (): NavigationModifier => {
         let isNavigationModifier: boolean = modifier instanceof NavigationModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new NavigationModifier();
+        let initModifier = component.getPeer().navigationAttributeSet ? component.getPeer().navigationAttributeSet! : new NavigationModifier();
         if (isNavigationModifier) {
             let navigationModifier = modifier as object as NavigationModifier;
             initModifier.mergeModifier(navigationModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().navigationAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().navigationAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -591,14 +584,14 @@ export function hookPathAttributeModifier(component: ArkPathComponent, modifier:
     }
     let attributeSet = (): PathModifier => {
         let isPathModifier: boolean = modifier instanceof PathModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new PathModifier();
+        let initModifier = component.getPeer().pathAttributeSet ? component.getPeer().pathAttributeSet! : new PathModifier();
         if (isPathModifier) {
             let pathModifier = modifier as object as PathModifier;
             initModifier.mergeModifier(pathModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().pathAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().pathAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -633,14 +626,14 @@ export function hookUIPickerComponentAttributeModifier(component: ArkUIPickerCom
     }
     let attributeSet = (): UIPickerComponentModifier => {
         let isUIPickerComponentModifier: boolean = modifier instanceof UIPickerComponentModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new UIPickerComponentModifier();
+        let initModifier = component.getPeer().uiPickerComponentAttributeSet ? component.getPeer().uiPickerComponentAttributeSet! : new UIPickerComponentModifier();
         if (isUIPickerComponentModifier) {
             let uiPickerComponentModifier = modifier as object as UIPickerComponentModifier;
             initModifier.mergeModifier(uiPickerComponentModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().uiPickerComponentAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().uiPickerComponentAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -676,14 +669,14 @@ export function hookPolygonAttributeModifier(component: ArkPolygonComponent, mod
     }
     let attributeSet = (): PolygonModifier => {
         let isPolygonModifier: boolean = modifier instanceof PolygonModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new PolygonModifier();
+        let initModifier = component.getPeer().polygonAttributeSet ? component.getPeer().polygonAttributeSet! : new PolygonModifier();
         if (isPolygonModifier) {
             let polygonModifier = modifier as object as PolygonModifier;
             initModifier.mergeModifier(polygonModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().polygonAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().polygonAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -717,14 +710,14 @@ export function hookPolylineAttributeModifier(component: ArkPolylineComponent, m
     }
     let attributeSet = (): PolylineModifier => {
         let isPolylineModifier: boolean = modifier instanceof PolylineModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new PolylineModifier();
+        let initModifier = component.getPeer().polylineAttributeSet ? component.getPeer().polylineAttributeSet! : new PolylineModifier();
         if (isPolylineModifier) {
             let polylineModifier = modifier as object as PolylineModifier;
             initModifier.mergeModifier(polylineModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().polylineAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().polylineAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -759,14 +752,14 @@ export function hookRectAttributeModifier(component: ArkRectComponent, modifier:
     }
     let attributeSet = (): RectModifier => {
         let isRectModifier: boolean = modifier instanceof RectModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new RectModifier();
+        let initModifier = component.getPeer().rectAttributeSet ? component.getPeer().rectAttributeSet! : new RectModifier();
         if (isRectModifier) {
             let rectModifier = modifier as object as RectModifier;
             initModifier.mergeModifier(rectModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().rectAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().rectAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -804,14 +797,14 @@ export function hookScrollBarAttributeModifier(component: ArkScrollBarComponent,
     }
     let attributeSet = (): ScrollBarModifier => {
         let isScrollBarModifier: boolean = modifier instanceof ScrollBarModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new ScrollBarModifier();
+        let initModifier = component.getPeer().scrollBarAttributeSet ? component.getPeer().scrollBarAttributeSet! : new ScrollBarModifier();
         if (isScrollBarModifier) {
             let scrollBarModifier = modifier as object as ScrollBarModifier;
             initModifier.mergeModifier(scrollBarModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().scrollBarAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().scrollBarAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -840,14 +833,14 @@ export function hookShapeAttributeModifier(component: ArkShapeComponent, modifie
     }
     let attributeSet = (): ShapeModifier => {
         let isShapeModifier: boolean = modifier instanceof ShapeModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new ShapeModifier();
+        let initModifier = component.getPeer().shapeAttributeSet ? component.getPeer().shapeAttributeSet! : new ShapeModifier();
         if (isShapeModifier) {
             let shapeModifier = modifier as object as ShapeModifier;
             initModifier.mergeModifier(shapeModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().shapeAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().shapeAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -882,14 +875,14 @@ export function hookSideBarContainerAttributeModifier(component: ArkSideBarConta
     }
     let attributeSet = (): SideBarContainerModifier => {
         let isSideBarContainerModifier: boolean = modifier instanceof SideBarContainerModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new SideBarContainerModifier();
+        let initModifier = component.getPeer().sideBarContainerAttributeSet ? component.getPeer().sideBarContainerAttributeSet! : new SideBarContainerModifier();
         if (isSideBarContainerModifier) {
             let sideBarContainerModifier = modifier as object as SideBarContainerModifier;
             initModifier.mergeModifier(sideBarContainerModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().sideBarContainerAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().sideBarContainerAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -903,68 +896,6 @@ export function hookSideBarContainerAttributeModifier(component: ArkSideBarConta
     applyAttributeModifierBase(modifier as Object as AttributeModifier<SideBarContainerAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
 }
 export function hookBaseSpanAttributeModifier(componenet: ArkBaseSpanComponent, value: AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined):void {}
-export function hookStepperAttributeModifier(component: ArkStepperComponent, modifier: AttributeModifier<StepperAttribute> | AttributeModifier<CommonMethod> | undefined):void {
-    if (modifier === undefined) {
-        return;
-    }
-    let isCommonModifier: boolean = modifier instanceof CommonModifier;
-    if (isCommonModifier) {
-        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
-        return;
-    }
-    let attributeSet = (): StepperModifier => {
-        let isStepperModifier: boolean = modifier instanceof StepperModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new StepperModifier();
-        if (isStepperModifier) {
-            let stepperModifier = modifier as object as StepperModifier;
-            initModifier.mergeModifier(stepperModifier);
-            component.getPeer().attributeSet = initModifier;
-            return initModifier;
-        } else {
-            component.getPeer().attributeSet = initModifier;
-            return initModifier;
-        }
-    }
-    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
-    };
-    let updaterReceiver = (): ArkStepperComponent => {
-        let componentNew: ArkStepperComponent = new ArkStepperComponent();
-        componentNew.setPeer(component.getPeer());
-        return componentNew;
-    };
-    applyAttributeModifierBase(modifier as Object as AttributeModifier<StepperAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
-}
-export function hookStepperItemAttributeModifier(component: ArkStepperItemComponent, modifier: AttributeModifier<StepperItemAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-    if (modifier === undefined) {
-        return;
-    }
-    let isCommonModifier: boolean = modifier instanceof CommonModifier;
-    if (isCommonModifier) {
-        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
-        return;
-    }
-    let attributeSet = (): StepperItemModifier => {
-        let isStepperItemModifier: boolean = modifier instanceof StepperItemModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new StepperItemModifier();
-        if (isStepperItemModifier) {
-            let stepperItemModifier = modifier as object as StepperItemModifier;
-            initModifier.mergeModifier(stepperItemModifier);
-            component.getPeer().attributeSet = initModifier;
-            return initModifier;
-        } else {
-            component.getPeer().attributeSet = initModifier;
-            return initModifier;
-        }
-    }
-    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
-    };
-    let updaterReceiver = (): ArkStepperItemComponent => {
-        let componentNew: ArkStepperItemComponent = new ArkStepperItemComponent();
-        componentNew.setPeer(component.getPeer());
-        return componentNew;
-    };
-    applyAttributeModifierBase(modifier as Object as AttributeModifier<StepperItemAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
-}
 export function hookSwiperAttributeModifier(component: ArkSwiperComponent, modifier: AttributeModifier<SwiperAttribute> | AttributeModifier<CommonMethod> | undefined):void {
         if (modifier === undefined) {
         return;
@@ -976,14 +907,14 @@ export function hookSwiperAttributeModifier(component: ArkSwiperComponent, modif
     }
     let attributeSet = (): SwiperModifier => {
         let isSwiperModifier: boolean = modifier instanceof SwiperModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new SwiperModifier();
+        let initModifier = component.getPeer().swiperAttributeSet ? component.getPeer().swiperAttributeSet! : new SwiperModifier();
         if (isSwiperModifier) {
             let swiperModifier = modifier as object as SwiperModifier;
             initModifier.mergeModifier(swiperModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().swiperAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().swiperAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -1007,14 +938,14 @@ export function hookTabContentAttributeModifier(component: ArkTabContentComponen
     }
     let attributeSet = (): TabContentModifier => {
         let isTabContentModifier: boolean = modifier instanceof TabContentModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new TabContentModifier();
+        let initModifier = component.getPeer().tabContentAttributeSet ? component.getPeer().tabContentAttributeSet! : new TabContentModifier();
         if (isTabContentModifier) {
             let TabContentModifier = modifier as object as TabContentModifier;
             initModifier.mergeModifier(TabContentModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().tabContentAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().tabContentAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -1038,14 +969,14 @@ export function hookTabsAttributeModifier(component: ArkTabsComponent, modifier:
     }
     let attributeSet = (): TabsModifier => {
         let isTabsModifier: boolean = modifier instanceof TabsModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new TabsModifier();
+        let initModifier = component.getPeer().tabsAttributeSet ? component.getPeer().tabsAttributeSet! : new TabsModifier();
         if (isTabsModifier) {
             let TabsModifier = modifier as object as TabsModifier;
             initModifier.mergeModifier(TabsModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().tabsAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().tabsAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -1072,14 +1003,14 @@ export function hookVideoAttributeModifier(component: ArkVideoComponent, modifie
     }
     let attributeSet = (): VideoModifier => {
         let isVideoModifier: boolean = modifier instanceof VideoModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new VideoModifier();
+        let initModifier = component.getPeer().videoAttributeSet ? component.getPeer().videoAttributeSet! : new VideoModifier();
         if (isVideoModifier) {
             let videoModifier = modifier as object as VideoModifier;
             initModifier.mergeModifier(videoModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().videoAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().videoAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -1115,12 +1046,12 @@ export function hookXComponentAttributeModifier(component: ArkXComponentComponen
     }
     let attributeSet = (): XComponentModifier => {
         let isXComponentModifier: boolean = modifier instanceof XComponentModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new XComponentModifier();
+        let initModifier = component.getPeer().xComponentAttributeSet ? component.getPeer().xComponentAttributeSet! : new XComponentModifier();
         if (isXComponentModifier) {
             let xcomponentModifier = modifier as object as XComponentModifier;
             initModifier.mergeModifier(xcomponentModifier);
         }
-        component.getPeer().attributeSet = initModifier;
+        component.getPeer().xComponentAttributeSet = initModifier;
         return initModifier;
     }
     let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
@@ -1152,14 +1083,14 @@ export function hookPatternLockAttributeModifier(component: ArkPatternLockCompon
     }
     let attributeSet = (): PatternLockModifier => {
         let isPatternLockModifier: boolean = modifier instanceof PatternLockModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new PatternLockModifier();
+        let initModifier = component.getPeer().patternLockAttributeSet ? component.getPeer().patternLockAttributeSet! : new PatternLockModifier();
         if (isPatternLockModifier) {
             let imageModifier = modifier as object as PatternLockModifier;
             initModifier.mergeModifier(imageModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().patternLockAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().patternLockAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -1188,14 +1119,14 @@ export function hookProgressAttributeModifier(component: ArkProgressComponent, m
     }
     let attributeSet = (): ProgressModifier => {
         let isProgressModifier: boolean = modifier instanceof ProgressModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new ProgressModifier();
+        let initModifier = component.getPeer().progressAttributeSet ? component.getPeer().progressAttributeSet! : new ProgressModifier();
         if (isProgressModifier) {
             let imageModifier = modifier as object as ProgressModifier;
             initModifier.mergeModifier(imageModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().progressAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().progressAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -1224,14 +1155,14 @@ export function hookQRCodeAttributeModifier(component: ArkQRCodeComponent, modif
     }
     let attributeSet = (): QRCodeModifier => {
         let isQRCodeModifier: boolean = modifier instanceof QRCodeModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new QRCodeModifier();
+        let initModifier = component.getPeer().qrCodeAttributeSet ? component.getPeer().qrCodeAttributeSet! : new QRCodeModifier();
         if (isQRCodeModifier) {
             let imageModifier = modifier as object as QRCodeModifier;
             initModifier.mergeModifier(imageModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().qrCodeAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().qrCodeAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -1261,14 +1192,14 @@ export function hookLoadingProgressAttributeModifier(component: ArkLoadingProgre
     }
     let attributeSet = (): LoadingProgressModifier => {
         let isLoadingProgressModifier: boolean = modifier instanceof LoadingProgressModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new LoadingProgressModifier();
+        let initModifier = component.getPeer().loadingProgressAttributeSet ? component.getPeer().loadingProgressAttributeSet! : new LoadingProgressModifier();
         if (isLoadingProgressModifier) {
             let imageModifier = modifier as object as LoadingProgressModifier;
             initModifier.mergeModifier(imageModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().loadingProgressAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().loadingProgressAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -1293,14 +1224,14 @@ export function hookGaugeAttributeModifier(component: ArkGaugeComponent, modifie
     }
     let attributeSet = (): GaugeModifier => {
         let isGaugeModifier: boolean = modifier instanceof GaugeModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new GaugeModifier();
+        let initModifier = component.getPeer().gaugeAttributeSet ? component.getPeer().gaugeAttributeSet! : new GaugeModifier();
         if (isGaugeModifier) {
             let GaugeModifier = modifier as object as GaugeModifier;
             initModifier.mergeModifier(GaugeModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().gaugeAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().gaugeAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -1329,14 +1260,14 @@ export function hookImageAttributeModifier(component: ArkImageComponent, modifie
     }
     let attributeSet = (): ImageModifier => {
         let isImageModifier: boolean = modifier instanceof ImageModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new ImageModifier();
+        let initModifier = component.getPeer().imageAttributeSet ? component.getPeer().imageAttributeSet! : new ImageModifier();
         if (isImageModifier) {
             let imageModifier = modifier as object as ImageModifier;
             initModifier.mergeModifier(imageModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().imageAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().imageAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -1371,14 +1302,14 @@ export function hookImageAnimatorAttributeModifier(component: ArkImageAnimatorCo
     }
     let attributeSet = (): ImageAnimatorModifier => {
         let isImageAnimatorModifier: boolean = modifier instanceof ImageAnimatorModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new ImageAnimatorModifier();
+        let initModifier = component.getPeer().imageAnimatorAttributeSet ? component.getPeer().imageAnimatorAttributeSet! : new ImageAnimatorModifier();
         if (isImageAnimatorModifier) {
             let imageModifier = modifier as object as ImageAnimatorModifier;
             initModifier.mergeModifier(imageModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().imageAnimatorAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().imageAnimatorAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -1402,14 +1333,14 @@ export function hookTextTimerAttributeModifier(component: ArkTextTimerComponent,
     }
     let attributeSet = (): TextTimerModifier => {
         let isTextTimerModifier: boolean = modifier instanceof TextTimerModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new TextTimerModifier();
+        let initModifier = component.getPeer().textTimerAttributeSet ? component.getPeer().textTimerAttributeSet! : new TextTimerModifier();
         if (isTextTimerModifier) {
             let imageModifier = modifier as object as TextTimerModifier;
             initModifier.mergeModifier(imageModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().textTimerAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().textTimerAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -1438,14 +1369,14 @@ export function hookTextClockAttributeModifier(component: ArkTextClockComponent,
     }
     let attributeSet = (): TextClockModifier => {
         let isTextClockModifier: boolean = modifier instanceof TextClockModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new TextClockModifier();
+        let initModifier = component.getPeer().textClockAttributeSet ? component.getPeer().textClockAttributeSet! : new TextClockModifier();
         if (isTextClockModifier) {
             let imageModifier = modifier as object as TextClockModifier;
             initModifier.mergeModifier(imageModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().textClockAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().textClockAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -1474,14 +1405,14 @@ export function hookCounterAttributeModifier(component: ArkCounterComponent, mod
     }
     let attributeSet = (): CounterModifier => {
         let isCounterModifier: boolean = modifier instanceof CounterModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new CounterModifier();
+        let initModifier = component.getPeer().counterAttributeSet ? component.getPeer().counterAttributeSet! : new CounterModifier();
         if (isCounterModifier) {
             let CounterModifier = modifier as object as CounterModifier;
             initModifier.mergeModifier(CounterModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().counterAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().counterAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -1505,14 +1436,14 @@ export function hookDataPanelAttributeModifier(component: ArkDataPanelComponent,
     }
     let attributeSet = (): DataPanelModifier => {
         let isDataPanelModifier: boolean = modifier instanceof DataPanelModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new DataPanelModifier();
+        let initModifier = component.getPeer().dataPanelAttributeSet ? component.getPeer().dataPanelAttributeSet! : new DataPanelModifier();
         if (isDataPanelModifier) {
             let DataPanelModifier = modifier as object as DataPanelModifier;
             initModifier.mergeModifier(DataPanelModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().dataPanelAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().dataPanelAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -1543,14 +1474,14 @@ export function hookCalendarPickerAttributeModifier(component: ArkCalendarPicker
     }
     let attributeSet = (): CalendarPickerModifier => {
         let isCalendarPickerModifier: boolean = modifier instanceof CalendarPickerModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new CalendarPickerModifier();
+        let initModifier = component.getPeer().calendarPickerAttributeSet ? component.getPeer().calendarPickerAttributeSet! : new CalendarPickerModifier();
         if (isCalendarPickerModifier) {
             let calendarPickerModifier = modifier as object as CalendarPickerModifier;
             initModifier.mergeModifier(calendarPickerModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().calendarPickerAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().calendarPickerAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -1585,14 +1516,14 @@ export function hookDatePickerAttributeModifier(component: ArkDatePickerComponen
     }
     let attributeSet = (): DatePickerModifier => {
         let isDatePickerModifier: boolean = modifier instanceof DatePickerModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new DatePickerModifier();
+        let initModifier = component.getPeer().datePickerAttributeSet ? component.getPeer().datePickerAttributeSet! : new DatePickerModifier();
         if (isDatePickerModifier) {
             let datePickerModifier = modifier as object as DatePickerModifier;
             initModifier.mergeModifier(datePickerModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().datePickerAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().datePickerAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -1628,14 +1559,14 @@ export function hookTimePickerAttributeModifier(component: ArkTimePickerComponen
     }
     let attributeSet = (): TimePickerModifier => {
         let isTimePickerModifier: boolean = modifier instanceof TimePickerModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new TimePickerModifier();
+        let initModifier = component.getPeer().timePickerAttributeSet ? component.getPeer().timePickerAttributeSet! : new TimePickerModifier();
         if (isTimePickerModifier) {
             let timePickerModifier = modifier as object as TimePickerModifier;
             initModifier.mergeModifier(timePickerModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().timePickerAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().timePickerAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -1671,14 +1602,14 @@ export function hookTextPickerAttributeModifier(component: ArkTextPickerComponen
     }
     let attributeSet = (): TextPickerModifier => {
         let isTextPickerModifier: boolean = modifier instanceof TextPickerModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new TextPickerModifier();
+        let initModifier = component.getPeer().textPickerAttributeSet ? component.getPeer().textPickerAttributeSet! : new TextPickerModifier();
         if (isTextPickerModifier) {
             let textPickerModifier = modifier as object as TextPickerModifier;
             initModifier.mergeModifier(textPickerModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().textPickerAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().textPickerAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -1713,14 +1644,14 @@ export function hookMenuItemGroupAttributeModifier(component: ArkMenuItemGroupCo
     }
     let attributeSet = (): MenuItemGroupModifier => {
         let isMenuItemGroupModifier: boolean = modifier instanceof MenuItemGroupModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new MenuItemGroupModifier();
+        let initModifier = component.getPeer().menuItemGroupAttributeSet ? component.getPeer().menuItemGroupAttributeSet! : new MenuItemGroupModifier();
         if (isMenuItemGroupModifier) {
             let menuItemGroupModifier = modifier as object as MenuItemGroupModifier;
             initModifier.mergeModifier(menuItemGroupModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().menuItemGroupAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().menuItemGroupAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -1746,14 +1677,14 @@ export function hookMenuItemAttributeModifier(component: ArkMenuItemComponent, m
     }
     let attributeSet = (): MenuItemModifier => {
         let isMenuItemModifier: boolean = modifier instanceof MenuItemModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new MenuItemModifier();
+        let initModifier = component.getPeer().menuItemAttributeSet ? component.getPeer().menuItemAttributeSet! : new MenuItemModifier();
         if (isMenuItemModifier) {
             let menuItemModifier = modifier as object as MenuItemModifier;
             initModifier.mergeModifier(menuItemModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().menuItemAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().menuItemAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -1779,14 +1710,14 @@ export function hookMenuAttributeModifier(component: ArkMenuComponent, modifier:
     }
     let attributeSet = (): MenuModifier => {
         let isMenuModifier: boolean = modifier instanceof MenuModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new MenuModifier();
+        let initModifier = component.getPeer().menuAttributeSet ? component.getPeer().menuAttributeSet! : new MenuModifier();
         if (isMenuModifier) {
             let menuModifier = modifier as object as MenuModifier;
             initModifier.mergeModifier(menuModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().menuAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().menuAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -1812,14 +1743,14 @@ export function hookButtonAttributeModifier(component: ArkButtonComponent, modif
     }
     let attributeSet = (): ButtonModifier => {
         let isButtonModifier: boolean = modifier instanceof ButtonModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new ButtonModifier();
+        let initModifier = component.getPeer().buttonAttributeSet ? component.getPeer().buttonAttributeSet! : new ButtonModifier();
         if (isButtonModifier) {
             let buttonModifier = modifier as object as ButtonModifier;
             initModifier.mergeModifier(buttonModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().buttonAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().buttonAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -1839,14 +1770,14 @@ export function hookSpanAttributeModifier(component: ArkSpanComponent, modifier:
     }
     let attributeSet = (): SpanModifier => {
         let isSpanModifier: boolean = modifier instanceof SpanModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new SpanModifier();
+        let initModifier = component.getPeer().spanAttributeSet ? component.getPeer().spanAttributeSet! : new SpanModifier();
         if (isSpanModifier) {
             let spanModifier = modifier as object as SpanModifier;
             initModifier.mergeModifier(spanModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().spanAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().spanAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -1878,14 +1809,14 @@ export function hookImageSpanAttributeModifier(component: ArkImageSpanComponent,
     }
     let attributeSet = (): ImageSpanModifier => {
         let isImageSpanModifier: boolean = modifier instanceof ImageSpanModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new ImageSpanModifier();
+        let initModifier = component.getPeer().imageSpanAttributeSet ? component.getPeer().imageSpanAttributeSet! : new ImageSpanModifier();
         if (isImageSpanModifier) {
             let imageSpanModifier = modifier as object as ImageSpanModifier;
             initModifier.mergeModifier(imageSpanModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().imageSpanAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().imageSpanAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -1911,14 +1842,14 @@ export function hookSymbolSpanAttributeModifier(component: ArkSymbolSpanComponen
     }
     let attributeSet = (): SymbolSpanModifier => {
         let isSymbolSpanModifier: boolean = modifier instanceof SymbolSpanModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new SymbolSpanModifier();
+        let initModifier = component.getPeer().symbolSpanAttributeSet ? component.getPeer().symbolSpanAttributeSet! : new SymbolSpanModifier();
         if (isSymbolSpanModifier) {
             let symbolSpanModifier = modifier as object as SymbolSpanModifier;
             initModifier.mergeModifier(symbolSpanModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().symbolSpanAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().symbolSpanAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -1945,14 +1876,14 @@ export function hookContainerSpanAttributeModifier(component: ArkContainerSpanCo
     }
     let attributeSet = (): ContainerSpanModifier => {
         let isContainerSpanModifier: boolean = modifier instanceof ContainerSpanModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new ContainerSpanModifier();
+        let initModifier = component.getPeer().containerSpanAttributeSet ? component.getPeer().containerSpanAttributeSet! : new ContainerSpanModifier();
         if (isContainerSpanModifier) {
             let containerSpanModifier = modifier as object as ContainerSpanModifier;
             initModifier.mergeModifier(containerSpanModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().containerSpanAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().containerSpanAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -1977,14 +1908,14 @@ export function hookTextAttributeModifier(component: ArkTextComponent, modifier:
     }
     let attributeSet = (): TextModifier => {
         let isTextModifier: boolean = modifier instanceof TextModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new TextModifier();
+        let initModifier = component.getPeer().textAttributeSet ? component.getPeer().textAttributeSet! : new TextModifier();
         if (isTextModifier) {
             let textModifier = modifier as object as TextModifier;
             initModifier.mergeModifier(textModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().textAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().textAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -2030,14 +1961,14 @@ export function hookBlankAttributeModifier(component: ArkBlankComponent,
     }
     let attributeSet = (): BlankModifier => {
         let isBlankModifier: boolean = modifier instanceof BlankModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new BlankModifier();
+        let initModifier = component.getPeer().blankAttributeSet ? component.getPeer().blankAttributeSet! : new BlankModifier();
         if (isBlankModifier) {
             let BlankModifier = modifier as object as BlankModifier;
             initModifier.mergeModifier(BlankModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().blankAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().blankAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -2063,14 +1994,14 @@ export function hookColumnAttributeModifier(component: ArkColumnComponent,
     }
     let attributeSet = (): ColumnModifier => {
         let isColumnModifier: boolean = modifier instanceof ColumnModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new ColumnModifier();
+        let initModifier = component.getPeer().columnAttributeSet ? component.getPeer().columnAttributeSet! : new ColumnModifier();
         if (isColumnModifier) {
             let ColumnModifier = modifier as object as ColumnModifier;
             initModifier.mergeModifier(ColumnModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().columnAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().columnAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -2096,14 +2027,14 @@ export function hookColumnSplitAttributeModifier(component: ArkColumnSplitCompon
     }
     let attributeSet = (): ColumnSplitModifier => {
         let isColumnSplitModifier: boolean = modifier instanceof ColumnSplitModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new ColumnSplitModifier();
+        let initModifier = component.getPeer().columnSplitAttributeSet ? component.getPeer().columnSplitAttributeSet! : new ColumnSplitModifier();
         if (isColumnSplitModifier) {
             let ColumnSplitModifier = modifier as object as ColumnSplitModifier;
             initModifier.mergeModifier(ColumnSplitModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().columnSplitAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().columnSplitAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -2129,14 +2060,14 @@ export function hookDividerAttributeModifier(component: ArkDividerComponent,
     }
     let attributeSet = (): DividerModifier => {
         let isDividerModifier: boolean = modifier instanceof DividerModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new DividerModifier();
+        let initModifier = component.getPeer().dividerAttributeSet ? component.getPeer().dividerAttributeSet! : new DividerModifier();
         if (isDividerModifier) {
             let DividerModifier = modifier as object as DividerModifier;
             initModifier.mergeModifier(DividerModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().dividerAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().dividerAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -2162,14 +2093,14 @@ export function hookFlexAttributeModifier(component: ArkFlexComponent,
     }
     let attributeSet = (): FlexModifier => {
         let isFlexModifier: boolean = modifier instanceof FlexModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new FlexModifier();
+        let initModifier = component.getPeer().flexAttributeSet ? component.getPeer().flexAttributeSet! : new FlexModifier();
         if (isFlexModifier) {
             let FlexModifier = modifier as object as FlexModifier;
             initModifier.mergeModifier(FlexModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().flexAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().flexAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -2195,14 +2126,14 @@ export function hookFolderStackAttributeModifier(component: ArkFolderStackCompon
     }
     let attributeSet = (): FolderStackModifier => {
         let isFolderStackModifier: boolean = modifier instanceof FolderStackModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new FolderStackModifier();
+        let initModifier = component.getPeer().folderStackAttributeSet ? component.getPeer().folderStackAttributeSet! : new FolderStackModifier();
         if (isFolderStackModifier) {
             let FolderStackModifier = modifier as object as FolderStackModifier;
             initModifier.mergeModifier(FolderStackModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().folderStackAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().folderStackAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -2228,14 +2159,14 @@ export function hookGridColAttributeModifier(component: ArkGridColComponent,
     }
     let attributeSet = (): GridColModifier => {
         let isGridColModifier: boolean = modifier instanceof GridColModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new GridColModifier();
+        let initModifier = component.getPeer().gridColAttributeSet ? component.getPeer().gridColAttributeSet! : new GridColModifier();
         if (isGridColModifier) {
             let GridColModifier = modifier as object as GridColModifier;
             initModifier.mergeModifier(GridColModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().gridColAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().gridColAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -2261,14 +2192,14 @@ export function hookGridRowAttributeModifier(component: ArkGridRowComponent,
     }
     let attributeSet = (): GridRowModifier => {
         let isGridRowModifier: boolean = modifier instanceof GridRowModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new GridRowModifier();
+        let initModifier = component.getPeer().gridRowAttributeSet ? component.getPeer().gridRowAttributeSet! : new GridRowModifier();
         if (isGridRowModifier) {
             let GridRowModifier = modifier as object as GridRowModifier;
             initModifier.mergeModifier(GridRowModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().gridRowAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().gridRowAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -2294,14 +2225,14 @@ export function hookRelativeContainerAttributeModifier(component: ArkRelativeCon
     }
     let attributeSet = (): RelativeContainerModifier => {
         let isRelativeContainerModifier: boolean = modifier instanceof RelativeContainerModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new RelativeContainerModifier();
+        let initModifier = component.getPeer().relativeContainerAttributeSet ? component.getPeer().relativeContainerAttributeSet! : new RelativeContainerModifier();
         if (isRelativeContainerModifier) {
             let RelativeContainerModifier = modifier as object as RelativeContainerModifier;
             initModifier.mergeModifier(RelativeContainerModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().relativeContainerAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().relativeContainerAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -2327,14 +2258,14 @@ export function hookRowAttributeModifier(component: ArkRowComponent,
     }
     let attributeSet = (): RowModifier => {
         let isRowModifier: boolean = modifier instanceof RowModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new RowModifier();
+        let initModifier = component.getPeer().rowAttributeSet ? component.getPeer().rowAttributeSet! : new RowModifier();
         if (isRowModifier) {
             let RowModifier = modifier as object as RowModifier;
             initModifier.mergeModifier(RowModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().rowAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().rowAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -2360,14 +2291,14 @@ export function hookRowSplitAttributeModifier(component: ArkRowSplitComponent,
     }
     let attributeSet = (): RowSplitModifier => {
         let isRowSplitModifier: boolean = modifier instanceof RowSplitModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new RowSplitModifier();
+        let initModifier = component.getPeer().rowSplitAttributeSet ? component.getPeer().rowSplitAttributeSet! : new RowSplitModifier();
         if (isRowSplitModifier) {
             let RowSplitModifier = modifier as object as RowSplitModifier;
             initModifier.mergeModifier(RowSplitModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().rowSplitAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().rowSplitAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -2393,14 +2324,14 @@ export function hookStackAttributeModifier(component: ArkStackComponent,
     }
     let attributeSet = (): StackModifier => {
         let isStackModifier: boolean = modifier instanceof StackModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new StackModifier();
+        let initModifier = component.getPeer().stackAttributeSet ? component.getPeer().stackAttributeSet! : new StackModifier();
         if (isStackModifier) {
             let StackModifier = modifier as object as StackModifier;
             initModifier.mergeModifier(StackModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().stackAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().stackAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -2426,14 +2357,14 @@ export function hookSymbolGlyphAttributeModifier(component: ArkSymbolGlyphCompon
     }
     let attributeSet = (): SymbolGlyphModifier => {
         let isSymbolGlyphModifier: boolean = modifier instanceof SymbolGlyphModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new SymbolGlyphModifier();
+        let initModifier = component.getPeer().symbolGlyphAttributeSet ? component.getPeer().symbolGlyphAttributeSet! : new SymbolGlyphModifier();
         if (isSymbolGlyphModifier) {
             let symbolGlyphModifier = modifier as object as SymbolGlyphModifier;
             initModifier.mergeModifier(symbolGlyphModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().symbolGlyphAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().symbolGlyphAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -2468,14 +2399,14 @@ export function hookCheckboxAttributeModifier(component: ArkCheckboxComponent,
     }
     let attributeSet = (): CheckboxModifier => {
         let isCheckboxModifier: boolean = modifier instanceof CheckboxModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new CheckboxModifier();
+        let initModifier = component.getPeer().checkboxAttributeSet ? component.getPeer().checkboxAttributeSet! : new CheckboxModifier();
         if (isCheckboxModifier) {
             let checkboxModifier = modifier as object as CheckboxModifier;
             initModifier.mergeModifier(checkboxModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().checkboxAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().checkboxAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -2501,14 +2432,14 @@ export function hookCheckboxGroupAttributeModifier(component: ArkCheckboxGroupCo
     }
     let attributeSet = (): CheckboxGroupModifier => {
         let isCheckboxGroupModifier: boolean = modifier instanceof CheckboxGroupModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new CheckboxGroupModifier();
+        let initModifier = component.getPeer().checkboxGroupAttributeSet ? component.getPeer().checkboxGroupAttributeSet! : new CheckboxGroupModifier();
         if (isCheckboxGroupModifier) {
             let checkboxgroupModifier = modifier as object as CheckboxGroupModifier;
             initModifier.mergeModifier(checkboxgroupModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().checkboxGroupAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().checkboxGroupAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -2534,14 +2465,14 @@ export function hookRatingAttributeModifier(component: ArkRatingComponent,
     }
     let attributeSet = (): RatingModifier => {
         let isRatingModifier: boolean = modifier instanceof RatingModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new RatingModifier();
+        let initModifier = component.getPeer().ratingAttributeSet ? component.getPeer().ratingAttributeSet! : new RatingModifier();
         if (isRatingModifier) {
             let componentModifier = modifier as object as RatingModifier;
             initModifier.mergeModifier(componentModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().ratingAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().ratingAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -2567,14 +2498,14 @@ export function hookRadioAttributeModifier(component: ArkRadioComponent,
     }
     let attributeSet = (): RadioModifier => {
         let isRadioModifier: boolean = modifier instanceof RadioModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new RadioModifier();
+        let initModifier = component.getPeer().radioAttributeSet ? component.getPeer().radioAttributeSet! : new RadioModifier();
         if (isRadioModifier) {
             let componentModifier = modifier as object as RadioModifier;
             initModifier.mergeModifier(componentModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().radioAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().radioAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -2600,14 +2531,14 @@ export function hookSelectAttributeModifier(component: ArkSelectComponent,
     }
     let attributeSet = (): SelectModifier => {
         let isSelectModifier: boolean = modifier instanceof SelectModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new SelectModifier();
+        let initModifier = component.getPeer().selectAttributeSet ? component.getPeer().selectAttributeSet! : new SelectModifier();
         if (isSelectModifier) {
             let componentModifier = modifier as object as SelectModifier;
             initModifier.mergeModifier(componentModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().selectAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().selectAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -2633,14 +2564,14 @@ export function hookSliderAttributeModifier(component: ArkSliderComponent,
     }
     let attributeSet = (): SliderModifier => {
         let isSliderModifier: boolean = modifier instanceof SliderModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new SliderModifier();
+        let initModifier = component.getPeer().sliderAttributeSet ? component.getPeer().sliderAttributeSet! : new SliderModifier();
         if (isSliderModifier) {
             let componentModifier = modifier as object as SliderModifier;
             initModifier.mergeModifier(componentModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().sliderAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().sliderAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -2666,14 +2597,14 @@ export function hookToggleAttributeModifier(component: ArkToggleComponent,
     }
     let attributeSet = (): ToggleModifier => {
         let isToggleModifier: boolean = modifier instanceof ToggleModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new ToggleModifier();
+        let initModifier = component.getPeer().toggleAttributeSet ? component.getPeer().toggleAttributeSet! : new ToggleModifier();
         if (isToggleModifier) {
             let componentModifier = modifier as object as ToggleModifier;
             initModifier.mergeModifier(componentModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().toggleAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().toggleAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -2685,6 +2616,11 @@ export function hookToggleAttributeModifier(component: ArkToggleComponent,
         return componentNew;
     };
     applyAttributeModifierBase(modifier as Object as AttributeModifier<ToggleAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+
+export function hookLazyGridLayoutAttributeAttributeModifier(component: ArkLazyGridLayoutAttributeComponent,
+    modifier: AttributeModifier<LazyGridLayoutAttribute> | AttributeModifier<CommonMethod> | undefined) {
+
 }
 
 export function hookLazyVGridLayoutAttributeModifier(component: ArkLazyVGridLayoutComponent,
@@ -2699,14 +2635,14 @@ export function hookLazyVGridLayoutAttributeModifier(component: ArkLazyVGridLayo
     }
     let attributeSet = (): LazyVGridLayoutModifier => {
         let isLazyVGridLayoutModifier: boolean = modifier instanceof LazyVGridLayoutModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new LazyVGridLayoutModifier();
+        let initModifier = component.getPeer().lazyVGridLayoutAttributeSet ? component.getPeer().lazyVGridLayoutAttributeSet! : new LazyVGridLayoutModifier();
         if (isLazyVGridLayoutModifier) {
             let lazyVGridLayoutModifier = modifier as object as LazyVGridLayoutModifier;
             initModifier.mergeModifier(lazyVGridLayoutModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().lazyVGridLayoutAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().lazyVGridLayoutAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -2718,6 +2654,40 @@ export function hookLazyVGridLayoutAttributeModifier(component: ArkLazyVGridLayo
         return componentNew;
     };
     applyAttributeModifierBase(modifier as Object as AttributeModifier<LazyVGridLayoutAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+
+export function hookUnionEffectContainerAttributeModifier(component: ArkUnionEffectContainerComponent,
+    modifier: AttributeModifier<UnionEffectContainerAttribute> | AttributeModifier<CommonMethod> | undefined): void {
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): UnionEffectContainerModifier => {
+        let isUnionEffectContainerModifier: boolean = modifier instanceof UnionEffectContainerModifier;
+        let initModifier = component.getPeer().unionEffectContainerAttributeSet ? component.getPeer().unionEffectContainerAttributeSet! : new UnionEffectContainerModifier();
+        if (isUnionEffectContainerModifier) {
+            let unionEffectContainerModifier = modifier as object as UnionEffectContainerModifier;
+            initModifier.mergeModifier(unionEffectContainerModifier);
+            component.getPeer().unionEffectContainerAttributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer().unionEffectContainerAttributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkUnionEffectContainerComponent => {
+        let componentNew: ArkUnionEffectContainerComponent = new ArkUnionEffectContainerComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<UnionEffectContainerAttribute>, attributeSet,
+        constructParam, updaterReceiver, component.getPeer());
 }
 
 export function hookGridAttributeModifier(component: ArkGridComponent,
@@ -2732,14 +2702,14 @@ export function hookGridAttributeModifier(component: ArkGridComponent,
     }
     let attributeSet = (): GridModifier => {
         let isGridModifier: boolean = modifier instanceof GridModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new GridModifier();
+        let initModifier = component.getPeer().gridAttributeSet ? component.getPeer().gridAttributeSet! : new GridModifier();
         if (isGridModifier) {
             let gridModifier = modifier as object as GridModifier;
             initModifier.mergeModifier(gridModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().gridAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().gridAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -2765,14 +2735,14 @@ export function hookGridItemAttributeModifier(component: ArkGridItemComponent,
     }
     let attributeSet = (): GridItemModifier => {
         let isGridItemModifier: boolean = modifier instanceof GridItemModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new GridItemModifier();
+        let initModifier = component.getPeer().gridItemAttributeSet ? component.getPeer().gridItemAttributeSet! : new GridItemModifier();
         if (isGridItemModifier) {
             let gridItemModifier = modifier as object as GridItemModifier;
             initModifier.mergeModifier(gridItemModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().gridItemAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().gridItemAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -2799,14 +2769,14 @@ export function hookListAttributeModifier(component: ArkListComponent,
     }
     let attributeSet = (): ListModifier => {
         let isListModifier: boolean = modifier instanceof ListModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new ListModifier();
+        let initModifier = component.getPeer().listAttributeSet ? component.getPeer().listAttributeSet! : new ListModifier();
         if (isListModifier) {
             let listModifier = modifier as object as ListModifier;
             initModifier.mergeModifier(listModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().listAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().listAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -2832,14 +2802,14 @@ export function hookListItemAttributeModifier(component: ArkListItemComponent,
     }
     let attributeSet = (): ListItemModifier => {
         let isListItemModifier: boolean = modifier instanceof ListItemModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new ListItemModifier();
+        let initModifier = component.getPeer().listItemAttributeSet ? component.getPeer().listItemAttributeSet! : new ListItemModifier();
         if (isListItemModifier) {
             let listItemModifier = modifier as object as ListItemModifier;
             initModifier.mergeModifier(listItemModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().listItemAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().listItemAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -2866,14 +2836,14 @@ export function hookListItemGroupAttributeModifier(component: ArkListItemGroupCo
     }
     let attributeSet = (): ListItemGroupModifier => {
         let isListItemGroupModifier: boolean = modifier instanceof ListItemGroupModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new ListItemGroupModifier();
+        let initModifier = component.getPeer().listItemGroupAttributeSet ? component.getPeer().listItemGroupAttributeSet! : new ListItemGroupModifier();
         if (isListItemGroupModifier) {
             let listItemGroupModifier = modifier as object as ListItemGroupModifier;
             initModifier.mergeModifier(listItemGroupModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().listItemGroupAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().listItemGroupAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -2900,14 +2870,14 @@ export function hookRefreshAttributeModifier(component: ArkRefreshComponent,
     }
     let attributeSet = (): RefreshModifier => {
         let isRefreshModifier: boolean = modifier instanceof RefreshModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new RefreshModifier();
+        let initModifier = component.getPeer().refreshAttributeSet ? component.getPeer().refreshAttributeSet! : new RefreshModifier();
         if (isRefreshModifier) {
             let refreshModifier = modifier as object as RefreshModifier;
             initModifier.mergeModifier(refreshModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().refreshAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().refreshAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -2934,14 +2904,14 @@ export function hookScrollAttributeModifier(component: ArkScrollComponent,
     }
     let attributeSet = (): ScrollModifier => {
         let isScrollModifier: boolean = modifier instanceof ScrollModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new ScrollModifier();
+        let initModifier = component.getPeer().scrollAttributeSet ? component.getPeer().scrollAttributeSet! : new ScrollModifier();
         if (isScrollModifier) {
             let scrollModifier = modifier as object as ScrollModifier;
             initModifier.mergeModifier(scrollModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().scrollAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().scrollAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -2968,14 +2938,14 @@ export function hookWaterFlowAttributeModifier(component: ArkWaterFlowComponent,
     }
     let attributeSet = (): WaterFlowModifier => {
         let isWaterFlowModifier: boolean = modifier instanceof WaterFlowModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new WaterFlowModifier();
+        let initModifier = component.getPeer().waterFlowAttributeSet ? component.getPeer().waterFlowAttributeSet! : new WaterFlowModifier();
         if (isWaterFlowModifier) {
             let waterFlowModifier = modifier as object as WaterFlowModifier;
             initModifier.mergeModifier(waterFlowModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().waterFlowAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().waterFlowAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -3002,14 +2972,14 @@ export function hookSearchAttributeModifier(component: ArkSearchComponent,
     }
     let attributeSet = (): SearchModifier => {
         let isSearchModifier: boolean = modifier instanceof SearchModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new SearchModifier();
+        let initModifier = component.getPeer().searchAttributeSet ? component.getPeer().searchAttributeSet! : new SearchModifier();
         if (isSearchModifier) {
             let searchModifier = modifier as object as SearchModifier;
             initModifier.mergeModifier(searchModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().searchAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().searchAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -3044,14 +3014,14 @@ export function hookTextInputAttributeModifier(component: ArkTextInputComponent,
     }
     let attributeSet = (): TextInputModifier => {
         let isTextInputModifier: boolean = modifier instanceof TextInputModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new TextInputModifier();
+        let initModifier = component.getPeer().textInputAttributeSet ? component.getPeer().textInputAttributeSet! : new TextInputModifier();
         if (isTextInputModifier) {
             let textInputModifier = modifier as object as TextInputModifier;
             initModifier.mergeModifier(textInputModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().textInputAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().textInputAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -3086,14 +3056,14 @@ export function hookTextAreaAttributeModifier(component: ArkTextAreaComponent,
     }
     let attributeSet = (): TextAreaModifier => {
         let isTextAreaModifier: boolean = modifier instanceof TextAreaModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new TextAreaModifier();
+        let initModifier = component.getPeer().textAreaAttributeSet ? component.getPeer().textAreaAttributeSet! : new TextAreaModifier();
         if (isTextAreaModifier) {
             let textAreaModifier = modifier as object as TextAreaModifier;
             initModifier.mergeModifier(textAreaModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().textAreaAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().textAreaAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -3128,14 +3098,14 @@ export function hookMarqueeAttributeModifier(component: ArkMarqueeComponent,
     }
     let attributeSet = (): MarqueeModifier => {
         let isMarqueeModifier: boolean = modifier instanceof MarqueeModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new MarqueeModifier();
+        let initModifier = component.getPeer().marqueeAttributeSet ? component.getPeer().marqueeAttributeSet! : new MarqueeModifier();
         if (isMarqueeModifier) {
             let marqueeModifier = modifier as object as MarqueeModifier;
             initModifier.mergeModifier(marqueeModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().marqueeAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().marqueeAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -3171,14 +3141,14 @@ export function hookHyperlinkAttributeModifier(component: ArkHyperlinkComponent,
     }
     let attributeSet = (): HyperlinkModifier => {
         let isHyperlinkModifier: boolean = modifier instanceof HyperlinkModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new HyperlinkModifier();
+        let initModifier = component.getPeer().hyperlinkAttributeSet ? component.getPeer().hyperlinkAttributeSet! : new HyperlinkModifier();
         if (isHyperlinkModifier) {
             let hyperlinkModifier = modifier as object as HyperlinkModifier;
             initModifier.mergeModifier(hyperlinkModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().hyperlinkAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().hyperlinkAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -3225,14 +3195,14 @@ export function hookRichEditorAttributeModifier(component: ArkRichEditorComponen
     }
     let attributeSet = (): RichEditorModifier => {
         let isRichEditorModifier: boolean = modifier instanceof RichEditorModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new RichEditorModifier();
+        let initModifier = component.getPeer().richEditorAttributeSet ? component.getPeer().richEditorAttributeSet! : new RichEditorModifier();
         if (isRichEditorModifier) {
             let richEditorModifier = modifier as object as RichEditorModifier;
             initModifier.mergeModifier(richEditorModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().richEditorAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().richEditorAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -3265,14 +3235,14 @@ export function hookParticleAttributeModifier(component: ArkParticleComponent, m
     }
     let attributeSet = (): ParticleModifier => {
         let isParticleModifier: boolean = modifier instanceof ParticleModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new ParticleModifier();
+        let initModifier = component.getPeer().particleAttributeSet ? component.getPeer().particleAttributeSet! : new ParticleModifier();
         if (isParticleModifier) {
             let particleModifier = modifier as object as ParticleModifier;
             initModifier.mergeModifier(particleModifier);
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().particleAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().attributeSet = initModifier;
+            component.getPeer().particleAttributeSet = initModifier;
             return initModifier;
         }
     }

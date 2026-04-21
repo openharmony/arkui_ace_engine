@@ -41,21 +41,19 @@ void QRCodePaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(pattern);
     auto frameNode = pattern->GetHost();
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<QrcodeTheme>();
-    CHECK_NULL_VOID(theme);
+    auto qrCodeTheme = frameNode->GetTheme<QrcodeTheme>(true);
+    CHECK_NULL_VOID(qrCodeTheme);
     if (renderContext->HasForegroundColor()) {
         if (renderContext->GetForegroundColorValue().GetValue() !=
-            paintProperty->GetColorValue(theme->GetQrcodeColor()).GetValue()) {
+            paintProperty->GetColorValue(qrCodeTheme->GetQrcodeColor()).GetValue()) {
             paintProperty->UpdateColor(Color::FOREGROUND);
         }
     } else if (renderContext->HasForegroundColorStrategy()) {
         paintProperty->UpdateColor(Color::FOREGROUND);
     }
 
-    auto color = paintProperty->GetColorValue(theme->GetQrcodeColor());
-    auto backgroundColor = paintProperty->GetBackgroundColorValue(theme->GetBackgroundColor());
+    auto color = paintProperty->GetColorValue(qrCodeTheme->GetQrcodeColor());
+    auto backgroundColor = paintProperty->GetBackgroundColorValue(qrCodeTheme->GetBackgroundColor());
     auto opacity = paintProperty->GetOpacityValue(1.0);
 
     // For the long string, just show the length as 256.

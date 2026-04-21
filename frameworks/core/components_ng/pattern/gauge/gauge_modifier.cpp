@@ -16,6 +16,7 @@
 
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/pattern/gauge/gauge_pattern.h"
+#include "core/components_ng/pattern/gauge/gauge_theme.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/image_painter.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -50,6 +51,8 @@ void GaugeModifier::UpdateValue()
     CHECK_NULL_VOID(pattern);
     auto paintProperty = pattern->GetPaintProperty<GaugePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
+    auto host = pattern->GetHost();
+    ACE_UINODE_TRACE(host);
     UpdateProperty(paintProperty);
     float value = paintProperty->GetValueValue();
     if (paintProperty->GetIsSensitiveValue(false)) {
@@ -75,7 +78,6 @@ void GaugeModifier::UpdateValue()
     option.SetDelay(ANIMATION_DELAY);
     option.SetCurve(curve);
     option.SetIteration(ANIMATION_TIMES);
-    auto host = pattern->GetHost();
     auto context = host? host->GetContextRefPtr(): nullptr;
     AnimationUtils::Animate(option, [&]() { value_->Set(end_); }, nullptr, nullptr, context);
 }
@@ -924,7 +926,9 @@ void GaugeModifier::NewDrawIndicator(
 
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<GaugeTheme>();
+    auto frameNode = paintProperty->GetHost();
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<GaugeTheme> theme = frameNode->GetTheme<GaugeTheme>(true);
 
     Dimension indicatorToTop = paintProperty->GetIndicatorSpaceValue(INDICATOR_DISTANCE_TO_TOP);
     if (GreatNotEqual(indicatorToTop.ConvertToPx(), data.radius)) {
@@ -1012,7 +1016,6 @@ void GaugeModifier::CreateDefaultTrianglePath(
     float width = radius * RADIUS_TO_DIAMETER * theme->GetIndicatorWidthRatio();
     float height = radius * RADIUS_TO_DIAMETER * theme->GetIndicatorHeightRatio();
     auto hypotenuse = std::sqrt(((width * PERCENT_HALF) * (width * PERCENT_HALF)) + (height * height));
-    
     float cornerRadius = radius * RADIUS_TO_DIAMETER * theme->GetIndicatorRadiusRatio();
     auto bottomAngle = std::atan(height / (width * PERCENT_HALF));
 

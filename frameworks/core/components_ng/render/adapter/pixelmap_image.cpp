@@ -22,10 +22,12 @@
 #include "core/components_ng/image_provider/image_data.h"
 #include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/components_ng/property/measure_utils.h"
-#include "core/components_ng/render/adapter/image_painter_utils.h"
 #include "core/components_ng/render/adapter/drawing_image.h"
+#include "core/components_ng/render/adapter/drawing_lattice_impl.h"
+#include "core/components_ng/render/adapter/image_painter_utils.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing_forward.h"
+#include "core/image/image_cache.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
@@ -195,11 +197,10 @@ bool PixelMapImage::StretchImageWithLattice(
 {
     auto pixmap = GetPixelMap();
     const auto& config = GetPaintConfig();
-    auto drawingLattice = config.resizableLattice_;
+    auto drawingLattice = AceType::DynamicCast<DrawingLatticeImpl>(config.resizableLattice_);
     CHECK_NULL_RETURN(drawingLattice, false);
-    auto latticeSptrAddr =
-        static_cast<std::shared_ptr<Rosen::Drawing::Lattice>*>(drawingLattice->GetDrawingLatticeSptrAddr());
-    CHECK_NULL_RETURN((latticeSptrAddr && (*latticeSptrAddr)), false);
+    auto* lattice = drawingLattice->GetLattice();
+    CHECK_NULL_RETURN(lattice, false);
     RSBrush brush;
     if (config.antiAlias_) {
         brush.SetAntiAlias(true);
@@ -223,18 +224,16 @@ bool PixelMapImage::StretchImageWithLattice(
     recordingCanvas.Scale(config.scaleX_, config.scaleY_);
 
     RSPoint pointRadius[BORDER_RADIUS_ARRAY_SIZE] = {};
-    ImagePainterUtils::ClipAdaptiveRRect(
-        recordingCanvas, radii, config.antiAlias_, pointRadius);
+    ImagePainterUtils::ClipAdaptiveRRect(recordingCanvas, radii, config.antiAlias_, pointRadius);
     std::shared_ptr<RSImage> rsImage = DrawingImage::MakeRSImageFromPixmap(pixmap);
     CHECK_NULL_RETURN(rsImage, false);
-    auto lattice = *(*latticeSptrAddr);
     if (SystemProperties::GetDebugEnabled()) {
-        PrintDrawingLatticeConfig(lattice, dstRect);
+        PrintDrawingLatticeConfig(*lattice, dstRect);
     }
     recordingCanvas.AttachBrush(brush);
     auto dfxConfig = GetImageDfxConfig();
-    NotifyDrawCompletion(dfxConfig.ToStringWithSrc(), pixmap);
-    recordingCanvas.DrawImageLattice(rsImage.get(), lattice, dstRect, filterMode);
+    NotifyDrawCompletion(dfxConfig.ToStringWithSrc(), pixmap, dstRect);
+    recordingCanvas.DrawImageLattice(rsImage.get(), *lattice, dstRect, filterMode);
     recordingCanvas.DetachBrush();
     return true;
 }
@@ -279,7 +278,7 @@ bool PixelMapImage::StretchImageWithSlice(
     CHECK_NULL_RETURN(rsImage, false);
     recordingCanvas.AttachBrush(brush);
     auto dfxConfig = GetImageDfxConfig();
-    NotifyDrawCompletion(dfxConfig.ToStringWithSrc(), pixmap);
+    NotifyDrawCompletion(dfxConfig.ToStringWithSrc(), pixmap, dstRect);
     recordingCanvas.DrawImageNine(rsImage.get(), rsCenterRect, dstRect, filterMode, &brush);
     recordingCanvas.DetachBrush();
     return true;
@@ -288,6 +287,14 @@ bool PixelMapImage::StretchImageWithSlice(
 bool PixelMapImage::CheckIfNeedForStretching(
     RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY)
 {
+    // Check if dstRect is valid (width and height must be positive)
+    if (LessOrEqual(dstRect.GetWidth(), 0.0f) || LessOrEqual(dstRect.GetHeight(), 0.0f)) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE,
+            "CheckIfNeedForStretching: dstRect is invalid (size <= 0.0f), dstRect=%{public}s",
+            dstRect.ToString().c_str());
+        return false;
+    }
+
     const auto& config = GetPaintConfig();
 
     if (config.frameCount_ == 1 && config.resizableLattice_ &&
@@ -301,10 +308,10 @@ bool PixelMapImage::CheckIfNeedForStretching(
     return false;
 }
 
-void PixelMapImage::NotifyDrawCompletion(const std::string& srcInfo, const RefPtr<PixelMap>& pixmap)
+void PixelMapImage::NotifyDrawCompletion(
+    const std::string& srcInfo, const RefPtr<PixelMap>& pixmap, const RSRect& dstRect)
 {
-    FireDrawCompleteCallback(RenderedImageInfo{
-        .renderSuccess = true,
+    FireDrawCompleteCallback(RenderedImageInfo { .renderSuccess = true,
         .width = pixmap->GetWidth(),
         .height = pixmap->GetHeight(),
         .rowStride = pixmap->GetRowStride(),
@@ -315,8 +322,8 @@ void PixelMapImage::NotifyDrawCompletion(const std::string& srcInfo, const RefPt
         .pixelFormat = pixmap->GetPixelFormat(),
         .allocatorType = pixmap->GetAllocatorType(),
         .pixelMapId = pixmap->GetId(),
-        .srcInfo = srcInfo
-    });
+        .srcInfo = srcInfo,
+        .dstRectInfo = dstRect.ToString() });
 }
 
 void PixelMapImage::DrawToRSCanvas(
@@ -362,7 +369,7 @@ void PixelMapImage::DrawToRSCanvas(
             GetDynamicModeString(config.dynamicMode).c_str());
         pixmap->SavePixelMapToFile(dfxConfig.ToStringWithoutSrc() + "_ToRS_");
     }
-    NotifyDrawCompletion(dfxConfig.ToStringWithSrc(), pixmap);
+    NotifyDrawCompletion(dfxConfig.ToStringWithSrc(), pixmap, dstRect);
     recordingCanvas.DrawPixelMapWithParm(pixmap->GetPixelMapSharedPtr(), rsImageInfo, options);
     recordingCanvas.DetachBrush();
 }

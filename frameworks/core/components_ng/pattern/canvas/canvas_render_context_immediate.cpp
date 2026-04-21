@@ -50,4 +50,10 @@ LineDashParam CanvasRenderContextImmediate::GetLineDash() const
     CHECK_NULL_RETURN(paintMethod_, {});
     return paintMethod_->GetLineDashInner(); // wait for recordingCanvas storing in CanvasRenderContext
 }
+
+std::optional<bool> CanvasRenderContextImmediate::GetAntialiasExt() const
+{
+    CHECK_NULL_RETURN(paintMethod_, std::nullopt);
+    return paintMethod_->GetAntialiasExtInner(); // wait for recordingCanvas storing in CanvasRenderContext
+}
 } // namespace OHOS::Ace::NG

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "test/mock/base/mock_system_properties.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #include "test/unittest/core/pattern/relative_container/relative_container_base_test_ng.h"
 using namespace std;
 namespace OHOS::Ace::NG {

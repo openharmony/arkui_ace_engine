@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
@@ -26,6 +25,19 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 const GENERATED_ArkUIEventTargetInfoAccessor* GetEventTargetInfoAccessor();
 const GENERATED_ArkUIScrollableTargetInfoAccessor* GetScrollableTargetInfoAccessor();
+namespace {
+bool IsNodeBelongsTo(const RefPtr<FrameNode>& startNode, int32_t uniqueId)
+{
+    auto node = startNode;
+    while (node) {
+        if (node->GetId() == uniqueId) {
+            return true;
+        }
+        node = node->GetAncestorNodeOfFrame(false);
+    }
+    return false;
+}
+} // namespace
 namespace GestureRecognizerAccessor {
 void DestroyPeerImpl(Ark_GestureRecognizer peer)
 {
@@ -104,10 +116,12 @@ Ark_EventTargetInfo GetEventTargetInfoImpl(Ark_GestureRecognizer peer)
         auto scrollableTargetInfoPeer = GetScrollableTargetInfoAccessor()->construct();
         scrollableTargetInfoPeer->SetPattern(pattern);
         scrollableTargetInfoPeer->id = attachNode->GetInspectorIdValue("");
+        scrollableTargetInfoPeer->uniqueId = attachNode->GetId();
         result = scrollableTargetInfoPeer;
     } else {
         auto eventTargetInfoPeer = GetEventTargetInfoAccessor()->construct();
         eventTargetInfoPeer->id = attachNode->GetInspectorIdValue("");
+        eventTargetInfoPeer->uniqueId = attachNode->GetId();
         eventTargetInfoPeer->isScrollableComponent_ = false;
         result = eventTargetInfoPeer;
     }
@@ -141,6 +155,15 @@ void PreventBeginImpl(Ark_GestureRecognizer peer)
     CHECK_NULL_VOID(recognizer);
     recognizer->SetPreventBegin(true);
 }
+Ark_Boolean IsHostBelongsToImpl(Ark_GestureRecognizer peer,
+                                Ark_Int32 uniqueId)
+{
+    CHECK_NULL_RETURN(peer, false);
+    auto recognizer = peer->GetRecognizer().Upgrade();
+    CHECK_NULL_RETURN(recognizer, false);
+    auto node = recognizer->GetAttachedNode().Upgrade();
+    return Converter::ArkValue<Ark_Boolean>(IsNodeBelongsTo(node, uniqueId));
+}
 } // GestureRecognizerAccessor
 const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor()
 {
@@ -159,6 +182,7 @@ const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor()
         GestureRecognizerAccessor::GetFingerCountImpl,
         GestureRecognizerAccessor::IsFingerCountLimitImpl,
         GestureRecognizerAccessor::PreventBeginImpl,
+        GestureRecognizerAccessor::IsHostBelongsToImpl,
     };
     return &GestureRecognizerAccessorImpl;
 }

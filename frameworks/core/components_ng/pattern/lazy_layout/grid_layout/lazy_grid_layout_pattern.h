@@ -16,6 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LAZY_LAYOUT_LAZY_GRID_LAYOUT_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LAZY_LAYOUT_LAZY_GRID_LAYOUT_PATTERN_H
 
+#include <functional>
+#include <utility>
+
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
@@ -26,7 +29,7 @@
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT LazyGridLayoutPattern : public LazyLayoutPattern {
+class ACE_FORCE_EXPORT LazyGridLayoutPattern : public LazyLayoutPattern {
     DECLARE_ACE_TYPE(LazyGridLayoutPattern, LazyLayoutPattern);
 
 public:
@@ -55,6 +58,16 @@ public:
     ScopeFocusAlgorithm GetScopeFocusAlgorithm() override;
 
     void OnAttachToMainTree() override;
+    void OnInActive() override;
+
+    // 判断当前组件是否为 DynamicLayout
+    bool IsDynamicLayout() const;
+
+    // DynamicLayout 支持：设置动态布局标志
+    void SetDynamicLayoutOptions(bool isDynamic)
+    {
+        isDynamicLayout_ = isDynamic;
+    }
 
     AdjustOffset GetAdjustOffset() const override
     {
@@ -68,16 +81,31 @@ public:
         return ret;
     }
 
+    void SetOnVisibleIndexesChange(std::function<void(int32_t, int32_t)>&& onVisibleIndexesChange)
+    {
+        onVisibleIndexesChange_ = std::move(onVisibleIndexesChange);
+    }
+
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    bool IsVerticalContainer(const RefPtr<UINode>& node);
 
     void PostIdleTask();
     void ProcessIdleTask(int64_t deadline);
+    std::pair<int32_t, int32_t> GetVisibleIndexesRangeForCallback() const;
+    void FireOnVisibleIndexesChange();
+    void FireOnVisibleIndexesChange(const std::pair<int32_t, int32_t>& range);
 
     Axis axis_ = Axis::VERTICAL;
     int32_t itemTotalCount_ = 0;
 
     RefPtr<LazyGridLayoutInfo> layoutInfo_;
+
+    // DynamicLayout 标识
+    bool isDynamicLayout_ = false;
+    bool hasVisibleIndexesChangeFired_ = false;
+    std::function<void(int32_t, int32_t)> onVisibleIndexesChange_;
+    std::pair<int32_t, int32_t> lastVisibleIndexesRange_ = { -1, -1 };
 
     ACE_DISALLOW_COPY_AND_MOVE(LazyGridLayoutPattern);
 };

@@ -67,7 +67,7 @@ void SyncItemDragEvent(
         std::move(onMoveThroughCallback), std::move(onDropCallback));
 }
 void SyncOnMoveOpsImpl(Ark_NativePointer node,
-                       const Array_NativePointer* additionalChild,
+                       const Array_Pointer* additionalChild,
                        const Opt_OnMoveHandler* onMoveOps,
                        const Opt_ItemDragEventHandler* onMoveDragEventOps)
 {

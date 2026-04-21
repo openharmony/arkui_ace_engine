@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
 
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/qrcode/qrcode_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -41,6 +42,11 @@ void QRCodeModelNG::Create(const std::string& value)
         pros->ResetQRBackgroundColorSetByUser();
     }
     ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, Value, value);
+    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        auto qrcodeTheme = frameNode->GetTheme<QrcodeTheme>(true);
+        CHECK_NULL_VOID(qrcodeTheme);
+        ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, qrcodeTheme->GetBackgroundColor());
+    }
 }
 
 void QRCodeModelNG::SetQRCodeColor(const Color& color)
@@ -124,9 +130,9 @@ void HandleColorResource(const RefPtr<QRCodePattern>& pattern, const RefPtr<Reso
         CHECK_NULL_VOID(pattern);
         Color result;
         if (!ResourceParseUtils::ParseResColor(resObj, result)) {
-            auto pipeline = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            RefPtr<QrcodeTheme> qrCodeTheme = pipeline->GetTheme<QrcodeTheme>();
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            auto qrCodeTheme = host->GetTheme<QrcodeTheme>(true);
             CHECK_NULL_VOID(qrCodeTheme);
             result = qrCodeTheme->GetQrcodeColor();
         }
@@ -146,9 +152,9 @@ void HandleBackgroundColorResource(const RefPtr<QRCodePattern>& pattern, const R
         CHECK_NULL_VOID(pattern);
         Color result;
         if (!ResourceParseUtils::ParseResColor(resObj, result)) {
-            auto pipeline = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            RefPtr<QrcodeTheme> qrCodeTheme = pipeline->GetTheme<QrcodeTheme>();
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            auto qrCodeTheme = host->GetTheme<QrcodeTheme>(true);
             CHECK_NULL_VOID(qrCodeTheme);
             result = qrCodeTheme->GetBackgroundColor();
         }
@@ -224,5 +230,10 @@ void QRCodeModelNG::CreateQRCodeModelNG(const std::string& value)
         pros->ResetQRBackgroundColorSetByUser();
     }
     ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, Value, value);
+    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        auto qrcodeTheme = frameNode->GetTheme<QrcodeTheme>(true);
+        CHECK_NULL_VOID(qrcodeTheme);
+        ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, qrcodeTheme->GetBackgroundColor());
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -120,14 +120,6 @@ void SpanModelNG::SetFont(const Font& value)
     }
 }
 
-void SpanModelNG::ResetFont()
-{
-    ResetFontSize();
-    ResetFontWeight();
-    ResetFontFamily();
-    ResetItalicFontStyle();
-}
-
 void SpanModelNG::SetFontSize(const Dimension& value)
 {
     ACE_UPDATE_SPAN_PROPERTY(FontSize, value);
@@ -143,11 +135,6 @@ void SpanModelNG::SetTextColor(const Color& value)
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     CHECK_NULL_VOID(spanNode);
     spanNode->UpdateSpanTextColor(value);
-}
-
-void SpanModelNG::ResetTextColor()
-{
-    ACE_RESET_SPAN_PROPERTY(TextColor);
 }
 
 void SpanModelNG::SetItalicFontStyle(Ace::FontStyle value)
@@ -223,6 +210,16 @@ void SpanModelNG::SetTextDecorationStyle(Ace::TextDecorationStyle value)
 void SpanModelNG::SetTextDecorationColor(const Color& value)
 {
     ACE_UPDATE_SPAN_PROPERTY(TextDecorationColor, value);
+}
+
+void SpanModelNG::SetFontVariations(const FONT_VARIATIONS_LIST& value)
+{
+    ACE_UPDATE_SPAN_PROPERTY(FontVariations, value);
+}
+
+void SpanModelNG::ResetFontVariations()
+{
+    ACE_RESET_SPAN_PROPERTY(FontVariations);
 }
 
 void SpanModelNG::SetLineThicknessScale(float value)
@@ -540,6 +537,18 @@ void SpanModelNG::ResetTextDecorationColor(UINode *uiNode)
     ACE_RESET_NODE_SPAN_PROPERTY(TextDecorationColor, uiNode);
 }
 
+void SpanModelNG::SetFontVariations(UINode* uiNode, const FONT_VARIATIONS_LIST& value)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
+    CHECK_NULL_VOID(spanNode);
+    spanNode->UpdateFontVariations(value);
+}
+
+void SpanModelNG::ResetFontVariations(UINode* uiNode)
+{
+    ACE_RESET_NODE_SPAN_PROPERTY(FontVariations, uiNode);
+}
+
 void SpanModelNG::SetLineThicknessScale(UINode *uiNode, float value)
 {
     auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
@@ -587,23 +596,15 @@ void SpanModelNG::SetFont(UINode* uiNode, const Font& value)
 {
     if (value.fontSize.has_value()) {
         SetFontSize(uiNode, value.fontSize.value());
-    } else {
-        ResetFontSize(uiNode);
     }
     if (value.fontWeight.has_value()) {
         SetFontWeight(uiNode, value.fontWeight.value());
-    } else {
-        ResetFontWeight(uiNode);
     }
     if (!value.fontFamilies.empty()) {
         SetFontFamily(uiNode, value.fontFamilies);
-    } else {
-        ResetFontFamily(uiNode);
     }
     if (value.fontStyle.has_value()) {
         SetItalicFontStyle(uiNode, value.fontStyle.value());
-    } else {
-        ResetItalicFontStyle(uiNode);
     }
     if (value.variableFontWeight.has_value()) {
         SetVariableFontWeight(uiNode, value.variableFontWeight.value());

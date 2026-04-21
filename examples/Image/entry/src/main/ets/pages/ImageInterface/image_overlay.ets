@@ -44,16 +44,16 @@ export const TestData: TestAttributes[] = [
     state: AnimationStatus.Initial,
     images: [
       {
-        src: $r('app.media.flower')
+        src: $r('app.media.startIcon')
       },
       {
-        src: $r('app.media.ic_jpg')
+        src: $r('app.media.background')
       },
       {
-        src: $r('app.media.jpeg_690_669')
+        src: $r('app.media.foreground')
       },
       {
-        src: $r('app.media.ic_bmp')
+        src: $r('app.media.startIcon')
       }
     ]
   },
@@ -66,22 +66,22 @@ export const TestData: TestAttributes[] = [
     state: AnimationStatus.Running,
     images: [
       {
-        src: $r('app.media.webp')
+        src: $r('app.media.background')
       },
       {
-        src: $r('app.media.ic_svg')
+        src: $r('app.media.startIcon')
       },
       {
-        src: $r('app.media.ic_gif')
+        src: $r('app.media.background')
       },
       {
-        src: $r('app.media.app_icon')
+        src: $r('app.media.startIcon')
       }
     ]
   },
   {
     images: [{
-      src: $r('app.media.flower'),
+      src: $r('app.media.startIcon'),
       width: 200,
       height: 100,
       top: 10,
@@ -95,14 +95,14 @@ export const TestData: TestAttributes[] = [
         left: 0
       },
       {
-        src: $r('app.media.app_icon'),
+        src: $r('app.media.startIcon'),
         width: '50vp',
         height: '50vp',
         top: '50vp',
         left: '50vp'
       },
       {
-        src: $r('app.media.ic_svg'),
+        src: $r('app.media.startIcon'),
         width: 100,
         height: 100,
         top: -10,
@@ -124,7 +124,7 @@ export const TestData: TestAttributes[] = [
   },
   {
     images: [{
-      src: $r('app.media.p3'),
+      src: $r('app.media.startIcon'),
       width: 100,
       height: 200,
       top: 0,
@@ -132,7 +132,7 @@ export const TestData: TestAttributes[] = [
       duration: 6000
     },
       {
-        src: $r('app.media.jpeg_690_669'),
+        src: $r('app.media.foreground'),
         width: '50vp',
         height: '100vp',
         top: '10vp',
@@ -164,7 +164,7 @@ export const TestData: TestAttributes[] = [
         duration: 2000
       },
       {
-        src: $r('app.media.200flowers'),
+        src: $r('app.media.startIcon'),
         width: 100,
         height: 200,
         top: 10,
@@ -172,7 +172,7 @@ export const TestData: TestAttributes[] = [
         duration: 6000
       },
       {
-        src: $r('app.media.jpeg_690_669'),
+        src: $r('app.media.foreground'),
         width: '50vp',
         height: '100vp',
         top: '5vp',
@@ -196,7 +196,7 @@ export const TestData: TestAttributes[] = [
         duration: 2000
       },
       {
-        src: $r('app.media.ic_public_refresh'),
+        src: $r('app.media.startIcon'),
         width: 300,
         height: 120,
         top: -400,
@@ -204,7 +204,7 @@ export const TestData: TestAttributes[] = [
         duration: 2000
       },
       {
-        src: $r('app.media.png_608_317'),
+        src: $r('app.media.startIcon'),
         width: 350,
         height: 0,
         top: 40,
@@ -220,7 +220,7 @@ export const TestData: TestAttributes[] = [
         duration: 6000
       },
       {
-        src: $r('app.media.alt_svg'),
+        src: $r('app.media.startIcon'),
         width: 0,
         height: '250vp',
         top: 40,
@@ -252,7 +252,7 @@ export const TestData: TestAttributes[] = [
       duration: 2000
     },
       {
-        src: $r('app.media.png_525_539'),
+        src: $r('app.media.background'),
         width: 100,
         height: 200,
         top: 10,
@@ -260,7 +260,7 @@ export const TestData: TestAttributes[] = [
         duration: 6000
       },
       {
-        src: $r('app.media.jpeg_690_669'),
+        src: $r('app.media.foreground'),
         width: '50vp',
         height: '100vp',
         top: 10,
@@ -276,21 +276,21 @@ export const TestData: TestAttributes[] = [
   },
   {
     images: [{
-      src: $r('app.media.png_608_317'),
+      src: $r('app.media.startIcon'),
       width: 300,
       height: 100,
       top: 40,
       left: 30
     },
       {
-        src: $r('app.media.png_525_539'),
+        src: $r('app.media.background'),
         width: 100,
         height: 200,
         top: 10,
         left: 20
       },
       {
-        src: $r('app.media.jpeg_690_669'),
+        src: $r('app.media.foreground'),
         width: '50vp',
         height: '100vp',
         top: 10,
@@ -318,7 +318,7 @@ export const TestData: TestAttributes[] = [
         left: 30
       },
       {
-        src: $r('app.media.ic_public_refresh'),
+        src: $r('app.media.startIcon'),
         width: 300,
         height: 100,
         top: 40,
@@ -332,7 +332,7 @@ export const TestData: TestAttributes[] = [
         left: 30
       },
       {
-        src: $r('app.media.alt_svg'),
+        src: $r('app.media.startIcon'),
         width: 300,
         height: 100,
         top: 40,
@@ -362,7 +362,7 @@ export const TestData: TestAttributes[] = [
       duration: 2000
     },
       {
-        src: $r('app.media.png_525_539'),
+        src: $r('app.media.background'),
         width: 100,
         height: 200,
         top: 10,
@@ -370,7 +370,7 @@ export const TestData: TestAttributes[] = [
         duration: 6000
       },
       {
-        src: $r('app.media.jpeg_690_669'),
+        src: $r('app.media.foreground'),
         width: '50vp',
         height: '100vp',
         top: 10,
@@ -386,7 +386,7 @@ export const TestData: TestAttributes[] = [
   },
   {
     images: [{
-      src: $r('app.media.png_525_539'),
+      src: $r('app.media.background'),
       width: 100,
       height: 200,
       top: 10,
@@ -394,7 +394,7 @@ export const TestData: TestAttributes[] = [
       duration: 6000
     },
       {
-        src: $r('app.media.jpeg_690_669'),
+        src: $r('app.media.foreground'),
         width: '50vp',
         height: '100vp',
         top: 10,

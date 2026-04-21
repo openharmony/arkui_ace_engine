@@ -137,6 +137,7 @@ void InitNativeMainSize(const JSRef<JSObject>& childrenSizeObj, RefPtr<NG::ListC
         auto frameNode =  jsChildrenMainSize->GetHost();
         CHECK_NULL_VOID(frameNode);
         auto context = frameNode->GetContext();
+        CHECK_NULL_VOID(context);
         context->AddBuildFinishCallBack([start, deleteCount, change = std::move(newChildrenSize), weak]() {
             auto listChildrenMainSize = weak.Upgrade();
             CHECK_NULL_VOID(listChildrenMainSize);
@@ -334,7 +335,7 @@ void JSList::SetChildrenMainSize(const JSRef<JSObject>& childrenSizeObj, NG::Fra
         jsChildrenMainSize = nativeMainSizeObj->Unwrap<JSListChildrenMainSize>();
     }
     auto frameNode = node ? node : NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    if (nativeMainSize->IsEmpty() || !nativeMainSize->IsObject() ||
+    if (nativeMainSize->IsEmpty() || !nativeMainSize->IsObject() || listChildrenMainSize->NeedSync() ||
         (jsChildrenMainSize && !jsChildrenMainSize->IsHostEqual(frameNode))) {
         InitNativeMainSize(childrenSizeObj, listChildrenMainSize);
         listChildrenMainSize->UpdateDefaultSize(Dimension(defaultSize, DimensionUnit::VP).ConvertToPx());
@@ -1015,6 +1016,19 @@ void JSList::SetSupportEmptyBranchInLazyLoading(const JSCallbackInfo& args)
     ListModel::GetInstance()->SetSupportEmptyBranchInLazyLoading(supportEmptyBranch);
 }
 
+void JSList::SetBackPressBehavior(const JSCallbackInfo& args)
+{
+    bool closeSwipeAction = true;
+    if (args.Length() >= 1 && args[0]->IsObject()) {
+        auto behaviorObj = JSRef<JSObject>::Cast(args[0]);
+        auto closeSwipeActionValue = behaviorObj->GetProperty("closeSwipeAction");
+        if (closeSwipeActionValue->IsBoolean()) {
+            closeSwipeAction = closeSwipeActionValue->ToBoolean();
+        }
+    }
+    ListModel::GetInstance()->SetBackPressCloseSwipeAction(closeSwipeAction);
+}
+
 void JSList::JSBind(BindingTarget globalObj)
 {
     JSClass<JSList>::Declare("List");
@@ -1045,6 +1059,7 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("focusWrapMode", &JSList::SetFocusWrapMode);
     JSClass<JSList>::StaticMethod("maintainVisibleContentPosition", &JSList::MaintainVisibleContentPosition);
     JSClass<JSList>::StaticMethod("supportEmptyBranchInLazyLoading", &JSList::SetSupportEmptyBranchInLazyLoading);
+    JSClass<JSList>::StaticMethod("backPressBehavior", &JSList::SetBackPressBehavior);
     JSClass<JSList>::StaticMethod("stackFromEnd", &JSList::SetStackFromEnd);
     JSClass<JSList>::StaticMethod("syncLoad", &JSList::SetSyncLoad);
     JSClass<JSList>::StaticMethod("editModeOptions", &JSList::SetEditModeOptions);

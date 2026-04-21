@@ -14,10 +14,9 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("text_input_test") {
-  module_name = "DrawingSet-Line"
+  module_name = "TextSet-TextInput"
   type = "new"
   sources = [
-    "$ace_root/test/mock/core/common/mock_font_manager.cpp",
     "text_area_base.cpp",
     "text_area_decoration_test.cpp",
     "text_area_menu_test.cpp",
@@ -28,7 +27,9 @@ ace_unittest("text_input_test") {
     "text_field_content_modifier_test.cpp",
     "text_field_keyevent_test.cpp",
     "text_field_manager_test_ng.cpp",
+    "text_field_manager_test_ng_two.cpp",
     "text_field_model_static_test.cpp",
+    "text_field_model_static_test_two.cpp",
     "text_field_overlay_modifier_test.cpp",
     "text_field_pattern_func_test.cpp",
     "text_field_pattern_onwill.cpp",
@@ -37,6 +38,7 @@ ace_unittest("text_input_test") {
     "text_input_check_test.cpp",
     "text_input_cursor_test.cpp",
     "text_input_decoration_test.cpp",
+    "text_input_decorator_test.cpp",
     "text_input_menu_test.cpp",
     "text_input_modify_test.cpp",
     "text_input_preview_test.cpp",
@@ -47,8 +49,20 @@ ace_unittest("text_input_test") {
     "text_input_wordbreak_test.cpp",
     "text_select_controller_test.cpp",
   ]
-  cflags = [ "-fno-access-control" ]
 
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "text_input_test_min.cpp",
+      "text_input_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "text_input_test_min.cpp",
+      "text_input_test_core.cpp",
+    ]
+  }
+  cflags = [ "-fno-access-control" ]
   external_deps = []
 }
 
@@ -56,8 +70,10 @@ ace_unittest("text_field_test_ng") {
   module_name = "TextSet-TextInput"
   type = "new"
   sources = [
-    "$ace_root/test/mock/core/common/mock_font_manager.cpp",
+    "text_field_layout_algorithm_test.cpp",
+    "text_field_layout_algorithm_test_two.cpp",
     "text_field_pattern_func_test_two.cpp",
+    "text_field_pattern_func_test_three.cpp",
     "text_field_test_ng_five.cpp",
     "text_field_test_ng_four.cpp",
     "text_field_test_ng_one.cpp",
@@ -65,16 +81,16 @@ ace_unittest("text_field_test_ng") {
     "text_field_test_ng_two.cpp",
     "text_input_base.cpp",
   ]
+
   cflags = [ "-fno-access-control" ]
 
   external_deps = []
 }
 
 ace_unittest("text_input_pattern_test") {
-  module_name = "TextSet-Text"
+  module_name = "TextSet-TextInput"
   type = "new"
   sources = [
-    "$ace_root/test/mock/core/common/mock_font_manager.cpp",
     "text_area_base.cpp",
     "text_field_pattern_test.cpp",
     "text_field_pattern_testeight.cpp",
@@ -86,9 +102,24 @@ ace_unittest("text_input_pattern_test") {
     "text_field_pattern_testsix.cpp",
     "text_field_pattern_testten.cpp",
     "text_field_pattern_testthree.cpp",
+    "text_field_pattern_testtwelve.cpp",
     "text_field_pattern_testtwo.cpp",
     "text_input_base.cpp",
+    "text_field_pattern_for_tv.cpp",
+    "text_field_pattern_ai_menu_option_test.cpp",
   ]
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "text_input_test_min.cpp",
+      "text_input_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "text_input_test_min.cpp",
+      "text_input_test_core.cpp",
+    ]
+  }
   cflags = [ "-fno-access-control" ]
 
   external_deps = []
@@ -102,6 +133,7 @@ ace_unittest("text_emoji_test") {
     "text_input_base.cpp",
     "text_input_emoji_test.cpp",
   ]
+
   cflags = [ "-fno-access-control" ]
 
   external_deps = [
@@ -111,11 +143,10 @@ ace_unittest("text_emoji_test") {
 }
 
 ace_unittest("text_input_listener_test") {
-  module_name = "TextSet-InputListener"
+  module_name = "TextSet-TextInput"
   type = "new"
   sources = [
     "$ace_root/frameworks/core/components_ng/pattern/text_field/on_text_changed_listener_impl.cpp",
-    "$ace_root/test/mock/core/common/mock_font_manager.cpp",
     "on_text_changed_listener_impl_test.cpp",
     "text_field_pattern_multi_thread_test.cpp",
     "text_input_base.cpp",
@@ -124,9 +155,10 @@ ace_unittest("text_input_listener_test") {
 
   external_deps = [
     "input:libmmi-client",
+    "ipc:ipc_single",
     "hilog:libhilog",
   ]
   if (defined(global_parts_info.inputmethod_imf)) {
-    external_deps += [ "imf:inputmethod_client" ]
+    external_deps += [ "imf:inputmethod_client", "ability_base:want" ]
   }
 }

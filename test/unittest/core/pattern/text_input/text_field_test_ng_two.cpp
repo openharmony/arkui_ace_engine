@@ -15,7 +15,7 @@
 
 #include "text_input_base.h"
 
-#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
 
 namespace OHOS::Ace::NG {
 
@@ -437,6 +437,28 @@ HWTEST_F(TextFieldTestNgTwo, testSelectedBackgroundColor001, TestSize.Level1)
     paintProperty->UpdateSelectedBackgroundColor(Color::RED);
     frameNode_->MarkModifyDone();
     EXPECT_EQ(paintProperty->GetSelectedBackgroundColor(), Color::RED);
+}
+
+/**
+ * @tc.name: testResetSelectedBackgroundColor001
+ * @tc.desc: test textarea ResetSelectedBackgroundColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTestNgTwo, testResetSelectedBackgroundColor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.ResetSelectedBackgroundColor();
+    });
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+
+    /**
+     * @tc.step: step2. Get selectedBackgroundColor
+     */
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(paintProperty->GetSelectedBackgroundColorValue(DEFAULT_SELECTED_BACKFROUND_COLOR), Color::BLUE);
 }
 
 /**

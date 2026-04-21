@@ -16,6 +16,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("radio_test_ng") {
   module_name = "FormAndSelection-Radio"
   type = "new"
+
   sources = [
     "radio_model_static_test_ng.cpp",
     "radio_node_test_ng.cpp",
@@ -26,4 +27,11 @@ ace_unittest("radio_test_ng") {
     "radio_test_two_ng.cpp",
     "radio_value_test_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "radio_test_core.cpp" ]
+  } else {
+    sources += [ "radio_test_core.cpp" ]
+  }
 }

@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "pan_recognizer_peer.h"
@@ -61,10 +60,9 @@ Ark_Float64 GetDistanceImpl(Ark_PanRecognizer peer)
     auto distance_new = context->ConvertPxToVp(Dimension(distance, DimensionUnit::PX));
     return ArkValue<Ark_Float64>(distance_new);
 }
-
-Map_SourceTool_Float64 GetDistanceMapImpl(Ark_PanRecognizer peer)
+Map_SourceTool_F64 GetDistanceMapImpl(Ark_PanRecognizer peer)
 {
-    Map_SourceTool_Float64 result = {0, nullptr, nullptr};
+    Map_SourceTool_F64 result = {0, nullptr, nullptr};
     CHECK_NULL_RETURN(peer, result);
 
     auto recognizer = peer->GetRecognizer().Upgrade();

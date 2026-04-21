@@ -50,6 +50,8 @@ public:
     void SetScale(float x, float y);
     void SetClipPath(const std::string& svgPath);
     void SetOnTouch(TouchEventFunc&& touchEventFunc);
+    void AddOnTouch(const RefPtr<NG::TouchEventImpl>& touchEventImpl);
+    void RemoveTouchEvent(const RefPtr<NG::TouchEventImpl>& touchEventImpl);
     void SetOnClick(GestureEventFunc&& clickEventFunc);
     void SetBorderRadius(const Dimension& radius);
     void SetBackgroundColor(const Color& color);

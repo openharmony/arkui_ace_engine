@@ -13,14 +13,12 @@
  * limitations under the License.
  */
 
-#ifdef ENABLE_STANDARD_INPUT
-#include "extra_config.h"
-#endif
 #include "arkoala_api_generated.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/ime_client_peer.h"
 #ifdef ENABLE_STANDARD_INPUT
+#include "core/common/ime/ime_extra_config.h"
 #include "core/interfaces/native/implementation/ime_extra_config_peer.h"
 #endif
 
@@ -41,12 +39,13 @@ Ark_NativePointer GetFinalizerImpl()
 void SetExtraConfigImpl(Ark_IMEClient peer,
                         Ark_InputMethodExtraConfig config)
 {
-    CHECK_NULL_VOID(config && peer);
 #ifdef ENABLE_STANDARD_INPUT
+    CHECK_NULL_VOID(config && config->aceExtraConfig_ && peer);
     RefPtr<IMEExtraInfo> imeExtraConfig = AceType::MakeRefPtr<IMEExtraInfo>(
-        config->extraInfo.get(), [configPtr = config->extraInfo]() mutable { configPtr.reset(); });
+        config->aceExtraConfig_->GetRawExtraConfig(),
+        [configPtr = config->aceExtraConfig_]() mutable { configPtr.Reset(); });
     peer->extraInfo = imeExtraConfig;
-    PeerUtils::DestroyPeer(config);
+    InputMethodExtraConfigPeer::Destroy(config);
 #endif
 }
 Ark_Int64 GetNodeIdImpl(Ark_IMEClient peer)

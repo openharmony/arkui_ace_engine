@@ -22,12 +22,12 @@
 
 #define private public
 #define protected public
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_paragraph.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
 
 #include "core/common/resource/resource_object.h"
 #include "core/components_ng/base/frame_node.h"
@@ -547,7 +547,7 @@ HWTEST_F(SymbolTestNg, SymbolPropertyTest011, TestSize.Level1)
     ASSERT_NE(symbolStyle, nullptr);
 
     auto textStyle = CreateTextStyleUsingTheme(symbolStyle, nullptr, nullptr, true);
-    
+
     auto symbolType = textStyle.GetSymbolType();
     EXPECT_EQ(symbolType, SymbolType::CUSTOM);
 }
@@ -592,10 +592,10 @@ HWTEST_F(SymbolTestNg, SymbolPropertyTest012, TestSize.Level1)
 }
 
 /*
-* @tc.name: SymbolPropertyTest013
-* @tc.desc: test symbol set font properties of symbol
-* @tc.type: FUNC
-*/
+ * @tc.name: SymbolPropertyTest013
+ * @tc.desc: test symbol set font properties of symbol
+ * @tc.type: FUNC
+ */
 HWTEST_F(SymbolTestNg, SymbolPropertyTest013, TestSize.Level1)
 {
     /**
@@ -678,7 +678,6 @@ HWTEST_F(SymbolTestNg, SymbolPropertyTest014, TestSize.Level1)
     EXPECT_EQ(symbolOptions.GetCommonSubType(), OHOS::Ace::CommonSubType::UP);
     EXPECT_EQ(textStyle.GetEffectStrategy(), EFFECT_STRATEGY);
 }
-
 
 /**
  * @tc.name: SymbolPropertyTest015

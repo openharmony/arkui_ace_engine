@@ -38,7 +38,7 @@ HWTEST_F(TextAreaModifierTest, setMaxFontScaleTestMaxFontScaleInvalidValues, Tes
         modifier_->setMaxFontScale(node_, &inputValueMaxFontScale);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_FONT_SCALE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_MAX_FONT_SCALE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_MAX_FONT_SCALE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setMaxFontScale, attribute: maxFontScale";
     };
 
@@ -56,10 +56,10 @@ HWTEST_F(TextAreaModifierTest, setMaxFontScaleTestMaxFontScaleInvalidValues, Tes
 HWTEST_F(TextAreaModifierTest, setHeightAdaptivePolicyTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HEIGHT_ADAPTIVE_POLICY_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_HEIGHT_ADAPTIVE_POLICY_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_HEIGHT_ADAPTIVE_POLICY_DEFAULT_VALUE)) <<
         "Default value for attribute 'heightAdaptivePolicy'";
 }
 
@@ -84,7 +84,7 @@ HWTEST_F(TextAreaModifierTest, setHeightAdaptivePolicyTestHeightAdaptivePolicyVa
         modifier_->setHeightAdaptivePolicy(node_, &inputValueHeightAdaptivePolicy);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HEIGHT_ADAPTIVE_POLICY_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setHeightAdaptivePolicy, attribute: heightAdaptivePolicy";
     };
 
@@ -115,7 +115,7 @@ HWTEST_F(TextAreaModifierTest, setHeightAdaptivePolicyTestHeightAdaptivePolicyIn
         modifier_->setHeightAdaptivePolicy(node_, &inputValueHeightAdaptivePolicy);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HEIGHT_ADAPTIVE_POLICY_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_HEIGHT_ADAPTIVE_POLICY_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_HEIGHT_ADAPTIVE_POLICY_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setHeightAdaptivePolicy, attribute: heightAdaptivePolicy";
     };
 
@@ -132,10 +132,10 @@ HWTEST_F(TextAreaModifierTest, setHeightAdaptivePolicyTestHeightAdaptivePolicyIn
 HWTEST_F(TextAreaModifierTest, DISABLED_setMaxLinesTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_LINES_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MAX_LINES_DEFAULT_VALUE) << "Default value for attribute 'maxLines'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_MAX_LINES_DEFAULT_VALUE)) << "Default value for attribute 'maxLines'";
 }
 
 /*
@@ -158,7 +158,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setMaxLinesTestMaxLinesValidValues, Test
         modifier_->setMaxLines(node_, &inputValueMaxLines);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_LINES_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setMaxLines, attribute: maxLines";
     };
 
@@ -187,7 +187,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setMaxLinesTestMaxLinesInvalidValues, Te
         modifier_->setMaxLines(node_, &inputValueMaxLines);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_LINES_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_MAX_LINES_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_MAX_LINES_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setMaxLines, attribute: maxLines";
     };
 
@@ -206,10 +206,10 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setMaxLinesTestMaxLinesInvalidValues, Te
 HWTEST_F(TextAreaModifierTest, setWordBreakTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WORD_BREAK_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_WORD_BREAK_DEFAULT_VALUE) << "Default value for attribute 'wordBreak'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_WORD_BREAK_DEFAULT_VALUE)) << "Default value for attribute 'wordBreak'";
 }
 
 /*
@@ -232,7 +232,7 @@ HWTEST_F(TextAreaModifierTest, setWordBreakTestWordBreakValidValues, TestSize.Le
         modifier_->setWordBreak(node_, &inputValueWordBreak);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WORD_BREAK_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setWordBreak, attribute: wordBreak";
     };
 
@@ -261,7 +261,7 @@ HWTEST_F(TextAreaModifierTest, setWordBreakTestWordBreakInvalidValues, TestSize.
         modifier_->setWordBreak(node_, &inputValueWordBreak);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WORD_BREAK_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_WORD_BREAK_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_WORD_BREAK_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setWordBreak, attribute: wordBreak";
     };
 
@@ -290,19 +290,19 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setLineBreakStrategyTestPlaceholder, Tes
 HWTEST_F(TextAreaModifierTest, setDecorationTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultDecoration =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DECORATION_NAME);
-    std::string resultStr;
+    std::unique_ptr<JsonValue> resultDecoration = GetAttrObject(jsonValue, ATTRIBUTE_DECORATION_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(resultDecoration, ATTRIBUTE_DECORATION_I_TYPE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DECORATION_I_TYPE_DEFAULT_VALUE) << "Default value for attribute 'decoration.type'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_DECORATION_I_TYPE_DEFAULT_VALUE)) <<
+        "Default value for attribute 'decoration.type'";
 
     resultStr = GetAttrValue<std::string>(resultDecoration, ATTRIBUTE_DECORATION_I_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DECORATION_I_COLOR_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_DECORATION_I_COLOR_DEFAULT_VALUE)) <<
         "Default value for attribute 'decoration.color'";
 
     resultStr = GetAttrValue<std::string>(resultDecoration, ATTRIBUTE_DECORATION_I_STYLE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DECORATION_I_STYLE_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_DECORATION_I_STYLE_DEFAULT_VALUE)) <<
         "Default value for attribute 'decoration.style'";
 }
 
@@ -329,9 +329,9 @@ HWTEST_F(TextAreaModifierTest, setDecorationTestDecorationTypeValidValues, TestS
         WriteTo(inputValueDecoration).type = value;
         modifier_->setDecoration(node_, &inputValueDecoration);
         auto jsonValue = GetJsonValue(node_);
-        auto resultDecoration = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DECORATION_NAME);
+        auto resultDecoration = GetAttrObject(jsonValue, ATTRIBUTE_DECORATION_NAME);
         auto resultStr = GetAttrValue<std::string>(resultDecoration, ATTRIBUTE_DECORATION_I_TYPE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setDecoration, attribute: decoration.type";
     };
 
@@ -363,9 +363,9 @@ HWTEST_F(TextAreaModifierTest, setDecorationTestDecorationTypeInvalidValues, Tes
         WriteTo(inputValueDecoration).type = value;
         modifier_->setDecoration(node_, &inputValueDecoration);
         auto jsonValue = GetJsonValue(node_);
-        auto resultDecoration = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DECORATION_NAME);
+        auto resultDecoration = GetAttrObject(jsonValue, ATTRIBUTE_DECORATION_NAME);
         auto resultStr = GetAttrValue<std::string>(resultDecoration, ATTRIBUTE_DECORATION_I_TYPE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_DECORATION_I_TYPE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_DECORATION_I_TYPE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setDecoration, attribute: decoration.type";
     };
 
@@ -397,9 +397,9 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setDecorationTestDecorationColorValidVal
         WriteTo(inputValueDecoration).color = value;
         modifier_->setDecoration(node_, &inputValueDecoration);
         auto jsonValue = GetJsonValue(node_);
-        auto resultDecoration = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DECORATION_NAME);
+        auto resultDecoration = GetAttrObject(jsonValue, ATTRIBUTE_DECORATION_NAME);
         auto resultStr = GetAttrValue<std::string>(resultDecoration, ATTRIBUTE_DECORATION_I_COLOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setDecoration, attribute: decoration.color";
     };
 
@@ -440,9 +440,9 @@ HWTEST_F(TextAreaModifierTest, setDecorationTestDecorationColorInvalidValues, Te
         WriteTo(inputValueDecoration).color = value;
         modifier_->setDecoration(node_, &inputValueDecoration);
         auto jsonValue = GetJsonValue(node_);
-        auto resultDecoration = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DECORATION_NAME);
+        auto resultDecoration = GetAttrObject(jsonValue, ATTRIBUTE_DECORATION_NAME);
         auto resultStr = GetAttrValue<std::string>(resultDecoration, ATTRIBUTE_DECORATION_I_COLOR_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_DECORATION_I_COLOR_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_DECORATION_I_COLOR_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setDecoration, attribute: decoration.color";
     };
 
@@ -481,9 +481,9 @@ HWTEST_F(TextAreaModifierTest, setDecorationTestDecorationStyleValidValues, Test
         WriteTo(inputValueDecoration).style = value;
         modifier_->setDecoration(node_, &inputValueDecoration);
         auto jsonValue = GetJsonValue(node_);
-        auto resultDecoration = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DECORATION_NAME);
+        auto resultDecoration = GetAttrObject(jsonValue, ATTRIBUTE_DECORATION_NAME);
         auto resultStr = GetAttrValue<std::string>(resultDecoration, ATTRIBUTE_DECORATION_I_STYLE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setDecoration, attribute: decoration.style";
     };
 
@@ -515,9 +515,9 @@ HWTEST_F(TextAreaModifierTest, setDecorationTestDecorationStyleInvalidValues, Te
         WriteTo(inputValueDecoration).style = value;
         modifier_->setDecoration(node_, &inputValueDecoration);
         auto jsonValue = GetJsonValue(node_);
-        auto resultDecoration = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DECORATION_NAME);
+        auto resultDecoration = GetAttrObject(jsonValue, ATTRIBUTE_DECORATION_NAME);
         auto resultStr = GetAttrValue<std::string>(resultDecoration, ATTRIBUTE_DECORATION_I_STYLE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_DECORATION_I_STYLE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_DECORATION_I_STYLE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setDecoration, attribute: decoration.style";
     };
 
@@ -534,10 +534,11 @@ HWTEST_F(TextAreaModifierTest, setDecorationTestDecorationStyleInvalidValues, Te
 HWTEST_F(TextAreaModifierTest, setLetterSpacingTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LETTER_SPACING_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_LETTER_SPACING_DEFAULT_VALUE) << "Default value for attribute 'letterSpacing'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_LETTER_SPACING_DEFAULT_VALUE)) <<
+        "Default value for attribute 'letterSpacing'";
 }
 
 /*
@@ -561,7 +562,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setLetterSpacingTestLetterSpacingValidVa
         modifier_->setLetterSpacing(node_, &inputValueLetterSpacing);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LETTER_SPACING_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setLetterSpacing, attribute: letterSpacing";
     };
 
@@ -598,7 +599,7 @@ HWTEST_F(TextAreaModifierTest, setLetterSpacingTestLetterSpacingInvalidValues, T
         modifier_->setLetterSpacing(node_, &inputValueLetterSpacing);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LETTER_SPACING_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_LETTER_SPACING_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_LETTER_SPACING_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setLetterSpacing, attribute: letterSpacing";
     };
 
@@ -625,10 +626,10 @@ HWTEST_F(TextAreaModifierTest, setLetterSpacingTestLetterSpacingInvalidValues, T
 HWTEST_F(TextAreaModifierTest, setLineHeightTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LINE_HEIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_LINE_HEIGHT_DEFAULT_VALUE) << "Default value for attribute 'lineHeight'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_LINE_HEIGHT_DEFAULT_VALUE)) << "Default value for attribute 'lineHeight'";
 }
 
 /*
@@ -652,7 +653,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setLineHeightTestLineHeightValidValues, 
         modifier_->setLineHeight(node_, &inputValueLineHeight);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LINE_HEIGHT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setLineHeight, attribute: lineHeight";
     };
 
@@ -689,7 +690,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setLineHeightTestLineHeightInvalidValues
         modifier_->setLineHeight(node_, &inputValueLineHeight);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LINE_HEIGHT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_LINE_HEIGHT_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_LINE_HEIGHT_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setLineHeight, attribute: lineHeight";
     };
 
@@ -716,10 +717,10 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setLineHeightTestLineHeightInvalidValues
 HWTEST_F(TextAreaModifierTest, setTypeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TYPE_DEFAULT_VALUE) << "Default value for attribute 'type'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_TYPE_DEFAULT_VALUE)) << "Default value for attribute 'type'";
 }
 
 /*
@@ -742,7 +743,8 @@ HWTEST_F(TextAreaModifierTest, setTypeTestTypeValidValues, TestSize.Level1)
         modifier_->setType(node_, &inputValueType);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setType, attribute: type";
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
+            "Input value is: " << input << ", method: setType, attribute: type";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumTextAreaTypeValidValues) {
@@ -770,7 +772,7 @@ HWTEST_F(TextAreaModifierTest, setTypeTestTypeInvalidValues, TestSize.Level1)
         modifier_->setType(node_, &inputValueType);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_TYPE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_TYPE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setType, attribute: type";
     };
 
@@ -787,10 +789,11 @@ HWTEST_F(TextAreaModifierTest, setTypeTestTypeInvalidValues, TestSize.Level1)
 HWTEST_F(TextAreaModifierTest, setEnableAutoFillTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_AUTO_FILL_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_AUTO_FILL_DEFAULT_VALUE) << "Default value for attribute 'enableAutoFill'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ENABLE_AUTO_FILL_DEFAULT_VALUE)) <<
+        "Default value for attribute 'enableAutoFill'";
 }
 
 /*
@@ -813,7 +816,7 @@ HWTEST_F(TextAreaModifierTest, setEnableAutoFillTestEnableAutoFillValidValues, T
         modifier_->setEnableAutoFill(node_, &inputValueEnableAutoFill);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_AUTO_FILL_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setEnableAutoFill, attribute: enableAutoFill";
     };
 
@@ -842,7 +845,7 @@ HWTEST_F(TextAreaModifierTest, setEnableAutoFillTestEnableAutoFillInvalidValues,
         modifier_->setEnableAutoFill(node_, &inputValueEnableAutoFill);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_AUTO_FILL_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_AUTO_FILL_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ENABLE_AUTO_FILL_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setEnableAutoFill, attribute: enableAutoFill";
     };
 
@@ -858,10 +861,11 @@ HWTEST_F(TextAreaModifierTest, setEnableAutoFillTestEnableAutoFillInvalidValues,
 HWTEST_F(TextAreaModifierTest, setContentTypeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTENT_TYPE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_CONTENT_TYPE_DEFAULT_VALUE) << "Default value for attribute 'contentType'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_CONTENT_TYPE_DEFAULT_VALUE)) <<
+        "Default value for attribute 'contentType'";
 }
 
 /*
@@ -885,7 +889,7 @@ HWTEST_F(TextAreaModifierTest, setContentTypeTestContentTypeValidValues, TestSiz
         modifier_->setContentType(node_, &inputValueContentType);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTENT_TYPE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setContentType, attribute: contentType";
     };
 
@@ -915,7 +919,7 @@ HWTEST_F(TextAreaModifierTest, setContentTypeTestContentTypeInvalidValues, TestS
         modifier_->setContentType(node_, &inputValueContentType);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTENT_TYPE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_CONTENT_TYPE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_CONTENT_TYPE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setContentType, attribute: contentType";
     };
 
@@ -934,10 +938,11 @@ HWTEST_F(TextAreaModifierTest, setContentTypeTestContentTypeInvalidValues, TestS
 HWTEST_F(TextAreaModifierTest, setFontFeatureTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_FEATURE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_FONT_FEATURE_DEFAULT_VALUE) << "Default value for attribute 'fontFeature'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_FONT_FEATURE_DEFAULT_VALUE)) <<
+        "Default value for attribute 'fontFeature'";
 }
 
 /*
@@ -960,7 +965,7 @@ HWTEST_F(TextAreaModifierTest, setFontFeatureTestFontFeatureValidValues, TestSiz
         modifier_->setFontFeature(node_, &inputValueFontFeature);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_FEATURE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setFontFeature, attribute: fontFeature";
     };
 
@@ -989,7 +994,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setFontFeatureTestFontFeatureInvalidValu
         modifier_->setFontFeature(node_, &inputValueFontFeature);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_FEATURE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_FONT_FEATURE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_FONT_FEATURE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setFontFeature, attribute: fontFeature";
     };
 
@@ -1008,10 +1013,10 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setFontFeatureTestFontFeatureInvalidValu
 HWTEST_F(TextAreaModifierTest, setEnablePreviewTextTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_PREVIEW_TEXT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_PREVIEW_TEXT_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ENABLE_PREVIEW_TEXT_DEFAULT_VALUE)) <<
         "Default value for attribute 'enablePreviewText'";
 }
 
@@ -1035,7 +1040,7 @@ HWTEST_F(TextAreaModifierTest, setEnablePreviewTextTestEnablePreviewTextValidVal
         modifier_->setEnablePreviewText(node_, &inputValueEnablePreviewText);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_PREVIEW_TEXT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setEnablePreviewText, attribute: enablePreviewText";
     };
 
@@ -1064,7 +1069,7 @@ HWTEST_F(TextAreaModifierTest, setEnablePreviewTextTestEnablePreviewTextInvalidV
         modifier_->setEnablePreviewText(node_, &inputValueEnablePreviewText);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_PREVIEW_TEXT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_PREVIEW_TEXT_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ENABLE_PREVIEW_TEXT_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setEnablePreviewText, attribute: enablePreviewText";
     };
 
@@ -1080,10 +1085,10 @@ HWTEST_F(TextAreaModifierTest, setEnablePreviewTextTestEnablePreviewTextInvalidV
 HWTEST_F(TextAreaModifierTest, setEnableHapticFeedbackTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE)) <<
         "Default value for attribute 'enableHapticFeedback'";
 }
 
@@ -1107,7 +1112,7 @@ HWTEST_F(TextAreaModifierTest, setEnableHapticFeedbackTestEnableHapticFeedbackVa
         modifier_->setEnableHapticFeedback(node_, &inputValueEnableHapticFeedback);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setEnableHapticFeedback, attribute: enableHapticFeedback";
     };
 
@@ -1136,7 +1141,7 @@ HWTEST_F(TextAreaModifierTest, setEnableHapticFeedbackTestEnableHapticFeedbackIn
         modifier_->setEnableHapticFeedback(node_, &inputValueEnableHapticFeedback);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setEnableHapticFeedback, attribute: enableHapticFeedback";
     };
 
@@ -1152,10 +1157,10 @@ HWTEST_F(TextAreaModifierTest, setEnableHapticFeedbackTestEnableHapticFeedbackIn
 HWTEST_F(TextAreaModifierTest, DISABLED_setAutoCapitalizationModeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_AUTO_CAPITALIZATION_MODE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_AUTO_CAPITALIZATION_MODE_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_AUTO_CAPITALIZATION_MODE_DEFAULT_VALUE)) <<
         "Default value for attribute 'autoCapitalizationMode'";
 }
 
@@ -1180,7 +1185,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setAutoCapitalizationModeTestAutoCapital
         modifier_->setAutoCapitalizationMode(node_, &inputValueAutoCapitalizationMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_AUTO_CAPITALIZATION_MODE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setAutoCapitalizationMode, attribute: autoCapitalizationMode";
     };
 
@@ -1212,7 +1217,7 @@ HWTEST_F(
         modifier_->setAutoCapitalizationMode(node_, &inputValueAutoCapitalizationMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_AUTO_CAPITALIZATION_MODE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_AUTO_CAPITALIZATION_MODE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_AUTO_CAPITALIZATION_MODE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setAutoCapitalizationMode, attribute: autoCapitalizationMode";
     };
 
@@ -1229,10 +1234,11 @@ HWTEST_F(
 HWTEST_F(TextAreaModifierTest, setHalfLeadingTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HALF_LEADING_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_HALF_LEADING_DEFAULT_VALUE) << "Default value for attribute 'halfLeading'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_HALF_LEADING_DEFAULT_VALUE)) <<
+        "Default value for attribute 'halfLeading'";
 }
 
 /*
@@ -1255,7 +1261,7 @@ HWTEST_F(TextAreaModifierTest, setHalfLeadingTestHalfLeadingValidValues, TestSiz
         modifier_->setHalfLeading(node_, &inputValueHalfLeading);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HALF_LEADING_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setHalfLeading, attribute: halfLeading";
     };
 
@@ -1284,7 +1290,7 @@ HWTEST_F(TextAreaModifierTest, setHalfLeadingTestHalfLeadingInvalidValues, TestS
         modifier_->setHalfLeading(node_, &inputValueHalfLeading);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HALF_LEADING_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_HALF_LEADING_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_HALF_LEADING_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setHalfLeading, attribute: halfLeading";
     };
 
@@ -1300,10 +1306,11 @@ HWTEST_F(TextAreaModifierTest, setHalfLeadingTestHalfLeadingInvalidValues, TestS
 HWTEST_F(TextAreaModifierTest, setEllipsisModeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ELLIPSIS_MODE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ELLIPSIS_MODE_DEFAULT_VALUE) << "Default value for attribute 'ellipsisMode'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ELLIPSIS_MODE_DEFAULT_VALUE)) <<
+        "Default value for attribute 'ellipsisMode'";
 }
 
 /*
@@ -1327,7 +1334,7 @@ HWTEST_F(TextAreaModifierTest, setEllipsisModeTestEllipsisModeValidValues, TestS
         modifier_->setEllipsisMode(node_, &inputValueEllipsisMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ELLIPSIS_MODE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setEllipsisMode, attribute: ellipsisMode";
     };
 
@@ -1357,7 +1364,7 @@ HWTEST_F(TextAreaModifierTest, setEllipsisModeTestEllipsisModeInvalidValues, Tes
         modifier_->setEllipsisMode(node_, &inputValueEllipsisMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ELLIPSIS_MODE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ELLIPSIS_MODE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ELLIPSIS_MODE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setEllipsisMode, attribute: ellipsisMode";
     };
 
@@ -1374,10 +1381,11 @@ HWTEST_F(TextAreaModifierTest, setEllipsisModeTestEllipsisModeInvalidValues, Tes
 HWTEST_F(TextAreaModifierTest, setStopBackPressTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STOP_BACK_PRESS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_STOP_BACK_PRESS_DEFAULT_VALUE) << "Default value for attribute 'stopBackPress'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_STOP_BACK_PRESS_DEFAULT_VALUE)) <<
+        "Default value for attribute 'stopBackPress'";
 }
 
 /*
@@ -1400,7 +1408,7 @@ HWTEST_F(TextAreaModifierTest, setStopBackPressTestStopBackPressValidValues, Tes
         modifier_->setStopBackPress(node_, &inputValueStopBackPress);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STOP_BACK_PRESS_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setStopBackPress, attribute: stopBackPress";
     };
 
@@ -1429,7 +1437,7 @@ HWTEST_F(TextAreaModifierTest, setStopBackPressTestStopBackPressInvalidValues, T
         modifier_->setStopBackPress(node_, &inputValueStopBackPress);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STOP_BACK_PRESS_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_STOP_BACK_PRESS_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_STOP_BACK_PRESS_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setStopBackPress, attribute: stopBackPress";
     };
 
@@ -1445,10 +1453,10 @@ HWTEST_F(TextAreaModifierTest, setStopBackPressTestStopBackPressInvalidValues, T
 HWTEST_F(TextAreaModifierTest, DISABLED_setKeyboardAppearanceTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_KEYBOARD_APPEARANCE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_KEYBOARD_APPEARANCE_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_KEYBOARD_APPEARANCE_DEFAULT_VALUE)) <<
         "Default value for attribute 'keyboardAppearance'";
 }
 
@@ -1473,7 +1481,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setKeyboardAppearanceTestKeyboardAppeara
         modifier_->setKeyboardAppearance(node_, &inputValueKeyboardAppearance);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_KEYBOARD_APPEARANCE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setKeyboardAppearance, attribute: keyboardAppearance";
     };
 
@@ -1504,7 +1512,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setKeyboardAppearanceTestKeyboardAppeara
         modifier_->setKeyboardAppearance(node_, &inputValueKeyboardAppearance);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_KEYBOARD_APPEARANCE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_KEYBOARD_APPEARANCE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_KEYBOARD_APPEARANCE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setKeyboardAppearance, attribute: keyboardAppearance";
     };
 
@@ -1521,22 +1529,20 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setKeyboardAppearanceTestKeyboardAppeara
 HWTEST_F(TextAreaModifierTest, setShowCounterTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultShowCounter =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SHOW_COUNTER_NAME);
-    std::unique_ptr<JsonValue> resultOptions =
-        GetAttrValue<std::unique_ptr<JsonValue>>(resultShowCounter, ATTRIBUTE_SHOW_COUNTER_I_OPTIONS_NAME);
-    std::string resultStr;
+    std::unique_ptr<JsonValue> resultShowCounter = GetAttrObject(jsonValue, ATTRIBUTE_SHOW_COUNTER_NAME);
+    std::unique_ptr<JsonValue> resultOptions = GetAttrObject(resultShowCounter, ATTRIBUTE_SHOW_COUNTER_I_OPTIONS_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(resultShowCounter, ATTRIBUTE_SHOW_COUNTER_I_VALUE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_COUNTER_I_VALUE_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SHOW_COUNTER_I_VALUE_DEFAULT_VALUE)) <<
         "Default value for attribute 'showCounter.value'";
 
     resultStr = GetAttrValue<std::string>(resultOptions, ATTRIBUTE_SHOW_COUNTER_I_OPTIONS_I_THRESHOLD_PERCENTAGE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_COUNTER_I_OPTIONS_I_THRESHOLD_PERCENTAGE_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SHOW_COUNTER_I_OPTIONS_I_THRESHOLD_PERCENTAGE_DEFAULT_VALUE)) <<
         "Default value for attribute 'showCounter.options.thresholdPercentage'";
 
     resultStr = GetAttrValue<std::string>(resultOptions, ATTRIBUTE_SHOW_COUNTER_I_OPTIONS_I_HIGHLIGHT_BORDER_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_COUNTER_I_OPTIONS_I_HIGHLIGHT_BORDER_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SHOW_COUNTER_I_OPTIONS_I_HIGHLIGHT_BORDER_DEFAULT_VALUE)) <<
         "Default value for attribute 'showCounter.options.highlightBorder'";
 }
 
@@ -1565,9 +1571,9 @@ HWTEST_F(TextAreaModifierTest, setShowCounterTestShowCounterValueValidValues, Te
         inputValueValue = value;
         modifier_->setShowCounter(node_, &inputValueValue, &inputValueOptions);
         auto jsonValue = GetJsonValue(node_);
-        auto resultShowCounter = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SHOW_COUNTER_NAME);
+        auto resultShowCounter = GetAttrObject(jsonValue, ATTRIBUTE_SHOW_COUNTER_NAME);
         auto resultStr = GetAttrValue<std::string>(resultShowCounter, ATTRIBUTE_SHOW_COUNTER_I_VALUE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setShowCounter, attribute: showCounter.value";
     };
 
@@ -1601,9 +1607,9 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setShowCounterTestShowCounterValueInvali
         inputValueValue = value;
         modifier_->setShowCounter(node_, &inputValueValue, &inputValueOptions);
         auto jsonValue = GetJsonValue(node_);
-        auto resultShowCounter = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SHOW_COUNTER_NAME);
+        auto resultShowCounter = GetAttrObject(jsonValue, ATTRIBUTE_SHOW_COUNTER_NAME);
         auto resultStr = GetAttrValue<std::string>(resultShowCounter, ATTRIBUTE_SHOW_COUNTER_I_VALUE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_COUNTER_I_VALUE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SHOW_COUNTER_I_VALUE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setShowCounter, attribute: showCounter.value";
     };
 
@@ -1636,9 +1642,8 @@ HWTEST_F(TextAreaModifierTest, setShowCounterTestShowCounterOptionsThresholdPerc
         WriteTo(inputValueOptions).thresholdPercentage = value;
         modifier_->setShowCounter(node_, &inputValueValue, &inputValueOptions);
         auto jsonValue = GetJsonValue(node_);
-        auto resultShowCounter = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SHOW_COUNTER_NAME);
-        auto resultOptions =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultShowCounter, ATTRIBUTE_SHOW_COUNTER_I_OPTIONS_NAME);
+        auto resultShowCounter = GetAttrObject(jsonValue, ATTRIBUTE_SHOW_COUNTER_NAME);
+        auto resultOptions = GetAttrObject(resultShowCounter, ATTRIBUTE_SHOW_COUNTER_I_OPTIONS_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultOptions, ATTRIBUTE_SHOW_COUNTER_I_OPTIONS_I_THRESHOLD_PERCENTAGE_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -1676,9 +1681,8 @@ HWTEST_F(TextAreaModifierTest, setShowCounterTestShowCounterOptionsThresholdPerc
         WriteTo(inputValueOptions).thresholdPercentage = value;
         modifier_->setShowCounter(node_, &inputValueValue, &inputValueOptions);
         auto jsonValue = GetJsonValue(node_);
-        auto resultShowCounter = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SHOW_COUNTER_NAME);
-        auto resultOptions =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultShowCounter, ATTRIBUTE_SHOW_COUNTER_I_OPTIONS_NAME);
+        auto resultShowCounter = GetAttrObject(jsonValue, ATTRIBUTE_SHOW_COUNTER_NAME);
+        auto resultOptions = GetAttrObject(resultShowCounter, ATTRIBUTE_SHOW_COUNTER_I_OPTIONS_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultOptions, ATTRIBUTE_SHOW_COUNTER_I_OPTIONS_I_THRESHOLD_PERCENTAGE_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_COUNTER_I_OPTIONS_I_THRESHOLD_PERCENTAGE_DEFAULT_VALUE) <<
@@ -1718,9 +1722,8 @@ HWTEST_F(TextAreaModifierTest, setShowCounterTestShowCounterOptionsHighlightBord
         WriteTo(inputValueOptions).highlightBorder = value;
         modifier_->setShowCounter(node_, &inputValueValue, &inputValueOptions);
         auto jsonValue = GetJsonValue(node_);
-        auto resultShowCounter = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SHOW_COUNTER_NAME);
-        auto resultOptions =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultShowCounter, ATTRIBUTE_SHOW_COUNTER_I_OPTIONS_NAME);
+        auto resultShowCounter = GetAttrObject(jsonValue, ATTRIBUTE_SHOW_COUNTER_NAME);
+        auto resultOptions = GetAttrObject(resultShowCounter, ATTRIBUTE_SHOW_COUNTER_I_OPTIONS_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultOptions, ATTRIBUTE_SHOW_COUNTER_I_OPTIONS_I_HIGHLIGHT_BORDER_NAME);
         EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input <<
@@ -1757,9 +1760,8 @@ HWTEST_F(TextAreaModifierTest, setShowCounterTestShowCounterOptionsHighlightBord
         WriteTo(inputValueOptions).highlightBorder = value;
         modifier_->setShowCounter(node_, &inputValueValue, &inputValueOptions);
         auto jsonValue = GetJsonValue(node_);
-        auto resultShowCounter = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SHOW_COUNTER_NAME);
-        auto resultOptions =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultShowCounter, ATTRIBUTE_SHOW_COUNTER_I_OPTIONS_NAME);
+        auto resultShowCounter = GetAttrObject(jsonValue, ATTRIBUTE_SHOW_COUNTER_NAME);
+        auto resultOptions = GetAttrObject(resultShowCounter, ATTRIBUTE_SHOW_COUNTER_I_OPTIONS_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultOptions, ATTRIBUTE_SHOW_COUNTER_I_OPTIONS_I_HIGHLIGHT_BORDER_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_COUNTER_I_OPTIONS_I_HIGHLIGHT_BORDER_DEFAULT_VALUE) <<

@@ -49,7 +49,6 @@
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/text_style.h"
 #include "frameworks/bridge/common/dom/dom_type.h"
-#include "frameworks/core/components_ng/property/border_property.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -224,6 +223,11 @@ inline std::pair<bool, FontWeight> ParseFontWeight(
 inline FontWeight ConvertStrToFontWeight(const std::string& weight, FontWeight defaultFontWeight = FontWeight::NORMAL)
 {
     return StringUtils::StringToFontWeight(weight, defaultFontWeight);
+}
+
+inline int32_t GetFontWeightNumericValue(FontWeight fontWeight)
+{
+    return StringUtils::GetFontWeightNumericValue(fontWeight);
 }
 
 ACE_FORCE_EXPORT TextDecoration ConvertStrToTextDecoration(const std::string& textDecoration);

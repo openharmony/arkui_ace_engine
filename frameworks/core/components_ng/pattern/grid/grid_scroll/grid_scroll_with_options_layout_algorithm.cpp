@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_with_options_layout_algorithm.h"
 
+#include "core/components_ng/pattern/grid/grid_item_pattern.h"
+#include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -356,7 +358,9 @@ int32_t GridScrollWithOptionsLayoutAlgorithm::CalculateStartCachedCount(
                 return (cachedCount - lineCount) * crossCount + sum;
             }
 
-            diff = (*iter) - (*(--iter)) - 1;
+            int32_t currentValue = *iter;
+            --iter;
+            diff = currentValue - (*iter) - 1;
         }
         return sum;
     }
@@ -415,7 +419,9 @@ int32_t GridScrollWithOptionsLayoutAlgorithm::CalculateEndCachedCount(
                 return (cachedCount - lineCount) * crossCount + sum;
             }
 
-            diff = -*(iter) + *(++iter) - 1;
+            int32_t currentValue = *iter;
+            ++iter;
+            diff = -currentValue + (*iter) - 1;
         }
         return sum;
     }

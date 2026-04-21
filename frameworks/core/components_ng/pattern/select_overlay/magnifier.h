@@ -26,16 +26,17 @@ constexpr Dimension MAGNIFIER_WIDTH = 112.0_vp;
 constexpr Dimension MAGNIFIER_HEIGHT = 72.0_vp;
 constexpr Dimension MAGNIFIER_OFFSETX = 0.0_vp;
 constexpr Dimension MAGNIFIER_OFFSETY = 80.0_vp;
-constexpr Dimension MAGNIFIER_BORDERWIDTH = 2.0_vp;
 constexpr Dimension MAGNIFIER_CORNERRADIUS = 36.0_vp;
 
 constexpr Dimension MAGNIFIER_SHADOWOFFSETX = 0.0_vp;
-constexpr Dimension MAGNIFIER_SHADOWOFFSETY = 8.0_vp;
-constexpr Dimension MAGNIFIER_SHADOWSIZE = 10.0_vp;
+constexpr Dimension MAGNIFIER_SHADOWOFFSETY = 0.0_vp;
+constexpr Dimension MAGNIFIER_SHADOWSIZE = 23.0_vp;
 constexpr float MAGNIFIER_FACTOR = 1.4f;
-constexpr float MAGNIFIER_SHADOWSTRENGTH = 0.08f;
-constexpr float ZOOM_OFFSET_Y = 10.f;
+constexpr float MAGNIFIER_SHADOWSTRENGTH = 0.05f;
 constexpr int32_t ANIMATION_DURATION_150 = 150;
+constexpr float MAGNIFIER_SHADOW_SIZE_SCALE = 1.5f;
+constexpr float MAGNIFIER_BORDERWIDTH = 3.0f;
+constexpr float MAGNIFIER_BORDERSTRENGTH = 0.5f;
 } // namespace
 class Magnifier : public virtual AceType {
     DECLARE_ACE_TYPE(Magnifier, AceType);

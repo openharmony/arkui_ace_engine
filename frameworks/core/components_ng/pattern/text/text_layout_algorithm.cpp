@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text/paragraph_util.h"
+#include "core/components_ng/render/paragraph.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_ui_director.h"
 #endif
@@ -104,10 +105,14 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     if (isSpanStringMode_ && spanStringHasMaxLines_ && !textLayoutProperty->GetIsTextMaxlinesFirstValue(false)) {
         textStyle_.SetMaxLines(UINT32_MAX);
     }
+    if (textLayoutProperty->IsNewMaterial()) {
+        pattern->MarkMeasured(true);
+        textStyle_.UpdateFontSizeOrColorChanged();
+    }
     // inheritTextStyle_ is used to control spans_ in versions below VERSION_EIGHTEEN, preventing them from
     // adapting to font size automatically.
     inheritTextStyle_ = textStyle_;
-    MeasureChildren(layoutWrapper, textStyle_);
+    MeasureChildren(contentConstraint, layoutWrapper, textStyle_);
     CheckNeedReCreateParagraph(layoutWrapper, textStyle_);
     ACE_SCOPED_TRACE("TextLayoutAlgorithm::MeasureContent[id:%d][needReCreateParagraph:%d][size:%d]", host->GetId(),
         needReCreateParagraph_, static_cast<int32_t>(spans_.size()));

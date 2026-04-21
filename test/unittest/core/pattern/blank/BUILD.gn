@@ -20,4 +20,11 @@ ace_unittest("blank_test_ng") {
     "blank_new_test_ng.cpp",
     "blank_test_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "blank_test_core.cpp" ]
+  } else {
+    sources += [ "blank_test_core.cpp" ]
+  }
 }

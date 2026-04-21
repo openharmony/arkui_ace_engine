@@ -21,16 +21,19 @@
 #include "accessibility_system_ability_client.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/pattern/node_container/node_container_pattern.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 
 #include "base/log/dump_log.h"
 #include "adapter/ohos/osal/js_accessibility_manager.h"
 #include "frameworks/core/accessibility/accessibility_node.h"
 #include "frameworks/core/accessibility/utils/accessibility_manager_utils.h"
+#include "frameworks/core/components_ng/property/accessibility_property.h"
+#include "frameworks/core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "adapter/ohos/entrance/ace_container.h"
+#include "js_accessibility_manager_test.h"
 
 using namespace OHOS::Accessibility;
 using namespace testing;
@@ -1137,6 +1140,28 @@ HWTEST_F(JsAccessibilityManagerTest, SingleHandTransformTest001, TestSize.Level1
 }
 
 /**
+ * @tc.name: DumpProcessEventParametersTest001
+ * @tc.desc: test DumpProcessEventParameters with no param
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, DumpProcessEventParametersTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    /**
+     * @tc.steps: step2. test DumpProcessEventParameters with no param
+     */
+    std::vector<std::string> params;
+    AccessibilityEvent accessibilityEvent;
+    bool ret = jsAccessibilityManager->DumpProcessEventParameters(accessibilityEvent, params);
+    EXPECT_EQ(ret, false);
+}
+
+/**
  * @tc.name: JsAccessibilityManager020
  * @tc.desc: dump event test  DumpProcessEventParameters
  * @tc.type: FUNC
@@ -1145,6 +1170,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager020, TestSize.Level1)
 {
     auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
     auto context = NG::PipelineContext::GetCurrentContext();
     jsAccessibilityManager->SetPipelineContext(context);
     jsAccessibilityManager->Register(true);
@@ -1190,6 +1216,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager0201, TestSize.Level1
 {
     auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
     auto context = NG::PipelineContext::GetCurrentContext();
     jsAccessibilityManager->SetPipelineContext(context);
     jsAccessibilityManager->Register(true);
@@ -2911,6 +2938,9 @@ HWTEST_F(JsAccessibilityManagerTest, SendEventToAccessibilityWithNode004, TestSi
  */
 HWTEST_F(JsAccessibilityManagerTest, GetTreeId001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
     auto frameNode = FrameNode::CreateFrameNode(
         "framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
     ASSERT_NE(frameNode, nullptr);
@@ -2918,6 +2948,9 @@ HWTEST_F(JsAccessibilityManagerTest, GetTreeId001, TestSize.Level1)
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test GetTreeId
+     */
     int32_t treeId = 666;
     jsAccessibilityManager->treeId_ = treeId;
     int32_t result = jsAccessibilityManager->GetTreeId();
@@ -2935,6 +2968,9 @@ HWTEST_F(JsAccessibilityManagerTest, GetTreeId001, TestSize.Level1)
  */
 HWTEST_F(JsAccessibilityManagerTest, GetTransformDegreeRelativeToWindow001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
     auto frameNode = FrameNode::CreateFrameNode(
         "framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
     ASSERT_NE(frameNode, nullptr);
@@ -2942,6 +2978,9 @@ HWTEST_F(JsAccessibilityManagerTest, GetTransformDegreeRelativeToWindow001, Test
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
     ASSERT_NE(jsAccessibilityManager, nullptr);
 
+    /**
+     * @tc.steps: step2. test GetTransformDegreeRelativeToWindow
+     */
     int32_t result = jsAccessibilityManager->GetTransformDegreeRelativeToWindow(frameNode, false);
     EXPECT_EQ(result, 0);
 }
@@ -3085,8 +3124,15 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager045, TestSize.Level1)
  */
 HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager046, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
     std::vector<std::string> params;
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+
+    /**
+     * @tc.steps: step2. test OnDumpInfoNG
+     */
     params.push_back("-inspector");
     params.push_back("--specific-search");
     params.push_back("1");
@@ -4343,6 +4389,121 @@ HWTEST_F(JsAccessibilityManagerTest, RegisterScreenReaderObserverCallback, TestS
 }
 
 /**
+ * @tc.name: GetCursorPosition001
+ * @tc.desc: Test GetCursorPosition with null context (CHECK_NULL_VOID_WITH_ACTION macro)
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, GetCursorPosition001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager without context
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    /**
+     * @tc.steps: step2. create mock callback and call GetCursorPosition with null pipeline context
+     * @tc.expected: callback should be called with default value (0) due to CHECK_NULL_VOID_WITH_ACTION
+     */
+    auto callback = std::make_shared<MockAccessibilityElementOperatorCallback>();
+    const int64_t elementId = 1;
+    const int32_t requestId = 100;
+
+    // Call GetCursorPosition with null pipeline context
+    // Should trigger CHECK_NULL_VOID_WITH_ACTION and call callback with 0
+    jsAccessibilityManager->GetCursorPosition(elementId, requestId, *callback);
+
+    // Verify callback was called with default value
+    EXPECT_TRUE(callback->called_);
+    EXPECT_EQ(callback->mockCursorPosition_, 0);
+    EXPECT_EQ(callback->mockRequestId, requestId);
+}
+
+/**
+ * @tc.name: GetCursorPosition002
+ * @tc.desc: Test GetCursorPosition with not UI Extension branch (AddAfterRenderTask executes lambda directly)
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, GetCursorPosition002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager with context
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+    ASSERT_NE(jsAccessibilityManager->GetPipelineContext().Upgrade(), nullptr);
+    auto root = context->GetRootElement();
+    ASSERT_NE(root, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    root->AddChild(frameNode);
+
+    /**
+     * @tc.steps: step2. create mock callback
+     */
+    auto callback = std::make_shared<MockAccessibilityElementOperatorCallback>();
+    const int64_t elementId = frameNode->GetAccessibilityId(); // UI Extension ID (UI_EXTENSION_OFFSET_MAX + offset)
+    const int32_t requestId = 102;
+
+    /**
+     * @tc.steps: step3. call GetCursorPosition with UI Extension element ID
+     * @tc.expected: AddAfterRenderTask executes lambda directly in test environment,
+     *               callback will be called when nodes are found or with 0 if not found
+     */
+    auto useFlushUITasks = MockPipelineContext::GetCurrent()->UseFlushUITasks();
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(false);
+    jsAccessibilityManager->GetCursorPosition(elementId, requestId, *callback);
+    EXPECT_TRUE(callback->called_);
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(useFlushUITasks);
+    root->RemoveChild(frameNode);
+}
+
+/**
+ * @tc.name: GetCursorPosition003
+ * @tc.desc: Test GetCursorPosition with UI Extension branch (AddAfterRenderTask executes lambda directly)
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, GetCursorPosition003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager with context
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+    ASSERT_NE(jsAccessibilityManager->GetPipelineContext().Upgrade(), nullptr);
+    auto root = context->GetRootElement();
+    ASSERT_NE(root, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    root->AddChild(frameNode);
+
+    /**
+     * @tc.steps: step2. create mock callback
+     */
+    auto callback = std::make_shared<MockAccessibilityElementOperatorCallback>();
+    const int64_t elementId = 10000000001; // UI Extension ID (UI_EXTENSION_OFFSET_MIN + 1)
+    const int32_t requestId = 102;
+    frameNode->accessibilityId_ = elementId;
+    /**
+     * @tc.steps: step3. call GetCursorPosition with UI Extension element ID
+     * @tc.expected: AddAfterRenderTask executes lambda directly in test environment,
+     *               callback will be called when nodes are found or with 0 if not found
+     */
+    auto useFlushUITasks = MockPipelineContext::GetCurrent()->UseFlushUITasks();
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(false);
+    jsAccessibilityManager->GetCursorPosition(elementId, requestId, *callback);
+    EXPECT_TRUE(callback->called_);
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(useFlushUITasks);
+    root->RemoveChild(frameNode);
+}
+
+/**
  * @tc.name: UpdateAccessibilityNodeRect001
  * @tc.desc: UpdateAccessibilityNodeRect
  * @tc.type: FUNC
@@ -4453,6 +4614,64 @@ HWTEST_F(JsAccessibilityManagerTest, NeedChangeToReadableNodeTest001, TestSize.L
     // vitural function need return false
     auto ret = accessibilityManager->NeedChangeToReadableNode(frameNode, frameNode2);
     EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: AccessibilityOnShowHide001
+ * @tc.desc: Test AccessibilityOnShowHide with isOnShow = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, AccessibilityOnShowHide001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager and context
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+
+    /**
+     * @tc.steps: step2. call AccessibilityOnShowHide with isOnShow = false
+     * @tc.expected: should not call CheckAndReConnectA11ySA, no crash
+     */
+    jsAccessibilityManager->AccessibilityOnShowHide(false, context);
+
+    /**
+     * @tc.steps: step3. verify a11y manager state unchanged
+     */
+    EXPECT_FALSE(jsAccessibilityManager->IsRegister());
+}
+
+/**
+ * @tc.name: AccessibilityOnShowHide002
+ * @tc.desc: Test AccessibilityOnShowHide with isOnShow = true, normal case
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, AccessibilityOnShowHide002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager and context
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+
+    /**
+     * @tc.steps: step2. call AccessibilityOnShowHide with isOnShow = true
+     * @tc.expected: should call CheckAndReConnectA11ySA
+     * Note: This test verifies the function can be called without crash.
+     * Actual behavior depends on AccessibilitySystemAbilityClient state.
+     */
+    jsAccessibilityManager->AccessibilityOnShowHide(true, context);
+
+    /**
+     * @tc.steps: step3. verify a11y manager state unchanged
+     */
+    EXPECT_FALSE(jsAccessibilityManager->IsRegister());
 }
 
 /**

@@ -47,19 +47,20 @@ public:
             g_onLongPress = true;
         };
         param.onLongPress = Converter::ArkCallback<Opt_Callback_GestureEvent_Void>(onLongPress, resId);
-        param.onTouch = Converter::ArkValue<Opt_Callback_TouchEvent_Void>();
+        param.onTouch = Converter::ArkValue<Opt_Callback_TouchEventProxy_Void>();
         auto optParam = Converter::ArkValue<Opt_GestureStyleInterface>(param);
         return accessor_->construct(&optParam);
     }
 };
 
 /**
- * @tc.name: callbacksTest
+ * @tc.name: constructTestCallbacks
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GestureStyleAccessorTest, callbacksTest, TestSize.Level1)
+HWTEST_F(GestureStyleAccessorTest, constructTestCallbacks, TestSize.Level1)
 {
+    ASSERT_NE(accessor_->construct, nullptr);
     ASSERT_NE(peer_, nullptr);
     auto style = peer_->span->GetGestureStyle();
     EXPECT_NE(style.onClick, nullptr);

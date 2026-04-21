@@ -16,22 +16,27 @@
 
 #include "gtest/gtest.h"
 #include "test/unittest/core/pattern/test_ng.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_default.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_default.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
 
+#include "core/components/button/button_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/picker/date_time_animation_controller.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -412,7 +417,7 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest002, TestSize.Level1)
      */
     DatePickerModel::GetInstance()->SetCanLoop(true);
     columnPattern_->SetCurrentIndex(2);
-    EXPECT_TRUE(columnPattern_->CanMove(true));
+    EXPECT_FALSE(columnPattern_->CanMove(true));
 }
 
 /**
@@ -596,13 +601,13 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest007, TestSize.Level1)
 
 /**
  * @tc.name: DatePickerCanLoopTest008
- * @tc.desc: Test GetCanLoopFromLayoutProperty.
+ * @tc.desc: Test GetCanLoopFromLayoutPropertyWithStartEnd.
  * @tc.type: FUNC
  */
 HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest008, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create columnNode and default canLoop is true.
+     * @tc.steps: step1. Create columnNode and default canLoop is false.
      */
     CreateDatePickerColumnNode();
     ASSERT_NE(columnNode_, nullptr);
@@ -610,7 +615,7 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest008, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
-    EXPECT_TRUE(columnPattern_->GetCanLoopFromLayoutProperty());
+    EXPECT_FALSE(columnPattern_->GetCanLoopFromLayoutPropertyWithStartEnd());
 
     /**
      * @tc.steps: step2. Set canLoop value to false.
@@ -618,9 +623,9 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest008, TestSize.Level1)
     DatePickerModelNG::SetCanLoop(frameNode, false);
 
     /**
-     * @tc.steps: step3. GetCanLoopFromLayoutProperty.
+     * @tc.steps: step3. GetCanLoopFromLayoutPropertyWithStartEnd.
      */
-    EXPECT_FALSE(columnPattern_->GetCanLoopFromLayoutProperty());
+    EXPECT_FALSE(columnPattern_->GetCanLoopFromLayoutPropertyWithStartEnd());
 }
 
 /**
@@ -655,7 +660,7 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest009, TestSize.Level1)
     KeyEvent keyEventUp(KeyCode::KEY_DPAD_UP, KeyAction::DOWN);
     columnPattern_->SetCurrentIndex(0);
     datePickerPattern->OnKeyEvent(keyEventUp);
-    EXPECT_EQ(columnPattern_->GetCurrentIndex(), 2);
+    EXPECT_EQ(columnPattern_->GetCurrentIndex(), 0);
 
     /**
      * @tc.steps: step3. Call OnKeyEvent while canLoop is false.
@@ -1326,9 +1331,14 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerUpdateConfirmButtonTextLayoutProperty001
     auto textConfirmNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textConfirmNode, nullptr);
+    auto buttonNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(buttonNode, nullptr);
     auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
-    DatePickerDialogView::UpdateConfirmButtonTextLayoutProperty(textLayoutProperty, theme);
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    DatePickerDialogView::UpdateConfirmButtonTextLayoutProperty(textLayoutProperty, theme, buttonLayoutProperty);
     EXPECT_EQ(textLayoutProperty->GetTextColor(), theme->GetTitleStyle().GetTextColor());
 }
 
@@ -1344,9 +1354,14 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerUpdateCancelButtonTextLayoutProperty001,
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textCancelNode, nullptr);
+    auto buttonNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(buttonNode, nullptr);
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textCancelLayoutProperty, nullptr);
-    DatePickerDialogView::UpdateCancelButtonTextLayoutProperty(textCancelLayoutProperty, theme);
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    DatePickerDialogView::UpdateCancelButtonTextLayoutProperty(textCancelLayoutProperty, theme, buttonLayoutProperty);
     EXPECT_EQ(textCancelLayoutProperty->GetTextColor(), theme->GetTitleStyle().GetTextColor());
 }
 

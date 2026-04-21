@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,18 @@ namespace OHOS::Ace {
 
 class AcePage;
 
+// Cache information for destroyed UIContext instances to enhance error messages
+// when ContainerScope fails to find a valid instanceId. This helps developers
+// identify which instance was destroyed and when, improving debugging experience.
+struct UIContextCacheInfo {
+    int32_t instanceId_ = -1;      // The instance ID of the destroyed container
+    int64_t createTime_;           // Container creation timestamp (for error messages)
+    int64_t destroyTime_;          // Container destruction timestamp
+    int32_t windowId_ = -1;        // Associated window ID
+    std::string windowName_ = "";  // Associated window name
+    std::string ToString() const;  // Format cache info as string for logging
+};
+
 class ACE_FORCE_EXPORT AceEngine {
 public:
     ~AceEngine();
@@ -56,11 +68,21 @@ public:
     void NotifyContainersOrderly(const std::function<void(const RefPtr<Container>&)>& callback);
     bool HasContainer(int32_t containerId) const;
 
+    // Get cached information about a destroyed UIContext by instanceId
+    // Returns formatted string with instance details or "not found" message
+    std::string GetDestroyedUIContextInfo(int32_t instanceId) const;
+
+    // Build enhanced error message when ContainerScope fails to find a valid instance
+    // Combines instanceId, reason description, and cached destroyed context info
+    static std::string GetEnhancedContextBNotFoundMessage(InstanceIdGenReason reason, int32_t instanceId = -1);
 private:
     AceEngine();
 
     mutable std::shared_mutex mutex_;
     std::unordered_map<int32_t, RefPtr<Container>> containerMap_;
+    // Cache for destroyed UIContext information to enhance error messages
+    // Stores up to MAX_DESTROYED_CACHE_SIZE (10) most recently destroyed instances
+    std::unordered_map<int32_t, UIContextCacheInfo> destroyedUIContextCache_;
     RefPtr<WatchDog> watchDog_;
     ACE_DISALLOW_COPY_AND_MOVE(AceEngine);
 };

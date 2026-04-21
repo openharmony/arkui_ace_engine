@@ -93,7 +93,7 @@ def run_command(test_binary_path: str, alter_cmds: list = None):
     if alter_cmds is not None:
         default_cmds.extend(alter_cmds)
     try:
-        subprocess.run(default_cmds, timeout=30)
+        subprocess.run(default_cmds, timeout=30, stderr=subprocess.DEVNULL)
     except Exception:
         pass
 

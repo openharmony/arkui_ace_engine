@@ -733,5 +733,8 @@ EnableHapticFeedbackModifier.identity = Symbol('enableHapticFeedback');
  function exportView() {
    globalThis.AlphabetIndexer = JSAlphabetIndexer;
  }
- 
-export default { ArkAlphabetIndexerComponent, JSAlphabetIndexer, createComponent, exportComponent, exportView };
+
+function loadComponent() {}
+export default { ArkAlphabetIndexerComponent, JSAlphabetIndexer, createComponent, exportComponent, exportView,
+    loadComponent
+ };

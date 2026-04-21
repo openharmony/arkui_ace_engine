@@ -33,6 +33,10 @@ FrameNode* GetFrameNode(ArkUINodeHandle node)
 {
     return node ? reinterpret_cast<FrameNode*>(node) : ViewStackProcessor::GetInstance()->GetMainFrameNode();
 }
+void CreateModel()
+{
+    CounterModelNG::CreateCounterModelNG();
+}
 void SetEnableInc(ArkUINodeHandle node, ArkUI_Bool enableInc)
 {
     FrameNode* frameNode = GetFrameNode(node);
@@ -222,17 +226,43 @@ ArkUINodeHandle CreateFrameNode(int32_t nodeId)
     return nullptr;
 }
 
+void SetControlWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    FrameNode* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    Dimension width = Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit));
+    CounterModelNG::SetControlWidth(frameNode, width);
+}
+
+void SetStateChange(ArkUINodeHandle node, ArkUI_Bool state)
+{
+    FrameNode* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    CounterModelNG::SetStateChange(frameNode, state);
+}
+
 #ifndef CROSS_PLATFORM
+
+void CreateModelImpl()
+{
+    GetCounterModelImpl()->Create();
+}
 void SetEnableIncImpl(ArkUINodeHandle node, ArkUI_Bool enableInc)
 {
     GetCounterModelImpl()->SetEnableInc(enableInc);
 }
-void ResetEnableIncImpl(ArkUINodeHandle node) {}
+void ResetEnableIncImpl(ArkUINodeHandle node)
+{
+    GetCounterModelImpl()->SetEnableInc(true);
+}
 void SetEnableDecImpl(ArkUINodeHandle node, ArkUI_Bool enableDec)
 {
     GetCounterModelImpl()->SetEnableDec(enableDec);
 }
-void ResetEnableDecImpl(ArkUINodeHandle node) {}
+void ResetEnableDecImpl(ArkUINodeHandle node)
+{
+    GetCounterModelImpl()->SetEnableDec(true);
+}
 
 void SetCounterHeightImpl(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
 {
@@ -240,7 +270,11 @@ void SetCounterHeightImpl(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32
     GetCounterModelImpl()->SetHeight(Dimension(value, unitEnum));
 }
 
-void SetCounterHeightResImpl(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* heightRawPtr) {}
+void SetCounterHeightResImpl(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* heightRawPtr)
+{
+    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
+    GetCounterModelImpl()->SetHeight(Dimension(value, unitEnum));
+}
 
 void ResetCounterHeightImpl(ArkUINodeHandle node)
 {
@@ -253,7 +287,11 @@ void SetCounterWidthImpl(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 
     GetCounterModelImpl()->SetWidth(Dimension(value, unitEnum));
 }
 
-void SetCounterWidthResImpl(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* widthRawPtr) {}
+void SetCounterWidthResImpl(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* widthRawPtr)
+{
+    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
+    GetCounterModelImpl()->SetWidth(Dimension(value, unitEnum));
+}
 
 void ResetCounterWidthImpl(ArkUINodeHandle node)
 {
@@ -266,11 +304,18 @@ void SetCounterBackgroundColorImpl(ArkUINodeHandle node, ArkUI_Uint32 color)
     GetCounterModelImpl()->SetBackgroundColor(backgroundColor);
 }
 
-void SetCounterBackgroundColorWithColorSpaceImpl(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace) {}
+void SetCounterBackgroundColorWithColorSpaceImpl(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace)
+{
+    auto backgroundColor = Color(color);
+    GetCounterModelImpl()->SetBackgroundColor(backgroundColor);
+}
 
 void SetCounterBackgroundColorResImpl(
     ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace, void* colorRawPtr)
-{}
+{
+    auto backgroundColor = Color(color);
+    GetCounterModelImpl()->SetBackgroundColor(backgroundColor);
+}
 
 void ResetCounterBackgroundColorImpl(ArkUINodeHandle node)
 {
@@ -298,6 +343,17 @@ void ResetCounterOnDecImpl(ArkUINodeHandle node)
 {
     GetCounterModelImpl()->SetOnDec(nullptr);
 }
+
+void SetControlWidthImpl(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
+{
+    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
+    GetCounterModelImpl()->SetControlWidth(Dimension(value, unitEnum));
+}
+
+void SetStateChangeImpl(ArkUINodeHandle node, ArkUI_Bool state)
+{
+    GetCounterModelImpl()->SetStateChange(state);
+}
 #endif
 
 const ArkUICounterModifier* GetCounterDynamicModifier()
@@ -307,6 +363,7 @@ const ArkUICounterModifier* GetCounterDynamicModifier()
 #ifndef CROSS_PLATFORM
         CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
         static const ArkUICounterModifier modifier = {
+            .createModel = CreateModelImpl,
             .setEnableInc = SetEnableIncImpl,
             .resetEnableInc = ResetEnableIncImpl,
             .setEnableDec = SetEnableDecImpl,
@@ -325,6 +382,8 @@ const ArkUICounterModifier* GetCounterDynamicModifier()
             .resetCounterOnInc = ResetCounterOnIncImpl,
             .setCounterOnDec = SetCounterOnDecImpl,
             .resetCounterOnDec = ResetCounterOnDecImpl,
+            .setControlWidth = SetControlWidthImpl,
+            .setStateChange = SetStateChangeImpl,
             .createFrameNode = CreateFrameNode,
         };
         CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
@@ -334,6 +393,7 @@ const ArkUICounterModifier* GetCounterDynamicModifier()
     }
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUICounterModifier modifier = {
+        .createModel = CreateModel,
         .setEnableInc = SetEnableInc,
         .resetEnableInc = ResetEnableInc,
         .setEnableDec = SetEnableDec,
@@ -352,6 +412,8 @@ const ArkUICounterModifier* GetCounterDynamicModifier()
         .resetCounterOnInc = ResetCounterOnInc,
         .setCounterOnDec = SetCounterOnDec,
         .resetCounterOnDec = ResetCounterOnDec,
+        .setControlWidth = SetControlWidth,
+        .setStateChange = SetStateChange,
         .createFrameNode = CreateFrameNode,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line

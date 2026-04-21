@@ -15,11 +15,15 @@
 
 #include "core/components/font/rosen_font_collection.h"
 
-#include "core/components_ng/render/adapter/txt_font_collection.h"
+#include <fstream>
+
 #include "rosen_text/font_collection.h"
+
+#include "core/components_ng/render/adapter/txt_font_collection.h"
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkTypeface.h"
 #endif
+#include "base/log/log_wrapper.h"
 #include "core/common/ace_engine.h"
 
 namespace OHOS::Ace {

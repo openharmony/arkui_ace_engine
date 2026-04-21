@@ -121,6 +121,9 @@ public:
 
     void SetCanvasRenderContext(const RefPtr<CanvasRenderContext>& canvasRenderContext);
 
+    std::optional<bool> GetAntialiasExt() const;
+    void SetAntialiasExtParam(std::optional<bool> isEnabled);
+    void ResetAntialiasExt();
     TransformParam GetTransform();
     LineDashParam GetLineDash() const;
     void SetLineDashParam(const std::vector<double>& segments);
@@ -137,6 +140,7 @@ public:
 
     TransformParam GetTransformInner();
     LineDashParam GetLineDashInner() const;
+    std::optional<bool> GetAntialiasExtInner() const;
 
 private:
     int32_t GetId() const;

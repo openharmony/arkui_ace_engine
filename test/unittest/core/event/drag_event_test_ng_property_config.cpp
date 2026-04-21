@@ -15,6 +15,7 @@
 
 #include "test/unittest/core/event/drag_event_test_ng.h"
 
+#include "core/components/common/properties/border_image.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -1922,5 +1923,24 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest030, TestSize.Leve
     framenode->SetDragPreviewOptions(previewOptions);
     dragEventActuator->PrepareShadowParametersForDragData(framenode, arkExtraInfoJson, scale);
     EXPECT_EQ(previewOptions.options.opacity, 0.0f);
+}
+
+/**
+ * @tc.name: DragEventAutoHideComponentUniqueIds001
+ * @tc.desc: Test autoHideComponentUniqueIds normalization.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventAutoHideComponentUniqueIds001, TestSize.Level1)
+{
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+
+    const std::vector<int32_t> inputUniqueIds = { 1, 2, 1, 3, 2 };
+    const std::vector<int32_t> expectedUniqueIds = { 1, 2, 3 };
+    dragEvent->SetAutoHideComponentUniqueIds(inputUniqueIds);
+    EXPECT_EQ(dragEvent->GetAutoHideComponentUniqueIds(), expectedUniqueIds);
+
+    dragEvent->SetAutoHideComponentUniqueIds({});
+    EXPECT_TRUE(dragEvent->GetAutoHideComponentUniqueIds().empty());
 }
 }

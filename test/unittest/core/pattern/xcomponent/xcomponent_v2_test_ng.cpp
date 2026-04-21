@@ -21,9 +21,9 @@
 
 #define private public
 #define protected public
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/render/mock_render_surface.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_surface.h"
 
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
@@ -1180,5 +1180,31 @@ HWTEST_F(XComponentV2TestNg, XComponentV2InitAndDisposeSurfaceTest, TestSize.Lev
     pattern->DisposeSurface();
     EXPECT_FALSE(pattern->renderContextForSurface_);
     EXPECT_EQ(pattern->renderContextForSurface_, pattern->handlingSurfaceRenderContext_);
+}
+
+/**
+ * @tc.name: XComponentV2SetSurfaceRectTest
+ * @tc.desc: Test XComponentV2SetSurfaceRectTest method
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentV2TestNg, XComponentV2SetSurfaceRectTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call CreateXComponentNode.
+     * @tc.expected: xcomponent frameNode create successfully.
+     */
+    auto frameNode = CreateXComponentNode();
+    ASSERT_TRUE(frameNode);
+    ASSERT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    auto pattern = frameNode->GetPattern<XComponentPatternV2>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. call SetXComponentSurfaceRect.
+     * @tc.expected: SetXComponentSurfaceRect.
+     */
+    XComponentModelNG::SetXComponentSurfaceRect(AceType::RawPtr(frameNode), 0.0, 0.0, 100.0, 100.0);
+    EXPECT_EQ(pattern->selfIdealSurfaceHeight_, 100.0);
+    EXPECT_EQ(pattern->selfIdealSurfaceWidth_, 100.0);
 }
 } // namespace OHOS::Ace::NG

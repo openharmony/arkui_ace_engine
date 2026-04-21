@@ -37,6 +37,7 @@ struct Parent {
     // Start after 200 ms to allow UI to start.
     setTimeout(() => {
       PageController.registerPages([
+        'pages/env_tests',
         'pages/v1_tests',
         'pages/v2_tests',
         'pages/repeat_tests',
@@ -46,7 +47,15 @@ struct Parent {
         // Performance should be enabled manually
         // 'pages/performance_tests',
         'pages/v1_get_statemgmt_info_test',
-        'pages/v2_get_statemgmt_info_test'
+        'pages/v2_get_statemgmt_info_test',
+        'pages/v2_change_observation_tests',
+        'pages/v2_computed_tests',
+        'pages/v2_decorated_variables_tests',
+        'pages/state_mgmt_console_trace_tests',
+        'pages/utils_tests',
+        'pages/weakref_pool_tests',
+        'pages/state_mgmt_configure_tests',
+        'pages/state_mgmt_dfx_tests'
       ])
       PageController.start(this.reportFinal)
     }, 200)

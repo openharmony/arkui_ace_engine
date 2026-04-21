@@ -18,6 +18,7 @@
 #include "base/log/log_wrapper.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/container.h"
+#include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 
 namespace OHOS::Ace::Framework {
 

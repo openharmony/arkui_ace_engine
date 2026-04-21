@@ -21,9 +21,10 @@ COMMON_SRC = [
 
 # Test original top-down WaterFlow
 ace_unittest("water_flow_test_original") {
-  module_name = "ScrollingSet-WaterFlowAndFlowItem"
+  module_name = "ScrollingSet-Scroll"
   type = "new"
   sources = [
+    "water_flow_dump_test.cpp",
     "water_flow_layout_info_test.cpp",
     "water_flow_misc_test.cpp",
     "water_flow_property_test.cpp",
@@ -31,6 +32,13 @@ ace_unittest("water_flow_test_original") {
     "water_flow_top_down_test.cpp",
   ]
   sources += COMMON_SRC
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "water_flow_test_core.cpp" ]
+  } else {
+    sources += [ "water_flow_test_core.cpp" ]
+  }
 }
 
 # Test segmented top-down WaterFlow
@@ -47,9 +55,16 @@ ace_unittest("water_flow_test_segmented") {
     "water_flow_top_down_test.cpp",
   ]
   sources += COMMON_SRC
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "water_flow_test_core.cpp" ]
+  } else {
+    sources += [ "water_flow_test_core.cpp" ]
+  }
 }
 
-# ----------- Test in Sliding Window LayoutMode
+# Test in Sliding Window LayoutMode
 ace_unittest("water_flow_test_sw") {
   module_name = "ScrollingSet-WaterFlowAndFlowItem"
   type = "new"
@@ -60,15 +75,46 @@ ace_unittest("water_flow_test_sw") {
     "water_flow_segment_common_test.cpp",
     "water_flow_sw_layout_test.cpp",
     "water_flow_sw_test.cpp",
+    "water_flow_layout_utils_test.cpp",
   ]
   sources += COMMON_SRC
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "water_flow_test_core.cpp" ]
+  } else {
+    sources += [ "water_flow_test_core.cpp" ]
+  }
 }
 
-ace_unittest("water_flow_static_test") {
-  module_name = "ScrollingSet-ScrollBar"
+# Test WaterFlow Model layer APIs
+ace_unittest("water_flow_test_generated") {
+  module_name = "ScrollingSet-WaterFlowAndFlowItem"
   type = "new"
+
   sources = [
+    "water_flow_item_model_test.cpp",
+    "water_flow_model_ng_multi_thread_test.cpp",
+    "water_flow_model_ng_test.cpp",
     "water_flow_static_test.cpp",
     "water_flow_test_ng.cpp",
+  ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "water_flow_static_test_core.cpp" ]
+  } else {
+    sources += [ "water_flow_static_test_core.cpp" ]
+  }
+}
+
+# Aggregate all WaterFlow unit tests
+group("water_flow_test_all") {
+  testonly = true
+  deps = [
+    ":water_flow_test_original",
+    ":water_flow_test_segmented",
+    ":water_flow_test_sw",
+    ":water_flow_test_generated",
   ]
 }

@@ -52,7 +52,7 @@ struct ImageExample038 {
   @State onTree: boolean = true
   @State rotateDegree: number = 0
   @State fit: ImageFit = ImageFit.None
-  res: Resource = $r('app.media.UP')
+  res: Resource = $r('app.media.startIcon')
   @State selfOrientation: ImageRotateOrientation = ImageRotateOrientation.AUTO;
   @State enabledModifier: boolean = true;
 
@@ -173,13 +173,13 @@ struct ImageExample038 {
 
           Row() {
             Text('Right_top cw90')
-            Image($r('app.media.Exif_Right_top'))
+            Image($r('app.media.startIcon'))
               .width(100)
               .height(100).objectFit(ImageFit.Fill)
 
               .attributeModifier(this.enabledModifier ? new MyImageModifier(this.selfOrientation) : new ImageModifier())
               .margin(5)
-            Image($r('app.media.Exif_Right_top'))
+            Image($r('app.media.startIcon'))
               .width(100).height(100)
               .orientation(ImageRotateOrientation.UP)
               .margin(5).objectFit(ImageFit.Fill)

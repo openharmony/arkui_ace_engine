@@ -73,29 +73,29 @@ HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestDefaultValues, TestSize
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::unique_ptr<JsonValue> resultTextBackgroundStyle =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_BACKGROUND_STYLE_NAME);
-    std::unique_ptr<JsonValue> resultRadius = GetAttrValue<std::unique_ptr<JsonValue>>(
-        resultTextBackgroundStyle, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_NAME);
-    std::string resultStr;
+        GetAttrObject(jsonValue, ATTRIBUTE_TEXT_BACKGROUND_STYLE_NAME);
+    std::unique_ptr<JsonValue> resultRadius =
+        GetAttrObject(resultTextBackgroundStyle, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(resultTextBackgroundStyle, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_COLOR_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_COLOR_DEFAULT_VALUE)) <<
         "Default value for attribute 'textBackgroundStyle.color'";
 
     resultStr = GetAttrValue<std::string>(resultRadius, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_TOP_LEFT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_TOP_LEFT_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_TOP_LEFT_DEFAULT_VALUE)) <<
         "Default value for attribute 'textBackgroundStyle.radius.BorderRadiuses.topLeft'";
 
     resultStr = GetAttrValue<std::string>(resultRadius, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_TOP_RIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_TOP_RIGHT_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_TOP_RIGHT_DEFAULT_VALUE)) <<
         "Default value for attribute 'textBackgroundStyle.radius.BorderRadiuses.topRight'";
 
     resultStr = GetAttrValue<std::string>(resultRadius, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_BOTTOM_LEFT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_BOTTOM_LEFT_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_BOTTOM_LEFT_DEFAULT_VALUE)) <<
         "Default value for attribute 'textBackgroundStyle.radius.BorderRadiuses.bottomLeft'";
 
     resultStr = GetAttrValue<std::string>(resultRadius, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_BOTTOM_RIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_BOTTOM_RIGHT_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_BOTTOM_RIGHT_DEFAULT_VALUE)) <<
         "Default value for attribute 'textBackgroundStyle.radius.BorderRadiuses.bottomRight'";
 }
 
@@ -127,8 +127,7 @@ HWTEST_F(BaseSpanModifierTest, DISABLED_setTextBackgroundStyleTestTextBackground
         WriteTo(inputValueTextBackgroundStyle).color = value;
         modifier_->setTextBackgroundStyle(node_, &inputValueTextBackgroundStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultTextBackgroundStyle =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_BACKGROUND_STYLE_NAME);
+        auto resultTextBackgroundStyle = GetAttrObject(jsonValue, ATTRIBUTE_TEXT_BACKGROUND_STYLE_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultTextBackgroundStyle, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_COLOR_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -177,8 +176,7 @@ HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleColo
         WriteTo(inputValueTextBackgroundStyle).color = value;
         modifier_->setTextBackgroundStyle(node_, &inputValueTextBackgroundStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultTextBackgroundStyle =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_BACKGROUND_STYLE_NAME);
+        auto resultTextBackgroundStyle = GetAttrObject(jsonValue, ATTRIBUTE_TEXT_BACKGROUND_STYLE_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultTextBackgroundStyle, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_COLOR_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_COLOR_DEFAULT_VALUE) <<
@@ -226,10 +224,8 @@ HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadi
         WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(inputValueTextBackgroundStyle).radius)).topLeft = value;
         modifier_->setTextBackgroundStyle(node_, &inputValueTextBackgroundStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultTextBackgroundStyle =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_BACKGROUND_STYLE_NAME);
-        auto resultRadius = GetAttrValue<std::unique_ptr<JsonValue>>(
-            resultTextBackgroundStyle, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_NAME);
+        auto resultTextBackgroundStyle = GetAttrObject(jsonValue, ATTRIBUTE_TEXT_BACKGROUND_STYLE_NAME);
+        auto resultRadius = GetAttrObject(resultTextBackgroundStyle, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultRadius, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_TOP_LEFT_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -277,10 +273,8 @@ HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadi
         WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(inputValueTextBackgroundStyle).radius)).topLeft = value;
         modifier_->setTextBackgroundStyle(node_, &inputValueTextBackgroundStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultTextBackgroundStyle =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_BACKGROUND_STYLE_NAME);
-        auto resultRadius = GetAttrValue<std::unique_ptr<JsonValue>>(
-            resultTextBackgroundStyle, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_NAME);
+        auto resultTextBackgroundStyle = GetAttrObject(jsonValue, ATTRIBUTE_TEXT_BACKGROUND_STYLE_NAME);
+        auto resultRadius = GetAttrObject(resultTextBackgroundStyle, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultRadius, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_TOP_LEFT_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_TOP_LEFT_DEFAULT_VALUE) <<
@@ -332,10 +326,8 @@ HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadi
         WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(inputValueTextBackgroundStyle).radius)).topRight = value;
         modifier_->setTextBackgroundStyle(node_, &inputValueTextBackgroundStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultTextBackgroundStyle =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_BACKGROUND_STYLE_NAME);
-        auto resultRadius = GetAttrValue<std::unique_ptr<JsonValue>>(
-            resultTextBackgroundStyle, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_NAME);
+        auto resultTextBackgroundStyle = GetAttrObject(jsonValue, ATTRIBUTE_TEXT_BACKGROUND_STYLE_NAME);
+        auto resultRadius = GetAttrObject(resultTextBackgroundStyle, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultRadius, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_TOP_RIGHT_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -383,10 +375,8 @@ HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadi
         WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(inputValueTextBackgroundStyle).radius)).topRight = value;
         modifier_->setTextBackgroundStyle(node_, &inputValueTextBackgroundStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultTextBackgroundStyle =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_BACKGROUND_STYLE_NAME);
-        auto resultRadius = GetAttrValue<std::unique_ptr<JsonValue>>(
-            resultTextBackgroundStyle, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_NAME);
+        auto resultTextBackgroundStyle = GetAttrObject(jsonValue, ATTRIBUTE_TEXT_BACKGROUND_STYLE_NAME);
+        auto resultRadius = GetAttrObject(resultTextBackgroundStyle, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultRadius, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_TOP_RIGHT_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_TOP_RIGHT_DEFAULT_VALUE) <<
@@ -438,10 +428,8 @@ HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadi
         WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(inputValueTextBackgroundStyle).radius)).bottomLeft = value;
         modifier_->setTextBackgroundStyle(node_, &inputValueTextBackgroundStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultTextBackgroundStyle =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_BACKGROUND_STYLE_NAME);
-        auto resultRadius = GetAttrValue<std::unique_ptr<JsonValue>>(
-            resultTextBackgroundStyle, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_NAME);
+        auto resultTextBackgroundStyle = GetAttrObject(jsonValue, ATTRIBUTE_TEXT_BACKGROUND_STYLE_NAME);
+        auto resultRadius = GetAttrObject(resultTextBackgroundStyle, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultRadius, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_BOTTOM_LEFT_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -489,10 +477,8 @@ HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadi
         WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(inputValueTextBackgroundStyle).radius)).bottomLeft = value;
         modifier_->setTextBackgroundStyle(node_, &inputValueTextBackgroundStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultTextBackgroundStyle =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_BACKGROUND_STYLE_NAME);
-        auto resultRadius = GetAttrValue<std::unique_ptr<JsonValue>>(
-            resultTextBackgroundStyle, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_NAME);
+        auto resultTextBackgroundStyle = GetAttrObject(jsonValue, ATTRIBUTE_TEXT_BACKGROUND_STYLE_NAME);
+        auto resultRadius = GetAttrObject(resultTextBackgroundStyle, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultRadius, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_BOTTOM_LEFT_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_BOTTOM_LEFT_DEFAULT_VALUE) <<
@@ -544,10 +530,8 @@ HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadi
         WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(inputValueTextBackgroundStyle).radius)).bottomRight = value;
         modifier_->setTextBackgroundStyle(node_, &inputValueTextBackgroundStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultTextBackgroundStyle =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_BACKGROUND_STYLE_NAME);
-        auto resultRadius = GetAttrValue<std::unique_ptr<JsonValue>>(
-            resultTextBackgroundStyle, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_NAME);
+        auto resultTextBackgroundStyle = GetAttrObject(jsonValue, ATTRIBUTE_TEXT_BACKGROUND_STYLE_NAME);
+        auto resultRadius = GetAttrObject(resultTextBackgroundStyle, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultRadius, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_BOTTOM_RIGHT_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
@@ -595,10 +579,8 @@ HWTEST_F(BaseSpanModifierTest,
         WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(inputValueTextBackgroundStyle).radius)).bottomRight = value;
         modifier_->setTextBackgroundStyle(node_, &inputValueTextBackgroundStyle);
         auto jsonValue = GetJsonValue(node_);
-        auto resultTextBackgroundStyle =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TEXT_BACKGROUND_STYLE_NAME);
-        auto resultRadius = GetAttrValue<std::unique_ptr<JsonValue>>(
-            resultTextBackgroundStyle, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_NAME);
+        auto resultTextBackgroundStyle = GetAttrObject(jsonValue, ATTRIBUTE_TEXT_BACKGROUND_STYLE_NAME);
+        auto resultRadius = GetAttrObject(resultTextBackgroundStyle, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_NAME);
         auto resultStr =
             GetAttrValue<std::string>(resultRadius, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_BOTTOM_RIGHT_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_BACKGROUND_STYLE_I_RADIUS_I_BOTTOM_RIGHT_DEFAULT_VALUE) <<

@@ -282,6 +282,10 @@ int64_t FfiOHOSAceFrameworkPanRecognizerGetPanGestureOptions(int64_t id)
         return FFI_ERROR_CODE;
     }
     auto panGestureOptions = panRecognizer->GetPanGestureOptions();
+    if (panGestureOptions == nullptr) {
+        LOGE("FfiOHOSAceFrameworkPanRecognizerGetPanGestureOptions: get panGestureOptions failed.");
+        return FFI_ERROR_CODE;
+    }
     return panGestureOptions->GetID();
 }
 

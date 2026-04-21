@@ -47,6 +47,7 @@ enum class FoldScreenType: int32_t {
     SMALL_FOLDER = 2,
     OUTER_FOLDER = 3,
     SUPER_FOLDER = 5,
+    PORTRAIT_FOLDER = 7,
 };
 
 constexpr int32_t MCC_UNDEFINED = 0;
@@ -56,6 +57,7 @@ extern const char ENABLE_TRACE_LAYOUT_KEY[];
 extern const char ENABLE_TRACE_INPUTEVENT_KEY[];
 extern const char ENABLE_SECURITY_DEVELOPERMODE_KEY[];
 extern const char ENABLE_DEBUG_STATEMGR_KEY[];
+enum class UiMaterialLevel;
 
 enum class LongScreenType : int32_t {
     LONG = 0,
@@ -286,6 +288,11 @@ public:
         return debugBoundaryEnabled_.load();
     }
 
+    static bool GetGestureDebugBoundaryEnabled()
+    {
+        return gestureDebugBoundaryEnabled_;
+    }
+
     static bool GetDebugOffsetLogEnabled()
     {
         return debugOffsetLogEnabled_;
@@ -304,6 +311,16 @@ public:
     static bool GetRecycleImageEnabled()
     {
         return recycleImageEnabled_;
+    }
+
+    static bool GetImageReleaseManageObjectEnabled()
+    {
+        return imageReleaseManageObjectEnabled_;
+    }
+
+    static bool GetImageAutoResizeEnabled()
+    {
+        return autoResizeEnabled_;
     }
 
     static bool GetSvgTraceEnabled()
@@ -564,8 +581,6 @@ public:
 
     static bool GetIsUseMemoryMonitor();
 
-    static int32_t GetComponentLoadNumber();
-
     static bool IsFormAnimationLimited();
 
     static bool GetResourceDecoupling();
@@ -673,6 +688,8 @@ public:
 
     static bool IsSmallFoldProduct();
 
+    static bool IsPortraitFoldProduct();
+
     static bool IsBigFoldProduct();
 
     static std::string GetWebDebugRenderMode();
@@ -710,7 +727,6 @@ public:
 
     static int32_t GetDragDropFrameworkStatus();
     static int32_t GetTouchAccelarate();
-    static int32_t GetPageLoadTimethreshold();
 
     static bool IsSuperFoldDisplayDevice();
 
@@ -722,6 +738,8 @@ public:
     static bool IsFormSkeletonBlurEnabled();
 
     static int32_t getFormSharedImageCacheThreshold();
+
+    static bool IsFormSkeletonRSTransactionEnabled();
 
     static bool IsWhiteBlockEnabled();
     static bool IsWhiteBlockIdleChange();
@@ -760,7 +778,11 @@ public:
         return isOpenYuvDecode_;
     }
 
+    static UiMaterialLevel GetUiMaterialLevel();
+
     static void ReadSystemParametersCallOnce();
+	
+    static int32_t GetFormTaskPriority();
 
 private:
     static bool opincEnabled_;
@@ -803,6 +825,7 @@ private:
     static int32_t mcc_;
     static int32_t mnc_;
     static ScreenShape screenShape_;
+    static bool autoResizeEnabled_;
 
     static std::atomic<bool> unZipHap_;
     static bool rosenBackendEnabled_;
@@ -816,10 +839,12 @@ private:
     static bool containerDeleteFlag_;
     static bool layoutDetectEnabled_;
     static std::atomic<bool> debugBoundaryEnabled_;
+    static bool gestureDebugBoundaryEnabled_;
     static bool debugAutoUIEnabled_; // for AutoUI Test
     static bool debugOffsetLogEnabled_;
     static bool downloadByNetworkEnabled_;
     static bool recycleImageEnabled_;
+    static bool imageReleaseManageObjectEnabled_;
     static bool gpuUploadEnabled_;
     static bool isHookModeEnabled_;
     static bool astcEnabled_;
@@ -860,7 +885,6 @@ private:
     static bool multiInstanceEnabled_;
     static int32_t dragDropFrameworkStatus_;
     static int32_t touchAccelarate_;
-    static int32_t pageLoadTimethreshold_;
     static bool pageTransitionFrzEnabled_;
     static bool forcibleLandscapeEnabled_;
     static bool softPagetransition_;

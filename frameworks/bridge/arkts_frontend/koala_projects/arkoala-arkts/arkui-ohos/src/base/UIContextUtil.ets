@@ -15,11 +15,11 @@
 
 import { int32 } from "@koalaui/common"
 import { UIContext } from "@ohos/arkui/UIContext"
-import { UIContextImpl } from "./UIContextImpl";
 import { ArkUIAniModule } from "arkui.ani";
 
 export class UIContextUtil {
     static contextMap_: Map<int32, UIContext> = new Map<int32, UIContext>();
+    public static envContextMap: Map<int32, Map<string, Object>> = new Map<int32, Map<string, Object>>();
 
     static getOrCreateCurrentUIContext(): UIContext {
         let id: int32 = ArkUIAniModule._Common_Get_Current_InstanceId();
@@ -33,13 +33,14 @@ export class UIContextUtil {
     static getOrCreateUIContextById(instanceId: int32): UIContext {
         let context = UIContextUtil.getUIContextById(instanceId);
         if (context === undefined) {
-            context = new UIContextImpl(instanceId);
+            context = new UIContext(instanceId);
             UIContextUtil.addUIContext(instanceId, context);
         }
         return context;
     }
 
     static isAvailableCountMap_: Map<int32, int32> = new Map<int32, int32>();
+    static availableInstanceIds_: Set<int32> = new Set<int32>();
 
     static addAvailableInstanceId(instanceId: int32): void {
         if (!UIContextUtil.isAvailableCountMap_.has(instanceId)) {
@@ -50,7 +51,7 @@ export class UIContextUtil {
         if (value === 1){
             if (instanceId >= 0) {
                 UIContextUtil.isAvailableCountMap_.set(instanceId, 0);
-                UIContextImpl.availableInstanceIds_.add(instanceId);
+                UIContextUtil.availableInstanceIds_.add(instanceId);
             }
         } else if (value === 0) {
             UIContextUtil.isAvailableCountMap_.set(instanceId, 1);
@@ -62,7 +63,7 @@ export class UIContextUtil {
         if (value === 0){
             if (instanceId >= 0) {
                 UIContextUtil.isAvailableCountMap_.set(instanceId, 1);
-                UIContextImpl.availableInstanceIds_.delete(instanceId);
+                UIContextUtil.availableInstanceIds_.delete(instanceId);
             }
         } else if (value === 1) {
             UIContextUtil.isAvailableCountMap_.set(instanceId, 0);
@@ -89,5 +90,21 @@ export class UIContextUtil {
     }
     static resolveUIContext(): Array<int> {
         return ArkUIAniModule._ResolveUIContext();
+    }
+    static setEnvContextById(instanceId: int32, envValue: string, envProperty: Object): void {
+        if (!UIContextUtil.envContextMap.has(instanceId)) {
+            const tempEnvMap: Map<string, Object> = new Map<string, Object>();
+            tempEnvMap.set(envValue, envProperty);
+            UIContextUtil.envContextMap.set(instanceId, tempEnvMap);
+        } else {
+            UIContextUtil.envContextMap.get(instanceId)!.set(envValue, envProperty);
+        }
+    }
+    static getEnvContextById(instanceId: int32, envValue: string): Object | undefined {
+        if (!UIContextUtil.envContextMap.has(instanceId) ||
+            !UIContextUtil.envContextMap.get(instanceId)!.has(envValue)) {
+            return undefined;
+        }
+        return UIContextUtil.envContextMap.get(instanceId)!.get(envValue);
     }
 }

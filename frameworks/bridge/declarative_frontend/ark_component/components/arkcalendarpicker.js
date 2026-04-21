@@ -480,7 +480,7 @@ class JSCalendarPickerDialog extends JSViewAbstract {
   }
 }
 
-function exportDialogView() {
+function exportViewDialog() {
   globalThis.CalendarPickerDialog = JSCalendarPickerDialog;
 }
 
@@ -496,4 +496,7 @@ function exportView() {
   globalThis.CalendarPicker = JSCalendarPicker;
 }
 
-export default { ArkCalendarPickerComponent, createComponent, exportComponent, exportView, exportDialogView };
+function loadComponent() {}
+export default { ArkCalendarPickerComponent, createComponent, exportComponent, exportView, exportViewDialog,
+    loadComponent
+ };

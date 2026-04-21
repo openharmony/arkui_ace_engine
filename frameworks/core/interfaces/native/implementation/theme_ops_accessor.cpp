@@ -75,9 +75,13 @@ void SetDefaultThemeImpl(const Array_ResourceColor* colorArray, Ark_Boolean isDa
     NodeModifier::GetThemeModifier()->setDefaultTheme(colors.data(), isDarkValue, static_cast<void*>(&resObjs));
 #endif
 }
-void CreateAndBindThemeImpl(Ark_Int32 themeScopeId, Ark_Int32 themeId, const Array_ResourceColor* colorArray,
-    const Array_ResourceColor* darkColorArray,
-    Ark_ThemeColorMode colorMode, const Callback_Void* onThemeScopeDestroy, Ark_Boolean darkSetStatus)
+void CreateAndBindThemeImpl(Ark_Int32 themeScopeId,
+                            Ark_Int32 themeId,
+                            const Array_ResourceColor* colorArray,
+                            const Array_ResourceColor* darkColorArray,
+                            Ark_ThemeColorMode colorMode,
+                            const synthetic_Callback_Void* onThemeScopeDestroy,
+                            Ark_Boolean darkSetStatus)
 {
 #if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
     CHECK_NULL_VOID(colorArray);

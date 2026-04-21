@@ -362,10 +362,12 @@ void VideoElement::PreparePlayer()
 // Interim programme
 void VideoElement::MediaPlay(const std::string& filePath)
 {
-    auto assetManager = PipelineBase::GetCurrentContext()->GetAssetManager();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
     uint32_t resId = 0;
     if (GetResourceId(filePath, resId)) {
-        auto themeManager = PipelineBase::GetCurrentContext()->GetThemeManager();
+        auto themeManager = pipeline->GetThemeManager();
+        CHECK_NULL_VOID(themeManager);
         auto themeConstants = themeManager->GetThemeConstants();
         std::string mediaPath;
         auto state1 = themeConstants->GetMediaById(resId, mediaPath);
@@ -374,12 +376,16 @@ void VideoElement::MediaPlay(const std::string& filePath)
             return;
         }
         MediaFileInfo fileInfo;
+        auto assetManager = pipeline->GetAssetManager();
+        CHECK_NULL_VOID(assetManager);
         auto state2 = assetManager->GetFileInfo(mediaPath.substr(mediaPath.find("resources/base")), fileInfo);
         if (!state2) {
             LOGE("GetMediaFileInfo failed");
             return;
         }
-        auto hapPath = Container::Current()->GetHapPath();
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        auto hapPath = container->GetHapPath();
         std::FILE* hapFp = std::fopen(hapPath.c_str(), "r");
         if (hapFp == nullptr) {
             LOGE("Open hap file failed");
@@ -397,7 +403,10 @@ void VideoElement::MediaPlay(const std::string& filePath)
 
 void VideoElement::RawFilePlay(const std::string& filePath)
 {
-    auto assetManager = PipelineBase::GetCurrentContext()->GetAssetManager();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto assetManager = pipeline->GetAssetManager();
+    CHECK_NULL_VOID(assetManager);
     auto path = "resources/rawfile/" + filePath.substr(RAWFILE_PREFIX_LENGTH);
     MediaFileInfo fileInfo;
     auto state1 = assetManager->GetFileInfo(path, fileInfo);
@@ -405,7 +414,9 @@ void VideoElement::RawFilePlay(const std::string& filePath)
         LOGE("GetMediaFileInfo failed");
         return;
     }
-    auto hapPath = Container::Current()->GetHapPath();
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto hapPath = container->GetHapPath();
     std::FILE* hapFp = std::fopen(hapPath.c_str(), "r");
     if (hapFp == nullptr) {
         LOGE("Open hap file failed");
@@ -422,15 +433,20 @@ void VideoElement::RawFilePlay(const std::string& filePath)
 
 void VideoElement::RelativePathPlay(const std::string& filePath)
 {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
     // relative path
-    auto assetManager = PipelineBase::GetCurrentContext()->GetAssetManager();
+    auto assetManager = pipeline->GetAssetManager();
+    CHECK_NULL_VOID(assetManager);
     MediaFileInfo fileInfo;
     auto state = assetManager->GetFileInfo(assetManager->GetAssetPath(filePath, false), fileInfo);
     if (!state) {
         LOGE("GetMediaFileInfo failed");
         return;
     }
-    auto hapPath = Container::Current()->GetHapPath();
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto hapPath = container->GetHapPath();
     std::FILE* hapFp = std::fopen(hapPath.c_str(), "r");
     if (hapFp == nullptr) {
         LOGE("Open hap file failed");
@@ -1982,7 +1998,7 @@ void VideoElement::Dump()
 
 bool VideoElement::OnKeyEvent(const KeyEvent& keyEvent)
 {
-    if (keyEvent.action != KeyAction::UP) {
+    if (keyEvent.action != KeyAction::UP && keyEvent.action != KeyAction::CANCEL) {
         return false;
     }
     switch (keyEvent.code) {

@@ -32,7 +32,7 @@ void FolderStackPattern::OnAttachToMainTreeMultiThread()
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     CHECK_NULL_VOID(OHOS::Ace::SystemProperties::IsBigFoldProduct() ||
-        OHOS::Ace::SystemProperties::IsSmallFoldProduct());
+        OHOS::Ace::SystemProperties::IsPortraitFoldProduct());
     auto callbackId = pipeline->RegisterFoldStatusChangedCallback([weak = WeakClaim(this)](FoldStatus folderStatus) {
         auto pattern = weak.Upgrade();
         if (pattern) {

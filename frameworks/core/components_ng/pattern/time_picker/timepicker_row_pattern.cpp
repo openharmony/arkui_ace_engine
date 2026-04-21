@@ -15,18 +15,23 @@
 
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
 #include <cstdint>
+#include <ctime>
+
+#include "core/components_ng/render/drawing.h"
 
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/time_picker/bridge/timepicker_util.h"
 #include "core/components_ng/pattern/picker_utils/toss_animation_controller.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -68,6 +73,12 @@ const std::string HOUR_STR_11 = "11";
 const std::string HOUR_STR_12 = "12";
 constexpr float PICKER_MAXFONTSCALE = 1.0f;
 constexpr float DEFAULT_SIZE_ZERO = 0.0f;
+constexpr int32_t MIN_HOUR = 0;
+constexpr int32_t MAX_HOUR = 23;
+constexpr int32_t MIN_MINUTE = 0;
+constexpr int32_t MAX_MINUTE = 59;
+constexpr int32_t MIN_SECOND = 0;
+constexpr int32_t MAX_SECOND = 59;
 } // namespace
 
 void TimePickerRowPattern::OnAttachToFrameNode()
@@ -76,6 +87,9 @@ void TimePickerRowPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
     host->GetRenderContext()->UpdateClipEdge(true);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddWindowSizeChangeCallback(host->GetId());
 }
 
 bool TimePickerRowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -125,6 +139,7 @@ void TimePickerRowPattern::SetButtonIdeaSize()
             buttonLayoutProperty->UpdateUserDefinedIdealSize(
                 CalcSize(CalcLength(width - PRESS_INTERVAL.ConvertToPx()), CalcLength(buttonHeight)));
             buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+            buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
         } else {
             auto isFocusButton = haveFocus_ && (currentFocusButtonNode == buttonNode);
             UpdateFocusStyles(buttonLayoutProperty, timePickerColumnNode, height, isFocusButton);
@@ -485,6 +500,14 @@ void TimePickerRowPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto pickerProperty = host->GetLayoutProperty<TimePickerLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
+
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_VOID(windowManager);
+    auto windowMode = windowManager->GetWindowMode();
+    isWindowFullscreen_ = (windowMode == WindowMode::WINDOW_MODE_FULLSCREEN);
+
     isForceUpdate_ = isForceUpdate_ ||
         (loop_ != pickerProperty->GetLoopValue(true)) ||
         (hour24_ != pickerProperty->GetIsUseMilitaryTimeValue(false));
@@ -611,6 +634,7 @@ void TimePickerRowPattern::CreateAmPmNode()
             buttonLayoutProperty->UpdateUserDefinedIdealSize(
                 CalcSize(CalcLength(SetAmPmButtonIdeaSize()), CalcLength(height - PRESS_INTERVAL)));
             buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
+            buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
             buttonNode->MarkModifyDone();
             buttonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
@@ -742,9 +766,12 @@ void TimePickerRowPattern::SetEventCallback(EventCallback&& value)
 void TimePickerRowPattern::FireChangeEvent(bool refresh)
 {
     if (refresh) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto str = GetSelectedObject(true);
+        ReportTimeChangeEvent(host->GetId(), str);
         auto timePickerEventHub = GetEventHub<TimePickerEventHub>();
         CHECK_NULL_VOID(timePickerEventHub);
-        auto str = GetSelectedObject(true);
         auto info = std::make_shared<DatePickerChangeEvent>(str);
         timePickerEventHub->FireChangeEvent(info.get());
         timePickerEventHub->FireDialogChangeEvent(str);
@@ -1436,11 +1463,15 @@ void TimePickerRowPattern::FlushColumn()
         hourColumnPattern->SetOptions(GetOptionsCount());
         hourColumnPattern->SetShowCount(GetShowCount());
         hourColumnPattern->FlushCurrentOptions();
+        hourColumn->MarkModifyDone();
+        hourColumn->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     } else if (amPmColumn) {
         auto amPmColumnPattern = amPmColumn->GetPattern<TimePickerColumnPattern>();
         CHECK_NULL_VOID(amPmColumnPattern);
         amPmColumnPattern->SetShowCount(AM_PM_COUNT);
         amPmColumnPattern->FlushCurrentOptions();
+        amPmColumn->MarkModifyDone();
+        amPmColumn->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
         CHECK_NULL_VOID(hourColumn);
         auto hourColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
@@ -1448,6 +1479,8 @@ void TimePickerRowPattern::FlushColumn()
         hourColumnPattern->SetOptions(GetOptionsCount());
         hourColumnPattern->SetShowCount(GetShowCount());
         hourColumnPattern->FlushCurrentOptions();
+        hourColumn->MarkModifyDone();
+        hourColumn->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 
     auto minuteColumn = allChildNode_["minute"].Upgrade();
@@ -1456,6 +1489,8 @@ void TimePickerRowPattern::FlushColumn()
     CHECK_NULL_VOID(minuteColumnPattern);
     minuteColumnPattern->SetShowCount(GetShowCount());
     minuteColumnPattern->FlushCurrentOptions();
+    minuteColumn->MarkModifyDone();
+    minuteColumn->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     if (hasSecond_) {
         auto secondColumn = allChildNode_["second"].Upgrade();
         CHECK_NULL_VOID(secondColumn);
@@ -1464,6 +1499,8 @@ void TimePickerRowPattern::FlushColumn()
         secondColumnPattern->SetOptions(GetOptionsCount());
         secondColumnPattern->SetShowCount(GetShowCount());
         secondColumnPattern->FlushCurrentOptions();
+        secondColumn->MarkModifyDone();
+        secondColumn->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 
@@ -2264,7 +2301,7 @@ void TimePickerRowPattern::OnColorConfigurationUpdate()
     host->SetNeedCallChildrenUpdate(false);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-    auto pickerTheme = context->GetTheme<PickerTheme>(host->GetThemeScopeId());
+    auto pickerTheme = host->GetTheme<PickerTheme>(true);
     CHECK_NULL_VOID(pickerTheme);
     auto pickerProperty = host->GetLayoutProperty<TimePickerLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
@@ -2310,7 +2347,8 @@ void TimePickerRowPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(contentRowNode);
     auto layoutRenderContext = contentRowNode->GetRenderContext();
     CHECK_NULL_VOID(layoutRenderContext);
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) || !layoutRenderContext->IsUniRenderEnabled()) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) ||
+        !DialogView::IsSupportBlurStyle(buttonTitleNode, isShowInSubWindow_)) {
         layoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
     }
     host->MarkModifyDone();
@@ -2321,12 +2359,15 @@ bool TimePickerRowPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     bool result = false;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, result);
+    if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return result;
+    }
     host->SetNeedCallChildrenUpdate(false);
     auto pickerProperty = host->GetLayoutProperty<TimePickerLayoutProperty>();
     CHECK_NULL_RETURN(pickerProperty, result);
     // The following three attributes will be affected by withTheme.
-    // If they are setted by user, then use the value by user set; Otherwise use the value from withTheme
-    // When the "result" is true, mean to notify the framework to Re-render
+    // If they are setted by user, then use value by user set; Otherwise use value from withTheme
+    // When "result" is true, mean to notify framework to Re-render
     if ((!pickerProperty->HasColor()) || (!pickerProperty->HasDisappearColor()) ||
         (!pickerProperty->HasSelectedColor())) {
         result = true;
@@ -2334,6 +2375,30 @@ bool TimePickerRowPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     FREE_NODE_CHECK(host, OnThemeScopeUpdate);
     OnModifyDone();
     return result;
+}
+
+void TimePickerRowPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
+{
+    bool oldFullscreen = isWindowFullscreen_;
+    switch (type) {
+        case WindowSizeChangeReason::SPLIT_TO_FULL:
+        case WindowSizeChangeReason::FLOATING_TO_FULL:
+            isWindowFullscreen_ = true;
+            break;
+        case WindowSizeChangeReason::FULL_TO_SPLIT:
+        case WindowSizeChangeReason::FULL_TO_FLOATING:
+            isWindowFullscreen_ = false;
+            break;
+        default:
+            break;
+    }
+    if (oldFullscreen != isWindowFullscreen_) {
+        for (auto& column : timePickerColumns_) {
+            auto columnNode = column.Upgrade();
+            CHECK_NULL_VOID(columnNode);
+            columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    }
 }
 
 bool TimePickerRowPattern::NeedAdaptForAging()
@@ -2405,7 +2470,7 @@ void TimePickerRowPattern::UpdateTextStyleCommon(
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
 
-    if (pipelineContext->IsSystmColorChange()) {
+    if (pipelineContext->IsSystemColorChange()) {
         updateTextColorFunc(textStyle.textColor.value_or(defaultTextStyle.GetTextColor()));
 
         Dimension fontSize = defaultTextStyle.GetFontSize();
@@ -2528,4 +2593,146 @@ void TimePickerRowPattern::BeforeCreateLayoutWrapper()
     }
 }
 
+int32_t TimePickerRowPattern::OnInjectionEvent(const std::string& command)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, RET_FAILED);
+
+    auto json = JsonUtil::ParseJsonString(command);
+    if (!IsJsonValid(json) || !IsJsonObject(json)) {
+        auto errorMsg1 = std::string("invalidCommand: ") + command;
+        ReportCommandResult(host->GetId(), "", "fail", errorMsg1);
+        return RET_FAILED;
+    }
+
+    auto cmd = json->GetString("cmd");
+    if (cmd != "setTimePickerTime" && cmd != "setTimePickerDialogTime") {
+        auto errorMsg2 = std::string("invalidCommand Json: ") + command;
+        ReportCommandResult(host->GetId(), cmd, "fail", errorMsg2);
+        return RET_FAILED;
+    }
+    if ((cmd == "setTimePickerTime" && GetIsShowInDialog())
+     || (cmd == "setTimePickerDialogTime" && !GetIsShowInDialog())) {
+        auto errorMsg3 = std::string("invalidCommand Json: ") + command;
+        ReportCommandResult(host->GetId(), cmd, "fail", errorMsg3);
+        return RET_FAILED;
+    }
+
+    auto paramJson = json->GetValue("params");
+    if (!IsJsonValid(paramJson) || !IsJsonObject(paramJson)) {
+        auto errorMsg4 = std::string("invalidParams: ") + command;
+        ReportCommandResult(host->GetId(), cmd, "fail", errorMsg4);
+        return RET_FAILED;
+    }
+
+    int32_t hour;
+    int32_t minute;
+    int32_t second;
+    if (!ValidateTimeParameters(paramJson, hour, minute, second)) {
+        auto errorMsg = std::string("invalidParams: ") + command;
+        ReportCommandResult(host->GetId(), cmd, "fail", errorMsg);
+        return RET_FAILED;
+    }
+    ReportCommandResult(host->GetId(), cmd, "success");
+    PickerTime targetTime(hour, minute, second);
+    SetSelectedTime(targetTime);
+    OnModifyDone();
+    FireChangeEvent(true);
+    return RET_SUCCESS;
+}
+
+bool TimePickerRowPattern::ValidateTimeParameters(const std::unique_ptr<JsonValue>& paramJson,
+    int32_t& hour, int32_t& minute, int32_t& second)
+{
+    if (!paramJson->Contains("hour") || !paramJson->Contains("minute")
+        || !paramJson->Contains("second")) {
+        return false;
+    }
+    auto hourValue = paramJson->GetValue("hour");
+    auto minuteValue = paramJson->GetValue("minute");
+    auto secondValue = paramJson->GetValue("second");
+    if ((hourValue && minuteValue && secondValue) &&
+        (hourValue->IsNumber() && minuteValue->IsNumber() && secondValue->IsNumber())) {
+        hour = paramJson->GetInt("hour");
+        minute = paramJson->GetInt("minute");
+        second = paramJson->GetInt("second");
+        if (hour < MIN_HOUR || hour > MAX_HOUR || minute < MIN_MINUTE ||
+            minute > MAX_MINUTE || second < MIN_SECOND || second > MAX_SECOND) {
+            return false;
+        }
+
+        auto TimeToSeconds = [](uint32_t h, uint32_t m, uint32_t s) {
+            return s + m * 60 + h * 3600;
+        };
+
+        uint32_t inputSeconds = TimeToSeconds(hour, minute, second);
+        uint32_t startSeconds = TimeToSeconds(startTime_.GetHour(), startTime_.GetMinute(), startTime_.GetSecond());
+        uint32_t endSeconds = TimeToSeconds(endTime_.GetHour(), endTime_.GetMinute(), endTime_.GetSecond());
+        if (inputSeconds < startSeconds || inputSeconds > endSeconds) {
+            return false;
+        }
+        return true;
+    }
+    return false;
+}
+
+bool TimePickerRowPattern::IsJsonValid(const std::unique_ptr<JsonValue>& json)
+{
+    CHECK_NULL_RETURN(json, false);
+    return json->IsValid();
+}
+
+bool TimePickerRowPattern::IsJsonObject(const std::unique_ptr<JsonValue>& json)
+{
+    CHECK_NULL_RETURN(json, false);
+    return json->IsObject();
+}
+bool TimePickerRowPattern::ReportTimeChangeEvent(int32_t nodeId, const std::string& timeStr)
+{
+    auto dataJson = JsonUtil::ParseJsonString(timeStr);
+    CHECK_NULL_RETURN(dataJson, false);
+    int32_t hour = dataJson->GetInt("hour");
+    int32_t minute = dataJson->GetInt("minute");
+    int32_t second = dataJson->GetInt("second");
+
+    auto params = InspectorJsonUtil::CreateObject();
+    CHECK_NULL_RETURN(params, false);
+    params->Put("hour", hour);
+    params->Put("minute", minute);
+    params->Put("second", second);
+
+    auto value = InspectorJsonUtil::Create();
+    CHECK_NULL_RETURN(value, false);
+
+    if (GetIsShowInDialog()) {
+        if (isInDatePickerDialog_) {
+            return false;
+        }
+
+        value->Put("TimePickerDialog", "onTimeChange");
+    } else {
+        value->Put("TimePicker", "onTimeChange");
+    }
+    value->Put("params", params);
+
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value,
+        ComponentEventType::COMPONENT_EVENT_PICKER);
+    return true;
+}
+
+bool TimePickerRowPattern::ReportCommandResult(int32_t nodeId, const std::string& event,
+    const std::string& result, const std::string& reason)
+{
+    auto value = InspectorJsonUtil::Create();
+    CHECK_NULL_RETURN(value, false);
+    value->Put("event", event.c_str());
+    value->Put("result", result.c_str());
+    if (!reason.empty()) {
+        value->Put("reason", reason.c_str());
+    }
+
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "TimePickerResult", value,
+        ComponentEventType::COMPONENT_EVENT_PICKER);
+    return true;
+}
 } // namespace OHOS::Ace::NG

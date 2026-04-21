@@ -17,10 +17,8 @@
 
 #include <string>
 
-#include "base/image/pixel_map.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/frame_node.h"
 #include "frameworks/core/components/image/image_event.h"
 

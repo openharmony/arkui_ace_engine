@@ -23,6 +23,7 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_position_map.h"
 #include "compatible/components/list_v2/list_component.h"
@@ -30,7 +31,9 @@
 
 namespace OHOS::Ace::NG {
 class PipelineContext;
+class ListPattern;
 class ListPositionMap;
+struct AdjustOffset;
 
 struct ListItemGroupLayoutInfo {
     bool atStart = false;
@@ -231,15 +234,9 @@ public:
         prevContentMainSize_ = mainSize;
     }
 
-    int32_t GetStartIndex() const
-    {
-        return itemPosition_.empty() ? -1 : itemPosition_.begin()->first;
-    }
+    int32_t GetStartIndex(bool ignoreFixOffset = false) const;
 
-    int32_t GetEndIndex() const
-    {
-        return itemPosition_.empty() ? -1 : itemPosition_.rbegin()->first;
-    }
+    int32_t GetEndIndex(bool ignoreFixOffset = false) const;
 
     int32_t GetMidIndex(LayoutWrapper* layoutWrapper, bool usePreContentMainSize = false);
 
@@ -486,6 +483,16 @@ public:
         return prevMeasureBreak_;
     }
 
+    float GetStartFixOffset() const
+    {
+        return startFixOffset_;
+    }
+
+    float GetEndFixOffset() const
+    {
+        return endFixOffset_;
+    }
+
     bool IsNeedSyncLoad(const RefPtr<ListLayoutProperty>& property) const;
 
     void CheckGroupMeasureBreak(const RefPtr<LayoutWrapper>& layoutWrapper);
@@ -493,6 +500,21 @@ public:
     void SetDraggingIndex(int32_t index)
     {
         draggingIndex_ = index;
+    }
+
+    void SetContentClipExpend(ExpandEdges expand)
+    {
+        expandEdges_ = expand;
+    }
+
+    void SetContentClipMode(ContentClipMode contentClipMode)
+    {
+        contentClipMode_ = contentClipMode;
+    }
+
+    void SetContentClipShape(const RefPtr<ShapeRect>& shape)
+    {
+        clipShapeRect_ = shape;
     }
 
     void ExpandWithSafeAreaPadding(const RefPtr<LayoutWrapper>& layoutWrapper);
@@ -532,6 +554,9 @@ protected:
     void CheckListItemGroupRecycle(
         LayoutWrapper* layoutWrapper, int32_t index, float referencePos, bool forwardLayout) const;
     void AdjustPostionForListItemGroup(LayoutWrapper* layoutWrapper, Axis axis, int32_t index, bool forwardLayout);
+    void MeasureLazyVGridLayout(const RefPtr<LayoutWrapper>& wrapper, float& referencePos, bool forward);
+    void ApplyLazyVGridAdjustOffset(const RefPtr<LayoutWrapper>& wrapper, float& referencePos, bool forward);
+    AdjustOffset GetAdjustOffset(const RefPtr<LayoutWrapper>& item);
     void SetItemInfo(int32_t index, ListItemInfo&& info)
     {
         itemPosition_[index] = info;
@@ -555,6 +580,8 @@ protected:
     bool IsListLanesEqual(const RefPtr<LayoutWrapper>& wrapper) const;
     void ReportGetChildError(const std::string& funcName, int32_t index) const;
     void UpdateNoLayoutedItems();
+
+    AdjustOffset GetLazyVGridAdjustOffset(const RefPtr<LayoutWrapper>& wrapper) const;
 
     Axis axis_ = Axis::VERTICAL;
     int32_t laneIdx4Divider_ = 0;
@@ -618,6 +645,8 @@ protected:
         return 0.0f;
     }
 
+    void CalculateFixOffset(const ScaleProperty& scaleProperty);
+
     void LostChildFocusToSelf(LayoutWrapper* layoutWrapper, int32_t start, int32_t end);
 
     virtual void MeasureHeader(LayoutWrapper* layoutWrapper) {}
@@ -665,6 +694,8 @@ protected:
     bool isReverse_ = false;
     float contentMainSize_ = 0.0f;
     float prevContentMainSize_ = 0.0f;
+    float startFixOffset_ = 0.0f;
+    float endFixOffset_ = 0.0f;
     float paddingBeforeContent_ = 0.0f;
     float paddingAfterContent_ = 0.0f;
     float groupItemAverageHeight_ = 0.0f;
@@ -680,6 +711,16 @@ private:
     void CheckAndMeasureStartItem(
         LayoutWrapper* layoutWrapper, int32_t startIndex, float& startPos, bool isGroup, bool forwardLayout);
 
+    // Helper function for nested lazy loading support (static, no instance state needed)
+    static bool CanSupportNestedLazy(const RefPtr<FrameNode>& childNode, const RefPtr<FrameNode>& listNode);
+
+    static void ProcessPredictBuildLazyVGrid(
+        const RefPtr<LayoutWrapper>& wrapper,
+        int32_t index,
+        const RefPtr<ListPattern>& pattern,
+        const ListPredictLayoutParamV2& param,
+        const ListMainSizeValues& listMainSizeValues,
+        bool show);
     std::pair<int32_t, float> RequestNewItemsForward(LayoutWrapper* layoutWrapper,
         const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos, Axis axis);
 
@@ -722,6 +763,9 @@ private:
 
     float chainInterval_ = 0.0f;
     int32_t draggingIndex_ = -1;
+    ContentClipMode contentClipMode_ = ContentClipMode::CONTENT_ONLY;
+    std::optional<ExpandEdges> expandEdges_;
+    RefPtr<ShapeRect> clipShapeRect_;
 };
 } // namespace OHOS::Ace::NG
 

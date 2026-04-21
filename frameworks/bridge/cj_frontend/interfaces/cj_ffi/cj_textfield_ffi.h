@@ -29,6 +29,7 @@ struct CJSubmitEvent {
 
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldEditMenuOptions(
     CjOnCreateMenu cjOnCreateMenu, CjOnMenuItemClick cjOnMenuItemClick);
+CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetWidth(double value, uint32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetHeight(double value, uint32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkTextFieldSetSize(
     double width, uint32_t widthUnit, double height, uint32_t heightUnit);

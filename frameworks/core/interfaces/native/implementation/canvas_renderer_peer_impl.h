@@ -162,6 +162,8 @@ public:
     void Path2DRoundRect(double x, double y, double width, double height) override;
     void Path2DRoundRect(double x, double y, double width, double height, double radiusValue) override;
     void Path2DRoundRect(double x, double y, double width, double height, const std::vector<double>& radiiVec) override;
+    std::optional<bool> GetAntialias() const;
+    void SetAntialias(std::optional<bool> enabled);
 
     // inheritance
     void ResetPaintState();

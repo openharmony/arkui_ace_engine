@@ -232,6 +232,15 @@ SizeF ScrollableController::ContentSize() const
     return pattern->GetChildrenExpandedSize();
 }
 
+int32_t ScrollableController::GetBindingFrameNodeId() const
+{
+    auto pattern = scroll_.Upgrade();
+    CHECK_NULL_RETURN(pattern, -1);
+    auto host = pattern->GetHost();
+    CHECK_NULL_RETURN(host, -1);
+    return host->GetId();
+}
+
 void ScrollableController::StopAnimate()
 {
     auto pattern = scroll_.Upgrade();

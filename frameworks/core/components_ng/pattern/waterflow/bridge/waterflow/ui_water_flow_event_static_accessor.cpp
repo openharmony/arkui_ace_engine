@@ -30,12 +30,9 @@ void DestroyPeerImpl(Ark_UIWaterFlowEvent peer)
     CHECK_NULL_VOID(peer);
     PeerUtils::DestroyPeer(peer);
 }
-Ark_UIWaterFlowEvent ConstructImpl(Ark_NativePointer node)
+Ark_UIWaterFlowEvent ConstructImpl()
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_RETURN(frameNode, nullptr);
     auto eventPeer = PeerUtils::CreatePeer<UIWaterFlowEventPeer>();
-    eventPeer->node = frameNode;
     return eventPeer;
 }
 Ark_NativePointer GetFinalizerImpl()

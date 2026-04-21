@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,9 @@
  */
 
 #include "core/components_ng/pattern/side_bar/side_bar_container_pattern.h"
+
+#include "core/animation/animator.h"
+#include "core/animation/curve_animation.h"
 
 #include <optional>
 #include "base/log/ace_trace.h"
@@ -51,6 +54,10 @@
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #endif
 namespace OHOS::Ace::NG {
+
+SideBarContainerPattern::SideBarContainerPattern() = default;
+
+SideBarContainerPattern::~SideBarContainerPattern() = default;
 
 namespace {
 constexpr int32_t DEFAULT_MIN_CHILDREN_SIZE = 3;
@@ -671,6 +678,7 @@ RefPtr<FrameNode> SideBarContainerPattern::CreateControlButton(const RefPtr<Side
     auto buttonRenderContext = buttonNode->GetRenderContext();
     CHECK_NULL_RETURN(buttonRenderContext, nullptr);
     buttonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     buttonRenderContext->UpdateZIndex(DEFAULT_CONTROL_BUTTON_ZINDEX);
     auto focusHub = buttonNode->GetOrCreateFocusHub();
     CHECK_NULL_RETURN(focusHub, nullptr);
@@ -1433,6 +1441,20 @@ void SideBarContainerPattern::ShowDialogWithNode()
     auto accessibilityProperty = buttonNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     auto text = accessibilityProperty->GetAccessibilityText();
+    do {
+        if (!text.empty()) {
+            break;
+        }
+        auto context = host->GetContext();
+        CHECK_NULL_BREAK(context);
+        auto sideBarTheme = context->GetTheme<SideBarTheme>();
+        CHECK_NULL_BREAK(sideBarTheme);
+        if (sideBarStatus_ == SideBarStatus::HIDDEN) {
+            text = sideBarTheme->GetSideBarHidden();
+        } else {
+            text = sideBarTheme->GetSideBarShown();
+        }
+    } while (0);
 
     dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(text, imageInfo_, host->GetThemeScopeId());
 
@@ -1555,7 +1577,9 @@ void SideBarContainerPattern::SetSideBarWidthToolBarManager(bool isShow, float s
 void SideBarContainerPattern::InitToolBarManager()
 {
     if (!toolbarManager_) {
-        auto pipeline = GetHost()->GetContext();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
         toolbarManager_ = pipeline->GetToolbarManager();
         UpdateSideBarStatus();

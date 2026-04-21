@@ -36,6 +36,8 @@ public:
     void SetFillText(const PaintState& state, const FillTextInfo& fillTextInfo) override;
     void SetStrokeText(const PaintState& state, const FillTextInfo& fillTextInfo) override;
     void SetAntiAlias(bool anti) override;
+    std::optional<bool> GetAntialiasExt() const override;
+    void SetAntialiasExt(std::optional<bool> isEnabled) override;
     void SetFontWeight(const FontWeight& weight) override;
     void SetFontStyle(const Ace::FontStyle& fontStyle) override;
     void SetFontFamilies(const std::vector<std::string>& families) override;
@@ -117,6 +119,8 @@ public:
     void GetHeight(double& height) override;
     void StartImageAnalyzer(void* config, OnAnalyzedCallback& onAnalyzed) override;
     void StopImageAnalyzer() override;
+
+    void SetPatternInstanceId(int32_t id) override;
 #ifdef PIXEL_MAP_SUPPORTED
     void TransferFromImageBitmap(const RefPtr<AceType>& pixelMap) override;
 #else

@@ -40,7 +40,7 @@ Ark_NativePointer GetFinalizerImpl()
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void ChangeIndexImpl(Ark_TabsController peer,
-                     const Ark_Int32 value)
+                     Ark_Int32 value)
 {
     auto peerImpl = reinterpret_cast<TabsControllerPeerImpl *>(peer);
     CHECK_NULL_VOID(peerImpl);
@@ -50,7 +50,7 @@ void ChangeIndexImpl(Ark_TabsController peer,
 void PreloadItemsImpl(Ark_VMContext vmContext,
                       Ark_AsyncWorkerPtr asyncWorker,
                       Ark_TabsController peer,
-                      const Opt_Array_Int32* indices,
+                      const Opt_Array_I32* indices,
                       const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
     CHECK_NULL_VOID(asyncWorker);
@@ -89,7 +89,7 @@ void SetTabBarTranslateImpl(Ark_TabsController peer,
     peerImpl->TriggerSetTabBarTranslate(convValue);
 }
 void SetTabBarOpacityImpl(Ark_TabsController peer,
-                          const Ark_Float64 opacity)
+                          Ark_Float64 opacity)
 {
     auto peerImpl = reinterpret_cast<TabsControllerPeerImpl *>(peer);
     CHECK_NULL_VOID(peerImpl);

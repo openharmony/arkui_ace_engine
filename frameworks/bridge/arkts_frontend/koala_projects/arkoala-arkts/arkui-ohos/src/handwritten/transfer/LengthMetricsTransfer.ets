@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,10 +23,10 @@ export class LengthMetricsTransfer {
         }
         const value = ESValue.wrap(input).getProperty('value').toNumber();
         const unit = ESValue.wrap(input).getProperty('unit').toNumber();
-        let unitInt32 = unit as int32;
+        let unitInt32 = unit.toInt();
         let lengthUnit: LengthUnit = LengthUnit.VP;
         if (unitInt32 >= LengthUnit.PX || unitInt32 <= LengthUnit.LPX) {
-            lengthUnit = unitInt32 as LengthUnit;
+            lengthUnit = LengthUnit.fromValue(unitInt32);
         }
         let sizeInternal = new LengthMetrics(value, lengthUnit);
         return sizeInternal;

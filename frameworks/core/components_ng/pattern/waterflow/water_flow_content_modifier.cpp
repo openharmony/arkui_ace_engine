@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/waterflow/water_flow_content_modifier.h"
 
+#include "core/components_ng/render/drawing.h"
+
 namespace OHOS::Ace::NG {
 WaterFlowContentModifier::WaterFlowContentModifier()
 {

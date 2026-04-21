@@ -18,12 +18,12 @@
 #define private public
 #define protected public
 
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/rosen/testing_bitmap.h"
-#include "test/mock/core/rosen/testing_canvas.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/rosen/testing_bitmap.h"
+#include "test/mock/frameworks/core/rosen/testing_canvas.h"
 
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/model/model_adapter_wrapper.h"
@@ -60,6 +60,11 @@ class TestSceneAdapter : public Render3D::ISceneAdapter {
     std::shared_ptr<Render3D::TextureLayer> CreateTextureLayer()
     {
         return std::make_shared<Render3D::TextureLayer>(key_++);
+    }
+
+    void OnWindowChange(float renderWidth, float renderHeight) override
+    {
+        return;
     }
     void OnWindowChange(const Render3D::WindowChangeInfo& windowChangeInfo)
     {
@@ -632,5 +637,31 @@ HWTEST_F(ModelTestNg, ModelViewNgTest013, TestSize.Level1)
     ModelViewNG::AddCustomRender(frameNode.GetRawPtr(), desc);
     EXPECT_EQ(modelPaintProperty->GetModelCustomRenderValue(), desc);
     ModelViewNG::AddCustomRender(frameNode.GetRawPtr(), desc);
+}
+
+/**
+ * @tc.name: ModelViewNgTest014
+ * @tc.desc: static path, test UpdateRenderSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ModelTestNg, ModelViewNgTest014, TestSize.Level1)
+{
+    // Create FrameNode in static way
+    auto frameNode = ModelViewNG::CreateFrameNode(testKey++);
+    ASSERT_NE(frameNode, nullptr);
+    // Get ModelPaintProperty
+    auto modelPaintProperty = frameNode->GetPaintProperty<ModelPaintProperty>();
+    ASSERT_NE(modelPaintProperty, nullptr);
+
+    // Get ModelPattern
+    auto modelPattern = frameNode->GetPattern<ModelPattern>();
+    ASSERT_NE(modelPattern, nullptr);
+
+    ModelViewNG::SetRenderHeight(frameNode.GetRawPtr(), std::nullopt);
+    ASSERT_EQ(modelPaintProperty->GetRenderHeightValue(), 1.0f);
+
+    Dimension dimension(100.0f);
+    ModelViewNG::SetRenderHeight(frameNode.GetRawPtr(), dimension);
+    ASSERT_EQ(modelPaintProperty->GetRenderHeightValue(), 100.0f);
 }
 } // namespace OHOS::Ace::NG

@@ -77,11 +77,12 @@ public:
 };
 
 /**
- * @tc.name: setAndGetStyledStringTest
+ * @tc.name: getStyledStringTestSetAndGetStyledString
  * @tc.desc: Check the functionality of setAndGetStyledString
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorStyledStringControllerAccessorTest, DISABLED_setAndGetStyledStringTest, TestSize.Level1)
+HWTEST_F(RichEditorStyledStringControllerAccessorTest, DISABLED_getStyledStringTestSetAndGetStyledString,
+    TestSize.Level1)
 {
     ASSERT_NE(accessor_->setStyledString, nullptr);
     ASSERT_NE(accessor_->getStyledString, nullptr);

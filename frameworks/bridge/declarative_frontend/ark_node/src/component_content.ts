@@ -19,6 +19,7 @@ class ComponentContentCommonBase extends Content {
   private attachNodeRef_: NativeStrongRef;
   private parentWeak_: WeakRef<FrameNode> | undefined;
   private _isDisposed: boolean;
+  protected instanceId_: number;
   constructor() {
     super();
     this._isDisposed = false;
@@ -30,6 +31,13 @@ class ComponentContentCommonBase extends Content {
 
   public getFrameNode(): FrameNode | null | undefined {
     return this.builderNode_.getFrameNodeWithoutCheck();
+  }
+  public getFrameNodePtr(): NodePtr | undefined{
+    let frameNode = this.builderNode_.getFrameNode();
+    if (frameNode !== null) {
+      return frameNode.nodePtr_;
+    }
+    return undefined;
   }
   public setAttachedParent(parent: WeakRef<FrameNode> | undefined) {
     this.parentWeak_ = parent;
@@ -60,6 +68,10 @@ class ComponentContentCommonBase extends Content {
     this.detachFromParent();
     this.attachNodeRef_?.dispose();
     this.builderNode_?.dispose();
+  }
+
+  public isTransferred(): boolean {
+    return false;
   }
 
   public isDisposed(): boolean {
@@ -95,23 +107,43 @@ class ComponentContentCommonBase extends Content {
   public inheritFreezeOptions(enable: boolean): void {
     this.builderNode_.inheritFreezeOptions(enable);
   }
+
+  public getInstanceId(): number {
+    return this.instanceId_;
+  }
+
+  protected createBuilderNode(uiContext: UIContext, nodePtr: number, frameNodePtr: number): void {
+    let jsBuilderNode = JSBuilderNode.createForTrans(uiContext, nodePtr, frameNodePtr);
+    this.builderNode_ = new BuilderNode(uiContext, {}, jsBuilderNode);
+  }
+
+  protected createReactiveBuilderNode(uiContext: UIContext, nodePtr: number, frameNodePtr: number): void {
+    let jsBuilderNode = JSBuilderNode.createForTrans(uiContext, nodePtr, frameNodePtr);
+    this.builderNode_ = new ReactiveBuilderNode(uiContext, {}, jsBuilderNode);
+  }
 }
 
 class ComponentContent extends ComponentContentCommonBase {
   constructor(uiContext: UIContext, builder: WrappedBuilder<[]> | WrappedBuilder<[Object]>, params?: Object, options?: BuildOptions) {
-    super();
-    let builderNode = new BuilderNode(uiContext, {});
-    this.builderNode_ = builderNode;
-    this.builderNode_.build(builder, params ?? undefined, options);
+    super();   
+    this.instanceId_ = uiContext.instanceId_;
+    if (this.isTransferred() == false) {
+      let builderNode = new BuilderNode(uiContext, {});
+      this.builderNode_ = builderNode;
+      this.builderNode_.build(builder, params ?? undefined, options);
+    }
   }
 }
 
 class ReactiveComponentContent extends ComponentContentCommonBase {
   constructor(uiContext: UIContext, builder: WrappedBuilder<[]> | WrappedBuilder<[Object]>, options?: BuildOptions, ...params: Object[]) {
     super();
-    let reactiveBuilderNode = new ReactiveBuilderNode(uiContext, {});
-    this.builderNode_ = reactiveBuilderNode;
-    this.builderNode_.build(builder, options, ...params);
+    this.instanceId_ = uiContext.instanceId_;
+    if (this.isTransferred() === false) {
+      let reactiveBuilderNode = new ReactiveBuilderNode(uiContext, {});
+      this.builderNode_ = reactiveBuilderNode;
+      this.builderNode_.build(builder, options, ...params);
+    }
   }
   public flushState(): void {
     if (this.builderNode_ instanceof ReactiveBuilderNode) {

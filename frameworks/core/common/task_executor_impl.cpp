@@ -91,7 +91,7 @@ TaskExecutor::Task TaskExecutorImpl::WrapTaskWithCustomWrapper(
 }
 
 bool TaskExecutorImpl::PostTaskToTaskRunner(const RefPtr<TaskRunnerAdapter>& taskRunner, TaskExecutor::Task&& task,
-    uint32_t delayTime, const std::string& name, PriorityType priorityType) const
+    uint32_t delayTime, const std::string& name, PriorityType priorityType, VsyncBarrierOption barrierOption) const
 {
     CHECK_NULL_RETURN(taskRunner, false);
     CHECK_NULL_RETURN(task, false);
@@ -99,7 +99,7 @@ bool TaskExecutorImpl::PostTaskToTaskRunner(const RefPtr<TaskRunnerAdapter>& tas
     if (delayTime > 0) {
         taskRunner->PostDelayedTask(std::move(task), delayTime, name, priorityType);
     } else {
-        taskRunner->PostTask(std::move(task), name, priorityType);
+        taskRunner->PostTask(std::move(task), name, priorityType, barrierOption);
     }
     return true;
 }
@@ -181,7 +181,8 @@ void TaskExecutorImpl::InitOtherThreads(const OHOS::Ace::TaskRunners& taskRunner
 }
 
 bool TaskExecutorImpl::OnPostTask(
-    Task&& task, TaskType type, uint32_t delayTime, const std::string& name, PriorityType priorityType) const
+    Task&& task, TaskType type, uint32_t delayTime, const std::string& name, PriorityType priorityType,
+    VsyncBarrierOption barrierOption) const
 {
     int32_t currentId = Container::CurrentId();
     auto traceIdFunc = [weak = WeakClaim(const_cast<TaskExecutorImpl*>(this)), type]() {
@@ -204,17 +205,22 @@ bool TaskExecutorImpl::OnPostTask(
 
     switch (type) {
         case TaskType::PLATFORM:
-            return PostTaskToTaskRunner(platformRunner_, std::move(wrappedTask), delayTime, name);
+            return PostTaskToTaskRunner(platformRunner_, std::move(wrappedTask), delayTime, name,
+                PriorityType::LOW, barrierOption);
         case TaskType::UI:
-            return PostTaskToTaskRunner(uiRunner_, std::move(wrappedTask), delayTime, name, priorityType);
+            return PostTaskToTaskRunner(uiRunner_, std::move(wrappedTask), delayTime, name, priorityType,
+                barrierOption);
         case TaskType::IO:
-            return PostTaskToTaskRunner(ioRunner_, std::move(wrappedTask), delayTime, name);
+            return PostTaskToTaskRunner(ioRunner_, std::move(wrappedTask), delayTime, name, PriorityType::LOW,
+                barrierOption);
         case TaskType::GPU:
-            return PostTaskToTaskRunner(gpuRunner_, std::move(wrappedTask), delayTime, name);
+            return PostTaskToTaskRunner(gpuRunner_, std::move(wrappedTask), delayTime, name, PriorityType::LOW,
+                barrierOption);
         case TaskType::JS:
-            return PostTaskToTaskRunner(jsRunner_, std::move(wrappedTask), delayTime, name);
+            return PostTaskToTaskRunner(jsRunner_, std::move(wrappedTask), delayTime, name, PriorityType::LOW,
+                barrierOption);
         case TaskType::BACKGROUND:
-            // Ignore delay time
+            // Ignore delay time and barrier option for background tasks
             return BackgroundTaskExecutor::GetInstance().PostTask(std::move(wrappedTask));
         default:
             return false;

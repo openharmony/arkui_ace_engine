@@ -24,7 +24,7 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT ViewFullUpdateModelNG : public ViewFullUpdateModel {
 public:
-    RefPtr<AceType> CreateNode(NodeInfo&& info) override;
+    RefPtr<AceType> CreateNode(OHOS::Ace::NodeInfo&& info) override;
 
     bool MarkNeedUpdate(const WeakPtr<AceType>& node) override
     {

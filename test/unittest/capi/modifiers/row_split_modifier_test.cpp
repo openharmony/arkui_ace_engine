@@ -41,10 +41,10 @@ class RowSplitModifierTest : public ModifierTestBase<GENERATED_ArkUIRowSplitModi
 HWTEST_F(RowSplitModifierTest, setResizeableTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RESIZEABLE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_RESIZEABLE_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_RESIZEABLE_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'resizeable' of method 'resizeable'
@@ -61,12 +61,12 @@ static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> resizeable
 HWTEST_F(RowSplitModifierTest, setResizeableTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     for (auto [passed, checkVal, expected]: resizeableValidValues) {
         modifier_->setResizeable(node_, &checkVal);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RESIZEABLE_NAME);
-        EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
+        EXPECT_THAT(resultStr, Eq(expected)) << "Passed value is: " << passed;
     }
 }
 

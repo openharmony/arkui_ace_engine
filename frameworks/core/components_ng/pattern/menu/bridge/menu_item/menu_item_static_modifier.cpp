@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_static.h"
+#include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/interfaces/native/implementation/symbol_glyph_modifier_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -23,7 +24,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 using SelectIconType = std::variant<bool, std::optional<std::string>, std::optional<SymbolGlyphModifierPeer *>>;
-std::optional<bool> ProcessBindableSelected(FrameNode* frameNode, const Opt_Union_Boolean_Bindable *value)
+std::optional<bool> ProcessBindableSelected(FrameNode* frameNode, const Opt_Union_Boolean_Bindable_Boolean *value)
 {
     std::optional<bool> result;
     Converter::VisitUnionPtr(value,
@@ -97,7 +98,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 } // MenuItemModifier
 namespace MenuItemInterfaceModifier {
 void SetMenuItemOptionsImpl(Ark_NativePointer node,
-                            const Opt_Union_MenuItemOptions_CustomBuilder* value)
+                            const Opt_Union_MenuItemOptions_CustomNodeBuilder* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -143,7 +144,7 @@ void SetMenuItemOptionsImpl(Ark_NativePointer node,
 } // MenuItemInterfaceModifier
 namespace MenuItemAttributeModifier {
 void SetSelectedImpl(Ark_NativePointer node,
-                     const Opt_Union_Boolean_Bindable* value)
+                     const Opt_Union_Boolean_Bindable_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -174,7 +175,7 @@ void SetSelectIconImpl(Ark_NativePointer node,
     }
 }
 void SetOnChangeImpl(Ark_NativePointer node,
-                     const Opt_Callback_Boolean_Void* value)
+                     const Opt_synthetic_Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -189,7 +190,7 @@ void SetOnChangeImpl(Ark_NativePointer node,
     MenuItemModelStatic::SetOnChange(frameNode, onChange);
 }
 void SetContentFontImpl(Ark_NativePointer node,
-                        const Opt_Font* value)
+                        const Opt_arkui_component_units_Font* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -214,7 +215,7 @@ void SetContentFontColorImpl(Ark_NativePointer node,
     MenuItemModelStatic::SetFontColor(frameNode, Converter::OptConvertPtr<Color>(value));
 }
 void SetLabelFontImpl(Ark_NativePointer node,
-                      const Opt_Font* value)
+                      const Opt_arkui_component_units_Font* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

@@ -82,10 +82,26 @@ SearchModel* GetInstance()
 SearchModel* GetSearchModelImpl()
 {
     static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("search");
-    static SearchModel* instance = loader ? reinterpret_cast<SearchModel*>(loader->CreateModel()) : nullptr;
+    if (loader == nullptr) {
+        LOGF_ABORT("Can't find search loader");
+    }
+    static SearchModel* instance = reinterpret_cast<SearchModel*>(loader->CreateModel());
+    if (instance == nullptr) {
+        LOGF_ABORT("search loader CreateModel fail");
+    }
     return instance;
 }
 #endif
+
+void FillColorValueAndPlaceholder(Color& result, ArkUI_Int32 colorValue, ArkUI_Int32 colorPlaceholder)
+{
+    result.SetValue(colorValue);
+    if (colorPlaceholder > static_cast<ArkUI_Int32>(ColorPlaceholder::NONE) &&
+        colorPlaceholder <= static_cast<ArkUI_Int32>(ColorPlaceholder::MAX)) {
+        // no need to set ColorPlaceholder::NONE
+        result.SetPlaceholder(static_cast<ColorPlaceholder>(colorPlaceholder));
+    }
+}
 
 void SetSearchTextFont(ArkUINodeHandle node, const struct ArkUIFontStruct* value, void* resRawPtr)
 {
@@ -125,16 +141,18 @@ void ResetSearchTextFont(ArkUINodeHandle node)
     }
 }
 
-void SetSearchPlaceholderColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr)
+void SetSearchPlaceholderColor(ArkUINodeHandle node, const ArkUI_InnerColor* color, void* resRawPtr)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    SearchModelNG::SetPlaceholderColor(frameNode, Color(color));
+    const auto* colorPtr = reinterpret_cast<const Color*>(color);
+    CHECK_NULL_VOID(colorPtr);
+    SearchModelNG::SetPlaceholderColor(frameNode, *colorPtr);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     if (SystemProperties::ConfigChangePerform() && resRawPtr) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<Color>("placeholderColor", resObj, Color(color));
+        pattern->RegisterResource<Color>("placeholderColor", resObj, *colorPtr, true);
     } else {
         pattern->UnRegisterResource("placeholderColor");
     }
@@ -166,13 +184,14 @@ void ResetSearchSelectionMenuHidden(ArkUINodeHandle node)
     SearchModelNG::SetSelectionMenuHidden(frameNode, DEFAULT_SELECTION_MENU_HIDDEN);
 }
 
-void SetSearchCaretStyle(ArkUINodeHandle node, const ArkUI_Float32 number, ArkUI_Int32 unit, ArkUI_Uint32 caretColor,
-    void* widthRawPtr, void* colorRawPtr)
+void SetSearchCaretStyle(ArkUINodeHandle node, const ArkUI_Float32 number, ArkUI_Int32 unit,
+    const ArkUI_InnerColor* caretColor, void* widthRawPtr, void* colorRawPtr)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
+    const auto* caretColorPtr = reinterpret_cast<const Color*>(caretColor);
     SearchModelNG::SetCaretWidth(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
-    SearchModelNG::SetCaretColor(frameNode, Color(caretColor));
+    SearchModelNG::SetCaretColor(frameNode, *caretColorPtr);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     if (SystemProperties::ConfigChangePerform() && widthRawPtr) {
@@ -184,7 +203,7 @@ void SetSearchCaretStyle(ArkUINodeHandle node, const ArkUI_Float32 number, ArkUI
     }
     if (SystemProperties::ConfigChangePerform() && colorRawPtr) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
-        pattern->RegisterResource<Color>("caretColor", resObj, Color(caretColor));
+        pattern->RegisterResource<Color>("caretColor", resObj, *caretColorPtr, true);
     } else {
         pattern->UnRegisterResource("caretColor");
     }
@@ -226,7 +245,7 @@ void SetSearchDirection(ArkUINodeHandle node, ArkUI_Uint32 textDirection)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    if (textDirection < 0 || textDirection >= TEXT_DIRECTIONS.size()) {
+    if (textDirection >= TEXT_DIRECTIONS.size()) {
         SearchModelNG::ResetTextDirection(frameNode);
         return;
     }
@@ -261,7 +280,7 @@ void RegisterSearchCancelButtonResources(const RefPtr<Pattern>& pattern, const s
     }
     if (SystemProperties::ConfigChangePerform() && imageIconRes && imageIconRes->colorObj) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(imageIconRes->colorObj));
-        pattern->RegisterResource<Color>("cancelButtonIconColor", resObj, iconColor);
+        pattern->RegisterResource<Color>("cancelButtonIconColor", resObj, iconColor, true);
     } else {
         pattern->UnRegisterResource("cancelButtonIconColor");
     }
@@ -285,7 +304,7 @@ void SetJsSearchCancelButton(ArkUI_Int32 style, const struct ArkUIIconOptionsStr
     std::string bundleNameStr(bundleName);
     std::string moduleNameStr(moduleName);
     if (value->color != INVALID_COLOR_VALUE) {
-        iconColor = Color(value->color);
+        FillColorValueAndPlaceholder(iconColor, value->color, value->colorPlaceholder);
         cancelIconOptions =
             NG::IconOptions(iconColor, Dimension(value->value, static_cast<DimensionUnit>(value->unit)),
                 std::string(value->src), bundleNameStr, moduleNameStr);
@@ -308,18 +327,32 @@ void SetJsSearchDefaultCancelButton(ArkUI_Int32 style)
 }
 
 void SetSearchCancelButton(ArkUINodeHandle node, ArkUI_Int32 style, const struct ArkUISizeType* size,
-    ArkUI_Uint32 color, ArkUI_CharPtr src, ArkUIImageIconRes* imageIconRes)
+    const ArkUI_InnerColor* color, ArkUI_CharPtr src, ArkUIImageIconRes* imageIconRes, bool isThemeColor)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetCancelButtonStyle(frameNode, static_cast<CancelButtonStyle>(style));
-    NG::IconOptions cancelIconOptions = NG::IconOptions(
-        Color(color), Dimension(size->value, static_cast<DimensionUnit>(size->unit)), std::string(src), "", "");
+    const auto* colorPtr = reinterpret_cast<const Color*>(color);
+    NG::IconOptions cancelIconOptions;
+    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        cancelIconOptions = isThemeColor ?
+            NG::IconOptions(
+                Dimension(size->value, static_cast<DimensionUnit>(size->unit)), std::string(src), "", "") :
+            NG::IconOptions(*colorPtr, Dimension(size->value, static_cast<DimensionUnit>(size->unit)),
+                std::string(src), "", "");
+    } else {
+        cancelIconOptions = isThemeColor && SystemProperties::ConfigChangePerform() ?
+            NG::IconOptions(
+                Dimension(size->value, static_cast<DimensionUnit>(size->unit)), std::string(src), "", "") :
+            NG::IconOptions(
+                *colorPtr, Dimension(size->value, static_cast<DimensionUnit>(size->unit)), std::string(src), "", "");
+    }
     SearchModelNG::SetCancelImageIcon(frameNode, cancelIconOptions);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
-    struct ArkUIIconOptionsStruct value = {size->value, size->unit, color, src};
-    RegisterSearchCancelButtonResources(pattern, &value, imageIconRes, Color(color));
+    struct ArkUIIconOptionsStruct value = { size->value, size->unit, static_cast<ArkUI_Int32>(colorPtr->GetValue()),
+        static_cast<ArkUI_Int32>(colorPtr->GetPlaceholder()), src };
+    RegisterSearchCancelButtonResources(pattern, &value, imageIconRes, *colorPtr);
 }
 
 void ResetSearchCancelButton(ArkUINodeHandle node)
@@ -397,7 +430,7 @@ void RegisterSearchIconResources(const RefPtr<Pattern>& pattern, const struct Ar
     ArkUIImageIconRes* imageIconRes, const Color& iconColor, bool isJsView)
 {
     CHECK_NULL_VOID(pattern);
-    std::string resourceName = isJsView ? "searchButtonIconSrc" : "searchIconSrc";
+    std::string resourceName = "searchIconSrc";
     if (SystemProperties::ConfigChangePerform() && imageIconRes && imageIconRes->sizeObj) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(imageIconRes->sizeObj));
         pattern->RegisterResource<CalcDimension>(
@@ -407,7 +440,7 @@ void RegisterSearchIconResources(const RefPtr<Pattern>& pattern, const struct Ar
     }
     if (SystemProperties::ConfigChangePerform() && imageIconRes && imageIconRes->colorObj) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(imageIconRes->colorObj));
-        pattern->RegisterResource<Color>("searchIconColor", resObj, iconColor);
+        pattern->RegisterResource<Color>("searchIconColor", resObj, iconColor, true);
     } else {
         pattern->UnRegisterResource("searchIconColor");
     }
@@ -424,14 +457,30 @@ void SetSearchSearchIcon(
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
+    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (SystemProperties::ConfigChangePerform()) {
+            pattern->UnRegisterResource("searchIconSize");
+            pattern->UnRegisterResource("searchIconSrc");
+            pattern->UnRegisterResource("searchIconColor");
+        }
+    }
     Color iconColor;
     if (value->color != INVALID_COLOR_VALUE) {
-        iconColor = Color(value->color);
+        FillColorValueAndPlaceholder(iconColor, value->color, value->colorPlaceholder);
     }
-
-    NG::IconOptions cancelInconOptions = NG::IconOptions(
-        iconColor, Dimension(value->value, static_cast<DimensionUnit>(value->unit)), std::string(value->src), "", "");
-    SearchModelNG::SetSearchImageIcon(frameNode, cancelInconOptions);
+    NG::IconOptions searchIconOptions;
+    if (value->color == INVALID_COLOR_VALUE &&
+        frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        searchIconOptions = NG::IconOptions(Dimension(value->value, static_cast<DimensionUnit>(value->unit)),
+            std::string(value->src), "", "");
+    } else {
+        searchIconOptions = NG::IconOptions(iconColor,
+            Dimension(value->value, static_cast<DimensionUnit>(value->unit)),
+            std::string(value->src), "", "");
+    }
+    SearchModelNG::SetSearchImageIcon(frameNode, searchIconOptions);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     RegisterSearchIconResources(pattern, value, imageIconRes, iconColor, false);
@@ -446,7 +495,7 @@ void SetJsSearchSearchIcon(ArkUINodeHandle node, const struct ArkUIIconOptionsSt
     CHECK_NULL_VOID(pattern);
     if (SystemProperties::ConfigChangePerform()) {
         pattern->UnRegisterResource("searchIconSize");
-        pattern->UnRegisterResource("searchButtonIconSrc");
+        pattern->UnRegisterResource("searchIconSrc");
         pattern->UnRegisterResource("searchIconColor");
     }
     CHECK_NULL_VOID(value);
@@ -455,7 +504,7 @@ void SetJsSearchSearchIcon(ArkUINodeHandle node, const struct ArkUIIconOptionsSt
     std::string bundleNameStr(bundleName);
     std::string moduleNameStr(moduleName);
     if (value->color != INVALID_COLOR_VALUE) {
-        iconColor = Color(value->color);
+        FillColorValueAndPlaceholder(iconColor, value->color, value->colorPlaceholder);
         searchIconOptions =
             NG::IconOptions(iconColor, Dimension(value->value, static_cast<DimensionUnit>(value->unit)),
                 std::string(value->src), bundleNameStr, moduleNameStr);
@@ -476,7 +525,7 @@ void SetSearchDefaultIcon(ArkUINodeHandle node)
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
         pattern->UnRegisterResource("searchIconSize");
-        pattern->UnRegisterResource("searchButtonIconSrc");
+        pattern->UnRegisterResource("searchIconSrc");
         pattern->UnRegisterResource("searchIconColor");
     }
     SearchModelNG::SetSearchDefaultIcon(frameNode);
@@ -571,16 +620,18 @@ void ResetSearchSearchButton(ArkUINodeHandle node)
     }
 }
 
-void SetSearchFontColor(ArkUINodeHandle node, ArkUI_Uint32 value, void* resRawPtr)
+void SetSearchFontColor(ArkUINodeHandle node, const ArkUI_InnerColor* value, void* resRawPtr)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    SearchModelNG::SetTextColor(frameNode, Color(value));
+    const auto* colorPtr = reinterpret_cast<const Color*>(value);
+    CHECK_NULL_VOID(colorPtr);
+    SearchModelNG::SetTextColor(frameNode, *colorPtr);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     if (SystemProperties::ConfigChangePerform() && resRawPtr) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<Color>("fontColor", resObj, Color(value));
+        pattern->RegisterResource<Color>("fontColor", resObj, *colorPtr, true);
     } else {
         pattern->UnRegisterResource("fontColor");
     }
@@ -683,7 +734,8 @@ void SetSearchDividerColor(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Uint3
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         if (!resRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
         }
@@ -1023,6 +1075,25 @@ void ResetSearchOnSubmitWithEvent(ArkUINodeHandle node)
     SearchModelNG::SetOnSubmit(frameNode, nullptr);
 }
 
+void SetSearchOnWillCopy(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto func = reinterpret_cast<std::function<bool(const std::u16string&)>*>(callback);
+        SearchModelNG::SetOnWillCopy(frameNode, std::move(*func));
+    } else {
+        SearchModelNG::SetOnWillCopy(frameNode, nullptr);
+    }
+}
+
+void ResetSearchOnWillCopy(ArkUINodeHandle node)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetOnWillCopy(frameNode, nullptr);
+}
+
 void SetSearchOnCopy(ArkUINodeHandle node, void* callback)
 {
     auto* frameNode = GetFrameNode(node);
@@ -1040,6 +1111,25 @@ void ResetSearchOnCopy(ArkUINodeHandle node)
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetOnCopy(frameNode, nullptr);
+}
+
+void SetSearchOnWillCut(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto func = reinterpret_cast<std::function<bool(const std::u16string&)>*>(callback);
+        SearchModelNG::SetOnWillCut(frameNode, std::move(*func));
+    } else {
+        SearchModelNG::SetOnWillCut(frameNode, nullptr);
+    }
+}
+
+void ResetSearchOnWillCut(ArkUINodeHandle node)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetOnWillCut(frameNode, nullptr);
 }
 
 void SetSearchOnCut(ArkUINodeHandle node, void* callback)
@@ -1755,7 +1845,7 @@ void SetSearchBackgroundColor(ArkUINodeHandle node, uint32_t color)
     SearchModelNG::SetBackgroundColor(frameNode, Color(color));
 }
 
-void RetSetSearchBackgroundColor(ArkUINodeHandle node)
+void ResetSearchBackgroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
@@ -1860,9 +1950,11 @@ void SetBackBorder(ArkUINodeHandle node)
 }
 
 #ifndef CROSS_PLATFORM
-void SetSearchPlaceholderColorImpl(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr)
+void SetSearchPlaceholderColorImpl(ArkUINodeHandle node, const ArkUI_InnerColor* color, void* resRawPtr)
 {
-    GetSearchModelImpl()->SetPlaceholderColor(Color(color));
+    const auto* colorPtr = reinterpret_cast<const Color*>(color);
+    CHECK_NULL_VOID(colorPtr);
+    GetSearchModelImpl()->SetPlaceholderColor(*colorPtr);
 }
 
 void SetSearchTextFontImpl(ArkUINodeHandle node, const struct ArkUIFontStruct* value, void* resRawPtr)
@@ -2012,8 +2104,8 @@ const ArkUISearchModifier* GetSearchDynamicModifier()
         CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
         static const ArkUISearchModifier modifier = {
             .setSelectDetectorEnable = nullptr,
-            .getSelectDetectorEnable = nullptr,
             .resetSelectDetectorEnable = nullptr,
+            .getSelectDetectorEnable = nullptr,
             .setSearchPlaceholderColor = SetSearchPlaceholderColorImpl,
             .resetSearchPlaceholderColor = nullptr,
             .setSearchTextFont = SetSearchTextFontImpl,
@@ -2022,9 +2114,12 @@ const ArkUISearchModifier* GetSearchDynamicModifier()
             .resetSearchSelectionMenuHidden = nullptr,
             .setSearchCaretStyle = nullptr,
             .resetSearchCaretStyle = nullptr,
+            .resetSearchCaretColor = nullptr,
             .setSearchTextAlign = SetSearchTextAlignImpl,
             .resetSearchTextAlign = nullptr,
             .setSearchCancelButton = nullptr,
+            .setJsSearchCancelButton = nullptr,
+            .setJsSearchDefaultCancelButton = nullptr,
             .resetSearchCancelButton = nullptr,
             .setSearchEnableKeyboardOnFocus = nullptr,
             .resetSearchEnableKeyboardOnFocus = nullptr,
@@ -2054,10 +2149,10 @@ const ArkUISearchModifier* GetSearchDynamicModifier()
             .resetSearchLineHeight = nullptr,
             .setSearchHalfLeading = nullptr,
             .resetSearchHalfLeading = nullptr,
-            .setSearchFontFeature = nullptr,
-            .resetSearchFontFeature = nullptr,
             .setSearchDividerColor = nullptr,
             .resetSearchDividerColor = nullptr,
+            .setSearchFontFeature = nullptr,
+            .resetSearchFontFeature = nullptr,
             .setSearchAdaptMinFontSize = nullptr,
             .resetSearchAdaptMinFontSize = nullptr,
             .setSearchAdaptMaxFontSize = nullptr,
@@ -2082,14 +2177,19 @@ const ArkUISearchModifier* GetSearchDynamicModifier()
             .resetSearchOnEditChange = nullptr,
             .setSearchOnSubmitWithEvent = SetSearchOnSubmitWithEventImpl,
             .resetSearchOnSubmitWithEvent = nullptr,
+            .setSearchOnWillCopy = nullptr,
+            .resetSearchOnWillCopy = nullptr,
             .setSearchOnCopy = SetSearchOnCopyImpl,
             .resetSearchOnCopy = nullptr,
+            .setSearchOnWillCut = nullptr,
+            .resetSearchOnWillCut = nullptr,
             .setSearchOnCut = SetSearchOnCutImpl,
             .resetSearchOnCut = nullptr,
             .setSearchOnPaste = SetSearchOnPasteImpl,
             .resetSearchOnPaste = nullptr,
             .setSearchOnChange = nullptr,
             .resetSearchOnChange = nullptr,
+            .setSearchOnChangeEvent = nullptr,
             .setSearchOnTextSelectionChange = nullptr,
             .resetSearchOnTextSelectionChange = nullptr,
             .setSearchOnContentScroll = nullptr,
@@ -2129,15 +2229,15 @@ const ArkUISearchModifier* GetSearchDynamicModifier()
             .resetSearchStrokeColor = nullptr,
             .setEnableAutoSpacing = nullptr,
             .resetEnableAutoSpacing = nullptr,
+            .setSearchCompressLeadingPunctuation = nullptr,
+            .resetSearchCompressLeadingPunctuation = nullptr,
+            .getSearchCompressLeadingPunctuation = nullptr,
             .setSearchMargin = nullptr,
             .resetSearchMargin = nullptr,
             .setSearchCustomKeyboard = nullptr,
             .resetSearchCustomKeyboard = nullptr,
             .setSearchOnWillAttachIME = nullptr,
             .resetSearchOnWillAttachIME = nullptr,
-            .setSearchCompressLeadingPunctuation = nullptr,
-            .getSearchCompressLeadingPunctuation = nullptr,
-            .resetSearchCompressLeadingPunctuation = nullptr,
             .setSearchDirection = nullptr,
             .getSearchDirection = nullptr,
             .resetSearchDirection = nullptr,
@@ -2158,14 +2258,10 @@ const ArkUISearchModifier* GetSearchDynamicModifier()
             .resetSearchInputFilter = nullptr,
             .setSearchCustomKeyboardWithBuilder = nullptr,
             .resetSearchCustomKeyboardWithBuilder = nullptr,
-            .resetSearchCaretColor = nullptr,
             .setSearchBorderRadius = nullptr,
             .setSearchBackgroundColor = nullptr,
             .resetSearchBackgroundColor = nullptr,
             .setBackBorder = SetBackBorderImpl,
-            .setJsSearchCancelButton = nullptr,
-            .setJsSearchDefaultCancelButton = nullptr,
-            .setSearchOnChangeEvent = nullptr,
         };
         CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -2175,8 +2271,8 @@ const ArkUISearchModifier* GetSearchDynamicModifier()
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUISearchModifier modifier = {
         .setSelectDetectorEnable = SetSelectDetectorEnable,
-        .getSelectDetectorEnable = GetSelectDetectorEnable,
         .resetSelectDetectorEnable = ResetSelectDetectorEnable,
+        .getSelectDetectorEnable = GetSelectDetectorEnable,
         .setSearchPlaceholderColor = SetSearchPlaceholderColor,
         .resetSearchPlaceholderColor = ResetSearchPlaceholderColor,
         .setSearchTextFont = SetSearchTextFont,
@@ -2185,9 +2281,12 @@ const ArkUISearchModifier* GetSearchDynamicModifier()
         .resetSearchSelectionMenuHidden = ResetSearchSelectionMenuHidden,
         .setSearchCaretStyle = SetSearchCaretStyle,
         .resetSearchCaretStyle = ResetSearchCaretStyle,
+        .resetSearchCaretColor = ResetSearchCaretColor,
         .setSearchTextAlign = SetSearchTextAlign,
         .resetSearchTextAlign = ResetSearchTextAlign,
         .setSearchCancelButton = SetSearchCancelButton,
+        .setJsSearchCancelButton = SetJsSearchCancelButton,
+        .setJsSearchDefaultCancelButton = SetJsSearchDefaultCancelButton,
         .resetSearchCancelButton = ResetSearchCancelButton,
         .setSearchEnableKeyboardOnFocus = SetSearchEnableKeyboardOnFocus,
         .resetSearchEnableKeyboardOnFocus = ResetSearchEnableKeyboardOnFocus,
@@ -2217,10 +2316,10 @@ const ArkUISearchModifier* GetSearchDynamicModifier()
         .resetSearchLineHeight = ResetSearchLineHeight,
         .setSearchHalfLeading = SetSearchHalfLeading,
         .resetSearchHalfLeading = ResetSearchHalfLeading,
-        .setSearchFontFeature = SetSearchFontFeature,
-        .resetSearchFontFeature = ResetSearchFontFeature,
         .setSearchDividerColor = SetSearchDividerColor,
         .resetSearchDividerColor = ResetSearchDividerColor,
+        .setSearchFontFeature = SetSearchFontFeature,
+        .resetSearchFontFeature = ResetSearchFontFeature,
         .setSearchAdaptMinFontSize = SetSearchAdaptMinFontSize,
         .resetSearchAdaptMinFontSize = ResetSearchAdaptMinFontSize,
         .setSearchAdaptMaxFontSize = SetSearchAdaptMaxFontSize,
@@ -2245,14 +2344,19 @@ const ArkUISearchModifier* GetSearchDynamicModifier()
         .resetSearchOnEditChange = ResetSearchOnEditChange,
         .setSearchOnSubmitWithEvent = SetSearchOnSubmitWithEvent,
         .resetSearchOnSubmitWithEvent = ResetSearchOnSubmitWithEvent,
+        .setSearchOnWillCopy = SetSearchOnWillCopy,
+        .resetSearchOnWillCopy = ResetSearchOnWillCopy,
         .setSearchOnCopy = SetSearchOnCopy,
         .resetSearchOnCopy = ResetSearchOnCopy,
+        .setSearchOnWillCut = SetSearchOnWillCut,
+        .resetSearchOnWillCut = ResetSearchOnWillCut,
         .setSearchOnCut = SetSearchOnCut,
         .resetSearchOnCut = ResetSearchOnCut,
         .setSearchOnPaste = SetSearchOnPaste,
         .resetSearchOnPaste = ResetSearchOnPaste,
         .setSearchOnChange = SetSearchOnChange,
         .resetSearchOnChange = ResetSearchOnChange,
+        .setSearchOnChangeEvent = SetSearchOnChangeEvent,
         .setSearchOnTextSelectionChange = SetSearchOnTextSelectionChange,
         .resetSearchOnTextSelectionChange = ResetSearchOnTextSelectionChange,
         .setSearchOnContentScroll = SetSearchOnContentScroll,
@@ -2292,15 +2396,15 @@ const ArkUISearchModifier* GetSearchDynamicModifier()
         .resetSearchStrokeColor = ResetSearchStrokeColor,
         .setEnableAutoSpacing = SetEnableAutoSpacing,
         .resetEnableAutoSpacing = ResetEnableAutoSpacing,
+        .setSearchCompressLeadingPunctuation = SetSearchCompressLeadingPunctuation,
+        .resetSearchCompressLeadingPunctuation = ResetSearchCompressLeadingPunctuation,
+        .getSearchCompressLeadingPunctuation = GetSearchCompressLeadingPunctuation,
         .setSearchMargin = SetSearchMargin,
         .resetSearchMargin = ResetSearchMargin,
         .setSearchCustomKeyboard = SetSearchCustomKeyboard,
         .resetSearchCustomKeyboard = ResetSearchCustomKeyboard,
         .setSearchOnWillAttachIME = SetSearchOnWillAttachIME,
         .resetSearchOnWillAttachIME = ResetSearchOnWillAttachIME,
-        .setSearchCompressLeadingPunctuation = SetSearchCompressLeadingPunctuation,
-        .getSearchCompressLeadingPunctuation = GetSearchCompressLeadingPunctuation,
-        .resetSearchCompressLeadingPunctuation = ResetSearchCompressLeadingPunctuation,
         .setSearchDirection = SetSearchDirection,
         .getSearchDirection = GetSearchDirection,
         .resetSearchDirection = ResetSearchDirection,
@@ -2321,14 +2425,10 @@ const ArkUISearchModifier* GetSearchDynamicModifier()
         .resetSearchInputFilter = ResetSearchInputFilter,
         .setSearchCustomKeyboardWithBuilder = SetSearchCustomKeyboardWithBuilder,
         .resetSearchCustomKeyboardWithBuilder = ResetSearchCustomKeyboardWithBuilder,
-        .resetSearchCaretColor = ResetSearchCaretColor,
         .setSearchBorderRadius = SetSearchBorderRadius,
         .setSearchBackgroundColor = SetSearchBackgroundColor,
-        .resetSearchBackgroundColor = RetSetSearchBackgroundColor,
+        .resetSearchBackgroundColor = ResetSearchBackgroundColor,
         .setBackBorder = SetBackBorder,
-        .setJsSearchCancelButton = SetJsSearchCancelButton,
-        .setJsSearchDefaultCancelButton = SetJsSearchDefaultCancelButton,
-        .setSearchOnChangeEvent = SetSearchOnChangeEvent,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -2339,8 +2439,8 @@ const CJUISearchModifier* GetCJUISearchModifier()
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUISearchModifier modifier = {
         .setSelectDetectorEnable = SetSelectDetectorEnable,
-        .getSelectDetectorEnable = GetSelectDetectorEnable,
         .resetSelectDetectorEnable = ResetSelectDetectorEnable,
+        .getSelectDetectorEnable = GetSelectDetectorEnable,
         .setSearchPlaceholderColor = SetSearchPlaceholderColor,
         .resetSearchPlaceholderColor = ResetSearchPlaceholderColor,
         .setSearchTextFont = SetSearchTextFont,

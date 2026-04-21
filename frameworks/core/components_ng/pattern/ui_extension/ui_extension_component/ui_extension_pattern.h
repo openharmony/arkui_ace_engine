@@ -16,28 +16,17 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UEC_UI_EXTENSION_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UEC_UI_EXTENSION_PATTERN_H
 
-#include <cstdint>
-#include <functional>
-#include <list>
-#include <memory>
-#include <optional>
-#include <vector>
-
-#include "base/memory/referenced.h"
 #include "base/want/want_wrap.h"
 #include "core/common/container.h"
-#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/ui_extension/accessibility_session_adapter_ui_extension.h"
 #include "core/components_ng/pattern/ui_extension/platform_event_proxy.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #ifdef SUPPORT_DIGITAL_CROWN
 #include "core/event/crown_event.h"
 #endif
 #include "core/event/mouse_event.h"
-#include "core/event/touch_event.h"
 #include "interfaces/inner_api/ace/ui_content_config.h"
 
 #define UIEXT_LOGD(fmt, ...)                                                                                      \
@@ -107,6 +96,7 @@ struct DelayTaskRecord {
 using BusinessDataUECConsumeCallback = std::function<int32_t(const AAFwk::Want&)>;
 using BusinessDataUECConsumeReplyCallback = std::function<int32_t(const AAFwk::Want&, std::optional<AAFwk::Want>&)>;
 
+class UIExtensionAvoidListener;
 class UIExtensionProxy;
 class UIExtensionPattern : public Pattern {
     DECLARE_ACE_TYPE(UIExtensionPattern, Pattern);
@@ -223,7 +213,18 @@ public:
     {
         isModal_ = isModal;
     }
-
+    bool GetModalFlag() const
+    {
+        return isModal_;
+    }
+    bool GetIsModalFixFocus() const
+    {
+        return isModalFixFocus_;
+    }
+    void SetIsModalFixFocus(bool isModalFixFocus)
+    {
+        isModalFixFocus_ = isModalFixFocus;
+    }
     void SetNeedCheckWindowSceneId(bool needCheckWindowSceneId)
     {
         needCheckWindowSceneId_ = needCheckWindowSceneId;
@@ -310,6 +311,15 @@ public:
 
     void UpdateSessionViewportConfigFromContext();
 
+    bool IsUpdateDisplayArea() const
+    {
+        return isUpdateDisplayArea_;
+    }
+    void SetIsUpdateDisplayArea(bool isUpdate)
+    {
+        isUpdateDisplayArea_ = isUpdate;
+    }
+
 protected:
     virtual void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     virtual void DispatchKeyEvent(const KeyEvent& event);
@@ -353,6 +363,8 @@ private:
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
     void InitHoverEvent(const RefPtr<InputEventHub>& inputHub);
+    void InitTouchpadInteraction(const RefPtr<InputEventHub>& inputHub);
+    bool IsInComponent(PointF point);
     void InitializeAccessibility();
     bool HandleKeyEvent(const KeyEvent& event);
     void HandleFocusEvent();
@@ -411,6 +423,8 @@ private:
     void RegisterEventProxyFlagCallback();
 
     void RegisterGetAvoidInfoCallback();
+    void RegisterAvoidInfoChangeListener(int32_t instanceId);
+    void UnRegisterAvoidInfoChangeListener();
 
     void SendPageModeToProvider();
     void RegisterReceivePageModeRequestCallback();
@@ -463,6 +477,7 @@ private:
     SessionViewportConfig sessionViewportConfig_;
     bool viewportConfigChanged_ = false;
     bool displayAreaChanged_ = false;
+    bool isModalFixFocus_ = false;
     bool isKeyAsync_ = false;
     bool hasDetachContext_ = false;
     // Whether to send the focus to the UIExtension
@@ -498,6 +513,8 @@ private:
     std::shared_ptr<AccessibilitySAObserverCallback> accessibilitySAObserverCallback_;
 
     ContainerModalAvoidInfo avoidInfo_;
+    RefPtr<UIExtensionAvoidListener> avoidListener_;
+    bool isUpdateDisplayArea_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
 };

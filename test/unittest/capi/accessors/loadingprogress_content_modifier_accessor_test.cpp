@@ -42,11 +42,11 @@ static constexpr bool TEST_DEFAULT_ENABLED = true;
 static constexpr bool TEST_DEFAULT_ENABLED_LOADING = true;
 
 /**
- * @tc.name: LoadingProgressContentModifierHelperAccessor
+ * @tc.name: contentModifierLoadingProgressTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LoadingProgressContentModifierHelperAccessor, LoadingProgressContentModifierHelperTest, TestSize.Level1)
+HWTEST_F(LoadingProgressContentModifierHelperAccessor, contentModifierLoadingProgressTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->contentModifierLoadingProgress, nullptr);
 

@@ -17,13 +17,17 @@
 
 #include "gtest/gtest.h"
 #include "test/unittest/core/pattern/test_ng.h"
+#include "test/mock/frameworks/core/components_ng/pattern/mock_nestable_scroll_container.h"
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/arc_list/arc_list_pattern.h"
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
+#include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/components_ng/pattern/scrollable/refresh_coordination.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/animation/bezier_variable_velocity_motion.h"
+#include "core/components_ng/pattern/scrollable/scrollable_paint_method.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;
@@ -31,18 +35,6 @@ using namespace testing::ext;
 
 class ScrollablePatternTestNg : public TestNG {
 public:
-};
-
-class MockNestableScrollContainer : public NestableScrollContainer {
-    DECLARE_ACE_TYPE(MockNestableScrollContainer, NestableScrollContainer);
-
-public:
-    MOCK_METHOD(OHOS::Ace::Axis, GetAxis, (), (const, override));
-    MOCK_METHOD(ScrollResult, HandleScroll, (float, int32_t, NestedState, float), (override));
-    MOCK_METHOD(bool, HandleScrollVelocity, (float, const RefPtr<NestableScrollContainer>&), (override));
-    MOCK_METHOD(void, OnScrollStartRecursive, (WeakPtr<NestableScrollContainer>, float, float), (override));
-    MOCK_METHOD(void, OnScrollEndRecursive, (const std::optional<float>&), (override));
-    MOCK_METHOD(void, OnScrollDragEndRecursive, (), (override));
 };
 
 /**
@@ -2095,9 +2087,9 @@ HWTEST_F(ScrollablePatternTestNg, CustomizeSafeAreaPadding, TestSize.Level1)
      * @tc.steps: step2. set padding and call CustomizeSafeAreaPadding with true.
      * @tc.expected: safeAreaPadding is PaddingPropertyF{}.
      */
-    PaddingPropertyF padding {10, 20, 30, 40};
+    PaddingPropertyF padding { 10, 20, 30, 40 };
     auto safeAreaPadding = scrollablePattern->CustomizeSafeAreaPadding(padding, true);
-    EXPECT_EQ(safeAreaPadding, PaddingPropertyF{});
+    EXPECT_EQ(safeAreaPadding, PaddingPropertyF {});
     /**
      * @tc.steps: step3. call CustomizeSafeAreaPadding with false.
      * @tc.expected: safeAreaPadding is equal to padding.
@@ -2122,7 +2114,7 @@ HWTEST_F(ScrollablePatternTestNg, AccumulatingTerminateHelper, TestSize.Level1)
      * @tc.expected: the return value is false.
      */
     scrollablePattern->needFullSafeArea_ = true;
-    ExpandEdges padding {10, 20, 30, 40};
+    ExpandEdges padding { 10, 20, 30, 40 };
     RectF rect {};
     auto result = scrollablePattern->AccumulatingTerminateHelper(rect, padding);
     EXPECT_FALSE(result);
@@ -2148,5 +2140,53 @@ HWTEST_F(ScrollablePatternTestNg, UpdateBorderRadius, TestSize.Level1)
     EXPECT_FALSE(renderContext->HasBorderRadius());
     auto paintProperty = frameNode->GetPaintProperty<ScrollablePaintProperty>();
     EXPECT_EQ(paintProperty->GetPropertyChangeFlag(), PROPERTY_UPDATE_RENDER);
+}
+
+/**
+ * @tc.name: OnDetachFromMainTree001
+ * @tc.desc: Test ScrollablePattern OnDetachFromMainTree when scrollStop_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollablePatternTestNg, OnDetachFromMainTree001, TestSize.Level1)
+{
+    RefPtr<ScrollablePattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    scrollablePattern->scrollStop_ = true;
+    RefPtr<MockNestableScrollContainer> parent = AceType::MakeRefPtr<MockNestableScrollContainer>();
+    EXPECT_CALL(*parent, OnScrollEndRecursive(testing::_)).Times(0);
+    scrollablePattern->parent_ = parent;
+    scrollablePattern->OnDetachFromMainTree();
+}
+
+/**
+ * @tc.name: OnDetachFromMainTree002
+ * @tc.desc: Test ScrollablePattern OnDetachFromMainTree when parent is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollablePatternTestNg, OnDetachFromMainTree002, TestSize.Level1)
+{
+    RefPtr<ScrollablePattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    scrollablePattern->scrollStop_ = false;
+    scrollablePattern->parent_ = nullptr;
+    scrollablePattern->OnDetachFromMainTree();
+}
+
+/**
+ * @tc.name: OnDetachFromMainTree003
+ * @tc.desc: Test ScrollablePattern OnDetachFromMainTree when parent exists and scrollStop_ is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollablePatternTestNg, OnDetachFromMainTree003, TestSize.Level1)
+{
+    RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    scrollablePattern->scrollStop_ = false;
+    RefPtr<Scrollable> scrollable = AceType::MakeRefPtr<Scrollable>();
+    scrollable->currentVelocity_ = 5.0f;
+    RefPtr<ScrollableEvent> scrollableEvent = AceType::MakeRefPtr<ScrollableEvent>(Axis::VERTICAL);
+    scrollableEvent->scrollable_ = scrollable;
+    scrollablePattern->scrollableEvent_ = scrollableEvent;
+    RefPtr<MockNestableScrollContainer> parent = AceType::MakeRefPtr<MockNestableScrollContainer>();
+    EXPECT_CALL(*parent, OnScrollEndRecursive(testing::_)).Times(1);
+    scrollablePattern->parent_ = parent;
+    scrollablePattern->OnDetachFromMainTree();
 }
 } // namespace OHOS::Ace::NG

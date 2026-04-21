@@ -14,6 +14,8 @@
  */
 
 #include "core/components_ng/pattern/navigation/navdestination_pattern_base.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
+#include "core/common/event_manager.h"
 
 #include "core/components_ng/pattern/navigation/navdestination_node_base.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
@@ -24,6 +26,65 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t DEFAULT_ANIMATION_DURATION = 500;
+
+void ResetForceSplitTouchTargets(const RefPtr<NavigationPattern>& navPattern)
+{
+    CHECK_NULL_VOID(navPattern);
+    navPattern->SetTouchedPrimaryColumnDestination(nullptr);
+    navPattern->SetTouchedSecondaryColumnDestination(nullptr);
+}
+
+void RecordPrimaryOrSecondaryTouch(const RefPtr<NavigationPattern>& navPattern,
+    const RefPtr<NavDestinationGroupNode>& touchedDest, const RefPtr<NavDestinationGroupNode>& topPrimaryDest,
+    const RefPtr<NavDestinationGroupNode>& topSecondaryDest)
+{
+    CHECK_NULL_VOID(navPattern);
+    CHECK_NULL_VOID(touchedDest);
+    if (touchedDest == topPrimaryDest) {
+        navPattern->SetTouchedPrimaryColumnDestination(touchedDest);
+        return;
+    }
+    if (touchedDest == topSecondaryDest) {
+        navPattern->SetTouchedSecondaryColumnDestination(touchedDest);
+    }
+}
+
+bool TryRecordNavBarHomeTouch(const RefPtr<NavigationPattern>& navPattern, const RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_RETURN(navPattern, false);
+    auto navBar = AceType::DynamicCast<NavBarNode>(host);
+    if (navBar == nullptr) {
+        return false;
+    }
+    navPattern->SetIsHomeNodeTouched(true);
+    return true;
+}
+
+void RecordTouchWhenNavBarIsHome(const RefPtr<NavigationPattern>& navPattern, const RefPtr<FrameNode>& host,
+    const RefPtr<NavDestinationGroupNode>& touchedDest, const RefPtr<NavDestinationGroupNode>& topPrimaryDest,
+    const RefPtr<NavDestinationGroupNode>& topSecondaryDest)
+{
+    CHECK_NULL_VOID(navPattern);
+    CHECK_NULL_VOID(host);
+    if (TryRecordNavBarHomeTouch(navPattern, host)) {
+        return;
+    }
+    navPattern->SetIsHomeNodeTouched(false);
+    RecordPrimaryOrSecondaryTouch(navPattern, touchedDest, topPrimaryDest, topSecondaryDest);
+}
+
+void RecordTouchWhenHomeDestinationIsHome(const RefPtr<NavigationPattern>& navPattern,
+    const RefPtr<NavDestinationGroupNode>& touchedDest, const RefPtr<NavDestinationGroupNode>& topPrimaryDest,
+    const RefPtr<NavDestinationGroupNode>& topSecondaryDest)
+{
+    CHECK_NULL_VOID(navPattern);
+    bool homeTouched = touchedDest && touchedDest->GetNavDestinationType() == NavDestinationType::HOME;
+    navPattern->SetIsHomeNodeTouched(homeTouched);
+    if (homeTouched) {
+        return;
+    }
+    RecordPrimaryOrSecondaryTouch(navPattern, touchedDest, topPrimaryDest, topSecondaryDest);
+}
 } // namespace
 
 void NavDestinationPatternBase::SetTitleBarStyle(const std::optional<BarStyle>& barStyle)
@@ -473,13 +534,15 @@ void NavDestinationPatternBase::InitOnTouchEvent(const RefPtr<FrameNode>& host)
         if (!navPattern->IsForceSplitSuccess()) {
             return;
         }
+        auto touchedDest = AceType::DynamicCast<NavDestinationGroupNode>(host);
+        auto topPrimaryDest = navPattern->GetTopPrimaryDestination();
+        auto topSecondaryDest = navPattern->GetTopSecondaryDestination();
+        ResetForceSplitTouchTargets(navPattern);
         if (navPattern->IsForceSplitUseNavBar()) {
-            auto navBar = AceType::DynamicCast<NavBarNode>(host);
-            navPattern->SetIsHomeNodeTouched(navBar != nullptr);
+            RecordTouchWhenNavBarIsHome(navPattern, host, touchedDest, topPrimaryDest, topSecondaryDest);
             return;
         }
-        auto dest = AceType::DynamicCast<NavDestinationGroupNode>(host);
-        navPattern->SetIsHomeNodeTouched(dest && dest->GetNavDestinationType() == NavDestinationType::HOME);
+        RecordTouchWhenHomeDestinationIsHome(navPattern, touchedDest, topPrimaryDest, topSecondaryDest);
     });
 }
 

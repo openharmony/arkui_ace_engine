@@ -1,0 +1,254 @@
+{
+  "tests": [
+    {
+      "name": "Test001",
+      "config": {
+        "name": "Root", "type": "flex", "children": [
+          { "name": "A1", "type": "flex", "isIgnore": true, "children": [
+            { "name": "B1", "type": "flex", "isIgnore": true, "children": [
+              { "name": "C1", "type": "leaf" }, { "name": "C2", "type": "leaf" }]},
+            { "name": "B2", "type": "flex", "children": [
+              { "name": "C3", "type": "leaf" }, { "name": "C4", "type": "leaf" }]}]},
+          { "name": "A2", "type": "flex", "children": [
+            { "name": "B3", "type": "flex", "children": [
+              { "name": "C5", "type": "leaf", "isIgnore": true }, { "name": "C6", "type": "leaf" }]},
+            { "name": "B4", "type": "flex", "isIgnore": true, "children": [
+              { "name": "C7", "type": "leaf" }, { "name": "C8", "type": "leaf" }]}]}]
+      }
+    },
+    {
+      "name": "Test002",
+      "config": {
+        "name": "Root", "type": "multiChild", "children": [
+          { "name": "A1", "type": "multiChild", "isIgnore": true, "children": [
+            { "name": "B1", "type": "multiChild", "isIgnore": true, "children": [
+              { "name": "C1", "type": "leaf" }, { "name": "C2", "type": "leaf" }]},
+            { "name": "B2", "type": "multiChild", "children": [
+              { "name": "C3", "type": "leaf" }, { "name": "C4", "type": "leaf" }]}]},
+          { "name": "A2", "type": "multiChild", "children": [
+            { "name": "B3", "type": "multiChild", "children": [
+              { "name": "C5", "type": "leaf", "isIgnore": true }, { "name": "C6", "type": "leaf" }]},
+            { "name": "B4", "type": "multiChild", "isIgnore": true, "children": [
+              { "name": "C7", "type": "leaf" }, { "name": "C8", "type": "leaf" }]}]}]
+      }
+    },
+    {
+      "name": "Test003",
+      "config": {
+        "name": "Root", "type": "flex", "children": [
+          { "name": "Child", "type": "leaf", "isIgnore": true }]
+      }
+    },
+    {
+      "name": "Test004",
+      "config": {
+        "name": "Root", "type": "multiChild", "children": [
+          { "name": "Child", "type": "leaf", "isIgnore": true }]
+      }
+    },
+    {
+      "name": "Test005",
+      "config": {
+        "name": "Root", "type": "flex", "children": [
+          { "name": "Child1", "type": "leaf", "isIgnore": true },
+          { "name": "Child2", "type": "leaf", "isIgnore": true },
+          { "name": "Child3", "type": "leaf" }]
+      }
+    },
+    {
+      "name": "Test006",
+      "config": {
+        "name": "Root", "type": "multiChild", "children": [
+          { "name": "Child1", "type": "leaf", "isIgnore": true },
+          { "name": "Child2", "type": "leaf", "isIgnore": true },
+          { "name": "Child3", "type": "leaf" }]
+      }
+    },
+    {
+      "name": "Test007",
+      "config": {
+        "name": "Root", "type": "flex", "children": [
+          { "name": "A", "type": "flex", "isIgnore": true, "children": [
+            { "name": "B", "type": "flex", "children": [
+              { "name": "C", "type": "leaf", "isIgnore": true }]}]}]
+      }
+    },
+    {
+      "name": "Test008",
+      "config": {
+        "name": "Root", "type": "multiChild", "children": [
+          { "name": "A", "type": "multiChild", "isIgnore": true, "children": [
+            { "name": "B", "type": "multiChild", "children": [
+              { "name": "C", "type": "leaf", "isIgnore": true }]}]}]
+      }
+    },
+    {
+      "name": "Test009",
+      "config": {
+        "name": "Root", "type": "flex", "children": [
+          { "name": "Container", "type": "flex", "children": [
+            { "name": "Child1", "type": "leaf", "isIgnore": true },
+            { "name": "Child2", "type": "leaf" },
+            { "name": "Child3", "type": "leaf", "isIgnore": true }]}]
+      }
+    },
+    {
+      "name": "Test010",
+      "config": {
+        "name": "Root", "type": "multiChild", "children": [
+          { "name": "Container", "type": "multiChild", "children": [
+            { "name": "Child1", "type": "leaf", "isIgnore": true },
+            { "name": "Child2", "type": "leaf" },
+            { "name": "Child3", "type": "leaf", "isIgnore": true }]}]
+      }
+    },
+    {
+      "name": "Test011",
+      "config": {
+        "name": "Root", "type": "flex", "children": [
+          { "name": "A", "type": "flex", "isIgnore": true, "children": [
+            { "name": "B", "type": "leaf" }]},
+          { "name": "C", "type": "leaf", "isIgnore": true }]
+      }
+    },
+    {
+      "name": "Test012",
+      "config": {
+        "name": "Root", "type": "multiChild", "children": [
+          { "name": "A", "type": "multiChild", "isIgnore": true, "children": [
+            { "name": "B", "type": "leaf" }]},
+          { "name": "C", "type": "leaf", "isIgnore": true }]
+      }
+    },
+    {
+      "name": "Test013",
+      "config": {
+        "name": "Root", "type": "flex", "children": [
+          { "name": "A", "type": "flex", "children": [
+            { "name": "B", "type": "leaf", "isIgnore": true }]},
+          { "name": "C", "type": "flex", "children": [
+            { "name": "D", "type": "leaf", "isIgnore": true }]},
+          { "name": "E", "type": "leaf", "isIgnore": true }]
+      }
+    },
+    {
+      "name": "Test014",
+      "config": {
+        "name": "Root", "type": "multiChild", "children": [
+          { "name": "A", "type": "multiChild", "children": [
+            { "name": "B", "type": "leaf", "isIgnore": true }]},
+          { "name": "C", "type": "multiChild", "children": [
+            { "name": "D", "type": "leaf", "isIgnore": true }]},
+          { "name": "E", "type": "leaf", "isIgnore": true }]
+      }
+    },
+    {
+      "name": "Test015",
+      "config": {
+        "name": "Root", "type": "flex", "children": [
+          { "name": "A", "type": "flex", "isIgnore": true, "children": [
+            { "name": "B", "type": "flex", "children": [
+              { "name": "C", "type": "flex", "isIgnore": true, "children": [
+                { "name": "D", "type": "flex", "children": [
+                  { "name": "E", "type": "leaf", "isIgnore": true }]}]}]}]}]
+      }
+    },
+    {
+      "name": "Test016",
+      "config": {
+        "name": "Root", "type": "multiChild", "children": [
+          { "name": "A", "type": "multiChild", "isIgnore": true, "children": [
+            { "name": "B", "type": "multiChild", "children": [
+              { "name": "C", "type": "multiChild", "isIgnore": true, "children": [
+                { "name": "D", "type": "multiChild", "children": [
+                  { "name": "E", "type": "leaf", "isIgnore": true }]}]}]}]}]
+      }
+    },
+    {
+      "name": "Test017",
+      "config": {
+        "name": "Root", "type": "flex", "children": [
+          { "name": "Container", "type": "flex", "children": [
+            { "name": "Child1", "type": "leaf", "isIgnore": true },
+            { "name": "Child2", "type": "leaf", "isIgnore": true },
+            { "name": "Child3", "type": "leaf", "isIgnore": true }]}]
+      }
+    },
+    {
+      "name": "Test018",
+      "config": {
+        "name": "Root", "type": "multiChild", "children": [
+          { "name": "Container", "type": "multiChild", "children": [
+            { "name": "Child1", "type": "leaf", "isIgnore": true },
+            { "name": "Child2", "type": "leaf", "isIgnore": true },
+            { "name": "Child3", "type": "leaf", "isIgnore": true }]}]
+      }
+    },
+    {
+      "name": "Test019",
+      "config": {
+        "name": "Root", "type": "flex", "children": [
+          { "name": "A", "type": "flex", "isIgnore": true, "children": [
+            { "name": "B", "type": "leaf" },
+            { "name": "C", "type": "leaf", "isIgnore": true }]},
+          { "name": "D", "type": "flex", "children": [
+            { "name": "E", "type": "leaf", "isIgnore": true }]}]
+      }
+    },
+    {
+      "name": "Test020",
+      "config": {
+        "name": "Root", "type": "multiChild", "children": [
+          { "name": "A", "type": "multiChild", "isIgnore": true, "children": [
+            { "name": "B", "type": "leaf" },
+            { "name": "C", "type": "leaf", "isIgnore": true }]},
+          { "name": "D", "type": "multiChild", "children": [
+            { "name": "E", "type": "leaf", "isIgnore": true }]}]
+      }
+    },
+    {
+      "name": "Test021",
+      "config": {
+        "name": "Root", "type": "flex", "children": [
+          { "name": "A", "type": "flex", "children": [
+            { "name": "B", "type": "leaf", "isIgnore": true },
+            { "name": "C", "type": "leaf" }]},
+          { "name": "D", "type": "flex", "children": [
+            { "name": "E", "type": "leaf" },
+            { "name": "F", "type": "leaf", "isIgnore": true }]}]
+      }
+    },
+    {
+      "name": "Test022",
+      "config": {
+        "name": "Root", "type": "multiChild", "children": [
+          { "name": "A", "type": "multiChild", "children": [
+            { "name": "B", "type": "leaf", "isIgnore": true },
+            { "name": "C", "type": "leaf" }]},
+          { "name": "D", "type": "multiChild", "children": [
+            { "name": "E", "type": "leaf" },
+            { "name": "F", "type": "leaf", "isIgnore": true }]}]
+      }
+    }
+  ],
+  "knownCorrect": {
+    "Test001": [
+      "Root:Measure", "A2:Measure", "B3:Measure", "C6:Measure",
+      "Root:Layout(skip)",
+      "C5:Measure", "C5:Layout(skip)",
+      "Root:Layout", "A1:Layout(skip)", "A2:Layout", "B3:Layout(skip)", "B4:Layout(skip)",
+      "C5:Layout",
+      "B4:Measure", "C7:Measure", "C8:Measure",
+      "B4:Layout(skip)",
+      "A2:Layout", "B3:Layout(skip)", "B4:Layout", "C7:Layout", "C8:Layout"
+    ],
+    "Test003": [
+      "Root:Measure", "Root:Layout(skip)",
+      "Child:Measure", "Child:Layout(skip)", "Root:Layout", "Child:Layout"
+    ],
+    "Test004": [
+      "Root:Measure", "Child:PreMeasure(skip)", "Root:Layout", "Child:Layout(skip)",
+      "Child:Measure", "Child:Layout"
+    ]
+  }
+}

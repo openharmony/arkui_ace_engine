@@ -604,7 +604,7 @@ struct System__Reserved_$$$__UI__ButtonBar__Component {
     this.cancelMenuDisappearTimer()
     this.menuDisappearTimeoutId = setTimeout(() => {
        this.isShowMenu = false
-    }, disappearTime as Int)
+    }, disappearTime.toInt())
   }
 
   cancelMenuDisappearTimer() {

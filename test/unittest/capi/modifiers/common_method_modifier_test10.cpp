@@ -29,7 +29,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
     const auto ATTRIBUTE_BACKGROUND_NAME = "background";
-    const auto ATTRIBUTE_BACKGROUND_DEFAULT_VALUE = "";
+    const auto ATTRIBUTE_BACKGROUND_DEFAULT_VALUE = std::nullopt;
 }
 
 struct DoublePair {
@@ -93,16 +93,16 @@ public:
  */
 HWTEST_F(CommonMethodModifierTest10, setBackgroundTestDefaultValues, TestSize.Level1)
 {
-    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_BACKGROUND_NAME);
-    EXPECT_EQ(strResult, ATTRIBUTE_BACKGROUND_DEFAULT_VALUE);
+    auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_BACKGROUND_NAME);
+    EXPECT_THAT(strResult, Eq(ATTRIBUTE_BACKGROUND_DEFAULT_VALUE));
 }
 
 /*
- * @tc.name: setBackgroundCustomNodeBuilderTest
+ * @tc.name: setBackgroundTestCustomNodeBuilder
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest10, DISABLED_setBackgroundCustomNodeBuilderTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest10, DISABLED_setBackgroundTestCustomNodeBuilder, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBackground, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);

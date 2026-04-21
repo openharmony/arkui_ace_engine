@@ -18,6 +18,7 @@
 
 #include <mutex>
 
+#include "base/utils/linear_map.h"
 #include "core/common/resource/resource_object.h"
 #include "core/components_ng/pattern/checkbox/checkbox_event_hub.h"
 
@@ -26,7 +27,8 @@ enum class CheckBoxStyle { CIRCULAR_STYLE = 0, SQUARE_STYLE };
 enum class OriginalCheckBoxStyle { CIRCULAR_STYLE = 0, SQUARE_STYLE, NONE };
 enum class CheckBoxColorType {
     SELECTED_COLOR,
-    UN_SELECTED_COLOR
+    UN_SELECTED_COLOR,
+    STROKE_COLOR
 };
 class ACE_FORCE_EXPORT CheckBoxModel {
 public:

@@ -18,15 +18,30 @@
 #include "adapter/ohos/osal/want_wrap_ohos.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr uint32_t LOG_DELAY_TIME = 3600000; // 60*60*1000 ms
+} // namespace
+
 UIExtensionProxy::UIExtensionProxy(
     const RefPtr<SessionWrapper>& sessionWrapper, const RefPtr<UIExtensionPattern>& pattern)
     : sessionWrapper_(sessionWrapper), pattern_(pattern)
 {}
 
+UIExtensionProxy::~UIExtensionProxy()
+{
+    taskTimeForComeIn_.lastTaskTime = 0;
+    taskTimeForExit_.lastTaskTime = 0;
+}
+
 void UIExtensionProxy::SendData(const RefPtr<WantParamsWrap>& wantParams)
 {
     CHECK_NULL_VOID(sessionWrapper_);
     auto params = DynamicCast<WantParamsWrapOhos>(wantParams)->GetWantParams();
+    auto logTask = [sessionId = sessionWrapper_->GetSessionId()]() {
+        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "SendDataAsync %{public}d", sessionId);
+    };
+    taskTimeForComeIn_.taskName = "ArkUISendDataAsync";
+    ArkUIDelayLogTask::PostReductionTask(logTask, taskTimeForComeIn_, LOG_DELAY_TIME);
     sessionWrapper_->SendDataAsync(params);
 }
 

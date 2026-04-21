@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,10 +19,10 @@
 
 #define private public
 #define protected public
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/render/mock_paragraph.h"
-#include "test/mock/core/common/mock_container.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
@@ -50,10 +50,10 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/drawing_mock.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 
 using namespace testing;
@@ -1465,5 +1465,98 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest004, TestSize.Level1
             EXPECT_EQ(pointAccessibilityProperty->GetAccessibilityDescription(), description);
         }
     }
+}
+
+HWTEST_F(SliderPatternTestNg, SliderTextProperty001, TestSize.Level1)
+{
+    auto backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    RefPtr<FrameNode> frameNode;
+    auto sliderPattern = AccessibilityInit(frameNode);
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_NE(sliderPattern, nullptr);
+    sliderPattern->AddStepPointsAccessibilityVirtualNode();
+    sliderPattern->UpdateStepAccessibilityVirtualNode();
+    for (const auto& node : sliderPattern->pointAccessibilityNodeVec_) {
+        ASSERT_NE(node, nullptr);
+        auto pointNodeProperty = node->GetLayoutProperty<TextLayoutProperty>();
+        ASSERT_NE(pointNodeProperty, nullptr);
+        EXPECT_TRUE(pointNodeProperty->GetEnableSmallLanguageTruncationValue(false));
+    }
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ParseCommand001
+ * @tc.desc: Test SliderPattern ParseCommand.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, ParseCommand001, TestSize.Level1)
+{
+    float value = MIN;
+    std::string command = "";
+    SliderPattern sliderPattern;
+    EXPECT_FALSE(sliderPattern.ParseCommand(command, value));
+    command = "{";
+    EXPECT_FALSE(sliderPattern.ParseCommand(command, value));
+    command = "{}";
+    EXPECT_FALSE(sliderPattern.ParseCommand(command, value));
+    command = "{\"cmd\":\"SetValue\"}";
+    EXPECT_FALSE(sliderPattern.ParseCommand(command, value));
+    command = "{\"cmd\":\"onSliderChange\"}";
+    EXPECT_FALSE(sliderPattern.ParseCommand(command, value));
+    command = "{\"cmd\":\"onSliderChange\",\"params\":{}}";
+    EXPECT_FALSE(sliderPattern.ParseCommand(command, value));
+    command = "{\"cmd\":\"onSliderChange\",\"params\":{\"value\":\"abc\"}}";
+    EXPECT_FALSE(sliderPattern.ParseCommand(command, value));
+    command = "{\"cmd\":\"onSliderChange\",\"params\":{\"value\":true}}";
+    EXPECT_FALSE(sliderPattern.ParseCommand(command, value));
+    command = "{\"cmd\":\"onSliderChange\",\"params\":{\"value\":12.5}}";
+    EXPECT_TRUE(sliderPattern.ParseCommand(command, value));
+    EXPECT_EQ(value, 12.5f);
+}
+
+/**
+ * @tc.name: OnInjectionEvent001
+ * @tc.desc: Test SliderPattern OnInjectionEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, OnInjectionEvent001, TestSize.Level1)
+{
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    ASSERT_EQ(sliderPaintProperty->GetValueValue(MIN), VALUE);
+
+    std::string command = "abc";
+    EXPECT_EQ(sliderPattern->OnInjectionEvent(command), RET_FAILED);
+    command = "{\"cmd\":\"onSliderChange\",\"params\":{\"value\":7}}";
+    EXPECT_EQ(sliderPattern->OnInjectionEvent(command), RET_SUCCESS);
+    EXPECT_EQ(sliderPaintProperty->GetValueValue(MIN), 7.0f);
+}
+
+/**
+ * @tc.name: OnInjectionEvent002
+ * @tc.desc: Test SliderPattern OnInjectionEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, OnInjectionEvent002, TestSize.Level1)
+{
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetEnabled(false);
+    std::string command = "{\"cmd\":\"onSliderChange\",\"params\":{\"value\":7}}";
+    EXPECT_EQ(sliderPattern->OnInjectionEvent(command), RET_FAILED);
 }
 } // namespace OHOS::Ace::NG

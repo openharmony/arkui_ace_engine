@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ARC_LIST_ARC_LIST_POSITION_MAP_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ARC_LIST_ARC_LIST_POSITION_MAP_H
 
+#include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/arc_list/arc_list_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_position_map.h"
 

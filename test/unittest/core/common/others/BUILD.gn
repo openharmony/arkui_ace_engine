@@ -17,4 +17,17 @@ ace_unittest("thread_checker_test") {
   module_name = "FormAndSelection-Select"
   type = "new"
   sources = [ "thread_checker_test.cpp" ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "others_test_min.cpp",
+      "others_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "others_test_min.cpp",
+      "others_test_core.cpp",
+    ]
+  }
 }

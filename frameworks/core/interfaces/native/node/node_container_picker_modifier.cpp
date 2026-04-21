@@ -268,19 +268,23 @@ void SetContainerPickerIndicator(ArkUINodeHandle node, const struct ArkUI_Picker
     indicatorStyle.type = pickerIndicatorStyle->type;
     if (indicatorStyle.type == static_cast<int32_t>(PickerIndicatorType::DIVIDER)) {
         indicatorStyle.strokeWidth = Dimension(pickerIndicatorStyle->strokeWidth, DimensionUnit::VP);
+        indicatorStyle.isDefaultDividerWidth = false;
         indicatorStyle.dividerColor = Color(pickerIndicatorStyle->dividerColor);
-        indicatorStyle.isDefaultDividerColor = !pickerIndicatorStyle->dividerColor;
+        indicatorStyle.isDefaultDividerColor = false;
         indicatorStyle.startMargin = Dimension(pickerIndicatorStyle->startMargin, DimensionUnit::VP);
+        indicatorStyle.isDefaultStartMargin = false;
         indicatorStyle.endMargin = Dimension(pickerIndicatorStyle->endMargin, DimensionUnit::VP);
+        indicatorStyle.isDefaultEndMargin = false;
     } else if (indicatorStyle.type == static_cast<int32_t>(PickerIndicatorType::BACKGROUND)) {
         indicatorStyle.backgroundColor = Color(pickerIndicatorStyle->backgroundColor);
-        indicatorStyle.isDefaultBackgroundColor = !pickerIndicatorStyle->backgroundColor;
+        indicatorStyle.isDefaultBackgroundColor = false;
         BorderRadiusProperty borderRadius;
         borderRadius.radiusTopLeft = Dimension(pickerIndicatorStyle->topLeftRadius, DimensionUnit::VP);
         borderRadius.radiusTopRight = Dimension(pickerIndicatorStyle->topRightRadius, DimensionUnit::VP);
         borderRadius.radiusBottomLeft = Dimension(pickerIndicatorStyle->bottomLeftRadius, DimensionUnit::VP);
         borderRadius.radiusBottomRight = Dimension(pickerIndicatorStyle->bottomRightRadius, DimensionUnit::VP);
         indicatorStyle.borderRadius = borderRadius;
+        indicatorStyle.isDefaultBorderRadius = false;
     }
     ContainerPickerModel::SetIndicatorStyle(frameNode, indicatorStyle);
 }
@@ -292,12 +296,14 @@ void ResetContainerPickerIndicator(ArkUINodeHandle node)
     PickerIndicatorStyle indicatorStyle = {};
     indicatorStyle.type = static_cast<int32_t>(PickerIndicatorType::BACKGROUND);
     indicatorStyle.backgroundColor = Color(Color::TRANSPARENT);
+    indicatorStyle.isDefaultBackgroundColor = false;
     BorderRadiusProperty borderRadius;
     borderRadius.radiusTopLeft = Dimension(0, DimensionUnit::VP);
     borderRadius.radiusTopRight = Dimension(0, DimensionUnit::VP);
     borderRadius.radiusBottomLeft = Dimension(0, DimensionUnit::VP);
     borderRadius.radiusBottomRight = Dimension(0, DimensionUnit::VP);
     indicatorStyle.borderRadius = borderRadius;
+    indicatorStyle.isDefaultBorderRadius = false;
     ContainerPickerModel::SetIndicatorStyle(frameNode, indicatorStyle);
 }
 

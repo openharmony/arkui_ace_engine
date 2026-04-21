@@ -14,12 +14,12 @@
  */
 
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_data_detector_mgr.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_data_detector_mgr.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/style_manager.h"
@@ -618,6 +618,51 @@ HWTEST_F(RichEditorLayoutTestNg, UpdateMaxSizeByLayoutPolicy, TestSize.Level2)
     maxSize = parentLayoutConstraint.maxSize;
     layoutAlgorithm->UpdateMaxSizeByLayoutPolicy(parentLayoutConstraint, AceType::RawPtr(layoutWrapper), maxSize);
     EXPECT_EQ(maxSize.Width(), std::numeric_limits<float>::max());
+}
+
+/**
+ * @tc.name: GetCustomSpanMeasureMaxWidth001
+ * @tc.desc: test RichEditor custom span maxWidth follows layout policy preprocessing
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorLayoutTestNg, GetCustomSpanMeasureMaxWidth001, TestSize.Level2)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        richEditorNode_, AceType::MakeRefPtr<GeometryNode>(), richEditorNode_->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = SizeF(CONTAINER_WIDTH, CONTAINER_HEIGHT);
+    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+    parentLayoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
+    layoutProperty->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutProperty->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+
+    auto maxWidth = layoutAlgorithm->GetCustomSpanMeasureMaxWidth(
+        parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
+    ASSERT_TRUE(maxWidth.has_value());
+    EXPECT_EQ(maxWidth.value(), CONTAINER_WIDTH);
+
+    layoutProperty->layoutPolicy_->widthLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    maxWidth = layoutAlgorithm->GetCustomSpanMeasureMaxWidth(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
+    ASSERT_TRUE(maxWidth.has_value());
+    EXPECT_EQ(maxWidth.value(), CONTAINER_WIDTH);
+
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    maxWidth = layoutAlgorithm->GetCustomSpanMeasureMaxWidth(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
+    ASSERT_TRUE(maxWidth.has_value());
+    EXPECT_EQ(maxWidth.value(), std::numeric_limits<float>::infinity());
 }
 
 /**

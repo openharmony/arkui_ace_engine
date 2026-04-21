@@ -20,6 +20,7 @@
 
 #include "accessibility_event_info.h"
 #include "extension/extension_business_info.h"
+#include "int_wrapper.h"
 #include "interfaces/include/ws_common.h"
 #include "parameters.h"
 #include "refbase.h"
@@ -80,6 +81,7 @@ constexpr char UIEXTENSION_HOST_UICONTENT_ALLOW_CROSS_PROCESS_NESTING[] =
     "ohos.ace.uiextension.allowCrossProcessNesting";
 constexpr const char* const UIEXTENSION_CONFIG_FIELD = "ohos.system.window.uiextension.params";
 constexpr const char* const UIEXTENSION_CONFIG_MENUBAR = "ohos.system.atomicservice.menubar.params";
+constexpr const char* const UIEXTENSION_CONFIG_WINDOW_MODE = "ohos.system.window.mode";
 const std::string EMBEDDED_UI("embeddedUI");
 constexpr int32_t AVOID_DELAY_TIME = 30;
 constexpr int32_t INVALID_WINDOW_ID = -1;
@@ -770,6 +772,8 @@ void SessionWrapperImpl::UpdateWantPtr(std::shared_ptr<AAFwk::Want>& wantPtr)
     AAFwk::WantParams menuBarWantParam;
     UpdateMenuBarWantPtr(wantPtr, menuBarWantParam);
     configParam.SetParam(UIEXTENSION_CONFIG_MENUBAR, AAFwk::WantParamWrapper::Box(menuBarWantParam));
+    auto mode = container->GetWindowMode();
+    configParam.SetParam(UIEXTENSION_CONFIG_WINDOW_MODE, AAFwk::Integer::Box(static_cast<int32_t>(mode)));
     AAFwk::WantParams wantParam(wantPtr->GetParams());
     wantParam.SetParam(UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
     wantPtr->SetParams(wantParam);

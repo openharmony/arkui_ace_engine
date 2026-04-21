@@ -18,7 +18,8 @@
 
 #include "base/log/dump_log.h"
 #include "base/utils/multi_thread.h"
-#include "core/components_ng/pattern/grid/grid_pattern.h"
+#include "core/components_ng/pattern/grid/grid_item_theme.h"
+#include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
 void GridItemPattern::OnAttachToFrameNodeMultiThread()
 {

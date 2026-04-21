@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 #include "text_input_base.h"
 
 #include "core/components/common/properties/text_style.h"
@@ -403,8 +403,14 @@ HWTEST_F(TextFieldPatternTestThree, OnBackPressed001, TestSize.Level0)
     pattern_->SetSelectionFlag(start, end, options);
     EXPECT_EQ(pattern_->isEdit_, true);
 
+    /**
+     * trigger onbackpressed
+     */
     bool ret = pattern_->OnBackPressed();
     pattern_->imeShown_ = true;
+    /**
+     * trigger onbackpressed
+     */
     ret = pattern_->OnBackPressed();
     EXPECT_EQ(ret, true);
 }

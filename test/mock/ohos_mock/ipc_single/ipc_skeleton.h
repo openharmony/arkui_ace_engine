@@ -25,6 +25,7 @@ public:
     ~IPCSkeleton() = default;
 
     static uint32_t GetCallingTokenID();
+    static uint32_t GetCallingRealPid();
 };
 }
 #endif

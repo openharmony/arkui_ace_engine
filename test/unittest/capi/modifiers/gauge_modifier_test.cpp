@@ -23,13 +23,16 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/linear_gradient_peer.h"
 #include "test/unittest/capi/utils/custom_node_builder_test_helper.h"
+#include "generated/type_helpers.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace  {
+#ifdef WRONG_API // setTrackShadow not in GENERATED_ArkUIGaugeModifier
     const auto ATTRIBUTE_TRACK_SHADOW_NAME = "trackShadow";
+#endif
 #ifdef GAUGE_HAS_INDICATOR
     const auto ATTRIBUTE_INDICATOR_NAME = "indicator";
 #endif
@@ -49,12 +52,14 @@ namespace  {
     const auto ATTRIBUTE_COLORS_DEFAULT_VALUE = "[\"#FF64BB5C\",\"#FFF7CE00\",\"#FFE84026\"]";
     const auto ATTRIBUTE_DESCRIPTION_NAME = "description";
     const auto ATTRIBUTE_DESCRIPTION_DEFAULT_VALUE = "";
+#ifdef WRONG_API // setTrackShadow not in GENERATED_ArkUIGaugeModifier
     const auto ATTRIBUTE_TRACK_SHADOW_RADIUS_NAME = "radius";
     const auto ATTRIBUTE_TRACK_SHADOW_RADIUS_DEFAULT_VALUE = "20.000000";
     const auto ATTRIBUTE_TRACK_SHADOW_OFFSET_X_NAME = "offsetX";
     const auto ATTRIBUTE_TRACK_SHADOW_OFFSET_X_DEFAULT_VALUE = "5.000000";
     const auto ATTRIBUTE_TRACK_SHADOW_OFFSET_Y_NAME = "offsetY";
     const auto ATTRIBUTE_TRACK_SHADOW_OFFSET_Y_DEFAULT_VALUE = "5.000000";
+#endif
 #ifdef GAUGE_HAS_INDICATOR
     const auto ATTRIBUTE_INDICATOR_ICON_NAME = "icon";
     const auto ATTRIBUTE_INDICATOR_ICON_DEFAULT_VALUE = "SystemStyle";
@@ -102,15 +107,15 @@ public:
 HWTEST_F(GaugeModifierTest, setGaugeOptionsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_VALUE_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_VALUE_DEFAULT_VALUE));
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MIN_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_MIN_DEFAULT_VALUE));
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MAX_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_MAX_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'value' of method 'setGaugeOptions'
@@ -151,7 +156,7 @@ static std::vector<std::tuple<std::string, Opt_Float64, std::string>> setGaugeOp
 HWTEST_F(GaugeModifierTest, setGaugeOptionsTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_GaugeOptions inputValueOptions;
     Ark_GaugeOptions initValueOptions;
@@ -169,7 +174,7 @@ HWTEST_F(GaugeModifierTest, setGaugeOptionsTestValidValues, TestSize.Level1)
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 
     // Verifying attribute's 'min'  values
@@ -180,7 +185,7 @@ HWTEST_F(GaugeModifierTest, setGaugeOptionsTestValidValues, TestSize.Level1)
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 
     // Verifying attribute's 'max'  values
@@ -191,7 +196,7 @@ HWTEST_F(GaugeModifierTest, setGaugeOptionsTestValidValues, TestSize.Level1)
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -213,7 +218,7 @@ static std::vector<std::tuple<std::string, Opt_Float64>> setGaugeOptionsMaxInval
 HWTEST_F(GaugeModifierTest, setGaugeOptionsTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_GaugeOptions inputValueOptions;
     Ark_GaugeOptions initValueOptions;
@@ -232,7 +237,7 @@ HWTEST_F(GaugeModifierTest, setGaugeOptionsTestInvalidValues, TestSize.Level1)
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_NAME);
         expectedStr = ATTRIBUTE_MIN_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 
     // Verifying attribute's 'max'  values
@@ -244,7 +249,7 @@ HWTEST_F(GaugeModifierTest, setGaugeOptionsTestInvalidValues, TestSize.Level1)
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_NAME);
         expectedStr = ATTRIBUTE_MAX_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -256,10 +261,10 @@ HWTEST_F(GaugeModifierTest, setGaugeOptionsTestInvalidValues, TestSize.Level1)
 HWTEST_F(GaugeModifierTest, setValueTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_VALUE_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_VALUE_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'value' of method 'value'
@@ -280,7 +285,7 @@ static std::vector<std::tuple<std::string, Opt_Float64, std::string>> valueValue
 HWTEST_F(GaugeModifierTest, setValueTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
 
     // Verifying attribute's  values
@@ -290,7 +295,7 @@ HWTEST_F(GaugeModifierTest, setValueTestValidValues, TestSize.Level1)
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -302,9 +307,9 @@ HWTEST_F(GaugeModifierTest, setValueTestValidValues, TestSize.Level1)
 HWTEST_F(GaugeModifierTest, setStartAngleTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_START_ANGLE_ANGLE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_START_ANGLE_ANGLE_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_START_ANGLE_ANGLE_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'startAngle' and 'endAngle' of method 'startAngle' and 'endAngle'
@@ -328,7 +333,7 @@ static std::vector<std::tuple<std::string, Opt_Float64, std::string>> angleValid
 HWTEST_F(GaugeModifierTest, setStartAngleTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
 
     // Verifying attribute's  values
@@ -338,7 +343,7 @@ HWTEST_F(GaugeModifierTest, setStartAngleTestValidValues, TestSize.Level1)
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_START_ANGLE_ANGLE_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -350,10 +355,10 @@ HWTEST_F(GaugeModifierTest, setStartAngleTestValidValues, TestSize.Level1)
 HWTEST_F(GaugeModifierTest, setEndAngleTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_END_ANGLE_ANGLE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_END_ANGLE_ANGLE_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_END_ANGLE_ANGLE_DEFAULT_VALUE));
 }
 
 /*
@@ -364,7 +369,7 @@ HWTEST_F(GaugeModifierTest, setEndAngleTestDefaultValues, TestSize.Level1)
 HWTEST_F(GaugeModifierTest, setEndAngleTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
 
     // Verifying attribute's  values
@@ -374,7 +379,7 @@ HWTEST_F(GaugeModifierTest, setEndAngleTestValidValues, TestSize.Level1)
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_END_ANGLE_ANGLE_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -386,10 +391,10 @@ HWTEST_F(GaugeModifierTest, setEndAngleTestValidValues, TestSize.Level1)
 HWTEST_F(GaugeModifierTest, setColorsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLORS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_COLORS_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_COLORS_DEFAULT_VALUE));
 }
 
 namespace {
@@ -546,7 +551,7 @@ HWTEST_F(GaugeModifierTest, setColorsTestValidValues, TestSize.Level1)
 {
     auto colorsValidValues = CreateColorsValidValues();
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     ArkColorColor inputColors;
     ArkColorColor initColors;
@@ -562,7 +567,7 @@ HWTEST_F(GaugeModifierTest, setColorsTestValidValues, TestSize.Level1)
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLORS_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -578,7 +583,7 @@ HWTEST_F(GaugeModifierTest, setColorsTestInvalidValue1, TestSize.Level1)
     modifier_->setColors(node_, &inputColor);
     auto jsonValue = GetJsonValue(node_);
     auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLORS_NAME);
-    EXPECT_EQ(resultStr, GaugeModelStatic::ERROR_COLOR.ToString());
+    EXPECT_THAT(resultStr, Eq(GaugeModelStatic::ERROR_COLOR.ToString()));
 }
 
 /*
@@ -620,10 +625,10 @@ HWTEST_F(GaugeModifierTest, setColorsTestInvalidValue2, TestSize.Level1)
 HWTEST_F(GaugeModifierTest, setStrokeWidthTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STROKE_WIDTH_LENGTH_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_STROKE_WIDTH_LENGTH_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_STROKE_WIDTH_LENGTH_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'strokeWidthLength' of method 'strokeWidth'
@@ -650,7 +655,7 @@ static std::vector<std::tuple<std::string, Ark_Length, std::string>> strokeWidth
 HWTEST_F(GaugeModifierTest, setStrokeWidthTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_Length inputValueStrokeWidthLength;
     Ark_Length initValueStrokeWidthLength;
@@ -667,7 +672,7 @@ HWTEST_F(GaugeModifierTest, setStrokeWidthTestValidValues, TestSize.Level1)
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STROKE_WIDTH_LENGTH_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -675,7 +680,7 @@ HWTEST_F(GaugeModifierTest, setStrokeWidthTestValidValues, TestSize.Level1)
 static std::vector<std::tuple<std::string, Ark_Length>> strokeWidthStrokeWidthLengthInvalidValues = {
     {"10%", Converter::ArkValue<Ark_Length>("10%")},
     {"0%", Converter::ArkValue<Ark_Length>("0%")},
-#ifdef WRONG_API // Need to check synamic API behavior
+#ifdef WRONG_API // Need to check dynamic API behavior
     {"-5.0f", Converter::ArkValue<Ark_Length>(-5.0f)},
     {"-15.5vp", Converter::ArkValue<Ark_Length>("-15.5vp")},
     {"-25.0px", Converter::ArkValue<Ark_Length>("-25.0px")},
@@ -691,7 +696,7 @@ static std::vector<std::tuple<std::string, Ark_Length>> strokeWidthStrokeWidthLe
 HWTEST_F(GaugeModifierTest, setStrokeWidthTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_Length inputValueStrokeWidthLength;
     Ark_Length initValueStrokeWidthLength;
@@ -709,7 +714,7 @@ HWTEST_F(GaugeModifierTest, setStrokeWidthTestInvalidValues, TestSize.Level1)
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STROKE_WIDTH_LENGTH_NAME);
         expectedStr = ATTRIBUTE_STROKE_WIDTH_LENGTH_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -718,22 +723,23 @@ HWTEST_F(GaugeModifierTest, setStrokeWidthTestInvalidValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GaugeModifierTest, setDescriptionTestDefaultValues, TestSize.Level1)
+HWTEST_F(GaugeModifierTest, DISABLED_setDescriptionTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DESCRIPTION_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DESCRIPTION_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_DESCRIPTION_DEFAULT_VALUE));
 }
 
 /*
- * @tc.name: setDescriptionTest_CustomNodeBuilder
+ * @tc.name: setDescriptionTestCustomNodeBuilder
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GaugeModifierTest, setDescriptionTest_CustomNodeBuilder, TestSize.Level1)
+HWTEST_F(GaugeModifierTest, DISABLED_setDescriptionTestCustomNodeBuilder, TestSize.Level1)
 {
+#ifdef WRONG_API // setDescription not in GENERATED_ArkUIGaugeModifier
     ASSERT_NE(modifier_->setDescription, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -744,6 +750,7 @@ HWTEST_F(GaugeModifierTest, setDescriptionTest_CustomNodeBuilder, TestSize.Level
     auto optBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder);
     modifier_->setDescription(node_, &optBuilder);
     EXPECT_EQ(builderHelper.GetCallsCountAsync(), ++callsCount);
+#endif
 }
 
 /*
@@ -751,23 +758,26 @@ HWTEST_F(GaugeModifierTest, setDescriptionTest_CustomNodeBuilder, TestSize.Level
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GaugeModifierTest, setTrackShadowTestDefaultValues, TestSize.Level1)
+HWTEST_F(GaugeModifierTest, DISABLED_setTrackShadowTestDefaultValues, TestSize.Level1)
 {
+#ifdef WRONG_API // setTrackShadow not in GENERATED_ArkUIGaugeModifier
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::unique_ptr<JsonValue> resultTrackShadow
-        = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
-    std::string resultStr;
+        = GetAttrObject(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(resultTrackShadow, ATTRIBUTE_TRACK_SHADOW_RADIUS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TRACK_SHADOW_RADIUS_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_TRACK_SHADOW_RADIUS_DEFAULT_VALUE));
 
     resultStr = GetAttrValue<std::string>(resultTrackShadow, ATTRIBUTE_TRACK_SHADOW_OFFSET_X_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TRACK_SHADOW_OFFSET_X_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_TRACK_SHADOW_OFFSET_X_DEFAULT_VALUE));
 
     resultStr = GetAttrValue<std::string>(resultTrackShadow, ATTRIBUTE_TRACK_SHADOW_OFFSET_Y_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TRACK_SHADOW_OFFSET_Y_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_TRACK_SHADOW_OFFSET_Y_DEFAULT_VALUE));
+#endif
 }
 
+#ifdef WRONG_API // setTrackShadow not in GENERATED_ArkUIGaugeModifier
 // Valid values for attribute 'radius' of method 'trackShadow'
 static std::vector<std::tuple<std::string, Opt_Union_F64_Resource, std::string>> trackShadowRadiusValidValues = {
     {"0.05", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(0.05), "0.050000"},
@@ -794,17 +804,19 @@ static std::vector<std::tuple<std::string, Opt_Union_F64_Resource, std::string>>
     {"res:str", CreateResourceUnion<Opt_Union_F64_Resource>(RES_VALUE_NAME), "5.000000"},
     {"res:id", CreateResourceUnion<Opt_Union_F64_Resource>(RES_VALUE_ID), "1.000000"},
 };
+#endif
 
 /*
  * @tc.name: setTrackShadowTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GaugeModifierTest, setTrackShadowTestValidValues, TestSize.Level1)
+HWTEST_F(GaugeModifierTest, DISABLED_setTrackShadowTestValidValues, TestSize.Level1)
 {
+#ifdef WRONG_API // setTrackShadow not in GENERATED_ArkUIGaugeModifier
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultTrackShadow;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_GaugeShadowOptions inputValueTrackShadow;
     Ark_GaugeShadowOptions initValueTrackShadow;
@@ -821,10 +833,10 @@ HWTEST_F(GaugeModifierTest, setTrackShadowTestValidValues, TestSize.Level1)
         auto optInputValueTrackShadow = Converter::ArkValue<Opt_GaugeShadowOptions>(inputValueTrackShadow);
         modifier_->setTrackShadow(node_, &optInputValueTrackShadow);
         jsonValue = GetJsonValue(node_);
-        resultTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
+        resultTrackShadow = GetAttrObject(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
         resultStr = GetAttrValue<std::string>(resultTrackShadow, ATTRIBUTE_TRACK_SHADOW_RADIUS_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 
     // Verifying attribute's 'offsetX'  values
@@ -834,10 +846,10 @@ HWTEST_F(GaugeModifierTest, setTrackShadowTestValidValues, TestSize.Level1)
         auto optInputValueTrackShadow = Converter::ArkValue<Opt_GaugeShadowOptions>(inputValueTrackShadow);
         modifier_->setTrackShadow(node_, &optInputValueTrackShadow);
         jsonValue = GetJsonValue(node_);
-        resultTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
+        resultTrackShadow = GetAttrObject(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
         resultStr = GetAttrValue<std::string>(resultTrackShadow, ATTRIBUTE_TRACK_SHADOW_OFFSET_X_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 
     // Verifying attribute's 'offsetY'  values
@@ -847,13 +859,15 @@ HWTEST_F(GaugeModifierTest, setTrackShadowTestValidValues, TestSize.Level1)
         auto optInputValueTrackShadow = Converter::ArkValue<Opt_GaugeShadowOptions>(inputValueTrackShadow);
         modifier_->setTrackShadow(node_, &optInputValueTrackShadow);
         jsonValue = GetJsonValue(node_);
-        resultTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
+        resultTrackShadow = GetAttrObject(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
         resultStr = GetAttrValue<std::string>(resultTrackShadow, ATTRIBUTE_TRACK_SHADOW_OFFSET_Y_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
+#endif
 }
 
+#ifdef WRONG_API // setTrackShadow not in GENERATED_ArkUIGaugeModifier
 // Invalid values for attribute 'radius' of method 'trackShadow'
 static std::vector<std::tuple<std::string, Opt_Union_F64_Resource>> trackShadowRadiusInvalidValues = {
     {"undefined", Converter::ArkUnion<Opt_Union_F64_Resource>(Ark_Empty())},
@@ -873,20 +887,23 @@ static std::vector<std::tuple<std::string, Opt_Union_F64_Resource>> trackShadowO
     {"undefined", Converter::ArkUnion<Opt_Union_F64_Resource>(Ark_Empty())},
     {"nullptr", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Empty>(nullptr)},
 };
+#endif
 
 /*
  * @tc.name: setTrackShadowTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GaugeModifierTest, setTrackShadowTestInvalidValues, TestSize.Level1)
+HWTEST_F(GaugeModifierTest, DISABLED_setTrackShadowTestInvalidValues, TestSize.Level1)
 {
+#ifdef WRONG_API // setTrackShadow not in GENERATED_ArkUIGaugeModifier
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultTrackShadow;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_GaugeShadowOptions inputValueTrackShadow;
-    Ark_GaugeShadowOptions initValueTrackShadow;
+    Opt_GaugeShadowOptions optInputValueTrackShadow;
+    Ark_GaugeShadowOptions& initValueTrackShadow = TypeHelper::WriteTo(optInputValueTrackShadow);
 
     // Initial setup
     initValueTrackShadow.radius = std::get<1>(trackShadowRadiusValidValues[0]);
@@ -896,47 +913,42 @@ HWTEST_F(GaugeModifierTest, setTrackShadowTestInvalidValues, TestSize.Level1)
     // Verifying attribute's 'radius'  values
     for (auto&& value: trackShadowRadiusInvalidValues) {
         inputValueTrackShadow = initValueTrackShadow;
-        auto optInputValueTrackShadow = Converter::ArkValue<Opt_GaugeShadowOptions>(inputValueTrackShadow);
         modifier_->setTrackShadow(node_, &optInputValueTrackShadow);
         inputValueTrackShadow.radius = std::get<1>(value);
-        optInputValueTrackShadow = Converter::ArkValue<Opt_GaugeShadowOptions>(inputValueTrackShadow);
         modifier_->setTrackShadow(node_, &optInputValueTrackShadow);
         jsonValue = GetJsonValue(node_);
-        resultTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
+        resultTrackShadow = GetAttrObject(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
         resultStr = GetAttrValue<std::string>(resultTrackShadow, ATTRIBUTE_TRACK_SHADOW_RADIUS_NAME);
         expectedStr = ATTRIBUTE_TRACK_SHADOW_RADIUS_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 
     // Verifying attribute's 'offsetX'  values
     for (auto&& value: trackShadowOffsetXInvalidValues) {
         inputValueTrackShadow = initValueTrackShadow;
-        auto optInputValueTrackShadow = Converter::ArkValue<Opt_GaugeShadowOptions>(inputValueTrackShadow);
         modifier_->setTrackShadow(node_, &optInputValueTrackShadow);
         inputValueTrackShadow.offsetX = std::get<1>(value);
-        optInputValueTrackShadow = Converter::ArkValue<Opt_GaugeShadowOptions>(inputValueTrackShadow);
         modifier_->setTrackShadow(node_, &optInputValueTrackShadow);
         jsonValue = GetJsonValue(node_);
-        resultTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
+        resultTrackShadow = GetAttrObject(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
         resultStr = GetAttrValue<std::string>(resultTrackShadow, ATTRIBUTE_TRACK_SHADOW_OFFSET_X_NAME);
         expectedStr = ATTRIBUTE_TRACK_SHADOW_OFFSET_X_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 
     // Verifying attribute's 'offsetY'  values
     for (auto&& value: trackShadowOffsetYInvalidValues) {
         inputValueTrackShadow = initValueTrackShadow;
-        auto optInputValueTrackShadow = Converter::ArkValue<Opt_GaugeShadowOptions>(inputValueTrackShadow);
         modifier_->setTrackShadow(node_, &optInputValueTrackShadow);
         inputValueTrackShadow.offsetY = std::get<1>(value);
-        optInputValueTrackShadow = Converter::ArkValue<Opt_GaugeShadowOptions>(inputValueTrackShadow);
         modifier_->setTrackShadow(node_, &optInputValueTrackShadow);
         jsonValue = GetJsonValue(node_);
-        resultTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
+        resultTrackShadow = GetAttrObject(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
         resultStr = GetAttrValue<std::string>(resultTrackShadow, ATTRIBUTE_TRACK_SHADOW_OFFSET_Y_NAME);
         expectedStr = ATTRIBUTE_TRACK_SHADOW_OFFSET_Y_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
+#endif
 }
 
 #ifdef GAUGE_HAS_INDICATOR
@@ -949,14 +961,14 @@ HWTEST_F(GaugeModifierTest, setIndicatorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::unique_ptr<JsonValue> resultIndicator
-        = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_INDICATOR_NAME);
-    std::string resultStr;
+        = GetAttrObject(jsonValue, ATTRIBUTE_INDICATOR_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(resultIndicator, ATTRIBUTE_INDICATOR_ICON_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_INDICATOR_ICON_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_INDICATOR_ICON_DEFAULT_VALUE));
 
     resultStr = GetAttrValue<std::string>(resultIndicator, ATTRIBUTE_INDICATOR_SPACE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_INDICATOR_SPACE_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_INDICATOR_SPACE_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'icon' of method 'indicator'
@@ -990,7 +1002,7 @@ HWTEST_F(GaugeModifierTest, setIndicatorTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultIndicator;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_GaugeIndicatorOptions inputValueIndicator;
     Ark_GaugeIndicatorOptions initValueIndicator;
@@ -1006,10 +1018,10 @@ HWTEST_F(GaugeModifierTest, setIndicatorTestValidValues, TestSize.Level1)
         auto optInputValueIndicator = Converter::ArkValue<Opt_GaugeIndicatorOptions>(inputValueIndicator);
         modifier_->setIndicator(node_, &optInputValueIndicator);
         jsonValue = GetJsonValue(node_);
-        resultIndicator = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_INDICATOR_NAME);
+        resultIndicator = GetAttrObject(jsonValue, ATTRIBUTE_INDICATOR_NAME);
         resultStr = GetAttrValue<std::string>(resultIndicator, ATTRIBUTE_INDICATOR_ICON_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 
     // Verifying attribute's 'space'  values
@@ -1019,10 +1031,10 @@ HWTEST_F(GaugeModifierTest, setIndicatorTestValidValues, TestSize.Level1)
         auto optInputValueIndicator = Converter::ArkValue<Opt_GaugeIndicatorOptions>(inputValueIndicator);
         modifier_->setIndicator(node_, &optInputValueIndicator);
         jsonValue = GetJsonValue(node_);
-        resultIndicator = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_INDICATOR_NAME);
+        resultIndicator = GetAttrObject(jsonValue, ATTRIBUTE_INDICATOR_NAME);
         resultStr = GetAttrValue<std::string>(resultIndicator, ATTRIBUTE_INDICATOR_SPACE_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -1048,7 +1060,7 @@ HWTEST_F(GaugeModifierTest, setIndicatorTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultIndicator;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_GaugeIndicatorOptions inputValueIndicator;
     Ark_GaugeIndicatorOptions initValueIndicator;
@@ -1066,10 +1078,10 @@ HWTEST_F(GaugeModifierTest, setIndicatorTestInvalidValues, TestSize.Level1)
         optInputValueIndicator = Converter::ArkValue<Opt_GaugeIndicatorOptions>(inputValueIndicator);
         modifier_->setIndicator(node_, &optInputValueIndicator);
         jsonValue = GetJsonValue(node_);
-        resultIndicator = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_INDICATOR_NAME);
+        resultIndicator = GetAttrObject(jsonValue, ATTRIBUTE_INDICATOR_NAME);
         resultStr = GetAttrValue<std::string>(resultIndicator, ATTRIBUTE_INDICATOR_ICON_NAME);
         expectedStr = ATTRIBUTE_INDICATOR_ICON_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 
     // Verifying attribute's 'space'  values
@@ -1081,10 +1093,10 @@ HWTEST_F(GaugeModifierTest, setIndicatorTestInvalidValues, TestSize.Level1)
         optInputValueIndicator = Converter::ArkValue<Opt_GaugeIndicatorOptions>(inputValueIndicator);
         modifier_->setIndicator(node_, &optInputValueIndicator);
         jsonValue = GetJsonValue(node_);
-        resultIndicator = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_INDICATOR_NAME);
+        resultIndicator = GetAttrObject(jsonValue, ATTRIBUTE_INDICATOR_NAME);
         resultStr = GetAttrValue<std::string>(resultIndicator, ATTRIBUTE_INDICATOR_SPACE_NAME);
         expectedStr = ATTRIBUTE_INDICATOR_SPACE_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 #endif // GAUGE_HAS_INDICATOR
@@ -1097,10 +1109,10 @@ HWTEST_F(GaugeModifierTest, setIndicatorTestInvalidValues, TestSize.Level1)
 HWTEST_F(GaugeModifierTest, setPrivacySensitiveTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PRIVACY_SENSITIVE_IS_PRIVACY_SENSITIVE_MODE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_PRIVACY_SENSITIVE_IS_PRIVACY_SENSITIVE_MODE_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_PRIVACY_SENSITIVE_IS_PRIVACY_SENSITIVE_MODE_DEFAULT_VALUE));
 }
 
 // Valid values for attribute 'privacySensitiveIsPrivacySensitiveMode' of method 'privacySensitive'
@@ -1118,7 +1130,7 @@ privacySensitivePrivacySensitiveIsPrivacySensitiveModeValidValues = {
 HWTEST_F(GaugeModifierTest, setPrivacySensitiveTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Opt_Boolean inputValuePrivacySensitiveIsPrivacySensitiveMode;
 
@@ -1128,7 +1140,7 @@ HWTEST_F(GaugeModifierTest, setPrivacySensitiveTestValidValues, TestSize.Level1)
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PRIVACY_SENSITIVE_IS_PRIVACY_SENSITIVE_MODE_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -1146,7 +1158,7 @@ privacySensitivePrivacySensitiveIsPrivacySensitiveModeInvalidValues = {
 HWTEST_F(GaugeModifierTest, setPrivacySensitiveTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Opt_Boolean inputValuePrivacySensitiveIsPrivacySensitiveMode;
     Opt_Boolean initValuePrivacySensitiveIsPrivacySensitiveMode;
@@ -1164,7 +1176,7 @@ HWTEST_F(GaugeModifierTest, setPrivacySensitiveTestInvalidValues, TestSize.Level
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PRIVACY_SENSITIVE_IS_PRIVACY_SENSITIVE_MODE_NAME);
         expectedStr = ATTRIBUTE_PRIVACY_SENSITIVE_IS_PRIVACY_SENSITIVE_MODE_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        EXPECT_THAT(resultStr, Eq(expectedStr)) << "Passed value is: " << std::get<0>(value);
     }
 }
 } // namespace OHOS::Ace::NG

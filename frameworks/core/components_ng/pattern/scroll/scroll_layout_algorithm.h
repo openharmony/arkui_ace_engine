@@ -16,11 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLL_SCROLL_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLL_SCROLL_LAYOUT_ALGORITHM_H
 
-#include <map>
-
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
-#include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
@@ -110,6 +107,10 @@ private:
     bool UnableOverScroll(LayoutWrapper* layoutWrapper) const;
     void OnSurfaceChanged(LayoutWrapper* layoutWrapper, float contentMainSize);
     void CalcContentOffset(LayoutWrapper* layoutWrapper);
+    OffsetF GetAlignmentPosition(const RefPtr<ScrollLayoutProperty>& layoutProperty, Axis axis,
+        TextDirection layoutDirection, const SizeF& size, const SizeF& viewPortExtent);
+    SizeF MeasureLazyChild(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& childWrapper,
+        LayoutConstraintF& childLayoutConstraint, Axis axis, const SizeF& contentSize);
 
     float crossOffset_;
     double currentOffset_ = 0.0f;
@@ -120,6 +121,7 @@ private:
     SizeF viewPort_;       // content area size (viewSize_ minus padding)
     SizeF viewPortExtent_; // size of child (scrollable area)
     SizeF viewSize_;       // size of the Scroll component
+    bool hasLazyLayoutChild_ = false;
     void UpdateScrollAlignment(Alignment& scrollAlignment);
 };
 

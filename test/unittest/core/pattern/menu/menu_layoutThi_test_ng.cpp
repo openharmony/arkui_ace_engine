@@ -19,12 +19,12 @@
 #define private public
 #define protected public
 
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/rosen/testing_canvas.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/rosen/testing_canvas.h"
 
 #include "core/common/ace_engine.h"
 #include "core/components/common/layout/constants.h"
@@ -1529,5 +1529,213 @@ HWTEST_F(MenuLayout3TestNg, Initialize003, TestSize.Level1)
     EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
     EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF());
     EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: UpdateMaxSpaceHeightByMenuMaxHeight001
+ * @tc.desc: Verify UpdateMaxSpaceHeightByMenuMaxHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout3TestNg, UpdateMaxSpaceHeightByMenuMaxHeight001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, NODE_ID, AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "menu", MenuType::MENU));
+    ASSERT_NE(frameNode, nullptr);
+
+    auto container = Container::Current();
+    frameNode->instanceId_ = container->GetInstanceId();
+    AceEngine::Get().AddContainer(container->GetInstanceId(), container);
+
+    RefPtr<MenuLayoutProperty> prop = AceType::MakeRefPtr<MenuLayoutProperty>();
+    ASSERT_NE(prop, nullptr);
+    Dimension value = Dimension(75.0, DimensionUnit::VP);
+    frameNode->SetLayoutProperty(prop);
+    auto menuProp = frameNode->GetLayoutProperty<MenuLayoutProperty>();
+    menuProp->UpdateMenuMaxHeight(value);
+    auto pattern = frameNode->GetPattern<MenuPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetPreviewMode(MenuPreviewMode::CUSTOM);
+    auto refLayoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    ASSERT_NE(layoutWrapper, nullptr);
+    LayoutConstraintF layoutConstraintF = {
+        .minSize = { ONE, ONE },
+        .maxSize = { TEN, TEN },
+        .percentReference = { FIVE, FIVE },
+        .parentIdealSize = { TWO, TWO },
+    };
+    RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutAlgorithm->lastPosition_ = std::make_optional(OffsetF(OFFSET_FIRST_NEW, OFFSET_SECOND));
+    layoutAlgorithm->holdEmbeddedMenuPosition_ = true;
+    layoutAlgorithm->UpdateConstraintHeight(layoutWrapper, layoutConstraintF);
+    EXPECT_FLOAT_EQ(layoutConstraintF.maxSize.height_, MAX_SIZE_HEIGHT);
+}
+
+/**
+ * @tc.name: UpdateMaxSpaceHeightByMenuMaxHeight002
+ * @tc.desc: Verify UpdateMaxSpaceHeightByMenuMaxHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout3TestNg, UpdateMaxSpaceHeightByMenuMaxHeight002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, NODE_ID, AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "menu", MenuType::MENU));
+    ASSERT_NE(frameNode, nullptr);
+
+    auto container = Container::Current();
+    frameNode->instanceId_ = container->GetInstanceId();
+    AceEngine::Get().AddContainer(container->GetInstanceId(), container);
+
+    RefPtr<MenuLayoutProperty> prop = AceType::MakeRefPtr<MenuLayoutProperty>();
+    ASSERT_NE(prop, nullptr);
+    Dimension value = Dimension(75.0, DimensionUnit::VP);
+    frameNode->SetLayoutProperty(prop);
+    auto menuProp = frameNode->GetLayoutProperty<MenuLayoutProperty>();
+    menuProp->UpdateMenuMaxHeight(value);
+    auto pattern = frameNode->GetPattern<MenuPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetPreviewMode(MenuPreviewMode::NONE);
+    auto refLayoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    ASSERT_NE(layoutWrapper, nullptr);
+    LayoutConstraintF layoutConstraintF = {
+        .minSize = { ONE, ONE },
+        .maxSize = { TEN, TEN },
+        .percentReference = { FIVE, FIVE },
+        .parentIdealSize = { TWO, TWO },
+    };
+    RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutAlgorithm->lastPosition_ = std::make_optional(OffsetF(OFFSET_FIRST_NEW, OFFSET_SECOND));
+    layoutAlgorithm->holdEmbeddedMenuPosition_ = true;
+    layoutAlgorithm->UpdateConstraintHeight(layoutWrapper, layoutConstraintF);
+    EXPECT_FLOAT_EQ(layoutConstraintF.maxSize.height_, ZERO);
+}
+
+/**
+ * @tc.name: UpdateMaxSpaceHeightByMenuMaxHeight003
+ * @tc.desc: Verify UpdateMaxSpaceHeightByMenuMaxHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout3TestNg, UpdateMaxSpaceHeightByMenuMaxHeight003, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, NODE_ID, AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "menu", MenuType::MENU));
+    ASSERT_NE(frameNode, nullptr);
+
+    auto container = Container::Current();
+    frameNode->instanceId_ = container->GetInstanceId();
+    AceEngine::Get().AddContainer(container->GetInstanceId(), container);
+
+    RefPtr<MenuLayoutProperty> prop = AceType::MakeRefPtr<MenuLayoutProperty>();
+    ASSERT_NE(prop, nullptr);
+    Dimension value = Dimension(75.0, DimensionUnit::VP);
+    frameNode->SetLayoutProperty(prop);
+    auto menuProp = frameNode->GetLayoutProperty<MenuLayoutProperty>();
+    menuProp->UpdateMenuMaxHeight(value);
+    auto pattern = frameNode->GetPattern<MenuPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetPreviewMode(MenuPreviewMode::IMAGE);
+    auto refLayoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    ASSERT_NE(layoutWrapper, nullptr);
+    LayoutConstraintF layoutConstraintF = {
+        .minSize = { ONE, ONE },
+        .maxSize = { TEN, TEN },
+        .percentReference = { FIVE, FIVE },
+        .parentIdealSize = { TWO, TWO },
+    };
+    RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutAlgorithm->lastPosition_ = std::make_optional(OffsetF(OFFSET_FIRST_NEW, OFFSET_SECOND));
+    layoutAlgorithm->holdEmbeddedMenuPosition_ = true;
+    layoutAlgorithm->UpdateConstraintHeight(layoutWrapper, layoutConstraintF);
+    EXPECT_FLOAT_EQ(layoutConstraintF.maxSize.height_, MAX_SIZE_HEIGHT);
+}
+
+/**
+ * @tc.name: UpdateMaxSpaceHeightByMenuMaxHeight004
+ * @tc.desc: Verify UpdateMaxSpaceHeightByMenuMaxHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout3TestNg, UpdateMaxSpaceHeightByMenuMaxHeight004, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, NODE_ID, AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "menu", MenuType::MENU));
+    ASSERT_NE(frameNode, nullptr);
+
+    auto container = Container::Current();
+    frameNode->instanceId_ = container->GetInstanceId();
+    AceEngine::Get().AddContainer(container->GetInstanceId(), container);
+
+    RefPtr<MenuLayoutProperty> prop = AceType::MakeRefPtr<MenuLayoutProperty>();
+    ASSERT_NE(prop, nullptr);
+    frameNode->SetLayoutProperty(prop);
+    auto menuProp = frameNode->GetLayoutProperty<MenuLayoutProperty>();
+    auto pattern = frameNode->GetPattern<MenuPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetPreviewMode(MenuPreviewMode::NONE);
+    auto refLayoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    ASSERT_NE(layoutWrapper, nullptr);
+    LayoutConstraintF layoutConstraintF = {
+        .minSize = { ONE, ONE },
+        .maxSize = { TEN, TEN },
+        .percentReference = { FIVE, FIVE },
+        .parentIdealSize = { TWO, TWO },
+    };
+    RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutAlgorithm->lastPosition_ = std::make_optional(OffsetF(OFFSET_FIRST_NEW, OFFSET_SECOND));
+    layoutAlgorithm->holdEmbeddedMenuPosition_ = true;
+    layoutAlgorithm->UpdateConstraintHeight(layoutWrapper, layoutConstraintF);
+    EXPECT_FLOAT_EQ(layoutConstraintF.maxSize.height_, MAX_SIZE_HEIGHT);
+}
+
+/**
+ * @tc.name: UpdateMaxSpaceHeightByMenuMaxHeight005
+ * @tc.desc: Verify UpdateMaxSpaceHeightByMenuMaxHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout3TestNg, UpdateMaxSpaceHeightByMenuMaxHeight005, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, NODE_ID, AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "menu", MenuType::MENU));
+    ASSERT_NE(frameNode, nullptr);
+
+    auto container = Container::Current();
+    frameNode->instanceId_ = container->GetInstanceId();
+    AceEngine::Get().AddContainer(container->GetInstanceId(), container);
+
+    RefPtr<MenuLayoutProperty> prop = AceType::MakeRefPtr<MenuLayoutProperty>();
+    ASSERT_NE(prop, nullptr);
+    Dimension value = Dimension(-0.2, DimensionUnit::PERCENT);
+    frameNode->SetLayoutProperty(prop);
+    auto menuProp = frameNode->GetLayoutProperty<MenuLayoutProperty>();
+    menuProp->UpdateMenuMaxHeight(value);
+    auto pattern = frameNode->GetPattern<MenuPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetPreviewMode(MenuPreviewMode::NONE);
+    auto refLayoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    ASSERT_NE(layoutWrapper, nullptr);
+    LayoutConstraintF layoutConstraintF = {
+        .minSize = { ONE, ONE },
+        .maxSize = { TEN, TEN },
+        .percentReference = { FIVE, FIVE },
+        .parentIdealSize = { TWO, TWO },
+    };
+    RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutAlgorithm->lastPosition_ = std::make_optional(OffsetF(OFFSET_FIRST_NEW, OFFSET_SECOND));
+    layoutAlgorithm->holdEmbeddedMenuPosition_ = true;
+    layoutAlgorithm->UpdateConstraintHeight(layoutWrapper, layoutConstraintF);
+    EXPECT_FLOAT_EQ(layoutConstraintF.maxSize.height_, MAX_SIZE_HEIGHT);
 }
 } // namespace OHOS::Ace::NG

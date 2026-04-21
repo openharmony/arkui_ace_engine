@@ -36,13 +36,6 @@ class ArkLogConsole {
       aceConsole.error(LogTag.ARK_COMPONENT, ...args);
   }
 }
-const arkUINativeModule = globalThis.getArkUINativeModule();
-function getUINativeModule() {
-  if (arkUINativeModule) {
-    return arkUINativeModule;
-  }
-  return arkUINativeModule;
-}
 let ModifierType;
 (function (ModifierType) {
     ModifierType[ModifierType['ORIGIN'] = 0] = 'ORIGIN';
@@ -2104,6 +2097,19 @@ class OnFocusModifier extends ModifierWithKey {
   }
 }
 OnFocusModifier.identity = Symbol('onFocus');
+class OnNeedSoftkeyboardModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnNeedSoftkeyboard(node);
+    } else {
+      getUINativeModule().common.setOnNeedSoftkeyboard(node, this.value);
+    }
+  }
+}
+OnNeedSoftkeyboardModifier.identity = Symbol('onNeedSoftkeyboard');
 class OnBlurModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -2192,7 +2198,11 @@ class OnAreaChangeModifier extends ModifierWithKey {
     if (reset) {
       getUINativeModule().common.resetOnAreaChange(node);
     } else {
-      getUINativeModule().common.setOnAreaChange(node, this.value);
+      if (!this.value.hasOptionsArg) {
+        getUINativeModule().common.setOnAreaChange(node, this.value.event);
+      } else {
+        getUINativeModule().common.setOnAreaChangeWithInterval(node, this.value.event, this.value.expectedUpdateInterval);
+      }
     }
   }
 }
@@ -2236,6 +2246,19 @@ class OnTouchTestDoneModifier extends ModifierWithKey {
   }
 }
 OnTouchTestDoneModifier.identity = Symbol('onOnTouchTestDone');
+class OnGestureCollectInterceptModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnGestureCollectIntercept(node);
+    } else {
+      getUINativeModule().common.setOnGestureCollectIntercept(node, this.value);
+    }
+  }
+}
+OnGestureCollectInterceptModifier.identity = Symbol('onGestureCollectIntercept');
 class ShouldBuiltInRecognizerParallelWithModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -4077,6 +4100,11 @@ class ArkComponent {
     modifierWithKey(this._modifiersWithKeys, OnTouchTestDoneModifier.identity, OnTouchTestDoneModifier, callback);
     return this;
   }
+  onGestureCollectIntercept(callback) {
+    this._onGestureCollectIntercept = callback;
+    modifierWithKey(this._modifiersWithKeys, OnGestureCollectInterceptModifier.identity, OnGestureCollectInterceptModifier, callback);
+    return this;
+  }
   shouldBuiltInRecognizerParallelWith(callback) {
     this._shouldBuiltInRecognizerParallelWith = callback;
     modifierWithKey(this._modifiersWithKeys, ShouldBuiltInRecognizerParallelWithModifier.identity, ShouldBuiltInRecognizerParallelWithModifier, callback);
@@ -4702,6 +4730,10 @@ class ArkComponent {
     modifierWithKey(this._modifiersWithKeys, OnFocusModifier.identity, OnFocusModifier, event);
     return this;
   }
+  onNeedSoftkeyboard(onNeedSoftkeyboardCallback) {
+    modifierWithKey(this._modifiersWithKeys, OnNeedSoftkeyboardModifier.identity, OnNeedSoftkeyboardModifier, onNeedSoftkeyboardCallback);
+    return this;
+  }
   onBlur(event) {
     modifierWithKey(this._modifiersWithKeys, OnBlurModifier.identity, OnBlurModifier, event);
     return this;
@@ -4945,9 +4977,10 @@ class ArkComponent {
     modifierWithKey(this._modifiersWithKeys, OnDetachModifier.identity, OnDetachModifier, event);
     return this;
   }
-  onAreaChange(event) {
+  onAreaChange(event, options) {
     this._onAreaChange = event;
-    modifierWithKey(this._modifiersWithKeys, OnAreaChangeModifier.identity, OnAreaChangeModifier, event);
+    modifierWithKey(this._modifiersWithKeys, OnAreaChangeModifier.identity, OnAreaChangeModifier,
+      new ArkOnAreaChange(event, options?.expectedUpdateInterval, arguments.length > 1));
     return this;
   }
   visibility(value) {
@@ -5658,6 +5691,7 @@ class ArkComponent {
     return this;
   }
 }
+globalThis.__ArkComponent__ = ArkComponent;
 const isNull = (val) => typeof val === 'object' && val === null;
 const isArray = (val) => Array.isArray(val);
 const isDate = (val) => val instanceof Date;
@@ -7315,6 +7349,21 @@ class BackToTopModifier extends ModifierWithKey {
 }
 BackToTopModifier.identity = Symbol('backToTop');
 
+class EnableScrollWithMouseModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scrollable.resetEnableScrollWithMouse(node);
+    }
+    else {
+      getUINativeModule().scrollable.setEnableScrollWithMouse(node, this.value);
+    }
+  }
+}
+EnableScrollWithMouseModifier.identity = Symbol('enableScrollWithMouse');
+
 class ScrollBarMarginModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -7328,6 +7377,20 @@ class ScrollBarMarginModifier extends ModifierWithKey {
   }
 }
 ScrollBarMarginModifier.identity = Symbol('scrollBarMargin');
+
+class AutoAdjustScrollBarMarginModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scrollable.resetAutoAdjustScrollBarMargin(node);
+    } else {
+      getUINativeModule().scrollable.setAutoAdjustScrollBarMargin(node, this.value);
+    }
+  }
+}
+AutoAdjustScrollBarMarginModifier.identity = Symbol('autoAdjustScrollBarMargin');
 
 class OnWillStopDraggingModifier extends ModifierWithKey {
   constructor(value) {
@@ -7469,8 +7532,16 @@ class ArkScrollable extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, BackToTopModifier.identity, BackToTopModifier, value);
     return this;
   }
+  enableScrollWithMouse(value) {
+    modifierWithKey(this._modifiersWithKeys, EnableScrollWithMouseModifier.identity, EnableScrollWithMouseModifier, value);
+    return this;
+  }
   scrollBarMargin(value) {
     modifierWithKey(this._modifiersWithKeys, ScrollBarMarginModifier.identity, ScrollBarMarginModifier, value);
+    return this;
+  }
+  autoAdjustScrollBarMargin(value) {
+    modifierWithKey(this._modifiersWithKeys, AutoAdjustScrollBarMarginModifier.identity, AutoAdjustScrollBarMarginModifier, value);
     return this;
   }
   onWillStopDragging(value) {
@@ -7705,20 +7776,22 @@ class GridLayoutOptionsModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    let _a, _b, _c, _d;
+    let _a, _b, _c, _d, _e, _f;
     if (reset) {
-      getUINativeModule().grid.setGridLayoutOptions(node, undefined, undefined, undefined, undefined, undefined);
+      getUINativeModule().grid.setGridLayoutOptions(node, undefined, undefined, undefined, undefined, undefined, undefined, undefined);
     }
     else {
       getUINativeModule().grid.setGridLayoutOptions(node, isArray(this.value.regularSize) ? this.value.regularSize : undefined,
         isArray((_a = this.value) === null || _a === void 0 ? void 0 : _a.irregularIndexes) ? this.value.irregularIndexes : undefined,
         isArray((_b = this.value) === null || _b === void 0 ? void 0 : _b.irregularIndexes) ? this.value.irregularIndexes.length : undefined,
         isFunction((_c = this.value) === null || _c === void 0 ? void 0 : _c.onGetIrregularSizeByIndex) ? this.value.onGetIrregularSizeByIndex : undefined,
-        isFunction((_d = this.value) === null || _d === void 0 ? void 0 : _d.onGetRectByIndex) ? this.value.onGetRectByIndex : undefined);
+        isFunction((_d = this.value) === null || _d === void 0 ? void 0 : _d.onGetRectByIndex) ? this.value.onGetRectByIndex : undefined,
+        isFunction((_e = this.value) === null || _e === void 0 ? void 0 : _e.onGetStartIndexByOffset) ? this.value.onGetStartIndexByOffset : undefined,
+        isFunction((_f = this.value) === null || _f === void 0 ? void 0 : _f.onGetStartIndexByIndex) ? this.value.onGetStartIndexByIndex : undefined);
     }
   }
   checkObjectDiff() {
-    let _a, _b, _c, _d, _e, _f, _g, _h;
+    let _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l;
     return !isBaseOrResourceEqual((_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.regularSize,
       (_b = this.value) === null || _b === void 0 ? void 0 : _b.regularSize) ||
       !isBaseOrResourceEqual((_c = this.stageValue) === null || _c === void 0 ? void 0 : _c.irregularIndexes,
@@ -7726,7 +7799,11 @@ class GridLayoutOptionsModifier extends ModifierWithKey {
       !isBaseOrResourceEqual((_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.onGetIrregularSizeByIndex,
         (_f = this.value) === null || _f === void 0 ? void 0 : _f.onGetIrregularSizeByIndex) ||
       !isBaseOrResourceEqual((_g = this.stageValue) === null || _g === void 0 ? void 0 : _g.onGetRectByIndex,
-        (_h = this.value) === null || _h === void 0 ? void 0 : _h.onGetRectByIndex);
+        (_h = this.value) === null || _h === void 0 ? void 0 : _h.onGetRectByIndex) ||
+      !isBaseOrResourceEqual((_i = this.stageValue) === null || _i === void 0 ? void 0 : _i.onGetStartIndexByOffset,
+        (_j = this.value) === null || _j === void 0 ? void 0 : _j.onGetStartIndexByOffset) ||
+      !isBaseOrResourceEqual((_k = this.stageValue) === null || _k === void 0 ? void 0 : _k.onGetStartIndexByIndex,
+        (_l = this.value) === null || _l === void 0 ? void 0 : _l.onGetStartIndexByIndex);
   }
 }
 GridLayoutOptionsModifier.identity = Symbol('gridLayoutOptions');
@@ -9960,19 +10037,6 @@ if (globalThis.ImageSpan !== undefined) {
   };
 }
 
-// @ts-ignore
-if (globalThis.PatternLock === undefined) {
-  globalThis.PatternLock = {
-    create: function(value) {
-      getUINativeModule().loadNativeModule('PatternLock');
-      let module = globalThis.requireNapi('arkui.components.arkpatternlock');
-      module.exportView();
-      getUINativeModule().patternlock.create(value);
-    },
-    name: 'JSPatternLock'
-  }
-}
-
 /// <reference path='./import.ts' />
 class RowAlignItemsModifier extends ModifierWithKey {
   constructor(value) {
@@ -10480,6 +10544,19 @@ class SpanFontWeightModifier extends ModifierWithKey {
   }
 }
 SpanFontWeightModifier.identity = Symbol('spanfontweight');
+class SpanFontVariationsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().span.resetFontVariations(node);
+    } else {
+      getUINativeModule().span.setFontVariations(node, this.value);
+    }
+  }
+}
+SpanFontVariationsModifier.identity = Symbol('spanFontVariations');
 class SpanInputModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -10717,6 +10794,9 @@ class ArkSpanComponent {
   onFocus(event) {
     throw new BusinessError(100201, 'onFocus function not supported in attributeModifier scenario.');
   }
+  onNeedSoftkeyboard(onNeedSoftkeyboardCallback) {
+    throw new Error('Method not implemented.');
+  }
   onBlur(event) {
     throw new BusinessError(100201, 'onBlur function not supported in attributeModifier scenario.');
   }
@@ -10819,7 +10899,7 @@ class ArkSpanComponent {
   onDetach(event) {
     throw new BusinessError(100201, 'onDetach function not supported in attributeModifier scenario.');
   }
-  onAreaChange(event) {
+  onAreaChange(event, options) {
     throw new BusinessError(100201, 'onAreaChange function not supported in attributeModifier scenario.');
   }
   visibility(value) {
@@ -11039,8 +11119,12 @@ class ArkSpanComponent {
   font(value, fontConfigs) {
     let arkFontWeight = new ArkFontWeight();
     arkFontWeight.value = (value === null || value === void 0 ? void 0 : value.weight);
-    arkFontWeight.enableVariableFontWeight = fontConfigs?.fontWeightConfigs?.enableVariableFontWeight;
-    arkFontWeight.enableDeviceFontWeightCategory = fontConfigs?.fontWeightConfigs?.enableDeviceFontWeightCategory;
+    if (fontConfigs !== null && fontConfigs !== undefined &&
+        fontConfigs.fontWeightConfigs !== null && fontConfigs.fontWeightConfigs !== undefined &&
+        'fontWeightConfigs' in fontConfigs) {
+      arkFontWeight.enableVariableFontWeight = fontConfigs.fontWeightConfigs?.enableVariableFontWeight ?? false;
+      arkFontWeight.enableDeviceFontWeightCategory = fontConfigs.fontWeightConfigs?.enableDeviceFontWeightCategory ?? true;
+    }
     modifierWithKey(this._modifiersWithKeys, SpanFontSizeModifier.identity, SpanFontSizeModifier,
       value === null || value === void 0 ? void 0 : value.size);
     modifierWithKey(this._modifiersWithKeys, SpanFontWeightModifier.identity, SpanFontWeightModifier,
@@ -11070,8 +11154,10 @@ class ArkSpanComponent {
   fontWeight(value, fontWeightConfigs) {
     let arkFontWeight = new ArkFontWeight();
     arkFontWeight.value = value;
-    arkFontWeight.enableVariableFontWeight = fontWeightConfigs?.enableVariableFontWeight;
-    arkFontWeight.enableDeviceFontWeightCategory = fontWeightConfigs?.enableDeviceFontWeightCategory;
+    if (fontWeightConfigs !== null && fontWeightConfigs !== undefined && typeof fontWeightConfigs === 'object') {
+      arkFontWeight.enableVariableFontWeight = fontWeightConfigs.enableVariableFontWeight ?? false;
+      arkFontWeight.enableDeviceFontWeightCategory = fontWeightConfigs.enableDeviceFontWeightCategory ?? true;
+    }
     modifierWithKey(this._modifiersWithKeys, SpanFontWeightModifier.identity, SpanFontWeightModifier, arkFontWeight);
     return this;
   }
@@ -11097,6 +11183,10 @@ class ArkSpanComponent {
   }
   textShadow(value) {
     modifierWithKey(this._modifiersWithKeys, SpanTextShadowModifier.identity, SpanTextShadowModifier, value);
+    return this;
+  }
+  fontVariations(value) {
+    modifierWithKey(this._modifiersWithKeys, SpanFontVariationsModifier.identity, SpanFontVariationsModifier, value);
     return this;
   }
 }
@@ -11132,6 +11222,10 @@ class ArkStackComponent extends ArkComponent {
   }
   pointLight(value) {
     modifierWithKey(this._modifiersWithKeys, StackPointLightModifier.identity, StackPointLightModifier, value);
+    return this;
+  }
+  syncLoad(value) {
+    modifierWithKey(this._modifiersWithKeys, StackSyncLoadModifier.identity, StackSyncLoadModifier, value);
     return this;
   }
 }
@@ -11191,6 +11285,19 @@ class StackAlignContentModifier extends ModifierWithKey {
   }
 }
 StackAlignContentModifier.identity = Symbol('stackAlignContent');
+class StackSyncLoadModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().stack.resetSyncLoad(node);
+    } else {
+      getUINativeModule().stack.setSyncLoad(node, this.value);
+    }
+  }
+}
+StackSyncLoadModifier.identity = Symbol('stackSyncLoad');
 // @ts-ignore
 if (globalThis.Stack !== undefined) {
   globalThis.Stack.attributeModifier = function (modifier) {
@@ -11430,6 +11537,23 @@ class TextFontFeatureModifier extends ModifierWithKey {
   }
 }
 TextFontFeatureModifier.identity = Symbol('textFontFeature');
+
+class TextFontVariationsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetFontVariations(node);
+    } else {
+      getUINativeModule().text.setFontVariations(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextFontVariationsModifier.identity = Symbol('textFontVariations');
 
 class TextEllipsisModeModifier extends ModifierWithKey {
   constructor(value) {
@@ -11709,6 +11833,24 @@ class TextLineSpacingModifier extends ModifierWithKey {
   }
 }
 TextLineSpacingModifier.identity = Symbol('textLineSpacing');
+
+class TextOrphanCharOptimizationModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetOrphanCharOptimization(node);
+    }
+    else {
+      getUINativeModule().text.setOrphanCharOptimization(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextOrphanCharOptimizationModifier.identity = Symbol('textOrphanCharOptimization');
 
 class TextCompressLeadingPunctuationModifier extends ModifierWithKey {
   constructor(value) {
@@ -12070,6 +12212,19 @@ class TextSelectDetectorEnableModifier extends ModifierWithKey {
   }
 }
 TextSelectDetectorEnableModifier.identity = Symbol('textSelectDetectorEnable');
+class TextOnWillCopyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetOnWillCopy(node);
+    } else {
+      getUINativeModule().text.setOnWillCopy(node, this.value);
+    }
+  }
+}
+TextOnWillCopyModifier.identity = Symbol('textOnWillCopy');
 class TextOnCopyModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -12519,6 +12674,11 @@ class ArkTextComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextLineSpacingModifier.identity, TextLineSpacingModifier, arkLineSpacing);
     return this;
   }
+  orphanCharOptimization(value) {
+    modifierWithKey(this._modifiersWithKeys, TextOrphanCharOptimizationModifier.identity,
+      TextOrphanCharOptimizationModifier, value);
+    return this;
+  }
   compressLeadingPunctuation(value) {
     modifierWithKey(this._modifiersWithKeys, TextCompressLeadingPunctuationModifier.identity,
       TextCompressLeadingPunctuationModifier, value);
@@ -12572,6 +12732,15 @@ class ArkTextComponent extends ArkComponent {
   }
   fontFeature(value) {
     modifierWithKey(this._modifiersWithKeys, TextFontFeatureModifier.identity, TextFontFeatureModifier, value);
+    return this;
+  }
+  fontVariations(value) {
+    modifierWithKey(this._modifiersWithKeys, TextFontVariationsModifier.identity, TextFontVariationsModifier, value);
+    return this;
+  }
+  onWillCopy(callback) {
+    modifierWithKey(this._modifiersWithKeys, TextOnWillCopyModifier.identity,
+      TextOnWillCopyModifier, callback);
     return this;
   }
   onCopy(callback) {
@@ -13421,6 +13590,19 @@ class TextAreaOnEditChangeModifier extends ModifierWithKey {
   }
 }
 TextAreaOnEditChangeModifier.identity = Symbol('textAreaOnEditChange');
+class TextAreaOnWillCopyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetOnWillCopy(node);
+    } else {
+      getUINativeModule().textArea.setOnWillCopy(node, this.value);
+    }
+  }
+}
+TextAreaOnWillCopyModifier.identity = Symbol('textAreaOnWillCopy');
 class TextAreaOnCopyModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -13434,6 +13616,19 @@ class TextAreaOnCopyModifier extends ModifierWithKey {
   }
 }
 TextAreaOnCopyModifier.identity = Symbol('textAreaOnCopy');
+class TextAreaOnWillCutModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetOnWillCut(node);
+    } else {
+      getUINativeModule().textArea.setOnWillCut(node, this.value);
+    }
+  }
+}
+TextAreaOnWillCutModifier.identity = Symbol('textAreaOnWillCut');
 class TextAreaOnCutModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -14058,6 +14253,23 @@ class TextAreaEnableAutoSpacingModifier extends ModifierWithKey {
 }
 TextAreaEnableAutoSpacingModifier.identity = Symbol('textAreaEnableAutoSpacing');
 
+class TextAreaOrphanCharOptimizationModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetOrphanCharOptimization(node);
+    } else {
+      getUINativeModule().textArea.setOrphanCharOptimization(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextAreaOrphanCharOptimizationModifier.identity = Symbol('textAreaOrphanCharOptimization');
+
 class TextAreaCompressLeadingPunctuationModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -14146,6 +14358,22 @@ class TextAreaSelectDetectorEnableModifier extends ModifierWithKey {
   }
 }
 TextAreaSelectDetectorEnableModifier.identity = Symbol('textAreaSelectDetectorEnable');
+class TextAreaHorizontalScrollingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetHorizontalScrolling(node);
+    } else {
+      getUINativeModule().textArea.setHorizontalScrolling(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextAreaHorizontalScrollingModifier.identity = Symbol('textAreaHorizontalScrolling');
 class TextAreaOnWillAttachIMEModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -14202,6 +14430,10 @@ class ArkTextAreaComponent extends ArkComponent {
   }
   enableSelectedDataDetector(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaSelectDetectorEnableModifier.identity, TextAreaSelectDetectorEnableModifier, value);
+    return this;
+  }
+  horizontalScrolling(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaHorizontalScrollingModifier.identity, TextAreaHorizontalScrollingModifier, value);
     return this;
   }
   allowChildCount() {
@@ -14280,8 +14512,16 @@ class ArkTextAreaComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextAreaOnEditChangeModifier.identity, TextAreaOnEditChangeModifier, callback);
     return this;
   }
+  onWillCopy(callback) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnWillCopyModifier.identity, TextAreaOnWillCopyModifier, callback);
+    return this;
+  }
   onCopy(callback) {
     modifierWithKey(this._modifiersWithKeys, TextAreaOnCopyModifier.identity, TextAreaOnCopyModifier, callback);
+    return this;
+  }
+  onWillCut(callback) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnWillCutModifier.identity, TextAreaOnWillCutModifier, callback);
     return this;
   }
   onCut(callback) {
@@ -14584,6 +14824,11 @@ class ArkTextAreaComponent extends ArkComponent {
   }
   enableAutoSpacing(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaEnableAutoSpacingModifier.identity, TextAreaEnableAutoSpacingModifier, value);
+    return this;
+  }
+  orphanCharOptimization(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaOrphanCharOptimizationModifier.identity,
+      TextAreaOrphanCharOptimizationModifier, value);
     return this;
   }
   compressLeadingPunctuation(value) {
@@ -15597,6 +15842,19 @@ class TextInputOnContentScrollModifier extends ModifierWithKey {
   }
 }
 TextInputOnContentScrollModifier.identity = Symbol('textInputOnContentScroll');
+class TextInputOnWillCopyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetOnWillCopy(node);
+    } else {
+      getUINativeModule().textInput.setOnWillCopy(node, this.value);
+    }
+  }
+}
+TextInputOnWillCopyModifier.identity = Symbol('textInputOnWillCopy');
 class TextInputOnCopyModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -15610,6 +15868,19 @@ class TextInputOnCopyModifier extends ModifierWithKey {
   }
 }
 TextInputOnCopyModifier.identity = Symbol('textInputOnCopy');
+class TextInputOnWillCutModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetOnWillCut(node);
+    } else {
+      getUINativeModule().textInput.setOnWillCut(node, this.value);
+    }
+  }
+}
+TextInputOnWillCutModifier.identity = Symbol('textInputOnWillCut');
 class TextInputOnCutModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -16206,6 +16477,23 @@ class TextInputEnableAutoSpacingModifier extends ModifierWithKey {
 }
 TextInputEnableAutoSpacingModifier.identity = Symbol('textInputEnableAutoSpacing');
 
+class TextInputOrphanCharOptimizationModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetOrphanCharOptimization(node);
+    } else {
+      getUINativeModule().textInput.setOrphanCharOptimization(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextInputOrphanCharOptimizationModifier.identity = Symbol('textInputOrphanCharOptimization');
+
 class TextInputCompressLeadingPunctuationModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -16480,8 +16768,16 @@ class ArkTextInputComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextInputFilterModifier.identity, TextInputFilterModifier, arkValue);
     return this;
   }
+  onWillCopy(callback) {
+    modifierWithKey(this._modifiersWithKeys, TextInputOnWillCopyModifier.identity, TextInputOnWillCopyModifier, callback);
+    return this;
+  }
   onCopy(callback) {
     modifierWithKey(this._modifiersWithKeys, TextInputOnCopyModifier.identity, TextInputOnCopyModifier, callback);
+    return this;
+  }
+  onWillCut(callback) {
+    modifierWithKey(this._modifiersWithKeys, TextInputOnWillCutModifier.identity, TextInputOnWillCutModifier, callback);
     return this;
   }
   onCut(callback) {
@@ -16780,6 +17076,11 @@ class ArkTextInputComponent extends ArkComponent {
   }
   enableAutoSpacing(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputEnableAutoSpacingModifier.identity, TextInputEnableAutoSpacingModifier, value);
+    return this;
+  }
+  orphanCharOptimization(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputOrphanCharOptimizationModifier.identity,
+      TextInputOrphanCharOptimizationModifier, value);
     return this;
   }
   compressLeadingPunctuation(value) {
@@ -17633,6 +17934,17 @@ class ArkOnVisibleAreaChange {
     return this.ratios === another.ratios && this.event === another.event && this.measureFromViewport === another.measureFromViewport;
   }
 }
+class ArkOnAreaChange {
+  constructor(event, expectedUpdateInterval, hasOptionsArg = false) {
+    this.event = event;
+    this.expectedUpdateInterval = expectedUpdateInterval;
+    this.hasOptionsArg = hasOptionsArg;
+  }
+  isEqual(another) {
+    return this.event === another.event && this.expectedUpdateInterval === another.expectedUpdateInterval &&
+      this.hasOptionsArg === another.hasOptionsArg;
+  }
+}
 
 class ArkOnVisibleAreaApproximateChange {
   constructor(ratios, event, expectedUpdateInterval, measureFromViewport) {
@@ -18137,6 +18449,15 @@ class ArkAlignStyle {
     return (this.indexerAlign === another.indexerAlign && this.offset === another.offset);
   }
 }
+class ArkEnableScrollDirectionalLock {
+  constructor() {
+    this.value = undefined;
+    this.type = undefined;
+  }
+  isEqual(another) {
+    return (this.value === another.value && this.type === another.type);
+  }
+}
 class ArkNestedScrollOptions {
   constructor() {
     this.scrollForward = undefined;
@@ -18348,10 +18669,10 @@ class ArkDisplayCount {
 class ArkSwiperCachedCount {
   constructor() {
     this.value = undefined;
-    this.isShown = undefined;
+    this.options = undefined;
   }
   isEqual(another) {
-    return this.value === another.value && this.isShown === another.isShown;
+    return this.value === another.value && this.options === another.options;
   }
 }
 
@@ -20666,11 +20987,15 @@ class ToggleSwitchStyleModifier extends ModifierWithKey {
         }
     }
     checkObjectDiff() {
+        if (isUndefined(this.stageValue.pointRadius) || isUndefined(this.stageValue.unselectedColor) ||
+            isUndefined(this.stageValue.pointColor) || isUndefined(this.stageValue.trackBorderRadius)) {
+                return true;
+            }
         if (!isResource(this.stageValue) && !isResource(this.value)) {
-            return !(this.stageValue.pointRadius === this.value.pointRadius &&
-                this.stageValue.unselectedColor === this.value.unselectedColor &&
-                this.stageValue.pointColor === this.value.pointColor &&
-                this.stageValue.trackBorderRadius === this.value.trackBorderRadius);
+            return !isBaseOrResourceEqual(this.stageValue.pointRadius, this.value.pointRadius) ||
+                !isBaseOrResourceEqual(this.stageValue.unselectedColor, this.value.unselectedColor) ||
+                !isBaseOrResourceEqual(this.stageValue.pointColor, this.value.pointColor) ||
+                !isBaseOrResourceEqual(this.stageValue.trackBorderRadius, this.value.trackBorderRadius);
         }
         else {
             return true;
@@ -21772,19 +22097,7 @@ class TextpickerDefaultTextStyleModifier extends ModifierWithKey {
       }
   }
   checkObjectDiff() {
-      var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z;
-      if (!(((_b = (_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.font) === null || _b === void 0 ? void 0 : _b.weight) === ((_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.weight) &&
-          ((_f = (_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.font) === null || _f === void 0 ? void 0 : _f.style) === ((_h = (_g = this.value) === null || _g === void 0 ? void 0 : _g.font) === null || _h === void 0 ? void 0 : _h.style) &&
-          ((_j = this.stageValue) === null || _j === void 0 ? void 0 : _j.overflow) === ((_k = this.value) === null || _k === void 0 ? void 0 : _k.overflow))) {
-          return true;
-      }
-      else {
-          return !isBaseOrResourceEqual((_l = this.stageValue) === null || _l === void 0 ? void 0 : _l.color, (_m = this.value) === null || _m === void 0 ? void 0 : _m.color) ||
-              !isBaseOrResourceEqual((_p = (_o = this.stageValue) === null || _o === void 0 ? void 0 : _o.font) === null || _p === void 0 ? void 0 : _p.size, (_r = (_q = this.value) === null || _q === void 0 ? void 0 : _q.font) === null || _r === void 0 ? void 0 : _r.size) ||
-              !isBaseOrResourceEqual((_t = (_s = this.stageValue) === null || _s === void 0 ? void 0 : _s.font) === null || _t === void 0 ? void 0 : _t.family, (_v = (_u = this.value) === null || _u === void 0 ? void 0 : _u.font) === null || _v === void 0 ? void 0 : _v.family) ||
-              !isBaseOrResourceEqual((_w = this.stageValue) === null || _w === void 0 ? void 0 : _w.minFontSize, (_x = this.value) === null || _x === void 0 ? void 0 : _x.minFontSize) ||
-              !isBaseOrResourceEqual((_y = this.stageValue) === null || _y === void 0 ? void 0 : _y.maxFontSize, (_z = this.value) === null || _z === void 0 ? void 0 : _z.maxFontSize);
-      }
+      return true;
   }
 }
 TextpickerDefaultTextStyleModifier.identity = Symbol('textpickerDefaultTextStyle');
@@ -21802,19 +22115,7 @@ class TextpickerTextStyleModifier extends ModifierWithKey {
       }
   }
   checkObjectDiff() {
-      var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z;
-      if (!(((_b = (_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.font) === null || _b === void 0 ? void 0 : _b.weight) === ((_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.weight) &&
-          ((_f = (_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.font) === null || _f === void 0 ? void 0 : _f.style) === ((_h = (_g = this.value) === null || _g === void 0 ? void 0 : _g.font) === null || _h === void 0 ? void 0 : _h.style) &&
-          ((_j = this.stageValue) === null || _j === void 0 ? void 0 : _j.overflow) === ((_k = this.value) === null || _k === void 0 ? void 0 : _k.overflow))) {
-          return true;
-      }
-      else {
-          return !isBaseOrResourceEqual((_l = this.stageValue) === null || _l === void 0 ? void 0 : _l.color, (_m = this.value) === null || _m === void 0 ? void 0 : _m.color) ||
-              !isBaseOrResourceEqual((_p = (_o = this.stageValue) === null || _o === void 0 ? void 0 : _o.font) === null || _p === void 0 ? void 0 : _p.size, (_r = (_q = this.value) === null || _q === void 0 ? void 0 : _q.font) === null || _r === void 0 ? void 0 : _r.size) ||
-              !isBaseOrResourceEqual((_t = (_s = this.stageValue) === null || _s === void 0 ? void 0 : _s.font) === null || _t === void 0 ? void 0 : _t.family, (_v = (_u = this.value) === null || _u === void 0 ? void 0 : _u.font) === null || _v === void 0 ? void 0 : _v.family) ||
-              !isBaseOrResourceEqual((_w = this.stageValue) === null || _w === void 0 ? void 0 : _w.minFontSize, (_x = this.value) === null || _x === void 0 ? void 0 : _x.minFontSize) ||
-              !isBaseOrResourceEqual((_y = this.stageValue) === null || _y === void 0 ? void 0 : _y.maxFontSize, (_z = this.value) === null || _z === void 0 ? void 0 : _z.maxFontSize);
-      }
+      return true;
   }
 }
 TextpickerTextStyleModifier.identity = Symbol('textpickerTextStyle');
@@ -21832,19 +22133,7 @@ class TextpickerSelectedTextStyleModifier extends ModifierWithKey {
       }
   }
   checkObjectDiff() {
-      var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z;
-      if (!(((_b = (_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.font) === null || _b === void 0 ? void 0 : _b.weight) === ((_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.weight) &&
-          ((_f = (_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.font) === null || _f === void 0 ? void 0 : _f.style) === ((_h = (_g = this.value) === null || _g === void 0 ? void 0 : _g.font) === null || _h === void 0 ? void 0 : _h.style) &&
-          ((_j = this.stageValue) === null || _j === void 0 ? void 0 : _j.overflow) === ((_k = this.value) === null || _k === void 0 ? void 0 : _k.overflow))) {
-          return true;
-      }
-      else {
-          return !isBaseOrResourceEqual((_l = this.stageValue) === null || _l === void 0 ? void 0 : _l.color, (_m = this.value) === null || _m === void 0 ? void 0 : _m.color) ||
-              !isBaseOrResourceEqual((_p = (_o = this.stageValue) === null || _o === void 0 ? void 0 : _o.font) === null || _p === void 0 ? void 0 : _p.size, (_r = (_q = this.value) === null || _q === void 0 ? void 0 : _q.font) === null || _r === void 0 ? void 0 : _r.size) ||
-              !isBaseOrResourceEqual((_t = (_s = this.stageValue) === null || _s === void 0 ? void 0 : _s.font) === null || _t === void 0 ? void 0 : _t.family, (_v = (_u = this.value) === null || _u === void 0 ? void 0 : _u.font) === null || _v === void 0 ? void 0 : _v.family) ||
-              !isBaseOrResourceEqual((_w = this.stageValue) === null || _w === void 0 ? void 0 : _w.minFontSize, (_x = this.value) === null || _x === void 0 ? void 0 : _x.minFontSize) ||
-              !isBaseOrResourceEqual((_y = this.stageValue) === null || _y === void 0 ? void 0 : _y.maxFontSize, (_z = this.value) === null || _z === void 0 ? void 0 : _z.maxFontSize);
-      }
+      return true;
   }
 }
 TextpickerSelectedTextStyleModifier.identity = Symbol('textpickerSelectedTextStyle');
@@ -21862,19 +22151,7 @@ class TextpickerDisappearTextStyleModifier extends ModifierWithKey {
       }
   }
   checkObjectDiff() {
-      var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z;
-      if (!(((_b = (_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.font) === null || _b === void 0 ? void 0 : _b.weight) === ((_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.weight) &&
-          ((_f = (_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.font) === null || _f === void 0 ? void 0 : _f.style) === ((_h = (_g = this.value) === null || _g === void 0 ? void 0 : _g.font) === null || _h === void 0 ? void 0 : _h.style) &&
-          ((_j = this.stageValue) === null || _j === void 0 ? void 0 : _j.overflow) === ((_k = this.value) === null || _k === void 0 ? void 0 : _k.overflow))) {
-          return true;
-      }
-      else {
-          return !isBaseOrResourceEqual((_l = this.stageValue) === null || _l === void 0 ? void 0 : _l.color, (_m = this.value) === null || _m === void 0 ? void 0 : _m.color) ||
-              !isBaseOrResourceEqual((_p = (_o = this.stageValue) === null || _o === void 0 ? void 0 : _o.font) === null || _p === void 0 ? void 0 : _p.size, (_r = (_q = this.value) === null || _q === void 0 ? void 0 : _q.font) === null || _r === void 0 ? void 0 : _r.size) ||
-              !isBaseOrResourceEqual((_t = (_s = this.stageValue) === null || _s === void 0 ? void 0 : _s.font) === null || _t === void 0 ? void 0 : _t.family, (_v = (_u = this.value) === null || _u === void 0 ? void 0 : _u.font) === null || _v === void 0 ? void 0 : _v.family) ||
-              !isBaseOrResourceEqual((_w = this.stageValue) === null || _w === void 0 ? void 0 : _w.minFontSize, (_x = this.value) === null || _x === void 0 ? void 0 : _x.minFontSize) ||
-              !isBaseOrResourceEqual((_y = this.stageValue) === null || _y === void 0 ? void 0 : _y.maxFontSize, (_z = this.value) === null || _z === void 0 ? void 0 : _z.maxFontSize);
-      }
+      return true;
   }
 }
 TextpickerDisappearTextStyleModifier.identity = Symbol('textpickerDisappearTextStyle');
@@ -22717,17 +22994,7 @@ if (globalThis.NavDestination !== undefined) {
     });
   };
 }
-// @ts-ignore
-if (globalThis.Counter === undefined) {
-  globalThis.Counter = {
-    create: function() {
-      getUINativeModule().loadNativeModule("Counter");
-      let module = globalThis.requireNapi('arkui.components.arkcounter');
-      module.exportView();
-      getUINativeModule().counter.create();
-    }
-  }
-}
+
 /// <reference path='./import.ts' />
 class ArkPanelComponent extends ArkComponent {
   constructor(nativePtr, classType) {
@@ -23928,22 +24195,7 @@ class DatePickerTextStyleModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t;
-    if (!(((_b = (_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.font) === null || _b === void 0 ? void 0 : _b.weight) ===
-      ((_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.weight) &&
-      ((_f = (_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.font) === null || _f === void 0 ? void 0 : _f.style) ===
-      ((_h = (_g = this.value) === null || _g === void 0 ? void 0 : _g.font) === null || _h === void 0 ? void 0 : _h.style))) {
-      return true;
-    }
-    else {
-      return !isBaseOrResourceEqual((_j = this.stageValue) === null || _j === void 0 ? void 0 : _j.color, (_k = this.value) === null ||
-      _k === void 0 ? void 0 : _k.color) ||
-        !isBaseOrResourceEqual((_m = (_l = this.stageValue) === null || _l === void 0 ? void 0 : _l.font) === null ||
-        _m === void 0 ? void 0 : _m.size, (_p = (_o = this.value) === null || _o === void 0 ? void 0 : _o.font) === null || _p === void 0 ? void 0 : _p.size) ||
-        !isBaseOrResourceEqual((_r = (_q = this.stageValue) === null || _q === void 0 ? void 0 : _q.font) === null ||
-        _r === void 0 ? void 0 : _r.family, (_t = (_s = this.value) === null || _s === void 0 ? void 0 : _s.font) === null ||
-        _t === void 0 ? void 0 : _t.family);
-    }
+    return true;
   }
 }
 DatePickerTextStyleModifier.identity = Symbol('textStyle');
@@ -23970,23 +24222,7 @@ class DatePickerSelectedTextStyleModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t;
-    if (!(((_b = (_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.font) === null || _b === void 0 ? void 0 : _b.weight) ===
-    ((_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.weight) &&
-      ((_f = (_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.font) === null || _f === void 0 ? void 0 : _f.style) ===
-      ((_h = (_g = this.value) === null || _g === void 0 ? void 0 : _g.font) === null || _h === void 0 ? void 0 : _h.style))) {
-      return true;
-    }
-    else {
-      return !isBaseOrResourceEqual((_j = this.stageValue) === null || _j === void 0 ? void 0 : _j.color, (_k = this.value) === null ||
-      _k === void 0 ? void 0 : _k.color) ||
-        !isBaseOrResourceEqual((_m = (_l = this.stageValue) === null || _l === void 0 ? void 0 : _l.font) === null || _m ===
-        void 0 ? void 0 : _m.size, (_p = (_o = this.value) === null || _o === void 0 ? void 0 : _o.font) === null || _p ===
-        void 0 ? void 0 : _p.size) ||
-        !isBaseOrResourceEqual((_r = (_q = this.stageValue) === null || _q === void 0 ? void 0 : _q.font) === null || _r ===
-        void 0 ? void 0 : _r.family, (_t = (_s = this.value) === null || _s === void 0 ? void 0 : _s.font) === null || _t ===
-        void 0 ? void 0 : _t.family);
-    }
+    return true;
   }
 }
 DatePickerSelectedTextStyleModifier.identity = Symbol('selectedTextStyle');
@@ -24013,23 +24249,7 @@ class DatePickerDisappearTextStyleModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t;
-    if (!(((_b = (_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.font) === null || _b === void 0 ? void 0 : _b.weight) ===
-    ((_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.weight) &&
-      ((_f = (_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.font) === null || _f === void 0 ? void 0 : _f.style) ===
-      ((_h = (_g = this.value) === null || _g === void 0 ? void 0 : _g.font) === null || _h === void 0 ? void 0 : _h.style))) {
-      return true;
-    }
-    else {
-      return !isBaseOrResourceEqual((_j = this.stageValue) === null || _j === void 0 ? void 0 : _j.color, (_k = this.value) === null ||
-      _k === void 0 ? void 0 : _k.color) ||
-        !isBaseOrResourceEqual((_m = (_l = this.stageValue) === null || _l === void 0 ? void 0 : _l.font) === null ||
-        _m === void 0 ? void 0 : _m.size, (_p = (_o = this.value) === null || _o === void 0 ? void 0 : _o.font) === null ||
-        _p === void 0 ? void 0 : _p.size) ||
-        !isBaseOrResourceEqual((_r = (_q = this.stageValue) === null || _q === void 0 ? void 0 : _q.font) === null ||
-        _r === void 0 ? void 0 : _r.family, (_t = (_s = this.value) === null ||
-        _s === void 0 ? void 0 : _s.font) === null || _t === void 0 ? void 0 : _t.family);
-    }
+    return true;
   }
 }
 DatePickerDisappearTextStyleModifier.identity = Symbol('disappearTextStyle');
@@ -24322,46 +24542,6 @@ if (globalThis.IsolatedComponent !== undefined) {
       return new modifierJS.CommonModifier(nativePtr, classType);
     });
   };
-}
-
-// @ts-ignore
-if (globalThis.Menu === undefined) {
-  globalThis.Menu = {
-    create: function (params) {
-      getUINativeModule().loadNativeModule('Menu');
-      let module = globalThis.requireNapi('arkui.components.arkmenu');
-      module.exportView();
-      getUINativeModule().menu.create();
-    },
-    name: 'JSMenu'
-  }
-}
-
-
-// @ts-ignore
-if (globalThis.MenuItem === undefined) {
-  globalThis.MenuItem = {
-    create: function (params) {
-      getUINativeModule().loadNativeModule('MenuItem');
-      let module = globalThis.requireNapi('arkui.components.arkmenuitem');
-      module.exportView();
-      getUINativeModule().menuitem.create(params);
-    },
-    name: 'JSMenuItem'
-  }
-}
-
-// @ts-ignore
-if (globalThis.MenuItemGroup === undefined) {
-  globalThis.MenuItemGroup = {
-    create: function (params) {
-      getUINativeModule().loadNativeModule('MenuItemGroup');
-      let module = globalThis.requireNapi('arkui.components.arkmenuitemgroup');
-      module.exportView();
-      getUINativeModule().menuitemgroup.create(params);
-    },
-    name: 'JSMenuItemGroup'
-  }
 }
 
 /// <reference path='./import.ts' />
@@ -24732,351 +24912,6 @@ if (globalThis.ScrollBar !== undefined) {
 }
 
 /// <reference path='./import.ts' />
-class ArkTextClockComponent extends ArkComponent {
-  constructor(nativePtr, classType) {
-    super(nativePtr, classType);
-  }
-  allowChildCount() {
-    return 0;
-  }
-  initialize(value) {
-    let _a, _b;
-    if (value.length === 1 && isObject(value[0])) {
-      if (((_a = value[0]) === null || _a === void 0 ? void 0 : _a.timeZoneOffset) !== undefined) {
-        modifierWithKey(this._modifiersWithKeys, TextClockTimeZoneOffsetModifier.identity, TextClockTimeZoneOffsetModifier, value[0].timeZoneOffset);
-      } else {
-        modifierWithKey(this._modifiersWithKeys, TextClockTimeZoneOffsetModifier.identity, TextClockTimeZoneOffsetModifier, undefined);
-      }
-      if (((_b = value[0]) === null || _b === void 0 ? void 0 : _b.controller) !== undefined) {
-        modifierWithKey(this._modifiersWithKeys, TextClockControllerModifier.identity, TextClockControllerModifier, value[0].controller);
-      } else {
-        modifierWithKey(this._modifiersWithKeys, TextClockControllerModifier.identity, TextClockControllerModifier, undefined);
-      }
-    }
-    else {
-      modifierWithKey(this._modifiersWithKeys, TextClockTimeZoneOffsetModifier.identity, TextClockTimeZoneOffsetModifier, undefined);
-      modifierWithKey(this._modifiersWithKeys, TextClockControllerModifier.identity, TextClockControllerModifier, undefined);
-    }
-    return this;
-  }
-  format(value) {
-    modifierWithKey(this._modifiersWithKeys, TextClockFormatModifier.identity, TextClockFormatModifier, value);
-    return this;
-  }
-  onDateChange(event) {
-    modifierWithKey(this._modifiersWithKeys, TextClockOnDateChangeModifier.identity, TextClockOnDateChangeModifier, event);
-    return this;
-  }
-  fontColor(value) {
-    modifierWithKey(this._modifiersWithKeys, TextClockFontColorModifier.identity, TextClockFontColorModifier, value);
-    return this;
-  }
-  fontSize(value) {
-    modifierWithKey(this._modifiersWithKeys, TextClockFontSizeModifier.identity, TextClockFontSizeModifier, value);
-    return this;
-  }
-  fontStyle(value) {
-    modifierWithKey(this._modifiersWithKeys, TextClockFontStyleModifier.identity, TextClockFontStyleModifier, value);
-    return this;
-  }
-  fontWeight(value) {
-    modifierWithKey(this._modifiersWithKeys, TextClockFontWeightModifier.identity, TextClockFontWeightModifier, value);
-    return this;
-  }
-  fontFamily(value) {
-    modifierWithKey(this._modifiersWithKeys, TextClockFontFamilyModifier.identity, TextClockFontFamilyModifier, value);
-    return this;
-  }
-  textShadow(value) {
-    modifierWithKey(this._modifiersWithKeys, TextClockTextShadowModifier.identity, TextClockTextShadowModifier, value);
-    return this;
-  }
-  fontFeature(value) {
-    modifierWithKey(this._modifiersWithKeys, TextClockFontFeatureModifier.identity, TextClockFontFeatureModifier, value);
-    return this;
-  }
-  contentModifier(value) {
-    modifierWithKey(this._modifiersWithKeys, TextClockContentModifier.identity, TextClockContentModifier, value);
-    return this;
-  }
-  setContentModifier(modifier) {
-    if (modifier === undefined || modifier === null) {
-      getUINativeModule().textClock.setContentModifierBuilder(this.nativePtr, false);
-      return;
-    }
-    this.needRebuild = false;
-    if (this.builder !== modifier.applyContent()) {
-      this.needRebuild = true;
-    }
-    this.builder = modifier.applyContent();
-    this.modifier = modifier;
-    getUINativeModule().textClock.setContentModifierBuilder(this.nativePtr, this);
-  }
-  makeContentModifierNode(context, textClockConfiguration) {
-    textClockConfiguration.contentModifier = this.modifier;
-    if (isUndefined(this.textClockNode) || this.needRebuild) {
-      const xNode = globalThis.requireNapi('arkui.node');
-      this.textClockNode = new xNode.BuilderNode(context);
-      this.textClockNode.build(this.builder, textClockConfiguration);
-      this.needRebuild = false;
-    } else {
-      this.textClockNode.update(textClockConfiguration);
-    }
-    return this.textClockNode.getFrameNode();
-  }
-  dateTimeOptions(value) {
-    modifierWithKey(this._modifiersWithKeys, TextClockDateTimeOptionsModifier.identity, TextClockDateTimeOptionsModifier, value);
-    return this;
-  }
-}
-class TextClockOnDateChangeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().textClock.resetTextClockOnDateChange(node);
-    } else {
-      getUINativeModule().textClock.setTextClockOnDateChange(node, this.value);
-    }
-  }
-}
-TextClockOnDateChangeModifier.identity = Symbol('textClockOnDateChange');
-class TextClockTimeZoneOffsetModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().textClock.setTextClockTimeZoneOffset(node, undefined);
-    } else {
-      getUINativeModule().textClock.setTextClockTimeZoneOffset(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-TextClockTimeZoneOffsetModifier.identity = Symbol('textClockTimeZoneOffset');
-class TextClockControllerModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().textClock.setTextClockController(node, undefined);
-    } else {
-      getUINativeModule().textClock.setTextClockController(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-TextClockControllerModifier.identity = Symbol('textClockController');
-class TextClockFormatModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().textClock.resetFormat(node);
-    }
-    else {
-      getUINativeModule().textClock.setFormat(node, this.value);
-    }
-  }
-}
-TextClockFormatModifier.identity = Symbol('textClockFormat');
-class TextClockFontColorModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().textClock.resetFontColor(node);
-    }
-    else {
-      getUINativeModule().textClock.setFontColor(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-TextClockFontColorModifier.identity = Symbol('textClockFontColor');
-class TextClockFontSizeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().textClock.resetFontSize(node);
-    }
-    else {
-      getUINativeModule().textClock.setFontSize(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-TextClockFontSizeModifier.identity = Symbol('textClockFontSize');
-class TextClockFontStyleModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().textClock.resetFontStyle(node);
-    }
-    else {
-      getUINativeModule().textClock.setFontStyle(node, this.value);
-    }
-  }
-}
-TextClockFontStyleModifier.identity = Symbol('textClockFontStyle');
-class TextClockFontWeightModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().textClock.resetFontWeight(node);
-    }
-    else {
-      getUINativeModule().textClock.setFontWeight(node, this.value);
-    }
-  }
-}
-TextClockFontWeightModifier.identity = Symbol('textClockFontWeight');
-class TextClockFontFamilyModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().textClock.resetFontFamily(node);
-    }
-    else {
-      getUINativeModule().textClock.setFontFamily(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-TextClockFontFamilyModifier.identity = Symbol('textClockFontFamily');
-class TextClockFontFeatureModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().textClock.resetFontFeature(node);
-    }
-    else {
-      getUINativeModule().textClock.setFontFeature(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-TextClockFontFeatureModifier.identity = Symbol('textClockFontFeature');
-class TextClockContentModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset, component) {
-    let textClockComponent = component;
-    textClockComponent.setContentModifier(this.value);
-  }
-}
-TextClockContentModifier.identity = Symbol('textClockContentModifier');
-class TextClockTextShadowModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().textClock.resetTextShadow(node);
-    }
-    else {
-      let shadow = new ArkShadowInfoToArray();
-      if (!shadow.convertShadowOptions(this.value)) {
-        getUINativeModule().textClock.resetTextShadow(node);
-      }
-      else {
-        getUINativeModule().textClock.setTextShadow(node, shadow.radius, shadow.type, shadow.color,
-          shadow.offsetX, shadow.offsetY, shadow.fill, shadow.radius.length);
-      }
-    }
-  }
-  checkObjectDiff() {
-    let checkDiff = true;
-    let arkShadow = new ArkShadowInfoToArray();
-    if (Object.getPrototypeOf(this.stageValue).constructor === Object &&
-      Object.getPrototypeOf(this.value).constructor === Object) {
-      checkDiff = arkShadow.checkDiff(this.stageValue, this.value);
-    }
-    else if (Object.getPrototypeOf(this.stageValue).constructor === Array &&
-      Object.getPrototypeOf(this.value).constructor === Array &&
-      this.stageValue.length === this.value.length) {
-      let isDiffItem = false;
-      for (let i = 0; i < this.value.length; i++) {
-        if (arkShadow.checkDiff(this.stageValue[i], this.value[1])) {
-          isDiffItem = true;
-          break;
-        }
-      }
-      if (!isDiffItem) {
-        checkDiff = false;
-      }
-    }
-    return checkDiff;
-  }
-}
-TextClockTextShadowModifier.identity = Symbol('textClockTextShadow');
-
-class TextClockDateTimeOptionsModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().textClock.resetDateTimeOptions(node);
-    }
-    else {
-      getUINativeModule().textClock.setDateTimeOptions(node, this.value.hour);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-TextClockDateTimeOptionsModifier.identity = Symbol('textClockDateTimeOptions');
-
-// @ts-ignore
-if (globalThis.TextClock !== undefined) {
-  globalThis.TextClock.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
-      return new ArkTextClockComponent(nativePtr);
-    }, (nativePtr, classType, modifierJS) => {
-      return new modifierJS.TextClockModifier(nativePtr, classType);
-    });
-  };
-  globalThis.TextClock.contentModifier = function (modifier) {
-    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-    let component = this.createOrGetNode(elmtId, () => {
-      return new ArkTextClockComponent(nativeNode);
-    });
-    component.setContentModifier(modifier);
-  };
-}
-
-/// <reference path='./import.ts' />
 class ArkTextTimerComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -25173,25 +25008,28 @@ class TextTimerOptionsModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    let _a, _b, _c;
+    let _a, _b, _c, _d;
     if (reset) {
-      getUINativeModule().textTimer.setTextTimerOptions(node, undefined, undefined, undefined);
+      getUINativeModule().textTimer.setTextTimerOptions(node, undefined, undefined, undefined, undefined);
     }
     else {
       getUINativeModule().textTimer.setTextTimerOptions(node,
         (_a = this.value) === null || _a === void 0 ? void 0 : _a.isCountDown,
         (_b = this.value) === null || _b === void 0 ? void 0 : _b.count,
-        (_c = this.value) === null || _c === void 0 ? void 0 : _c.controller);
+        (_c = this.value) === null || _c === void 0 ? void 0 : _c.controller,
+        (_d = this.value) === null || _d === void 0 ? void 0 : _d.startTime);
     }
   }
   checkObjectDiff() {
-    let _a, _b, _c, _d, _e, _f;
+    let _a, _b, _c, _d, _e, _f, _g, _h;
     return !isBaseOrResourceEqual((_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.isCountDown,
       (_b = this.value) === null || _b === void 0 ? void 0 : _b.isCountDown) ||
       !isBaseOrResourceEqual((_c = this.stageValue) === null || _c === void 0 ? void 0 : _c.count,
         (_d = this.value) === null || _d === void 0 ? void 0 : _d.count) ||
       !isBaseOrResourceEqual((_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.controller,
-        (_f = this.value) === null || _f === void 0 ? void 0 : _f.controller);
+        (_f = this.value) === null || _f === void 0 ? void 0 : _f.controller) ||
+      !isBaseOrResourceEqual((_g = this.stageValue) === null || _g === void 0 ? void 0 : _g.startTime,
+        (_h = this.value) === null || _h === void 0 ? void 0 : _h.startTime);
   }
 }
 TextTimerOptionsModifier.identity = Symbol('textTimerOptions');
@@ -25823,7 +25661,12 @@ class ArkWebComponent extends ArkComponent {
     return this;
   }
   enableNativeMediaPlayer(config) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebEnableNativeMediaPlayerModifier.identity, WebEnableNativeMediaPlayerModifier, config);
+    return this;
+  }
+  enableWebAVSession(enabled) {
+    modifierWithKey(this._modifiersWithKeys, WebEnableWebAVSessionModifier.identity, WebEnableWebAVSessionModifier, enabled);
+    return this;
   }
   onRenderProcessNotResponding(callback) {
     modifierWithKey(this._modifiersWithKeys, WebOnRenderProcessNotRespondingModifier.identity, WebOnRenderProcessNotRespondingModifier, callback);
@@ -25919,6 +25762,37 @@ class ArkWebComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, WebEnableAutoFillModifier.identity, WebEnableAutoFillModifier, value);
     return this;
   }
+  enableDefaultContextMenu(value) {
+    modifierWithKey(this._modifiersWithKeys, WebEnableDefaultContextMenuModifier.identity, WebEnableDefaultContextMenuModifier, value);
+    return this;
+  }
+  aiSessionOptions(value) {
+    modifierWithKey(this._modifiersWithKeys, WebAiSessionOptionsModifier.identity, WebAiSessionOptionsModifier, value);
+    return this;
+  }
+  enableScrollDirectionalLock(enabled, type) {
+    let config = new ArkEnableScrollDirectionalLock();
+    config.value = enabled;
+    config.type = type;
+    modifierWithKey(this._modifiersWithKeys, WebEnableScrollDirectionalLockModifier.identity, WebEnableScrollDirectionalLockModifier, config);
+    return this;
+  }
+  enableDrag(value) {
+    modifierWithKey(this._modifiersWithKeys, WebEnableDragModifier.identity, WebEnableDragModifier, value);
+    return this;
+  }
+  scrollbarLayoutPolicy(value) {
+    modifierWithKey(this._modifiersWithKeys, WebScrollbarLayoutPolicyModifier.identity, WebScrollbarLayoutPolicyModifier, value);
+    return this;
+  }
+  onInputmethodAttached(callback) {
+    modifierWithKey(this._modifiersWithKeys, WebOnInputMethodAttachedModifier.identity, WebOnInputMethodAttachedModifier, callback);
+    return this;
+  }
+  keyboardAppearance(mode) {
+    modifierWithKey(this._modifiersWithKeys, WebKeyboardAppearanceModifier.identity, WebKeyboardAppearanceModifier, mode);
+    return this;
+  }
 }
 
 class WebJavaScriptAccessModifier extends ModifierWithKey {
@@ -25935,6 +25809,21 @@ class WebJavaScriptAccessModifier extends ModifierWithKey {
   }
 }
 WebJavaScriptAccessModifier.identity = Symbol('webJavaScriptAccessModifier');
+
+class WebKeyboardAppearanceModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetKeyboardAppearance(node);
+    }
+    else {
+      getUINativeModule().web.setKeyboardAppearance(node, this.value);
+    }
+  }
+}
+WebKeyboardAppearanceModifier.identity = Symbol('webKeyboardAppearanceModifier');
 
 class WebFileAccessModifier extends ModifierWithKey {
     constructor(value) {
@@ -27617,6 +27506,21 @@ class WebOnMicrophoneCaptureStateChangeModifier extends ModifierWithKey {
 }
 WebOnMicrophoneCaptureStateChangeModifier.identity = Symbol('webOnMicrophoneCaptureStateChangeModifier');
 
+class WebOnInputMethodAttachedModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetOnInputMethodAttached(node);
+    }
+    else {
+      getUINativeModule().web.setOnInputMethodAttached(node, this.value);
+    }
+  }
+}
+WebOnInputMethodAttachedModifier.identity = Symbol('webOnInputMethodAttachedModifier');
+
 class WebEnableAutoFillModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -27630,6 +27534,104 @@ class WebEnableAutoFillModifier extends ModifierWithKey {
   }
 }
 WebEnableAutoFillModifier.identity = Symbol('webEnableAutoFillModifier');
+
+class WebEnableDragModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetEnableDrag(node);
+    } else {
+      getUINativeModule().web.setEnableDrag(node, this.value);
+    }
+  }
+}
+WebEnableDragModifier.identity = Symbol('webEnableDragModifier');
+
+class WebEnableDefaultContextMenuModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetEnableDefaultContextMenu(node);
+    } else {
+      getUINativeModule().web.setEnableDefaultContextMenu(node, this.value);
+    }
+  }
+}
+WebEnableDefaultContextMenuModifier.identity = Symbol('webEnableDefaultContextMenuModifier');
+
+class WebAiSessionOptionsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetAiSessionOptions(node);
+    } else {
+      getUINativeModule().web.setAiSessionOptions(node, this.value);
+    }
+  }
+}
+WebAiSessionOptionsModifier.identity = Symbol('webAiSessionOptionsModifier');
+
+class WebEnableScrollDirectionalLockModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetEnableScrollDirectionalLock(node);
+    } else {
+      getUINativeModule().web.setEnableScrollDirectionalLock(node, this.value.value, this.value.type);
+    }
+  }
+}
+WebEnableScrollDirectionalLockModifier.identity = Symbol('webEnableScrollDirectionalLockModifier');
+
+class WebEnableNativeMediaPlayerModifier extends ModifierWithKey {
+  constructor(value) {
+      super(value);
+  }
+  applyPeer(node, reset) {
+      if (reset) {
+          getUINativeModule().web.resetEnableNativeMediaPlayer(node);
+      } else {
+          getUINativeModule().web.setEnableNativeMediaPlayer(node, this.value);
+      }
+  }
+}
+WebEnableNativeMediaPlayerModifier.identity = Symbol('webEnableNativeMediaPlayerModifier');
+
+class WebEnableWebAVSessionModifier extends ModifierWithKey {
+  constructor(value) {
+      super(value);
+  }
+  applyPeer(node, reset) {
+      if (reset) {
+          getUINativeModule().web.resetEnableWebAVSession(node);
+      } else {
+          getUINativeModule().web.setEnableWebAVSession(node, this.value);
+      }
+  }
+}
+WebEnableWebAVSessionModifier.identity = Symbol('webEnableWebAVSessionModifier');
+
+class WebScrollbarLayoutPolicyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetScrollbarLayoutPolicy(node);
+    } else {
+      getUINativeModule().web.setScrollbarLayoutPolicy(node, this.value);
+    }
+  }
+}
+WebScrollbarLayoutPolicyModifier.identity = Symbol('webScrollbarLayoutPolicyModifier');
 
 // @ts-ignore
 if (globalThis.Web !== undefined) {
@@ -27750,6 +27752,12 @@ class ArkXComponentComponent extends ArkComponent {
   onFocus(event) {
     if (this.xComponentType === XComponentType.NODE || isUndefined(this.libraryname)) {
       modifierWithKey(this._modifiersWithKeys, OnFocusModifier.identity, OnFocusModifier, event);
+    }
+    return this;
+  }
+  onNeedSoftkeyboard(onNeedSoftkeyboardCallback) {
+    if (this.xComponentType === XComponentType.NODE || isUndefined(this.libraryname)) {
+      modifierWithKey(this._modifiersWithKeys, OnNeedSoftkeyboardModifier.identity, OnNeedSoftkeyboardModifier, onNeedSoftkeyboardCallback);
     }
     return this;
   }
@@ -27936,9 +27944,6 @@ class ArkXComponentComponent extends ArkComponent {
   }
   useSizeType(value) {
     throw new BusinessError(100201, 'useSizeType Method not supportted in ArkXComponentComponent class.');
-  }
-  privacySensitive(value) {
-    throw new BusinessError(100201, 'privacySensitive Method not supportted in ArkXComponentComponent class.');
   }
   clip(value) {
     throw new BusinessError(100201, 'clip Method not supportted in ArkXComponentComponent class.');
@@ -28484,18 +28489,6 @@ if (globalThis.Badge !== undefined) {
       return new modifierJS.CommonModifier(nativePtr, classType);
     });
   };
-}
-
-// @ts-ignore
-if (globalThis.FlowItem === undefined) {
-  globalThis.FlowItem = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('FlowItem');
-      let module = globalThis.requireNapi('arkui.components.arkflowitem');
-      module.exportView();
-      getUINativeModule().flowItem.create();
-    }
-  }
 }
 
 /// <reference path='./import.ts' />
@@ -29308,6 +29301,21 @@ class ListSupportEmptyBranchInLazyLoading extends ModifierWithKey {
 }
 ListSupportEmptyBranchInLazyLoading.identity = Symbol('listSupportEmptyBranchInLazyLoading');
 
+class ListBackPressCloseSwipeActionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().list.setBackPressCloseSwipeAction(node, true);
+    }
+    else {
+      getUINativeModule().list.setBackPressCloseSwipeAction(node, this.value);
+    }
+  }
+}
+ListBackPressCloseSwipeActionModifier.identity = Symbol('listBackPressCloseSwipeAction');
+
 class ArkListComponent extends ArkScrollable {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -29525,6 +29533,11 @@ class ArkListComponent extends ArkScrollable {
     modifierWithKey(this._modifiersWithKeys, ListSupportEmptyBranchInLazyLoading.identity, ListSupportEmptyBranchInLazyLoading, value);
     return this;
   }
+  backPressCloseSwipeAction(value) {
+    modifierWithKey(this._modifiersWithKeys, ListBackPressCloseSwipeActionModifier.identity,
+      ListBackPressCloseSwipeActionModifier, value);
+    return this;
+  }
 }
 // @ts-ignore
 if (globalThis.List !== undefined) {
@@ -29705,7 +29718,7 @@ class ListItemGroupInitializeModifier extends ModifierWithKey {
       getUINativeModule().listItemGroup.resetListItemGroupInitialize(node);
     } else {
       getUINativeModule().listItemGroup.setListItemGroupInitialize(node, this.value?.space, this.value?.style,
-        this.value?.headerComponent, this.value?.footerComponent);
+        this.value?.headerComponent, this.value?.footerComponent, this.value?.headerStyle, this.value?.footerStyle);
     }
   }
 }
@@ -29959,10 +29972,10 @@ class ArkSwiperComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, SwiperDisplayModeModifier.identity, SwiperDisplayModeModifier, value);
     return this;
   }
-  cachedCount(value, isShown) {
+  cachedCount(value, options) {
     let arkCachedCount = new ArkSwiperCachedCount();
     arkCachedCount.value = value;
-    arkCachedCount.isShown = isShown;
+    arkCachedCount.options = options;
     modifierWithKey(this._modifiersWithKeys, SwiperCachedCountModifier.identity, SwiperCachedCountModifier, arkCachedCount);
     return this;
   }
@@ -30428,15 +30441,25 @@ class SwiperCachedCountModifier extends ModifierWithKey {
     if (reset) {
       getUINativeModule().swiper.resetSwiperCachedCount(node);
       getUINativeModule().swiper.resetSwiperIsShown(node);
+      getUINativeModule().swiper.resetSwiperCachedIndependent(node);
     }
     else {
       getUINativeModule().swiper.setSwiperCachedCount(node, this.value.value);
-      getUINativeModule().swiper.setSwiperIsShown(node, this.value.isShown);
+      if (typeof this.value.options === 'boolean') {
+        getUINativeModule().swiper.setSwiperIsShown(node, this.value.options);
+      } else if (typeof this.value.options === 'object') {
+        if ('isShown' in this.value.options) {
+          getUINativeModule().swiper.setSwiperIsShown(node, this.value.options.isShown);
+        }
+        if ('independent' in this.value.options) {
+          getUINativeModule().swiper.setSwiperCachedIndependent(node, this.value.options.independent);
+        }
+      }
     }
   }
   checkObjectDiff() {
     return (!isBaseOrResourceEqual(this.stageValue.value, this.value.value) ||
-      !isBaseOrResourceEqual(this.stageValue.isShown, this.value.isShown));
+      !isBaseOrResourceEqual(this.stageValue.options, this.value.options));
   }
 }
 SwiperCachedCountModifier.identity = Symbol('swiperCachedCount');
@@ -32039,18 +32062,6 @@ if (globalThis.UIExtensionComponent !== undefined) {
   };
 }
 
-// @ts-ignore
-if (globalThis.WaterFlow === undefined) {
-  globalThis.WaterFlow = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('WaterFlow');
-      let module = globalThis.requireNapi('arkui.components.arkwaterflow');
-      module.exportView();
-      getUINativeModule().waterFlow.create(params);
-    }
-  }
-}
-
 /// <reference path='./import.ts' />
 class ArkCommonShapeComponent extends ArkComponent {
   constructor(nativePtr, classType) {
@@ -33440,18 +33451,6 @@ if (globalThis.MediaCachedImage !== undefined) {
     });
   };
 }
-// @ts-ignore
-if (globalThis.SymbolGlyph === undefined) {
-  globalThis.SymbolGlyph = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('SymbolGlyph');
-      let module = globalThis.requireNapi('arkui.components.arksymbolglyph');
-      module.exportView();
-      getUINativeModule().symbolGlyph.create(params);
-    },
-    name: 'JSSymbolGlyph'
-  }
-}
 class SystemBarEffectModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -33926,321 +33925,6 @@ if (globalThis.UIPickerComponent !== undefined) {
   };
 }
 
-function __ArkUI_PreloadDynamicModule__(componentName, abcName) {
-    getUINativeModule().loadNativeModule(componentName);
-    let module = globalThis.requireNapi(abcName);
-    module.exportView();
-}
-
-// @ts-ignore
-if (globalThis.Hyperlink === undefined) {
-  globalThis.Hyperlink = {
-    create: function(address, content) {
-      getUINativeModule().loadNativeModule("Hyperlink");
-      let module = globalThis.requireNapi('arkui.components.arkhyperlink');
-      module.exportView();
-      getUINativeModule().hyperlink.create(address, content);
-    }
-  }
-}
-
-// @ts-ignore
-if (globalThis.CalendarPicker === undefined) {
-  globalThis.CalendarPicker = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('CalendarPicker');
-      let module = globalThis.requireNapi('arkui.components.arkcalendarpicker');
-      module.exportView();
-      getUINativeModule().calendarPicker.create(params);
-    },
-    name: 'JSCalendarPicker'
-  }
-}
-
-// @ts-ignore
-if (globalThis.CalendarPickerDialog === undefined) {
-  globalThis.CalendarPickerDialog = {
-    show: function(params) {
-      getUINativeModule().loadNativeModule('CalendarPickerDialog');
-      let module = globalThis.requireNapi('arkui.components.arkcalendarpicker');
-      module.exportDialogView();
-      getUINativeModule().calendarPickerDialog.show(params);
-    },
-    name: 'JSCalendarPickerDialog'
-  }
-}
-
-// @ts-ignore
-if (globalThis.Gauge === undefined) {
-  globalThis.Gauge = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('Gauge');
-      let module = globalThis.requireNapi('arkui.components.arkgauge');
-      module.exportView();
-      getUINativeModule().gauge.create(params);
-    },
-    name: 'JSGauge'
-  }
-}
-
-// @ts-ignore
-if (globalThis.AlphabetIndexer === undefined) {
-  globalThis.AlphabetIndexer = {
-    create: function (params) {
-      getUINativeModule().loadNativeModule('Indexer');
-      let module = globalThis.requireNapi('arkui.components.arkalphabetindexer');
-      module.exportView();
-      if (params !== undefined) {
-        getUINativeModule().alphabetIndexer.create(params, false);
-      } else {
-        getUINativeModule().alphabetIndexer.create(undefined, false);
-      }
-      return this;
-    },
-    createArc: function (params) {
-      getUINativeModule().loadNativeModule('Indexer');
-      let module = globalThis.requireNapi('arkui.components.arkalphabetindexer');
-      module.exportView();
-      if (params !== undefined) {
-        getUINativeModule().alphabetIndexer.create(params, true);
-      } else {
-        getUINativeModule().alphabetIndexer.create(undefined, true);
-      }
-      return this;
-    },
-    name: 'JSAlphabetIndexer'
-  }
-}
-
-// @ts-ignore
-if (globalThis.Checkbox === undefined) {
-  globalThis.Checkbox = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('Checkbox');
-      let module = globalThis.requireNapi('arkui.components.arkcheckbox');
-      module.exportView();
-      getUINativeModule().checkbox.create(params);
-    },
-    name: 'JSCheckbox'
-  };
-}
-
-// @ts-ignore
-if (globalThis.CheckboxGroup === undefined) {
-  globalThis.CheckboxGroup = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('CheckboxGroup');
-      let module = globalThis.requireNapi('arkui.components.arkcheckboxgroup');
-      module.exportView();
-      getUINativeModule().checkboxgroup.create(params);
-    },
-    name: 'JSCheckboxGroup'
-  };
-}
-
-// @ts-ignore
-if (globalThis.Rating === undefined) {
-  globalThis.Rating = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('Rating');
-      const module = globalThis.requireNapi('arkui.components.arkrating');
-      module.exportView();
-      getUINativeModule().rating.create(params);
-    },
-    name: 'JSRating'
-  };
-}
-
-// @ts-ignore
-if (globalThis.SideBarContainer === undefined) {
-  globalThis.SideBarContainer = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('Sidebar');
-      let module = globalThis.requireNapi('arkui.components.arksidebarcontainer');
-      module.exportView();
-      getUINativeModule().sideBarContainer.create(params);
-    }
-  }
-}
-
-if (globalThis.RichEditor === undefined) {
-  globalThis.RichEditor = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule("Richeditor");
-      let module = globalThis.requireNapi('arkui.components.arkricheditor');
-      module.exportView();
-      getUINativeModule().richEditor.create(params);
-    },
-    name: 'JSRichEditor'
-  };
-}
-
-// @ts-ignore
-if (globalThis.RowSplit === undefined) {
-  globalThis.RowSplit = {
-    create: function() {
-      getUINativeModule().loadNativeModule('RowSplit');
-      let module = globalThis.requireNapi('arkui.components.arkrowsplit');
-      module.exportView();
-      getUINativeModule().rowSplit.create();
-    },
-    name: 'JSRowSplit'
-  };
-}
-
-// @ts-ignore
-if (globalThis.ColumnSplit === undefined) {
-  globalThis.ColumnSplit = {
-    create: function() {
-      getUINativeModule().loadNativeModule('ColumnSplit');
-      let module = globalThis.requireNapi('arkui.components.arkcolumnsplit');
-      module.exportView();
-      getUINativeModule().columnSplit.create();
-    },
-    name: 'JSColumnSplit'
-  };
-}
-// @ts-ignore
-if (globalThis.Stepper === undefined) {
-  globalThis.Stepper = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('Stepper');
-      let module = globalThis.requireNapi('arkui.components.arkstepper');
-      module.exportView();
-      getUINativeModule().stepper.create(params);
-    },
-    name: 'JSStepper'
-  };
-}
-
-// @ts-ignore
-if (globalThis.StepperItem === undefined) {
-  globalThis.StepperItem = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('StepperItem');
-      let module = globalThis.requireNapi('arkui.components.arkstepperitem');
-      module.exportView();
-      getUINativeModule().stepperItem.create(params);
-    },
-    name: 'JSStepperItem'
-  };
-}
-
-// @ts-ignore
-if (globalThis.Marquee === undefined) {
-  globalThis.Marquee = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('Marquee');
-      let module = globalThis.requireNapi('arkui.components.arkmarquee');
-      module.exportView();
-      getUINativeModule().marquee.create(params);
-    }
-  }
-}
-
-// @ts-ignore
-if (globalThis.Search === undefined) {
-  globalThis.Search = {
-    create: function (params) {
-      getUINativeModule().loadNativeModule("Search");
-      var module = globalThis.requireNapi('arkui.components.arksearch');
-      module.exportView();
-      getUINativeModule().search.jsCreate(params);
-    },
-    name: 'JSSearch'
-  }
-}
-
-// @ts-ignore
-if (globalThis.Radio === undefined) {
-  globalThis.Radio = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('Radio');
-      let module = globalThis.requireNapi('arkui.components.arkradio');
-      module.exportView();
-      getUINativeModule().radio.create(params);
-    },
-    name: 'JSRadio'
-  }
-}
-
-// @ts-ignore
-if (globalThis.Slider === undefined) {
-  globalThis.Slider = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule("Slider");
-      let module = globalThis.requireNapi('arkui.components.arkslider');
-      module.exportView();
-      getUINativeModule().slider.create(params);
-    },
-    name: 'JSSlider'
-  }
-}
-
-if (globalThis.QRCode === undefined) {
-  globalThis.QRCode = {
-    create: function(value) {
-      getUINativeModule().loadNativeModule('QRCode');
-      let module = globalThis.requireNapi('arkui.components.arkqrcode');
-      module.exportView();
-      getUINativeModule().qrcode.create(value);
-    },
-    name: 'JSQRCode'
-  }
-}
-
-// @ts-ignore
-if (globalThis.FolderStack === undefined) {
-  globalThis.FolderStack = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('FolderStack');
-      let module = globalThis.requireNapi('arkui.components.arkfolderstack');
-      module.exportView();
-      getUINativeModule().folderStack.create(params);
-    },
-    name: 'JSFolderStack'
-  };
-}
-
-// @ts-ignore
-if (globalThis.TimePicker === undefined) {
-  globalThis.TimePicker = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('TimePicker');
-      const module = globalThis.requireNapi('arkui.components.arktimepicker');
-      module.exportView();
-      getUINativeModule().timePicker.create(params);
-    },
- 	  name: 'JSTimePicker'
-  }
-}
-
-// @ts-ignore
-if (globalThis.TimePickerDialog === undefined) {
-  globalThis.TimePickerDialog = {
-    show: function(params) {
-      getUINativeModule().loadNativeModule('TimePickerDialog');
-      const module = globalThis.requireNapi('arkui.components.arktimepicker');
-      module.exportViewDialog();
-      getUINativeModule().timePickerDialog.show(params);
-    },
- 	  name: 'JSTimePickerDialog'
-  }
-}
-
-// @ts-ignore
-if (globalThis.DataPanel === undefined) {
-  globalThis.DataPanel = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('DataPanel');
-      let module = globalThis.requireNapi('arkui.components.arkdatapanel');
-      module.exportView();
-      getUINativeModule().dataPanel.create(params);
-    },
-    name: 'JSDataPanel'
-  }
-}
-
 function getArkUINodeFromNapi() {
   if(globalThis.__XNode__ === undefined) {
       globalThis.__XNode__ = globalThis.requireNapi('arkui.node');
@@ -34249,7 +33933,3 @@ function getArkUINodeFromNapi() {
 }
 
 globalThis.__getArkUINode__ = getArkUINodeFromNapi;
-
-function __getArkUINativeModuleForm__() {
-  return arkUINativeModule;
-}

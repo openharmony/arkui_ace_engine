@@ -14,8 +14,11 @@
  */
 
 #include "list_test_ng.h"
-#include "test/mock/core/animation/mock_animation_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/animation/mock_animation_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+
+#include "core/components_ng/pattern/list/list_item_layout_property.h"
+#include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 
 namespace OHOS::Ace::NG {
 class ListAttrTestNg : public ListTestNg {};
@@ -1827,6 +1830,22 @@ HWTEST_F(ListAttrTestNg, ListMaintainVisibleContentPosition008, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetEnableScrollWithMouse001
+ * @tc.desc: Test SetEnableScrollWithMouse
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, SetEnableScrollWithMouse001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateListItems();
+    pattern_->SetIsAllowMouse(true);
+    CreateDone();
+    EXPECT_TRUE(pattern_->GetIsAllowMouse());
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    EXPECT_TRUE(scrollable->panRecognizerNG_->isAllowMouse_);
+}
+
+/**
  * @tc.name: SetScrollSnapAnimationSpeed001
  * @tc.desc: Test SetScrollSnapAnimationSpeed.
  * @tc.type: FUNC
@@ -1853,5 +1872,92 @@ HWTEST_F(ListAttrTestNg, SetScrollSnapAnimationSpeed001, TestSize.Level1)
      */
     model.SetScrollSnapAnimationSpeed(AceType::RawPtr(frameNode_), ScrollSnapAnimationSpeed::NORMAL);
     EXPECT_EQ(model.GetScrollSnapAnimationSpeed(AceType::RawPtr(frameNode_)), ScrollSnapAnimationSpeed::NORMAL);
+}
+
+/**
+ * @tc.name: FadingEdgeProperty001
+ * @tc.desc: Test fadingEdge and defaultFadingEdge properties in ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, FadingEdgeProperty001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List with default properties.
+     * @tc.expected: Created successful.
+     */
+    ListModelNG model = CreateList();
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Get ToJsonValue and check default fadingEdge values.
+     * @tc.expected: fadingEdge and defaultFadingEdge are both false by default.
+     */
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    auto paintProperty = frameNode_->GetPaintProperty<ScrollablePaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->ToJsonValue(json, filter);
+
+    EXPECT_EQ(json->GetBool("fadingEdge"), false);
+    EXPECT_EQ(json->GetBool("defaultFadingEdge"), false);
+    EXPECT_EQ(paintProperty->GetDefaultFadingEdge(), false);
+
+    /**
+     * @tc.steps: step3. SetFadingEdge to true.
+     * @tc.expected: fadingEdge property is true after setting.
+     */
+    paintProperty->UpdateFadingEdge(true);
+
+    // Re-generate JSON to verify the change
+    json = JsonUtil::Create(true);
+    paintProperty->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetBool("fadingEdge"), true);
+    // defaultFadingEdge remains false as GetDefaultFadingEdge() returns false by default
+    EXPECT_EQ(json->GetBool("defaultFadingEdge"), false);
+
+    /**
+     * @tc.steps: step4. UpdateDefaultFadingEdge to true.
+     * @tc.expected: fadingEdge and defaultFadingEdge are both true by default.
+     */
+    paintProperty->UpdateDefaultFadingEdge(true);
+    // Re-generate JSON to verify the change
+    json = JsonUtil::Create(true);
+    paintProperty->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetBool("fadingEdge"), true);
+    EXPECT_EQ(json->GetBool("defaultFadingEdge"), true);
+}
+
+/**
+ * @tc.name: GetListController001
+ * @tc.desc: Test GetListController returns existing controller without replacing positionController_
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, GetListController001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+    auto controller = pattern_->positionController_;
+    EXPECT_NE(controller, nullptr);
+
+    auto fetched = ListModelNG::GetOrCreateController(AceType::RawPtr(frameNode_));
+    EXPECT_NE(fetched, nullptr);
+    EXPECT_EQ(fetched, controller);
+    EXPECT_EQ(pattern_->positionController_, controller);
+}
+
+/**
+ * @tc.name: SetListScrollBarProxy001
+ * @tc.desc: Test SetScrollBarProxy pushes proxy to list pattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, SetListScrollBarProxy001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+    auto proxy = AceType::MakeRefPtr<ScrollBarProxy>();
+    pattern_->SetScrollBarProxy(proxy);
+    EXPECT_EQ(pattern_->scrollBarProxy_, proxy);
 }
 } // namespace OHOS::Ace::NG

@@ -34,7 +34,6 @@ private:
     void Close();
     Kit::InputCompatiblePolicy* productPolicy_ = nullptr;
     void* libraryHandle_ = nullptr;
-    bool transformSoLoaded_ = false;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_INPUT_COMPATIBLE_MANAGER_H

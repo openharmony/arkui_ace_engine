@@ -73,6 +73,8 @@ public:
     static void SetBaselineOffset(const JSCallbackInfo& info);
     static void SetDecoration(const JSCallbackInfo& info);
     static void SetCopyOption(const JSCallbackInfo& info);
+    static void SetOnWillCopy(const JSCallbackInfo& info);
+    static JSRef<JSVal> CreateSimpleJsOnWillObj(const std::u16string& value);
     static void SetOnCopy(const JSCallbackInfo& info);
     static void SetHeightAdaptivePolicy(int32_t value);
     static void SetContentTransition(const JSCallbackInfo& info);
@@ -96,8 +98,10 @@ public:
     static void JsClip(const JSCallbackInfo& info);
     static void SetForegroundColor(const JSCallbackInfo& info);
     static void SetFontFeature(const JSCallbackInfo &info);
+    static void SetFontVariations(const JSCallbackInfo& info);
     static void SetMarqueeOptions(const JSCallbackInfo& info);
     static void SetOnMarqueeStateChange(const JSCallbackInfo& info);
+    static void SetOrphanCharOptimization(const JSCallbackInfo& info);
     static void ParseMarqueeParam(const JSRef<JSObject>& paramObject, NG::TextMarqueeOptions& options);
     static void EditMenuOptions(const JSCallbackInfo& info);
     static void JsResponseRegion(const JSCallbackInfo& info);

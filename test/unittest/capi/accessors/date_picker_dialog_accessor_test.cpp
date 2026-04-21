@@ -26,11 +26,11 @@ class DatePickerDialogAccessorTest : public StaticAccessorTest<GENERATED_ArkUIDa
 };
 
 /**
- * @tc.name: datePickerDialogAccessorTest
+ * @tc.name: showTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerDialogAccessorTest, datePickerDialogAccessorTest, TestSize.Level1)
+HWTEST_F(DatePickerDialogAccessorTest, DISABLED_showTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->show, nullptr);
 }

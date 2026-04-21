@@ -38,6 +38,7 @@ export struct ToggleIndex {
     { name: 'Toggle组合场景4', path: 'ToggleMultiTestLevel3' },
     { name: 'Toggle组合场景5', path: 'ToggleMultiTestLevel4' },
     { name: 'Toggle组合场景6', path: 'ToggleMultiTestLevel5' },
+    { name: 'Toggle组合场景7', path: 'ToggleMultiTestLevel6' }
   ]
 
   build() {

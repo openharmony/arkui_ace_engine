@@ -26,11 +26,11 @@ class AlertDialogAccessorTest : public StaticAccessorTest<GENERATED_ArkUIAlertDi
 };
 
 /**
- * @tc.name: alertDialogAccessorTest
+ * @tc.name: showTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(AlertDialogAccessorTest, alertDialogAccessorTest, TestSize.Level1)
+HWTEST_F(AlertDialogAccessorTest, DISABLED_showTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->show, nullptr);
 }

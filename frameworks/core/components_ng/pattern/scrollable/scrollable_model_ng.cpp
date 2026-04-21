@@ -17,6 +17,7 @@
 
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_layout_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
@@ -394,7 +395,13 @@ float ScrollableModelNG::GetMaxFlingSpeed(FrameNode* frameNode)
 
 void ScrollableModelNG::SetContentClip(ContentClipMode mode, const RefPtr<ShapeRect>& shape)
 {
-    ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ContentClip, std::make_pair(mode, shape));
+    ContentClip contentClip = std::make_pair(mode, shape);
+    ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ContentClip, contentClip);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<ScrollableLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateContentClip(contentClip);
 }
 
 ContentClipMode ScrollableModelNG::GetContentClip(FrameNode* frameNode)
@@ -412,7 +419,12 @@ ContentClipMode ScrollableModelNG::GetContentClip(FrameNode* frameNode)
 
 void ScrollableModelNG::SetContentClip(FrameNode* frameNode, ContentClipMode mode, const RefPtr<ShapeRect>& rect)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ContentClip, std::make_pair(mode, rect), frameNode);
+    ContentClip contentClip = std::make_pair(mode, rect);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ContentClip, contentClip, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<ScrollableLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateContentClip(contentClip);
 }
 
 void ScrollableModelNG::ResetContentClip(FrameNode* frameNode)
@@ -421,6 +433,9 @@ void ScrollableModelNG::ResetContentClip(FrameNode* frameNode)
     auto paintProperty = frameNode->GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     paintProperty->UpdateContentClip({ paintProperty->GetDefaultContentClip(), nullptr });
+    auto layoutProperty = frameNode->GetLayoutProperty<ScrollableLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateContentClip(std::nullopt);
 }
 
 bool ScrollableModelNG::GetFadingEdge(FrameNode* frameNode)
@@ -508,6 +523,39 @@ bool ScrollableModelNG::GetBackToTop(FrameNode* frameNode)
     auto pattern = frameNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_RETURN(pattern, false);
     return pattern->GetBackToTop();
+}
+
+void ScrollableModelNG::SetEnableScrollWithMouse(bool enableScrollWithMouse)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsAllowMouse(enableScrollWithMouse);
+}
+
+void ScrollableModelNG::SetEnableScrollWithMouse(FrameNode* frameNode, bool enableScrollWithMouse)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsAllowMouse(enableScrollWithMouse);
+}
+
+void ScrollableModelNG::ResetEnableScrollWithMouse(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsAllowMouse(false);
+}
+
+bool ScrollableModelNG::GetEnableScrollWithMouse(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->GetIsAllowMouse();
 }
 
 void ScrollableModelNG::SetScrollBarMargin(const ScrollBarMargin& scrollBarMargin)
@@ -688,5 +736,33 @@ float ScrollableModelNG::GetContentEndOffset(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, 0);
     auto layoutProperty = frameNode->GetLayoutProperty<ScrollableLayoutProperty>();
     return static_cast<float>(layoutProperty->GetContentEndOffset().value_or(0.0f));
+}
+
+void ScrollableModelNG::SetAutoAdjustScrollBarMargin(std::optional<bool> autoAdjust)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetAutoAdjustScrollBarMargin(frameNode, autoAdjust);
+}
+
+void ScrollableModelNG::SetAutoAdjustScrollBarMargin(FrameNode* frameNode, std::optional<bool> autoAdjust)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(
+        ScrollablePaintProperty, AutoAdjustScrollBarMargin, autoAdjust.value_or(false), frameNode);
+}
+
+void ScrollableModelNG::ResetAutoAdjustScrollBarMargin(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+        ScrollablePaintProperty, AutoAdjustScrollBarMargin, PROPERTY_UPDATE_MEASURE, frameNode);
+}
+
+bool ScrollableModelNG::GetAutoAdjustScrollBarMargin(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto paintProperty = frameNode->GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+    return paintProperty->GetAutoAdjustScrollBarMargin().value_or(false);
 }
 } // namespace OHOS::Ace::NG

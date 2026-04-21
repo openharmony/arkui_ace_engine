@@ -144,6 +144,7 @@ ohos_unittest("SvgAnimateTest") {
     "$ace_root/frameworks/core/components/common/properties/page_transition_option.cpp",
     "$ace_root/frameworks/core/components/common/properties/scroll_bar.cpp",
     "$ace_root/frameworks/core/components/common/properties/shadow.cpp",
+    "$ace_root/frameworks/core/components/common/properties/text_enums.cpp",
     "$ace_root/frameworks/core/components/common/properties/text_style.cpp",
     "$ace_root/frameworks/core/components/display/render_display.cpp",
     "$ace_root/frameworks/core/components/focus_animation/render_focus_animation.cpp",

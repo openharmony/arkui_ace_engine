@@ -1,0 +1,32 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "Sticker example module"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "Sticker Example Application"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "Sticker"
+    },
+    {
+      "name": "sticker_add_image",
+      "value": "Add Image"
+    },
+    {
+      "name": "sticker_clear_all",
+      "value": "Clear All"
+    },
+    {
+      "name": "sticker_delete",
+      "value": "Delete"
+    },
+    {
+      "name": "sticker_title",
+      "value": "Sticker Editor"
+    }
+  ]
+}

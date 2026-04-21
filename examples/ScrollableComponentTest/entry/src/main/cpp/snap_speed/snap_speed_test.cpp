@@ -61,7 +61,7 @@ std::shared_ptr<ButtonComponent> CreateButton(
             list->resetAttribute(NODE_LIST_SCROLL_SNAP_ANIMATION_SPEED);
         } else {
             int32_t speed = ConvertSnapSpeed(label);
-            list->SetScrollSnapAnimationSpeed(speed);
+            list->SetScrollSnapAlign(speed);
         }
         text->SetTextContent(std::to_string(list->getAttribute(NODE_LIST_SCROLL_SNAP_ANIMATION_SPEED)->value[0].i32));
     });
@@ -167,7 +167,7 @@ napi_value SnapSpeedTest::CreateNativeNode(napi_env env, napi_callback_info info
     std::string id(xComponentID);
     if (OH_NativeXComponent_AttachNativeRootNode(
         PluginManager::GetInstance()->GetNativeXComponent(id),
-        rootColumn->GetComponent == INVALID_PARAM)) {
+        rootColumn->GetComponent()) == INVALID_PARAM) {
         OH_LOG_Print(
             LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "SnapSpeedTest", "OH_NativeXComponent_AttachNativeRootNode failed");
     }
@@ -213,7 +213,7 @@ napi_value SnapSpeedTest::CreateNativeNodeNoLazyForeach(napi_env env, napi_callb
     std::string id(xComponentID);
     if (OH_NativeXComponent_AttachNativeRootNode(
         PluginManager::GetInstance()->GetNativeXComponent(id),
-        rootColumn->GetComponent == INVALID_PARAM)) {
+        rootColumn->GetComponent()) == INVALID_PARAM) {
         OH_LOG_Print(
             LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "SnapSpeedTest", "OH_NativeXComponent_AttachNativeRootNode failed");
     }

@@ -41,4 +41,33 @@ ArkUINativeModuleValue StackBridge::ResetAlignContent(ArkUIRuntimeCallInfo* runt
     GetArkUINodeModifiers()->getStackModifier()->resetAlignContent(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue StackBridge::SetSyncLoad(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> argSyncLoad = runtimeCallInfo->GetCallArgRef(1);
+
+    CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    bool syncLoad = true;
+    if (!argSyncLoad->IsUndefined() && !argSyncLoad->IsNull()) {
+        syncLoad = argSyncLoad->BooleaValue(vm);
+    }
+
+    GetArkUINodeModifiers()->getStackModifier()->setSyncLoad(nativeNode, syncLoad);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue StackBridge::ResetSyncLoad(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getStackModifier()->resetSyncLoad(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 }

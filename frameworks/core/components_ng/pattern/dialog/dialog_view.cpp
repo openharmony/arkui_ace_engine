@@ -14,16 +14,17 @@
  */
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 
+#include "core/components_ng/base/frame_node.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<FrameNode> DialogView::CreateDialogNode(
-    const DialogProperties& param, const RefPtr<UINode>& customNode = nullptr)
+    const DialogProperties& param, const RefPtr<UINode>& customNode, const RefPtr<UINode>& themeNode)
 {
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    return CreateDialogNode(nodeId, param, customNode);
+    return CreateDialogNode(nodeId, param, customNode, themeNode);
 }
 
 void SetDialogTransitionEffects(
@@ -58,8 +59,8 @@ void UpdateAndAddMaskColorCallback(RefPtr<FrameNode> dialog, const DialogPropert
     if (dialogProps.maskColor.has_value() && dialogProps.hasInvertColor.hasMaskColor) {
         Color maskColor = dialogProps.maskColor.value();
         RefPtr<ResourceObject> resObj;
-        ResourceParseUtils::CompleteResourceObjectFromColor(resObj, maskColor, dialog->GetTag());
-
+        ResourceParseUtils::CompleteResourceObjectFromColor(
+            resObj, maskColor, ResourceParseUtils::MakeNativeNodeInfo(AceType::RawPtr(dialog)));
         auto updateFunc = [dialogWeak = AceType::WeakClaim(AceType::RawPtr(dialog))](
                               const RefPtr<ResourceObject>& resObj) {
             auto dialog = dialogWeak.Upgrade();
@@ -72,13 +73,11 @@ void UpdateAndAddMaskColorCallback(RefPtr<FrameNode> dialog, const DialogPropert
             CHECK_NULL_VOID(maskContext);
             auto pipelineContext = dialog->GetContext();
             CHECK_NULL_VOID(pipelineContext);
-            auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
+            auto dialogTheme = pattern->GetDialogTheme();
             CHECK_NULL_VOID(dialogTheme);
-
             Color maskColor;
             bool state = ResourceParseUtils::ParseResColor(resObj, maskColor);
             maskColor = state ? maskColor : dialogTheme->GetMaskColorEnd();
-
             auto dialogLayoutProp = AceType::DynamicCast<DialogLayoutProperty>(dialog->GetLayoutProperty());
             CHECK_NULL_VOID(dialogLayoutProp);
             // is app subwindow
@@ -96,7 +95,6 @@ void UpdateAndAddMaskColorCallback(RefPtr<FrameNode> dialog, const DialogPropert
         auto pattern = dialog->GetPattern<DialogPattern>();
         CHECK_NULL_VOID(pattern);
         pattern->AddResObj("dialog.maskcolor", resObj, std::move(updateFunc));
-        
         auto maskNode = pattern->GetExtraMaskNode() ? pattern->GetExtraMaskNode() : dialog;
         CHECK_NULL_VOID(maskNode);
         auto maskContext = maskNode->GetRenderContext();
@@ -119,11 +117,13 @@ void UpdateAndAddShadowCallback(RefPtr<FrameNode> dialog, const DialogProperties
         Shadow shadow = dialogProps.shadow.value();
         Color shadowColor = shadow.GetColor();
         RefPtr<ResourceObject> resObj;
-        ResourceParseUtils::CompleteResourceObjectFromColor(resObj, shadowColor, dialog->GetTag());
+        ResourceParseUtils::CompleteResourceObjectFromColor(
+            resObj, shadowColor, ResourceParseUtils::MakeNativeNodeInfo(AceType::RawPtr(dialog)));
         auto updateFunc = [dialogWeak = AceType::WeakClaim(AceType::RawPtr(dialog))](
                               const RefPtr<ResourceObject>& resObj) {
             auto dialog = dialogWeak.Upgrade();
             CHECK_NULL_VOID(dialog);
+            ACE_UINODE_TRACE(dialog);
             auto pattern = dialog->GetPattern<DialogPattern>();
             CHECK_NULL_VOID(pattern);
 
@@ -160,16 +160,18 @@ void UpdateAndAddBackgroundColorCallback(RefPtr<FrameNode> dialog, const DialogP
     if (dialogProps.backgroundColor.has_value() && dialogProps.hasInvertColor.hasBackgroundColor) {
         Color backgroundColor = dialogProps.backgroundColor.value();
         RefPtr<ResourceObject> resObj;
-        ResourceParseUtils::CompleteResourceObjectFromColor(resObj, backgroundColor, dialog->GetTag());
+        ResourceParseUtils::CompleteResourceObjectFromColor(
+            resObj, backgroundColor, ResourceParseUtils::MakeNativeNodeInfo(AceType::RawPtr(dialog)));
         auto updateFunc = [dialogWeak = AceType::WeakClaim(AceType::RawPtr(dialog))](
                               const RefPtr<ResourceObject>& resObj) {
             auto dialog = dialogWeak.Upgrade();
             CHECK_NULL_VOID(dialog);
+            ACE_UINODE_TRACE(dialog);
             auto pattern = dialog->GetPattern<DialogPattern>();
             CHECK_NULL_VOID(pattern);
             auto pipelineContext = dialog->GetContext();
             CHECK_NULL_VOID(pipelineContext);
-            auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
+            auto dialogTheme = pattern->GetDialogTheme();
             CHECK_NULL_VOID(dialogTheme);
 
             Color backgroundColor;
@@ -202,16 +204,18 @@ void UpdateAndAddBorderTopColorCallback(
     if (topColor.has_value() && hasBorderTopColor) {
         Color topBorderColor = topColor.value();
         RefPtr<ResourceObject> resObj;
-        ResourceParseUtils::CompleteResourceObjectFromColor(resObj, topBorderColor, dialog->GetTag());
+        ResourceParseUtils::CompleteResourceObjectFromColor(
+            resObj, topBorderColor, ResourceParseUtils::MakeNativeNodeInfo(AceType::RawPtr(dialog)));
         auto updateFunc = [dialogWeak = AceType::WeakClaim(AceType::RawPtr(dialog))](
                               const RefPtr<ResourceObject>& resObj) {
             auto dialog = dialogWeak.Upgrade();
             CHECK_NULL_VOID(dialog);
+            ACE_UINODE_TRACE(dialog);
             auto pattern = dialog->GetPattern<DialogPattern>();
             CHECK_NULL_VOID(pattern);
             auto pipelineContext = dialog->GetContext();
             CHECK_NULL_VOID(pipelineContext);
-            auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
+            auto dialogTheme = pattern->GetDialogTheme();
             CHECK_NULL_VOID(dialogTheme);
 
             Color topBorderColor;
@@ -249,16 +253,18 @@ void UpdateAndAddBorderBottomColorCallback(
     if (bottomColor.has_value() && hasBorderBottomColor) {
         Color bottomBorderColor = bottomColor.value();
         RefPtr<ResourceObject> resObj;
-        ResourceParseUtils::CompleteResourceObjectFromColor(resObj, bottomBorderColor, dialog->GetTag());
+        ResourceParseUtils::CompleteResourceObjectFromColor(
+            resObj, bottomBorderColor, ResourceParseUtils::MakeNativeNodeInfo(AceType::RawPtr(dialog)));
         auto updateFunc = [dialogWeak = AceType::WeakClaim(AceType::RawPtr(dialog))](
                               const RefPtr<ResourceObject>& resObj) {
             auto dialog = dialogWeak.Upgrade();
             CHECK_NULL_VOID(dialog);
+            ACE_UINODE_TRACE(dialog);
             auto pattern = dialog->GetPattern<DialogPattern>();
             CHECK_NULL_VOID(pattern);
             auto pipelineContext = dialog->GetContext();
             CHECK_NULL_VOID(pipelineContext);
-            auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
+            auto dialogTheme = pattern->GetDialogTheme();
             CHECK_NULL_VOID(dialogTheme);
 
             Color bottomBorderColor;
@@ -297,16 +303,18 @@ void UpdateAndAddBorderLeftColorCallback(
     if (leftColor.has_value() && hasBorderLeftColor) {
         Color leftBorderColor = leftColor.value();
         RefPtr<ResourceObject> resObj;
-        ResourceParseUtils::CompleteResourceObjectFromColor(resObj, leftBorderColor, dialog->GetTag());
+        ResourceParseUtils::CompleteResourceObjectFromColor(
+            resObj, leftBorderColor, ResourceParseUtils::MakeNativeNodeInfo(AceType::RawPtr(dialog)));
         auto updateFunc = [dialogWeak = AceType::WeakClaim(AceType::RawPtr(dialog))](
                               const RefPtr<ResourceObject>& resObj) {
             auto dialog = dialogWeak.Upgrade();
             CHECK_NULL_VOID(dialog);
+            ACE_UINODE_TRACE(dialog);
             auto pattern = dialog->GetPattern<DialogPattern>();
             CHECK_NULL_VOID(pattern);
             auto pipelineContext = dialog->GetContext();
             CHECK_NULL_VOID(pipelineContext);
-            auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
+            auto dialogTheme = pattern->GetDialogTheme();
             CHECK_NULL_VOID(dialogTheme);
 
             Color leftBorderColor;
@@ -345,16 +353,18 @@ void UpdateAndAddBorderRightColorCallback(
     if (rightColor.has_value() && hasBorderRightColor) {
         Color rightBorderColor = rightColor.value();
         RefPtr<ResourceObject> resObj;
-        ResourceParseUtils::CompleteResourceObjectFromColor(resObj, rightBorderColor, dialog->GetTag());
+        ResourceParseUtils::CompleteResourceObjectFromColor(
+            resObj, rightBorderColor, ResourceParseUtils::MakeNativeNodeInfo(AceType::RawPtr(dialog)));
         auto updateFunc = [dialogWeak = AceType::WeakClaim(AceType::RawPtr(dialog))](
                               const RefPtr<ResourceObject>& resObj) {
             auto dialog = dialogWeak.Upgrade();
             CHECK_NULL_VOID(dialog);
+            ACE_UINODE_TRACE(dialog);
             auto pattern = dialog->GetPattern<DialogPattern>();
             CHECK_NULL_VOID(pattern);
             auto pipelineContext = dialog->GetContext();
             CHECK_NULL_VOID(pipelineContext);
-            auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
+            auto dialogTheme = pattern->GetDialogTheme();
             CHECK_NULL_VOID(dialogTheme);
 
             Color rightBorderColor;
@@ -421,11 +431,13 @@ void UpdateAndAddBlurStyleOptionCallback(RefPtr<FrameNode> dialog, const DialogP
         BlurStyleOption blurStyleOption = dialogProps.blurStyleOption.value();
         Color inactiveColor = blurStyleOption.inactiveColor;
         RefPtr<ResourceObject> resObj;
-        ResourceParseUtils::CompleteResourceObjectFromColor(resObj, inactiveColor, dialog->GetTag());
+        ResourceParseUtils::CompleteResourceObjectFromColor(
+            resObj, inactiveColor, ResourceParseUtils::MakeNativeNodeInfo(AceType::RawPtr(dialog)));
         auto updateFunc = [dialogWeak = AceType::WeakClaim(AceType::RawPtr(dialog))](
                               const RefPtr<ResourceObject>& resObj) {
             auto dialog = dialogWeak.Upgrade();
             CHECK_NULL_VOID(dialog);
+            ACE_UINODE_TRACE(dialog);
             auto pattern = dialog->GetPattern<DialogPattern>();
             CHECK_NULL_VOID(pattern);
 
@@ -465,11 +477,13 @@ void UpdateAndAddEffectOptionColorCallback(RefPtr<FrameNode> dialog, const Dialo
         EffectOption effectOption = dialogProps.effectOption.value();
         Color color = effectOption.color;
         RefPtr<ResourceObject> resObj;
-        ResourceParseUtils::CompleteResourceObjectFromColor(resObj, color, dialog->GetTag());
+        ResourceParseUtils::CompleteResourceObjectFromColor(
+            resObj, color, ResourceParseUtils::MakeNativeNodeInfo(AceType::RawPtr(dialog)));
         auto updateFunc = [dialogWeak = AceType::WeakClaim(AceType::RawPtr(dialog))](
                               const RefPtr<ResourceObject>& resObj) {
             auto dialog = dialogWeak.Upgrade();
             CHECK_NULL_VOID(dialog);
+            ACE_UINODE_TRACE(dialog);
 
             Color color;
             auto state = ResourceParseUtils::ParseResColor(resObj, color);
@@ -506,11 +520,13 @@ void UpdateAndAddEffectOptionInactiveColorCallback(RefPtr<FrameNode> dialog, con
         EffectOption effectOption = dialogProps.effectOption.value();
         Color inactiveColor = effectOption.inactiveColor;
         RefPtr<ResourceObject> resObj;
-        ResourceParseUtils::CompleteResourceObjectFromColor(resObj, inactiveColor, dialog->GetTag());
+        ResourceParseUtils::CompleteResourceObjectFromColor(
+            resObj, inactiveColor, ResourceParseUtils::MakeNativeNodeInfo(AceType::RawPtr(dialog)));
         auto updateFunc = [dialogWeak = AceType::WeakClaim(AceType::RawPtr(dialog))](
                               const RefPtr<ResourceObject>& resObj) {
             auto dialog = dialogWeak.Upgrade();
             CHECK_NULL_VOID(dialog);
+            ACE_UINODE_TRACE(dialog);
 
             Color inactiveColor;
             auto state = ResourceParseUtils::ParseResColor(resObj, inactiveColor);
@@ -568,18 +584,21 @@ void AddColorModeChangeCallback(RefPtr<FrameNode> dialog, const DialogProperties
     UpdateAndAddEffectOptionCallback(dialog, dialogProps);
 }
 
-RefPtr<FrameNode> DialogView::CreateDialogNode(
-    const int32_t nodeId, const DialogProperties& param, const RefPtr<UINode>& customNode = nullptr)
+RefPtr<FrameNode> DialogView::CreateDialogNode(const int32_t nodeId, const DialogProperties& param,
+    const RefPtr<UINode>& customNode, const RefPtr<UINode>& themeNode)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
-    CHECK_NULL_RETURN(dialogTheme, nullptr);
-
     std::string tag = GetDialogTag(param);
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", tag.c_str(), nodeId);
     RefPtr<FrameNode> dialog = FrameNode::CreateFrameNode(tag, nodeId,
-        AceType::MakeRefPtr<DialogPattern>(dialogTheme, customNode));
+        AceType::MakeRefPtr<DialogPattern>(nullptr, customNode));
+    ACE_UINODE_TRACE(dialog);
+
+    auto pattern = dialog->GetPattern<DialogPattern>();
+    CHECK_NULL_RETURN(pattern, dialog);
+    pattern->SetDialogThemeNode(themeNode);
+    pattern->UpdateDialogTheme();
+    auto dialogTheme = pattern->GetDialogTheme();
+    CHECK_NULL_RETURN(dialogTheme, nullptr);
 
     if (customNode) {
         customNode->Build(nullptr);
@@ -618,8 +637,6 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     // create gray background
     auto dialogContext = dialog->GetRenderContext();
     CHECK_NULL_RETURN(dialogContext, dialog);
-    auto pattern = dialog->GetPattern<DialogPattern>();
-    CHECK_NULL_RETURN(pattern, dialog);
     pattern->SetDialogProperties(param);
     auto isSubwindow = dialogLayoutProp->GetShowInSubWindowValue(false) && !pattern->IsUIExtensionSubWindow();
     if (isSubwindow || !dialogLayoutProp->GetIsModal().value_or(true)) {
@@ -676,6 +693,7 @@ void DialogView::SetDialogAccessibilityHoverConsume(const RefPtr<FrameNode>& dia
         [weak = AceType::WeakClaim(AceType::RawPtr(dialog))](const NG::PointF& point) {
             auto dialogNode = weak.Upgrade();
             CHECK_NULL_RETURN(dialogNode, true);
+            ACE_UINODE_TRACE(dialogNode);
             auto dialogLayoutProp = dialogNode->GetLayoutProperty<DialogLayoutProperty>();
             CHECK_NULL_RETURN(dialogLayoutProp, true);
             auto pattern = dialogNode->GetPattern<DialogPattern>();
@@ -688,4 +706,17 @@ void DialogView::SetDialogAccessibilityHoverConsume(const RefPtr<FrameNode>& dia
         });
 }
 
+bool DialogView::IsSupportBlurStyle(const RefPtr<FrameNode>& node, bool isShowInSubwindow)
+{
+    CHECK_NULL_RETURN(node, false);
+    auto renderContext = node->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+    if (isShowInSubwindow) {
+        return renderContext->IsUniRenderEnabled();
+    }
+    return true;
+#endif
+    return renderContext->IsUniRenderEnabled();
+}
 } // namespace OHOS::Ace::NG

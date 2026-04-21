@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/pattern/web/web_agent_event_reporter.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
 #include "core/components_ng/pattern/web/web_model_ng.h"
 #include "core/components_ng/pattern/web/web_pattern_property.h"
@@ -78,6 +79,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, AudioResumeInterval, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, AudioExclusive, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, KeyboardAvoidMode, WebKeyboardAvoidMode);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, KeyboardAppearanceMode, WebKeyboardAppearanceMode);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, TextZoomRatio, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, InitialScale, float);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, UserAgent, std::string);
@@ -107,6 +109,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ZoomControlAccess, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, GestureFocusMode, GestureFocusMode);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableAutoFill, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableDefaultContextMenu, bool);
     using NativeVideoPlayerConfigType = std::tuple<bool, bool>;
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeVideoPlayerConfig, NativeVideoPlayerConfigType);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SelectionMenuOptions, WebMenuOptionsParam);
@@ -136,6 +139,7 @@ public:
 
     void SetWebController(const RefPtr<WebController>& webController);
     RefPtr<WebController> GetWebController() const;
+    RefPtr<WebAgentEventReporter> GetAgentEventReporter();
 
     void SetNewDragStyle(bool isNewDragStyle)
     {
@@ -166,6 +170,10 @@ public:
     void SetEmulateTouchFromMouseEvent(bool emulateTouchFromMouseEvent) {}
     void UpdateDataDetectorConfig(const TextDetectConfig& config) {}
     void SetJsProxyCallback(JsProxyCallback&& jsProxyCallback) {}
+    void EnableScrollDirectionalLock(bool enabled,
+        ScrollDirectionalLockType type = ScrollDirectionalLockType::NESTED_SCROLL);
+    void UpdateEnableDrag(bool enabled) {}
+    void UpdateScrollbarLayoutPolicy(ScrollbarLayoutPolicy policy) {}
 
 private:
     std::string GetMixedModeAsString() const;
@@ -224,6 +232,7 @@ private:
     void OnOverScrollModeUpdate(int) {}
     void OnCopyOptionModeUpdate(int) {}
     void OnKeyboardAvoidModeUpdate(WebKeyboardAvoidMode const&) {}
+    void OnKeyboardAppearanceModeUpdate(WebKeyboardAppearanceMode const&) {}
     void OnAudioResumeIntervalUpdate(int) {}
     void OnAudioExclusiveUpdate(bool) {}
     void OnTextZoomRatioUpdate(int) {}
@@ -258,6 +267,7 @@ private:
     void OnEnableSelectedDataDetectorUpdate(bool enable) {}
     void OnZoomControlAccessUpdate(bool zoomControlAccess) {}
     void OnEnableAutoFillUpdate(bool enable) {}
+    void OnEnableDefaultContextMenuUpdate(bool isEnabled) {}
     void OnGestureFocusModeUpdate(GestureFocusMode mode) {}
     void OnEnableImageAnalyzerUpdate(bool isEnabled) {}
 
@@ -269,6 +279,7 @@ private:
         .scrollRight = NestedScrollMode::SELF_ONLY,
     };
     RefPtr<WebController> webController_;
+    RefPtr<WebAgentEventReporter> webAgentEventReporter_ = nullptr;
     std::optional<std::string> webData_;
     bool isNewDragStyle_ = false;
     OnControllerAttachedCallback onControllerAttachedCallback_ = nullptr;

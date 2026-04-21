@@ -516,6 +516,24 @@ void CanvasPaintMethod::SetCanvasRenderContext(const RefPtr<CanvasRenderContext>
     canvasRenderContext_->SetPaintMethod(this);
 }
 
+std::optional<bool> CanvasPaintMethod::GetAntialiasExt() const
+{
+    CHECK_NULL_RETURN(canvasRenderContext_, std::nullopt);
+    return canvasRenderContext_->GetAntialiasExt();
+}
+
+void CanvasPaintMethod::SetAntialiasExtParam(std::optional<bool> isEnabled)
+{
+    CHECK_NULL_VOID(canvasRenderContext_);
+    canvasRenderContext_->SetAntialiasExtParam(isEnabled);
+}
+
+void CanvasPaintMethod::ResetAntialiasExt()
+{
+    CHECK_NULL_VOID(canvasRenderContext_);
+    canvasRenderContext_->ResetAntialiasExt();
+}
+
 TransformParam CanvasPaintMethod::GetTransform()
 {
     CHECK_NULL_RETURN(canvasRenderContext_, {});
@@ -605,5 +623,10 @@ TransformParam CanvasPaintMethod::GetTransformInner()
 LineDashParam CanvasPaintMethod::GetLineDashInner() const
 {
     return state_.strokeState.GetLineDash();
+}
+
+std::optional<bool> CanvasPaintMethod::GetAntialiasExtInner() const
+{
+    return fontAntiAlias_;
 }
 } // namespace OHOS::Ace::NG

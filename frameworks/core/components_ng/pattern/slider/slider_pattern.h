@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -164,8 +164,8 @@ public:
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
     OffsetF CalculateGlobalSafeOffset();
-    void UpdateValue(float value);
-    void UpdateValueMultiThread(const RefPtr<FrameNode>& frameNode);
+    void UpdateValue(float value, bool isNotifyRecovery = true);
+    void UpdateValueMultiThread(const RefPtr<FrameNode>& frameNode, bool isNotifyRecovery = true);
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
     void SetBuilderFunc(SliderMakeCallback&& makeFunc)
@@ -212,7 +212,7 @@ public:
         return suffix_.Upgrade() != nullptr;
     };
 
-    void SetSliderValue(double value, int32_t mode);
+    void SetSliderValue(double value, int32_t mode, bool isNotifyRecovery = true);
     void InitSliderEnds();
     void InitAccessibilityVirtualNodeTask();
     void SetIsAccessibilityOn(bool value)
@@ -267,6 +267,7 @@ public:
     void UpdateSliderComponentMedia();
     void UpdateSliderComponentString(const bool isShowTips, const std::string& value);
     Axis GetDirection() const;
+    int32_t OnInjectionEvent(const std::string& command) override;
 
 private:
     void OnAttachToFrameNode() override;
@@ -326,6 +327,9 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
     void PaintFocusState();
     bool MoveStep(int32_t stepCount);
+    bool ParseCommand(const std::string& command, float& value);
+    void ReportChangeEvent(float value, int32_t mode);
+    bool ReportInjectionResult(bool isSuccess, const std::string& reason);
 #ifdef SUPPORT_DIGITAL_CROWN
     void InitDigitalCrownEvent(const RefPtr<FocusHub>& focusHub)
     {

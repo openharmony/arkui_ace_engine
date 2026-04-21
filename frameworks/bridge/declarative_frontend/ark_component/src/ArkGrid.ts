@@ -222,21 +222,25 @@ class GridLayoutOptionsModifier extends ModifierWithKey<GridLayoutOptions> {
   static identity: Symbol = Symbol('gridLayoutOptions');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().grid.setGridLayoutOptions(node, undefined, undefined, undefined, undefined, undefined);
+      getUINativeModule().grid.setGridLayoutOptions(node, undefined, undefined, undefined, undefined, undefined, undefined, undefined);
     } else {
       getUINativeModule().grid.setGridLayoutOptions(node,
         isArray(this.value.regularSize) ? this.value.regularSize : undefined,
         isArray(this.value?.irregularIndexes) ? this.value.irregularIndexes : undefined,
         isArray(this.value?.irregularIndexes) ? this.value.irregularIndexes.length : undefined,
         isFunction(this.value?.onGetIrregularSizeByIndex) ? this.value.onGetIrregularSizeByIndex : undefined,
-        isFunction(this.value?.onGetRectByIndex) ? this.value.onGetRectByIndex : undefined);
+        isFunction(this.value?.onGetRectByIndex) ? this.value.onGetRectByIndex : undefined,
+        isFunction(this.value?.onGetStartIndexByOffset) ? this.value.onGetStartIndexByOffset : undefined,
+        isFunction(this.value?.onGetStartIndexByIndex) ? this.value.onGetStartIndexByIndex : undefined);
     }
   }
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue?.regularSize, this.value?.regularSize) ||
       !isBaseOrResourceEqual(this.stageValue?.irregularIndexes, this.value?.irregularIndexes) ||
       !isBaseOrResourceEqual(this.stageValue?.onGetIrregularSizeByIndex, this.value?.onGetIrregularSizeByIndex) ||
-      !isBaseOrResourceEqual(this.stageValue?.onGetRectByIndex, this.value?.onGetRectByIndex);
+      !isBaseOrResourceEqual(this.stageValue?.onGetRectByIndex, this.value?.onGetRectByIndex) ||
+      !isBaseOrResourceEqual(this.stageValue?.onGetStartIndexByOffset, this.value?.onGetStartIndexByOffset) ||
+      !isBaseOrResourceEqual(this.stageValue?.onGetStartIndexByIndex, this.value?.onGetStartIndexByIndex);
   }
 }
 

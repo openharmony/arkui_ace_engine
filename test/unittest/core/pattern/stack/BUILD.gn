@@ -16,9 +16,17 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("stack_test_ng") {
   type = "new"
   module_name = "Layout-Stack"
+
   sources = [
     "old_cases/stack_test_ng.cpp",
     "stack_base_test_ng.cpp",
     "stack_new_test_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "stack_test_core.cpp" ]
+  } else {
+    sources += [ "stack_test_core.cpp" ]
+  }
 }

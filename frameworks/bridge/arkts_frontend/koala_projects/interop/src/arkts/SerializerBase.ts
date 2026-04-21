@@ -150,7 +150,10 @@ export class SerializerBase implements Disposable {
             return new SerializerBase()
         }
         if (SerializerBase.poolTop === SerializerBase.pool.length) {
-            throw new Error("Pool empty! Release one of taken serializers")
+            // Dynamically expand the pool when all serializers are in use
+            const newSerializer = new SerializerBase()
+            SerializerBase.pool.push(newSerializer)
+            console.log(`SerializerBase pool expanded to size ${SerializerBase.pool.length}`)
         }
         return SerializerBase.pool[SerializerBase.poolTop++]
     }
@@ -187,6 +190,7 @@ export class SerializerBase implements Disposable {
     public release() {
         this.releaseResources()
         if (SerializerBase.isMultithread) {
+            this.dispose()
             return
         }
         this._position = this._buffer
@@ -209,7 +213,7 @@ export class SerializerBase implements Disposable {
 
     final toArray(): byte[] {
         const len = this.length()
-        let result = new byte[len]
+        let result = new byte[len](0)
         for (let i = 0; i < len; i++) {
             result[i] = unsafeMemory.readInt8(this._buffer + i)
         }

@@ -82,6 +82,11 @@ void InputMethodManager::ManageFocusNode(const RefPtr<NG::FrameNode>& curFocusNo
         return;
     }
     bool lastFocusNodeExist = curFocusNode_.Upgrade() ? true : false;
+    if (lastFocusNodeExist) {
+        preTag = curFocusNode_.Upgrade()->GetTag();
+    } else {
+        preTag = "";
+    }
     if (lastFocusNodeExist && isLastFocusUIExtension_ && lastFocusNodeId_ != curFocusNode->GetId()) {
         curFocusNode_ = curFocusNode;
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "UIExtension switch focus");
@@ -97,8 +102,9 @@ void InputMethodManager::ManageFocusNode(const RefPtr<NG::FrameNode>& curFocusNo
             HideKeyboardAcrossProcesses();
         }
     }
-    if (curFocusNode->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG ||
-        curFocusNode->GetTag() == V2::EMBEDDED_COMPONENT_ETS_TAG) {
+    if (preTag != V2::WEB_ETS_TAG &&
+        (curFocusNode->GetTag() != V2::TEXTINPUT_ETS_TAG || curFocusNode->GetTag() != V2::TEXTAREA_ETS_TAG ||
+            curFocusNode->GetTag() != V2::RICH_EDITOR_ETS_TAG || curFocusNode->GetTag() != V2::SEARCH_ETS_TAG)) {
         CloseCustomKeyboard(true);
     }
 
@@ -245,9 +251,6 @@ void InputMethodManager::CloseKeyboard(bool disableNeedToRequestKeyboard)
     CHECK_NULL_VOID(pipeline);
     auto textFieldManager = pipeline->GetTextFieldManager();
     CHECK_NULL_VOID(textFieldManager);
-    if (currentFocusNode->GetTag() != V2::WEB_ETS_TAG) {
-        CloseCustomKeyboard();
-    }
     if (!textFieldManager->GetImeShow() && !textFieldManager->GetIsImeAttached()) {
         return;
     }

@@ -19,6 +19,7 @@
 #include "base/log/dump_log.h"
 #include "base/log/log_wrapper.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "parameters.h"
 
 namespace OHOS::Ace::NG {

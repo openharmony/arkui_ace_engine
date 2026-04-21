@@ -150,7 +150,7 @@ HWTEST_F(WaterFlowModifierTest, setOnScrollFrameBeginTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: setCashedCountTest
+ * @tc.name: setCachedCount0Test
  * @tc.desc: test function of SetCachedCount
  * @tc.type: FUNC
  */
@@ -160,11 +160,11 @@ HWTEST_F(WaterFlowModifierTest, setCachedCount0Test, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     ASSERT_NE(modifier_->setCachedCount0, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, CASHED_COUNT_ATTRIBUTE_NAME);
-    EXPECT_EQ(checkVal, CASHED_COUNT_ATTRIBUTE_DEFAULT_VALUE);
+    EXPECT_THAT(checkVal, Eq(CASHED_COUNT_ATTRIBUTE_DEFAULT_VALUE));
     for (const auto& [value, expectVal] : CASHED_COUNT_TEST_PLAN) {
         modifier_->setCachedCount0(node_, &value);
         checkVal = GetAttrValue<std::string>(node_, CASHED_COUNT_ATTRIBUTE_NAME);
-        EXPECT_EQ(checkVal, expectVal);
+        EXPECT_THAT(checkVal, Eq(expectVal));
     }
 }
 } // namespace OHOS::Ace::NG

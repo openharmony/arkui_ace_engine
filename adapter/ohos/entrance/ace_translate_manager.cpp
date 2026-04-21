@@ -364,7 +364,6 @@ void UiTranslateManagerImpl::GetPixelMapFromImageTypeNode(RefPtr<NG::FrameNode> 
             componentPixelMap = result.first == OHOS::Ace::ERROR_CODE_NO_ERROR ? result.second : nullptr;
             return;
         }
-        imagePattern->AddPixelMapToUiManager();
         auto canvasImage = imagePattern->GetCanvasImage();
         if (canvasImage == nullptr) {
             const auto& result = NG::ComponentSnapshot::GetSyncByUniqueId(frameNodeId, options);
@@ -465,11 +464,13 @@ void UiTranslateManagerImpl::GetAllPixelMap(RefPtr<NG::FrameNode> pageNode)
 {
     std::list<RefPtr<NG::FrameNode>> result;
     pageNode->FindTopNavDestination(result);
-    for (auto frameNode : result) {
-        if (frameNode) {
-            TravelFindPixelMap(frameNode);
-        } else {
-            TravelFindPixelMap(pageNode);
+    if (result.empty()) {
+        TravelFindPixelMap(pageNode);
+    } else {
+        for (auto frameNode : result) {
+            if (frameNode) {
+                TravelFindPixelMap(frameNode);
+            }
         }
     }
     
@@ -496,7 +497,7 @@ void UiTranslateManagerImpl::TravelFindPixelMap(RefPtr<NG::UINode> currentNode)
 
 void UiTranslateManagerImpl::PostToUI(const std::function<void()>& task)
 {
-    if (taskExecutor_) {
+    if (taskExecutor_ && task) {
         taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIHandleUiTranslateManager");
     }
 }

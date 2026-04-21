@@ -399,12 +399,12 @@ struct ImageExample {
       Column() {
         Column() {
           if (this.isModifier) {
-            Image($r('app.media.cat'))
+            Image($r('app.media.startIcon'))
               .attributeModifier(this.myModifier)
               .overlay('modifier')
           } else {
             if (this.backType == 0) {
-              Image($r('app.media.cat'))
+              Image($r('app.media.startIcon'))
                 .width(this.widthValue)
                 .height(this.heightValue)
                 .aspectRatio(this.aspectRatioValue)
@@ -413,7 +413,7 @@ struct ImageExample {
                 .border({ width: 1, color: Color.Red })
                 .overlay('原生')
             } else if (this.backType == 1) {
-              Image($r('app.media.cat'))
+              Image($r('app.media.startIcon'))
                 .width(this.widthValue)
                 .height(this.heightValue)
                 .objectFit(ImageFit.CENTER)
@@ -424,7 +424,7 @@ struct ImageExample {
                 .border({ width: 1, color: Color.Red })
                 .overlay('原生')
             } else {
-              Image($r('app.media.cat'))
+              Image($r('app.media.startIcon'))
                 .onError((eve)=>{
                   console.log(' ' + JSON.stringify(eve))
                 })

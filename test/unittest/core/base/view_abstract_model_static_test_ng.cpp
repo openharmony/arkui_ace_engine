@@ -17,8 +17,8 @@
 #define protected public
 #define private public
 #include "base/subwindow/subwindow_manager.h"
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/unittest/core/base/view_abstract_test_ng.h"
 
 #include "core/common/resource/resource_parse_utils.h"

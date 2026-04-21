@@ -14,6 +14,8 @@
  */
 #include "arc_round.h"
 
+#include "base/log/log_wrapper.h"
+
 #ifndef PI_NUM
 #define PI_NUM 3.14f
 #endif

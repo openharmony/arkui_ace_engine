@@ -32,7 +32,6 @@
 #include "core/components_ng/pattern/text/symbol_span_model.h"
 #include "core/components_ng/pattern/text/symbol_span_model_ng.h"
 #include "core/components_ng/pattern/text/span_node.h"
-#include "core/components_ng/pattern/text/text_model.h"
 
 namespace OHOS::Ace {
 constexpr int32_t SYSTEM_SYMBOL_BOUNDARY = 0XFFFFF;

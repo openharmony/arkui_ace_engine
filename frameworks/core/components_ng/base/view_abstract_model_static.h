@@ -30,7 +30,6 @@
 #include "base/utils/utils.h"
 #include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/alignment.h"
-#include "core/components/common/properties/border_image.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model.h"
@@ -47,6 +46,10 @@
 
 namespace OHOS::Rosen {
     class BrightnessBlender;
+}
+
+namespace OHOS::Ace {
+class BorderImage;
 }
 
 namespace OHOS::Ace::NG {
@@ -66,6 +69,11 @@ public:
     static void UpdateLayoutPolicyProperty(FrameNode* frameNode, const LayoutCalPolicy layoutPolicy, bool isWidth)
     {
         ViewAbstract::UpdateLayoutPolicyProperty(frameNode, layoutPolicy, isWidth);
+    }
+
+    static void ResetLayoutPolicyProperty(FrameNode* frameNode, bool isWidth)
+    {
+        ViewAbstract::ResetLayoutPolicyProperty(frameNode, isWidth);
     }
 
     static void SetHeight(FrameNode* frameNode, const CalcDimension& height)
@@ -209,7 +217,7 @@ public:
         const NG::MenuParam& menuParam);
 
     static void BindContentCover(FrameNode* targetNode, bool isShow,
-        std::function<void(const std::string&)>&& callback, std::function<RefPtr<UINode>()>&& buildFunc,
+        std::function<void(const std::string&)>&& callback, std::function<void()>&& buildFunc,
         NG::ModalStyle& modalStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
         std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
         const NG::ContentCoverParam& contentCoverParam);
@@ -248,10 +256,10 @@ public:
     static void SetGeometryTransition(FrameNode* frameNode, const std::string& id,
         bool followWithoutTransition, bool doRegisterSharedTransition);
 
-    static void SetFrontBlur(FrameNode* frameNode, const std::optional<float>& radius,
+    static void SetFrontBlur(FrameNode* frameNode, const std::optional<double>& radius,
         const std::optional<BlurOption>& blurOption, const std::optional<SysOptions>& sysOptions)
     {
-        Dimension radiusPX(radius.value_or(0.0f), DimensionUnit::PX);
+        Dimension radiusPX(radius.value_or(0.0), DimensionUnit::PX);
         ViewAbstract::SetFrontBlur(frameNode, radiusPX, blurOption.value_or(BlurOption()),
             sysOptions.value_or(DEFAULT_SYS_OPTIONS));
     }
@@ -355,6 +363,7 @@ public:
     static void SetLightUpEffect(FrameNode* frameNode, const std::optional<double> radio);
     static void SetPixelStretchEffect(FrameNode* frameNode,
         const std::optional<PixStretchEffectOption>& option);
+    static void SetSpatialEffect(FrameNode* frameNode, const std::optional<SpatialEffectParams>& params);
     static void SetBlendApplyType(FrameNode* frameNode, const std::optional<BlendApplyType>& blendApplyType);
     static void SetPrivacySensitive(FrameNode* frameNode, const std::optional<bool>& flag);
     static void SetOnTouchTestFunc(FrameNode* frameNode, NG::OnChildTouchTestFunc&& onChildTouchTest);
@@ -376,6 +385,7 @@ public:
     static constexpr SysOptions DEFAULT_SYS_OPTIONS = {
         .disableSystemAdaptation = false
     };
+    static void SetToolbarBuilder(FrameNode* frameNode, std::function<void()>&& buildFunc);
     static void SetSystemBarEffect(FrameNode* frameNode, bool systemBarEffect);
 
 private:

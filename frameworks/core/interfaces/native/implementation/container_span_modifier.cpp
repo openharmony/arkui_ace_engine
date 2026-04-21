@@ -51,6 +51,16 @@ void SetTextBackgroundStyleImpl(Ark_NativePointer node,
     }
     SpanModelNG::SetTextBackgroundStyleByBaseSpan(frameNode, *convValue);
 }
+void SetDebugLineImpl(Ark_NativePointer node,
+                      const Ark_String* sourceLine,
+                      const Opt_String* moduleName)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(sourceLine);
+    //auto convValue = Converter::OptConvert<type>(sourceLine); // for enums
+    // ContainerSpanModelNG::SetSetDebugLine(frameNode, convValue);
+}
 } // ContainerSpanAttributeModifier
 const GENERATED_ArkUIContainerSpanModifier* GetContainerSpanModifier()
 {
@@ -58,6 +68,7 @@ const GENERATED_ArkUIContainerSpanModifier* GetContainerSpanModifier()
         ContainerSpanModifier::ConstructImpl,
         ContainerSpanInterfaceModifier::SetContainerSpanOptionsImpl,
         ContainerSpanAttributeModifier::SetTextBackgroundStyleImpl,
+        ContainerSpanAttributeModifier::SetDebugLineImpl,
     };
     return &ArkUIContainerSpanModifierImpl;
 }

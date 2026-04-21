@@ -25,12 +25,13 @@
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT UIContentServiceStubImpl : public UiContentStub {
 public:
-    int32_t Connect(const EventCallback& eventCallback) override
+    int32_t Connect(const EventCallback& eventCallback,
+        std::shared_ptr<AppExecFwk::EventHandler> eventHandler = nullptr) override
     {
         return 0;
     }
     int32_t GetInspectorTree(const std::function<void(std::string, int32_t, bool)>& eventCallback,
-        ParamConfig config = ParamConfig()) override;
+        ParamConfig config = ParamConfig(), int32_t timeout = DEFAULT_INSPECTOR_TREE_CALLBACK_TIMEOUT_MS) override;
     int32_t RegisterClickEventCallback(const EventCallback& eventCallback) override;
     int32_t RegisterRouterChangeEventCallback(const EventCallback& eventCallback) override;
     int32_t RegisterSearchEventCallback(const EventCallback& eventCallback) override;
@@ -81,7 +82,7 @@ public:
         const std::function<void(int32_t, const std::map<int32_t, std::map<int32_t,
             std::shared_ptr<Media::PixelMap>>>&, MultiImageQueryErrorCode)>& arkWebfinishCallback) override;
     int32_t GetVisibleInspectorTree(const std::function<void(std::string, int32_t, bool)>& eventCallback,
-        ParamConfig config = ParamConfig()) override;
+        ParamConfig config = ParamConfig(), int32_t timeout = DEFAULT_INSPECTOR_TREE_CALLBACK_TIMEOUT_MS) override;
     int32_t GetLatestHitTestNodeInfosForTouch(
         const std::function<void(std::string, int32_t, bool)>& eventCallback,
         InteractionParamConfig config = InteractionParamConfig()) override;
@@ -92,7 +93,8 @@ public:
         [[maybe_unused]] const std::function<void(ChangeType type, const std::string& simpleTree)> callback) override;
     int32_t UnregisterContentChangeCallback() override;
     int32_t GetStateMgmtInfo(const std::string& componentName, const std::string& propertyName,
-        const std::string& jsonPath, const std::function<void(std::vector<std::string>)>& eventCallback) override;
+        const std::string& jsonPath, const std::function<void(std::vector<std::string>)>& eventCallback,
+        bool onlyVisible = false) override;
 
     int32_t GetWebInfoByRequest(
         int32_t webId,

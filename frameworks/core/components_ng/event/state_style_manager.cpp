@@ -181,6 +181,9 @@ bool StateStyleManager::AddSupportedUIStateWithCallback(
     } else {
         userSubscribersExcludeConfigs_ &= ~state;
     }
+    if (currentState_ == UI_STATE_SELECTED && HasStateStyle(UI_STATE_SELECTED)) {
+        SetCurrentUIState(UI_STATE_SELECTED, true);
+    }
     return true;
 }
 

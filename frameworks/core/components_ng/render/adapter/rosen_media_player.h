@@ -66,6 +66,7 @@ public:
     int32_t SetParameter(const std::string& key, int64_t value) override;
     int32_t EnableCameraPostprocessing() override;
     int32_t SetCameraPostprocessing(bool isOpen) override;
+    int32_t GetGlobalInfo(std::shared_ptr<OHOS::Media::Meta> &globalInfo) override;
 
 private:
     // Interim programme

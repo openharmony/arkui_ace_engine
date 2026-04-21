@@ -29,6 +29,7 @@ private:
     ani_vm* vm_ = nullptr;
     ani_ref func_ = nullptr;
 };
+ani_boolean IsEasySplit([[maybe_unused]] ani_env* env, ani_object obj, ani_int instaceId);
 ani_object GetHostContext([[maybe_unused]] ani_env* env, ani_object obj, ani_int key);
 void SetFrameRateRange([[maybe_unused]] ani_env* env, ani_object obj, ani_long key, ani_object value, ani_int type);
 ani_object GetSharedLocalStorage([[maybe_unused]] ani_env* env);
@@ -41,6 +42,7 @@ void SetFrameNodeDrawCallback(ani_env* env, ani_object obj, ani_long ptr, ani_fn
 void SetDrawModifier(
     ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, uint32_t flag, ani_object drawModifier);
 void SetCustomCallbackWithCheck(ani_env* env, ani_object obj, ani_long ptr, ani_object frameNdoe);
+void SetCustomCallbackWithCheckForFrameNodes(ani_env* env, ani_object obj, ani_array ptrArray, ani_array nodeArray);
 void Invalidate(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr);
 ani_long BuilderProxyNodeConstruct(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_int id);
 void RemoveComponentFromFrameNode(ani_env* env, ani_object obj, ani_long node, ani_long content);
@@ -63,6 +65,7 @@ ani_int IsDebugMode(ani_env* env, ani_object obj, ani_int id);
 void OnMeasureInnerMeasure(ani_env* env, ani_object obj, ani_long ptr);
 void OnLayoutInnerLayout(ani_env* env, ani_object obj, ani_long ptr);
 void SetParallelScoped(ani_env* env, ani_object obj, ani_boolean parallel);
+void CheckThreadValid(ani_env* env, ani_object obj, ani_boolean checkUIThread, ani_long node);
 void SetCustomPropertyCallBack(
     ani_env* env, ani_object aniClass, ani_long node, ani_fn_object removeCallback, ani_fn_object getCallback,
     ani_fn_object getAllCustomPropertiesCallback);
@@ -123,6 +126,8 @@ ani_long ExtractorsToDrawContextPtr(ani_env* env, ani_object aniClass, ani_objec
 ani_object ExtractorsFromDrawContextPtr(ani_env* env, ani_object aniClass, ani_long ptr);
 void ApplyThemeScopeId(ani_env* env, ani_object obj, ani_long ptr, ani_int themeScopeId);
 ani_boolean GetBaseEventModifierKeyState(
+    ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer, ani_array keys);
+ani_boolean GetTouchEventModifierKeyState(
     ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer, ani_array keys);
 ani_boolean GetDragEventModifierKeyState(
     ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer, ani_array keys);

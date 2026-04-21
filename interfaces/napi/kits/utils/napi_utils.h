@@ -28,6 +28,7 @@
 #include "bridge/common/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/resource/resource_wrapper.h"
+#include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/color.h"
 
 namespace OHOS::Ace::Napi {
@@ -93,6 +94,24 @@ bool ParseColor(napi_env env, napi_value value, Color& info);
 bool ParseResourceParam(napi_env env, napi_value value, ResourceInfo& info);
 
 bool ParseString(const ResourceInfo& info, std::string& result);
+
+bool MatchValueTypeLuminance(napi_env env, napi_value value, napi_valuetype targetType);
+
+bool ParseStringLuminance(napi_env env, napi_value propertyNapi, std::string& property);
+
+bool ParseIntLuminance(napi_env env, napi_value propertyNapi, int32_t& property);
+
+bool ParseEdgesLengthMetrics(napi_env env, napi_value value, EdgesParam& edges);
+
+bool ParseRightEdge(napi_env env, napi_value obj, EdgesParam& edges);
+
+bool ParseLeftEdge(napi_env env, napi_value obj, EdgesParam& edges);
+
+bool ParseBottomEdge(napi_env env, napi_value obj, EdgesParam& edges);
+
+bool ParseTopEdge(napi_env env, napi_value obj, EdgesParam& edges);
+
+bool ParseLengthMetricValue(napi_env env, napi_value value, CalcDimension& dimension);
 
 std::string ErrorToMessage(int32_t code);
 

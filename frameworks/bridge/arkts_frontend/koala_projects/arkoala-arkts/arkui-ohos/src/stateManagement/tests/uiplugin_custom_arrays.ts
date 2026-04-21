@@ -20,7 +20,7 @@ import { IMutableStateMeta } from '../decorator'
 
 // unit testing
 import { ObserveSingleton } from '../base/observeSingleton';
-import { TestMSM } from './lib/testAddRefFireChange'
+import { TestMSM, TestMutableKeyedStateMeta } from './lib/testAddRefFireChange'
 import { tsuite, tcase, test, eq } from './lib/testFramework'
 import { STATE_MGMT_FACTORY } from '../decorator'
 let StateMgmtFactory = STATE_MGMT_FACTORY;
@@ -130,7 +130,9 @@ class ParentComponent extends ExtendableComponent {
     // For testing
     public getFireChangeCnt(key:string): number {
         // meta_ not visible
-        return TestMSM.getFireChangeCnt(this._backing_state_arr.get().meta_, key);
+        //return TestMSM.getFireChangeCnt(this._backing_state_arr.get().meta_, key);
+        return (this._backing_state_arr.get().meta_ instanceof TestMutableKeyedStateMeta)
+            ? (this._backing_state_arr.get().meta_ as TestMutableKeyedStateMeta).getFireChangeCnt(key) : 0
     }
     public getRefCnt(key:string) {
         // meta_ not visible

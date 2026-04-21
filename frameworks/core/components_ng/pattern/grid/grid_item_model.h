@@ -19,7 +19,9 @@
 #include <functional>
 #include <memory>
 #include <mutex>
-#include "core/components_ng/pattern/grid/grid_item_theme.h"
+
+#include "base/utils/macros.h"
+#include "core/components_ng/pattern/grid/grid_item_constants.h"
 
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT GridItemModel {

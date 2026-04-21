@@ -46,6 +46,7 @@ public:
     static void SetDisplayMode(FrameNode* frameNode, SwiperDisplayMode displayMode);
     static void SetCachedCount(FrameNode* frameNode, int32_t cachedCount);
     static void SetCachedIsShown(FrameNode* frameNode, bool isShown);
+    static void SetCachedIndependent(FrameNode* frameNode, bool independent);
     static void SetEdgeEffect(FrameNode* frameNode, EdgeEffect EdgeEffect);
     static void SetDisableSwipe(FrameNode* frameNode, bool disableSwipe);
     static void SetCurve(FrameNode* frameNode, const RefPtr<Curve>& curve);
@@ -71,6 +72,10 @@ public:
         const std::optional<bool> &ignoreBlank = false);
     static void SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin,
         const std::optional<bool> &ignoreBlank = false);
+    static void SetMaintainVisibleContentPosition(FrameNode* frameNode, bool value);
+    static void SetOnScrollStateChanged(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onScrollStateChanged);
+    static void SetFillType(FrameNode* frameNode, int32_t options);
     static void SetOnChangeEvent(FrameNode* frameNode,
         std::function<void(const BaseEventInfo* info)>&& onChangeEvent);
     static void SetBindIndicator(FrameNode* frameNode, bool bind);

@@ -35,6 +35,7 @@ RefPtr<MenuPattern> GetMenuPattern(const RefPtr<FrameNode>& menuWrapper)
     CHECK_NULL_RETURN(menuWrapperPattern, nullptr);
     auto menuNode = menuWrapperPattern->GetMenu();
     CHECK_NULL_RETURN(menuNode, nullptr);
+    ACE_UINODE_TRACE(menuNode);
     return menuNode->GetPattern<MenuPattern>();
 }
 
@@ -67,6 +68,7 @@ void ShowScaleAnimation(const RefPtr<RenderContext>& context, const RefPtr<MenuT
     CHECK_NULL_VOID(menuPattern);
     auto menuNode = menuPattern->GetHost();
     CHECK_NULL_VOID(menuNode);
+    ACE_UINODE_TRACE(menuNode);
     AnimationUtils::Animate(
         scaleOption,
         [context, previewAfterAnimationScale]() {

@@ -14,8 +14,8 @@
  */
 
 #include "list_test_ng.h"
-#include "test/mock/core/animation/mock_animation_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/animation/mock_animation_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 class ListSyncLoadTestNg : public ListTestNg {
@@ -170,19 +170,20 @@ HWTEST_F(ListSyncLoadTestNg, SyncLoad005, TestSize.Level1)
     ListModelNG model = CreateList();
     model.SetSyncLoad(false);
     CreateListItems(10);
-    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
-    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
-    EXPECT_FALSE(frameNode_->IsActive());
+    MockPipelineContext::GetCurrent()->SetResponseTime(1);
+    CreateDone();
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 0));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 1));
 
     /**
-     * @tc.steps: step2. Layout List
+     * @tc.steps: step2. Set List inactive and layout List.
      * @tc.expected: List async load, item2 inactive
      */
-    MockPipelineContext::GetCurrent()->SetResponseTime(2);
+    MockPipelineContext::GetCurrent()->SetResponseTime(1);
     frameNode_->SetLayoutDirtyMarked(true);
     frameNode_->CreateLayoutTask();
-    IsExistAndActive(frameNode_, 1);
-    IsExistAndInActive(frameNode_, 2);
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 1));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 2));
     EXPECT_FALSE(frameNode_->IsActive());
     frameNode_->SetLayoutDirtyMarked(true);
 
@@ -192,7 +193,7 @@ HWTEST_F(ListSyncLoadTestNg, SyncLoad005, TestSize.Level1)
      */
     MockPipelineContext::GetCurrent()->SetResponseTime(2);
     frameNode_->CreateLayoutTask();
-    IsExistAndActive(frameNode_, 3);
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 3));
     EXPECT_FALSE(frameNode_->IsActive());
 }
 
@@ -217,19 +218,19 @@ HWTEST_F(ListSyncLoadTestNg, SyncLoad006, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Flush at same frame
-     * @tc.expected: List load 1 item in same frame
+     * @tc.expected: List not load item in same frame
      */
     frameNode_->CreateLayoutTask();
-    EXPECT_EQ(pattern_->itemPosition_.size(), 3);
+    EXPECT_EQ(pattern_->itemPosition_.size(), 2);
     EXPECT_TRUE(pattern_->prevMeasureBreak_);
 
     /**
      * @tc.steps: step3. Flush at same frame
-     * @tc.expected: List load 1 item in same frame
+     * @tc.expected: List not load item in same frame
      */
     frameNode_->CreateLayoutTask();
-    EXPECT_EQ(pattern_->itemPosition_.size(), 4);
-    EXPECT_FALSE(pattern_->prevMeasureBreak_);
+    EXPECT_EQ(pattern_->itemPosition_.size(), 2);
+    EXPECT_TRUE(pattern_->prevMeasureBreak_);
 }
 
 /**
@@ -318,17 +319,17 @@ HWTEST_F(ListSyncLoadTestNg, GroupSyncLoad003, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Flush same frame
-     * @tc.expected: List load 1 item in same frame
+     * @tc.expected: List not load item in same frame
      */
     frameNode_->CreateLayoutTask();
-    EXPECT_EQ(itemGroupPatters_[0]->itemPosition_.size(), 3);
+    EXPECT_EQ(itemGroupPatters_[0]->itemPosition_.size(), 2);
     EXPECT_TRUE(pattern_->prevMeasureBreak_);
 
     /**
      * @tc.steps: step2. Flush next frame
-     * @tc.expected: List load 2 item in 2th frame
+     * @tc.expected: List load 3 item in 2th frame
      */
-    MockPipelineContext::GetCurrent()->SetResponseTime(2);
+    MockPipelineContext::GetCurrent()->SetResponseTime(3);
     FlushUITasks(frameNode_);
     EXPECT_EQ(itemGroupPatters_[0]->itemPosition_.size(), 5);
     EXPECT_FALSE(pattern_->prevMeasureBreak_);

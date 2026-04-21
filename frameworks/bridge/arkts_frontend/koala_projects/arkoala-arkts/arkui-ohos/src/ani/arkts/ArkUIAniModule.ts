@@ -32,7 +32,8 @@ import { HookDragInfo } from 'arkui/handwritten';
 import { dragController } from '@ohos/arkui/dragController';
 import { componentSnapshot } from '@ohos/arkui/componentSnapshot';
 import { KeyboardAvoidMode, PanListenerCallback, ClickEventListenerCallback, GestureEventListenerCallback, GestureListenerCallback, GestureListenerType, GestureActionPhase } from '@ohos.arkui.UIContext';
-import { DrawableDescriptor } from '@ohos.arkui.drawableDescriptor';
+import { DrawableDescriptor, PixelMapDrawableDescriptor, LayeredDrawableDescriptor, AnimatedDrawableDescriptor, AnimationOptions, DrawableDescriptorLoadedResult, AnimationController, AnimationStatus } from '@ohos.arkui.drawableDescriptor';
+import { Resource } from '#generated';
 import { default as uiObserver }  from '@ohos/arkui/observer';
 import { SymbolGlyphModifier } from 'arkui.SymbolGlyphModifier';
 import { TextModifier } from 'arkui.TextModifier'
@@ -49,6 +50,7 @@ import { ErrorCallback } from '@ohos.base';
 import { int32 } from '@koalaui/compat';
 import { SaveButtonCallback, PasteButtonCallback } from '#generated';
 import { InputMethodExtraConfig } from '@ohos.inputMethod.ExtraConfig'
+import { default as text } from '@ohos.graphics.text'
 
 export class ArkUIAniModule {
     static {
@@ -60,6 +62,8 @@ export class ArkUIAniModule {
     native static _Extractors_ToImagePixelMapPtr(pixelmap: image.PixelMap): KPointer;
     native static _Extractors_FromImagePixelMapPtr(ptr: KPointer): image.PixelMap;
     native static _Extractors_ToInputMethodExtraConfigPtr(config: InputMethodExtraConfig): KPointer;
+    native static _Extractors_ToTextParagraphPtr(paragraph: text.Paragraph): KPointer;
+    native static _Extractors_FromTextParagraphPtr(ptr: KPointer): text.Paragraph;
     native static _Extractors_ToRectShapePtr(value: RectShape): KPointer;
     native static _Extractors_FromRectShapePtr(ptr: KPointer): RectShape;
     native static _Extractors_ToCircleShapePtr(value: CircleShape): KPointer;
@@ -123,6 +127,7 @@ export class ArkUIAniModule {
     native static _SetFrameNodeDrawCallback(ptr: KPointer, callback: ((context: DrawContext) => void)): void
     native static _SetDrawModifier(ptr: KPointer, flag: KInt, drawModifier: DrawModifier): void
     native static _SetCustomCallbackWithCheck(ptr: KPointer, node: FrameNode): void
+    native static _SetCustomCallbackWithCheckForFrameNodes(ptrArray: Array<KPointer>, nodeArray: Array<FrameNode>): void
     native static _Invalidate(ptr: KPointer): void
     native static _SetWaterFlowSection(ptr: KPointer, sections: WaterFlowSections): void
     native static _SetWaterFlowFooterContent(ptr: KPointer, footerContent: KPointer): void
@@ -153,6 +158,7 @@ export class ArkUIAniModule {
     native static _TransferScrollableTargetInfoPointer(input: KPointer): KPointer
     native static _Common_setIsRecycleInvisibleImageMemory(value: KBoolean, instanceId: KInt): void
     native static _BaseEvent_getModifierKeyState(ptr: KPointer, keys: Array<string>): boolean
+    native static _TouchEvent_getModifierKeyState(ptr: KPointer, keys: Array<string>): boolean
     native static _DragEvent_getModifierKeyState(ptr: KPointer, keys: Array<string>): boolean
     native static _KeyEvent_getModifierKeyState(ptr: KPointer, keys: Array<string>): boolean
     native static _ClickEvent_preventDefault(ptr: KPointer): void
@@ -238,6 +244,33 @@ export class ArkUIAniModule {
     native static _ComponentSnapshot_createFromComponentWithPromise(ptr: KPointer, destroyCallback: () => void,
         delay?: int32, checkImageStatus?: boolean,
         options?: componentSnapshot.SnapshotOptions): Promise<image.PixelMap> | null
+    
+    // for drawable
+    native static _Drawable_CreatePixelMapDrawable(value: PixelMapDrawableDescriptor, pixelmap?: image.PixelMap): void
+    native static _Drawable_CreateLayeredDrawable(value: LayeredDrawableDescriptor, foreground?: image.PixelMap,
+        background?: image.PixelMap, mask?: image.PixelMap): void
+    native static _Drawable_CreateAnimatedDrawable(value: AnimatedDrawableDescriptor,
+        pixelMaps: Array<image.PixelMap>, options?: AnimationOptions): void
+    native static _Drawable_CreateAnimatedDrawableByResource(value: AnimatedDrawableDescriptor,
+        resourceObjectKPointer: KPointer, options?: AnimationOptions): void
+    native static _Drawable_CreateAnimatedDrawableByString(value: AnimatedDrawableDescriptor,
+        src: string, options?: AnimationOptions): void
+    native static _Drawable_CreatePixelMap(value: DrawableDescriptor): image.PixelMap
+    native static _Drawable_CreateForeground(value: LayeredDrawableDescriptor): DrawableDescriptor
+    native static _Drawable_CreateBackground(value: LayeredDrawableDescriptor): DrawableDescriptor
+    native static _Drawable_CreateMask(value: LayeredDrawableDescriptor): DrawableDescriptor
+    native static _Drawable_GetMaskClipPath(): string
+    native static _Drawable_LoadSync(value: DrawableDescriptor): DrawableDescriptorLoadedResult
+    native static _Drawable_Load(value: DrawableDescriptor): Promise<DrawableDescriptorLoadedResult>
+    native static _Drawable_GetAnimationController(value: AnimatedDrawableDescriptor, id?: string): AnimationController | undefined
+    native static _Drawable_SetBlendMode(value: LayeredDrawableDescriptor, mode: drawing.BlendMode): void
+    native static _Drawable_NativeTransferStatic(input: ESValue, typeName: string): DrawableDescriptor
+    native static _Drawable_DestructDrawable(ptr: KPointer): void
+    native static _Drawable_AnimationControllerStart(value: AnimationController): void
+    native static _Drawable_AnimationControllerStop(value: AnimationController): void
+    native static _Drawable_AnimationControllerPause(value: AnimationController): void
+    native static _Drawable_AnimationControllerResume(value: AnimationController): void
+    native static _Drawable_AnimationControllerGetStatus(value: AnimationController): AnimationStatus
 
     // for dragController
     native static _DragController_executeDragWithCallback(custom: DragItemInfo, builder: KPointer,
@@ -355,6 +388,7 @@ export class ArkUIAniModule {
     native static _OnMeasure_InnerMeasure(ptr: KPointer): void
     native static _OnLayout_InnerLayout(ptr: KPointer): void
     native static _SetParallelScoped(parallel: boolean): void
+    native static _CheckThreadValid(checkUIThread: boolean, ptr: KPointer): void
     native static _Common_SetCustomPropertyCallBack(ptr: KPointer, removeCallback: () => void,
         getCallback: (name: string) => string | undefined,
         getAllCustomPropertiesCallback: () => string): void
@@ -369,9 +403,11 @@ export class ArkUIAniModule {
     native static _Common_lpx2px(value:double, instanceId: KInt): double
     native static _Common_px2lpx(value:double, instanceId: KInt): double
     native static _Common_getWindowName(instanceId: KInt): string
-    native static _Common_getWindowId(instanceId: KInt): int32 | undefined
+    native static _Common_getWindowId(instanceId: KInt): int32
     native static _Common_getWindowWidthBreakpoint(): KInt
     native static _Common_getWindowHeightBreakpoint(): KInt
+
+    native static _Common_IsEasySplit(instanceId: KInt): boolean
 
     // for transfer
     native static _createTouchEventAccessorWithPointer(input: KPointer): KPointer

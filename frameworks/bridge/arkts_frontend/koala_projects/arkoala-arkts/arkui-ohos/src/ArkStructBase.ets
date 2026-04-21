@@ -26,12 +26,14 @@ import { ArkCommonMethodComponent, ArkCommonPeer, CommonMethod } from 'arkui/com
 import { memo_skip } from '@koalaui/runtime/annotations';
 import { int32 } from '@koalaui/common';
 import { IExtendableComponent } from './component/extendableComponent';
+import { LifeCycleEvent } from './component/customComponent';
+import { KPointer } from '@koalaui/interop'
 
 /** base class for user's structs */
 export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent {
     private peer?: PeerNode
     public _initializers?: () => T_Options
-    reuseForceAddRefFlag: boolean = false;
+    public reuseForceAddRefFlag: boolean = false;
     private themeScopeId?: int32
 
     setPeer(peer: PeerNode): void {
@@ -63,6 +65,7 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
     aboutToRecycle(): void {}
     __aboutToReuse_Internal(param?: RecordData): void { }
     __aboutToRecycle_Internal(): void { }
+    __debugLine_Internal(ptr: KPointer): void { }
     switchHasBeenRecycle(recycle: boolean) {}
     // Can be overridden as an effect of @Prop, @Watch etc
     protected __updateStruct(initializers?: T_Options): void { }
@@ -121,7 +124,7 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
         ArkComponentRoot(this, (node: PeerNode) => {
             if (callFromReuse) {
                 // reuse component should manually update dependency
-                this.reuseForceAddRefFlag = !this.reuseForceAddRefFlag;
+                // this flag should be switched when reuse to force record again
                 if (this.reuseForceAddRefFlag) {
                     // switch branch to force update dependency
                     this.updateStructWithMemoParameter(initializers);
@@ -137,11 +140,14 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
                 ? ObserveSingleton.RenderingComponentV2
                 : ObserveSingleton.RenderingComponentV1;
             this.build();
-            OBSERVE.renderingComponent = savedRenderingComponent
             remember(() => {
                 ObserveSingleton.instance.applyTaskDelayMutableStateChange(() => {
+                    this.__getLifecycle__Internal()?.trigger(LifeCycleEvent.ON_BUILD);
                     this.onDidBuild();
                 })
+                if (node.peer) {
+                    this.__debugLine_Internal(node.peer.ptr);
+                }
             });
             node.setOnRecycle(() =>
                 this.__aboutToRecycle_Internal()
@@ -151,6 +157,7 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
                     this.__aboutToReuse_Internal(param)
                 }
             )
+            OBSERVE.renderingComponent = savedRenderingComponent;
         })
     }
 
@@ -209,5 +216,9 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
 
     isV2(): boolean {
         return true;
+    }
+
+    getName(): string {
+        return '';
     }
 }

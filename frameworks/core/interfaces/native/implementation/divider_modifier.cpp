@@ -58,7 +58,7 @@ void SetColorImpl(Ark_NativePointer node,
     DividerModelNGStatic::SetDividerColor(frameNode, Converter::OptConvertPtr<Color>(value));
 }
 void SetStrokeWidthImpl(Ark_NativePointer node,
-                        const Opt_Union_Number_String* value)
+                        const Opt_Union_F64_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

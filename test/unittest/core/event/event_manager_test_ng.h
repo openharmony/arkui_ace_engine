@@ -25,9 +25,9 @@
 #define private public
 #define protected public
 #include "mock_touch_event_target.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/offset.h"
@@ -60,7 +60,6 @@
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/animation/animatable_properties.h"
-#include "frameworks/core/common/event_info_manager.h"
 #include "frameworks/core/common/event_manager.h"
 #include "frameworks/core/common/font_manager.h"
 #include "frameworks/core/common/manager_interface.h"

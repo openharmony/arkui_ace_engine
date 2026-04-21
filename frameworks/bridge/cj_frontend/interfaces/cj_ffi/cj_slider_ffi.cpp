@@ -52,8 +52,7 @@ NG::SliderModelNG* GetSliderModel()
 {
     auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Slider");
     if (module == nullptr) {
-        LOGF("Can't find slider dynamic module");
-        abort();
+        LOGF_ABORT("Can't find slider dynamic module");
     }
     return reinterpret_cast<NG::SliderModelNG*>(module->GetModel());
 }

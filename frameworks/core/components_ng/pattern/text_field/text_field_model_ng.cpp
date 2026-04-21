@@ -287,9 +287,7 @@ void TextFieldModelNG::ProcessDefaultStyleAndBehaviors(const RefPtr<FrameNode>& 
         frameNode);  // call ProcessDefaultStyleAndBehaviorsMultiThread() by multi thread
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>(frameNode->GetThemeScopeId());
+    auto textFieldTheme = frameNode->GetTheme<TextFieldTheme>(true);
     CHECK_NULL_VOID(textFieldTheme);
     auto textfieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textfieldPaintProperty);
@@ -474,6 +472,17 @@ void TextFieldModelNG::SetCaretPosition(const int32_t& value)
 void TextFieldModelNG::SetSelectedBackgroundColor(const Color& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, SelectedBackgroundColor, value);
+    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, SelectedBackgroundColorFlagByUser, true);
+    }
+}
+
+void TextFieldModelNG::ResetSelectedBackgroundColor()
+{
+    ACE_RESET_PAINT_PROPERTY(TextFieldPaintProperty, SelectedBackgroundColor);
+    ACE_RESET_PAINT_PROPERTY(TextFieldPaintProperty, SelectedBackgroundColorFlagByUser);
 }
 
 void TextFieldModelNG::SetTextAlign(TextAlign value)
@@ -675,11 +684,25 @@ void TextFieldModelNG::SetOnContentScroll(std::function<void(float, float)>&& fu
     eventHub->SetOnScrollChangeEvent(std::move(func));
 }
 
+void TextFieldModelNG::SetOnWillCopy(std::function<bool(const std::u16string&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillCopy(std::move(func));
+}
+
 void TextFieldModelNG::SetOnCopy(std::function<void(const std::u16string&)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnCopy(std::move(func));
+}
+
+void TextFieldModelNG::SetOnWillCut(std::function<bool(const std::u16string&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillCut(std::move(func));
 }
 
 void TextFieldModelNG::SetOnCut(std::function<void(const std::u16string&)>&& func)
@@ -845,11 +868,7 @@ void TextFieldModelNG::SetBackgroundColor(const Color& color, bool tmp)
     if (tmp) {
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
         CHECK_NULL_VOID(frameNode);
-        auto pipeline = frameNode->GetContextRefPtr();
-        CHECK_NULL_VOID(pipeline);
-        auto themeManager = pipeline->GetThemeManager();
-        CHECK_NULL_VOID(themeManager);
-        auto theme = themeManager->GetTheme<TextFieldTheme>(frameNode->GetThemeScopeId());
+        auto theme = frameNode->GetTheme<TextFieldTheme>(true);
         CHECK_NULL_VOID(theme);
         backgroundColor = theme->GetBgColor();
     }
@@ -1100,6 +1119,15 @@ void TextFieldModelNG::SetHalfLeading(bool value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, HalfLeading, value);
 }
 
+void TextFieldModelNG::SetHorizontalScrolling(bool value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetHorizontalScrolling(value);
+}
+
 void TextFieldModelNG::SetLineSpacing(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineSpacing, value);
@@ -1230,9 +1258,15 @@ void TextFieldModelNG::SetTextOverflow(FrameNode* frameNode, Ace::TextOverflow v
 
 TextOverflow TextFieldModelNG::GetTextOverflow(FrameNode* frameNode)
 {
-    TextOverflow value = TextOverflow::DEFAULT;
-    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, TextOverflow, value, frameNode, value);
-    return value;
+    TextOverflow defaultValue = TextOverflow::NONE;
+    CHECK_NULL_RETURN(frameNode, defaultValue);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, defaultValue);
+    auto isTextArea = pattern->IsTextArea();
+    defaultValue = isTextArea ? TextOverflow::CLIP : TextOverflow::NONE;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldLayoutProperty, TextOverflow, defaultValue, frameNode, defaultValue);
+    return defaultValue;
 }
 
 void TextFieldModelNG::SetTextIndent(FrameNode* frameNode, const Dimension& value)
@@ -1304,6 +1338,15 @@ void TextFieldModelNG::SetPasswordIcon(FrameNode* frameNode, const PasswordIcon&
 void TextFieldModelNG::SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, SelectedBackgroundColor, value, frameNode);
+    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, SelectedBackgroundColorFlagByUser, true, frameNode);
+    }
+}
+
+void TextFieldModelNG::ResetSelectedBackgroundColor(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY(TextFieldPaintProperty, SelectedBackgroundColor, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY(TextFieldPaintProperty, SelectedBackgroundColorFlagByUser, frameNode);
 }
 
 void TextFieldModelNG::SetMaxViewLines(FrameNode* frameNode, uint32_t value)
@@ -1487,6 +1530,30 @@ void TextFieldModelNG::ResetSelectDetectEnable(FrameNode* frameNode)
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->ResetSelectDetectEnable();
+}
+
+void TextFieldModelNG::SetHorizontalScrolling(FrameNode* frameNode, bool value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetHorizontalScrolling(value);
+}
+
+bool TextFieldModelNG::GetHorizontalScrolling(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->GetHorizontalScrolling();
+}
+
+void TextFieldModelNG::ResetHorizontalScrolling(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetHorizontalScrolling(false);
 }
 
 void TextFieldModelNG::SetCaretStyle(FrameNode* frameNode, const CaretStyle& value)
@@ -1743,6 +1810,14 @@ void TextFieldModelNG::SetOnSubmit(FrameNode* frameNode, std::function<void(int3
     auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSubmit(std::move(func));
+}
+
+void TextFieldModelNG::SetOnWillCut(FrameNode* frameNode, std::function<bool(const std::u16string&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillCut(std::move(func));
 }
 
 void TextFieldModelNG::SetOnCut(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func)
@@ -2203,6 +2278,14 @@ void TextFieldModelNG::SetOnContentScroll(FrameNode* frameNode, std::function<vo
     auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollChangeEvent(std::move(func));
+}
+
+void TextFieldModelNG::SetOnWillCopy(FrameNode* frameNode, std::function<bool(const std::u16string&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillCopy(std::move(func));
 }
 
 void TextFieldModelNG::SetOnCopy(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func)
@@ -2769,6 +2852,26 @@ bool TextFieldModelNG::GetEnableAutoSpacing(FrameNode* frameNode)
     return value;
 }
 
+void TextFieldModelNG::SetOrphanCharOptimization(bool isOrphanChar)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, OrphanCharOptimization, isOrphanChar);
+}
+
+void TextFieldModelNG::SetOrphanCharOptimization(FrameNode* frameNode, bool isOrphanChar)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, OrphanCharOptimization, isOrphanChar, frameNode);
+}
+
+bool TextFieldModelNG::GetOrphanCharOptimization(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, OrphanCharOptimization,
+        value, frameNode, value);
+    return value;
+}
+
 void TextFieldModelNG::SetCompressLeadingPunctuation(bool enabled)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CompressLeadingPunctuation, enabled);
@@ -2912,6 +3015,15 @@ void TextFieldModelNG::SetSelectedDragPreviewStyle(FrameNode* frameNode, const C
 void TextFieldModelNG::ResetSelectedDragPreviewStyle(FrameNode* frameNode)
 {
     ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SelectedDragPreviewStyle, frameNode);
+}
+
+void TextFieldModelNG::SetUserAccessibilityText()
+{
+    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetHasUserAccessibilityText();
 }
 
 } // namespace OHOS::Ace::NG

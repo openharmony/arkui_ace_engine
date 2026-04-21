@@ -14,12 +14,15 @@
  */
 
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include "core/components/common/properties/color.h"
 #include "core/components/text_field/textfield_theme.h"
+#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select_overlay/magnifier.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_pattern.h"
 #include "core/components_ng/pattern/text/text_base.h"
+#include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -34,6 +37,7 @@ void MagnifierController::SetLocalOffset(
     CHECK_NULL_VOID(pattern);
     PointF point(
         localOffsetWithoutTrans.value_or(localOffset).GetX(), localOffsetWithoutTrans_.value_or(localOffset).GetY());
+    OffsetF patternOffset(0.f, 0.f);
     auto node = pattern->GetHost();
     while (node) {
         if (node->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
@@ -43,9 +47,11 @@ void MagnifierController::SetLocalOffset(
         CHECK_NULL_VOID(renderContext);
         auto paintOffset = renderContext->GetPaintRectWithoutTransform().GetOffset();
         point = point + paintOffset;
+        patternOffset = patternOffset + paintOffset;
         renderContext->GetPointTransform(point);
         node = node ->GetAncestorNodeOfFrame(true);
     }
+    patternOffset_ = patternOffset;
     globalOffset_.SetX(point.GetX());
     globalOffset_.SetY(point.GetY());
     magnifierNodeExist_ = true;
@@ -62,9 +68,48 @@ void MagnifierController::UpdateShowMagnifier(bool isShowMagnifier)
     }
 }
 
+bool MagnifierController::UpdateMagnifierEdgeY(const RefPtr<PipelineContext>& pipelineContext, float& magnifierY,
+    float& patternVisibleBottom, float& windowScale, int32_t& screenHeight)
+{
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_RETURN(container, false);
+    windowScale = container->GetWindowScale();
+    windowScale = NearZero(windowScale) ? 1.0f : windowScale;
+    screenHeight = container->GetDisplayInfo()->GetHeight();
+
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, false);
+    auto node = pattern->GetHost();
+    CHECK_NULL_RETURN(node, false);
+    if (node->GetTag() == V2::SEARCH_Field_ETS_TAG) {
+        auto searchNode = AceType::DynamicCast<FrameNode>(node->GetParent());
+        if (searchNode && searchNode->GetTag() == V2::SEARCH_ETS_TAG) {
+            node = searchNode;
+        }
+    }
+    auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
+    RectF visibleRect;
+    RectF frameRect;
+    node->GetVisibleRect(visibleRect, frameRect);
+    auto patternFrameTop = windowGlobalRect.Top() + visibleRect.GetY() * windowScale;
+    auto patternBottom = visibleRect.Height() * windowScale + patternFrameTop;
+    patternVisibleBottom = visibleRect.Bottom();
+    if (GreatNotEqual(patternBottom, screenHeight) && LessNotEqual(windowScale, 1.f)) {
+        patternVisibleBottom = visibleRect.GetY() + (screenHeight - patternFrameTop) / windowScale;
+    }
+    magnifierY =
+        std::clamp(magnifierY, 0.f, static_cast<float>(patternVisibleBottom - magnifierNodeHeight_.ConvertToPx()));
+    return true;
+}
+
 bool MagnifierController::UpdateMagnifierOffsetX(OffsetF& magnifierPaintOffset, VectorF& magnifierOffset,
     VectorF& zoomOffset)
 {
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_RETURN(container, false);
     const float halfMenuWidth = magnifierNodeWidth_.ConvertToPx() / 2;
     float left = globalOffset_.GetX() - halfMenuWidth;
     auto rootUINode = GetRootNode();
@@ -72,13 +117,32 @@ bool MagnifierController::UpdateMagnifierOffsetX(OffsetF& magnifierPaintOffset, 
     auto rootGeometryNode = rootUINode->GetGeometryNode();
     CHECK_NULL_RETURN(rootGeometryNode, false);
     auto rootFrameSize = rootGeometryNode->GetFrameSize();
+    auto windowScale = container->GetWindowScale();
+    windowScale = NearZero(windowScale) ? 1.0f : windowScale;
+    int32_t screenWidth = container->GetDisplayInfo()->GetWidth();
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, false);
+    auto node = pattern->GetHost();
+    CHECK_NULL_RETURN(node, false);
+    auto parentGeometryNode = node->GetGeometryNode();
+    CHECK_NULL_RETURN(parentGeometryNode, false);
+    auto windowGlobalRect = pipeline->GetDisplayWindowRectInfo();
+    auto patternFrameLeft = static_cast<float>(windowGlobalRect.Left() + patternOffset_.GetX() * windowScale);
+    auto patternWidth = parentGeometryNode->GetFrameSize().Width() * windowScale;
+    float magnifierInnerPaddingX = static_cast<float>(
+        (MAGNIFIER_SHADOWOFFSETX + MAGNIFIER_SHADOWSIZE * MAGNIFIER_SHADOW_SIZE_SCALE).ConvertToPx());
+    if ((GreatNotEqual(patternWidth + patternFrameLeft, screenWidth) || LessNotEqual(patternFrameLeft, 0.f)) &&
+        LessNotEqual(windowScale, 1.f)) {
+        auto maxPatternWidth = (patternOffset_.GetX() * windowScale + screenWidth - patternFrameLeft) / windowScale;
+        auto minPatternWidth = patternFrameLeft - magnifierInnerPaddingX * windowScale;
+        left = std::clamp(
+            left, -minPatternWidth, static_cast<float>(maxPatternWidth - magnifierNodeWidth_.ConvertToPx()));
+    }
     auto magnifierX =
         std::clamp(left, 0.f, static_cast<float>(rootFrameSize.Width() - magnifierNodeWidth_.ConvertToPx()));
     float halfPreScaledTextWidth = halfMenuWidth / MAGNIFIER_FACTOR;
-    float magnifierInnerPaddingX =
-        static_cast<float>((MAGNIFIER_SHADOWOFFSETX + MAGNIFIER_SHADOWSIZE * 1.5).ConvertToPx());
-    float maxZoomOffsetX = halfMenuWidth - halfPreScaledTextWidth + magnifierInnerPaddingX;
-    auto zoomOffsetX = globalOffset_.GetX() - (magnifierX + halfMenuWidth);
+    float maxZoomOffsetX = (halfMenuWidth - halfPreScaledTextWidth + magnifierInnerPaddingX) * windowScale;
+    auto zoomOffsetX = (globalOffset_.GetX() - (magnifierX + halfMenuWidth)) * windowScale;
     if (LessNotEqual(zoomOffsetX, -halfMenuWidth) || GreatNotEqual(zoomOffsetX, halfMenuWidth)) {
         TAG_LOGW(AceLogTag::ACE_SELECT_OVERLAY, "zoomOffsetX is invalid.");
     }
@@ -98,41 +162,39 @@ bool MagnifierController::UpdateMagnifierOffsetY(OffsetF& magnifierPaintOffset, 
     float halfMenuHeight = menuHeight / 2;
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     auto keyboardInsert = safeAreaManager->GetKeyboardInset();
-    auto hasKeyboard = GreatNotEqual(keyboardInsert.Length(), 0.0f);
-    auto magnifierY = globalOffset_.GetY() - halfMenuHeight;
-    float offsetY_ = 0.f;
-
-    if (hasKeyboard && globalOffset_.GetY() >= keyboardInsert.start) {
+    auto rawMagnifierY = globalOffset_.GetY() - halfMenuHeight;
+    auto magnifierY = rawMagnifierY;
+    float windowScale = 0.f;
+    float patternVisibleBottom = 0.f;
+    int32_t screenHeight = 0;
+    if (GreatNotEqual(keyboardInsert.Length(), 0.0f) && globalOffset_.GetY() >= keyboardInsert.start) {
         UpdateShowMagnifier();
         return false;
-    }
-    auto container = Container::CurrentSafely();
-    if (container && container->GetDisplayInfo()) {
-        auto screenHeight = container->GetDisplayInfo()->GetHeight();
-        magnifierY = std::clamp(magnifierY, 0.f, static_cast<float>(screenHeight - menuHeight));
     }
     auto rootUINode = GetRootNode();
     CHECK_NULL_RETURN(rootUINode, false);
     auto rootGeometryNode = rootUINode->GetGeometryNode();
     CHECK_NULL_RETURN(rootGeometryNode, false);
     auto rootFrameSize = rootGeometryNode->GetFrameSize();
-    offsetY_ = std::clamp(magnifierY, 0.f, static_cast<float>(MAGNIFIER_OFFSETY.ConvertToPx()));
-    auto magnifierPaintOffsetY = magnifierY - offsetY_;
-    magnifierPaintOffsetY =
-        std::clamp(magnifierPaintOffsetY, 0.f, static_cast<float>(rootFrameSize.Height() - menuHeight));
-    magnifierPaintOffset.SetY(magnifierPaintOffsetY);
-    magnifierOffset.y = offsetY_;
-    if (LessNotEqual(globalOffset_.GetY(), halfMenuHeight)) {
-        zoomOffset.y = globalOffset_.GetY() - halfMenuHeight;
-    } else if (GreatNotEqual(globalOffset_.GetY(), rootFrameSize.Height() - halfMenuHeight)) {
-        zoomOffset.y = globalOffset_.GetY() - rootFrameSize.Height() + halfMenuHeight;
-    } else {
-        zoomOffset.y = 0.f;
+    CHECK_NULL_RETURN(
+        UpdateMagnifierEdgeY(pipeline, magnifierY, patternVisibleBottom, windowScale, screenHeight), false);
+    float maxOffsetY = static_cast<float>(MAGNIFIER_OFFSETY.ConvertToPx());
+    float patternBottomLimit = static_cast<float>(patternVisibleBottom - menuHeight);
+    float offsetY = std::clamp(magnifierY, 0.f, maxOffsetY);
+    if (GreatNotEqual(rawMagnifierY, patternBottomLimit)) {
+        float exceedBottom = rawMagnifierY - patternBottomLimit;
+        float edgeOffsetY = std::clamp(maxOffsetY - exceedBottom, 0.f, maxOffsetY);
+        offsetY = std::min(offsetY, edgeOffsetY);
     }
-    float preScaledTextHeight = static_cast<float>(magnifierNodeHeight_.ConvertToPx() / MAGNIFIER_FACTOR);
-    float magnifierInnerPaddingY =
-        static_cast<float>((MAGNIFIER_SHADOWOFFSETY + MAGNIFIER_SHADOWSIZE * 1.5).ConvertToPx());
-    float maxZoomOffsetY = halfMenuHeight - preScaledTextHeight / 2 + magnifierInnerPaddingY + ZOOM_OFFSET_Y;
+    auto magnifierPaintOffsetY = std::clamp(magnifierY - offsetY, 0.f, rootFrameSize.Height() - menuHeight);
+    magnifierPaintOffset.SetY(magnifierPaintOffsetY);
+    magnifierOffset.y = offsetY;
+    zoomOffset.y = (globalOffset_.GetY() - (magnifierY + halfMenuHeight)) * windowScale;
+    float preScaledMagnifierHeight = static_cast<float>(MAGNIFIER_HEIGHT.ConvertToPx() / MAGNIFIER_FACTOR);
+    float halfMagnifierInnerPaddingY = static_cast<float>(
+        (MAGNIFIER_SHADOWOFFSETY + MAGNIFIER_SHADOWSIZE * MAGNIFIER_SHADOW_SIZE_SCALE).ConvertToPx() / 2);
+    float maxZoomOffsetY = (menuHeight - preScaledMagnifierHeight) * windowScale / 2 +
+                          halfMagnifierInnerPaddingY / MAGNIFIER_FACTOR;
     zoomOffset.y = std::clamp(zoomOffset.y, -maxZoomOffsetY, maxZoomOffsetY);
     return true;
 }
@@ -158,12 +220,6 @@ bool MagnifierController::UpdateMagnifierOffset()
     CHECK_NULL_RETURN(UpdateMagnifierOffsetX(magnifierPaintOffset, magnifierOffset, zoomOffset), false);
     CHECK_NULL_RETURN(UpdateMagnifierOffsetY(magnifierPaintOffset, magnifierOffset, zoomOffset), false);
     auto geometryNode = magnifierFrameNode_->GetGeometryNode();
-    if (magnifierPaintOffset == geometryNode->GetFrameOffset() && NearEqual(params_.offsetX_, magnifierOffset.x) &&
-        NearEqual(params_.offsetY_, magnifierOffset.y)) {
-        // change x one pixel so magnifier can refresh
-        magnifierPaintOffset.SetX(magnifierPaintOffset.GetX() - 1.0f);
-        magnifierOffset.x += 1.0f;
-    }
     geometryNode->SetFrameOffset(magnifierPaintOffset);
     childContext->UpdatePosition(
         OffsetT<Dimension>(Dimension(magnifierPaintOffset.GetX()), Dimension(magnifierPaintOffset.GetY())));
@@ -318,7 +374,7 @@ void MagnifierController::InitMagnifierParams()
     params_.factor_ = MAGNIFIER_FACTOR;
     params_.width_ = MAGNIFIER_WIDTH.ConvertToPx();
     params_.height_ = MAGNIFIER_HEIGHT.ConvertToPx();
-    params_.borderWidth_ = MAGNIFIER_BORDERWIDTH.ConvertToPx();
+    params_.borderWidth_ = MAGNIFIER_BORDERWIDTH;
     params_.cornerRadius_ = MAGNIFIER_CORNERRADIUS.ConvertToPx();
     params_.shadowOffsetX_ = MAGNIFIER_SHADOWOFFSETX.ConvertToPx();
     params_.shadowOffsetY_ = MAGNIFIER_SHADOWOFFSETY.ConvertToPx();
@@ -329,8 +385,6 @@ void MagnifierController::InitMagnifierParams()
     CHECK_NULL_VOID(pipeline);
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(textFieldTheme);
-    uint32_t gradientMaskColor1 = textFieldTheme->GetGlassMaskPrimaryColor().GetValue();
-    uint32_t gradientMaskColor2 = textFieldTheme->GetGlassMaskSecondaryColor().GetValue();
 
     Color outlineColor1 = textFieldTheme->GetGlassOutlinePrimaryColor();
     Color outlineColor2 = textFieldTheme->GetGlassOutlineSecondaryColor();
@@ -341,16 +395,12 @@ void MagnifierController::InitMagnifierParams()
         outlineColor1 = outlineColor1.ChangeAlpha(0x7F); // 0x7F: 50%
         outlineColor2 = outlineColor2.ChangeAlpha(0x7F); // 0x7F: 50%
     }
-    uint32_t outerContourColor1 = outlineColor1.GetValue();
-    uint32_t outerContourColor2 = outlineColor2.GetValue();
-    params_.gradientMaskColor1_ = ArgbToRgba(gradientMaskColor1);
-    params_.gradientMaskColor2_ = ArgbToRgba(gradientMaskColor2);
-    params_.outerContourColor1_ = ArgbToRgba(outerContourColor1);
-    params_.outerContourColor2_ = ArgbToRgba(outerContourColor2);
-    magnifierNodeWidth_ =
-        MAGNIFIER_WIDTH + MAGNIFIER_SHADOWOFFSETX + MAGNIFIER_SHADOWSIZE * 1.5; // 1.5: Compute the node width
-    magnifierNodeHeight_ =
-        MAGNIFIER_HEIGHT + MAGNIFIER_SHADOWOFFSETY + MAGNIFIER_SHADOWSIZE * 1.5; // 1.5: Compute the node height
+    magnifierNodeWidth_ = MAGNIFIER_WIDTH + MAGNIFIER_SHADOWSIZE * 2.0f;
+    magnifierNodeHeight_ = MAGNIFIER_HEIGHT + MAGNIFIER_SHADOWSIZE * 2.0f;
+    auto color = Color::WHITE;
+    color = color.ChangeOpacity(MAGNIFIER_BORDERSTRENGTH);
+    uint32_t borderColor = color.GetValue();
+    params_.outerContourColor1_ = ArgbToRgba(borderColor);
 }
 
 uint32_t MagnifierController::ArgbToRgba(const uint32_t& color)

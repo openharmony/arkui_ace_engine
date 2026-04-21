@@ -19,7 +19,6 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
 #include "core/interfaces/native/implementation/unified_data_peer.h"
-#include "unified_data_peer.h"
 
 namespace OHOS::Ace::NG::Converter {
     template<>
@@ -113,6 +112,7 @@ void SetDataImpl(Ark_DragEvent peer,
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(peer->dragInfo);
     CHECK_NULL_VOID(unifiedData);
+    peer->dragInfo->SetUseDataLoadParams(false);
     peer->dragInfo->SetData(unifiedData->unifiedData);
 }
 Opt_unifiedDataChannel_UnifiedData GetDataImpl(Ark_DragEvent peer)
@@ -126,10 +126,6 @@ Opt_unifiedDataChannel_UnifiedData GetDataImpl(Ark_DragEvent peer)
     const auto unifiedPeer = PeerUtils::CreatePeer<unifiedDataChannel_UnifiedDataPeer>();
     unifiedPeer->unifiedData = data;
     return Converter::ArkValue<Opt_unifiedDataChannel_UnifiedData>(unifiedPeer);
-}
-Opt_unifiedDataChannel_Summary GetSummaryImpl(Ark_DragEvent peer)
-{
-    return Converter::ArkValue<Opt_unifiedDataChannel_Summary>();
 }
 void SetResultImpl(Ark_DragEvent peer,
                    Ark_DragResult dragResult)
@@ -183,7 +179,7 @@ Ark_Float64 GetVelocityImpl(Ark_DragEvent peer)
     return Converter::ArkValue<Ark_Float64>(value);
 }
 void ExecuteDropAnimationImpl(Ark_DragEvent peer,
-                              const Callback_Void* customDropAnimation)
+                              const VoidCallback* customDropAnimation)
 {
     CHECK_NULL_VOID(customDropAnimation);
     CHECK_NULL_VOID(peer);
@@ -219,14 +215,6 @@ Ark_Boolean IsRemoteImpl(Ark_DragEvent peer)
     CHECK_NULL_RETURN(peer->dragInfo, errValue);
     auto isRemote = peer->dragInfo->isRemoteDev();
     return Converter::ArkValue<Ark_Boolean>(isRemote);
-}
-void SetDataLoadParamsImpl(Ark_DragEvent peer,
-                           const Ark_unifiedDataChannel_DataLoadParams* dataLoadParams)
-{
-}
-void EnableInternalDropAnimationImpl(Ark_DragEvent peer,
-                                     const Ark_String* configuration)
-{
 }
 Ark_Float64 GetGlobalDisplayXImpl(Ark_DragEvent peer)
 {
@@ -278,21 +266,42 @@ void SetUseCustomDropAnimationImpl(Ark_DragEvent peer,
     CHECK_NULL_VOID(peer->dragInfo);
     peer->dragInfo->UseCustomAnimation(Convert<bool>(useCustomDropAnimation));
 }
-Opt_ModifierKeyStateGetter GetGetModifierKeyStateImpl(Ark_DragEvent peer)
+Opt_Union_I32_Array_I32 GetAutoHideComponentUniqueIdsImpl(Ark_DragEvent peer)
 {
-    const auto invalid = Converter::ArkValue<Opt_ModifierKeyStateGetter>(Ark_Empty());
+    auto invalid = ArkUnion<Opt_Union_I32_Array_I32>(Ark_Empty());
     CHECK_NULL_RETURN(peer, invalid);
-    auto info = peer->dragInfo;
-    CHECK_NULL_RETURN(info, invalid);
-    auto getter = CallbackKeeper::ReturnReverseCallback<ModifierKeyStateGetter,
-            std::function<void(const Array_String, const Callback_Boolean_Void)>>([info]
-            (const Array_String keys, const Callback_Boolean_Void continuation) {
-        auto eventKeys = info->GetPressedKeyCodes();
-        auto keysStr = Converter::Convert<std::vector<std::string>>(keys);
-        Ark_Boolean arkResult = Converter::ArkValue<Ark_Boolean>(AccessorUtils::CheckKeysPressed(keysStr, eventKeys));
-        CallbackHelper(continuation).InvokeSync(arkResult);
-    });
-    return Converter::ArkValue<Opt_ModifierKeyStateGetter, ModifierKeyStateGetter>(getter);
+    CHECK_NULL_RETURN(peer->dragInfo, invalid);
+    const auto& uniqueIds = peer->dragInfo->GetAutoHideComponentUniqueIds();
+    if (uniqueIds.empty()) {
+        return invalid;
+    }
+    if (uniqueIds.size() == 1) {
+        return ArkUnion<Opt_Union_I32_Array_I32, Ark_Int32>(uniqueIds.front());
+    }
+    return ArkUnion<Opt_Union_I32_Array_I32, Array_I32>(uniqueIds, FC);
+}
+void SetAutoHideComponentUniqueIdsImpl(Ark_DragEvent peer,
+                                       const Opt_Union_I32_Array_I32* autoHideComponentUniqueIds)
+{
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(peer->dragInfo);
+    std::vector<int32_t> uniqueIds;
+    auto autoHideComponentUniqueIdsOpt = GetOptPtr(autoHideComponentUniqueIds);
+    if (autoHideComponentUniqueIdsOpt) {
+        switch (autoHideComponentUniqueIdsOpt->selector) {
+            case SELECTOR_ID_0:
+                uniqueIds.emplace_back(Convert<int32_t>(autoHideComponentUniqueIdsOpt->value0));
+                break;
+            case SELECTOR_ID_1:
+                uniqueIds = Convert<std::vector<int32_t>>(autoHideComponentUniqueIdsOpt->value1);
+                break;
+            default:
+                LOGE("Unexpected selector in autoHideComponentUniqueIds: %{public}d",
+                    autoHideComponentUniqueIdsOpt->selector);
+                return;
+        }
+    }
+    peer->dragInfo->SetAutoHideComponentUniqueIds(uniqueIds);
 }
 void SetGetModifierKeyStateImpl(Ark_DragEvent peer,
                                 const Opt_ModifierKeyStateGetter* getModifierKeyState)
@@ -312,26 +321,24 @@ const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor()
         DragEventAccessor::GetWindowYImpl,
         DragEventAccessor::SetDataImpl,
         DragEventAccessor::GetDataImpl,
-        DragEventAccessor::GetSummaryImpl,
         DragEventAccessor::SetResultImpl,
         DragEventAccessor::GetResultImpl,
         DragEventAccessor::GetPreviewRectImpl,
         DragEventAccessor::GetVelocityXImpl,
         DragEventAccessor::GetVelocityYImpl,
         DragEventAccessor::GetVelocityImpl,
+        DragEventAccessor::ExecuteDropAnimationImpl,
         DragEventAccessor::GetDisplayIdImpl,
         DragEventAccessor::GetDragSourceImpl,
         DragEventAccessor::IsRemoteImpl,
-        DragEventAccessor::SetDataLoadParamsImpl,
-        DragEventAccessor::ExecuteDropAnimationImpl,
-        DragEventAccessor::EnableInternalDropAnimationImpl,
         DragEventAccessor::GetGlobalDisplayXImpl,
         DragEventAccessor::GetGlobalDisplayYImpl,
         DragEventAccessor::GetDragBehaviorImpl,
         DragEventAccessor::SetDragBehaviorImpl,
         DragEventAccessor::GetUseCustomDropAnimationImpl,
         DragEventAccessor::SetUseCustomDropAnimationImpl,
-        DragEventAccessor::GetGetModifierKeyStateImpl,
+        DragEventAccessor::GetAutoHideComponentUniqueIdsImpl,
+        DragEventAccessor::SetAutoHideComponentUniqueIdsImpl,
         DragEventAccessor::SetGetModifierKeyStateImpl,
     };
     return &DragEventAccessorImpl;

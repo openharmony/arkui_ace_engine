@@ -16,7 +16,6 @@
 #include "core/components_ng/pattern/sheet/sheet_object.h"
 
 #include "base/geometry/dimension.h"
-#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/animation/curve.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
@@ -175,6 +174,7 @@ void SheetObject::ClipSheetNode()
     }
     if (sheetType == SheetType::SHEET_POPUP && pattern->GetSheetPopupInfo().showArrow) {
         std::string clipPath = pattern->GetPopupStyleSheetClipPath(sheetSize, borderRadius);
+        ACE_UINODE_TRACE(host);
         auto path = AceType::MakeRefPtr<Path>();
         path->SetValue(clipPath);
         path->SetBasicShapeType(BasicShapeType::PATH);
@@ -669,6 +669,7 @@ void SheetObject::CreatePropertyCallback()
         renderContext->UpdateTransformTranslate({0.0f, targetTranslateY, 0.0f});
         ref->ChangeSheetPage(position);
     };
+    ACE_UINODE_TRACE(host);
     auto property = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
     sheetPattern->SetProperty(property);
 }

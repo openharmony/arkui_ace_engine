@@ -54,6 +54,7 @@ public:
     static void SetShowPassword(FrameNode* frameNode, const std::optional<bool>& valueOpt);
     static void SetTextAlign(FrameNode* frameNode, const std::optional<TextAlign>& valueOpt);
     static void SetTextDirection(FrameNode* frameNode, const std::optional<TextDirection>& valueOpt);
+    static void SetHorizontalScrolling(FrameNode* frameNode, const std::optional<bool>& valueOpt);
     static void SetTextColor(FrameNode* frameNode, const std::optional<Color>& colorOpt);
     static void SetCaretPosition(FrameNode* frameNode, const std::optional<int32_t>& optValue);
     static void SetFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& valueOpt);
@@ -106,6 +107,7 @@ public:
     static void SetSelectAllValue(FrameNode* frameNode, const std::optional<bool>& isSelectAllValue);
     static void SetDefaultCancelIcon(FrameNode* frameNode);
     static void SetCompressLeadingPunctuation(FrameNode* frameNode, const std::optional<bool>& valueOpt);
+    static void SetOrphanCharOptimization(FrameNode* frameNode, const std::optional<bool>& valueOpt);
     static void SetWidthAuto(FrameNode* frameNode, bool val);
     static void SetPadding(FrameNode* frameNode, const NG::PaddingProperty& newPadding, bool tmp);
     static void SetMargin(FrameNode* frameNode);

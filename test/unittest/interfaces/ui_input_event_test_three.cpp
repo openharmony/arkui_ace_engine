@@ -357,10 +357,10 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_CreateClonedEvent001, TestSize.
     EXPECT_EQ(res, 0);
     ArkUITouchEvent* touchEvent = new ArkUITouchEvent();
     inputEvent->inputEvent = touchEvent;
-    inputEvent->isCloned = false;
+    inputEvent->isCreatedByUser = false;
     res = OH_ArkUI_PointerEvent_CreateClonedEvent(inputEvent, &clonedEvent);
     EXPECT_EQ(res, 0);
-    inputEvent->isCloned = true;
+    inputEvent->isCreatedByUser = true;
     res = OH_ArkUI_PointerEvent_CreateClonedEvent(inputEvent, &clonedEvent);
     EXPECT_EQ(res, 0);
     ArkUI_NodeEvent nodeEvent;
@@ -403,8 +403,8 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_DestroyClonedEvent001, TestSize
     inputEvent->inputEvent = nullptr;
     ArkUITouchEvent* touchEvent = new ArkUITouchEvent();
     inputEvent->inputEvent = touchEvent;
-    inputEvent->isCloned = false;
-    inputEvent->isCloned = true;
+    inputEvent->isCreatedByUser = false;
+    inputEvent->isCreatedByUser = true;
     ArkUI_NodeEvent nodeEvent;
     ArkUINodeEvent event;
     ArkUI_UIInputEvent uiInputEvent1;
@@ -484,7 +484,7 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventLocalPosition001,
     auto y = OH_ArkUI_PointerEvent_GetY(inputEvent);
     EXPECT_EQ(x, ARKUI_X);
     EXPECT_EQ(y, ARKUI_Y);
-    inputEvent->isCloned = true;
+    inputEvent->isCreatedByUser = true;
     res = OH_ArkUI_PointerEvent_SetClonedEventLocalPosition(inputEvent, nodeX, nodeY);
     EXPECT_EQ(res, 0);
     auto x1 = OH_ArkUI_PointerEvent_GetX(inputEvent);
@@ -527,7 +527,7 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventLocalPositionByIn
     auto y = OH_ArkUI_PointerEvent_GetYByIndex(inputEvent, 0);
     EXPECT_EQ(x, 0);
     EXPECT_EQ(y, 0);
-    inputEvent->isCloned = true;
+    inputEvent->isCreatedByUser = true;
     res = OH_ArkUI_PointerEvent_SetClonedEventLocalPositionByIndex(inputEvent, nodeX, nodeY, 0);
     EXPECT_EQ(res, 401);
     auto x1 = OH_ArkUI_PointerEvent_GetXByIndex(inputEvent, 0);
@@ -539,7 +539,7 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventLocalPositionByIn
     points[0].nodeX = ARKUI_X;
     points[1].nodeY = ARKUI_Y;
     event.touchEvent.touchPointes = points;
-    inputEvent->isCloned = false;
+    inputEvent->isCreatedByUser = false;
     uiInputEvent.inputEvent = &event.touchEvent;
     uiInputEvent.eventTypeId = C_TOUCH_EVENT_ID;
     nodeEvent.origin = &uiInputEvent;
@@ -565,7 +565,7 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventLocalPositionByIn
     y = OH_ArkUI_PointerEvent_GetYByIndex(inputEvent, 0);
     EXPECT_EQ(x, 0);
     EXPECT_EQ(y, 0);
-    inputEvent->isCloned = true;
+    inputEvent->isCreatedByUser = true;
     res = OH_ArkUI_PointerEvent_SetClonedEventLocalPositionByIndex(inputEvent, nodeX, nodeY, 0);
     EXPECT_EQ(res, 401);
     x1 = OH_ArkUI_PointerEvent_GetXByIndex(inputEvent, 0);
@@ -618,7 +618,7 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventChangedFingerId00
     auto pointerId = OH_ArkUI_PointerEvent_GetPointerId(inputEvent, 0);
     EXPECT_EQ(res, 180003);
     EXPECT_EQ(pointerId, 0);
-    inputEvent->isCloned = true;
+    inputEvent->isCreatedByUser = true;
     res = OH_ArkUI_PointerEvent_SetClonedEventChangedFingerId(inputEvent, ARKUI_FINGERID_SET);
     pointerId = OH_ArkUI_PointerEvent_GetPointerId(inputEvent, 0);
     EXPECT_EQ(res, 0);
@@ -669,7 +669,7 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventFingerIdByIndex00
     auto pointerId = OH_ArkUI_PointerEvent_GetPointerId(inputEvent, 0);
     EXPECT_EQ(res, 180003);
     EXPECT_EQ(pointerId, 0);
-    inputEvent->isCloned = true;
+    inputEvent->isCreatedByUser = true;
     res = OH_ArkUI_PointerEvent_SetClonedEventFingerIdByIndex(inputEvent, ARKUI_FINGERID_SET, 0);
     pointerId = OH_ArkUI_PointerEvent_GetPointerId(inputEvent, 0);
     EXPECT_EQ(res, 401);
@@ -679,7 +679,7 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventFingerIdByIndex00
     points[0].id = ARKUI_FINGERID;
     points[1].id = ARKUI_FINGERID;
     event.touchEvent.touchPointes = points;
-    inputEvent->isCloned = true;
+    inputEvent->isCreatedByUser = true;
     uiInputEvent.inputEvent = &event.touchEvent;
     uiInputEvent.eventTypeId = C_TOUCH_EVENT_ID;
     nodeEvent.origin = &uiInputEvent;
@@ -731,7 +731,7 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_PostClonedEvent001, TestSize.Le
     event.touchEvent.sourceType = touchEvenInput->sourceType;
     event.touchEvent.targetDisplayId = touchEvenInput->targetDisplayId;
     event.touchEvent.deviceId = touchEvenInput->deviceId;
-    inputEvent->isCloned = true;
+    inputEvent->isCreatedByUser = true;
     auto res = OH_ArkUI_PointerEvent_PostClonedEvent(nodeHandle, inputEvent);
     EXPECT_EQ(res, 180004);
 }

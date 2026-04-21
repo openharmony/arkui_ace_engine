@@ -23,8 +23,8 @@ struct drawing_LatticePeer final {
 
     static drawing_LatticePeer* Create(void* data)
     {
-        auto colorFilter = OHOS::Ace::DrawingLattice::CreateDrawingLatticeFromNative(data);
-        return new drawing_LatticePeer { colorFilter };
+        auto lattice = OHOS::Ace::DrawingLattice::CreateDrawingLatticeFromNative(data);
+        return new drawing_LatticePeer { lattice };
     }
 
     static void Destroy(drawing_LatticePeer* peer)

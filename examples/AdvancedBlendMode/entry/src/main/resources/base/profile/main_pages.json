@@ -1,0 +1,11 @@
+{
+  "src": [
+    "pages/Index",
+    "pages/text",
+    "pages/textArea",
+    "pages/text_modifier",
+    "pages/textArea_modifier",
+    "pages/textInput_modifier",
+    "pages/textinput"
+  ]
+}

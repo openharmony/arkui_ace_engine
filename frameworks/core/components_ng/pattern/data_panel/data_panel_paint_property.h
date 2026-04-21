@@ -24,6 +24,7 @@
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
 struct DataPanelShadow {
@@ -143,9 +144,9 @@ public:
         if (propEffect_.has_value()) {
             closeEffect = !propEffect_.value();
         }
-        auto pipelineContext = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto theme = pipelineContext->GetTheme<DataPanelTheme>();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto theme = host->GetTheme<DataPanelTheme>(true);
         json->PutExtAttr("max", std::to_string(propMax_.value_or(100)).c_str(), filter);
         json->PutExtAttr("closeEffect", closeEffect ? "true" : "false", filter);
         json->PutExtAttr("type", propDataPanelType_ == 1 ? "DataPanelType.Line" : "DataPanelType.Circle", filter);
@@ -169,9 +170,9 @@ public:
         if (propValueColors_.has_value()) {
             valueColors = propValueColors_.value();
         } else {
-            auto pipelineContext = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID(pipelineContext);
-            auto theme = pipelineContext->GetTheme<DataPanelTheme>();
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            auto theme = host->GetTheme<DataPanelTheme>(true);
             auto colors = theme->GetColorsArray();
             for (const auto& item : colors) {
                 Gradient gradient;
@@ -202,9 +203,9 @@ public:
         if (filter.IsFastFilter()) {
             return;
         }
-        auto pipelineContext = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto theme = pipelineContext->GetTheme<DataPanelTheme>();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto theme = host->GetTheme<DataPanelTheme>(true);
         DataPanelShadow trackShadow;
         if (propShadowOption_.has_value()) {
             trackShadow.radius = propShadowOption_.value().radius;

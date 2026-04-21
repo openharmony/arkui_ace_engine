@@ -27,6 +27,13 @@ ace_unittest("flex_test_ng") {
     "old_cases/flex_testtwo_ng_second_part.cpp",
     "old_cases/flex_wrap_layout_algorithm_test.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "flex_test_core.cpp" ]
+  } else {
+    sources += [ "flex_test_core.cpp" ]
+  }
 }
 
 ace_unittest("flex_overflow_test_ng") {

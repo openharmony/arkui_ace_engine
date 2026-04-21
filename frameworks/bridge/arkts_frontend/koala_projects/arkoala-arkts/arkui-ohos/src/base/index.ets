@@ -21,3 +21,4 @@ export * from "./ForeignFunctions";
 export * from "./base";
 export * from "./ArkStateStyle";
 export * from "./Callback";
+export * from "./ArkUIObjectFinalizationRegisterProxy";

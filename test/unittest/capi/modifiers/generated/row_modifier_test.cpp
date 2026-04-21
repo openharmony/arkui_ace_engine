@@ -54,10 +54,11 @@ public:
 HWTEST_F(RowModifierTest, setRowOptionsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SPACE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SPACE_DEFAULT_VALUE) << "Default value for attribute 'options.RowOptions.space'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SPACE_DEFAULT_VALUE)) <<
+        "Default value for attribute 'options.RowOptions.space'";
 }
 
 /*
@@ -84,7 +85,7 @@ HWTEST_F(RowModifierTest, setRowOptionsTestOptionsRowOptionsSpaceValidValues, Te
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SPACE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setRowOptions, attribute: options.RowOptions.space";
     };
 
@@ -119,7 +120,7 @@ HWTEST_F(RowModifierTest, setRowOptionsTestOptionsRowOptionsSpaceInvalidValues, 
         auto jsonValue = GetJsonValue(node);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SPACE_NAME);
         DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_SPACE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SPACE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setRowOptions, attribute: options.RowOptions.space";
     };
 

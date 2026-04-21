@@ -160,6 +160,29 @@ void JsEngine::UnregisterLayoutChildrenInspectorCallback(
     }
 }
 
+void JsEngine::RegisterDrawChildrenWithParameterInspectorCallback(
+    const RefPtr<InspectorEvent>& drawChildrenWithParameterEvent, const std::string& componentId)
+{
+        if (drawChildrenWithParameterEvent) {
+            drawChildrenWithParameterEvents_[componentId].emplace(drawChildrenWithParameterEvent);
+        }
+}
+
+void JsEngine::UnregisterDrawChildrenWithParameterInspectorCallback(
+    const RefPtr<InspectorEvent>& drawChildrenWithParameterEvent, const std::string& componentId)
+{
+    if (!drawChildrenWithParameterEvent) {
+        return;
+    }
+    auto iter = drawChildrenWithParameterEvents_.find(componentId);
+    if (iter != drawChildrenWithParameterEvents_.end()) {
+        iter->second.erase(drawChildrenWithParameterEvent);
+        if (iter->second.empty()) {
+            drawChildrenWithParameterEvents_.erase(componentId);
+        }
+    }
+}
+
 void JsEngine::RegisterLayoutInspectorCallback(const RefPtr<InspectorEvent>& layoutEvent, int32_t uniqueId)
 {
     uniqueIdLayoutEvents_[uniqueId].emplace(layoutEvent);

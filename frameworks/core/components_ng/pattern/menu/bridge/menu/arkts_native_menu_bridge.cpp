@@ -331,17 +331,16 @@ bool ParseFontOptions(EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUINo
     return true;
 }
 
-void SetFontOptions(
-    EcmaVM* vm, bool isJsView, std::vector<Local<JSValueRef>>& args, ArkUIMenuFontOptions& menuFontOptions)
+void SetFontOptions(EcmaVM* vm, std::vector<Local<JSValueRef>>& args, ArkUIMenuFontOptions& menuFontOptions,
+    RefPtr<ResourceObject>& sizeResObj)
 {
     CalcDimension size;
-    RefPtr<ResourceObject> sizeRawPtr;
-    if (!ArkTSUtils::ParseJsDimensionFp(vm, args[NUM_0], size, sizeRawPtr, false)) {
+    if (!ArkTSUtils::ParseJsDimensionFp(vm, args[NUM_0], size, sizeResObj, false)) {
         size = Dimension(0.0);
     }
     menuFontOptions.size.value = size.Value();
     menuFontOptions.size.units = static_cast<int32_t>(size.Unit());
-    menuFontOptions.sizeRawPtr = AceType::RawPtr(sizeRawPtr);
+    menuFontOptions.sizeRawPtr = AceType::RawPtr(sizeResObj);
 
     std::string weight = DEFAULT_ERR_CODE;
     if (args[NUM_1]->IsNumber()) {
@@ -359,8 +358,11 @@ void SetFontOptions(
     } else {
         menuFontOptions.style = static_cast<int32_t>(DEFAULT_FONT_STYLE);
     }
+}
 
-    RefPtr<ResourceObject> familyResObj;
+void SetFontFamily(EcmaVM* vm, bool isJsView, std::vector<Local<JSValueRef>>& args,
+    ArkUIMenuFontOptions& menuFontOptions, RefPtr<ResourceObject>& familyResObj)
+{
     if (isJsView && !args[NUM_2]->IsString(vm) && !args[NUM_2]->IsObject(vm)) {
         menuFontOptions.family = nullptr;
         menuFontOptions.familyRawPtr = AceType::RawPtr(familyResObj);
@@ -570,7 +572,10 @@ ArkUINativeModuleValue MenuBridge::SetFont(ArkUIRuntimeCallInfo* runtimeCallInfo
     CHECK_EQUAL_RETURN(
         ParseFontOptions(vm, runtimeCallInfo, nativeNode, isJsView, args), false, panda::JSValueRef::Undefined(vm));
     ArkUIMenuFontOptions menuFontOptions;
-    SetFontOptions(vm, isJsView, args, menuFontOptions);
+    RefPtr<ResourceObject> sizeResObj;
+    RefPtr<ResourceObject> familyResObj;
+    SetFontOptions(vm, args, menuFontOptions, sizeResObj);
+    SetFontFamily(vm, isJsView, args, menuFontOptions, familyResObj);
     menuModifier->setFont(nativeNode, &menuFontOptions);
     return panda::JSValueRef::Undefined(vm);
 }

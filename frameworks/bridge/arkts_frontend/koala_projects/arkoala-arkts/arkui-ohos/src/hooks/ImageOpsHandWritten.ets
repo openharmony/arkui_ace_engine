@@ -22,10 +22,11 @@ import { Resource } from "global.resource"
 import { DrawableDescriptor } from "@ohos.arkui.drawableDescriptor"
 import { ImageAIOptions_serializer } from "#generated"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
-import { Resource_serializer } from './../framework/resource'
+import { global_resource_Resource_serializer } from './../framework/resource'
 import { DrawableDescriptor_serializer } from "./../framework/ohos.arkui.drawableDescriptor"
 import { ArkUIAniModule } from "arkui.ani";
 import { int32 } from "@koalaui/common";
+import { ObserveSingleton } from "../stateManagement/base/observeSingleton"
 
 class ImageErrorImpl implements ImageError {
     componentWidth: int32;
@@ -53,7 +54,7 @@ export class ImageOpsHandWritten {
             } else if (srcForIdx1 instanceof Resource) {
                 thisSerializer.writeInt8((1).toByte())
                 const srcForIdx1ForIdx1 = srcForIdx1 as Resource
-                Resource_serializer.write(thisSerializer, srcForIdx1ForIdx1)
+                global_resource_Resource_serializer.write(thisSerializer, srcForIdx1ForIdx1)
             }
         } else if (src instanceof DrawableDescriptor) {
             thisSerializer.writeInt8((2).toByte())
@@ -110,6 +111,13 @@ export class ImageOpsHandWritten {
         if (peerPtr === undefined) {
             return;
         }
-        ArkUIAniModule._Image_SetOnErrorCallback(peerPtr, value);
+        const wrappedErrorCallback = (error: ImageError) => {
+            ObserveSingleton.instance.applyTaskDelayMutableStateChange(() => {
+                if (value) {
+                    value(error)
+                }
+            });
+        };
+        ArkUIAniModule._Image_SetOnErrorCallback(peerPtr, wrappedErrorCallback);
     }
 }

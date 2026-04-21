@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class RectModifier extends ArkRectComponent implements AttributeModifier<RectAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {

@@ -11,6 +11,7 @@ struct RotationIndex {
 
   private items : ListCategories[] = [
     {title: 'Menu示例代码',url: 'pages/Examples/Index' },
+    {title: 'Menu高级功能示例',url: 'pages/Examples/MenuAdvancedIndex' },
     {title: 'Menu生命周期',url:'pages/LifeCycle/Index'},
     {title: 'Menu拖拽相关测试',url:'pages/Drag/Index'},
     {title: 'bindContextMenu菜单UX规格',url:'pages/BindContextMenu/Index'},
@@ -26,6 +27,9 @@ struct RotationIndex {
     {title: 'UpdateMenu',url:'pages/OpenMenu/UpdateMenu'},
     {title: 'MenuUX',url:'pages/MenuUX/Index'},
     {title: 'MenuPlacement',url:'pages/MenuPlacement/Index'},
+    {title: 'Menu小型化验证',url:'pages/Menu1_1/Index'},
+    {title: 'Menu综合示例',url:'pages/Examples/MenuComprehensiveDemo'},
+    {title: 'Menu高级示例',url:'pages/Examples/MenuAdvancedDemo'},
   ]
 
   build() {
@@ -34,15 +38,15 @@ struct RotationIndex {
         .fontSize(22).fontColor(0xFFFFFF).fontWeight(FontWeight.Bold).textAlign(TextAlign.Center)
         .width('100%').height(50).backgroundColor('#2ebd82')
       List({space:'10vp'}) {
-        ForEach(this.items,(item : ListCategories) => {
-          ListItem() {
-            Text(item.title).fontSize(16).fontWeight(FontWeight.Bold)
-          }.width('90%').height('40vp').backgroundColor('#ff53ecd9').borderRadius(10)
-          .onClick(() => {
-            router.pushUrl({url:item.url})
-          })
+      ForEach(this.items,(item : ListCategories) => {
+        ListItem() {
+          Text(item.title).fontSize(16).fontWeight(FontWeight.Bold)
+        }.width('90%').height('40vp').backgroundColor('#ff53ecd9').borderRadius(10)
+        .onClick(() => {
+          router.pushUrl({url:item.url})
         })
-      }.alignListItem(ListItemAlign.Center).margin({top:'10vp'}).width('100%').height('80%')
-    }.width('100%').height('100%')
+      })
+    }.alignListItem(ListItemAlign.Center).margin({top:'10vp'}).width('100%').height('80%')
+  }.width('100%').height('100%')
   }
 }

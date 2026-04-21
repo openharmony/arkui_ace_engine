@@ -23,7 +23,7 @@ import {
     HorizontalAlign, ButtonAttribute, LocalizedMargin, LoadingProgress, LocalizedPadding, CommonMethod, ButtonStyleMode,
     RelativeContainer, BaseGestureEvent, ThemeColorMode, NestedScrollMode, GestureRecognizer, GestureJudgeResult,
     ConstraintSizeOptions, CustomPopupOptions, TextHeightAdaptivePolicy, PopupStateChangeParam, LocalizedAlignRuleOptions,
-    PromptActionDialogController, CustomLayout
+    PromptActionDialogController, CustomLayout, ButtonLabelStyle, WordBreak, TextAttribute
   } from '@ohos.arkui.component';
   import {
     Local, Once, Trace, Event, Param, Require, Monitor, PropRef, Provider, IMonitor, Consumer, Computed, ObservedV2,
@@ -99,6 +99,13 @@ import {
   export type AdvancedDialogV2OnCheckedChange = (checked: boolean) => void;
   
   export type AdvancedDialogV2ButtonAction = () => void;
+
+  function textAttributeExtension(this: TextAttribute): TextAttribute {
+    this.fallbackLineSpacing(true);
+    this.wordBreak(WordBreak.HYPHENATION);
+    this.orphanCharOptimization(true);
+    return this;
+  }
   
   @ObservedV2
   export class AdvancedDialogV2Button {
@@ -118,6 +125,8 @@ import {
     public defaultFocus?: boolean;
     @Trace
     public enabled?: boolean;
+    @Trace
+    public textAlign?: TextAlign;
     constructor(options: AdvancedDialogV2ButtonOptions) {
       this.content = options.content;
       this.action = options.action;
@@ -127,6 +136,7 @@ import {
       this.role = options.role;
       this.defaultFocus = options.defaultFocus;
       this.enabled = options.enabled;
+      this.textAlign = options.textAlign;
     };
   }
   
@@ -139,6 +149,7 @@ import {
     role?: ButtonRole;
     defaultFocus?: boolean;
     enabled?: boolean;
+    textAlign?: TextAlign;
   }
   
   @ComponentV2
@@ -283,6 +294,7 @@ import {
             .layoutWeight(1)
             .focusable(false)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
+            .textAttributeExtension()
         }
       }
       .accessibilityGroup(true)
@@ -348,6 +360,7 @@ import {
                 .maxLines(CONTENT_MAX_LINES)
                 .textOverflow({ overflow: TextOverflow.Ellipsis })
                 .width('100%')
+                .textAttributeExtension()
             }
             .padding({ bottom: $r('sys.float.padding_level8') } as Padding)
           }
@@ -370,6 +383,7 @@ import {
                   }
                   return false
                 })
+                .textAttributeExtension()
             }
           }
         }
@@ -592,6 +606,7 @@ import {
                 .fontWeight(FontWeight.Regular)
                 .fontColor(this.fontColorWithTheme)
                 .textOverflow({ overflow: TextOverflow.Ellipsis })
+                .textAttributeExtension()
             }.applyStyles(this.paddingContentStyle).width('100%')
           }
           List() {
@@ -606,6 +621,7 @@ import {
                         .fontColor(this.fontColorWithTheme)
                         .layoutWeight(1)
                         .direction(i18n.isRTL(i18n.System.getSystemLanguage()) ? Direction.Rtl : Direction.Ltr)
+                        .textAttributeExtension()
                       Radio({ value: 'item.title', group: 'radioGroup' })
                         .size({ width: CHECKBOX_CONTAINER_LENGTH, height: CHECKBOX_CONTAINER_LENGTH })
                         .checked(this.selectedIndexInner === index)
@@ -868,6 +884,7 @@ import {
                 return false
               })
               .width('100%')
+              .textAttributeExtension()
           }
           .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) } as LocalizedMargin)
           .width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`)
@@ -902,6 +919,7 @@ import {
           .focusable(false)
           .layoutWeight(1)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
+          .textAttributeExtension()
       }
       .accessibilityGroup(true)
       .accessibilityText(this.getCheckTipsAccessibilityText(this.checkTips, this.checkedInner))
@@ -1016,7 +1034,7 @@ import {
               strokeWidth: LengthMetrics.px(0)
             })
             .fontSize(`${BODY_L}fp`)
-            .fontWeight(this.getFontWeight() as int)
+            .fontWeight(this.getFontWeight().toInt())
             .fontColor(this.fontColorWithTheme)
             .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) } as LocalizedMargin)
             .width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`)
@@ -1027,6 +1045,7 @@ import {
               }
               return false
             })
+            .textAttributeExtension()
         }
         .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
         .width('100%')
@@ -1426,6 +1445,7 @@ import {
             .heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
             .width('100%')
+            .textAttributeExtension()
         }
         .width('100%')
   
@@ -1446,6 +1466,7 @@ import {
             .heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
             .width('100%')
+            .textAttributeExtension()
         }
         .width('100%')
       }
@@ -1549,6 +1570,15 @@ import {
       } as Padding;
     }
   
+    private getButtonLabelStyle(buttonOptions: AdvancedDialogV2Button | undefined): ButtonLabelStyle {
+      return {
+        maxLines: 1,
+        maxFontSize: this.buttonMaxFontSize,
+        minFontSize: this.buttonMinFontSize,
+        textAlign: buttonOptions?.textAlign ?? TextAlign.Start
+      } as ButtonLabelStyle;
+    }
+
     @Builder
     buildSingleButton(index: int): void {
       if (this.isNewPropertiesHighPriority(index)) {
@@ -1557,7 +1587,7 @@ import {
             this.isAllFocusFalse, this.getDialogController())
           .role(this.buttons?.[index].role ?? ButtonRole.NORMAL)
           .key(`advanced_dialog_button_${this.keyIndex++}`)
-          .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
+          .labelStyle(this.getButtonLabelStyle(this.buttons?.[index]))
       } else if (this.buttons?.[index].background !== undefined && this.buttons?.[index].fontColor !== undefined) {
         Button(((this.buttons as Array<AdvancedDialogV2Button>)?.[index].content) as ResourceStr)
           .setButtonProperties(this.buttons?.[index], this.isHasDefaultFocus,
@@ -1565,21 +1595,21 @@ import {
           .backgroundColor(this.buttons?.[index].background?.color)
           .fontColor(this.buttons?.[index].fontColor?.color)
           .key(`advanced_dialog_button_${this.keyIndex++}`)
-          .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
+          .labelStyle(this.getButtonLabelStyle(this.buttons?.[index]))
       } else if (this.buttons?.[index].background !== undefined) {
         Button(((this.buttons as Array<AdvancedDialogV2Button>)?.[index.toInt()].content) as ResourceStr)
           .setButtonProperties(this.buttons?.[index], this.isHasDefaultFocus,
             this.isAllFocusFalse, this.getDialogController())
           .backgroundColor(this.buttons?.[index.toInt()].background?.color)
           .key(`advanced_dialog_button_${this.keyIndex++}`)
-          .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
+          .labelStyle(this.getButtonLabelStyle(this.buttons?.[index]))
       } else {
         Button(((this.buttons as Array<AdvancedDialogV2Button>)?.[index.toInt()].content) as ResourceStr)
           .setButtonProperties(this.buttons?.[index.toInt()], this.isHasDefaultFocus,
             this.isAllFocusFalse, this.getDialogController())
           .fontColor(this.buttons?.[index.toInt()]?.fontColor?.color)
           .key(`advanced_dialog_button_${this.keyIndex++}`)
-          .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
+          .labelStyle(this.getButtonLabelStyle(this.buttons?.[index]))
       }
     }
   
@@ -1868,6 +1898,7 @@ import {
               strokeWidth: LengthMetrics.px(0)
             })
             .textOverflow({ overflow: TextOverflow.Ellipsis })
+            .textAttributeExtension()
           LoadingProgress()
             .color(this.loadingProgressIconColorWithTheme)
             .width(LOADING_PROGRESS_WIDTH)

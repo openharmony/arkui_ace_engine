@@ -14,8 +14,8 @@
  */
 
 #include "gtest/gtest.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/frame_node.h"
@@ -64,7 +64,7 @@ void FocusBoxTestNg::TearDown() {}
  * @tc.desc: Create SetStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(FocusBoxTestNg, FocusBoxTest001, TestSize.Level1)
+HWTEST_F(FocusBoxTestNg, FocusBoxTest001, TestSize.Level0)
 {
     auto focusBox = AceType::MakeRefPtr<FocusBox>();
     NG::FocusBoxStyle style;
@@ -98,7 +98,7 @@ HWTEST_F(FocusBoxTestNg, FocusBoxTest002, TestSize.Level1)
  * @tc.desc: Create SetStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(FocusBoxTestNg, FocusBoxTest003, TestSize.Level1)
+HWTEST_F(FocusBoxTestNg, FocusBoxTest003, TestSize.Level0)
 {
     auto focusBox = AceType::MakeRefPtr<FocusBox>();
     NG::FocusBoxStyle style;
@@ -129,7 +129,7 @@ HWTEST_F(FocusBoxTestNg, FocusBoxTest004, TestSize.Level1)
  * @tc.desc: Create SetStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(FocusBoxTestNg, FocusBoxTest005, TestSize.Level1)
+HWTEST_F(FocusBoxTestNg, FocusBoxTest005, TestSize.Level0)
 {
     auto focusBox = AceType::MakeRefPtr<FocusBox>();
     NG::FocusBoxStyle style;
@@ -158,7 +158,7 @@ HWTEST_F(FocusBoxTestNg, FocusBoxTest006, TestSize.Level1)
  * @tc.desc: Create ToJsonValue.
  * @tc.type: FUNC
  */
-HWTEST_F(FocusBoxTestNg, FocusBoxTest007, TestSize.Level1)
+HWTEST_F(FocusBoxTestNg, FocusBoxTest007, TestSize.Level0)
 {
     auto focusBox = AceType::MakeRefPtr<FocusBox>();
     NG::FocusBoxStyle style;
@@ -205,7 +205,7 @@ HWTEST_F(FocusBoxTestNg, FocusBoxTest009, TestSize.Level1)
  * @tc.desc: Create ToJsonValue.
  * @tc.type: FUNC
  */
-HWTEST_F(FocusBoxTestNg, FocusBoxTest010, TestSize.Level1)
+HWTEST_F(FocusBoxTestNg, FocusBoxTest010, TestSize.Level0)
 {
     auto focusBox = AceType::MakeRefPtr<FocusBox>();
     focusBox->ToJsonValue(*focusBox);

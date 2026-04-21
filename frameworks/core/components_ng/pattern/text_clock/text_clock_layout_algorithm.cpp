@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/text_clock/text_clock_layout_algorithm.h"
 
 #include "core/components_ng/pattern/text_clock/text_clock_pattern.h"
+#include "frameworks/core/components_ng/property/measure_utils.h"
 namespace OHOS::Ace::NG {
 void TextClockLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {

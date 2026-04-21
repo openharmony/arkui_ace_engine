@@ -576,6 +576,7 @@ RefPtr<FrameNode> DragAnimationHelper::CreateGatherNode(const RefPtr<FrameNode>&
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto children = SelectableUtils::GetVisibleSelectedItems(frameNode);
     if (children.empty()) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Create gather node, has no visible selected items.");
         return nullptr;
     }
 
@@ -1032,6 +1033,7 @@ void DragAnimationHelper::InitImageNodeProperties(const RefPtr<FrameNode>& image
     CHECK_NULL_VOID(renderProps);
     renderProps->UpdateImageInterpolation(ImageInterpolation::HIGH);
     auto props = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(props);
     props->UpdateAutoResize(false);
     props->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
     auto targetSize = CalcSize(NG::CalcLength(pixelMap->GetWidth()), NG::CalcLength(pixelMap->GetHeight()));

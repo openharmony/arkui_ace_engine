@@ -14,6 +14,7 @@
  */
 
 #include "test/unittest/core/event/event_manager_test_ng.h"
+#include "core/common/event_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -410,5 +411,217 @@ HWTEST_F(EventManagerTestNg, UpdatePenHoverMoveNode012, TestSize.Level1)
     EXPECT_EQ(eventManager->curPenHoverResultsMap_[eventId].size(), 1U);
     EXPECT_EQ(eventManager->lastPenHoverResultsMap_[eventId].front(), eventTarget);
     EXPECT_EQ(eventManager->curPenHoverResultsMap_[eventId].front(), newTarget);
+}
+
+/**
+ * @tc.name: UpdatePenHoverNode013
+ * @tc.desc: Test UpdatePenHoverNode with empty testResult.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, UpdatePenHoverNode013, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    TouchEvent touchEvent;
+    int32_t eventId = 1;
+    touchEvent.SetOriginalId(eventId).SetId(eventId);
+    touchEvent.SetType(TouchType::HOVER_MOVE);
+
+    TouchTestResult testResult;
+    eventManager->UpdatePenHoverNode(touchEvent, testResult);
+    EXPECT_FALSE(eventManager->lastPenHoverResultsMap_.empty());
+    EXPECT_FALSE(eventManager->curPenHoverResultsMap_.empty());
+}
+
+/**
+ * @tc.name: UpdatePenHoverMoveNode014
+ * @tc.desc: Test UpdatePenHoverMoveNode with empty testResult.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, UpdatePenHoverMoveNode014, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    TouchEvent touchEvent;
+    int32_t eventId = 1;
+    touchEvent.SetOriginalId(eventId).SetId(eventId);
+
+    TouchTestResult testResult;
+    eventManager->UpdatePenHoverMoveNode(touchEvent, testResult);
+    EXPECT_TRUE(eventManager->curPenHoverMoveResultsMap_[eventId].empty());
+}
+
+/**
+ * @tc.name: UpdatePenHoverMoveNode015
+ * @tc.desc: Test UpdatePenHoverMoveNode when result is not PenHoverMoveTarget.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, UpdatePenHoverMoveNode015, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    TouchEvent touchEvent;
+    int32_t eventId = 1;
+    touchEvent.SetOriginalId(eventId).SetId(eventId);
+
+    TouchTestResult testResult;
+    auto mockTarget = AceType::MakeRefPtr<MockTouchEventTarget>();
+    testResult.push_back(mockTarget);
+    eventManager->UpdatePenHoverMoveNode(touchEvent, testResult);
+    EXPECT_TRUE(eventManager->curPenHoverMoveResultsMap_[eventId].empty());
+}
+
+/**
+ * @tc.name: DispatchPenHoverEventNG016
+ * @tc.desc: Test DispatchPenHoverEventNG with empty maps.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, DispatchPenHoverEventNG016, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    TouchEvent touchEvent;
+    int32_t eventId = 1;
+    touchEvent.SetX(100.0).SetY(100.0).SetOriginalId(eventId).SetId(eventId);
+
+    eventManager->lastPenHoverResultsMap_.clear();
+    eventManager->curPenHoverResultsMap_.clear();
+    eventManager->DispatchPenHoverEventNG(touchEvent);
+    EXPECT_TRUE(eventManager->lastPenHoverDispatchLength_ == 0);
+}
+
+/**
+ * @tc.name: DispatchPenHoverEventNG017
+ * @tc.desc: Test DispatchPenHoverEventNG when lastPenHoverResults is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, DispatchPenHoverEventNG017, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    TouchEvent touchEvent;
+    int32_t eventId = 1;
+    touchEvent.SetX(100.0).SetY(100.0).SetOriginalId(eventId).SetId(eventId);
+
+    const int nodeId = 10008;
+    auto hoverEventTarget = AceType::MakeRefPtr<HoverEventTarget>(V2::LOCATION_BUTTON_ETS_TAG, nodeId);
+    const OnHoverFunc onHover = [](bool, HoverInfo) {};
+    hoverEventTarget->SetPenHoverCallback(onHover);
+
+    eventManager->lastPenHoverResultsMap_.clear();
+    eventManager->curPenHoverResultsMap_[eventId].push_back(hoverEventTarget);
+
+    int32_t callbackCount = 0;
+    hoverEventTarget->onPenHoverEventCallback_ = [&callbackCount](bool isHovered, HoverInfo& hoverInfo) {
+        hoverInfo.SetStopPropagation(false);
+        ++callbackCount;
+    };
+    eventManager->DispatchPenHoverEventNG(touchEvent);
+    EXPECT_EQ(callbackCount, 1);
+}
+
+/**
+ * @tc.name: DispatchPenHoverEventNG018
+ * @tc.desc: Test DispatchPenHoverEventNG when curPenHoverResults is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, DispatchPenHoverEventNG018, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    TouchEvent touchEvent;
+    int32_t eventId = 1;
+    touchEvent.SetX(100.0).SetY(100.0).SetOriginalId(eventId).SetId(eventId);
+
+    const int nodeId = 10008;
+    auto hoverEventTarget = AceType::MakeRefPtr<HoverEventTarget>(V2::LOCATION_BUTTON_ETS_TAG, nodeId);
+    const OnHoverFunc onHover = [](bool, HoverInfo) {};
+    hoverEventTarget->SetPenHoverCallback(onHover);
+
+    eventManager->lastPenHoverResultsMap_[eventId].push_back(hoverEventTarget);
+    eventManager->curPenHoverResultsMap_.clear();
+
+    int32_t callbackCount = 0;
+    hoverEventTarget->onPenHoverEventCallback_ = [&callbackCount](bool isHovered, HoverInfo& hoverInfo) {
+        hoverInfo.SetStopPropagation(false);
+        ++callbackCount;
+    };
+    eventManager->DispatchPenHoverEventNG(touchEvent);
+    EXPECT_EQ(callbackCount, 1);
+}
+
+/**
+ * @tc.name: DispatchPenHoverMoveEventNG019
+ * @tc.desc: Test DispatchPenHoverMoveEventNG with empty map.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, DispatchPenHoverMoveEventNG019, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    TouchEvent touchEvent;
+    int32_t eventId = 1;
+    touchEvent.SetX(100.0).SetY(100.0).SetOriginalId(eventId).SetId(eventId);
+    eventManager->curPenHoverMoveResultsMap_.clear();
+    eventManager->DispatchPenHoverMoveEventNG(touchEvent);
+    EXPECT_TRUE(eventManager->curPenHoverMoveResultsMap_.empty());
+}
+
+/**
+ * @tc.name: DispatchPenHoverMoveEventNG020
+ * @tc.desc: Test DispatchPenHoverMoveEventNG when HandlePenHoverMoveEvent returns false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, DispatchPenHoverMoveEventNG020, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    TouchEvent touchEvent;
+    int32_t eventId = 1;
+    touchEvent.SetX(100.0).SetY(100.0).SetOriginalId(eventId).SetId(eventId);
+
+    const int nodeId = 10008;
+    auto hoverEventTarget = AceType::MakeRefPtr<HoverEventTarget>(V2::LOCATION_BUTTON_ETS_TAG, nodeId);
+    const OnHoverMoveFunc onHoverMove = [](HoverInfo& hoverInfo) {
+        hoverInfo.SetStopPropagation(true);
+        return false;
+    };
+    hoverEventTarget->SetPenHoverMoveCallback(onHoverMove);
+    eventManager->curPenHoverMoveResultsMap_[eventId].push_back(hoverEventTarget);
+    eventManager->DispatchPenHoverMoveEventNG(touchEvent);
+    EXPECT_FALSE(eventManager->curPenHoverMoveResultsMap_.empty());
+}
+
+ * @tc.name: PenHoverTest0021
+ * @tc.desc: Test PenHoverTest function.
+ */
+HWTEST_F(EventManagerTestNg, PenHoverTest0021, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    const int nodeId = 10008;
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::LOCATION_BUTTON_ETS_TAG, nodeId, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    TouchRestrict touchRestrict;
+    TouchEvent touchEvent;
+    int32_t eventId = 1;
+    touchEvent.SetX(100.0).SetY(100.0).SetOriginalId(eventId).SetId(eventId);
+    touchEvent.sourceTool = SourceTool::PEN;
+
+    touchEvent.SetType(TouchType::PROXIMITY_OUT);
+    auto hoverEventTarget = AceType::MakeRefPtr<HoverEventTarget>(V2::LOCATION_BUTTON_ETS_TAG, nodeId);
+    eventManager->curPenHoverResultsMap_[eventId].push_back(hoverEventTarget);
+    eventManager->PenHoverTest(touchEvent, frameNode, touchRestrict);
+    EXPECT_FALSE(eventManager->lastPenHoverResultsMap_.empty());
+    EXPECT_FALSE(eventManager->curPenHoverResultsMap_.empty());
+    EXPECT_FALSE(eventManager->curPenHoverMoveResultsMap_.empty());
 }
 } // namespace OHOS::Ace::NG

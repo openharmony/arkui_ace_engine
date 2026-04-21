@@ -68,7 +68,8 @@ void SetCheckboxGroupSelectedColorPtr(ArkUINodeHandle node, uint32_t color, void
         CHECK_NULL_VOID(frameNode);
         RefPtr<ResourceObject> resObj;
         if (!colorRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
         }
@@ -114,7 +115,8 @@ void SetCheckboxGroupUnSelectedColorPtr(ArkUINodeHandle node, uint32_t color, vo
         CHECK_NULL_VOID(frameNode);
         RefPtr<ResourceObject> resObj;
         if (!colorRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
         }
@@ -126,12 +128,15 @@ void ResetCheckboxGroupUnSelectedColor(ArkUINodeHandle node)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    auto context = frameNode->GetContext();
-    CHECK_NULL_VOID(context);
-    auto themeManager = context->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto checkBoxTheme = themeManager->GetTheme<CheckboxTheme>();
     if (node) {
+        auto context = frameNode->GetContext();
+        CHECK_NULL_VOID(context);
+        auto themeManager = context->GetThemeManager();
+        CHECK_NULL_VOID(themeManager);
+        auto scopeId = frameNode->GetThemeScopeId();
+        auto checkBoxTheme = SystemProperties::ConfigChangePerform() ? themeManager->GetTheme<CheckboxTheme>(scopeId)
+            : themeManager->GetTheme<CheckboxTheme>();
+        CHECK_NULL_VOID(checkBoxTheme);
         CheckBoxGroupModelNG::SetUnSelectedColor(frameNode, checkBoxTheme->GetInactiveColor());
     } else {
         CheckBoxGroupModelNG::ResetUnSelectedColor(frameNode);
@@ -198,11 +203,25 @@ void ResetCheckboxGroupHeight(ArkUINodeHandle node)
     ViewAbstract::ClearWidthOrHeight(frameNode, false);
 }
 
-void SetCheckboxGroupMark(ArkUINodeHandle node, uint32_t color, ArkUI_Float32 sizeValue, ArkUI_Float32 widthValue)
+void SetCheckboxGroupMark(ArkUINodeHandle node, uint32_t color, void* colorRawPtr, ArkUI_Float32 sizeValue,
+    ArkUI_Float32 widthValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CheckBoxGroupModelNG::SetCheckMarkColor(frameNode, Color(color));
+    Color result = Color(color);
+    CheckBoxGroupModelNG::SetCheckMarkColor(frameNode, result);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* frameNode = GetFrameNode(node);
+        CHECK_NULL_VOID(frameNode);
+        RefPtr<ResourceObject> resObj;
+        if (!colorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result,
+                ResourceParseUtils::MakeNativeNodeInfo(frameNode));
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
+        }
+        CheckBoxGroupModelNG::CreateWithResourceObj(frameNode, CheckBoxGroupColorType::STROKE_COLOR, resObj);
+    }
 
     Dimension size = Dimension(sizeValue, DEFAULT_UNIT);
     CheckBoxGroupModelNG::SetCheckMarkSize(frameNode, size);
@@ -341,11 +360,24 @@ ArkUINodeHandle CreateCheckboxGroupFrameNode(ArkUI_Uint32 nodeId)
     return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
 }
 
-void SetCheckMarkColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+void SetCheckMarkColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorRawPtr)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    CheckBoxGroupModelNG::SetCheckMarkColor(frameNode, Color(color));
+    Color result = Color(color);
+    CheckBoxGroupModelNG::SetCheckMarkColor(frameNode, result);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* frameNode = GetFrameNode(node);
+        CHECK_NULL_VOID(frameNode);
+        RefPtr<ResourceObject> resObj;
+        if (!colorRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result,
+                ResourceParseUtils::MakeNativeNodeInfo(frameNode));
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
+        }
+        CheckBoxGroupModelNG::CreateWithResourceObj(frameNode, CheckBoxGroupColorType::STROKE_COLOR, resObj);
+    }
 }
 
 void ResetCheckMarkColor(ArkUINodeHandle node)

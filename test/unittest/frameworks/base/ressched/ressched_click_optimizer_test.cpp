@@ -19,6 +19,7 @@
 #include "base/ressched/ressched_click_optimizer.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/property/accessibility_property.h"
 #undef private
 #undef protected
 

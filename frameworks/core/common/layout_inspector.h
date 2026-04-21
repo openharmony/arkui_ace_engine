@@ -40,10 +40,10 @@ class ACE_FORCE_EXPORT LayoutInspector {
 public:
     ACE_FORCE_EXPORT static void SupportInspector();
     static void SetlayoutInspectorStatus(int32_t containerId);
-    static void GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t containerId);
+    static void GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t containerId, bool isNeedFreeNodes = false);
     static void CreateLayoutInfo(int32_t containerId);
-    static void CreateContainerLayoutInfo(RefPtr<Container>& container);
-    static void CreateLayoutInfoByWinId(uint32_t windId);
+    static void CreateContainerLayoutInfo(RefPtr<Container>& container, bool isNeedFreeNodes = false);
+    static void CreateLayoutInfoByWinId(uint32_t windId, bool isNeedFreeNodes = false);
     static void SetCallback(int32_t instanceId);
     static void SetStatus(bool layoutInspectorStatus);
     static void GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonValue>& message);

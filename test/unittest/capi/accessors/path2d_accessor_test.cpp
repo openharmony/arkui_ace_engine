@@ -137,11 +137,11 @@ HWTEST_F(Path2DAccessorTest, construct2Test, TestSize.Level1)
 }
 
 /**
- * @tc.name: construct3UnitTest
+ * @tc.name: construct3TestUnit
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(Path2DAccessorTest, construct3UnitTest, TestSize.Level1)
+HWTEST_F(Path2DAccessorTest, construct3TestUnit, TestSize.Level1)
 {
     ASSERT_NE(accessor_->construct3, nullptr);
     for (const auto& [actual, expected] : unitTestPlan) {
@@ -156,11 +156,11 @@ HWTEST_F(Path2DAccessorTest, construct3UnitTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: construct3PathTest
+ * @tc.name: construct3TestPath
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(Path2DAccessorTest, construct3PathTest, TestSize.Level1)
+HWTEST_F(Path2DAccessorTest, construct3TestPath, TestSize.Level1)
 {
     ASSERT_NE(accessor_->construct3, nullptr);
     for (const auto& [actual, expected] : pathTestPlan) {
@@ -200,11 +200,11 @@ HWTEST_F(Path2DAccessorTest, construct4Test, TestSize.Level1)
 }
 
 /**
- * @tc.name: construct5UnitTest
+ * @tc.name: construct5TestUnit
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(Path2DAccessorTest, construct5UnitTest, TestSize.Level1)
+HWTEST_F(Path2DAccessorTest, construct5TestUnit, TestSize.Level1)
 {
     ASSERT_NE(accessor_->construct5, nullptr);
     for (const auto& [actual, expected] : unitTestPlan) {
@@ -219,11 +219,11 @@ HWTEST_F(Path2DAccessorTest, construct5UnitTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: construct5DescriptionTest
+ * @tc.name: construct5TestDescription
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(Path2DAccessorTest, construct5DescriptionTest, TestSize.Level1)
+HWTEST_F(Path2DAccessorTest, construct5TestDescription, TestSize.Level1)
 {
     ASSERT_NE(accessor_->construct5, nullptr);
     for (const auto& [actual, expected] : pathStringTestPlan) {

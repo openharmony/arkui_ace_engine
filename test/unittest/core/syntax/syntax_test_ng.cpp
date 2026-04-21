@@ -218,8 +218,8 @@ RefPtr<RepeatVirtualScroll2Node> SyntaxTestNg::CreateRepeatVirtual2()
         {4, 5},
         {5, 6}
     };
-    std::function<std::pair<RIDType, uint32_t>(IndexType)> onGetRid4Index =
-        [&](IndexType index) -> std::pair<RIDType, uint32_t> {
+    std::function<std::pair<RIDType, uint32_t>(IndexType, bool)> onGetRid4Index =
+        [&](IndexType index, bool inAnimation) -> std::pair<RIDType, uint32_t> {
             auto it = l1Rid4Index_.find(0);
             if (it != l1Rid4Index_.end()) {
                 return {index, 2};

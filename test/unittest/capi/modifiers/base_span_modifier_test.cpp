@@ -41,9 +41,9 @@ class BaseSpanModifierTest : public ModifierTestBase<GENERATED_ArkUIBaseSpanModi
  */
 HWTEST_F(BaseSpanModifierTest, DISABLED_setBaselineOffsetTestDefaultValues, TestSize.Level1)
 {
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_BASELINE_OFFSET_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_BASELINE_OFFSET_DEFAULT_VALUE);
+    auto jsonValue = GetJsonValue(node_);
+    auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_BASELINE_OFFSET_NAME);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_TEXT_BASELINE_OFFSET_DEFAULT_VALUE));
 }
 
 // Valid values for method 'baselineOffset'
@@ -64,7 +64,7 @@ static const std::vector<LengthMetrictsTestStep> LENGTH_METRICS_ANY_TEST_PLAN = 
 HWTEST_F(BaseSpanModifierTest, DISABLED_setBaselineOffsetTestValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     std::string expectedStr;
     Ark_LengthMetrics inputBaselineOffset;
 
@@ -76,7 +76,7 @@ HWTEST_F(BaseSpanModifierTest, DISABLED_setBaselineOffsetTestValues, TestSize.Le
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_BASELINE_OFFSET_NAME);
         expectedStr = std::get<1>(value);
-        EXPECT_EQ(resultStr, expectedStr);
+        EXPECT_THAT(resultStr, Eq(expectedStr));
 }
 }
 

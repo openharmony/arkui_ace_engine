@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/animation/animator.h"
+
 #include <ani.h>
 #include <array>
 #include <iostream>
@@ -26,12 +28,13 @@
 #include "interop_js/hybridgref_napi.h"
 #include "napi/kits/animator/animator_option.h"
 
+#include "base/log/log_wrapper.h"
 #include "base/memory/referenced.h"
 #include "base/utils/string_utils.h"
 #include "bridge/common/utils/utils.h"
-#include "core/animation/animator.h"
 #include "core/animation/animation.h"
 #include "core/animation/curve.h"
+#include "core/animation/curve_animation.h"
 #include "core/animation/spring_motion.h"
 
 namespace OHOS::Ace::Ani {

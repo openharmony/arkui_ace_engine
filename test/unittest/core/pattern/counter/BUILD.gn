@@ -17,4 +17,11 @@ ace_unittest("counter_test_ng") {
   type = "new"
   module_name = "InfoShowSet-Counter"
   sources = [ "counter_test_ng.cpp" ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "counter_test_core.cpp" ]
+  } else {
+    sources += [ "counter_test_core.cpp" ]
+  }
 }

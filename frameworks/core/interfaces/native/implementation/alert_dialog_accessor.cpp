@@ -48,10 +48,10 @@ struct DialogPropsForUpdate {
     Ark_ResourceStr message;
     Opt_Offset offset;
     Opt_Callback_DismissDialogAction_Void onWillDismiss;
-    Opt_Callback_Void onDidAppear;
-    Opt_Callback_Void onDidDisappear;
-    Opt_Callback_Void onWillAppear;
-    Opt_Callback_Void onWillDisappear;
+    Opt_VoidCallback onDidAppear;
+    Opt_VoidCallback onDidDisappear;
+    Opt_VoidCallback onWillAppear;
+    Opt_VoidCallback onWillDisappear;
     Opt_Union_ShadowOptions_ShadowStyle shadow;
     Opt_Boolean showInSubWindow;
     Opt_ResourceStr subtitle;
@@ -63,6 +63,7 @@ struct DialogPropsForUpdate {
     Opt_Int32 levelUniqueId;
     Opt_ImmersiveMode immersiveMode;
     Opt_LevelOrder levelOrder;
+    Opt_uiMaterial_Material systemMaterial;
 };
 } // namespace OHOS::Ace::NG
 
@@ -259,6 +260,10 @@ void UpdateDynamicDialogProperties(DialogProperties& dialogProps, const DialogPr
     if (dialogImmersiveMode) {
         dialogProps.dialogImmersiveMode = dialogImmersiveMode.value();
     }
+    auto systemMaterial = Converter::OptConvert<UiMaterial*>(props.systemMaterial).value_or(nullptr);
+    if (systemMaterial) {
+        dialogProps.systemMaterial = systemMaterial->Copy();
+    }
 }
 DialogProperties CreateDialogProperties(const DialogPropsForUpdate props)
 {
@@ -301,19 +306,19 @@ DialogProperties CreateDialogProperties(const DialogPropsForUpdate props)
     dialogProps.height = Converter::OptConvert<CalcDimension>(props.height);
 
     AddOnWillDismiss(dialogProps, props.onWillDismiss);
-    auto onDidAppear = Converter::OptConvert<Callback_Void>(props.onDidAppear);
+    auto onDidAppear = Converter::OptConvert<VoidCallback>(props.onDidAppear);
     if (onDidAppear) {
         dialogProps.onDidAppear = [arkCallback = CallbackHelper(onDidAppear.value())]() { arkCallback.InvokeSync(); };
     }
-    auto onDidDisappear = Converter::OptConvert<Callback_Void>(props.onDidDisappear);
+    auto onDidDisappear = Converter::OptConvert<VoidCallback>(props.onDidDisappear);
     if (onDidDisappear) {
         dialogProps.onDidDisappear = [arkCallback = CallbackHelper(onDidDisappear.value())]() { arkCallback.Invoke(); };
     }
-    auto onWillAppear = Converter::OptConvert<Callback_Void>(props.onWillAppear);
+    auto onWillAppear = Converter::OptConvert<VoidCallback>(props.onWillAppear);
     if (onWillAppear) {
         dialogProps.onWillAppear = [arkCallback = CallbackHelper(onWillAppear.value())]() { arkCallback.Invoke(); };
     }
-    auto onWillDisappear = Converter::OptConvert<Callback_Void>(props.onWillDisappear);
+    auto onWillDisappear = Converter::OptConvert<VoidCallback>(props.onWillDisappear);
     if (onWillDisappear) {
         dialogProps.onWillDisappear = [arkCallback = CallbackHelper(onWillDisappear.value())]() {
             arkCallback.Invoke();
@@ -372,7 +377,8 @@ DialogPropsForUpdate GetPropsWithConfirm(const Ark_AlertDialogParamWithConfirm p
         .levelMode = params.levelMode,
         .levelUniqueId = params.levelUniqueId,
         .immersiveMode = params.immersiveMode,
-        .levelOrder = params.levelOrder
+        .levelOrder = params.levelOrder,
+        .systemMaterial = params.systemMaterial
     };
 }
 void UpdateConfirmButton(DialogProperties& dialogProps, const Ark_AlertDialogParamWithConfirm params)
@@ -448,7 +454,8 @@ DialogPropsForUpdate GetPropsWithButtons(const Ark_AlertDialogParamWithButtons p
         .levelMode = params.levelMode,
         .levelUniqueId = params.levelUniqueId,
         .immersiveMode = params.immersiveMode,
-        .levelOrder = params.levelOrder
+        .levelOrder = params.levelOrder,
+        .systemMaterial = params.systemMaterial
     };
 }
 void ShowWithButtons(const Ark_AlertDialogParamWithButtons params)
@@ -527,7 +534,8 @@ DialogPropsForUpdate GetPropsWithOptions(const Ark_AlertDialogParamWithOptions p
         .levelMode = params.levelMode,
         .levelUniqueId = params.levelUniqueId,
         .immersiveMode = params.immersiveMode,
-        .levelOrder = params.levelOrder
+        .levelOrder = params.levelOrder,
+        .systemMaterial = params.systemMaterial
     };
 }
 void ShowWithOptions(const Ark_AlertDialogParamWithOptions params)

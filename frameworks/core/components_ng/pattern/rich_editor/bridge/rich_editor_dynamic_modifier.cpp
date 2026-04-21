@@ -22,6 +22,7 @@
 #include "core/interfaces/native/node/node_text_modifier.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "bridge/common/utils/utils.h"
+#include "core/components_ng/pattern/text/span/mutable_span_string.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/cjui/cjui_api.h"
@@ -72,18 +73,6 @@ void SetRichEditorFocusable(ArkUINodeHandle node, ArkUI_Bool focusable)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetFocusable(frameNode, focusable);
-}
-
-void SetRichEditorOnShare(ArkUINodeHandle node, void* callback)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    if (callback) {
-        auto onShare = reinterpret_cast<std::function<void(NG::TextCommonEvent&)>*>(callback);
-        RichEditorModelNG::SetOnShare(frameNode, std::move(*onShare));
-    } else {
-        RichEditorModelNG::SetOnShare(frameNode, nullptr);
-    }
 }
 
 void SetRichEditorSelectDetectConfig(ArkUINodeHandle node, const ArkUI_Uint32* values,
@@ -592,12 +581,12 @@ void SetRichEditorNapiOnPaste(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onPaste = [extraParam](NG::TextCommonEvent& commonEvent) {
-        ArkUINodeEvent event = CreateArkUINodeEvent(PREVENTABLE_EVENT, extraParam);
-        event.preventableEvent.subKind = ON_RICH_EDITOR_ON_PASTE;
-        event.preventableEvent.preventDefault = false;
+    auto onPaste = [extraParam](NG::TextCommonEvent& pasteEvent) {
+        ArkUINodeEvent event = CreateArkUINodeEvent(MIXED_EVENT, extraParam);
+        event.mixedEvent.subKind = ON_RICH_EDITOR_ON_PASTE;
         SendArkUISyncEvent(&event);
-        commonEvent.SetPreventDefault(event.preventableEvent.preventDefault);
+        bool preventDefault = static_cast<bool>(event.mixedEvent.numberReturnData[0].i32);
+        pasteEvent.SetPreventDefault(preventDefault);
     };
     RichEditorModelNG::SetOnPaste(frameNode, std::move(onPaste));
 }
@@ -626,11 +615,11 @@ void SetRichEditorNapiOnCut(ArkUINodeHandle node, void* extraParam)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto onCut = [extraParam](NG::TextCommonEvent& pasteEvent) {
-        ArkUINodeEvent event = CreateArkUINodeEvent(PREVENTABLE_EVENT, extraParam);
-        event.preventableEvent.subKind = ON_RICH_EDITOR_ON_CUT;
-        event.preventableEvent.preventDefault = false;
+        ArkUINodeEvent event = CreateArkUINodeEvent(MIXED_EVENT, extraParam);
+        event.mixedEvent.subKind = ON_RICH_EDITOR_ON_CUT;
         SendArkUISyncEvent(&event);
-        pasteEvent.SetPreventDefault(event.preventableEvent.preventDefault);
+        bool preventDefault = static_cast<bool>(event.mixedEvent.numberReturnData[0].i32);
+        pasteEvent.SetPreventDefault(preventDefault);
     };
     RichEditorModelNG::SetOnCut(frameNode, std::move(onCut));
 }
@@ -658,12 +647,12 @@ void SetRichEditorNapiOnCopy(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onCopy = [extraParam](NG::TextCommonEvent& pasteEvent) {
-        ArkUINodeEvent event = CreateArkUINodeEvent(PREVENTABLE_EVENT, extraParam);
-        event.preventableEvent.subKind = ON_RICH_EDITOR_ON_COPY;
-        event.preventableEvent.preventDefault = false;
+    auto onCopy = [extraParam](NG::TextCommonEvent& copyEvent) {
+        ArkUINodeEvent event = CreateArkUINodeEvent(MIXED_EVENT, extraParam);
+        event.mixedEvent.subKind = ON_RICH_EDITOR_ON_COPY;
         SendArkUISyncEvent(&event);
-        pasteEvent.SetPreventDefault(event.preventableEvent.preventDefault);
+        bool preventDefault = static_cast<bool>(event.mixedEvent.numberReturnData[0].i32);
+        copyEvent.SetPreventDefault(preventDefault);
     };
     RichEditorModelNG::SetOnCopy(frameNode, std::move(onCopy));
 }
@@ -737,11 +726,7 @@ void SetRichEditorEditMenuOptions(ArkUINodeHandle node, void* onCreateMenuCallba
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (isJsView) {
-        CHECK_NULL_VOID(onCreateMenuCallback || onMenuItemClickCallback || onPrepareMenuCallback);
-    } else {
-        CHECK_NULL_VOID(onCreateMenuCallback && onMenuItemClickCallback && onPrepareMenuCallback);
-    }
+    CHECK_NULL_VOID(onCreateMenuCallback && onMenuItemClickCallback && onPrepareMenuCallback);
     NG::OnCreateMenuCallback* onCreateMenu = reinterpret_cast<NG::OnCreateMenuCallback*>(onCreateMenuCallback);
     NG::OnMenuItemClickCallback* onMenuItemClick
         = reinterpret_cast<NG::OnMenuItemClickCallback*>(onMenuItemClickCallback);
@@ -1146,12 +1131,15 @@ void ResetRichEditorKeyboardAppearance(ArkUINodeHandle node)
     RichEditorModelNG::SetKeyboardAppearance(frameNode, value);
 }
 
-void SetRichEditorCustomKeyboard(ArkUINodeHandle node, ArkUINodeHandle customKeyboard, ArkUI_Bool supportAvoidance)
+void SetRichEditorCustomKeyboard(ArkUINodeHandle node, ArkUINodeHandle customKeyboard, ArkUI_Bool supportAvoidance,
+    bool isJsView)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto *customKeyboardNode = reinterpret_cast<FrameNode*>(customKeyboard);
-    CHECK_NULL_VOID(customKeyboardNode);
+    if (!isJsView) {
+        CHECK_NULL_VOID(customKeyboardNode);
+    }
     RichEditorModelNG::SetCustomKeyboardWithNode(frameNode, customKeyboardNode, supportAvoidance);
 }
 
@@ -1345,6 +1333,27 @@ void ResetRichEditorUndoStyle(ArkUINodeHandle node)
     RichEditorModelNG::SetSupportStyledUndo(frameNode, false);
 }
 
+void SetRichEditorOrphanCharOptimization(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetOrphanCharOptimization(frameNode, value);
+}
+ 
+void ResetRichEditorOrphanCharOptimization(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetOrphanCharOptimization(frameNode, false);
+}
+
+ArkUI_Bool GetRichEditorOrphanCharOptimization(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
+    return RichEditorModelNG::IsOrphanCharOptimization(frameNode);
+}
+
 void SetRichEditorScrollBarColor(ArkUINodeHandle node, ArkUI_Int32 color, void* resRawPtr)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -1378,7 +1387,8 @@ void SetRichEditorSelectedDragPreviewStyle(ArkUINodeHandle node, ArkUI_Uint32 co
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         if (!resRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
         }
@@ -1500,6 +1510,13 @@ void DoRichEditorDeleteBackward(ArkUINodeHandle node)
     RichEditorModelNG::DeleteBackward(frameNode);
 }
 
+void CloseSelectionMenu(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::CloseSelectionMenu(frameNode);
+}
+
 void SetRichEditorSupportPreviewText(ArkUINodeHandle node, ArkUI_Bool isSupportPreviewText)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1570,7 +1587,54 @@ ArkUITextLineMetrics GetRichEditorLineMetrics(ArkUINodeHandle node, ArkUI_Int32 
     return Convert(textLineMetrics);
 }
 
-void SetTypingParagraphStyle(ArkUINodeHandle node, const ArkUIRichEditorParagraphStyle& paragraphStyle)
+void* GetRichEditorCharacterPositionAtCoordinate(ArkUINodeHandle node, ArkUI_Float64 dx, ArkUI_Float64 dy)
+{
+#ifndef PREVIEW
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    PositionWithAffinity positionWithAffinity = RichEditorModelNG::GetCharacterPositionAtCoordinate(frameNode, dx, dy);
+    auto* indexAndAffinity = new OHOS::Rosen::IndexAndAffinity(0, OHOS::Rosen::Affinity::PREV);
+    indexAndAffinity->index = positionWithAffinity.position_;
+    indexAndAffinity->affinity = static_cast<OHOS::Rosen::Affinity>(positionWithAffinity.affinity_);
+    return indexAndAffinity;
+#else
+    return nullptr;
+#endif
+}
+
+void GetRichEditorGlyphRangeForCharacterRange(
+    ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end, GlyphCharacterRange* range)
+{
+#ifndef PREVIEW
+    CHECK_NULL_VOID(range);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto [glyphRange, charRange] = RichEditorModelNG::GetGlyphRangeForCharacterRange(frameNode, start, end);
+    range->glyphStart = glyphRange.start;
+    range->glyphEnd = glyphRange.end;
+    range->charStart = charRange.start;
+    range->charEnd = charRange.end;
+#else
+#endif
+}
+
+void GetRichEditorCharacterRangeForGlyphRange(
+    ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end, GlyphCharacterRange* range)
+{
+#ifndef PREVIEW
+    CHECK_NULL_VOID(range);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto [charRange, glyphRange] = RichEditorModelNG::GetCharacterRangeForGlyphRange(frameNode, start, end);
+    range->glyphStart = glyphRange.start;
+    range->glyphEnd = glyphRange.end;
+    range->charStart = charRange.start;
+    range->charEnd = charRange.end;
+#else
+#endif
+}
+
+void SetTypingParagraphStyle(ArkUINodeHandle node, const ArkUIParagraphStyle& paragraphStyle)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1606,10 +1670,26 @@ void ParseFontSize(FrameNode* frameNode, struct OHOS::Ace::UpdateSpanStyle& upda
     textStyle.SetFontSize(fontSize);
 }
 
+void ParseLineHeight(FrameNode* frameNode, struct OHOS::Ace::UpdateSpanStyle& updateSpanStyle,
+    TextStyle& textStyle, const ArkUIRichEditorTextStyle& style)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+
+    auto lineHeight = Dimension(style.lineHeight, DimensionUnit::VP);
+    if (lineHeight.IsNonPositive()) {
+        auto theme = pipelineContext->GetTheme<TextTheme>();
+        lineHeight = theme->GetTextStyle().GetLineHeight();
+    }
+    updateSpanStyle.updateLineHeight = lineHeight;
+    textStyle.SetLineHeight(lineHeight);
+}
+
 void ParseShadow(struct OHOS::Ace::UpdateSpanStyle& updateSpanStyle, TextStyle& textStyle,
     const ArkUIRichEditorTextStyle& style)
 {
-    std::vector<Shadow> shadows(style.textShadow.size());
+    std::vector<Shadow> shadows;
     for (auto& shadow : style.textShadow) {
         Shadow tempShadow;
         tempShadow.SetColor(Color(shadow.color));
@@ -1617,7 +1697,7 @@ void ParseShadow(struct OHOS::Ace::UpdateSpanStyle& updateSpanStyle, TextStyle& 
         tempShadow.SetOffsetY(shadow.offsetY);
         tempShadow.SetIsFilled(shadow.isFill);
         tempShadow.SetShadowType(static_cast<ShadowType>(shadow.type));
-        tempShadow.SetBlurRadius(shadow.radius);
+        tempShadow.SetBlurRadius(LessNotEqual(shadow.radius, 0.0f) ? 0.0f : shadow.radius);
         shadows.push_back(tempShadow);
     }
     updateSpanStyle.updateTextShadows = shadows;
@@ -1669,9 +1749,7 @@ void SetRichEditorTypingStyle(ArkUINodeHandle node, const ArkUIRichEditorTextSty
         textStyle.SetFontFamilies(family);
     }
     ParseFontSize(frameNode, updateSpanStyle, textStyle, style);
-    auto lineHeight = Dimension(style.lineHeight, DimensionUnit::VP);
-    updateSpanStyle.updateLineHeight = lineHeight;
-    textStyle.SetLineHeight(lineHeight);
+    ParseLineHeight(frameNode, updateSpanStyle, textStyle, style);
     auto isHalfLeading = style.halfLeading;
     updateSpanStyle.updateHalfLeading = isHalfLeading;
     textStyle.SetHalfLeading(isHalfLeading);
@@ -1762,6 +1840,7 @@ void ParseTextBackgroundStyle(struct ArkUIRichEditorTextStyle& textStyle,
     auto& textBackgroundStyle = typingStyle.updateTextBackgroundStyle.value();
     textStyle.textBackgroundColor = textBackgroundStyle.backgroundColor->GetValue();
     auto radius = textBackgroundStyle.backgroundRadius;
+    CHECK_NULL_VOID(radius.has_value());
     textStyle.textBackgroundTopLeftRadius = radius->radiusTopLeft.value_or(Dimension(0)).ConvertToVp();
     textStyle.textBackgroundTopRightRadius = radius->radiusTopRight.value_or(Dimension(0)).ConvertToVp();
     textStyle.textBackgroundBottomLeftRadius = radius->radiusBottomLeft.value_or(Dimension(0)).ConvertToVp();
@@ -1812,6 +1891,95 @@ ArkUIRichEditorTextStyle GetRichEditorTypingStyle(ArkUINodeHandle node)
     return textStyle;
 }
 
+std::pair<uint32_t, uint32_t> GetSelectionRangeInfo(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, {});
+    auto info = RichEditorModelNG::GetSelectionRangeInfo(frameNode);
+    return {std::max(info.start_, 0), std::max(info.end_, 0)};
+}
+
+void SetStyledString(ArkUINodeHandle node, const ArkUI_StyledString_Descriptor* descriptor)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto spanStringRawPtr = reinterpret_cast<MutableSpanString*>(descriptor->spanString);
+    CHECK_NULL_VOID(spanStringRawPtr);
+    RichEditorModelNG::SetStyledString(frameNode, spanStringRawPtr);
+}
+
+void GetStyledString(ArkUINodeHandle node, ArkUI_StyledString_Descriptor* descriptor)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode && descriptor);
+    SpanStringBase* spanString = RichEditorModelNG::GetStyledString(frameNode);
+    descriptor->spanString = spanString;
+}
+
+void SetStyledPlaceholder(ArkUINodeHandle node, const ArkUI_StyledString_Descriptor* descriptor)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto spanStringRawPtr = reinterpret_cast<MutableSpanString*>(descriptor->spanString);
+    CHECK_NULL_VOID(spanStringRawPtr);
+    RichEditorModelNG::SetStyledPlaceholder(frameNode, spanStringRawPtr);
+}
+
+void SetRichEditorNapiOnWillChange(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onWillChange = [extraParam](const StyledStringChangeValue& changeValue) -> bool {
+        ArkUINodeEvent event = CreateArkUINodeEvent(TEXT_EDITOR_CHANGE_EVENT, extraParam);
+        // return local value
+        auto rangeBefore = changeValue.GetRangeBefore();
+        auto& changeEvent = event.textEditorChangeEvent;
+        changeEvent.subKind = ON_RICH_EDITOR_ON_WILL_CHANGE;
+        changeEvent.start = rangeBefore.start;
+        changeEvent.end = rangeBefore.end;
+        changeEvent.returnValue = 1;
+        changeEvent.replacementStyledString = static_cast<void*>(changeValue.GetReplacementString().GetRawPtr());
+        changeEvent.previewStyledString = static_cast<void*>(changeValue.GetPreviewText().GetRawPtr());
+        SendArkUISyncEvent(&event);
+        return static_cast<bool>(changeEvent.returnValue);
+    };
+    RichEditorModelNG::SetOnStyledStringWillChange(frameNode, std::move(onWillChange));
+}
+
+void ResetRichEditorNapiOnWillChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetOnStyledStringWillChange(frameNode, nullptr);
+}
+
+void SetRichEditorNapiOnDidChange(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onDidChange = [extraParam](const StyledStringChangeValue& changeValue) {
+        ArkUINodeEvent event = CreateArkUINodeEvent(COMPONENT_ASYNC_EVENT, extraParam);
+        auto rangeBefore = changeValue.GetRangeBefore();
+        auto rangeAfter = changeValue.GetRangeAfter();
+        // return local value
+        auto& asyncEvent = event.componentAsyncEvent;
+        asyncEvent.subKind = ON_RICH_EDITOR_ON_DID_CHANGE;
+        asyncEvent.data[0].i32 = rangeBefore.start;
+        asyncEvent.data[1].i32 = rangeBefore.end;
+        asyncEvent.data[2].i32 = rangeAfter.start;
+        asyncEvent.data[3].i32 = rangeAfter.end;
+        SendArkUISyncEvent(&event);
+    };
+    RichEditorModelNG::SetOnStyledStringDidChange(frameNode, std::move(onDidChange));
+}
+
+void ResetRichEditorNapiOnDidChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetOnStyledStringDidChange(frameNode, nullptr);
+}
+
 void* GetEventSetHandler(uint32_t kind)
 {
     static const ComponentAsyncEventHandler richEditorNodeAsyncEventHandlers[] = {
@@ -1822,6 +1990,8 @@ void* GetEventSetHandler(uint32_t kind)
         NG::SetRichEditorNapiOnSubmit,
         NG::SetRichEditorNapiOnCut,
         NG::SetRichEditorNapiOnCopy,
+        NG::SetRichEditorNapiOnWillChange,
+        NG::SetRichEditorNapiOnDidChange,
     };
     if (kind >= sizeof(richEditorNodeAsyncEventHandlers) / sizeof(ComponentAsyncEventHandler)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
@@ -1840,6 +2010,8 @@ void* GetEventResetHandler(uint32_t kind)
         NG::ResetRichEditorOnSubmit,
         NG::ResetRichEditorOnCut,
         NG::ResetRichEditorOnCopy,
+        NG::ResetRichEditorNapiOnWillChange,
+        NG::ResetRichEditorNapiOnDidChange,
     };
     if (kind >=
         sizeof(richEditorNodeResetAsyncEventHandlers) / sizeof(ResetComponentAsyncEventHandler)) {
@@ -1859,7 +2031,6 @@ const ArkUIRichEditorModifier* GetRichEditorDynamicModifier()
         .setRichEditorPreviewMenuParam= SetRichEditorPreviewMenuParam,
         .setRichEditorBindSelectionMenuJS = SetRichEditorBindSelectionMenuJS,
         .setRichEditorFocusable = SetRichEditorFocusable,
-        .setRichEditorOnShare = SetRichEditorOnShare,
         .setRichEditorSelectDetectConfig = SetRichEditorSelectDetectConfig,
         .resetRichEditorSelectDetectConfig = ResetRichEditorSelectDetectConfig,
         .setRichEditorEnableDataDetector = SetRichEditorDetectEnable,
@@ -1988,6 +2159,7 @@ const ArkUIRichEditorModifier* GetRichEditorDynamicModifier()
         .getRichEditorPreviewTextValue= GetRichEditorPreviewTextValue,
         .getRichEditorCaretRect = GetRichEditorCaretRect,
         .doRichEditorDeleteBackward = DoRichEditorDeleteBackward,
+        .closeSelectionMenu = CloseSelectionMenu,
         .setRichEditorSupportPreviewText = SetRichEditorSupportPreviewText,
         .resetRichEditorSupportPreviewText = ResetRichEditorSupportPreviewText,
         .getRichEditorSupportPreviewText = GetRichEditorSupportPreviewText,
@@ -1995,6 +2167,9 @@ const ArkUIRichEditorModifier* GetRichEditorDynamicModifier()
         .getRichEditorRectsForRange = GetRichEditorRectsForRange,
         .getRichEditorGlyphPositionAtCoordinate = GetRichEditorGlyphPositionAtCoordinate,
         .getRichEditorLineMetrics = GetRichEditorLineMetrics,
+        .getRichEditorCharacterPositionAtCoordinate = GetRichEditorCharacterPositionAtCoordinate,
+        .getRichEditorGlyphRangeForCharacterRange = GetRichEditorGlyphRangeForCharacterRange,
+        .getRichEditorCharacterRangeForGlyphRange = GetRichEditorCharacterRangeForGlyphRange,
         .setTypingParagraphStyle = SetTypingParagraphStyle,
         .setRichEditorTypingStyle = SetRichEditorTypingStyle,
         .getRichEditorTypingStyle = GetRichEditorTypingStyle,
@@ -2002,6 +2177,13 @@ const ArkUIRichEditorModifier* GetRichEditorDynamicModifier()
         .resetRichEditorBindSelectionMenu = ResetRichEditorBindSelectionMenu,
         .getEventSetHandler = GetEventSetHandler,
         .getEventResetHandler = GetEventResetHandler,
+        .getSelectionRangeInfo = GetSelectionRangeInfo,
+        .setStyledString = SetStyledString,
+        .getStyledString = GetStyledString,
+        .setStyledPlaceholder = SetStyledPlaceholder,
+        .setRichEditorOrphanCharOptimization = SetRichEditorOrphanCharOptimization,
+        .resetRichEditorOrphanCharOptimization = ResetRichEditorOrphanCharOptimization,
+        .getRichEditorOrphanCharOptimization = GetRichEditorOrphanCharOptimization,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

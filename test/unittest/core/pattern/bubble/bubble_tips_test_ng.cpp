@@ -16,11 +16,11 @@
 
 #define private public
 #define protected public
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 
 #include "base/memory/ace_type.h"
 #include "base/subwindow/subwindow_manager.h"
@@ -35,6 +35,7 @@
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/bubble/bubble_render_property.h"
 #include "core/components_ng/pattern/bubble/bubble_view.h"
+#include "core/components/button/button_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 
@@ -116,6 +117,20 @@ void BubbleTipsTestNg::SetUpTestCase()
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     BubbleTipsTestNg::popupTheme = AceType::MakeRefPtr<PopupTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextTheme::TypeId()) {
+            return AceType::MakeRefPtr<TextTheme>();
+        } else if (type == HyperlinkTheme::TypeId()) {
+            return AceType::MakeRefPtr<HyperlinkTheme>();
+        } else if (type == ButtonTheme::TypeId()) {
+            return AceType::MakeRefPtr<ButtonTheme>();
+        } else if (type == ShadowTheme::TypeId()) {
+            return AceType::MakeRefPtr<ShadowTheme>();
+        } else {
+            return BubbleTipsTestNg::popupTheme;
+        }
+    });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+    .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
         if (type == TextTheme::TypeId()) {
             return AceType::MakeRefPtr<TextTheme>();
         } else if (type == HyperlinkTheme::TypeId()) {
@@ -328,7 +343,7 @@ RefPtr<BubbleLayoutAlgorithm> BubbleTipsTestNg::MeasureTipsRegion(const std::u16
  * @tc.desc: Test BubbleLayoutAlgorithm::MesureTipsRegion.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTipsTestNg, MesureTipsRegion001, TestSize.Level1)
+HWTEST_F(BubbleTipsTestNg, MesureTipsRegion001, TestSize.Level0)
 {
     /*
      * @tc.desc: 1.Set mouse position to calculate target position.
@@ -383,7 +398,7 @@ HWTEST_F(BubbleTipsTestNg, MesureTipsRegion001, TestSize.Level1)
  * @tc.desc: Test ResetTipsMaxLines.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTipsTestNg, ResetTipsMaxLines001, TestSize.Level1)
+HWTEST_F(BubbleTipsTestNg, ResetTipsMaxLines001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -428,7 +443,7 @@ HWTEST_F(BubbleTipsTestNg, ResetTipsMaxLines001, TestSize.Level1)
  * @tc.desc: Test ResetTipsMaxLines.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTipsTestNg, ResetTipsMaxLines002, TestSize.Level1)
+HWTEST_F(BubbleTipsTestNg, ResetTipsMaxLines002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -457,7 +472,7 @@ HWTEST_F(BubbleTipsTestNg, ResetTipsMaxLines002, TestSize.Level1)
  * @tc.desc: Test ResetTipsMaxLines.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTipsTestNg, ResetTipsMaxLines003, TestSize.Level1)
+HWTEST_F(BubbleTipsTestNg, ResetTipsMaxLines003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -493,7 +508,7 @@ HWTEST_F(BubbleTipsTestNg, ResetTipsMaxLines003, TestSize.Level1)
  * @tc.desc: Test FitAvailableRect for tips.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTipsTestNg, TipsFitAvailableRect001, TestSize.Level1)
+HWTEST_F(BubbleTipsTestNg, TipsFitAvailableRect001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -531,7 +546,7 @@ HWTEST_F(BubbleTipsTestNg, TipsFitAvailableRect001, TestSize.Level1)
  * @tc.desc: Test HandleKeyboard function.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTipsTestNg, TipsHandleKeyboardTest, TestSize.Level1)
+HWTEST_F(BubbleTipsTestNg, TipsHandleKeyboardTest, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -581,7 +596,7 @@ HWTEST_F(BubbleTipsTestNg, TipsHandleKeyboardTest, TestSize.Level1)
  * @tc.desc: Test UpdateTextNodeMaxLines function.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTipsTestNg, UpdateTextNodeMaxLinesTest001, TestSize.Level1)
+HWTEST_F(BubbleTipsTestNg, UpdateTextNodeMaxLinesTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -625,7 +640,7 @@ HWTEST_F(BubbleTipsTestNg, UpdateTextNodeMaxLinesTest001, TestSize.Level1)
  * @tc.desc: Test CalculateTipsDirections function.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTipsTestNg, CalculateTipsDirectionsTest001, TestSize.Level1)
+HWTEST_F(BubbleTipsTestNg, CalculateTipsDirectionsTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -661,7 +676,7 @@ HWTEST_F(BubbleTipsTestNg, CalculateTipsDirectionsTest001, TestSize.Level1)
  * @tc.desc: Test GetPositionWithPlacementLeftTop function.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTipsTestNg, GetPositionWithPlacementLeftTopTest001, TestSize.Level1)
+HWTEST_F(BubbleTipsTestNg, GetPositionWithPlacementLeftTopTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -697,7 +712,7 @@ HWTEST_F(BubbleTipsTestNg, GetPositionWithPlacementLeftTopTest001, TestSize.Leve
  * @tc.desc: Test GetPositionWithPlacementLeftTop function.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTipsTestNg, GetPositionWithPlacementLeftTopTest002, TestSize.Level1)
+HWTEST_F(BubbleTipsTestNg, GetPositionWithPlacementLeftTopTest002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -734,7 +749,7 @@ HWTEST_F(BubbleTipsTestNg, GetPositionWithPlacementLeftTopTest002, TestSize.Leve
  * @tc.desc: Test GetPositionWithPlacementRightTop function.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTipsTestNg, GetPositionWithPlacementRightTopTest001, TestSize.Level1)
+HWTEST_F(BubbleTipsTestNg, GetPositionWithPlacementRightTopTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -769,7 +784,7 @@ HWTEST_F(BubbleTipsTestNg, GetPositionWithPlacementRightTopTest001, TestSize.Lev
  * @tc.desc: Test GetPositionWithPlacementRightTop function.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTipsTestNg, GetPositionWithPlacementRightTopTest002, TestSize.Level1)
+HWTEST_F(BubbleTipsTestNg, GetPositionWithPlacementRightTopTest002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -806,7 +821,7 @@ HWTEST_F(BubbleTipsTestNg, GetPositionWithPlacementRightTopTest002, TestSize.Lev
  * @tc.desc: Test IsPaintDoubleBorder function.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTipsTestNg, IsPaintDoubleBorderTest001, TestSize.Level1)
+HWTEST_F(BubbleTipsTestNg, IsPaintDoubleBorderTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -835,7 +850,7 @@ HWTEST_F(BubbleTipsTestNg, IsPaintDoubleBorderTest001, TestSize.Level1)
  * @tc.desc: Test IsPaintDoubleBorder function.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTipsTestNg, IsPaintDoubleBorderTest002, TestSize.Level1)
+HWTEST_F(BubbleTipsTestNg, IsPaintDoubleBorderTest002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -866,7 +881,7 @@ HWTEST_F(BubbleTipsTestNg, IsPaintDoubleBorderTest002, TestSize.Level1)
  * @tc.desc: Test FitMouseOffset.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTipsTestNg, FitMouseOffset001, TestSize.Level1)
+HWTEST_F(BubbleTipsTestNg, FitMouseOffset001, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     auto id = targetNode->GetId();
@@ -911,7 +926,7 @@ HWTEST_F(BubbleTipsTestNg, FitMouseOffset001, TestSize.Level1)
  * @tc.desc: Test FitMouseOffset.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTipsTestNg, FitMouseOffset002, TestSize.Level1)
+HWTEST_F(BubbleTipsTestNg, FitMouseOffset002, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     auto id = targetNode->GetId();
@@ -946,7 +961,7 @@ HWTEST_F(BubbleTipsTestNg, FitMouseOffset002, TestSize.Level1)
  * @tc.desc: Test FitMouseOffset.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTipsTestNg, FitMouseOffset003, TestSize.Level1)
+HWTEST_F(BubbleTipsTestNg, FitMouseOffset003, TestSize.Level0)
 {
     auto targetNode = CreateTargetNode();
     auto id = targetNode->GetId();
@@ -986,7 +1001,7 @@ HWTEST_F(BubbleTipsTestNg, FitMouseOffset003, TestSize.Level1)
  * @tc.desc: Test MeasureTipsFollowTarget.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTipsTestNg, MeasureTipsFollowTarget001, TestSize.Level1)
+HWTEST_F(BubbleTipsTestNg, MeasureTipsFollowTarget001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -1021,7 +1036,7 @@ HWTEST_F(BubbleTipsTestNg, MeasureTipsFollowTarget001, TestSize.Level1)
  * @tc.desc: Test OnAttachToFrameNode.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTipsTestNg, OnAttachToFrameNode001, TestSize.Level1)
+HWTEST_F(BubbleTipsTestNg, OnAttachToFrameNode001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -1048,7 +1063,7 @@ HWTEST_F(BubbleTipsTestNg, OnAttachToFrameNode001, TestSize.Level1)
  * @tc.desc: Test PopBubble.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTipsTestNg, PopBubble001, TestSize.Level1)
+HWTEST_F(BubbleTipsTestNg, PopBubble001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -1091,7 +1106,7 @@ HWTEST_F(BubbleTipsTestNg, PopBubble001, TestSize.Level1)
  * @tc.desc: Test PopBubble.
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTipsTestNg, PopBubble002, TestSize.Level1)
+HWTEST_F(BubbleTipsTestNg, PopBubble002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create bubble and get frameNode.
@@ -1122,7 +1137,7 @@ HWTEST_F(BubbleTipsTestNg, PopBubble002, TestSize.Level1)
  * @tc.desc: Test Bubble Algorithm
  * @tc.type: FUNC
  */
-HWTEST_F(BubbleTipsTestNg, PopBubble003, TestSize.Level1)
+HWTEST_F(BubbleTipsTestNg, PopBubble003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create targetNode and get frameNode.

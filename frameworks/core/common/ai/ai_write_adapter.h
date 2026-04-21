@@ -17,18 +17,21 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_AI_WRITE_H
 
 #include <functional>
+#include <memory>
 #include <string>
+#include <vector>
 
 #include "base/memory/ace_type.h"
-#include "core/common/ace_application_info.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/text_field/text_selector.h"
-#include "interfaces/inner_api/ace/modal_ui_extension_config.h"
+#include "interfaces/inner_api/ace_kit/include/ui/base/versions.h"
 
 namespace OHOS::AAFwk {
 class Want;
 class WantParams;
 } // namespace OHOS::AAFwk
+
+namespace OHOS::Ace::NG {
+class PipelineContext;
+}
 
 namespace OHOS::Ace {
 struct AIWriteInfo {
@@ -48,6 +51,8 @@ struct AIWriteInfo {
     std::vector<uint8_t> selectBuffer;
     std::vector<uint8_t> sentenceBuffer;
 };
+class ModalUIExtensionProxy;
+struct ModalUIExtensionCallbacks;
 
 class AIWriteAdapter : public AceType {
     DECLARE_ACE_TYPE(AIWriteAdapter, AceType);

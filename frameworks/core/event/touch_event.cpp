@@ -18,6 +18,7 @@
 #include "base/input_manager/input_manager.h"
 #include "base/utils/time_util.h"
 #include "core/common/ace_application_info.h"
+#include "core/components_ng/event/target_component.h"
 #include "core/event/mouse_event.h"
 #include "core/event/key_event.h"
 
@@ -169,6 +170,12 @@ TouchEvent& TouchEvent::SetTouchEventId(int32_t touchEventId)
     return *this;
 }
 
+TouchEvent& TouchEvent::SetEventHandleId(int32_t eventHandleId)
+{
+    this->eventHandleId = eventHandleId;
+    return *this;
+}
+
 TouchEvent& TouchEvent::SetIsInterpolated(bool isInterpolated)
 {
     this->isInterpolated = isInterpolated;
@@ -309,7 +316,10 @@ TouchEvent TouchEvent::CloneWith(float scale, float offsetX, float offsetY, std:
     event.passThrough = passThrough;
     event.operatingHand = operatingHand;
     event.convertInfo = convertInfo;
+    event.sensorTime = sensorTime;
     event.processTime = processTime;
+    event.eventHandleId = eventHandleId;
+    event.isNewReferee = isNewReferee;
     if (passThrough) {
         event.postEventNodeId = postEventNodeId;
     }

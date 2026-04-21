@@ -33,7 +33,7 @@ HWTEST_F(KeyEventTest, KeyEvent_GetKeyIntentionCode002, TestSize.Level0)
         .inputType = ARKUI_UIINPUTEVENT_TYPE_KEY,
         .eventTypeId = C_KEY_EVENT_ID,
         .inputEvent = nullptr,
-        .isCloned = false,
+        .isCreatedByUser = false,
         .apiVersion = 0,
     };
     auto result = OH_ArkUI_KeyEvent_GetKeyIntensionCode(&event);
@@ -57,7 +57,7 @@ HWTEST_F(KeyEventTest, KeyEvent_GetKeyIntentionCode003, TestSize.Level0)
             .inputType = ARKUI_UIINPUTEVENT_TYPE_KEY,
             .eventTypeId = C_KEY_EVENT_ID,
             .inputEvent = &keyEvent,
-            .isCloned = false,
+            .isCreatedByUser = false,
             .apiVersion = 0,
         };
         auto result = OH_ArkUI_KeyEvent_GetKeyIntensionCode(&event);
@@ -72,7 +72,7 @@ HWTEST_F(KeyEventTest, KeyEvent_GetKeyIntentionCode004, TestSize.Level0)
         .inputType = ARKUI_UIINPUTEVENT_TYPE_KEY,
         .eventTypeId = AXIS_EVENT_ID,
         .inputEvent = nullptr,
-        .isCloned = false,
+        .isCreatedByUser = false,
         .apiVersion = 0,
     };
     auto result = OH_ArkUI_KeyEvent_GetKeyIntensionCode(&event);

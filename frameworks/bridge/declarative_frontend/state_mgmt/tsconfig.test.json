@@ -1,6 +1,5 @@
 {
   "files": [
-    // mock of what is implemented on native side
     "src/utest/common/state_mgmt_console_trace_mock.ts",
     "src/lib/common/state_mgmt_configure.ts",
     "src/utest/mock/common/mock_storage.ts",
@@ -12,18 +11,14 @@
     "src/utest/mock/partial_update/mock_foreach.ts",
     "src/utest/mock/partial_update/pu_view_native_mock.ts",
     
-    // common:
-    // delcrations of C++ exposed classes
     "src/lib/common/environment_setting.d.ts",
     "src/lib/common/ark_tools.d.ts",
     "src/lib/common/storage.d.ts",
     "src/lib/common/ifelse_native.d.ts",
     
-    // interfaces
     "src/lib/common/i_environment_backend.ts",
     "src/lib/common/i_storage.ts",
     
-    // sdk
     "src/lib/sdk/i_data_source.d.ts",
     "src/lib/sdk/i_property_subscriber.ts",
     "src/lib/sdk/local_storage.ts",
@@ -35,7 +30,6 @@
     "src/lib/sdk/environment.ts",
     "src/lib/sdk/i_repeat.ts",
 
-    // common, non-sdk
     "src/lib/common/observed_object.ts",
     "src/lib/common/observed_property_abstract.ts",
     "src/lib/common/utils.ts",
@@ -43,13 +37,11 @@
     "src/lib/common/finalization_registry.d.ts",
     "src/lib/common/weakref_pool.ts",
 
-    // full_update specific
     "src/lib/full_update/fu_observed_property.ts",
     "src/lib/full_update/fu_synced_property_two_way.ts",
     "src/lib/full_update/fu_synced_property_one_way.ts",
     "src/lib/full_update/fu_view.ts",
 
-    // partial update specific 
     "src/lib/partial_update/pu_types_events.ts",
     "src/lib/partial_update/pu_tracked_object.ts",
     "src/lib/partial_update/pu_observed_property_abstract.ts",
@@ -67,7 +59,6 @@
     "src/lib/partial_update/pu_recycle_manager.ts",
     "src/lib/partial_update/pu_builder_proxy.ts",
 
-    // 'new' stateMgmt vers 2
     "src/lib/v2/v2_observed_proxy.ts",
     "src/lib/v2/v2_change_observation.ts",
     "src/lib/v2/v2_decorated_variables.ts",
@@ -81,20 +72,17 @@
     "src/lib/v2/v2_make_observed.ts",
     "src/lib/v2/v2_recycle_pool.ts",
     "src/lib/common/sendable_type.ts",
-
+    "src/lib/puv2_common/puv2_globalreuse.ts",
     
-    // partial_update specific
     "src/lib/partial_update/pu_repeat.ts",
     "src/lib/partial_update/pu_repeat_impl.ts",
     "src/lib/partial_update/pu_repeat_virtual_scroll_impl.ts",
     "src/lib/partial_update/pu_repeat_virtual_scroll_2_impl.ts",
 
-    // sdk
     "src/lib/sdk/v2_persistence.ts",
     "src/lib/sdk/ui_utils.ts",
     "src/lib/sdk/observed_util.ts",
 
-    // unit testing
     "src/utest/common/helpers_for_test.ts",
     "src/utest/common/local_storage_test.ts",
     "src/utest/common/app_storage_test.ts",
@@ -108,7 +96,6 @@
     "src/utest/partial_update/observed_objects_properties_array1.ts",
     "src/utest/partial_update/viewpu_appstorage_test.ts",
 
-    // run the test
     "src/utest/index_test.ts"
   ],
   "compilerOptions": {

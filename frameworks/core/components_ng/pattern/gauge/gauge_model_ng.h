@@ -31,7 +31,7 @@ class GaugeConfiguration : public CommonConfiguration {
 };
 using GaugeMakeCallback =
     std::function<RefPtr<FrameNode>(const GaugeConfiguration& gaugeConfiguration)>;
-class ACE_FORCE_EXPORT GaugeModelNG : public OHOS::Ace::GaugeModel {
+class ACE_EXPORT GaugeModelNG : public OHOS::Ace::GaugeModel {
 public:
     void Create(float values, float min, float max) override;
     void SetValue(float value) override;

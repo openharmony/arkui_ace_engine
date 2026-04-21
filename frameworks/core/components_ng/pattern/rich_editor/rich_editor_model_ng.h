@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,23 +53,23 @@ public:
     void SetOnDidChange(std::function<void(const RichEditorChangeValue&)>&& func) override;
     void SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func) override;
     void SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func) override;
-    void SetOnShare(std::function<void(NG::TextCommonEvent&)>&& func) override;
     void SetOnWillAttachIME(IMEAttachCallback&& func) override;
     void SetSelectionMenuOptions(const OnCreateMenuCallback&& onCreateMenuCallback,
         const OnMenuItemClickCallback&& onMenuItemClick,
         const OnPrepareMenuCallback&& onPrepareMenuCallback) override;
     void SetRequestKeyboardOnFocus(bool needToRequest) override;
     void SetEnableHapticFeedback(bool isEnabled) override;
+    void SetBarState(DisplayMode mode) override;
     void SetPreviewMenuParam(TextSpanType spanType, std::function<void()>& buildFunc,
         const SelectMenuParam& menuParam) override;
-    void SetBarState(DisplayMode mode) override;
     void SetMaxLength(std::optional<int32_t> value) override;
     void ResetMaxLength() override;
     void SetMaxLines(uint32_t value) override;
+    void SetOrphanCharOptimization(bool enabled) override;
     void SetEnableAutoSpacing(bool enabled) override;
-    void SetCompressLeadingPunctuation(bool enabled) override;
     void SetIncludeFontPadding(bool enabled) override;
     void SetFallbackLineSpacing(bool enabled) override;
+    void SetCompressLeadingPunctuation(bool enabled) override;
     void SetStopBackPress(bool isStopBackPress) override;
     void SetKeyboardAppearance(KeyboardAppearance value) override;
     void SetSupportStyledUndo(bool enabled) override;
@@ -87,6 +87,7 @@ public:
     static bool IsEditing(FrameNode* frameNode);
     static RectF GetCaretRect(FrameNode* frameNode);
     static void DeleteBackward(FrameNode* frameNode);
+    static void CloseSelectionMenu(FrameNode* frameNode);
     static PreviewTextInfo GetPreviewTextInfo(FrameNode* frameNode);
     static RefPtr<FrameNode> CreateRichEditorStyledStringNode(int32_t nodeId);
     static void CreateModel(bool isStyledStringMode = false);
@@ -131,7 +132,6 @@ public:
     static void SetOnPaste(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func);
     static void SetOnCut(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func);
-    static void SetOnShare(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func);
     static void SetOnWillAttachIME(FrameNode* frameNode, IMEAttachCallback&& func);
     void SetEnterKeyType(TextInputAction value) override;
     static void SetEnterKeyType(FrameNode* frameNode, const TextInputAction& action);
@@ -143,6 +143,11 @@ public:
     static std::vector<ParagraphManager::TextBox> GetRectsForRange(FrameNode* frameNode, int32_t start, int32_t end,
         RectHeightStyle heightStyle, RectWidthStyle widthStyle);
     static PositionWithAffinity GetGlyphPositionAtCoordinate(FrameNode* frameNode, int32_t x, int32_t y);
+    static PositionWithAffinity GetCharacterPositionAtCoordinate(FrameNode* frameNode, int32_t x, int32_t y);
+    static std::pair<TextRange, TextRange> GetGlyphRangeForCharacterRange(
+        FrameNode* frameNode, int32_t start, int32_t end);
+    static std::pair<TextRange, TextRange> GetCharacterRangeForGlyphRange(
+        FrameNode* frameNode, int32_t start, int32_t end);
     static void SetTypingParagraphStyle(FrameNode* frameNode,
         std::optional<struct UpdateParagraphStyle> typingParagraphStyle);
     static void SetTypingStyle(FrameNode* frameNode, std::optional<struct UpdateSpanStyle> typingStyle,
@@ -157,22 +162,24 @@ public:
     static void SetSelectionMenuOptions(FrameNode* frameNode,
         const OnCreateMenuCallback&& onCreateMenuCallback, const OnMenuItemClickCallback&& onMenuItemClick,
         const OnPrepareMenuCallback&& onPrepareMenuCallback);
-    static void SetPreviewMenuParam(FrameNode* frameNode,
-        TextSpanType spanType, std::function<void()>& buildFunc, const SelectMenuParam& menuParam);
     static void SetBarState(FrameNode* frameNode, DisplayMode mode);
     static OHOS::Ace::DisplayMode GetBarState(FrameNode* frameNode);
+    static void SetPreviewMenuParam(FrameNode* frameNode,
+        TextSpanType spanType, std::function<void()>& buildFunc, const SelectMenuParam& menuParam);
     static void SetMaxLength(FrameNode* frameNode, std::optional<int32_t> value);
     static int32_t GetMaxLength(FrameNode* frameNode);
     static void SetMaxLines(FrameNode* frameNode, uint32_t value);
     static int32_t GetMaxLines(FrameNode* frameNode);
+    static void SetOrphanCharOptimization(FrameNode* frameNode, bool enabled);
+    static bool IsOrphanCharOptimization(FrameNode* frameNode);
     static void SetEnableAutoSpacing(FrameNode* frameNode, bool enabled);
     static bool IsEnableAutoSpacing(FrameNode* frameNode);
-    static void SetCompressLeadingPunctuation(FrameNode* frameNode, bool enabled);
-    static bool IsCompressLeadingPunctuation(FrameNode* frameNode);
     static void SetIncludeFontPadding(FrameNode* frameNode, bool enabled);
     static bool IsIncludeFontPadding(FrameNode* frameNode);
     static void SetFallbackLineSpacing(FrameNode* frameNode, bool enabled);
     static bool IsFallbackLineSpacing(FrameNode* frameNode);
+    static void SetCompressLeadingPunctuation(FrameNode* frameNode, bool enabled);
+    static bool IsCompressLeadingPunctuation(FrameNode* frameNode);
     static void SetStopBackPress(FrameNode* frameNode, bool isStopBackPress);
     static bool IsStopBackPress(FrameNode* frameNode);
     static void SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value);
@@ -182,16 +189,24 @@ public:
     static void SetSupportStyledUndo(FrameNode* frameNode, bool enabled);
     static bool IsSupportStyledUndo(FrameNode* frameNode);
     static void SetScrollBarColor(FrameNode* frameNode, std::optional<Color> value);
-    static Color GetScrollBarColor(FrameNode* frameNode);
     static Color GetSelectedDragPreviewStyle(FrameNode* frameNode);
     static void SetSelectedDragPreviewStyle(FrameNode* frameNode, const Color& value);
     static void ResetSelectedDragPreviewStyle(FrameNode* frameNode);
     static void SetSingleLine(FrameNode* frameNode, bool enabled);
     static void ResetSingleLine(FrameNode* frameNode);
     static bool GetSingleLine(FrameNode* frameNode);
+    static Color GetScrollBarColor(FrameNode* frameNode);
     static void BindSelectionMenu(FrameNode* frameNode, TextSpanType& spanType,
         TextResponseType& responseType, std::function<void()>& buildFunc, const SelectMenuParam& menuParam);
     static void ResetBindSelectionMenu(FrameNode* frameNode);
+    static SelectionRangeInfo GetSelectionRangeInfo(FrameNode* frameNode);
+    static void SetStyledString(FrameNode* frameNode, const SpanString* value);
+    static SpanStringBase* GetStyledString(FrameNode* frameNode);
+    static void SetStyledPlaceholder(FrameNode* frameNode, const SpanString* value);
+    static void SetOnStyledStringWillChange(FrameNode* frameNode,
+        std::function<bool(const NG::StyledStringChangeValue&)>&& func);
+    static void SetOnStyledStringDidChange(FrameNode* frameNode,
+        std::function<void(const NG::StyledStringChangeValue&)>&& func);
 
 private:
     void SetDraggable(bool draggable);

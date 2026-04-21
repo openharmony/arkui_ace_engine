@@ -55,11 +55,11 @@ public:
 };
 
 /**
- * @tc.name: GetPropagationTest
+ * @tc.name: getPropagationTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(AxisEventAccessorTest, GetPropagationTest, TestSize.Level1)
+HWTEST_F(AxisEventAccessorTest, getPropagationTest, TestSize.Level1)
 {
     AxisInfo* eventInfo = peer_->GetEventInfo();
     ASSERT_NE(eventInfo, nullptr);

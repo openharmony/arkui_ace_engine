@@ -97,10 +97,11 @@ public:
         json->PutExtAttr("navBarPosition", GetNavBarPosition().value_or(NavBarPosition::START) == NavBarPosition::START
                                         ? "NavBarPosition.Start"
                                         : "NavBarPosition.End", filter);
-        static const std::array<std::string, 3> NAVIGATION_MODE_TO_STRING = {
+        static const std::array<std::string, 4> NAVIGATION_MODE_TO_STRING = {
             "NavigationMode.STACK",
             "NavigationMode.SPLIT",
             "NavigationMode.AUTO",
+            "NavigationMode.AUTO_WITH_ASPECT_RATIO",
         };
         json->PutExtAttr("mode",
             NAVIGATION_MODE_TO_STRING.at(static_cast<int32_t>(GetUsrNavigationMode().value_or(NavigationMode::AUTO)))

@@ -14,11 +14,11 @@
  */
 
 #include "test/unittest/core/pattern/rich_editor/rich_editor_styled_string_common_test_ng.h"
-#include "test/mock/core/common/mock_udmf.h"
-#include "test/mock/core/render/mock_paragraph.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_udmf.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_undo_manager.h"
 #include "core/components_ng/pattern/rich_editor/style_manager.h"
@@ -1041,10 +1041,16 @@ HWTEST_F(RichEditorStyledStringTestNg, ToStyledString001, TestSize.Level0)
  */
 HWTEST_F(RichEditorStyledStringTestNg, ToStyledString002, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. create richEditorPattern
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
+    /**
+     * @tc.steps: step2. test ToStyledString
+     */
     int32_t start = 3;
     int32_t end = -2;
     AddSpan("test");

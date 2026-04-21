@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_SVG_ROSEN_RENDER_SVG_LINE_H
 #define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_SVG_ROSEN_RENDER_SVG_LINE_H
 
-#include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/drawing_forward.h"
 
 #include "frameworks/compatible/components/svg/render_svg_line.h"
 

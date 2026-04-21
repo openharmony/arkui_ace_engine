@@ -30,11 +30,11 @@ class SymbolEffectAccessorTest : public AccessorTestBase<GENERATED_ArkUISymbolEf
 };
 
 /**
- * @tc.name: ctorDefaultTest
+ * @tc.name: constructTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SymbolEffectAccessorTest, ctorDefaultTest, TestSize.Level1)
+HWTEST_F(SymbolEffectAccessorTest, constructTestDefaultValues, TestSize.Level1)
 {
     EXPECT_EQ(peer_->type, SymbolEffectType::NONE);
     EXPECT_EQ(peer_->scope, std::nullopt);

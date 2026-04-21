@@ -22,4 +22,17 @@ ace_unittest("media_query_test_ng") {
     "$ace_root/frameworks/bridge/common/media_query/media_queryer.cpp",
     "media_query_test.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "media_query_test_min.cpp",
+      "media_query_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "media_query_test_min.cpp",
+      "media_query_test_core.cpp",
+    ]
+  }
 }

@@ -24,7 +24,6 @@ void ActionSheetModelNG::ShowActionSheet(const DialogProperties& arg)
 {
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
-
     auto isSubContainer = container->IsSubContainer();
     auto expandDisplay = SubwindowManager::GetInstance()->GetIsExpandDisplay();
     if (!expandDisplay && isSubContainer && arg.isShowInSubWindow) {
@@ -53,6 +52,7 @@ void ActionSheetModelNG::ShowActionSheet(const DialogProperties& arg)
         }
     }
     RefPtr<NG::FrameNode> dialog;
+    ACE_UINODE_TRACE(dialog);
     if (arg.isShowInSubWindow) {
         dialog = SubwindowManager::GetInstance()->ShowDialogNG(arg, nullptr);
         CHECK_NULL_VOID(dialog);

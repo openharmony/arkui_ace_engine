@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,8 +20,8 @@
 #define protected public
 #define private public
 
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -39,7 +39,8 @@
 #include "core/event/touch_event.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
-#include "test/mock/base/mock_system_properties.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -80,6 +81,7 @@ void ToggleButtonTestNg::SetUpTestCase()
     auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerOne);
     EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ButtonTheme>()));
+    EXPECT_CALL(*themeManagerOne, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<ButtonTheme>()));
 }
 
 void ToggleButtonTestNg::TearDownTestCase()
@@ -973,5 +975,515 @@ HWTEST_F(ToggleButtonTestNg, SetBackgroundColor, TestSize.Level1)
     EXPECT_EQ(paintProperty->GetBackgroundColor(), BACKGROUND_COLOR);
     toggleButtonModelNG.SetBackgroundColor(AceType::RawPtr(toggleNode), BACKGROUND_COLOR, false);
     EXPECT_NE(paintProperty->GetBackgroundColor(), BACKGROUND_COLOR);
+}
+
+/**
+ * @tc.name: UpdateTexOverflow001
+ * @tc.desc: Test UpdateTexOverflow when isTextFadeOut_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleButtonTestNg, UpdateTexOverflow001, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.isOn = true;
+    auto frameNode = CreateToggleButtonFrameNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ToggleButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+
+    // ToggleButton has no text child, create a standalone text node for testing
+    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    pattern->isTextFadeOut_ = true;
+    pattern->UpdateTexOverflow(true, textLayoutProperty);
+    EXPECT_EQ(textLayoutProperty->GetTextOverflow().value_or(TextOverflow::CLIP), TextOverflow::MARQUEE);
+}
+
+/**
+ * @tc.name: UpdateTexOverflow002
+ * @tc.desc: Test UpdateTexOverflow when isTextFadeOut_ is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleButtonTestNg, UpdateTexOverflow002, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.isOn = true;
+    auto frameNode = CreateToggleButtonFrameNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ToggleButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+
+    // ToggleButton has no text child, create a standalone text node for testing
+    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    pattern->isTextFadeOut_ = false;
+    auto originalOverflow = textLayoutProperty->GetTextOverflow().value_or(TextOverflow::CLIP);
+    pattern->UpdateTexOverflow(false, textLayoutProperty);
+    EXPECT_EQ(textLayoutProperty->GetTextOverflow().value_or(TextOverflow::CLIP), originalOverflow);
+}
+
+/**
+ * @tc.name: HandleHoverEvent001
+ * @tc.desc: Test HandleHoverEvent when isHover is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleButtonTestNg, HandleHoverEvent001, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.isOn = true;
+    auto frameNode = CreateToggleButtonFrameNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ToggleButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+    pattern->HandleHoverEvent(true);
+    EXPECT_TRUE(pattern->isHover_);
+}
+
+/**
+ * @tc.name: HandleHoverEvent002
+ * @tc.desc: Test HandleHoverEvent when isHover is false and isScale_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleButtonTestNg, HandleHoverEvent002, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.isOn = true;
+    auto frameNode = CreateToggleButtonFrameNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ToggleButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+    pattern->isScale_ = true;
+    pattern->HandleHoverEvent(false);
+    EXPECT_FALSE(pattern->isHover_);
+    EXPECT_FALSE(pattern->isScale_);
+}
+
+/**
+ * @tc.name: OnAfterModifyDone001
+ * @tc.desc: Test OnAfterModifyDone with inspectorId
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleButtonTestNg, OnAfterModifyDone001, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.isOn = true;
+    auto frameNode = CreateToggleButtonFrameNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ToggleButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    frameNode->UpdateInspectorId("test_toggle");
+    EXPECT_NO_FATAL_FAILURE(pattern->OnAfterModifyDone());
+}
+
+/**
+ * @tc.name: OnAfterModifyDone002
+ * @tc.desc: Test OnAfterModifyDone without inspectorId
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleButtonTestNg, OnAfterModifyDone002, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.isOn = true;
+    auto frameNode = CreateToggleButtonFrameNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ToggleButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    frameNode->UpdateInspectorId("");
+    EXPECT_NO_FATAL_FAILURE(pattern->OnAfterModifyDone());
+}
+
+/**
+ * @tc.name: InitTouchEvent001
+ * @tc.desc: Test InitTouchEvent registers touch listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleButtonTestNg, InitTouchEvent001, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.isOn = true;
+    auto frameNode = CreateToggleButtonFrameNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ToggleButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->touchListener_ = nullptr;
+    pattern->InitTouchEvent();
+    EXPECT_TRUE(pattern->touchListener_ != nullptr);
+}
+
+/**
+ * @tc.name: InitTouchEvent002
+ * @tc.desc: Test InitTouchEvent when touchListener already set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleButtonTestNg, InitTouchEvent002, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.isOn = true;
+    auto frameNode = CreateToggleButtonFrameNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ToggleButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->touchListener_ = AceType::MakeRefPtr<TouchEventImpl>([](const TouchEventInfo&) {});
+    EXPECT_NO_FATAL_FAILURE(pattern->InitTouchEvent());
+}
+
+/**
+ * @tc.name: InitTouchEventTouchDown001
+ * @tc.desc: Test InitTouchEvent closure with DOWN touch type
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleButtonTestNg, InitTouchEventTouchDown001, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.isOn = true;
+    auto frameNode = CreateToggleButtonFrameNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ToggleButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+    pattern->touchListener_ = nullptr;
+    pattern->InitTouchEvent();
+    ASSERT_NE(pattern->touchListener_, nullptr);
+
+    TouchEventInfo touchInfo("touch");
+    TouchLocationInfo touchLocationInfo(0);
+    touchLocationInfo.SetTouchType(TouchType::DOWN);
+    touchInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    auto callback = pattern->touchListener_->GetTouchEventCallback();
+    EXPECT_NO_FATAL_FAILURE(callback(touchInfo));
+    EXPECT_TRUE(pattern->isPress_);
+}
+
+/**
+ * @tc.name: InitTouchEventTouchUp001
+ * @tc.desc: Test InitTouchEvent closure with UP touch type
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleButtonTestNg, InitTouchEventTouchUp001, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.isOn = true;
+    auto frameNode = CreateToggleButtonFrameNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ToggleButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+    pattern->touchListener_ = nullptr;
+    pattern->InitTouchEvent();
+    ASSERT_NE(pattern->touchListener_, nullptr);
+
+    TouchEventInfo touchInfo("touch");
+    TouchLocationInfo touchLocationInfo(0);
+    touchLocationInfo.SetTouchType(TouchType::UP);
+    touchInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    auto callback = pattern->touchListener_->GetTouchEventCallback();
+    EXPECT_NO_FATAL_FAILURE(callback(touchInfo));
+    EXPECT_FALSE(pattern->isPress_);
+}
+
+/**
+ * @tc.name: InitTouchEventCancel001
+ * @tc.desc: Test InitTouchEvent closure with CANCEL touch type
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleButtonTestNg, InitTouchEventCancel001, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.isOn = true;
+    auto frameNode = CreateToggleButtonFrameNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ToggleButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+    pattern->touchListener_ = nullptr;
+    pattern->InitTouchEvent();
+    ASSERT_NE(pattern->touchListener_, nullptr);
+
+    TouchEventInfo touchInfo("touch");
+    TouchLocationInfo touchLocationInfo(0);
+    touchLocationInfo.SetTouchType(TouchType::CANCEL);
+    touchInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    auto callback = pattern->touchListener_->GetTouchEventCallback();
+    EXPECT_NO_FATAL_FAILURE(callback(touchInfo));
+    EXPECT_FALSE(pattern->isPress_);
+}
+
+/**
+ * @tc.name: InitTouchEventEmptyTouch001
+ * @tc.desc: Test InitTouchEvent closure with empty touches
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleButtonTestNg, InitTouchEventEmptyTouch001, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.isOn = true;
+    auto frameNode = CreateToggleButtonFrameNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ToggleButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+    pattern->touchListener_ = nullptr;
+    pattern->InitTouchEvent();
+    ASSERT_NE(pattern->touchListener_, nullptr);
+
+    TouchEventInfo touchInfo("touch");
+    auto callback = pattern->touchListener_->GetTouchEventCallback();
+    EXPECT_NO_FATAL_FAILURE(callback(touchInfo));
+}
+
+/**
+ * @tc.name: OnTouchUp001
+ * @tc.desc: Test OnTouchUp with stateEffect and clickedColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleButtonTestNg, OnTouchUp001, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.isOn = true;
+    auto frameNode = CreateToggleButtonFrameNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ToggleButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+    auto eventHub = frameNode->GetEventHub<ButtonEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetStateEffect(true);
+    pattern->backgroundColor_ = Color::BLUE;
+    pattern->clickedColor_ = Color::GREEN;
+    pattern->OnTouchUp();
+    EXPECT_FALSE(pattern->isPress_);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT), Color::BLUE);
+}
+
+/**
+ * @tc.name: OnTouchUp002
+ * @tc.desc: Test OnTouchUp without stateEffect
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleButtonTestNg, OnTouchUp002, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.isOn = true;
+    auto frameNode = CreateToggleButtonFrameNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ToggleButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+    auto eventHub = frameNode->GetEventHub<ButtonEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetStateEffect(false);
+    pattern->OnTouchUp();
+    EXPECT_FALSE(pattern->isPress_);
+}
+
+/**
+ * @tc.name: OnTouchUp003
+ * @tc.desc: Test OnTouchUp with isScale_ and isHover_ true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleButtonTestNg, OnTouchUp003, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.isOn = true;
+    auto frameNode = CreateToggleButtonFrameNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ToggleButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+    auto eventHub = frameNode->GetEventHub<ButtonEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetStateEffect(false);
+    pattern->isScale_ = true;
+    pattern->isHover_ = true;
+    pattern->OnTouchUp();
+    EXPECT_FALSE(pattern->isPress_);
+}
+
+/**
+ * @tc.name: HandleOnOffStyle001
+ * @tc.desc: Test HandleOnOffStyle with isOnToOff true and isFocus false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleButtonTestNg, HandleOnOffStyle001, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.isOn = true;
+    auto frameNode = CreateToggleButtonFrameNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ToggleButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+    EXPECT_NO_FATAL_FAILURE(pattern->HandleOnOffStyle(true, false));
+}
+
+/**
+ * @tc.name: HandleOnOffStyle002
+ * @tc.desc: Test HandleOnOffStyle with isOnToOff false and isFocus true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleButtonTestNg, HandleOnOffStyle002, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.isOn = false;
+    auto frameNode = CreateToggleButtonFrameNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ToggleButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+    EXPECT_NO_FATAL_FAILURE(pattern->HandleOnOffStyle(false, true));
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdate001
+ * @tc.desc: Test OnThemeScopeUpdate when isOn is true without selectedColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleButtonTestNg, OnThemeScopeUpdate001, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.isOn = true;
+    auto frameNode = CreateToggleButtonFrameNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ToggleButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+    auto result = pattern->OnThemeScopeUpdate(0);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdate002
+ * @tc.desc: Test OnThemeScopeUpdate when isOn is false without backgroundColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleButtonTestNg, OnThemeScopeUpdate002, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.isOn = false;
+    auto frameNode = CreateToggleButtonFrameNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ToggleButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+    auto result = pattern->OnThemeScopeUpdate(0);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdate003
+ * @tc.desc: Test OnThemeScopeUpdate when isOn true with selectedColor set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleButtonTestNg, OnThemeScopeUpdate003, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.isOn = true;
+    testProperty.selectedColor = SELECTED_COLOR;
+    auto frameNode = CreateToggleButtonFrameNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ToggleButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+    auto result = pattern->OnThemeScopeUpdate(0);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: FireBuilder001
+ * @tc.desc: Test FireBuilder without toggleMakeFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleButtonTestNg, FireBuilder001, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.isOn = true;
+    auto frameNode = CreateToggleButtonFrameNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ToggleButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->toggleMakeFunc_ = std::nullopt;
+    pattern->nodeId_ = -1;
+    EXPECT_NO_FATAL_FAILURE(pattern->FireBuilder());
+}
+
+/**
+ * @tc.name: FireBuilder002
+ * @tc.desc: Test FireBuilder with toggleMakeFunc set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleButtonTestNg, FireBuilder002, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.isOn = true;
+    auto frameNode = CreateToggleButtonFrameNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ToggleButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->toggleMakeFunc_ = [](const ToggleConfiguration& config) -> RefPtr<FrameNode> { return nullptr; };
+    EXPECT_NO_FATAL_FAILURE(pattern->FireBuilder());
+}
+
+/**
+ * @tc.name: SetToggleBuilderFunc001
+ * @tc.desc: Test SetToggleBuilderFunc with nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleButtonTestNg, SetToggleBuilderFunc001, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.isOn = true;
+    auto frameNode = CreateToggleButtonFrameNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ToggleButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetToggleBuilderFunc(nullptr);
+    EXPECT_FALSE(pattern->toggleMakeFunc_.has_value());
+    EXPECT_EQ(pattern->contentModifierNode_, nullptr);
+}
+
+/**
+ * @tc.name: SetToggleBuilderFunc002
+ * @tc.desc: Test SetToggleBuilderFunc with valid callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleButtonTestNg, SetToggleBuilderFunc002, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.isOn = true;
+    auto frameNode = CreateToggleButtonFrameNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ToggleButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto makeFunc = [](const ToggleConfiguration& config) -> RefPtr<FrameNode> { return nullptr; };
+    pattern->SetToggleBuilderFunc(std::move(makeFunc));
+    EXPECT_TRUE(pattern->toggleMakeFunc_.has_value());
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate001
+ * @tc.desc: Test OnColorConfigurationUpdate calls OnModifyDone
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleButtonTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.isOn = true;
+    auto frameNode = CreateToggleButtonFrameNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ToggleButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_NO_FATAL_FAILURE(pattern->OnColorConfigurationUpdate());
 }
 } // namespace OHOS::Ace::NG

@@ -63,7 +63,7 @@ struct svgExample007 {
           .width('100%')
           .padding(10)
           .backgroundColor(this.selectedIdx === index ? '#F0F0F0' : Color.White)
-          .border({ width: { bottom: 1 }, color: Color.LightGray })
+          .border({ width: { bottom: 1 }, color: Color.Gray })
           .onClick(() => {
             this.selectedIdx = index
           })
@@ -85,8 +85,8 @@ struct svgExample007 {
                   .height(60)
                   .fillColor([
                     Color.Red, Color.Orange, Color.Yellow,
-                    Color.Green, Color.Cyan, Color.Blue,
-                    Color.Purple, Color.Pink, Color.Brown,
+                    Color.Green, Color.Blue, Color.Blue,
+                    0x800080, Color.Pink, Color.Brown,
                     Color.Gray, Color.Black, Color.White
                   ][index])
 
@@ -95,7 +95,7 @@ struct svgExample007 {
               }
               .padding(10)
               .backgroundColor(Color.White)
-              .border({ width: 1, color: Color.LightGray, radius: 8 })
+              .border({ width: 1, color: Color.Gray, radius: 8 })
             }
           })
         }

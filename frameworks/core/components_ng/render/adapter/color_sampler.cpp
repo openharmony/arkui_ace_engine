@@ -39,22 +39,7 @@ bool RegisterColorSampler(
 
     auto rsNode = GetRsNode(node);
     CHECK_NULL_RETURN(rsNode, false);
-
-    auto rosenCallback = [callback](uint32_t color) {
-        if (callback) {
-            callback(color, ERROR_CODE_NO_ERROR);
-        }
-    };
-
-    // Register callback with RSNode
-    bool success = rsNode->RegisterColorPickerCallback(interval, rosenCallback, notifyThreshold);
-
-    if (!success) {
-        TAG_LOGW(AceLogTag::ACE_COLOR_SAMPLER, "Failed to register color sampler callback");
-        return false;
-    }
-    TAG_LOGI(AceLogTag::ACE_COLOR_SAMPLER, "Successfully registered color sampler callback");
-    return true;
+    return false; // disabled
 }
 
 bool UnregisterColorSampler(const std::string& componentId)

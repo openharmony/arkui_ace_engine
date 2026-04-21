@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAV_BAR_PATTERN_H
 
 #include "base/memory/referenced.h"
+#include "core/animation/friction_motion.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_event_hub.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_algorithm.h"

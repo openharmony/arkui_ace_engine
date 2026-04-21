@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
  class MediaCachedImageModifier extends ArkMediaCachedImageComponent implements AttributeModifier<MediaCachedImageAttribute> {
 
     constructor(nativePtr: KNode, classType: ModifierType) {

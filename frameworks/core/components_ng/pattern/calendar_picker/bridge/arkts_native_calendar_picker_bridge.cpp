@@ -154,9 +154,9 @@ ArkUINativeModuleValue SetJSTextStyle(EcmaVM* vm, const panda::Local<panda::JSVa
 {
     ArkUINodeHandle nativeNode =
         reinterpret_cast<ArkUINodeHandle>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, panda::NativePointerRef::New(vm, nullptr));
-    RefPtr<CalendarTheme> calendarTheme = pipeline->GetTheme<CalendarTheme>();
+    auto frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
+    RefPtr<CalendarTheme> calendarTheme = frameNode->GetTheme<CalendarTheme>(true);
     CHECK_NULL_RETURN(calendarTheme, panda::NativePointerRef::New(vm, nullptr));
 
     NG::PickerTextStyle textStyle;
@@ -176,16 +176,18 @@ ArkUINativeModuleValue CalendarPickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* 
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, panda::NativePointerRef::New(vm, nullptr));
-    RefPtr<CalendarTheme> calendarTheme = pipeline->GetTheme<CalendarTheme>();
-    CHECK_NULL_RETURN(calendarTheme, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> fontSizeArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> fontWeightArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    auto frameNode = nativeNode
+                        ? nativeNode
+                        : reinterpret_cast<ArkUINodeHandle>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNodePtr = reinterpret_cast<NG::FrameNode*>(frameNode);
+    RefPtr<CalendarTheme> calendarTheme = frameNodePtr->GetTheme<CalendarTheme>(true);
+    CHECK_NULL_RETURN(calendarTheme, panda::NativePointerRef::New(vm, nullptr));
     if (IsJsView(firstArg, vm)) {
         SetJSTextStyle(vm, runtimeCallInfo->GetCallArgRef(NUM_1));
         return panda::JSValueRef::Undefined(vm);
@@ -195,9 +197,6 @@ ArkUINativeModuleValue CalendarPickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* 
     ArkUIPickerTextStyleStruct textStyleStruct;
     textStyleStruct.textColorSetByUser = false;
     if (!colorArg->IsUndefined()) {
-        auto frameNode = nativeNode
-                             ? nativeNode
-                             : reinterpret_cast<ArkUINodeHandle>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(frameNode);
         if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, textColor, textColorResObj, nodeInfo)) {
             textStyleStruct.textColorSetByUser = true;
@@ -493,38 +492,39 @@ void ParseBorderColor(ArkUINodeHandle handle, EcmaVM* vm, const Local<JSValueRef
     }
 }
 
-void BuildBorderWidthOption(const CommonCalcDimension& commonCalcDimension, ArkUIBorderWidthOption* borderWidthOption)
+void BuildBorderWidthOption(const CommonCalcDimension& commonCalcDimension,
+    ArkUIBorderWidthOption (*borderWidthOption)[NUM_4])
 {
     if (commonCalcDimension.left.has_value()) {
-        borderWidthOption[NUM_0].value = commonCalcDimension.left.value().Value();
-        borderWidthOption[NUM_0].unit = static_cast<int32_t>(commonCalcDimension.left.value().Unit());
-        borderWidthOption[NUM_0].hasValue = true;
+        (*borderWidthOption)[NUM_0].value = commonCalcDimension.left.value().Value();
+        (*borderWidthOption)[NUM_0].unit = static_cast<int32_t>(commonCalcDimension.left.value().Unit());
+        (*borderWidthOption)[NUM_0].hasValue = true;
     } else {
-        borderWidthOption[NUM_0].hasValue = false;
+        (*borderWidthOption)[NUM_0].hasValue = false;
     }
 
     if (commonCalcDimension.right.has_value()) {
-        borderWidthOption[NUM_1].value = commonCalcDimension.right.value().Value();
-        borderWidthOption[NUM_1].unit = static_cast<int32_t>(commonCalcDimension.right.value().Unit());
-        borderWidthOption[NUM_1].hasValue = true;
+        (*borderWidthOption)[NUM_1].value = commonCalcDimension.right.value().Value();
+        (*borderWidthOption)[NUM_1].unit = static_cast<int32_t>(commonCalcDimension.right.value().Unit());
+        (*borderWidthOption)[NUM_1].hasValue = true;
     } else {
-        borderWidthOption[NUM_1].hasValue = false;
+        (*borderWidthOption)[NUM_1].hasValue = false;
     }
 
     if (commonCalcDimension.top.has_value()) {
-        borderWidthOption[NUM_2].value = commonCalcDimension.top.value().Value();
-        borderWidthOption[NUM_2].unit = static_cast<int32_t>(commonCalcDimension.top.value().Unit());
-        borderWidthOption[NUM_2].hasValue = true;
+        (*borderWidthOption)[NUM_2].value = commonCalcDimension.top.value().Value();
+        (*borderWidthOption)[NUM_2].unit = static_cast<int32_t>(commonCalcDimension.top.value().Unit());
+        (*borderWidthOption)[NUM_2].hasValue = true;
     } else {
-        borderWidthOption[NUM_2].hasValue = false;
+        (*borderWidthOption)[NUM_2].hasValue = false;
     }
 
     if (commonCalcDimension.bottom.has_value()) {
-        borderWidthOption[NUM_3].value = commonCalcDimension.bottom.value().Value();
-        borderWidthOption[NUM_3].unit = static_cast<int32_t>(commonCalcDimension.bottom.value().Unit());
-        borderWidthOption[NUM_3].hasValue = true;
+        (*borderWidthOption)[NUM_3].value = commonCalcDimension.bottom.value().Value();
+        (*borderWidthOption)[NUM_3].unit = static_cast<int32_t>(commonCalcDimension.bottom.value().Unit());
+        (*borderWidthOption)[NUM_3].hasValue = true;
     } else {
-        borderWidthOption[NUM_3].hasValue = false;
+        (*borderWidthOption)[NUM_3].hasValue = false;
     }
 }
 
@@ -557,7 +557,7 @@ void ParseBorderWidth(ArkUINodeHandle node, EcmaVM* vm, const panda::Local<panda
         panda::Local<panda::ObjectRef> obj = args->ToObject(vm);
         if (ArkTSUtils::ParseCommonEdgeWidths(vm, obj, commonCalcDimension, true)) {
             ArkUIBorderWidthOption borderWidthOption[NUM_4];
-            BuildBorderWidthOption(commonCalcDimension, borderWidthOption);
+            BuildBorderWidthOption(commonCalcDimension, &borderWidthOption);
             GetArkUINodeModifiers()->getCalendarPickerModifier()->setJSBorderWidthIsLocalized(
                 node, borderWidthOption, NUM_4, true);
             return;
@@ -568,7 +568,7 @@ void ParseBorderWidth(ArkUINodeHandle node, EcmaVM* vm, const panda::Local<panda
             GetArkUINodeModifiers()->getCalendarPickerModifier()->setJSBorderWidthProperty(node, &borderWidth);
         } else {
             ArkUIBorderWidthOption borderWidthOption[NUM_4];
-            BuildBorderWidthOption(commonCalcDimension, borderWidthOption);
+            BuildBorderWidthOption(commonCalcDimension, &borderWidthOption);
             GetArkUINodeModifiers()->getCalendarPickerModifier()->setJSBorderWidthArray(node, borderWidthOption, NUM_4);
         }
     } else {
@@ -588,20 +588,20 @@ NG::BorderRadiusProperty GetLocalizedBorderRadius(const BorderRadiusOption& bord
 }
 
 void BuildArkUIBorderRadiusOption(const BorderRadiusOption& borderRadius,
-    ArkUIBorderRadiusOption* arkUIBorderRadiusOption)
+    ArkUIBorderRadiusOption (*arkUIBorderRadiusOption)[NUM_4])
 {
-    arkUIBorderRadiusOption[NUM_0].value = borderRadius.topLeft.Value();
-    arkUIBorderRadiusOption[NUM_0].unit = static_cast<ArkUI_Int32>(borderRadius.topLeft.Unit());
-    arkUIBorderRadiusOption[NUM_0].hasValue = true;
-    arkUIBorderRadiusOption[NUM_1].value = borderRadius.topRight.Value();
-    arkUIBorderRadiusOption[NUM_1].unit = static_cast<ArkUI_Int32>(borderRadius.topRight.Unit());
-    arkUIBorderRadiusOption[NUM_1].hasValue = true;
-    arkUIBorderRadiusOption[NUM_2].value = borderRadius.bottomLeft.Value();
-    arkUIBorderRadiusOption[NUM_2].unit = static_cast<ArkUI_Int32>(borderRadius.bottomLeft.Unit());
-    arkUIBorderRadiusOption[NUM_2].hasValue = true;
-    arkUIBorderRadiusOption[NUM_3].value = borderRadius.bottomRight.Value();
-    arkUIBorderRadiusOption[NUM_3].unit = static_cast<ArkUI_Int32>(borderRadius.bottomRight.Unit());
-    arkUIBorderRadiusOption[NUM_3].hasValue = true;
+    (*arkUIBorderRadiusOption)[NUM_0].value = borderRadius.topLeft.Value();
+    (*arkUIBorderRadiusOption)[NUM_0].unit = static_cast<ArkUI_Int32>(borderRadius.topLeft.Unit());
+    (*arkUIBorderRadiusOption)[NUM_0].hasValue = true;
+    (*arkUIBorderRadiusOption)[NUM_1].value = borderRadius.topRight.Value();
+    (*arkUIBorderRadiusOption)[NUM_1].unit = static_cast<ArkUI_Int32>(borderRadius.topRight.Unit());
+    (*arkUIBorderRadiusOption)[NUM_1].hasValue = true;
+    (*arkUIBorderRadiusOption)[NUM_2].value = borderRadius.bottomLeft.Value();
+    (*arkUIBorderRadiusOption)[NUM_2].unit = static_cast<ArkUI_Int32>(borderRadius.bottomLeft.Unit());
+    (*arkUIBorderRadiusOption)[NUM_2].hasValue = true;
+    (*arkUIBorderRadiusOption)[NUM_3].value = borderRadius.bottomRight.Value();
+    (*arkUIBorderRadiusOption)[NUM_3].unit = static_cast<ArkUI_Int32>(borderRadius.bottomRight.Unit());
+    (*arkUIBorderRadiusOption)[NUM_3].hasValue = true;
 }
 
 void ParseBorderRadius(ArkUINodeHandle nativeNode, EcmaVM* vm, const panda::Local<panda::JSValueRef>& args)
@@ -631,7 +631,7 @@ void ParseBorderRadius(ArkUINodeHandle nativeNode, EcmaVM* vm, const panda::Loca
                 nativeNode, &borderRadiusProperty);
         } else {
             ArkUIBorderRadiusOption arkUIBorderRadiusOption[NUM_4];
-            BuildArkUIBorderRadiusOption(borderRadiusOption, arkUIBorderRadiusOption);
+            BuildArkUIBorderRadiusOption(borderRadiusOption, &arkUIBorderRadiusOption);
             GetArkUINodeModifiers()->getCalendarPickerModifier()->setJSBorderRadiusArray(
                 nativeNode, arkUIBorderRadiusOption, NUM_4);
         }
@@ -727,9 +727,9 @@ bool SetJsHeight(ArkUINodeHandle nativeNode, EcmaVM* vm, const panda::Local<pand
 
 void ParseCalendarPickerBorderColor(ArkUINodeHandle nativeNode, EcmaVM* vm, const panda::Local<panda::JSValueRef>& args)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    auto frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<CalendarTheme> theme = frameNode->GetTheme<CalendarTheme>(true);
     CHECK_NULL_VOID(theme);
     if (!args->IsObject(vm) && !args->IsNumber() && !args->IsString(vm)) {
         GetArkUINodeModifiers()->getCalendarPickerModifier()->setJSBorderColor(
@@ -777,6 +777,7 @@ ArkUINativeModuleValue CalendarPickerBridge::SetCalendarPickerBorder(ArkUIRuntim
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    auto frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
     if (IsJsView(firstArg, vm)) {
         SetCalendarPickerJSBorder(vm, secondArg);
         return panda::JSValueRef::Undefined(vm);
@@ -795,9 +796,7 @@ ArkUINativeModuleValue CalendarPickerBridge::SetCalendarPickerBorder(ArkUIRuntim
     }
 
     if (leftArg->IsUndefined() && rightArg->IsUndefined() && topArg->IsUndefined() && bottomArg->IsUndefined()) {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipeline, panda::NativePointerRef::New(vm, nullptr));
-        RefPtr<CalendarTheme> calendarTheme = pipeline->GetTheme<CalendarTheme>();
+        RefPtr<CalendarTheme> calendarTheme = frameNode->GetTheme<CalendarTheme>(true);
         CHECK_NULL_RETURN(calendarTheme, panda::NativePointerRef::New(vm, nullptr));
         GetArkUINodeModifiers()->getCalendarPickerModifier()->setCalendarPickerBorder(
             nativeNode, calendarTheme->GetEntryBorderColor().GetValue());

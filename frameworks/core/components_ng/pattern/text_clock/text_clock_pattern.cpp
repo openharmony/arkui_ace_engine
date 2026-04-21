@@ -61,6 +61,7 @@ constexpr char TEXTCLOCK_WEEK[] = "textclock.week";
 constexpr char TEXTCLOCK_YEAR[] = "textclock.year";
 constexpr char TEXTCLOCK_MONTH[] = "textclock.month";
 constexpr char TEXTCLOCK_DAY[] = "textclock.day";
+constexpr char TEXT_ETS_TAG[] = "Text";
 
 enum class TextClockElementIndex {
     CUR_YEAR_INDEX = 0,
@@ -121,10 +122,47 @@ void TextClockPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
 }
 
+void TextClockPattern::SetFontColor(FrameNode* frameNode, const Color& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, TextColor, value, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, value, frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+    auto textNode = GetTextNode();
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateTextColorByRender(value);
+    auto textPattern = textNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->UpdateFontColor(value);
+}
+
+bool TextClockPattern::UpdateThemeFontColor(RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_RETURN(host, false);
+    if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) ||
+        !SystemProperties::ConfigChangePerform()) {
+        return false;
+    }
+    auto theme = host->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(theme, false);
+    auto pops = host->GetLayoutProperty<TextClockLayoutProperty>();
+    CHECK_NULL_RETURN(pops, false);
+    if (!(pops->HasTextColorSetByUser() && pops->GetTextColorSetByUserValue())) {
+        Color value = theme->GetTextClockFontColor();
+        SetFontColor(AceType::RawPtr(host), value);
+        return true;
+    }
+    return false;
+}
+
 void TextClockPattern::OnAttachToMainTree()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    UpdateThemeFontColor(host);
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
 }
 
@@ -138,6 +176,7 @@ void TextClockPattern::OnDetachFromMainTree()
 void TextClockPattern::UpdateTextLayoutProperty(
     RefPtr<TextClockLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty)
 {
+    textLayoutProperty->UpdateEnableSmallLanguageTruncation(true);
     if (layoutProperty->GetFontSize().has_value()) {
         textLayoutProperty->UpdateFontSize(layoutProperty->GetFontSize().value());
     }
@@ -159,6 +198,13 @@ void TextClockPattern::UpdateTextLayoutProperty(
     if (layoutProperty->GetFontFeature().has_value()) {
         textLayoutProperty->UpdateFontFeature(layoutProperty->GetFontFeature().value());
     }
+}
+
+bool TextClockPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    return UpdateThemeFontColor(host);
 }
 
 void TextClockPattern::OnModifyDone()
@@ -350,7 +396,6 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
     dateTime.week = static_cast<uint32_t>(timeZoneTime->tm_wday); // 0-6
 
     // parse input format
-    formatElementMap_.clear();
     ParseInputFormat();
 
     char buffer[SIZE_OF_TIME_TEXT] = {};
@@ -375,7 +420,10 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
         timeZoneTime->tm_hour);
     if (timeValue - timeValue_ > LOG_INTERVAL_TIME) {
         timeValue_ = timeValue;
-        TAG_LOGI(AceLogTag::ACE_TEXT_CLOCK, "newTime:%{public}s", outputDateTime.c_str());
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, outputDateTime);
+        TAG_LOGI(
+            AceLogTag::ACE_TEXT_CLOCK, "newTime:%{public}s nodeId:%{public}d", outputDateTime.c_str(), host->GetId());
     }
     return outputDateTime;
 }
@@ -432,6 +480,7 @@ std::string TextClockPattern::ParseDateTime(const std::string& dateTimeValue,
 
 void TextClockPattern::ParseInputFormat()
 {
+    formatElementMap_.clear();
     std::string inputFormat = GetFormat();
     std::vector<std::string> formatSplitter;
     auto i = 0;
@@ -804,7 +853,7 @@ RefPtr<FrameNode> TextClockPattern::GetTextNode()
     CHECK_NULL_RETURN(host, nullptr);
     auto textNode = AceType::DynamicCast<FrameNode>(host->GetLastChild());
     CHECK_NULL_RETURN(textNode, nullptr);
-    if (textNode->GetTag() != V2::TEXT_ETS_TAG) {
+    if (textNode->GetTag() != TEXT_ETS_TAG) {
         return nullptr;
     }
     return textNode;
@@ -877,21 +926,20 @@ void TextClockPattern::DumpInfo()
 
 void TextClockPattern::OnColorConfigurationUpdate()
 {
-    if (!SystemProperties::ConfigChangePerform()) {
+    if (!SystemProperties::ConfigChangePerform() || contentModifierNode_) {
+        // If contentModifier is used, the color mode change is perceived by the components inside the contentModifier.
         return;
     }
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContextWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<TextTheme>();
+    auto theme = host->GetTheme<TextTheme>(true);
     CHECK_NULL_VOID(theme);
     auto pops = host->GetLayoutProperty<TextClockLayoutProperty>();
     CHECK_NULL_VOID(pops);
     
     if (!pops->HasTextColorSetByUser() || (pops->HasTextColorSetByUser() && !pops->GetTextColorSetByUserValue())) {
-        UpdateTextClockColor(theme->GetTextStyle().GetTextColor(), false);
+        UpdateTextClockColor(theme->GetTextClockFontColor(), false);
     }
 }
 
@@ -915,6 +963,10 @@ void TextClockPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
 void TextClockPattern::OnColorModeChange(uint32_t colorMode)
 {
     Pattern::OnColorModeChange(colorMode);
+    if (contentModifierNode_) {
+        // If contentModifier is used, the color mode change is perceived by the components inside the contentModifier.
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
@@ -935,7 +987,7 @@ void TextClockPattern::UpdateTextClockColor(const Color& color, bool isFirstLoad
     CHECK_NULL_VOID(renderContext);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    if (isFirstLoad || pipelineContext->IsSystmColorChange()) {
+    if (isFirstLoad || pipelineContext->IsSystemColorChange()) {
         layoutProperty->UpdateTextColor(color);
         renderContext->UpdateForegroundColor(color);
         renderContext->ResetForegroundColorStrategy();

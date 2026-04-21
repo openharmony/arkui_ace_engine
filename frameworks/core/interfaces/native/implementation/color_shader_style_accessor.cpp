@@ -39,7 +39,8 @@ Ark_ResourceColor GetColorImpl(Ark_ColorShaderStyle peer)
     auto stylePeer = reinterpret_cast<ColorShaderStylePeer*>(peer);
     CHECK_NULL_RETURN(stylePeer, {});
     if (stylePeer->colorValue.has_value()) {
-        return Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(stylePeer->colorValue.value());
+        return Converter::ArkUnion<Ark_ResourceColor, Ark_String>(
+            stylePeer->colorValue.value().ColorToString(), Converter::FC);
     }
     return {};
 }

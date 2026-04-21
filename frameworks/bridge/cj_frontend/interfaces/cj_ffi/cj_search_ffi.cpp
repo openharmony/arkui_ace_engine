@@ -41,8 +41,7 @@ NG::SearchModelNG* GetSearchModel()
 {
     auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Search");
     if (module == nullptr) {
-        LOGF("Can't find search dynamic module");
-        abort();
+        LOGF_ABORT("Can't find search dynamic module");
     }
     return reinterpret_cast<NG::SearchModelNG*>(module->GetModel());
 }

@@ -45,10 +45,14 @@ ohos_shared_library("arkoala_native_ani") {
   include_dirs = [
     "./",
     "$ace_root/frameworks/bridge/arkts_frontend/koala_projects/",
+    "$ace_root/frameworks/core/interfaces/native/generated/interface",
   ]
 
-  deps = [ ":ani_utils_common" ]
-  if (!build_ohos_sdk) {
+  deps = [
+    ":ani_utils_common",
+    "$ace_root/interfaces/inner_api/drawable_descriptor:drawable_descriptor",
+  ]
+  if (!build_ohos_sdk && !(defined(is_arkui_x) && is_arkui_x)) {
     deps += [ "$ace_root/frameworks/bridge/arkts_frontend:ArkoalaNative_ark" ]
   }
 
@@ -67,6 +71,7 @@ ohos_shared_library("arkoala_native_ani") {
     "detached_free_root_node/detached_free_root_node.cpp",
     "dragController/drag_controller_module.cpp",
     "drag_and_drop/native_drag_drop_global.cpp",
+    "drawable/drawable_module.cpp",
     "image/image_module.cpp",
     "image_span/image_span_module.cpp",
     "interop/interop_module.cpp",
@@ -95,18 +100,14 @@ ohos_shared_library("arkoala_native_ani") {
     "xbar/xbar_module_methods.cpp",
     "xcomponent/xcomponent_module_methods.cpp",
   ]
-  if (ace_engine_feature_wearable) {
-    sources -= [
-      "canvas/canvas_module.cpp",
-      "module.cpp",
-    ]
-  }
 
   external_deps = [
     "graphic_2d:drawing_ani",
+    "graphic_2d:text_engine_ani",
     "hilog:libhilog",
     "image_framework:image",
     "image_framework:image_taihe",
+    "ipc:ipc_single",
     "napi:ace_napi",
     "runtime_core:ani",
     "runtime_core:ani_helpers",
@@ -146,6 +147,7 @@ if (use_linux) {
     include_dirs = [
       "./",
       "$ace_root/frameworks/bridge/arkts_frontend/koala_projects/",
+      "$ace_root/frameworks/core/interfaces/native/generated/interface",
     ]
 
     sources = [

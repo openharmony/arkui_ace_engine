@@ -23,6 +23,7 @@ import { StateUpdateLoop } from "./stateManagement"
 import { RecordData } from "@ohos.base"
 import { ArkUIAniModule } from 'arkui.ani';
 import { ExtendableComponent } from './component/extendableComponent'
+import { ElementInfo } from './stateManagement/utils';
 
 export const PeerNodeType = 11
 export const RootPeerType = 33
@@ -74,6 +75,21 @@ export class PeerNode extends IncrementalNode {
 
     getId(): int32 {
         return this.id
+    }
+
+    /**
+     * Get element information for DFX debugging purposes.
+     * Returns an object containing the element name and ID.
+     */
+    getElementInfo(): ElementInfo | undefined {
+        try {
+            return {
+                elementName: this.name,
+                elementId: this.id as int
+            } as ElementInfo;
+        } catch (e) {
+            return undefined;
+        }
     }
 
     onReuse(needRecurs: boolean, param?: RecordData): void {

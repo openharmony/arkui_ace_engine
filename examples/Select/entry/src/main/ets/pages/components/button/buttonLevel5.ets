@@ -35,8 +35,7 @@ interface setsObject {
 @Component
 struct ButtonLevel5Example {
   pathStack: NavPathStack = new NavPathStack()
-  @State borderRadius1?: Length | BorderRadiuses =
-    undefined //DTS2023010913825 BorderRadiuses设置无效;  规格：不支持BorderRadiuses类型入参
+  @State borderRadius1?: Length | BorderRadiuses = undefined
   @State borderRadius2?: Length | BorderRadiuses = 10
   @State borderRadius3?: Length | BorderRadiuses = undefined
   @State borderRadius4?: Length | BorderRadiuses = undefined

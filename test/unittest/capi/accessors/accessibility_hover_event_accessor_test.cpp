@@ -58,21 +58,21 @@ public:
 };
 
 /**
- * @tc.name: accessibilityHoverEventAcrGetTypeTest
+ * @tc.name: getTypeTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(AccessibilityHoverEventAccessorTest, DISABLED_accessibilityHoverEventAcrGetTypeTest, TestSize.Level1)
+HWTEST_F(AccessibilityHoverEventAccessorTest, DISABLED_getTypeTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getType, nullptr);
 }
 
 /**
- * @tc.name: accessibilityHoverEventAcrSetTypeTest
+ * @tc.name: setTypeTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(AccessibilityHoverEventAccessorTest, accessibilityHoverEventAcrSetTypeTest, TestSize.Level1)
+HWTEST_F(AccessibilityHoverEventAccessorTest, setTypeTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setType, nullptr);
 
@@ -85,11 +85,11 @@ HWTEST_F(AccessibilityHoverEventAccessorTest, accessibilityHoverEventAcrSetTypeT
 }
 
 /**
- * @tc.name: accessibilityHoverEventAcrSetGetXTest
+ * @tc.name: setXTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(AccessibilityHoverEventAccessorTest, accessibilityHoverEventAcrSetGetXTest, TestSize.Level1)
+HWTEST_F(AccessibilityHoverEventAccessorTest, setXTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setX, nullptr);
     ASSERT_NE(accessor_->getX, nullptr);
@@ -102,11 +102,11 @@ HWTEST_F(AccessibilityHoverEventAccessorTest, accessibilityHoverEventAcrSetGetXT
 }
 
 /**
- * @tc.name: accessibilityHoverEventAcrSetGetYTest
+ * @tc.name: setYTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(AccessibilityHoverEventAccessorTest, accessibilityHoverEventAcrSetGetYTest, TestSize.Level1)
+HWTEST_F(AccessibilityHoverEventAccessorTest, setYTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setY, nullptr);
     ASSERT_NE(accessor_->getY, nullptr);
@@ -119,11 +119,11 @@ HWTEST_F(AccessibilityHoverEventAccessorTest, accessibilityHoverEventAcrSetGetYT
 }
 
 /**
- * @tc.name: accessibilityHoverEventAcrDisplaySetGetXTest
+ * @tc.name: setDisplayXTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(AccessibilityHoverEventAccessorTest, accessibilityHoverEventAcrDisplaySetGetXTest, TestSize.Level1)
+HWTEST_F(AccessibilityHoverEventAccessorTest, setDisplayXTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setDisplayX, nullptr);
     ASSERT_NE(accessor_->getDisplayX, nullptr);
@@ -136,11 +136,11 @@ HWTEST_F(AccessibilityHoverEventAccessorTest, accessibilityHoverEventAcrDisplayS
 }
 
 /**
- * @tc.name: accessibilityHoverEventAcrDisplaySetGetYTest
+ * @tc.name: setDisplayYTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(AccessibilityHoverEventAccessorTest, accessibilityHoverEventAcrDisplaySetGetYTest, TestSize.Level1)
+HWTEST_F(AccessibilityHoverEventAccessorTest, setDisplayYTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setDisplayY, nullptr);
     ASSERT_NE(accessor_->getDisplayY, nullptr);
@@ -153,11 +153,11 @@ HWTEST_F(AccessibilityHoverEventAccessorTest, accessibilityHoverEventAcrDisplayS
 }
 
 /**
- * @tc.name: accessibilityHoverEventAcrWindowSetGetXTest
+ * @tc.name: setWindowXTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(AccessibilityHoverEventAccessorTest, accessibilityHoverEventAcrWindowSetGetXTest, TestSize.Level1)
+HWTEST_F(AccessibilityHoverEventAccessorTest, setWindowXTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setWindowX, nullptr);
     ASSERT_NE(accessor_->getWindowX, nullptr);
@@ -170,11 +170,11 @@ HWTEST_F(AccessibilityHoverEventAccessorTest, accessibilityHoverEventAcrWindowSe
 }
 
 /**
- * @tc.name: accessibilityHoverEventAcrWindowSetGetYTest
+ * @tc.name: setWindowYTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(AccessibilityHoverEventAccessorTest, accessibilityHoverEventAcrWindowSetGetYTest, TestSize.Level1)
+HWTEST_F(AccessibilityHoverEventAccessorTest, setWindowYTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setWindowY, nullptr);
     ASSERT_NE(accessor_->getWindowY, nullptr);

@@ -18,61 +18,9 @@
 
 import { __context, __id, remember } from '@koalaui/runtime'
 import { int32 } from "@koalaui/common"
-import { DynamicNode, OnMoveHandler, ItemDragEventHandler } from '#generated'
+import { DynamicNode, OnMoveHandler, ItemDragEventHandler, LazyForEachOptions, DataOperation } from '#generated'
 import { LazyForEachImplForOptions } from '../base/LazyForEachImpl'
 import { InteropNativeModule } from '@koalaui/interop'
-
-export enum DataOperationType {
-    ADD = 'add',
-    DELETE = 'delete',
-    EXCHANGE = 'exchange',
-    MOVE = 'move',
-    CHANGE = 'change',
-    RELOAD = 'reload'
-}
-export interface DataAddOperation {
-    type: DataOperationType;
-    index: int32;
-    count?: int32;
-    key?: string | Array<string>;
-}
-export interface DataDeleteOperation {
-    type: DataOperationType;
-    index: int32;
-    count?: int32;
-}
-export interface DataChangeOperation {
-    type: DataOperationType;
-    index: int32;
-    key?: string;
-}
-export interface MoveIndex {
-    from: int32;
-    to: int32;
-}
-export interface ExchangeIndex {
-    start: int32;
-    end: int32;
-}
-export interface ExchangeKey {
-    start: string;
-    end: string;
-}
-export interface DataMoveOperation {
-    type: DataOperationType;
-    index: MoveIndex;
-    key?: string;
-}
-export interface DataExchangeOperation {
-    type: DataOperationType;
-    index: ExchangeIndex;
-    key?: ExchangeKey;
-}
-export interface DataReloadOperation {
-    type: DataOperationType;
-}
-export type DataOperation = DataAddOperation | DataDeleteOperation | DataChangeOperation | DataMoveOperation
-    | DataExchangeOperation | DataReloadOperation;
 
 export interface DataChangeListener {
     onDataReloaded(): void;
@@ -112,10 +60,21 @@ export interface IDataSource<T> {
 
 export interface LazyForEachAttribute<T> extends DynamicNode {
     dataSource: IDataSource<T> | null;
-    setLazyForEachOptions(dataSource: IDataSource<T>,
+    setLazyForEachOptions(
+        dataSource: IDataSource<T>,
         /** @memo */
         itemGenerator: (item: T, index: int32) => void,
-        keyGenerator?: (item: T, index: number) => string): this {
+        keyGenerator?: (item: T, index: number) => string
+    ): this {
+        return this;
+    }
+    setLazyForEachOptions(
+        dataSource: IDataSource<T>,
+        /** @memo */
+        itemGenerator: (item: T, index: int32) => void,
+        keyGenerator?: (item: T, index: number) => string,
+        options?: LazyForEachOptions
+    ): this {
         return this;
     }
     onMove(handler?: OnMoveHandler): this {
@@ -125,6 +84,9 @@ export interface LazyForEachAttribute<T> extends DynamicNode {
         return this;
     }
     applyAttributesFinish(): void {}
+    debugLine(sourceLine: string, moduleName?: string): this {
+        return this;
+    }
 }
 
 export class ArkLazyForEachComponent<T> implements LazyForEachAttribute<T> {
@@ -134,14 +96,32 @@ export class ArkLazyForEachComponent<T> implements LazyForEachAttribute<T> {
     keyGenerator?: (item: T, index: int32) => string = undefined;
     onMoveEvent?: OnMoveHandler = undefined;
     itemDragEvent?: ItemDragEventHandler = undefined;
+    options?: LazyForEachOptions = undefined;
 
-    public setLazyForEachOptions(dataSource: IDataSource<T>,
+    public setLazyForEachOptions(
+        dataSource: IDataSource<T>,
         /** @memo */
         itemGenerator: (item: T, index: int32) => void,
-        keyGenerator?: (item: T, index: int32) => string): this {
+        keyGenerator?: (item: T, index: int32) => string
+    ): this {
         this.dataSource = dataSource;
         this.itemGenerator = itemGenerator;
         this.keyGenerator = keyGenerator;
+        this.options = undefined;
+        return this;
+    }
+
+    public setLazyForEachOptions(
+        dataSource: IDataSource<T>,
+        /** @memo */
+        itemGenerator: (item: T, index: int32) => void,
+        keyGenerator?: (item: T, index: int32) => string,
+        options?: LazyForEachOptions
+    ): this {
+        this.dataSource = dataSource;
+        this.itemGenerator = itemGenerator;
+        this.keyGenerator = keyGenerator;
+        this.options = options;
         return this;
     }
 
@@ -157,6 +137,10 @@ export class ArkLazyForEachComponent<T> implements LazyForEachAttribute<T> {
     }
 
     applyAttributesFinish(): void {}
+    
+    public debugLine(sourceLine: string, moduleName?: string): this {
+        return this;
+    }
 }
 
 /** @memo */
@@ -182,5 +166,6 @@ export function LazyForEachImpl<T>(
         receiver.itemGenerator,
         receiver.keyGenerator,
         receiver.onMoveEvent,
-        receiver.itemDragEvent)
+        receiver.itemDragEvent,
+        receiver.options)
 }

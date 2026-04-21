@@ -80,11 +80,11 @@ namespace {
 }
 
 /**
- * @tc.name: GetStopPropagationTest
+ * @tc.name: getStopPropagationTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MouseEventAccessorTest, GetStopPropagationTest, TestSize.Level1)
+HWTEST_F(MouseEventAccessorTest, getStopPropagationTest, TestSize.Level1)
 {
     MouseInfo* eventInfo = peer_->GetEventInfo();
     ASSERT_NE(eventInfo, nullptr);
@@ -98,11 +98,11 @@ HWTEST_F(MouseEventAccessorTest, GetStopPropagationTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetButtonTest
+ * @tc.name: setButtonTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MouseEventAccessorTest, SetButtonTest, TestSize.Level1)
+HWTEST_F(MouseEventAccessorTest, setButtonTest, TestSize.Level1)
 {
     auto info = peer_->GetEventInfo();
     ASSERT_NE(info, nullptr);
@@ -115,11 +115,11 @@ HWTEST_F(MouseEventAccessorTest, SetButtonTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetButtonTest
+ * @tc.name: getButtonTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MouseEventAccessorTest, GetButtonTest, TestSize.Level1)
+HWTEST_F(MouseEventAccessorTest, getButtonTest, TestSize.Level1)
 {
     for (auto& [value, expected]: getMouseButtonTestPlan) {
         auto eventInfo = peer_->GetEventInfo();
@@ -131,11 +131,11 @@ HWTEST_F(MouseEventAccessorTest, GetButtonTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetActionTest
+ * @tc.name: setActionTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MouseEventAccessorTest, SetActionTest, TestSize.Level1)
+HWTEST_F(MouseEventAccessorTest, setActionTest, TestSize.Level1)
 {
     auto info = peer_->GetEventInfo();
     ASSERT_NE(info, nullptr);
@@ -148,11 +148,11 @@ HWTEST_F(MouseEventAccessorTest, SetActionTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetActionTest
+ * @tc.name: getActionTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MouseEventAccessorTest, DISABLED_GetActionTest, TestSize.Level1)
+HWTEST_F(MouseEventAccessorTest, DISABLED_getActionTest, TestSize.Level1)
 {
     for (auto& [value, expected]: getMouseActionTestPlan) {
         auto eventInfo = peer_->GetEventInfo();
@@ -164,11 +164,11 @@ HWTEST_F(MouseEventAccessorTest, DISABLED_GetActionTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetDisplayXTest
+ * @tc.name: getDisplayXTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MouseEventAccessorTest, GetDisplayXTest, TestSize.Level1)
+HWTEST_F(MouseEventAccessorTest, getDisplayXTest, TestSize.Level1)
 {
     for (auto& [input, expected, value] : testFixtureNumberValues) {
         auto info = peer_->GetEventInfo();
@@ -183,11 +183,11 @@ HWTEST_F(MouseEventAccessorTest, GetDisplayXTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetDisplayXTest
+ * @tc.name: setDisplayXTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MouseEventAccessorTest, SetDisplayXTest, TestSize.Level1)
+HWTEST_F(MouseEventAccessorTest, setDisplayXTest, TestSize.Level1)
 {
     auto info = peer_->GetEventInfo();
     ASSERT_NE(info, nullptr);
@@ -195,21 +195,21 @@ HWTEST_F(MouseEventAccessorTest, SetDisplayXTest, TestSize.Level1)
     auto x = screenLocation.GetX();
     EXPECT_EQ(x, 0);
     for (auto& [input, value, expected] : testFixtureNumberValues) {
-        accessor_->setDisplayY(peer_, &value);
+        accessor_->setDisplayX(peer_, &value);
         info = peer_->GetEventInfo();
         ASSERT_NE(info, nullptr);
         screenLocation = info->GetScreenLocation();
-        EXPECT_NEAR(screenLocation.GetY(), expected, EPSILON) <<
+        EXPECT_NEAR(screenLocation.GetX(), expected, EPSILON) <<
             "Input value is: " << input << ", method: SetDisplayX";
     }
 }
 
 /**
- * @tc.name: GetDisplayYTest
+ * @tc.name: getDisplayYTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MouseEventAccessorTest, GetDisplayYTest, TestSize.Level1)
+HWTEST_F(MouseEventAccessorTest, getDisplayYTest, TestSize.Level1)
 {
     for (auto& [input, expected, value] : testFixtureNumberValues) {
         auto info = peer_->GetEventInfo();
@@ -224,11 +224,11 @@ HWTEST_F(MouseEventAccessorTest, GetDisplayYTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetDisplayYTest
+ * @tc.name: setDisplayYTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MouseEventAccessorTest, SetDisplayYTest, TestSize.Level1)
+HWTEST_F(MouseEventAccessorTest, setDisplayYTest, TestSize.Level1)
 {
     auto info = peer_->GetEventInfo();
     ASSERT_NE(info, nullptr);
@@ -246,11 +246,11 @@ HWTEST_F(MouseEventAccessorTest, SetDisplayYTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetWindowXTest
+ * @tc.name: getWindowXTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MouseEventAccessorTest, GetWindowXTest, TestSize.Level1)
+HWTEST_F(MouseEventAccessorTest, getWindowXTest, TestSize.Level1)
 {
     for (auto& [input, expected, value] : testFixtureNumberValues) {
         auto info = peer_->GetEventInfo();
@@ -265,11 +265,11 @@ HWTEST_F(MouseEventAccessorTest, GetWindowXTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetWindowXTest
+ * @tc.name: setWindowXTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MouseEventAccessorTest, SetWindowXTest, TestSize.Level1)
+HWTEST_F(MouseEventAccessorTest, setWindowXTest, TestSize.Level1)
 {
     auto info = peer_->GetEventInfo();
     ASSERT_NE(info, nullptr);
@@ -287,11 +287,11 @@ HWTEST_F(MouseEventAccessorTest, SetWindowXTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetWindowYTest
+ * @tc.name: getWindowYTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MouseEventAccessorTest, GetWindowYTest, TestSize.Level1)
+HWTEST_F(MouseEventAccessorTest, getWindowYTest, TestSize.Level1)
 {
     for (auto& [input, expected, value] : testFixtureNumberValues) {
         auto info = peer_->GetEventInfo();
@@ -306,11 +306,11 @@ HWTEST_F(MouseEventAccessorTest, GetWindowYTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetWindowYTest
+ * @tc.name: setWindowYTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MouseEventAccessorTest, SetWindowYTest, TestSize.Level1)
+HWTEST_F(MouseEventAccessorTest, setWindowYTest, TestSize.Level1)
 {
     auto info = peer_->GetEventInfo();
     ASSERT_NE(info, nullptr);
@@ -328,11 +328,11 @@ HWTEST_F(MouseEventAccessorTest, SetWindowYTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetXTest
+ * @tc.name: getXTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MouseEventAccessorTest, GetXTest, TestSize.Level1)
+HWTEST_F(MouseEventAccessorTest, getXTest, TestSize.Level1)
 {
     for (auto& [input, expected, value] : testFixtureNumberValues) {
         auto info = peer_->GetEventInfo();
@@ -347,11 +347,11 @@ HWTEST_F(MouseEventAccessorTest, GetXTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetXTest
+ * @tc.name: setXTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MouseEventAccessorTest, SetXTest, TestSize.Level1)
+HWTEST_F(MouseEventAccessorTest, setXTest, TestSize.Level1)
 {
     auto info = peer_->GetEventInfo();
     ASSERT_NE(info, nullptr);
@@ -369,11 +369,11 @@ HWTEST_F(MouseEventAccessorTest, SetXTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetYTest
+ * @tc.name: getYTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MouseEventAccessorTest, GetYTest, TestSize.Level1)
+HWTEST_F(MouseEventAccessorTest, getYTest, TestSize.Level1)
 {
     for (auto& [input, expected, value] : testFixtureNumberValues) {
         auto info = peer_->GetEventInfo();
@@ -388,11 +388,11 @@ HWTEST_F(MouseEventAccessorTest, GetYTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetYTest
+ * @tc.name: setYTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MouseEventAccessorTest, SetYTest, TestSize.Level1)
+HWTEST_F(MouseEventAccessorTest, setYTest, TestSize.Level1)
 {
     auto info = peer_->GetEventInfo();
     ASSERT_NE(info, nullptr);
@@ -410,11 +410,11 @@ HWTEST_F(MouseEventAccessorTest, SetYTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetRawDeltaXTest
+ * @tc.name: setRawDeltaXTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MouseEventAccessorTest, SetRawDeltaXTest, TestSize.Level1)
+HWTEST_F(MouseEventAccessorTest, setRawDeltaXTest, TestSize.Level1)
 {
     auto info = peer_->GetEventInfo();
     ASSERT_NE(info, nullptr);
@@ -432,11 +432,11 @@ HWTEST_F(MouseEventAccessorTest, SetRawDeltaXTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetRawDeltaXTest
+ * @tc.name: getRawDeltaXTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MouseEventAccessorTest, GetRawDeltaXTest, TestSize.Level1)
+HWTEST_F(MouseEventAccessorTest, getRawDeltaXTest, TestSize.Level1)
 {
     for (auto& [input, expected, value] : testFixtureNumberValues) {
         auto info = peer_->GetEventInfo();
@@ -449,11 +449,11 @@ HWTEST_F(MouseEventAccessorTest, GetRawDeltaXTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetRawDeltaYTest
+ * @tc.name: setRawDeltaYTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MouseEventAccessorTest, DISABLED_SetRawDeltaYTest, TestSize.Level1)
+HWTEST_F(MouseEventAccessorTest, DISABLED_setRawDeltaYTest, TestSize.Level1)
 {
     auto info = peer_->GetEventInfo();
     ASSERT_NE(info, nullptr);
@@ -471,11 +471,11 @@ HWTEST_F(MouseEventAccessorTest, DISABLED_SetRawDeltaYTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetRawDeltaYTest
+ * @tc.name: getRawDeltaYTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MouseEventAccessorTest, GetRawDeltaYTest, TestSize.Level1)
+HWTEST_F(MouseEventAccessorTest, getRawDeltaYTest, TestSize.Level1)
 {
     for (auto& [input, expected, value] : testFixtureNumberValues) {
         auto info = peer_->GetEventInfo();
@@ -488,11 +488,11 @@ HWTEST_F(MouseEventAccessorTest, GetRawDeltaYTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetPressedButtonsTest
+ * @tc.name: getPressedButtonsTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MouseEventAccessorTest, GetPressedButtonsTest, TestSize.Level1)
+HWTEST_F(MouseEventAccessorTest, getPressedButtonsTest, TestSize.Level1)
 {
     auto eventInfo = peer_->GetEventInfo();
     ASSERT_NE(eventInfo, nullptr);
@@ -510,11 +510,11 @@ HWTEST_F(MouseEventAccessorTest, GetPressedButtonsTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetPressedButtonsTest
+ * @tc.name: setPressedButtonsTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MouseEventAccessorTest, SetPressedButtonsTest, TestSize.Level1)
+HWTEST_F(MouseEventAccessorTest, setPressedButtonsTest, TestSize.Level1)
 {
     auto eventInfo = peer_->GetEventInfo();
     ASSERT_NE(eventInfo, nullptr);

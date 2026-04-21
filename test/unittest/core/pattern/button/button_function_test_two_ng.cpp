@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,8 +23,8 @@
 
 #define protected public
 #define private public
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
@@ -230,6 +230,7 @@ void ButtonFunctionTestTwoNg::SetUpTestCase()
 
     buttonTheme->heightMap_.emplace(std::pair<ControlSize, Dimension>(ControlSize::SMALL, DEFAULT_HEIGTH));
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(buttonTheme));
 }
 
 void ButtonFunctionTestTwoNg::TearDownTestCase()
@@ -613,21 +614,21 @@ HWTEST_F(ButtonFunctionTestTwoNg, ParseButtonResColor, TestSize.Level1)
      * @tc.steps: step3. Parse resource with invalid color type.
      * @tc.expected: step3. Color remains unchanged.
      */
-    buttonModelNG.ParseButtonResColor(resObj, result, static_cast<ButtonColorType>(2));
+    buttonModelNG.ParseButtonResColor(AceType::Claim(buttonNode), resObj, result, static_cast<ButtonColorType>(2));
     EXPECT_EQ(result, Color::RED);
 
     /**
      * @tc.steps: step4. Parse resource with background color type.
      * @tc.expected: step4. Color is set to button theme's background color.
      */
-    buttonModelNG.ParseButtonResColor(resObj, result, ButtonColorType::BACKGROUND_COLOR);
+    buttonModelNG.ParseButtonResColor(AceType::Claim(buttonNode), resObj, result, ButtonColorType::BACKGROUND_COLOR);
     EXPECT_EQ(result, buttonTheme->GetBgColor());
 
     /**
      * @tc.steps: step5. Parse resource with font color type.
      * @tc.expected: step5. Color is set to button theme's font color.
      */
-    buttonModelNG.ParseButtonResColor(resObj, result, ButtonColorType::FONT_COLOR);
+    buttonModelNG.ParseButtonResColor(AceType::Claim(buttonNode), resObj, result, ButtonColorType::FONT_COLOR);
     EXPECT_EQ(result, buttonTheme->GetTextStyle().GetTextColor());
 }
 
@@ -843,7 +844,7 @@ HWTEST_F(ButtonFunctionTestTwoNg, UpdateDefaultFamilies, TestSize.Level1)
         pipelineContext->SetIsSystemColorChange(pair.first);
         buttonNode->SetRerenderable(pair.second);
         buttonModelNG.UpdateDefaultFamilies(buttonNode, fonts, ButtonStringType::LABEL);
-        if (pipelineContext->IsSystmColorChange()) {
+        if (pipelineContext->IsSystemColorChange()) {
             buttonModelNG.UpdateDefaultFamilies(buttonNode, fonts, ButtonStringType::FONT_FAMILY);
             auto ret = layout->GetFontFamily();
             ASSERT_NE(ret.has_value(), false);
@@ -887,7 +888,7 @@ HWTEST_F(ButtonFunctionTestTwoNg, UpdateComponentFamilies001, TestSize.Level1)
         pipelineContext->SetIsSystemColorChange(pair.first);
         buttonNode->SetRerenderable(pair.second);
         buttonModelNG.UpdateComponentFamilies(buttonNode, fonts, ButtonStringType::LABEL);
-        if (pipelineContext->IsSystmColorChange()) {
+        if (pipelineContext->IsSystemColorChange()) {
             buttonModelNG.UpdateComponentFamilies(buttonNode, fonts, ButtonStringType::FONT_FAMILY);
             auto ret = layout->GetFontFamily();
             ASSERT_NE(ret.has_value(), false);
@@ -1135,7 +1136,7 @@ HWTEST_F(ButtonFunctionTestTwoNg, UpdateComponentColor, TestSize.Level1)
         pipelineContext->SetIsSystemColorChange(pair.first);
         buttonNode->SetRerenderable(pair.second);
         pattern->UpdateComponentColor(Color::RED, static_cast<ButtonColorType>(2));
-        if (pipelineContext->IsSystmColorChange() && pair.second) {
+        if (pipelineContext->IsSystemColorChange() && pair.second) {
             pattern->UpdateComponentColor(Color::RED, ButtonColorType::FONT_COLOR);
             auto foregroundColor = textRenderContext->GetForegroundColor();
             EXPECT_EQ(foregroundColor, Color::RED);
@@ -1181,7 +1182,7 @@ HWTEST_F(ButtonFunctionTestTwoNg, UpdateComponentString, TestSize.Level1)
         pipelineContext->SetIsSystemColorChange(pair.first);
         buttonNode->SetRerenderable(pair.second);
         pattern->UpdateComponentString(value, static_cast<ButtonStringType>(2));
-        if (pipelineContext->IsSystmColorChange() && pair.second) {
+        if (pipelineContext->IsSystemColorChange() && pair.second) {
             auto ret = textLayoutProperty->GetContent();
             EXPECT_NE(ret.value_or(eValue), UtfUtils::Str8DebugToStr16(value));
             pattern->UpdateComponentString(value, ButtonStringType::LABEL);
@@ -1225,7 +1226,7 @@ HWTEST_F(ButtonFunctionTestTwoNg, UpdateComponentFamilies002, TestSize.Level1)
         pipelineContext->SetIsSystemColorChange(pair.first);
         buttonNode->SetRerenderable(pair.second);
         pattern->UpdateComponentFamilies(fonts, static_cast<ButtonStringType>(2));
-        if (pipelineContext->IsSystmColorChange() && pair.second) {
+        if (pipelineContext->IsSystemColorChange() && pair.second) {
             auto ret = textLayoutProperty->GetFontFamily();
             ASSERT_NE(ret.has_value(), true);
             pattern->UpdateComponentFamilies(fonts, ButtonStringType::FONT_FAMILY);
@@ -1270,7 +1271,7 @@ HWTEST_F(ButtonFunctionTestTwoNg, UpdateComponentDimension, TestSize.Level1)
         pipelineContext->SetIsSystemColorChange(pair.first);
         buttonNode->SetRerenderable(pair.second);
         pattern->UpdateComponentDimension(value, static_cast<ButtonDimensionType>(2));
-        if (pipelineContext->IsSystmColorChange() && pair.second) {
+        if (pipelineContext->IsSystemColorChange() && pair.second) {
             auto ret = textLayoutProperty->GetAdaptMinFontSize();
             ASSERT_NE(ret.has_value(), true);
             pattern->UpdateComponentDimension(value, ButtonDimensionType::MIN_FONT_SIZE);
@@ -1317,7 +1318,7 @@ HWTEST_F(ButtonFunctionTestTwoNg, UpdateComponentDouble, TestSize.Level1)
         pipelineContext->SetIsSystemColorChange(pair.first);
         buttonNode->SetRerenderable(pair.second);
         pattern->UpdateComponentDouble(value, static_cast<ButtonDoubleType>(2));
-        if (pipelineContext->IsSystmColorChange() && pair.second) {
+        if (pipelineContext->IsSystemColorChange() && pair.second) {
             auto ret = textLayoutProperty->GetMinFontScale();
             ASSERT_NE(ret.has_value(), true);
             pattern->UpdateComponentDouble(value, ButtonDoubleType::MIN_FONT_SCALE);
@@ -1433,5 +1434,708 @@ HWTEST_F(ButtonFunctionTestTwoNg, SetNavBarMenuFocusStyle, TestSize.Level1)
     pattern->navMenuItemNeedFocus_ = true;
     pattern->SetNavBarMenuFocusStyle(renderContext, false);
     EXPECT_EQ(renderContext->GetBackgroundColor(), color);
+}
+
+/**
+ * @tc.name: ToJsonValue001
+ * @tc.desc: Test ToJsonValue with valid button node
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, ToJsonValue001, TestSize.Level1)
+{
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateFontSize(Dimension(16.0_vp));
+    layoutProperty->UpdateFontWeight(FontWeight::BOLD);
+    layoutProperty->UpdateFontColor(Color::RED);
+    layoutProperty->UpdateFontStyle(Ace::FontStyle::ITALIC);
+
+    const InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    pattern->ToJsonValue(json, filter);
+    EXPECT_NE(json->GetString("type"), "");
+}
+
+/**
+ * @tc.name: ToJsonValue002
+ * @tc.desc: Test ToJsonValue with fast filter
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, ToJsonValue002, TestSize.Level1)
+{
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    const InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    pattern->ToJsonValue(json, filter);
+    EXPECT_TRUE(json->IsValid());
+}
+
+/**
+ * @tc.name: ToJsonValueAttribute001
+ * @tc.desc: Test ToJsonValueAttribute with fontFamily
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, ToJsonValueAttribute001, TestSize.Level1)
+{
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    std::vector<std::string> fontFamilies = { "TestFont1", "TestFont2" };
+    layoutProperty->UpdateFontFamily(fontFamilies);
+    layoutProperty->UpdateTextAlign(TextAlign::CENTER);
+
+    const InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    pattern->ToJsonValueAttribute(json, filter);
+    EXPECT_TRUE(json->IsValid());
+}
+
+/**
+ * @tc.name: NeedAgingUpdateText001
+ * @tc.desc: Test NeedAgingUpdateText with null layoutProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, NeedAgingUpdateText001, TestSize.Level1)
+{
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    RefPtr<ButtonLayoutProperty> nullProp = nullptr;
+    EXPECT_FALSE(pattern->NeedAgingUpdateText(nullProp));
+}
+
+/**
+ * @tc.name: NeedAgingUpdateText002
+ * @tc.desc: Test NeedAgingUpdateText with CIRCLE type
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, NeedAgingUpdateText002, TestSize.Level1)
+{
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(frameNode->GetLayoutProperty<ButtonLayoutProperty>(), nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    layoutProperty->UpdateType(ButtonType::CIRCLE);
+    EXPECT_FALSE(pattern->NeedAgingUpdateText(layoutProperty));
+}
+
+/**
+ * @tc.name: NeedAgingUpdateText003
+ * @tc.desc: Test NeedAgingUpdateText with empty label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, NeedAgingUpdateText003, TestSize.Level1)
+{
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    layoutProperty->UpdateType(ButtonType::CAPSULE);
+    layoutProperty->UpdateLabel("");
+    EXPECT_FALSE(pattern->NeedAgingUpdateText(layoutProperty));
+}
+
+/**
+ * @tc.name: NeedAgingUpdateText004
+ * @tc.desc: Test NeedAgingUpdateText with non-FP fontSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, NeedAgingUpdateText004, TestSize.Level1)
+{
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    layoutProperty->UpdateType(ButtonType::CAPSULE);
+    layoutProperty->UpdateLabel("test");
+    layoutProperty->UpdateFontSize(Dimension(10.0, DimensionUnit::PX));
+    EXPECT_FALSE(pattern->NeedAgingUpdateText(layoutProperty));
+}
+
+/**
+ * @tc.name: InitButtonLabel001
+ * @tc.desc: Test InitButtonLabel when label is not set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, InitButtonLabel001, TestSize.Level1)
+{
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.Create("Button");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->InitButtonLabel();
+    auto focusHub = frameNode->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    EXPECT_EQ(focusHub->GetFocusType(), FocusType::SCOPE);
+}
+
+/**
+ * @tc.name: InitButtonLabel002
+ * @tc.desc: Test InitButtonLabel with label set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, InitButtonLabel002, TestSize.Level1)
+{
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+    auto focusHub = frameNode->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    EXPECT_EQ(focusHub->GetFocusType(), FocusType::NODE);
+}
+
+/**
+ * @tc.name: InitTouchEvent001
+ * @tc.desc: Test InitTouchEvent sets touchListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, InitTouchEvent001, TestSize.Level1)
+{
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->touchListener_ = nullptr;
+    pattern->InitTouchEvent();
+    EXPECT_TRUE(pattern->touchListener_ != nullptr);
+}
+
+/**
+ * @tc.name: InitTouchEvent002
+ * @tc.desc: Test InitTouchEvent when touchListener already set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, InitTouchEvent002, TestSize.Level1)
+{
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->touchListener_ = [](const UIState& state) {};
+    auto oldListener = pattern->touchListener_;
+    pattern->InitTouchEvent();
+    EXPECT_TRUE(pattern->touchListener_ != nullptr);
+}
+
+/**
+ * @tc.name: OnAfterModifyDone001
+ * @tc.desc: Test OnAfterModifyDone with inspectorId
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, OnAfterModifyDone001, TestSize.Level1)
+{
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    frameNode->UpdateInspectorId("test_button");
+    EXPECT_NO_FATAL_FAILURE(pattern->OnAfterModifyDone());
+}
+
+/**
+ * @tc.name: OnAfterModifyDone002
+ * @tc.desc: Test OnAfterModifyDone without inspectorId
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, OnAfterModifyDone002, TestSize.Level1)
+{
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    frameNode->UpdateInspectorId("");
+    EXPECT_NO_FATAL_FAILURE(pattern->OnAfterModifyDone());
+}
+
+/**
+ * @tc.name: HandlePressedStyle001
+ * @tc.desc: Test HandlePressedStyle with stateEffect true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, HandlePressedStyle001, TestSize.Level1)
+{
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+    auto eventHub = frameNode->GetEventHub<ButtonEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetStateEffect(true);
+    pattern->HandlePressedStyle();
+    EXPECT_TRUE(pattern->isPress_);
+}
+
+/**
+ * @tc.name: HandlePressedStyle002
+ * @tc.desc: Test HandlePressedStyle with clickedColor set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, HandlePressedStyle002, TestSize.Level1)
+{
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+    auto eventHub = frameNode->GetEventHub<ButtonEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetStateEffect(true);
+    pattern->clickedColor_ = Color::GREEN;
+    pattern->HandlePressedStyle();
+    EXPECT_TRUE(pattern->isPress_);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT), Color::GREEN);
+}
+
+/**
+ * @tc.name: HandleNormalStyle001
+ * @tc.desc: Test HandleNormalStyle with stateEffect and clickedColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, HandleNormalStyle001, TestSize.Level1)
+{
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+    auto eventHub = frameNode->GetEventHub<ButtonEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetStateEffect(true);
+    pattern->backgroundColor_ = Color::BLUE;
+    pattern->clickedColor_ = Color::GREEN;
+    pattern->HandleNormalStyle();
+    EXPECT_FALSE(pattern->isPress_);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT), Color::BLUE);
+}
+
+/**
+ * @tc.name: HandleNormalStyle002
+ * @tc.desc: Test HandleNormalStyle without stateEffect
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, HandleNormalStyle002, TestSize.Level1)
+{
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+    auto eventHub = frameNode->GetEventHub<ButtonEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetStateEffect(false);
+    pattern->HandleNormalStyle();
+    EXPECT_FALSE(pattern->isPress_);
+}
+
+/**
+ * @tc.name: HandleHoverEvent001
+ * @tc.desc: Test HandleHoverEvent when hover is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, HandleHoverEvent001, TestSize.Level1)
+{
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+    pattern->HandleHoverEvent(true);
+    EXPECT_TRUE(pattern->isHover_);
+}
+
+/**
+ * @tc.name: HandleHoverEvent002
+ * @tc.desc: Test HandleHoverEvent when hover is false and scaleModify is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, HandleHoverEvent002, TestSize.Level1)
+{
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+    pattern->scaleModify_ = true;
+    pattern->HandleHoverEvent(false);
+    EXPECT_FALSE(pattern->isHover_);
+    EXPECT_FALSE(pattern->scaleModify_);
+}
+
+/**
+ * @tc.name: HandleBorderAndShadow001
+ * @tc.desc: Test HandleBorderAndShadow with UseContentModifier true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, HandleBorderAndShadow001, TestSize.Level1)
+{
+    TestProperty testProperty;
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->makeFunc_ = [](ButtonConfiguration config) -> RefPtr<FrameNode> { return nullptr; };
+    EXPECT_NO_FATAL_FAILURE(pattern->HandleBorderAndShadow());
+}
+
+/**
+ * @tc.name: HandleBorderAndShadow002
+ * @tc.desc: Test HandleBorderAndShadow without content modifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, HandleBorderAndShadow002, TestSize.Level1)
+{
+    TestProperty testProperty;
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+    EXPECT_NO_FATAL_FAILURE(pattern->HandleBorderAndShadow());
+}
+
+/**
+ * @tc.name: SetButtonPress001
+ * @tc.desc: Test SetButtonPress with null contentModifierNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, SetButtonPress001, TestSize.Level1)
+{
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->contentModifierNode_ = nullptr;
+    EXPECT_NO_FATAL_FAILURE(pattern->SetButtonPress(10.0, 10.0));
+}
+
+/**
+ * @tc.name: FireBuilder001
+ * @tc.desc: Test FireBuilder with no makeFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, FireBuilder001, TestSize.Level1)
+{
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->makeFunc_ = std::nullopt;
+    pattern->nodeId_ = -1;
+    EXPECT_NO_FATAL_FAILURE(pattern->FireBuilder());
+}
+
+/**
+ * @tc.name: FireBuilder002
+ * @tc.desc: Test FireBuilder with makeFunc set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, FireBuilder002, TestSize.Level1)
+{
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->makeFunc_ = [](ButtonConfiguration config) -> RefPtr<FrameNode> { return nullptr; };
+    EXPECT_NO_FATAL_FAILURE(pattern->FireBuilder());
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate001
+ * @tc.desc: Test OnColorConfigurationUpdate with isColorUpdateFlag true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, OnColorConfigurationUpdate001, TestSize.Level1)
+{
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->isColorUpdateFlag_ = true;
+    EXPECT_NO_FATAL_FAILURE(pattern->OnColorConfigurationUpdate());
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate002
+ * @tc.desc: Test OnColorConfigurationUpdate normal case
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, OnColorConfigurationUpdate002, TestSize.Level1)
+{
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->isColorUpdateFlag_ = false;
+    pattern->OnModifyDone();
+    EXPECT_NO_FATAL_FAILURE(pattern->OnColorConfigurationUpdate());
+}
+
+/**
+ * @tc.name: SetBuilderFunc001
+ * @tc.desc: Test SetBuilderFunc with nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, SetBuilderFunc001, TestSize.Level1)
+{
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetBuilderFunc(nullptr);
+    EXPECT_FALSE(pattern->makeFunc_.has_value());
+    EXPECT_EQ(pattern->contentModifierNode_, nullptr);
+}
+
+/**
+ * @tc.name: SetBuilderFunc002
+ * @tc.desc: Test SetBuilderFunc with valid callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, SetBuilderFunc002, TestSize.Level1)
+{
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto makeFunc = [](ButtonConfiguration config) -> RefPtr<FrameNode> { return nullptr; };
+    pattern->SetBuilderFunc(std::move(makeFunc));
+    EXPECT_TRUE(pattern->makeFunc_.has_value());
+}
+
+/**
+ * @tc.name: OnFontScaleConfigurationUpdate001
+ * @tc.desc: Test OnFontScaleConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, OnFontScaleConfigurationUpdate001, TestSize.Level1)
+{
+    TestProperty testProperty;
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+    EXPECT_NO_FATAL_FAILURE(pattern->OnFontScaleConfigurationUpdate());
+}
+
+/**
+ * @tc.name: OnFontScaleConfigurationUpdate002
+ * @tc.desc: Test OnFontScaleConfigurationUpdate with maxFontSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, OnFontScaleConfigurationUpdate002, TestSize.Level1)
+{
+    TestProperty testProperty;
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateMaxFontSize(Dimension(20.0_vp));
+    layoutProperty->UpdateMinFontSize(Dimension(10.0_vp));
+    pattern->OnModifyDone();
+    EXPECT_NO_FATAL_FAILURE(pattern->OnFontScaleConfigurationUpdate());
+}
+
+/**
+ * @tc.name: SetFocusButtonStyle001
+ * @tc.desc: Test SetFocusButtonStyle with EMPHASIZE style
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, SetFocusButtonStyle001, TestSize.Level1)
+{
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(textNode, nullptr);
+    EXPECT_NO_FATAL_FAILURE(
+        pattern->SetFocusButtonStyle(renderContext, buttonTheme, layoutProperty, textNode));
+}
+
+/**
+ * @tc.name: SetFocusButtonStyle002
+ * @tc.desc: Test SetFocusButtonStyle with TEXT style
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, SetFocusButtonStyle002, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.buttonStyle = ButtonStyleMode::TEXT;
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(textNode, nullptr);
+    EXPECT_NO_FATAL_FAILURE(
+        pattern->SetFocusButtonStyle(renderContext, buttonTheme, layoutProperty, textNode));
+}
+
+/**
+ * @tc.name: SetButtonScale001
+ * @tc.desc: Test SetButtonScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, SetButtonScale001, TestSize.Level1)
+{
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_NO_FATAL_FAILURE(pattern->SetButtonScale(renderContext, buttonTheme));
+}
+
+/**
+ * @tc.name: HandleShadowStyle001
+ * @tc.desc: Test HandleShadowStyle with None shadow style
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, HandleShadowStyle001, TestSize.Level1)
+{
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_NO_FATAL_FAILURE(
+        pattern->HandleShadowStyle(ButtonStyleMode::EMPHASIZE, ShadowStyle::None, renderContext, buttonTheme));
+}
+
+/**
+ * @tc.name: HandleShadowStyle002
+ * @tc.desc: Test HandleShadowStyle with valid shadow and isApplyShadow true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestTwoNg, HandleShadowStyle002, TestSize.Level1)
+{
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->isApplyShadow_ = true;
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_NO_FATAL_FAILURE(
+        pattern->HandleShadowStyle(ButtonStyleMode::NORMAL, ShadowStyle::OuterDefaultLG, renderContext, buttonTheme));
 }
 } // namespace OHOS::Ace::NG

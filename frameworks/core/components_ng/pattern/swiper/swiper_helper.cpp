@@ -16,6 +16,7 @@
 #include "swiper_helper.h"
 
 #include "base/log/dump_log.h"
+#include "core/components_ng/token_theme/token_theme_storage.h"
 #include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
@@ -143,9 +144,8 @@ void SwiperHelper::SaveDigitIndicatorProperty(const RefPtr<FrameNode>& indicator
     CHECK_NULL_VOID(indicatorNode);
     auto indicatorProps = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
     CHECK_NULL_VOID(indicatorProps);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    const auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
+    const auto theme = indicatorNode->GetTheme<SwiperIndicatorTheme>(true);
+    CHECK_NULL_VOID(theme);
     const auto digitalParams = swiper.GetSwiperDigitalParameters();
     CHECK_NULL_VOID(digitalParams);
     indicatorProps->ResetIndicatorLayoutStyle();
@@ -479,14 +479,15 @@ std::string SwiperHelper::GetDotIndicatorStyle(const std::shared_ptr<SwiperParam
     return jsonValue->ToString();
 }
 
-std::string SwiperHelper::GetDigitIndicatorStyle(const std::shared_ptr<SwiperDigitalParameters>& params)
+std::string SwiperHelper::GetDigitIndicatorStyle(const std::shared_ptr<SwiperDigitalParameters>& params,
+    int32_t themeScopeId)
 {
     CHECK_NULL_RETURN(params, "");
     auto jsonValue = JsonUtil::Create(true);
     CHECK_NULL_RETURN(jsonValue, "");
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, "");
-    auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
+    auto theme = pipeline->GetTheme<SwiperIndicatorTheme>(themeScopeId);
     CHECK_NULL_RETURN(theme, "");
     jsonValue->Put("left", params->dimLeft.value_or(0.0_vp).ToString().c_str());
     jsonValue->Put("top", params->dimTop.value_or(0.0_vp).ToString().c_str());

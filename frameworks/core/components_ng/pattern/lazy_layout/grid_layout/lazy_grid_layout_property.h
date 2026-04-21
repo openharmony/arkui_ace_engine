@@ -39,6 +39,7 @@ public:
         value->propRowGap_ = CloneRowGap();
         value->propColumnGap_ = CloneColumnGap();
         value->propColumnsTemplate_ = CloneColumnsTemplate();
+        value->propItemFillPolicy_ = CloneItemFillPolicy();
         return value;
     }
 
@@ -48,6 +49,7 @@ public:
         ResetRowGap();
         ResetColumnGap();
         ResetColumnsTemplate();
+        ResetItemFillPolicy();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
@@ -66,6 +68,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RowGap, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ColumnGap, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ColumnsTemplate, std::string, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ItemFillPolicy, PresetFillType, PROPERTY_UPDATE_MEASURE);
 };
 } // namespace OHOS::Ace::NG
 

@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
-#include "foundation/arkui/ace_engine/test/mock/core/render/mock_paragraph.h"
+#include "foundation/arkui/ace_engine/test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "text_base.h"
 
 #include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -141,7 +142,7 @@ HWTEST_F(TextTestNgTen, InitTouchEvent_TouchTask, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
 
     /**
-     * @tc.steps: step2. Set touchEventInitialized_ to false
+     * @tc.steps: step2. Set touchEventInitialized_ to false.
      */
     pattern->touchEventInitialized_ = false;
     pattern->isSelecting_ = false;
@@ -197,8 +198,8 @@ HWTEST_F(TextTestNgTen, HandleKeyEvent_Marquee, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
 
     /**
-     * @tc.steps: step2. Set TextOverflow to MARQUEE
-     * and Set the pressedCodes of KeyEvent to { KeyCode::KEY_A };
+     * @tc.steps: step2. Set TextOverflow to MARQUEE.
+     * and Set the pressedCodes of KeyEvent to { KeyCode::KEY_A }.
      */
     auto layoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     layoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
@@ -208,8 +209,8 @@ HWTEST_F(TextTestNgTen, HandleKeyEvent_Marquee, TestSize.Level1)
     keyEvent.pressedCodes = { KeyCode::KEY_A };
 
     /**
-     * @tc.steps: step3. Calling the HandleKeyEvent function
-     * @tc.expected: The result return false
+     * @tc.steps: step3. Calling the HandleKeyEvent function.
+     * @tc.expected: The result return false.
      */
     auto result = pattern->HandleKeyEvent(keyEvent);
     EXPECT_FALSE(result);
@@ -233,8 +234,8 @@ HWTEST_F(TextTestNgTen, HandleKeyEvent_False, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
 
     /**
-     * @tc.steps: step2. Set TextOverflow to ELLIPSIS
-     * and Set the pressedCodes of KeyEvent to { KeyCode::KEY_A, KeyCode::KEY_B, KeyCode::KEY_C };
+     * @tc.steps: step2. Set TextOverflow to ELLIPSIS.
+     * and Set the pressedCodes of KeyEvent to { KeyCode::KEY_A, KeyCode::KEY_B, KeyCode::KEY_C }.
      */
     SystemProperties::textTraceEnable_ = true;
     auto layoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
@@ -245,8 +246,8 @@ HWTEST_F(TextTestNgTen, HandleKeyEvent_False, TestSize.Level1)
     keyEvent.pressedCodes = { KeyCode::KEY_A, KeyCode::KEY_B, KeyCode::KEY_C };
 
     /**
-     * @tc.steps: step3. Calling the HandleKeyEvent function
-     * @tc.expected: The result return false
+     * @tc.steps: step3. Calling the HandleKeyEvent function.
+     * @tc.expected: The result return false.
      */
     auto result = pattern->HandleKeyEvent(keyEvent);
     SystemProperties::textTraceEnable_ = false;

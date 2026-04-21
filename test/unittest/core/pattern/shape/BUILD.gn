@@ -37,7 +37,7 @@ ace_unittest("shape_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_abstract_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_paint_property.cpp",
-    "$ace_root/test/mock/core/render/mock_drawing_painter.cpp",
+    "$ace_root/test/mock/frameworks/core/components_ng/render/adapter/mock_drawing_painter.cpp",
     "base_polygon_pattern_test_ng.cpp",
     "base_shape_pattern_test_ng.cpp",
     "circle_pattern_test_ng.cpp",
@@ -50,4 +50,17 @@ ace_unittest("shape_test_ng") {
     "shape_container_pattern_test_ng.cpp",
     "shape_pattern_test_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "shape_test_min.cpp",
+      "shape_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "shape_test_min.cpp",
+      "shape_test_core.cpp",
+    ]
+  }
 }

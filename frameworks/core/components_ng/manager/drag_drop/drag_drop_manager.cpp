@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
-#include "drag_drop_func_wrapper.h"
 
 #include "base/geometry/point.h"
 #include "base/geometry/rect.h"
@@ -23,7 +22,9 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
+#include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/container_scope.h"
+#include "core/common/event_manager.h"
 #include "core/common/interaction/interaction_data.h"
 #include "core/common/interaction/interaction_interface.h"
 #include "core/components/common/layout/grid_column_info.h"
@@ -37,16 +38,15 @@
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
-#include "render_service_client/core/transaction/rs_transaction.h"
 #include "render_service_client/core/transaction/rs_sync_transaction_controller.h"
-#include "render_service_client/core/transaction/rs_sync_transaction_handler.h"
+#include "render_service_client/core/ui/rs_ui_context.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
 #endif
 
@@ -1296,8 +1296,8 @@ void DragDropManager::OnDragEnd(const DragPointerEvent& pointerEvent, const std:
         ClearVelocityInfo();
         return;
     }
-    if (IsUIExtensionOrDynamicComponent(preTargetFrameNode) && preTargetFrameNode != dragFrameNode) {
-        HandleUIExtensionDragEvent(preTargetFrameNode, pointerEvent, DragEventType::LEAVE);
+    if (preTargetFrameNode != dragFrameNode) {
+        FireOnDragEvent(preTargetFrameNode, pointerEvent, DragEventType::LEAVE, extraInfo);
     }
     if (!dragFrameNode) {
         DragDropBehaviorReporter::GetInstance().UpdateDragStopResult(DragStopResult::APP_DATA_UNSUPPORT);
@@ -1524,33 +1524,23 @@ bool DragDropManager::PostStopDrag(const RefPtr<FrameNode>& dragFrameNode, const
 {
     CHECK_NULL_RETURN(dragFrameNode, false);
     CHECK_NULL_RETURN(event, false);
+
+    std::function<void(const DragRet&, const DragBehavior&, const bool&)> callback =
+                        GetStopDragCallBack(dragFrameNode, pointerEvent, event, extraParams);
+    auto success = DragDropGlobalController::GetInstance().RequestDragEndCallback(event->GetRequestIdentify(),
+        event->GetResult(), event->GetDragBehavior(), event->IsUseCustomAnimation(), callback);
+
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     auto taskScheduler = pipeline->GetTaskExecutor();
     CHECK_NULL_RETURN(taskScheduler, false);
+    auto task = [requestId = event->GetRequestIdentify()]() {
+        DragDropGlobalController::GetInstance().NotifyPendingFailed(requestId);
+        DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(false);
+    };
     taskScheduler->PostDelayedTask(
-        [pointerEvent, event, extraParams, nodeWeak = WeakClaim(AceType::RawPtr(dragFrameNode)),
-            weakManager = WeakClaim(this)]() {
-            if (!DragDropGlobalController::GetInstance().IsOnOnDropPhase() || !event) {
-                return;
-            }
-            if (!DragDropGlobalController::GetInstance().IsCurrentDrag(event->GetRequestIdentify())) {
-                return;
-            }
-            auto dragDropManager = weakManager.Upgrade();
-            if (dragDropManager) {
-                auto frameNode = nodeWeak.Upgrade();
-                event->SetResult(DragRet::DRAG_FAIL);
-                event->SetDragBehavior(DragBehavior::UNKNOWN);
-                event->UseCustomAnimation(false);
-                dragDropManager->HandleStopDrag(frameNode, pointerEvent, event, extraParams);
-            }
-            DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(false);
-        },
-        TaskExecutor::TaskType::UI, DROP_DELAY_TIME, "ArkUIStopDragDeadlineTimer");
-    return DragDropGlobalController::GetInstance().RequestDragEndCallback(event->GetRequestIdentify(),
-        event->GetResult(), event->GetDragBehavior(), event->IsUseCustomAnimation(),
-        GetStopDragCallBack(dragFrameNode, pointerEvent, event, extraParams));
+        task, TaskExecutor::TaskType::UI, DROP_DELAY_TIME, "ArkUIStopDragDeadlineTimer");
+    return success;
 }
 
 std::function<void(const DragRet&, const DragBehavior&, const bool&)> DragDropManager::GetStopDragCallBack(
@@ -2672,7 +2662,10 @@ void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager>& overlay
     CHECK_NULL_VOID(gestureHub);
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
-    DragDropGlobalController::GetInstance().SetStartDragVsyncTime(pipeline->GetVsyncTime());
+    auto vsyncPipeline = ShouldSkipDragMoveOutForSubwindow() ? PipelineContext::GetMainPipelineContext() : pipeline;
+    if (vsyncPipeline) {
+        DragDropGlobalController::GetInstance().SetStartDragVsyncTime(vsyncPipeline->GetVsyncTime());
+    }
     bool isDragStartPending = DragDropGlobalController::GetInstance().GetAsyncDragCallback() != nullptr;
     if (!(GetDragPreviewInfo(overlayManager, info_, gestureHub, data)) ||
         (!IsNeedDisplayInSubwindow() && !data.isMenuShow && !isDragWithContextMenu_ && !isDragStartPending)) {

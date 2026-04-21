@@ -13,16 +13,16 @@
  * limitations under the License.
  */
 
- /*
-  * Description: List支持展开指定ListItem的swipeAction
-  * Writer: renxiaowen
-  */
+/*
+ * Description: List支持展开指定ListItem的swipeAction
+ * Writer: renxiaowen
+ */
 
 import { BusinessError } from '@ohos.base';
 
 class DemoListItemInfo {
-  name: string;
-  icon: Resource;
+  public name: string;
+  public icon: Resource;
 
   constructor(name: string, icon: Resource) {
     this.name = name;
@@ -60,8 +60,8 @@ struct DemoList {
     for (let i = 0; i < 10; i++) {
       // 此处app.media.listItem0、app.media.listItem1、app.media.listItem2仅作示例，请开发者自行替换
       this.videoList.push(new DemoListItemInfo('视频' + i,
-        i % 3 == 0 ? $r("app.media.app_icon") :
-          i % 3 == 1 ? $r("app.media.layered_image") : $r("app.media.startIcon")));
+        i % 3 == 0 ? $r('app.media.startIcon') :
+          i % 3 == 1 ? $r('app.media.layered_image') : $r('app.media.startIcon')));
     }
   }
 
@@ -70,7 +70,7 @@ struct DemoList {
     let count: number = node?.getChildrenCount() ?? 0;
     for (let i = 0; i < count; i++) {
       let child: FrameNode | undefined | null = node?.getChild(i);
-      if (child?.getNodeType() === "List") {
+      if (child?.getNodeType() === 'List') {
         return child;
       }
     }
@@ -93,16 +93,16 @@ struct DemoList {
         .fontSize(15)
         .fontColor(Color.Gray)
       Flex({ wrap: FlexWrap.Wrap }) {
-        TextInput({ placeholder: "请输入需要滑动item的索引", text: $$this.text }).width(80)
-        Button("directions " + this.directions[this.dirIndex])
+        TextInput({ placeholder: '请输入需要滑动item的索引', text: $$this.text }).width(80)
+        Button('directions ' + this.directions[this.dirIndex])
           .onClick(() => {
             this.dirIndex = (this.dirIndex + 1) % this.directions.length;
           })
-        Button("listItemGroup " + this.listItemGroupIndex)
+        Button('listItemGroup ' + this.listItemGroupIndex)
           .onClick(() => {
             this.listItemGroupIndex = (this.listItemGroupIndex + 1) % this.arr2.length;
           })
-        Button("expand inList")
+        Button('expand inList')
           .onClick(() => {
             try {
               // 测试点：观察指定列表项是否展开
@@ -110,18 +110,18 @@ struct DemoList {
               ListItemSwipeActionManager.expand(this.getList()?.getChild(Number(this.text)),
                 this.directions[this.dirIndex])
             } catch (error) {
-              console.error("CXN Error expanding item:", (error as BusinessError).code,
+              console.error('CXN Error expanding item:', (error as BusinessError).code,
                 (error as BusinessError).message);
             }
           })
-        Button("collapse inList")
+        Button('collapse inList')
           .onClick(() => {
             try {
               // 测试点：观察指定列表项是否收起
               // 预期结果：指定列表项收起
               ListItemSwipeActionManager.collapse(this.getList()?.getChild(Number(this.text)))
             } catch (error) {
-              console.error("CXN Error expanding item:", (error as BusinessError).code,
+              console.error('CXN Error expanding item:', (error as BusinessError).code,
                 (error as BusinessError).message);
             }
           })

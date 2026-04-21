@@ -17,8 +17,8 @@
 
 #include "gtest/gtest.h"
 #define private public
-#include "test/mock/core/common/mock_image_analyzer_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_image_analyzer_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
@@ -958,6 +958,36 @@ HWTEST_F(WebPatternFocusTestNg, OnAccessibilityChildTreeDeregister, TestSize.Lev
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     ASSERT_FALSE(webPattern->OnAccessibilityChildTreeDeregister());
+#endif
+}
+
+/**
+ * @tc.name: OnAccessibilityChildTreeDeregister_TreeIdZero
+ * @tc.desc: OnAccessibilityChildTreeDeregister returns true when treeId is zero.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternFocusTestNg, OnAccessibilityChildTreeDeregister_TreeIdZero, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    MockPipelineContext::SetUp();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto accessibilityManager = pipeline->GetAccessibilityManager();
+    ASSERT_NE(accessibilityManager, nullptr);
+    EXPECT_EQ(webPattern->treeId_, 0);
+    EXPECT_TRUE(webPattern->OnAccessibilityChildTreeDeregister());
+    MockPipelineContext::TearDown();
 #endif
 }
 

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_PROPERTIES_BORDER_PROPERTY_H
 
 #include <optional>
+#include <unordered_map>
 #include <functional>
 #include "base/geometry/dimension.h"
 #include "base/json/json_util.h"

@@ -41,21 +41,21 @@ struct Index {
       return;
     }
 
-    let pixmapDescResult = resManager.getDrawableDescriptor($r('app.media.mirrored3').id);
+    let pixmapDescResult = resManager.getDrawableDescriptor($r('app.media.startIcon').id);
     if (pixmapDescResult) {
       this.pixmapDesc = pixmapDescResult as DrawableDescriptor;
     }
 
-    const pixelMap = await this.getPixmapFromMedia($r('app.media.Exif_Right_top'));
+    const pixelMap = await this.getPixmapFromMedia($r('app.media.startIcon'));
     this.pixelMapDesc = new PixelMapDrawableDescriptor(pixelMap);
 
     const foreground = await this.getDrawableDescriptor($r('app.media.foreground'));
-    const background = await this.getDrawableDescriptor($r('app.media.2'));
+    const background = await this.getDrawableDescriptor($r('app.media.background'));
     this.layeredDesc = new LayeredDrawableDescriptor(foreground, background);
 
-    const frame1 = await this.getPixmapFromMedia($r('app.media.CW1'));
-    const frame2 = await this.getPixmapFromMedia($r('app.media.huawei_1024'));
-    const frame3 = await this.getPixmapFromMedia($r('app.media.huawei_200'));
+    const frame1 = await this.getPixmapFromMedia($r('app.media.background'));
+    const frame2 = await this.getPixmapFromMedia($r('app.media.background'));
+    const frame3 = await this.getPixmapFromMedia($r('app.media.startIcon'));
     if (frame1 && frame2 && frame3) {
       this.animatedDesc = new AnimatedDrawableDescriptor([frame1, frame2, frame3], this.animationOptions);
     }

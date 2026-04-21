@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/paragraph.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace {
@@ -38,8 +39,10 @@ bool TextDragPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirt
     return true;
 }
 
-const RectF GetFirstBoxRect(const std::vector<RectF>& boxes, const RectF& contentRect, const float textStartY)
+const RectF TextDragPattern::GetFirstBoxRect(const std::vector<RectF>& boxes, const RectF& contentRect,
+    const float textStartY)
 {
+    CHECK_NULL_RETURN(!boxes.empty(), RectF{});
     for (const auto& box : boxes) {
         if (box.Bottom() + textStartY > contentRect.Top() + BOX_EPSILON) {
             return box;
@@ -48,8 +51,10 @@ const RectF GetFirstBoxRect(const std::vector<RectF>& boxes, const RectF& conten
     return boxes.front();
 } // Obtains the first line in the visible area of the text box, including the truncated part.
 
-const RectF GetLastBoxRect(const std::vector<RectF>& boxes, const RectF& contentRect, const float textStartY)
+const RectF TextDragPattern::GetLastBoxRect(const std::vector<RectF>& boxes, const RectF& contentRect,
+    const float textStartY)
 {
+    CHECK_NULL_RETURN(!boxes.empty(), RectF{});
     bool hasResult = false;
     RectF result;
     RectF preBox;

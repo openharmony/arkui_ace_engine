@@ -17,11 +17,11 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_GRID_ITEM_MODEL_STATIC_H
 
 #include "base/utils/macros.h"
-#include "core/components_ng/pattern/grid/grid_item_event_hub.h"
-#include "core/components_ng/pattern/grid/grid_item_model.h"
-#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/grid/grid_item_constants.h"
+#include "core/components_ng/pattern/scrollable/selectable_item_event_hub.h"
 
 namespace OHOS::Ace::NG {
+class FrameNode;
 
 class ACE_EXPORT GridItemModelStatic {
 public:

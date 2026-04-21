@@ -17,10 +17,11 @@
 
 #include "base/log/ace_trace.h"
 #include "core/components/theme/app_theme.h"
-#include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/gesture_info.h"
+#include "core/components_ng/gestures/recognizers/sequenced_recognizer.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
@@ -70,7 +71,9 @@ DragDropEventActuator::DragDropEventActuator(const WeakPtr<GestureEventHub>& ges
         dragPanDistanceMouse = appTheme->GetDragPanDistanceMouse();
         dragPanDistanceTouch = appTheme->GetPanDistanceThresholdForDragDrop();
     }
-    auto frameNode = gestureEventHub.Upgrade()->GetFrameNode();
+    auto gestureHub = gestureEventHub.Upgrade();
+    CHECK_NULL_VOID(gestureHub);
+    auto frameNode = gestureHub->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
     ACE_UINODE_TRACE(frameNode);
     dragDropInitiatingHandler_ = AceType::MakeRefPtr<DragDropInitiatingHandler>(frameNode);

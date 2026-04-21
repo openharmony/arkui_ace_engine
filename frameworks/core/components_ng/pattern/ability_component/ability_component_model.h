@@ -18,13 +18,10 @@
 
 #include <functional>
 #include <memory>
-#include <mutex>
 #include <string>
 
 #include "frameworks/base/geometry/dimension.h"
 #include "frameworks/base/utils/macros.h"
-#include "frameworks/core/components/common/layout/constants.h"
-#include "frameworks/core/components_ng/pattern/ability_component/ability_component_pattern.h"
 
 namespace OHOS::Ace {
 

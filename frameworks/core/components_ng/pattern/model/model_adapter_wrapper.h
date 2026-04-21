@@ -89,6 +89,7 @@ private:
     void UpdateImageTexturePaths(const RefPtr<ModelPaintProperty>& modelPaintProperty);
     void UpdateShaderInputBuffers(const RefPtr<ModelPaintProperty>& modelPaintProperty);
     void UpdateBackgroundColor(const RefPtr<ModelPaintProperty>& modelPaintProperty);
+    void UpdateRenderSize(const RefPtr<ModelPaintProperty>& modelPaintProperty);
     void HandleCameraMove(const Render3D::PointerEvent& event);
     Render3D::HapInfo SetHapInfo();
 

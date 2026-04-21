@@ -19,14 +19,12 @@
 #include <functional>
 #include <memory>
 #include <mutex>
-#include <optional>
 #include <string>
 
 #include "base/geometry/dimension.h"
+#include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
-#include "base/utils/noncopyable.h"
-#include "core/components/box/drag_drop_event.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/common/resource/resource_object.h"
@@ -144,6 +142,16 @@ struct TextDetectConfig {
     std::unordered_map<std::string, ResourceUpdater> detectConfigResMap_;
 };
 
+// support new material.
+struct ExternalDrawCallbackInfo {
+    float paintX = 0.0f;
+    float paintY = 0.0f;
+    float width = 0.0f;
+    float height = 0.0f;
+    bool isFontChanged = false;
+    float fontSize = 0.0f;
+};
+
 class ACE_EXPORT SpanStringBase : public AceType {
     DECLARE_ACE_TYPE(SpanStringBase, AceType);
 };
@@ -175,6 +183,8 @@ public:
     virtual void SetFontWeight(FontWeight value) = 0;
     virtual void SetVariableFontWeight(int32_t value) = 0;
     virtual void SetEnableVariableFontWeight(bool value) = 0;
+    virtual void SetFontVariations(const FONT_VARIATIONS_LIST& value) = 0;
+    virtual void ResetFontVariations() = 0;
     virtual void SetMinFontScale(const float value) = 0;
     virtual void SetMaxFontScale(const float value) = 0;
     virtual void SetFontFamily(const std::vector<std::string>& value) = 0;
@@ -213,6 +223,7 @@ public:
     virtual void ClearOnClick() = 0;
     virtual void SetRemoteMessage(std::function<void()>&& click) = 0;
     virtual void SetCopyOption(CopyOptions copyOption) = 0;
+    virtual void SetOnWillCopy(std::function<bool(const std::u16string&)>&& func) = 0;
     virtual void SetOnCopy(std::function<void(const std::u16string&)>&& func) = 0;
     virtual void SetEllipsisMode(EllipsisMode modal) = 0;
 
@@ -241,6 +252,7 @@ public:
     virtual void SetEnableAutoSpacing(bool enabled) = 0;
     virtual void SetLineThicknessScale(float value) = 0;
     virtual void SetOptimizeTrailingSpace(bool trim) = 0;
+    virtual void SetOrphanCharOptimization(bool isOrphanChar) {};
     virtual void SetCompressLeadingPunctuation(bool enabled) = 0;
     virtual void SetGradientShaderStyle(NG::Gradient& gradient) = 0;
     virtual void SetColorShaderStyle(const Color& value) = 0;

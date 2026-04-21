@@ -15,7 +15,7 @@
 
 #include "text_input_base.h"
 
-#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
 
 namespace OHOS::Ace::NG {
 
@@ -30,7 +30,7 @@ public:
  * @tc.desc: Test UpdateCaretByTouchMove
  * @tc.type: FUNC
  */
-HWTEST_F(TextFieldUXTest, UpdateCaretByTouchMove001, TestSize.Level1)
+HWTEST_F(TextFieldUXTest, UpdateCaretByTouchMove001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Initialize textInput and focusHub.
@@ -323,6 +323,37 @@ HWTEST_F(TextFieldUXTest, CleanNode006, TestSize.Level1)
     EXPECT_TRUE(cleanNodeResponseArea->IsSymbolIcon());
 
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(backupApiVersion));
+}
+
+/**
+ * @tc.name: CleanNode007
+ * @tc.desc: Test OnCleanNodeClicked
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, CleanNode007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetIsShowCancelButton(true);
+        model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
+        model.SetCancelButtonSymbol(false);
+    });
+
+    auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
+    ASSERT_NE(cleanNodeResponseArea, nullptr);
+    EXPECT_FALSE(cleanNodeResponseArea->IsShowSymbol());
+    EXPECT_FALSE(cleanNodeResponseArea->IsSymbolIcon());
+
+    /**
+     * @tc.steps: step2. test clean node clicked
+     */
+
+    cleanNodeResponseArea->OnCleanNodeClicked();
+    pattern_->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(pattern_->GetTextValue(), "");
 }
 
 /**
@@ -790,6 +821,21 @@ HWTEST_F(TextFieldUXTest, NeedSoftKeyboard001, TestSize.Level1)
      */
     ASSERT_NE(pattern_, nullptr);
     EXPECT_TRUE(pattern_->NeedSoftKeyboard());
+}
+
+/**
+ * @tc.name: SetCaretTest001
+ * @tc.desc: test textInput SetCaretPos
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, SetCaretTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     * @tc.expected:
+     */
+    CreateTextField(DEFAULT_TEXT);
+    pattern_->ProcessPendingCaretEvent();
 }
 
 /**
@@ -1562,7 +1608,7 @@ HWTEST_F(TextFieldUXTest, TextSelectOverlayTestOnUpdateMenuInfo003, TestSize.Lev
 HWTEST_F(TextFieldUXTest, TextSelectOverlayTestOnUpdateMenuInfo004, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Initialize text input and get focus
+     * @tc.steps: step1. Initialize text input
      */
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         model.SetType(TextInputType::TEXT);
@@ -1570,7 +1616,14 @@ HWTEST_F(TextFieldUXTest, TextSelectOverlayTestOnUpdateMenuInfo004, TestSize.Lev
     });
     frameNode_->MarkModifyDone();
 
+    /*
+     * @tc.steps: step2. Get focus
+     */
     GetFocus();
+
+    /*
+     * @tc.steps: step3. Init Theme
+     */
     auto textFieldTheme = pattern_->GetTheme();
     ASSERT_NE(textFieldTheme, nullptr);
     pattern_->textSelector_.Update(0, 0);
@@ -1581,7 +1634,7 @@ HWTEST_F(TextFieldUXTest, TextSelectOverlayTestOnUpdateMenuInfo004, TestSize.Lev
     ASSERT_NE(textSelectOverlay, nullptr);
 
     /**
-     * @tc.steps: step2. Do OnUpdateMenuInfo
+     * @tc.steps: step4. Do OnUpdateMenuInfo
      */
     SelectMenuInfo menuInfo;
     textSelectOverlay->OnUpdateMenuInfo(menuInfo, DIRTY_ALL_MENU_ITEM);
@@ -1657,6 +1710,102 @@ HWTEST_F(TextFieldUXTest, TextSelectOverlayTestOnUpdateMenuInfo006, TestSize.Lev
 }
 
 /**
+ * @tc.name: TextSelectOverlayTestOnUpdateMenuInfo007
+ * @tc.desc: Verify OnUpdateMenuInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextSelectOverlayTestOnUpdateMenuInfo007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and get focus
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+        model.SetShowPasswordIcon(true);
+    });
+    frameNode_->MarkModifyDone();
+    GetFocus();
+    auto textFieldTheme = pattern_->GetTheme();
+    ASSERT_NE(textFieldTheme, nullptr);
+    pattern_->textSelector_.Update(0, 0);
+    textFieldTheme->aiWriteBundleName_ = "BundleName";
+    textFieldTheme->aiWriteAbilityName_ = "AbilityName";
+    textFieldTheme->aiWriteIsSupport_ = "true";
+    auto textSelectOverlay = pattern_->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+    /**
+     * @tc.steps: step2. Do OnUpdateMenuInfo
+     */
+    SelectMenuInfo menuInfo;
+    textSelectOverlay->OnUpdateMenuInfo(menuInfo, DIRTY_ALL_MENU_ITEM);
+    ASSERT_EQ(menuInfo.showAIWrite, false);
+}
+
+/**
+ * @tc.name: TextSelectOverlayTestOnUpdateMenuInfo008
+ * @tc.desc: Verify OnUpdateMenuInfo
+ * @tc.type: FUNC
+*/
+HWTEST_F(TextFieldUXTest, TextSelectOverlayTestOnUpdateMenuInfo008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and get focus
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::NUMBER);
+    });
+    frameNode_->MarkModifyDone();
+    GetFocus();
+    auto textFieldTheme = pattern_->GetTheme();
+    ASSERT_NE(textFieldTheme, nullptr);
+    pattern_->textSelector_.Update(0, 0);
+    textFieldTheme->aiWriteBundleName_ = "BundleName";
+    textFieldTheme->aiWriteAbilityName_ = "AbilityName";
+    textFieldTheme->aiWriteIsSupport_ = "true";
+    auto textSelectOverlay = pattern_->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+    /**
+     * @tc.steps: step2. Do OnUpdateMenuInfo
+     */
+    SelectMenuInfo menuInfo;
+    textSelectOverlay->OnUpdateMenuInfo(menuInfo, DIRTY_ALL_MENU_ITEM);
+    ASSERT_EQ(menuInfo.showAIWrite, false);
+}
+
+/**
+ * @tc.name: TextSelectOverlayTestOnUpdateMenuInfo009
+ * @tc.desc: Verify OnUpdateMenuInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextSelectOverlayTestOnUpdateMenuInfo009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and get focus
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::EMAIL_ADDRESS);
+    });
+    frameNode_->MarkModifyDone();
+
+    GetFocus();
+    auto textFieldTheme = pattern_->GetTheme();
+    ASSERT_NE(textFieldTheme, nullptr);
+    pattern_->textSelector_.Update(0, 0);
+    textFieldTheme->aiWriteBundleName_ = "BundleName";
+    textFieldTheme->aiWriteAbilityName_ = "AbilityName";
+    textFieldTheme->aiWriteIsSupport_ = "true";
+    auto textSelectOverlay = pattern_->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    /**
+     * @tc.steps: step2. Do OnUpdateMenuInfo
+     */
+    SelectMenuInfo menuInfo;
+    textSelectOverlay->OnUpdateMenuInfo(menuInfo, DIRTY_ALL_MENU_ITEM);
+    ASSERT_EQ(menuInfo.showAIWrite, false);
+}
+
+/**
  * @tc.name: SetPlaceholderColorInfo001
  * @tc.desc: Verify OnUpdateMenuInfo
  * @tc.type: FUNC
@@ -1684,5 +1833,35 @@ HWTEST_F(TextFieldUXTest, SetPlaceholderColorInfo002, TestSize.Level1)
     CreateTextField(DEFAULT_TEXT);
     pattern_->SetPlaceholderColorInfo("123456");
     EXPECT_EQ(pattern_->placeholderColorInfo_, "[123456]");
+}
+
+/**
+ * @tc.name: SetPlaceholderColorInfo003
+ * @tc.desc: Verify OnUpdateMenuInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, SetPlaceholderColorInfo003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and get focus
+     */
+    CreateTextField(DEFAULT_TEXT);
+    pattern_->SetPlaceholderColorInfo("文字测试");
+    EXPECT_EQ(pattern_->placeholderColorInfo_, "[文字测试]");
+}
+
+/**
+ * @tc.name: SetPlaceholderColorInfo004
+ * @tc.desc: Verify OnUpdateMenuInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, SetPlaceholderColorInfo004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and get focus
+     */
+    CreateTextField(DEFAULT_TEXT);
+    pattern_->SetPlaceholderColorInfo("!!!");
+    EXPECT_EQ(pattern_->placeholderColorInfo_, "[!!!]");
 }
 } // namespace OHOS::Ace::NG

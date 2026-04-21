@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_VIDEO_RESOURCE_PLAYER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_VIDEO_RESOURCE_PLAYER_H
 
+#include <atomic>
 #include <list>
 
 #include "core/animation/scheduler.h"
@@ -36,6 +37,7 @@ public:
     using CurrentPosListener = std::function<void(uint32_t)>;
     using SeekDoneListener = std::function<void(uint32_t)>;
     using CompletionListener = std::function<void()>;
+    using StopListener = std::function<void()>;
     using RefreshRenderListener = std::function<void()>;
 
     Player(int64_t textureId, const std::string& src, const WeakPtr<PipelineBase>& context, ErrorCallback&& onError)
@@ -93,6 +95,7 @@ public:
     void AddCurrentPosListener(CurrentPosListener&& listener);
     void AddSeekDoneListener(SeekDoneListener&& listener);
     void AddCompletionListener(CompletionListener&& listener);
+    void AddStopListener(StopListener&& listener);
     void AddRefreshRenderListener(RefreshRenderListener&& listener);
 
     void PopListener();
@@ -112,6 +115,11 @@ public:
     void SetDirection(std::string& direction);
     void SetLandscape();
     void SetFullScreenChange(bool isFullScreen);
+    void SetRenderFirstFrame(bool showFirstFrame);
+    void MarkResetPending()
+    {
+        resetPending_.store(true, std::memory_order_relaxed);
+    }
     void Release(const std::function<void(bool)>& onRelease = nullptr) override;
 
 private:
@@ -120,6 +128,7 @@ private:
     void OnAddCurrentPosListener(CurrentPosListener&& listener);
     void OnAddSeekDoneListener(CurrentPosListener&& listener);
     void OnAddCompletionListener(CompletionListener&& listener);
+    void OnAddStopListener(StopListener&& listener);
 
     void OnStarted();
     void OnPaused();
@@ -134,6 +143,7 @@ private:
     void GetCurrentTime();
     void OnTick(uint64_t timeStamp);
     void SetTickActive(bool isActive);
+    void ApplyRenderFirstFrame();
 
     int64_t textureId_ = INVALID_ID;
     std::string src_;
@@ -144,9 +154,12 @@ private:
     bool isPlaying_ = false;
     bool isMute_ = false;
     bool isAutoPlay_ = false;
+    bool showFirstFrame_ = false;
+    bool hasSetRenderFirstFrame_ = false;
     bool isPrepared_ = false;
     bool isNeedFreshForce_ = false;
     bool isInit_ = false;
+    std::atomic<bool> resetPending_ { false };
     Method getCurrentPosMethod_;
     Method playMethod_;
     Method pauseMethod_;
@@ -164,6 +177,7 @@ private:
     std::list<CurrentPosListener> onCurrentPosListener_;
     std::list<SeekDoneListener> onSeekDoneListener_;
     std::list<CompletionListener> onCompletionListener_;
+    std::list<StopListener> onStopListener_;
     std::list<RefreshRenderListener> onRefreshRenderListener_;
 
     RefPtr<Scheduler> scheduler_;

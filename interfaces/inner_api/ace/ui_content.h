@@ -137,7 +137,10 @@ public:
     static int32_t GetUIContentWindowID(int32_t instanceId);
     static bool SetXComponentCompensationAngle(const std::string& configStr);
     static const std::string& GetXComponentCompensationAngle();
+    static const std::string& GetUICorrectionConfig();
+    static bool SetUICorrectionConfig(const std::string& configStr);
     virtual ~UIContent() = default;
+    virtual OHOS::Rosen::Window* GetUIContentWindow() { return nullptr; };
 
     // UI content life-cycles
     virtual UIContentErrorCode Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) = 0;
@@ -518,7 +521,7 @@ public:
 
     virtual void SetStatusBarItemColor(uint32_t color) {};
 
-    virtual void SetForceSplitEnable(bool isForceSplit) {}
+    virtual void SetForceSplitEnable(bool isForceSplit, ForceSplitMode mode, bool needUpdateViewport = false) {}
 
     virtual void SetForceSplitConfig(const std::optional<SystemForceSplitConfig>& systemConfig,
                                      const std::optional<AppForceSplitConfig>& appConfig) {}
@@ -662,6 +665,9 @@ private:
     static std::atomic<bool> successFlag_;
     static std::mutex mtx_;
     static std::string angleConfigJson_;
+    static std::atomic<bool> setUICorrectionConfigSuccessFlag_;
+    static std::mutex setUICorrectionConfigMutex_;
+    static std::string uiCorrectionConfigJson_;
 };
 
 } // namespace OHOS::Ace

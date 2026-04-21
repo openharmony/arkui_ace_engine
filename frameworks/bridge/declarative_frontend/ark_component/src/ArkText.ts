@@ -14,6 +14,8 @@
  */
 
 /// <reference path='./import.ts' />
+type TextFontVariation = { axis: string; value: number; isNormalized?: boolean };
+
 class TextEnableDataDetectorModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -761,6 +763,23 @@ class TextFontFeatureModifier extends ModifierWithKey<FontFeature> {
   }
 }
 
+class TextFontVariationsModifier extends ModifierWithKey<Array<TextFontVariation>> {
+  constructor(value: Array<TextFontVariation>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textFontVariations');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetFontVariations(node);
+    } else {
+      getUINativeModule().text.setFontVariations(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextContentModifier extends ModifierWithKey<string | Resource> {
   constructor(value: string | Resource) {
     super(value);
@@ -860,6 +879,20 @@ class TextDataDetectorConfigModifier extends ModifierWithKey<TextDataDetectorCon
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue.types, this.value.types) ||
     !isBaseOrResourceEqual(this.stageValue.onDetectResultUpdate, this.value.onDetectResultUpdate);
+  }
+}
+
+class TextOnWillCopyModifier extends ModifierWithKey<Callback<string, boolean>> {
+  constructor(value: Callback<string, boolean>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textOnWillCopy');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetOnWillCopy(node);
+    } else {
+      getUINativeModule().text.setOnWillCopy(node, this.value);
+    }
   }
 }
 
@@ -985,6 +1018,23 @@ class TextOnMarqueeStateChangeModifier extends ModifierWithKey<(state: MarqueeSt
     } else {
       getUINativeModule().text.setOnMarqueeStateChange(node, this.value);
     }
+  }
+}
+
+class TextOrphanCharOptimizationModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textOrphanCharOptimization');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetOrphanCharOptimization(node);
+    } else {
+      getUINativeModule().text.setOrphanCharOptimization(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -1266,6 +1316,10 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextOptimizeTrailingSpaceModifier.identity, TextOptimizeTrailingSpaceModifier, value);
     return this;
   }
+  fontVariations(value: Array<TextFontVariation>): TextAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextFontVariationsModifier.identity, TextFontVariationsModifier, value);
+    return this;
+  }
   compressLeadingPunctuation(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TextCompressLeadingPunctuationModifier.identity, TextCompressLeadingPunctuationModifier, value);
     return this;
@@ -1309,6 +1363,11 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   lineBreakStrategy(value: LineBreakStrategy): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextLineBreakStrategyModifier.identity,
       TextLineBreakStrategyModifier, value);
+    return this;
+  }
+  onWillCopy(callback: Callback<string, boolean>): TextAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextOnWillCopyModifier.identity,
+      TextOnWillCopyModifier, callback);
     return this;
   }
   onCopy(callback: (value: string) => void): TextAttribute {
@@ -1380,6 +1439,11 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   onMarqueeStateChange(callback: (state: MarqueeState) => void): this {
     modifierWithKey(
       this._modifiersWithKeys, TextOnMarqueeStateChangeModifier.identity, TextOnMarqueeStateChangeModifier, callback);
+    return this;
+  }
+  orphanCharOptimization(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextOrphanCharOptimizationModifier.identity,
+      TextOrphanCharOptimizationModifier, value);
     return this;
   }
   enableAutoSpacing(value: boolean): this {

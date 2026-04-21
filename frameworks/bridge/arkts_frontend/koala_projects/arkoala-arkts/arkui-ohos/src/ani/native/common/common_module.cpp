@@ -31,6 +31,8 @@
 #include "securec.h"
 
 #include "base/utils/utils.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/modifier.h"
 #include "core/interfaces/ani/ani_api.h"
 #include "arkoala-arkts/framework/native/src/resource_color_helper.h"
 #ifndef __linux__
@@ -46,6 +48,7 @@ const int32_t FLAG_DRAW_CONTENT = 1 << 1;
 const int32_t FLAG_DRAW_BEHIND = 1 << 2;
 const int32_t FLAG_DRAW_FOREGROUND = 1 << 3;
 const int32_t FLAG_DRAW_OVERLAY = 1 << 4;
+constexpr char ARRAY_GET[] = "i:Y";
 }
 ani_status GetAniEnv(ani_vm* vm, ani_env** env)
 {
@@ -82,6 +85,15 @@ void CommonModuleCallbackAni::Call(ani_env* env, ani_size argc, ani_ref* argv, a
 {
     CHECK_NULL_VOID(env);
     env->FunctionalObject_Call(static_cast<ani_fn_object>(func_), argc, argv, result);
+}
+
+ani_boolean IsEasySplit([[maybe_unused]] ani_env* env, ani_object obj, ani_int instanceId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return ANI_FALSE;
+    }
+    return modifier->getCommonAniModifier()->isEasySplit(instanceId);
 }
 
 ani_object GetHostContext([[maybe_unused]] ani_env* env, ani_object obj, ani_int key)
@@ -708,6 +720,28 @@ void SetCustomCallbackWithCheck(ani_env* env, ani_object obj, ani_long ptr, ani_
     return;
 }
 
+void SetCustomCallbackWithCheckForFrameNodes(ani_env* env, ani_object obj, ani_array ptrArray, ani_array nodeArray)
+{
+    ani_size size;
+    ANI_CALL(env, Array_GetLength(ptrArray, &size), return);
+    ani_class arrayClass;
+    ANI_CALL(env, FindClass("std.core.Array", &arrayClass), return);
+    ani_method getDataMethod;
+    ANI_CALL(env, Class_FindMethod(arrayClass, "$_get", ARRAY_GET, &getDataMethod), return);
+    for (size_t index = 0; index < size; index++) {
+        ani_ref ptr;
+        ani_ref node;
+        ANI_CALL(env, Object_CallMethod_Ref(ptrArray, getDataMethod, &ptr, index), return);
+        ani_long nodePtr;
+        if (!AniUtils::GetBigIntValue(env, static_cast<ani_object>(ptr), nodePtr)) {
+            HILOGE("Get frameNode value from array failed.");
+            return;
+        }
+        ANI_CALL(env, Object_CallMethod_Ref(nodeArray, getDataMethod, &node, index), return);
+        SetCustomCallbackWithCheck(env, obj, nodePtr, static_cast<ani_object>(node));
+    }
+}
+
 void Invalidate(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr)
 {
     const auto* modifier = GetNodeAniModifier();
@@ -988,6 +1022,15 @@ void SetParallelScoped(ani_env* env, ani_object obj, ani_boolean parallel)
     modifier->getCommonAniModifier()->setParallelScoped(parallel);
 }
 
+void CheckThreadValid(ani_env* env, ani_object obj, ani_boolean checkUIThread, ani_long node)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier()) {
+        return;
+    }
+    modifier->getCommonAniModifier()->checkThreadValid(checkUIThread, node);
+}
+
 void ConvertRemoveCallbackFun(
     ani_vm* vm, std::function<void()>& callback, const std::shared_ptr<CommonModuleCallbackAni>& callbackAni)
 {
@@ -1262,11 +1305,7 @@ ani_int getWindowId(ani_env* env, ani_object obj, ani_int instanceId)
     if (!modifier || !modifier->getCommonAniModifier() || !env) {
         return -1;
     }
-    auto ret = modifier->getCommonAniModifier()->getWindowId(instanceId);
-    if (ret.has_value()) {
-        return ret.value();
-    }
-    return -1;
+    return modifier->getCommonAniModifier()->getWindowId(instanceId);
 }
 
 ani_int getWindowWidthBreakpoint(ani_env* env, ani_object obj)
@@ -1739,6 +1778,32 @@ ani_boolean GetBaseEventModifierKeyState(
     return result;
 }
 
+ani_boolean GetTouchEventModifierKeyState(
+    ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer, ani_array keys)
+{
+    char** modifierKeys = nullptr;
+    int32_t modifierLength = 0;
+    if (!ConvertKeysToLowerStrings(env, keys, &modifierKeys, &modifierLength)) {
+        return false;
+    }
+
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        ReleaseCharArray(modifierKeys, modifierLength);
+        return false;
+    }
+
+    char** pressedKeys = nullptr;
+    int32_t pressedKeysLength = 0;
+    modifier->getCommonAniModifier()->getTouchEventPressedModifierKey(pointer, &pressedKeys, &pressedKeysLength);
+    bool result = CheckPressedKeysMatch(modifierKeys, modifierLength, pressedKeys, pressedKeysLength);
+    ReleaseCharArray(modifierKeys, modifierLength);
+    if (pressedKeys) {
+        ReleaseCharArray(pressedKeys, pressedKeysLength);
+    }
+    return result;
+}
+
 ani_boolean GetDragEventModifierKeyState(
     ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer, ani_array keys)
 {
@@ -1870,7 +1935,7 @@ ani_array GetAllUIContexts(ani_env* env, [[maybe_unused]] ani_object obj)
     status = env->FindClass("std.core.Int", &intCls);
     status = env->Class_FindMethod(intCls, "<ctor>", "i:", &intCtor);
     ani_object result {};
-    for (int i = 0; i < arraySize; ++i) {
+    for (size_t i = 0; i < arraySize; ++i) {
         status = env->Object_New(intCls, intCtor, &result, ani_int(instanceIds[i]));
         status = env->Array_Set(resultArray, i, result);
     }
@@ -1893,7 +1958,7 @@ ani_array ResolveUIContext(ani_env* env, [[maybe_unused]] ani_object obj)
     status = env->FindClass("std.core.Int", &intCls);
     status = env->Class_FindMethod(intCls, "<ctor>","i:", &intCtor);
     ani_object result {};
-    for (int i = 0; i < arraySize; ++i) {
+    for (size_t i = 0; i < arraySize; ++i) {
         status = env->Object_New(intCls, intCtor, &result, ani_int(instance[i]));
         status = env->Array_Set(resultArray, i, result);
     }

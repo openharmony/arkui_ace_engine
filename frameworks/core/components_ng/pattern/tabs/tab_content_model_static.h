@@ -33,17 +33,19 @@ public:
     static void SetIndicator(FrameNode* frameNode, const std::optional<IndicatorStyle>& indicatorOpt);
     static void SetLabelStyle(FrameNode* frameNode,
         const std::optional<LabelStyle>& labelStyleOpt, bool isSubTabStyle);
-    static LabelStyle CompleteParameters(LabelStyle& labelStyle, bool isSubTabStyle);
+    static LabelStyle CompleteParameters(FrameNode* frameNode, LabelStyle& labelStyle, bool isSubTabStyle);
     static void SetSelectedMode(FrameNode* node, const std::optional<SelectedMode>& selectedMode);
     static void SetBoard(FrameNode* node, const std::optional<BoardStyle>& board);
     static void SetPadding(FrameNode* node,
         const std::optional<NG::PaddingProperty>& padding, bool isSubTabStyle);
-    static PaddingProperty CompletePaddingProperty(PaddingProperty& padding, bool isSubTabStyle);
+    static PaddingProperty CompletePaddingProperty(FrameNode* frameNode, PaddingProperty& padding, bool isSubTabStyle);
     static void SetUseLocalizedPadding(FrameNode* node, bool useLocalizedPadding);
     static void SetId(FrameNode* node, const std::optional<std::string>& id);
     static void SetTabBarStyle(FrameNode* node, TabBarStyle tabBarStyle);
     static void SetTabBar(FrameNode* node,
         const std::optional<std::string>& label, const std::optional<std::string>& icon, TabBarBuilderFunc&& builder);
+    static void SetTabBarWithContent(FrameNode* node, FrameNode* tabBarNode);
+    static void SetCustomStyleNode(FrameNode* node, const RefPtr<FrameNode>& customStyleNode);
     static void SetLayoutMode(FrameNode* node, const std::optional<LayoutMode>& layoutMode);
     static void SetVerticalAlign(FrameNode* node, const std::optional<FlexAlign>& verticalAlign);
     static void SetSymmetricExtensible(FrameNode* node, const std::optional<bool>& isExtensible);
@@ -60,6 +62,7 @@ public:
     static void SetDrawableIndicatorConfig(FrameNode* frameNode, const ImageInfoConfig& config);
     static void SetIndicatorColorByUser(FrameNode* frameNode, bool isByUser);
     static void SetDrawableIndicatorFlag(FrameNode* frameNode, bool isDrawableIndicator);
+    static void InitTabText(const RefPtr<TextLayoutProperty>& textLayoutProperty);
 };
 } // namespace OHOS::Ace::NG
 

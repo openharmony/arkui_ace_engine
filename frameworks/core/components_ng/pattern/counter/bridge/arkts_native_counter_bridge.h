@@ -39,6 +39,9 @@ public:
     static ArkUINativeModuleValue ResetCounterOnInc(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetCounterOnDec(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetCounterOnDec(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static void UpdateLayoutPolicy(ArkUIRuntimeCallInfo* runtimeCallInfo, bool isWidth);
+    static ArkUINativeModuleValue SetControlWidth(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetStateChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 }
 

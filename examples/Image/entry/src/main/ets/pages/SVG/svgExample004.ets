@@ -39,7 +39,7 @@ struct svgExample004 {
         .height(150)
         .objectFit(this.fitMode)
         .border({ width: 2, color: Color.Blue })
-        .backgroundColor(Color.LightGray)
+        .backgroundColor(Color.Gray)
         .margin(15)
 
       // Switch between different fit modes

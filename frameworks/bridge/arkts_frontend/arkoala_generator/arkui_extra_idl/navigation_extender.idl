@@ -1,0 +1,42 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package arkui.component.idlize;
+
+import arkui.component.navigation.NavPathInfo as NavPathInfo;
+import arkui.component.navigation.NavPathStack as NavPathStack;
+import arkui.component.navigation.NavigationOptions as NavigationOptions;
+
+callback NavExtender_OnUpdateStack = void ();
+callback NavExtender_PageMapNodeBuilder = pointer (String url, optional Object params);
+
+[Entity=Class]
+interface NavExtender {
+  static void setNavigationOptions(pointer ptr, NavPathStack pathStack);
+  static void setUpdateStackCallback(NavPathStack peer, NavExtender_OnUpdateStack callback);
+  static void setNavDestinationBuilderCallback(pointer navigation, NavExtender_PageMapNodeBuilder callback);
+  static void syncStack(NavPathStack peer);
+  static void setNavDestinationId(pointer ptr, (String or undefined) id);
+  static void pushPath(NavPathStack pathStack, NavPathInfo info, NavigationOptions options);
+  static void replacePath(NavPathStack pathStack, NavPathInfo info, NavigationOptions options);
+  static String pop(NavPathStack pathStack, boolean animated);
+  static void setOnPopCallback(NavPathStack pathStack, Callback_String_Void popCallback);
+  static String getIdByIndex(NavPathStack pathStack, i32 index);
+  static sequence<String> getIdByName(NavPathStack pathStack, String name);
+  static void popToIndex(NavPathStack pathStack, i32 index, boolean animated);
+  static i32 popToName(NavPathStack pathStack, String name, boolean animated);
+  static void setNavDestinationRouterMapBuilderCallback(pointer navigation, NavExtender_PageMapNodeBuilder callback);
+  static sequence<String> getRouteMapInConfig(pointer context);
+  static void setSplitPlaceholder(pointer navigation, pointer placeholderNode);
+};

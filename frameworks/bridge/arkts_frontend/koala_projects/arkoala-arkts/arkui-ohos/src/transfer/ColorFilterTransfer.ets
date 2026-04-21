@@ -16,6 +16,8 @@
 
 import { ArkUIAniModule } from 'arkui.ani'
 import { ColorFilter } from '../component/units'
+import { MaterializedBaseTag } from '@koalaui/interop'
+
 
 export class ColorFilterTransfer {
     static transferStatic(input: Any): Any {
@@ -32,12 +34,12 @@ export class ColorFilterTransfer {
         if (!pointer.isNumber()) {
             return undefined;
         }
-        let pointerVal = pointer.toNumber() as long;
+        let pointerVal = pointer.toNumber().toLong();
         let ctorPtr = ArkUIAniModule._Image_ColorFilter_TransferStatic(pointerVal);
         if (ctorPtr === 0) {
             return undefined;
         }
-        let colorFilter = new ColorFilter(false, ctorPtr);
+        let colorFilter = new ColorFilter(MaterializedBaseTag.NOP, ctorPtr);
         return colorFilter;
     }
     static transferDynamic(input: Object): Any {

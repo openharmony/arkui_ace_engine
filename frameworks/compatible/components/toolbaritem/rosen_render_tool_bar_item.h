@@ -18,6 +18,8 @@
 
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
+#else
+#include "core/components_ng/render/drawing_forward.h"
 #endif
 
 #include "compatible/components/toolbaritem/render_tool_bar_item.h"

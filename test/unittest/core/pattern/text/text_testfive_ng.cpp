@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#include "test/mock/core/common/mock_font_manager.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pattern/mock_nestable_scroll_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_canvas_image.h"
-#include "test/mock/core/render/mock_paragraph.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/common/mock_font_manager.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/components_ng/pattern/mock_nestable_scroll_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_canvas_image.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
 #include "text_base.h"
 
 #include "core/components/common/properties/text_style_parser.h"
@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/text/paragraph_util.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -391,7 +392,7 @@ HWTEST_F(TextTestFiveNg, UpdateTextColorIfForeground001, TestSize.Level1)
     TextStyle textStyle;
 
     renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy::INVERT);
-    textLayoutAlgorithm->UpdateTextColorIfForeground(frameNode, textStyle, Color::BLACK);
+    textLayoutAlgorithm->UpdateTextColorIfForeground(frameNode, textStyle, Color::RED, Color::BLACK);
     EXPECT_EQ(textStyle.GetTextColor(), Color::FOREGROUND);
 
     textStyle.SetTextColor(Color::BLACK);
@@ -400,6 +401,228 @@ HWTEST_F(TextTestFiveNg, UpdateTextColorIfForeground001, TestSize.Level1)
     auto layoutProperty = AceType::DynamicCast<TextLayoutProperty>(frameNode->GetLayoutProperty());
     ASSERT_NE(layoutProperty, nullptr);
     EXPECT_NE(layoutProperty->GetTextColorValue(Color::RED), Color::BLACK);
+}
+
+/**
+ * @tc.name: UpdateTextColorIfForeground002
+ * @tc.desc: test when HasForegroundColor is true and foregroundColor != layoutTextColor && != currentTextColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, UpdateTextColorIfForeground002, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto textLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(textLayoutAlgorithm, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    TextStyle textStyle;
+    Color layoutColor = Color::RED;
+    Color currentColor = Color::BLACK;
+
+    // Set foreground color different from both layout and current colors
+    renderContext->UpdateForegroundColor(Color::BLUE);
+    ASSERT_TRUE(renderContext->HasForegroundColor());
+
+    textLayoutAlgorithm->UpdateTextColorIfForeground(frameNode, textStyle, layoutColor, currentColor);
+
+    // Should set to FOREGROUND since foregroundColor != layoutTextColor && foregroundColor != currentTextColor
+    EXPECT_EQ(textStyle.GetTextColor(), Color::FOREGROUND);
+}
+
+/**
+ * @tc.name: UpdateTextColorIfForeground003
+ * @tc.desc: test when HasForegroundColor is true and foregroundColor == layoutTextColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, UpdateTextColorIfForeground003, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto textLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(textLayoutAlgorithm, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    TextStyle textStyle;
+    Color layoutColor = Color::RED;
+    Color currentColor = Color::BLACK;
+
+    // Set foreground color equal to layout color
+    renderContext->UpdateForegroundColor(layoutColor);
+    ASSERT_TRUE(renderContext->HasForegroundColor());
+
+    textLayoutAlgorithm->UpdateTextColorIfForeground(frameNode, textStyle, layoutColor, currentColor);
+
+    // Should set to currentTextColor since foregroundColor == layoutTextColor
+    EXPECT_EQ(textStyle.GetTextColor(), currentColor);
+}
+
+/**
+ * @tc.name: UpdateTextColorIfForeground004
+ * @tc.desc: test when HasForegroundColor is true and foregroundColor == currentTextColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, UpdateTextColorIfForeground004, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto textLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(textLayoutAlgorithm, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    TextStyle textStyle;
+    Color layoutColor = Color::RED;
+    Color currentColor = Color::BLACK;
+
+    // Set foreground color equal to current color
+    renderContext->UpdateForegroundColor(currentColor);
+    ASSERT_TRUE(renderContext->HasForegroundColor());
+
+    textLayoutAlgorithm->UpdateTextColorIfForeground(frameNode, textStyle, layoutColor, currentColor);
+
+    // Should set to currentTextColor since foregroundColor == currentTextColor
+    EXPECT_EQ(textStyle.GetTextColor(), currentColor);
+}
+
+/**
+ * @tc.name: UpdateTextColorIfForeground005
+ * @tc.desc: test when HasForegroundColor is false and HasForegroundColorStrategy is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, UpdateTextColorIfForeground005, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto textLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(textLayoutAlgorithm, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    TextStyle textStyle;
+    Color layoutColor = Color::RED;
+    Color currentColor = Color::BLACK;
+
+    // Reset foreground color and set foreground color strategy
+    renderContext->ResetForegroundColor();
+    ASSERT_FALSE(renderContext->HasForegroundColor());
+    renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy::INVERT);
+    ASSERT_TRUE(renderContext->HasForegroundColorStrategy());
+
+    textLayoutAlgorithm->UpdateTextColorIfForeground(frameNode, textStyle, layoutColor, currentColor);
+
+    // Should set to FOREGROUND since HasForegroundColorStrategy is true
+    EXPECT_EQ(textStyle.GetTextColor(), Color::FOREGROUND);
+}
+
+/**
+ * @tc.name: UpdateTextColorIfForeground006
+ * @tc.desc: test when HasForegroundColor is false and HasForegroundColorStrategy is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, UpdateTextColorIfForeground006, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto textLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(textLayoutAlgorithm, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    TextStyle textStyle;
+    Color layoutColor = Color::RED;
+    Color currentColor = Color::BLACK;
+
+    // Reset both foreground color and strategy
+    renderContext->ResetForegroundColor();
+    renderContext->ResetForegroundColorStrategy();
+    ASSERT_FALSE(renderContext->HasForegroundColor());
+    ASSERT_FALSE(renderContext->HasForegroundColorStrategy());
+
+    textLayoutAlgorithm->UpdateTextColorIfForeground(frameNode, textStyle, layoutColor, currentColor);
+
+    // Should set to currentTextColor since both HasForegroundColor and HasForegroundColorStrategy are false
+    EXPECT_EQ(textStyle.GetTextColor(), currentColor);
+}
+
+/**
+ * @tc.name: UpdateTextColorIfForeground007
+ * @tc.desc: test with CONTRAST foreground color strategy
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, UpdateTextColorIfForeground007, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto textLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(textLayoutAlgorithm, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    TextStyle textStyle;
+    Color layoutColor = Color::RED;
+    Color currentColor = Color::BLACK;
+
+    // Test with CONTRAST strategy
+    renderContext->ResetForegroundColor();
+    renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy::CONTRAST);
+    ASSERT_TRUE(renderContext->HasForegroundColorStrategy());
+
+    textLayoutAlgorithm->UpdateTextColorIfForeground(frameNode, textStyle, layoutColor, currentColor);
+
+    // Should set to FOREGROUND since HasForegroundColorStrategy is true
+    EXPECT_EQ(textStyle.GetTextColor(), Color::FOREGROUND);
+}
+
+/**
+ * @tc.name: UpdateTextColorIfForeground008
+ * @tc.desc: test when HasForegroundColor is true with same layout and current colors
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, UpdateTextColorIfForeground008, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto textLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(textLayoutAlgorithm, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    TextStyle textStyle;
+    Color layoutColor = Color::RED;
+    Color currentColor = Color::RED; // Same as layout
+
+    // Set foreground color different from both
+    renderContext->UpdateForegroundColor(Color::BLUE);
+    ASSERT_TRUE(renderContext->HasForegroundColor());
+
+    textLayoutAlgorithm->UpdateTextColorIfForeground(frameNode, textStyle, layoutColor, currentColor);
+
+    // Should set to FOREGROUND since foregroundColor != layoutTextColor (even though layout == current)
+    EXPECT_EQ(textStyle.GetTextColor(), Color::FOREGROUND);
 }
 
 /**
@@ -821,6 +1044,26 @@ HWTEST_F(TextTestFiveNg, UpdateTextStyle002, TestSize.Level1)
     EXPECT_CALL(*paragraph, PushStyle).Times(2);
     EXPECT_CALL(*paragraph, PopStyle).Times(2);
     spanNode->spanItem_->UpdateTextStyle(spanContent, paragraph, textStyle, -1, -1);
+}
+
+/**
+ * @tc.name: SpanUpdateFontVariations001
+ * @tc.desc: test span fontVariations property update
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, SpanUpdateFontVariations001, TestSize.Level1)
+{
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+
+    spanModelNG.SetFontVariations(FONT_VARIATIONS_VALUE);
+    EXPECT_TRUE(spanNode->HasFontVariations());
+    EXPECT_EQ(spanNode->GetFontVariationsValue({}), FONT_VARIATIONS_VALUE);
+
+    SpanModelNG::SetFontVariations(AceType::RawPtr(spanNode), {});
+    EXPECT_EQ(spanNode->GetFontVariationsValue(FONT_VARIATIONS_VALUE), FONT_VARIATIONS_LIST {});
 }
 
 /**

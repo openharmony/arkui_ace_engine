@@ -127,9 +127,9 @@ Ark_NativePointer RegisterContentCoverShowCallbackImpl(Ark_NativePointer node, A
             onWillShowCallback = std::move(onWillShowCallback),
             onWillDismissCallback = std::move(onWillDismissCallback), changeEvent
         ](const RefPtr<UINode>& uiNode) mutable {
-            PipelineContext::SetCallBackNode(weakNode);
-            auto buildFunc = [uiNode]() -> RefPtr<UINode> {
-                return uiNode;
+            auto buildFunc = [weakNode, uiNode]() {
+                PipelineContext::SetCallBackNode(weakNode);
+                ViewStackProcessor::GetInstance()->Push(uiNode);
             };
             ViewAbstractModelStatic::BindContentCover(frameNode, true, std::move(changeEvent), std::move(buildFunc),
                 modalStyle, std::move(onShowCallback), std::move(onDismissCallback), std::move(onWillShowCallback),

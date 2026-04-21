@@ -14,6 +14,7 @@
  */
 
 #include "inspect_swiper.h"
+#include "base/utils/system_properties.h"
 
 namespace OHOS::Ace::Framework {
 InspectSwiper::InspectSwiper(NodeId nodeId, const std::string& nodeName) : InspectNode(nodeId, nodeName) {

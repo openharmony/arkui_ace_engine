@@ -14,7 +14,7 @@
  */
 
 #include "list_test_ng.h"
-#include "test/mock/core/animation/mock_animation_manager.h"
+#include "test/mock/frameworks/core/animation/mock_animation_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -903,7 +903,7 @@ HWTEST_F(ListSwipeTestNg, DragSwipeItem_DeleteArea001, TestSize.Level1)
      * @tc.expected: No trigger delete
      */
     isDelete = false;
-    DragSwiperItem(item_, DELETE_AREA_DISTANCE / 2, 0);
+    EXPECT_TRUE(DragSwiperItem(item_, DELETE_AREA_DISTANCE / 2, 0, ListItemSwipeIndex::SWIPER_START));
     EXPECT_FALSE(isDelete);
 
     /**
@@ -911,7 +911,7 @@ HWTEST_F(ListSwipeTestNg, DragSwipeItem_DeleteArea001, TestSize.Level1)
      * @tc.expected: Trigger delete
      */
     isDelete = false;
-    DragSwiperItem(item_, DELETE_AREA_DISTANCE, 0);
+    EXPECT_TRUE(DragSwiperItem(item_, DELETE_AREA_DISTANCE, 0, ListItemSwipeIndex::SWIPER_ACTION));
     EXPECT_TRUE(isDelete);
 }
 
@@ -971,7 +971,7 @@ HWTEST_F(ListSwipeTestNg, DragSwipeItem_DeleteArea002, TestSize.Level1)
      * @tc.expected: No trigger delete
      */
     isDelete = false;
-    DragSwiperItem(item_, -exceedArea / 2, 0);
+    EXPECT_TRUE(DragSwiperItem(item_, -exceedArea / 2, 0, ListItemSwipeIndex::SWIPER_END));
     EXPECT_FALSE(isDelete);
 
     /**
@@ -979,7 +979,7 @@ HWTEST_F(ListSwipeTestNg, DragSwipeItem_DeleteArea002, TestSize.Level1)
      * @tc.expected: Trigger delete
      */
     isDelete = false;
-    DragSwiperItem(item_, -exceedArea, 0);
+    EXPECT_TRUE(DragSwiperItem(item_, -exceedArea, 0, ListItemSwipeIndex::SWIPER_ACTION));
     EXPECT_TRUE(isDelete);
 }
 
@@ -1211,7 +1211,7 @@ HWTEST_F(ListSwipeTestNg, DragSwipeItem_DeleteArea007, TestSize.Level1)
      * @tc.expected: No trigger delete
      */
     isDelete = false;
-    DragSwiperItem(item_, DELETE_AREA_DISTANCE / 2, 0);
+    EXPECT_TRUE(DragSwiperItem(item_, DELETE_AREA_DISTANCE / 2, 0));
     EXPECT_FALSE(isDelete);
 
     /**
@@ -1275,7 +1275,7 @@ HWTEST_F(ListSwipeTestNg, DragSwipeItem_DeleteArea008, TestSize.Level1)
      * @tc.expected: No trigger delete
      */
     isDelete = false;
-    DragSwiperItem(item_, -DELETE_AREA_DISTANCE / 2, 0);
+    EXPECT_TRUE(DragSwiperItem(item_, -DELETE_AREA_DISTANCE / 2, 0));
     EXPECT_FALSE(isDelete);
 
     /**
@@ -1330,7 +1330,7 @@ HWTEST_F(ListSwipeTestNg, ResetSwipeStatus001, TestSize.Level1)
      * @tc.steps: step1. Swipe first item
      * @tc.expected: The first item swiperIndex_ changed.
      */
-    DragSwiperItem(item_, START_NODE_LEN, 0);
+    EXPECT_TRUE(DragSwiperItem(item_, START_NODE_LEN, 0, ListItemSwipeIndex::SWIPER_START));
     EXPECT_EQ(itemPattern_->GetSwiperIndex(), ListItemSwipeIndex::SWIPER_START);
     EXPECT_EQ(secondItemPattern->GetSwiperIndex(), ListItemSwipeIndex::ITEM_CHILD);
 
@@ -1338,7 +1338,7 @@ HWTEST_F(ListSwipeTestNg, ResetSwipeStatus001, TestSize.Level1)
      * @tc.steps: step2. Swipe second item
      * @tc.expected: The second item swiperIndex_ changed, and first item was be reset.
      */
-    DragSwiperItem(secondItem, START_NODE_LEN, 0);
+    EXPECT_TRUE(DragSwiperItem(secondItem, START_NODE_LEN, 0, ListItemSwipeIndex::SWIPER_START));
     EXPECT_EQ(itemPattern_->GetSwiperIndex(), ListItemSwipeIndex::ITEM_CHILD);
     EXPECT_EQ(secondItemPattern->GetSwiperIndex(), ListItemSwipeIndex::SWIPER_START);
 }
@@ -1387,7 +1387,7 @@ HWTEST_F(ListSwipeTestNg, ResetSwipeStatus003, TestSize.Level1)
      * @tc.steps: step1. Swipe first item
      * @tc.expected: The first item swiperIndex_ changed.
      */
-    DragSwiperItem(item_, START_NODE_LEN, 0);
+    EXPECT_TRUE(DragSwiperItem(item_, START_NODE_LEN, 0, ListItemSwipeIndex::SWIPER_START));
     EXPECT_EQ(itemPattern_->GetSwiperIndex(), ListItemSwipeIndex::SWIPER_START);
 
     /**
@@ -1415,7 +1415,7 @@ HWTEST_F(ListSwipeTestNg, ResetSwipeStatus004, TestSize.Level1)
      * @tc.steps: step1. Swipe first item
      * @tc.expected: The first item swiperIndex_ changed.
      */
-    DragSwiperItem(item_, START_NODE_LEN, 0);
+    EXPECT_TRUE(DragSwiperItem(item_, START_NODE_LEN, 0, ListItemSwipeIndex::SWIPER_START));
     EXPECT_EQ(itemPattern_->GetSwiperIndex(), ListItemSwipeIndex::SWIPER_START);
 
     /**
@@ -1494,7 +1494,7 @@ HWTEST_F(ListSwipeTestNg, OtherTest003, TestSize.Level1)
      * @tc.steps: step1. Swipe end greater than maxDistance
      * @tc.expected: Can continue to move
      */
-    DragSwiperItem(item_, -maxDistance, 0);
+    EXPECT_TRUE(DragSwiperItem(item_, -maxDistance, 0, ListItemSwipeIndex::SWIPER_END));
     EXPECT_EQ(curState, SwipeActionState::EXPANDED);
 
     OnFinishFunc onFinishCallBack;
@@ -1780,7 +1780,7 @@ HWTEST_F(ListSwipeTestNg, SetBuilderComponent01, TestSize.Level1)
      * @tc.steps: step2. Swipe start.
      * @tc.expected: StartNode can be added and moved successfully.
      */
-    DragSwiperItem(item_, slightSwipeDelta, SWIPER_SPEED_TH);
+    EXPECT_TRUE(DragSwiperItem(item_, slightSwipeDelta, SWIPER_SPEED_TH));
     RectF startNodeRect = GetChildRect(item_, startNodeIndex);
     RectF itemNodeRect = GetChildRect(item_, itemNodeIndex);
     RectF expectStartNodeRect = RectF(slightSwipeDelta - START_NODE_LEN, 0, START_NODE_LEN, ITEM_MAIN_SIZE);
@@ -1790,7 +1790,7 @@ HWTEST_F(ListSwipeTestNg, SetBuilderComponent01, TestSize.Level1)
     ListItemSwipeIndex swiperIndex = itemPattern_->GetSwiperIndex();
     EXPECT_EQ(swiperIndex, ListItemSwipeIndex::ITEM_CHILD);
 
-    DragSwiperItem(item_, obviousSwipeDelta, SWIPER_SPEED_TH);
+    EXPECT_TRUE(DragSwiperItem(item_, obviousSwipeDelta, SWIPER_SPEED_TH, ListItemSwipeIndex::SWIPER_START));
     startNodeRect = GetChildRect(item_, startNodeIndex);
     itemNodeRect = GetChildRect(item_, itemNodeIndex);
     expectStartNodeRect = RectF(0, 0, START_NODE_LEN, ITEM_MAIN_SIZE);
@@ -1804,7 +1804,7 @@ HWTEST_F(ListSwipeTestNg, SetBuilderComponent01, TestSize.Level1)
      * @tc.steps: step3. Collapse start.
      * @tc.expected: StartNode can be collapse.
      */
-    DragSwiperItem(item_, -obviousSwipeDelta, SWIPER_SPEED_TH);
+    EXPECT_TRUE(DragSwiperItem(item_, -obviousSwipeDelta, SWIPER_SPEED_TH));
     startNodeRect = GetChildRect(item_, startNodeIndex);
     itemNodeRect = GetChildRect(item_, itemNodeIndex);
     expectStartNodeRect = RectF(-obviousSwipeDelta, 0, START_NODE_LEN, ITEM_MAIN_SIZE);

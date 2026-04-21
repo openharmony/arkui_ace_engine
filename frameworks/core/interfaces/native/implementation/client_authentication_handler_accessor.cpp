@@ -54,6 +54,27 @@ void Confirm1Impl(Ark_ClientAuthenticationHandler peer,
     std::string certChainFileStr;
     peer->handler->HandleConfirm(priKeyFileStr, certChainFileStr);
 }
+void Confirm2Impl(Ark_ClientAuthenticationHandler peer,
+                  const Ark_String* identity,
+                  const Ark_Union_CredentialType_String* credentialTypeOrCertChainFile)
+{
+    CHECK_NULL_VOID(peer && peer->handler);
+    CHECK_NULL_VOID(identity);
+    CHECK_NULL_VOID(credentialTypeOrCertChainFile);
+    std::string identityStr = Converter::Convert<std::string>(*identity);
+    int32_t credentialTypeValue = ARK_CREDENTIAL_TYPE_CREDENTIAL_USER;
+    Converter::VisitUnion(
+        *credentialTypeOrCertChainFile,
+        [peer, identityStr, &credentialTypeValue](const Ark_CredentialType& credType) {
+            credentialTypeValue = static_cast<int32_t>(credType);
+            peer->handler->HandleConfirm(identityStr, credentialTypeValue);
+        },
+        [peer, identityStr, &credentialTypeValue](const Ark_String& str) {
+            std::string strValue = Converter::Convert<std::string>(str);
+            peer->handler->HandleConfirm(identityStr, strValue);
+        },
+        []() {});
+}
 void CancelImpl(Ark_ClientAuthenticationHandler peer)
 {
     CHECK_NULL_VOID(peer && peer->handler);
@@ -73,6 +94,7 @@ const GENERATED_ArkUIClientAuthenticationHandlerAccessor* GetClientAuthenticatio
         ClientAuthenticationHandlerAccessor::GetFinalizerImpl,
         ClientAuthenticationHandlerAccessor::Confirm0Impl,
         ClientAuthenticationHandlerAccessor::Confirm1Impl,
+        ClientAuthenticationHandlerAccessor::Confirm2Impl,
         ClientAuthenticationHandlerAccessor::CancelImpl,
         ClientAuthenticationHandlerAccessor::IgnoreImpl,
     };

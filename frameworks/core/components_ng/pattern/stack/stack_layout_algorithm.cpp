@@ -26,10 +26,10 @@ StackLayoutAlgorithm::StackLayoutAlgorithm() = default;
 void StackLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     PerformLayout(layoutWrapper);
-    HandleStackContentOverflow(layoutWrapper);
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->Layout();
     }
+    HandleStackContentOverflow(layoutWrapper);
 }
 
 // Called to perform layout render node and child.
@@ -100,5 +100,24 @@ NG::OffsetF StackLayoutAlgorithm::CalculateStackAlignment(
     offset.SetX((1.0 + alignment.GetHorizontal()) * (parentSize.Width() - childSize.Width()) / 2.0);
     offset.SetY((1.0 + alignment.GetVertical()) * (parentSize.Height() - childSize.Height()) / 2.0);
     return offset;
+}
+
+bool StackLayoutAlgorithm::IsAsyncLoadAvailable(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_RETURN(layoutWrapper, false);
+    const auto& layoutProperty = AceType::DynamicCast<StackLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto syncLoad = layoutProperty->GetSyncLoad().value_or(true);
+    const auto& layoutConstraint = layoutProperty->GetLayoutConstraint();
+    if (syncLoad || !layoutConstraint.has_value()) {
+        return false;
+    }
+    auto idealSize = layoutConstraint.value().selfIdealSize;
+    return idealSize.IsValid();
+}
+
+bool StackLayoutAlgorithm::MeasureInNextFrame() const
+{
+    return measureInNextFrame_;
 }
 } // namespace OHOS::Ace::NG

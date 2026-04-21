@@ -398,7 +398,7 @@ bool PickerColumnPattern::InnerHandleScroll(bool isDown, bool isUpatePropertiesO
     auto totalOptionCount = pattern->GetOptionCount();
     CHECK_NULL_RETURN(totalOptionCount, false);
 
-    if (!GetCanLoopFromLayoutProperty() && ((isDown && currentIndex_ == totalOptionCount - 1) ||
+    if (!GetCanLoopFromLayoutPropertyWithStartEnd() && ((isDown && currentIndex_ == totalOptionCount - 1) ||
         (!isDown && currentIndex_ == 0))) {
         return false;
     }
@@ -482,6 +482,7 @@ void PickerColumnPattern::HandleDragStart(const GestureEvent& event)
 void PickerColumnPattern::HandleDragMove(const GestureEvent& event)
 {
     if (event.GetInputEventType() == InputEventType::AXIS && event.GetSourceTool() == SourceTool::MOUSE) {
+        stopHaptic_ = true;
         InnerHandleScroll(LessNotEqual(event.GetDelta().GetY(), 0.0f), true);
         return;
     }
@@ -1110,7 +1111,7 @@ bool PickerColumnPattern::NotLoopOptions() const
     auto showOptionCount = GetShowCount();
     auto pattern = host->GetPattern<PickerColumnPattern>();
     CHECK_NULL_RETURN(pattern, false);
-    uint32_t totalOptionCount = pattern->GetOptionCount();
+    uint32_t totalOptionCount = pattern->GetActualOptionCount();
     return totalOptionCount <= showOptionCount / HALF_NUMBER + 1; // the critical value of loop condition.
 }
 

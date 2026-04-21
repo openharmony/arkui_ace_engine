@@ -34,6 +34,7 @@
 #include "core/event/key_event.h"
 #include "core/focus/focus_node.h"
 #include "core/pipeline/base/element.h"
+#include "core/pipeline/base/render_component.h"
 
 namespace OHOS::Ace {
 
@@ -1248,6 +1249,17 @@ public:
     const EventMarker& GetMicrophoneCaptureStateChangedId() const
     {
         return declaration_->GetMicrophoneCaptureStateChangedId();
+    }
+
+    void SetInputMethodAttachedId(const EventMarker& inputMethodAttachedId)
+    {
+        CHECK_NULL_VOID(declaration_);
+        declaration_->SetInputMethodAttachedId(inputMethodAttachedId);
+    }
+
+    const EventMarker& GetInputMethodAttachedId() const
+    {
+        return declaration_->GetInputMethodAttachedId();
     }
 
     void SetAdsBlockedEventId(const EventMarker& adsBlockedEventId)

@@ -173,6 +173,38 @@ void JSRepeat::JsParseItemDragEventHandler(
         std::move(onMoveThroughCallback), std::move(onDropCallback));
 }
 
+void JSRepeat::IsAllowAnimation(const JSCallbackInfo& info)
+{
+    auto result = RepeatModel::GetInstance()->IsAllowAnimation();
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
+}
+
+void JSRepeat::IsImplicitAnimationOpen(const JSCallbackInfo& info)
+{
+    auto result = RepeatModel::GetInstance()->IsImplicitAnimationOpen();
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
+}
+
+void JSRepeat::IsChildInAnimation(const JSCallbackInfo& info)
+{
+    if ((info.Length() < 1) || !info[0]->IsNumber()) {
+        TAG_LOGE(AceLogTag::ACE_REPEAT, "JSRepeat::IsChildInAnimation - invalid parameter ERROR");
+        return;
+    }
+    auto index = info[0]->ToNumber<uint32_t>();
+    auto result = RepeatModel::GetInstance()->IsChildInAnimation(index);
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
+}
+
+void JSRepeat::GetActiveRange(const JSCallbackInfo& info)
+{
+    auto result = RepeatModel::GetInstance()->GetActiveRange();
+    JSRef<JSObject> activeRange = JSRef<JSObject>::New();
+    activeRange->SetProperty("start", result.first);
+    activeRange->SetProperty("end", result.second);
+    info.SetReturnValue(activeRange);
+}
+
 void JSRepeat::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRepeat>::Declare("RepeatNative");
@@ -183,6 +215,10 @@ void JSRepeat::JSBind(BindingTarget globalObj)
     JSClass<JSRepeat>::StaticMethod("createNewChildFinish", &JSRepeat::CreateNewChildFinish);
     JSClass<JSRepeat>::StaticMethod("afterAddChild", &JSRepeat::AfterAddChild);
     JSClass<JSRepeat>::StaticMethod("onMove", &JSRepeat::OnMove);
+    JSClass<JSRepeat>::StaticMethod("isAllowAnimation", &JSRepeat::IsAllowAnimation);
+    JSClass<JSRepeat>::StaticMethod("isImplicitAnimationOpen", &JSRepeat::IsImplicitAnimationOpen);
+    JSClass<JSRepeat>::StaticMethod("isChildInAnimation", &JSRepeat::IsChildInAnimation);
+    JSClass<JSRepeat>::StaticMethod("getActiveRange", &JSRepeat::GetActiveRange);
     JSClass<JSRepeat>::Bind<>(globalObj);
 }
 

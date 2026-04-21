@@ -31,7 +31,7 @@ public:
     class Builder {
     public:
         Builder() = default;
-        ~Builder() = default;
+        virtual ~Builder() = default;
 
         RefPtr<BadgeTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
@@ -43,7 +43,7 @@ public:
             return theme;
         }
 
-    private:
+    protected:
         void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<BadgeTheme>& theme) const
         {
             RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_BADGE);
@@ -174,11 +174,11 @@ public:
 
 protected:
     BadgeTheme() = default;
-
-private:
     Color badgeColor_;
     Color badgeTextColor_;
     Color badgeBorderColor_;
+
+private:
     Color badgeOuterBorderColor_;
     int64_t messageCount_;
     BadgePosition badgePosition_ = BadgePosition::RIGHT_TOP;

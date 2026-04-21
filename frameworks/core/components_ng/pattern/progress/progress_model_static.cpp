@@ -16,7 +16,6 @@
 #include "core/components_ng/pattern/progress/progress_model_static.h"
 
 #include "base/geometry/dimension.h"
-#include "core/components/progress/progress_component.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract_model_static.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -30,10 +29,6 @@
 namespace OHOS::Ace::NG {
 void ProgressModelStatic::SetColor(FrameNode* frameNode, const std::optional<Color>& value)
 {
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<ProgressPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetUserInitiatedColor(value.has_value());
     if (value) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, Color, value.value(), frameNode);
     } else {
@@ -433,15 +428,12 @@ void ProgressModelStatic::SetTextDefaultStyle(FrameNode* frameNode, const RefPtr
         textProps->UpdateContent(number);
     }
     textNode->MarkModifyDone();
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, Text, number, frameNode);
+    ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Text, number);
 }
 
 void ProgressModelStatic::SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& value)
 {
     CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<ProgressPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetUserInitiatedBgColor(value.has_value());
     if (value) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, BackgroundColor, value.value(), frameNode);
     } else {

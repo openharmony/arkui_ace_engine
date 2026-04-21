@@ -33,7 +33,13 @@ export struct RadioIndex {
     { name: 'Radio组合场景1', path: 'RadioLevel1' },
     { name: 'Radio组合场景2', path: 'RadioLevel2' },
     { name: 'Radio组合场景3', path: 'RadioLevel3' },
-    { name: 'Radio组合场景4', path: 'RadioLevel4' }
+    { name: 'Radio组合场景4', path: 'RadioLevel4' },
+    { name: 'Radio组合场景5', path: 'RadioLevel5' },
+    { name: 'RadioWithTheme1 基础主题切换', path: 'RadioWithTheme1' },
+    { name: 'RadioWithTheme2 深浅色模式', path: 'RadioWithTheme2' },
+    { name: 'RadioWithTheme3 主题+自定义颜色', path: 'RadioWithTheme3' },
+    { name: 'RadioWithTheme4 嵌套主题深浅色', path: 'RadioWithTheme4' },
+    { name: 'RadioWithTheme5 Token颜色随深浅色切换', path: 'RadioWithTheme5' }
   ]
 
   build() {

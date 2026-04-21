@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 #include "text_input_base.h"
 
 #include "base/memory/ace_type.h"
@@ -261,6 +261,9 @@ HWTEST_F(TextSelectControllerTest, GetTouchLinePos001, TestSize.Level1)
     textSelectController->contentController_->content_ = u"hhh";
     auto result = textSelectController->GetTouchLinePos(localOffset);
     EXPECT_EQ(result, TouchPosition::LEFT);
+    localOffset = { 0, 0 };
+    result = textSelectController->GetTouchLinePos(localOffset);
+    EXPECT_EQ(result, TouchPosition::LEFT);
 }
 
 /**
@@ -283,6 +286,9 @@ HWTEST_F(TextSelectControllerTest, GetTouchLinePos002, TestSize.Level1)
     Offset localOffset = { 0, 0 };
     textSelectController->contentController_->content_ = u"";
     auto result = textSelectController->GetTouchLinePos(localOffset);
+    EXPECT_EQ(result, TouchPosition::RIGHT);
+    localOffset = { 1, 1 };
+    result = textSelectController->GetTouchLinePos(localOffset);
     EXPECT_EQ(result, TouchPosition::RIGHT);
 }
 

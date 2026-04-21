@@ -28,7 +28,9 @@
 #include "core/interfaces/native/implementation/gesture_style_peer.h"
 #include "core/interfaces/native/implementation/image_attachment_peer.h"
 #include "core/interfaces/native/implementation/letter_spacing_style_peer.h"
+#include "core/interfaces/native/implementation/layout_policy_peer_impl.h"
 #include "core/interfaces/native/implementation/line_height_style_peer.h"
+#include "core/interfaces/native/implementation/line_spacing_style_peer.h"
 #include "core/interfaces/native/implementation/paragraph_style_peer.h"
 #include "core/interfaces/native/implementation/styled_string.h"
 #include "core/interfaces/native/implementation/styled_string_peer.h"
@@ -39,7 +41,49 @@
 #include "core/interfaces/native/implementation/user_data_span_holder.h"
 #include "core/text/html_utils.h"
 
+namespace OHOS::Ace::NG::GeneratedModifier {
+const GENERATED_ArkUILayoutPolicyAccessor* GetLayoutPolicyAccessor();
+}
+
 namespace OHOS::Ace::NG::Converter {
+namespace {
+Ark_LayoutPolicy GetCachedLayoutPolicyPeer(LayoutCalPolicy value)
+{
+    auto* accessor = GeneratedModifier::GetLayoutPolicyAccessor();
+    CHECK_NULL_RETURN(accessor, nullptr);
+    switch (value) {
+        case LayoutCalPolicy::MATCH_PARENT:
+            return accessor->getMatchParent ? accessor->getMatchParent() : nullptr;
+        case LayoutCalPolicy::WRAP_CONTENT:
+            return accessor->getWrapContent ? accessor->getWrapContent() : nullptr;
+        case LayoutCalPolicy::FIX_AT_IDEAL_SIZE:
+            return accessor->getFixAtIdealSize ? accessor->getFixAtIdealSize() : nullptr;
+        default:
+            return nullptr;
+    }
+}
+
+Opt_NativePointer CreateArkOptionalLayoutPolicyPtr(const std::optional<LayoutCalPolicy>& value)
+{
+    if (!value.has_value() || value.value() == LayoutCalPolicy::NO_MATCH) {
+        return ArkValue<Opt_NativePointer>(Ark_Empty());
+    }
+    return ArkValue<Opt_NativePointer>(reinterpret_cast<Ark_NativePointer>(GetCachedLayoutPolicyPeer(value.value())));
+}
+
+std::optional<LayoutCalPolicy> ConvertLayoutPolicyPtr(const Opt_NativePointer& src)
+{
+    if (src.tag == INTEROP_TAG_UNDEFINED) {
+        return std::nullopt;
+    }
+    auto peer = reinterpret_cast<LayoutPolicyPeer*>(src.value);
+    if (!peer || peer->layoutPolicy == LayoutCalPolicy::NO_MATCH) {
+        return std::nullopt;
+    }
+    return peer->layoutPolicy;
+}
+} // namespace
+
 template<>
 void AssignCast(std::optional<Ace::SpanType>& dst, const Ark_StyledStringKey& src)
 {
@@ -50,6 +94,7 @@ void AssignCast(std::optional<Ace::SpanType>& dst, const Ark_StyledStringKey& sr
         case ARK_STYLED_STRING_KEY_LETTER_SPACING: dst = Ace::SpanType::LetterSpacing; break;
         case ARK_STYLED_STRING_KEY_TEXT_SHADOW: dst = Ace::SpanType::TextShadow; break;
         case ARK_STYLED_STRING_KEY_LINE_HEIGHT: dst = Ace::SpanType::LineHeight; break;
+        case ARK_STYLED_STRING_KEY_LINE_SPACING: dst = Ace::SpanType::LineSpacing; break;
         case ARK_STYLED_STRING_KEY_BACKGROUND_COLOR: dst = Ace::SpanType::BackgroundColor; break;
         case ARK_STYLED_STRING_KEY_URL: dst = Ace::SpanType::Url; break;
         case ARK_STYLED_STRING_KEY_GESTURE: dst = Ace::SpanType::Gesture; break;
@@ -71,42 +116,161 @@ BorderRadiusProperty Convert(const Ark_ImageAttachmentLayoutStyle& src)
     return result.value();
 }
 
-static bool CheckKeyAndValueTypeEqual(int32_t styledKey, size_t valueTypeId)
+template<>
+RefPtr<SpanBase> Convert(const Ark_TextStyle& src)
 {
-    static int32_t KeyAndValueTypeMap[] = {
-        ARK_STYLED_STRING_KEY_FONT, ARK_STYLED_STRING_KEY_DECORATION, ARK_STYLED_STRING_KEY_BASELINE_OFFSET,
-        ARK_STYLED_STRING_KEY_LETTER_SPACING, ARK_STYLED_STRING_KEY_TEXT_SHADOW, ARK_STYLED_STRING_KEY_GESTURE,
-        ARK_STYLED_STRING_KEY_IMAGE, ARK_STYLED_STRING_KEY_PARAGRAPH_STYLE, ARK_STYLED_STRING_KEY_LINE_HEIGHT,
-        ARK_STYLED_STRING_KEY_URL, ARK_STYLED_STRING_KEY_CUSTOM_SPAN, ARK_STYLED_STRING_KEY_USER_DATA,
-        ARK_STYLED_STRING_KEY_BACKGROUND_COLOR
-    };
-    return (valueTypeId < (sizeof(KeyAndValueTypeMap) / sizeof(int32_t))) &&
-        (KeyAndValueTypeMap[valueTypeId] == styledKey);
+    return (src && src->span) ? src->span->GetSubSpan(0, 1) : nullptr;
+}
+template<>
+RefPtr<SpanBase> Convert(const Ark_DecorationStyle& src)
+{
+    return (src && src->span) ? src->span->GetSubSpan(0, 1) : nullptr;
+}
+template<>
+RefPtr<SpanBase> Convert(const Ark_BaselineOffsetStyle& src)
+{
+    return (src && src->span) ? src->span->GetSubSpan(0, 1) : nullptr;
+}
+template<>
+RefPtr<SpanBase> Convert(const Ark_LetterSpacingStyle& src)
+{
+    return (src && src->span) ? src->span->GetSubSpan(0, 1) : nullptr;
+}
+template<>
+RefPtr<SpanBase> Convert(const Ark_TextShadowStyle& src)
+{
+    return (src && src->span) ? src->span->GetSubSpan(0, 1) : nullptr;
+}
+template<>
+RefPtr<SpanBase> Convert(const Ark_GestureStyle& src)
+{
+    return (src && src->span) ? src->span->GetSubSpan(0, 1) : nullptr;
+}
+template<>
+RefPtr<SpanBase> Convert(const Ark_ParagraphStyle& src)
+{
+    return (src && src->span) ? src->span->GetSubSpan(0, 1) : nullptr;
+}
+template<>
+RefPtr<SpanBase> Convert(const Ark_LineHeightStyle& src)
+{
+    return (src && src->span) ? src->span->GetSubSpan(0, 1) : nullptr;
+}
+template<>
+RefPtr<SpanBase> Convert(const Ark_LineSpacingStyle& src)
+{
+    return (src && src->span) ? src->span->GetSubSpan(0, 1) : nullptr;
+}
+template<>
+RefPtr<SpanBase> Convert(const Ark_UrlStyle& src)
+{
+    return (src && src->span) ? src->span->GetSubSpan(0, 1) : nullptr;
+}
+template<>
+RefPtr<SpanBase> Convert(const Ark_BackgroundColorStyle& src)
+{
+    return (src && src->span) ? src->span->GetSubSpan(0, 1) : nullptr;
+}
+template<>
+RefPtr<SpanBase> Convert(const Ark_ImageAttachment& src)
+{
+    return (src && src->span) ? src->span->GetSubSpan(0, 1) : nullptr;
+}
+template<>
+RefPtr<SpanBase> Convert(const Ark_CustomSpanWrapper& src)
+{
+    auto peer = reinterpret_cast<CustomSpanNativePeer *>(src.nativeObj);
+    CHECK_NULL_RETURN(peer, nullptr);
+    peer->SetObject(src.managed);
+    peer->SetOnMeasure([arkCallback = CallbackHelper(src.onMeasure_callback)](
+        const CustomSpanMeasureInfo& measureInfo) {
+        auto arkMeasureInfo = Converter::ArkValue<Ark_CustomSpanMeasureInfoProxy>(measureInfo);
+        std::optional<CustomSpanMetrics> result = arkCallback.InvokeWithOptConvertResult<CustomSpanMetrics,
+            Ark_CustomSpanMetrics, Callback_CustomSpanMetrics_Void>(arkMeasureInfo);
+        return result.value_or(CustomSpanMetrics());
+    });
+    peer->SetOnDraw([arkCallback = CallbackHelper(src.onDraw_callback)](
+        NG::DrawingContext& drawingContext,
+        const CustomSpanOptions& customSpanOptions) {
+        auto arkCtxPtr = reinterpret_cast<Ark_DrawContext>(std::addressof(drawingContext));
+        auto arkInfo = Converter::ArkValue<Ark_CustomSpanDrawInfo>(customSpanOptions);
+        arkCallback.InvokeSync(arkCtxPtr, arkInfo);
+    });
+    return peer->GetSubSpan(0, 1);
+}
+template<>
+RefPtr<SpanBase> Convert(const Ark_UserDataSpan& src)
+{
+    return AceType::MakeRefPtr<UserDataSpanHolder>(src);
 }
 
 template<>
 RefPtr<SpanBase> Convert(const Ark_StyleOptions& src)
 {
-    RefPtr<SpanBase> result;
+    RefPtr<SpanBase> dst;
+    auto optSpanBase = Converter::OptConvert<RefPtr<SpanBase>>(src.styledValue);
+    CHECK_NULL_RETURN(optSpanBase && *optSpanBase, dst);
     auto start = Converter::OptConvert<int32_t>(src.start).value_or(0);
     start = std::max(0, start);
     auto end = Converter::OptConvert<int32_t>(src.length).value_or(0) + start;
-    Converter::VisitUnion(src.styledValue,
-        [&result, start, end, &src](const auto& peer) {
-            CHECK_NULL_VOID(peer && peer->span);
-            auto valueTypeId = Converter::Convert<int32_t>(src.styledValue.selector);
-            // Ark_CustomSpan, Ark_ImageAttachment will be declined by this check
-            if (!CheckKeyAndValueTypeEqual(static_cast<int32_t>(src.styledKey), valueTypeId)) {
-                return;
-            }
-            result = peer->span->GetSubSpan(start, end);
-        },
-        [&result, start, end](const Ark_UserDataSpan& value) {
-            result = AceType::MakeRefPtr<UserDataSpanHolder>(value, start, end);
-        },
-        []() {}
-    );
-    return result;
+    dst = (*optSpanBase);
+    dst->UpdateStartIndex(start);
+    dst->UpdateEndIndex(end);
+    return dst;
+}
+} // namespace OHOS::Ace::NG::Converter
+
+namespace OHOS::Ace::NG::Converter {
+void AssignArkValue(Ark_CustomSpanDrawInfo& dst, const CustomSpanOptions& src, ConvContext *ctx)
+{
+    dst.x = ArkValue<Ark_Float64>(src.x);
+    dst.lineTop = ArkValue<Ark_Float64>(src.lineTop);
+    dst.lineBottom = ArkValue<Ark_Float64>(src.lineBottom);
+    dst.baseline = ArkValue<Ark_Float64>(src.baseline);
+}
+
+void AssignArkValue(Ark_CustomSpanMeasureInfoProxy& dst, const CustomSpanMeasureInfo& src, ConvContext *ctx)
+{
+    dst.fontSize = ArkValue<Ark_Float64>(src.fontSize);
+    dst.maxWidth = ArkValue<Opt_Float64>(src.maxWidth);
+    dst.layoutPolicyPtr = CreateArkOptionalLayoutPolicyPtr(src.layoutPolicy);
+}
+
+void AssignArkValue(Ark_CustomSpanMetrics& dst, const CustomSpanMetrics& src, ConvContext *ctx)
+{
+    dst.width = ArkValue<Ark_Float64>(src.width);
+    dst.height = ArkValue<Opt_Float64>(src.height);
+}
+
+template<>
+CustomSpanMetrics Convert(const Ark_CustomSpanMetrics& src)
+{
+    return CustomSpanMetrics {
+        .width = Converter::Convert<float>(src.width),
+        .height = Converter::OptConvert<float>(src.height)
+    };
+}
+
+template<>
+CustomSpanOptions Convert(const Ark_CustomSpanDrawInfo& src)
+{
+    return CustomSpanOptions {
+        .x = Convert<float>(src.x),
+        .lineTop = Convert<float>(src.lineTop),
+        .lineBottom = Convert<float>(src.lineBottom),
+        .baseline = Convert<float>(src.baseline),
+    };
+}
+
+template<>
+CustomSpanMeasureInfo Convert(const Ark_CustomSpanMeasureInfoProxy& src)
+{
+    CustomSpanMeasureInfo info {
+        .fontSize = Convert<float>(src.fontSize)
+    };
+    info.maxWidth = OptConvert<float>(src.maxWidth);
+    info.layoutPolicy = ConvertLayoutPolicyPtr(src.layoutPolicyPtr);
+    return info;
 }
 } // namespace OHOS::Ace::NG::Converter
 
@@ -127,9 +291,11 @@ void UpdateSpansRange(std::vector<RefPtr<SpanBase>>& styles, int32_t maxLength)
             continue;
         }
         if (style->GetStartIndex() < 0 || style->GetStartIndex() >= maxLength) {
+            auto length = style->GetLength();
             style->UpdateStartIndex(0);
+            style->UpdateEndIndex(length);
         }
-        if (style->GetEndIndex() < style->GetStartIndex() || style->GetEndIndex() >= maxLength) {
+        if (style->GetEndIndex() <= style->GetStartIndex() || style->GetEndIndex() >= maxLength) {
             style->UpdateEndIndex(maxLength);
         }
     }
@@ -155,7 +321,7 @@ void DestroyPeerImpl(Ark_StyledString peer)
 {
     StyledStringPeer::Destroy(peer);
 }
-Ark_StyledString ConstructImpl(const Ark_Union_String_ImageAttachment_CustomSpan* value,
+Ark_StyledString ConstructImpl(const Ark_Union_String_ImageAttachment_CustomSpanWrapper* value,
                                const Opt_Array_StyleOptions* styles)
 {
     auto peer = StyledStringPeer::Create();
@@ -170,16 +336,17 @@ Ark_StyledString ConstructImpl(const Ark_Union_String_ImageAttachment_CustomSpan
                 UpdateSpansRange(spans.value(), data.length());
                 peer->spanString->BindWithSpans(spans.value());
             },
-            [&peer](const Ark_ImageAttachment& arkImageAttachment) {
-                ImageAttachmentPeer* peerImageAttachment = arkImageAttachment;
-                CHECK_NULL_VOID(peerImageAttachment && peerImageAttachment->span);
-                auto options = peerImageAttachment->span->GetImageSpanOptions();
-                peer->spanString = AceType::MakeRefPtr<SpanString>(options);
+            [&peer](const Ark_ImageAttachment& arkImageAtt) {
+                auto span = Convert<RefPtr<SpanBase>>(arkImageAtt);
+                CHECK_NULL_VOID(span);
+                peer->spanString = AceType::MakeRefPtr<SpanString>(std::u16string());
+                std::vector<RefPtr<SpanBase>> spans = { span };
+                peer->spanString->BindWithSpans(spans);
             },
-            [&peer](const Ark_CustomSpan& arkCustomSpan) {
-                CustomSpanPeer* peerCustomSpan = arkCustomSpan;
-                CHECK_NULL_VOID(peerCustomSpan && peerCustomSpan->span);
-                auto customSpan = AceType::DynamicCast<CustomSpan>(peerCustomSpan->span);
+            [&peer](const Ark_CustomSpanWrapper& arkCustomSpan) {
+                auto span = Convert<RefPtr<SpanBase>>(arkCustomSpan);
+                auto customSpan = AceType::DynamicCast<CustomSpan>(span);
+                CHECK_NULL_VOID(customSpan);
                 peer->spanString = AceType::MakeRefPtr<SpanString>(customSpan);
             },
             []() {}
@@ -352,7 +519,7 @@ void Unmarshalling0Impl(Ark_VMContext vmContext,
             Ark_Buffer arkBuffer = BufferKeeper::Allocate(buff.size());
             std::copy(buff.begin(), buff.end(), reinterpret_cast<uint8_t*>(arkBuffer.data));
             RefPtr<ExtSpan> result;
-            auto continuation = CallbackKeeper::Claim<Callback_StyledStringMarshallingValue_Void>(
+            auto continuation = CallbackKeeper::Claim<Callback_UserDataSpan_Void>(
                 [&result, spanStart, spanLength](Ark_UserDataSpan arkUserDataSpan) {
                 result = AceType::MakeRefPtr<UserDataSpanHolder>(arkUserDataSpan, spanStart, spanStart + spanLength);
             });
@@ -398,10 +565,6 @@ Ark_Int32 GetLengthImpl(Ark_StyledString peer)
     CHECK_NULL_RETURN(peer->spanString, errValue);
     return Converter::ArkValue<Ark_Int32>(peer->spanString->GetLength());
 }
-void SetLengthImpl(Ark_StyledString peer,
-                   Ark_Int32 length)
-{
-}
 } // StyledStringAccessor
 const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor()
 {
@@ -420,9 +583,7 @@ const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor()
         StyledStringAccessor::Marshalling1Impl,
         StyledStringAccessor::Unmarshalling1Impl,
         StyledStringAccessor::GetLengthImpl,
-        StyledStringAccessor::SetLengthImpl,
     };
     return &StyledStringAccessorImpl;
 }
-
 }

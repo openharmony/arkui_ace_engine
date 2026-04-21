@@ -48,6 +48,9 @@ public:
     // search pattern needs softkeyboard, override function.
     bool NeedSoftKeyboard() const override
     {
+        if (onNeedSoftkeyboardCallback_) {
+            return Pattern::NeedSoftKeyboard();
+        }
         return true;
     }
 
@@ -168,7 +171,6 @@ public:
     void OnSearchColorConfigrationUpdate(const RefPtr<FrameNode>& frameNode, const Color& color);
     void OnCancelColorConfigrationUpdate(const RefPtr<FrameNode>& frameNode, const Color& color);
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
-    bool ButtonNodeOnThemeScopeUpdate(const RefPtr<SearchTheme>& searchTheme);
     bool TextNodeOnThemeScopeUpdate(const RefPtr<SearchTheme>& searchTheme,
         const RefPtr<TextFieldTheme>& textFieldTheme);
 
@@ -307,6 +309,8 @@ private:
     void ImageIconColorConfigurationUpdate(int32_t index);
     void UpdateSymbolIconNode(int32_t index);
     void UpdateSymbolIconProperties(RefPtr<FrameNode>& frameNode, int32_t index);
+    void UpdateSymbolLayoutProperty(RefPtr<FrameNode>& iconFrameNode, int32_t index,
+        RefPtr<SearchLayoutProperty> layoutProperty, RefPtr<TextLayoutProperty> symbolLayoutProperty);
 
     void CreateOrUpdateSymbol(int32_t index, bool isCreateNode);
     void CreateOrUpdateImage(int32_t index, const std::string& src, bool isCreateNode, const std::string& bundleName,

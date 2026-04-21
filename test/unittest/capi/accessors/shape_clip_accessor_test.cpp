@@ -43,11 +43,11 @@ class ShapeClipAccessorTest : public AccessorTestBase<GENERATED_ArkUIShapeClipAc
                                   &GENERATED_ArkUIAccessors::getShapeClipAccessor, ShapeClipPeer> {};
 
 /**
- * @tc.name: setRectShapeTopLeftTest
+ * @tc.name: setRectShapeTestTopLeft
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ShapeClipAccessorTest, setRectShapeTopLeftTest, TestSize.Level1)
+HWTEST_F(ShapeClipAccessorTest, setRectShapeTestTopLeft, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setRectShape, nullptr);
 
@@ -78,11 +78,11 @@ HWTEST_F(ShapeClipAccessorTest, setRectShapeTopLeftTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setRectShapeRightBottomTest
+ * @tc.name: setRectShapeTestRightBottom
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ShapeClipAccessorTest, setRectShapeRightBottomTest, TestSize.Level1)
+HWTEST_F(ShapeClipAccessorTest, setRectShapeTestRightBottom, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setRectShape, nullptr);
 
@@ -114,11 +114,11 @@ HWTEST_F(ShapeClipAccessorTest, setRectShapeRightBottomTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setRoundRectShapeTopLeftTest
+ * @tc.name: setRoundRectShapeTestTopLeft
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ShapeClipAccessorTest, DISABLED_setRoundRectShapeTopLeftTest, TestSize.Level1)
+HWTEST_F(ShapeClipAccessorTest, DISABLED_setRoundRectShapeTestTopLeft, TestSize.Level1)
 {
 #ifdef WRONG_GEN
     ASSERT_NE(accessor_->setRoundRectShape, nullptr);
@@ -171,11 +171,11 @@ HWTEST_F(ShapeClipAccessorTest, DISABLED_setRoundRectShapeTopLeftTest, TestSize.
 }
 
 /**
- * @tc.name: setRoundRectShapeTopLeftTest
+ * @tc.name: setRoundRectShapeTestRightBottom
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ShapeClipAccessorTest, DISABLED_setRoundRectShapeRightBottomTest, TestSize.Level1)
+HWTEST_F(ShapeClipAccessorTest, DISABLED_setRoundRectShapeTestRightBottom, TestSize.Level1)
 {
 #ifdef WRONG_GEN
     ASSERT_NE(accessor_->setRoundRectShape, nullptr);
@@ -228,11 +228,11 @@ HWTEST_F(ShapeClipAccessorTest, DISABLED_setRoundRectShapeRightBottomTest, TestS
 }
 
 /**
- * @tc.name: setCircleShapeXYTest
+ * @tc.name: setCircleShapeTestXY
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ShapeClipAccessorTest, setCircleShapeXYTest, TestSize.Level1)
+HWTEST_F(ShapeClipAccessorTest, setCircleShapeTestXY, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setCircleShape, nullptr);
 
@@ -260,11 +260,11 @@ HWTEST_F(ShapeClipAccessorTest, setCircleShapeXYTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setCircleShapeRadiusTest
+ * @tc.name: setCircleShapeTestRadius
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ShapeClipAccessorTest, setCircleShapeRadiusTest, TestSize.Level1)
+HWTEST_F(ShapeClipAccessorTest, setCircleShapeTestRadius, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setCircleShape, nullptr);
 
@@ -292,11 +292,11 @@ HWTEST_F(ShapeClipAccessorTest, setCircleShapeRadiusTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setOvalShapeTopLeftTest
+ * @tc.name: setOvalShapeTestTopLeft
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ShapeClipAccessorTest, setOvalShapeTopLeftTest, TestSize.Level1)
+HWTEST_F(ShapeClipAccessorTest, setOvalShapeTestTopLeft, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setOvalShape, nullptr);
 
@@ -327,11 +327,11 @@ HWTEST_F(ShapeClipAccessorTest, setOvalShapeTopLeftTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setOvalShapeRightBottomTest
+ * @tc.name: setOvalShapeTestRightBottom
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ShapeClipAccessorTest, setOvalShapeRightBottomTest, TestSize.Level1)
+HWTEST_F(ShapeClipAccessorTest, setOvalShapeTestRightBottom, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setOvalShape, nullptr);
 

@@ -20,6 +20,7 @@
 #include <tuple>
 #include <vector>
 
+#include "../../capi_gen140_compat.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::Fixtures {

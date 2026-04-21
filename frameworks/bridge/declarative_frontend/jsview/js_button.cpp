@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/models/button_model_impl.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
 
 namespace OHOS::Ace {
 ButtonModel* ButtonModel::GetInstance()
@@ -170,9 +171,11 @@ void JSButton::SetTextColor(const JSCallbackInfo& info)
 {
     Color textColor;
     RefPtr<ResourceObject> resObj;
-    if (!ParseJsColor(info[0], textColor, resObj)) {
-        auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
-        textColor = buttonTheme->GetTextStyle().GetTextColor();
+    if (!ParseJsColorForMaterial(info[0], textColor, resObj)) {
+        auto buttonTheme = GetTheme<ButtonTheme>();
+        if (buttonTheme) {
+            textColor = buttonTheme->GetTextStyle().GetTextColor();
+        }
     }
     if (SystemProperties::ConfigChangePerform()) {
         ButtonModel::GetInstance()->CreateWithColorResourceObj(resObj, ButtonColorType::FONT_COLOR);
@@ -626,7 +629,7 @@ void JSButton::JsOnClick(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onClick");
         PipelineContext::SetCallBackNode(node);
-        func->Execute(info);
+        func->Execute(execCtx.vm_, info);
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
         JSInteractableView::ReportClickEvent(node);
 #endif
@@ -656,7 +659,7 @@ void JSButton::JsBackgroundColor(const JSCallbackInfo& info)
     RefPtr<ResourceObject> resObj;
     bool colorFlag = ParseJsColor(info[0], backgroundColor, resObj);
     if (!colorFlag) {
-        auto buttonTheme = GetTheme<ButtonTheme>();
+        auto buttonTheme = GetTheme<ButtonTheme>(true);
         if (buttonTheme) {
             backgroundColor = buttonTheme->GetBgColor();
         }

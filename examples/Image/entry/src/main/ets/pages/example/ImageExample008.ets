@@ -21,8 +21,8 @@ import { drawing, common2D } from '@kit.ArkGraphics2D';
 @Entry
 @Component
 struct ImageExample3 {
-  private imageOne: Resource = $r('app.media.1');
-  private imageTwo: Resource = $r('app.media.2');
+  private imageOne: Resource = $r('app.media.startIcon');
+  private imageTwo: Resource = $r('app.media.background');
   @State src: Resource = this.imageOne;
   @State src2: Resource = this.imageTwo;
   private colorFilterMatrix: number[] = [1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0];
@@ -52,11 +52,11 @@ struct ImageExample3 {
         .height(100)
         .colorFilter(this.drawingColorFilterSecond)
         .onClick(()=>{
-          this.drawingColorFilterSecond = new ColorFilter(this.ColorFilterMatrix);
+          this.drawingColorFilterSecond = new ColorFilter(this.colorFilterMatrix);
         })
 
       //当加载图片为SVG格式时
-      Image($r('app.media.test_self'))
+      Image($r('app.media.foreground'))
         .width(110)
         .height(110)
         .margin(15)

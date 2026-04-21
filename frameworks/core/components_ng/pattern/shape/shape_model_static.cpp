@@ -58,7 +58,7 @@ void ShapeModelStatic::SetStrokeDashOffset(FrameNode* frameNode, const std::opti
     if (dashOffset) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeDashOffset, dashOffset.value(), frameNode);
     } else {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeDashOffset, 0.0_vp, frameNode);
+        ACE_RESET_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeDashOffset, frameNode);
     }
 }
 

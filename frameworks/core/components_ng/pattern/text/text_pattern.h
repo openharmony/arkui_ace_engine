@@ -71,7 +71,7 @@ class PreviewMenuController;
 enum class Status { DRAGGING, FLOATING, ON_DROP, NONE };
 using CalculateHandleFunc = std::function<void()>;
 using ShowSelectOverlayFunc = std::function<void(const RectF&, const RectF&)>;
-using ExternalDrawCallback = std::function<bool(float, float, float, float)>;
+using ExternalDrawCallback = std::function<bool(const ExternalDrawCallbackInfo&)>;
 struct SpanNodeInfo {
     RefPtr<UINode> node;
     RefPtr<UINode> containerSpanNode;
@@ -162,6 +162,10 @@ public:
 
     void OnWindowShow() override;
 
+    void OnLanguageConfigurationUpdate() override;
+
+    bool CheckMeasureFlag();
+
     void PreCreateLayoutWrapper();
 
     void BeforeCreateLayoutWrapper() override;
@@ -174,7 +178,6 @@ public:
     {
         return { FocusType::NODE, false };
     }
-
     void DumpAdvanceInfo() override;
 
     void DumpInfo() override;
@@ -507,6 +510,7 @@ public:
     ACE_FORCE_EXPORT OffsetF GetDragUpperLeftCoordinates() override;
     void SetTextSelection(int32_t selectionStart, int32_t selectionEnd);
     void SetTextSelectionMultiThread(int32_t selectionStart, int32_t selectionEnd);
+    bool ParseCommand(const std::string& command);
 
     // Deprecated: Use the TextSelectOverlay::OnHandleMove() instead.
     // It is currently used by RichEditorPattern.
@@ -633,8 +637,9 @@ public:
     void SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd, const SelectionOptions options);
     void ActSetSelectionFlag(int32_t selectionStart, int32_t selectionEnd, const SelectionOptions options);
     bool IsShowMenu(MenuPolicy options, bool defaultValue);
-    void SetStyledString(const RefPtr<SpanString>& value, bool closeSelectOverlay = true);
-    void SetStyledStringMultiThread(const RefPtr<SpanString>& value, bool closeSelectOverlay = true);
+    void SetStyledString(const RefPtr<SpanString>& value, bool closeSelectOverlay = true, bool isReplace = false);
+    void SetStyledStringMultiThread(const RefPtr<SpanString>& value,
+        bool closeSelectOverlay = true, bool isReplace = false);
     // select overlay
     virtual int32_t GetHandleIndex(const Offset& offset) const;
     std::u16string GetSelectedText(int32_t start, int32_t end, bool includeStartHalf = false,
@@ -767,6 +772,11 @@ public:
 
     ACE_FORCE_EXPORT bool DidExceedMaxLines() const override;
 
+    bool IsOnlyFontSizeOrColorChanged()
+    {
+        return textStyle_.has_value() ? textStyle_->CheckIsFontSizeOrColorChanged() : false;
+    }
+
     std::optional<ParagraphStyle> GetExternalParagraphStyle()
     {
         return externalParagraphStyle_;
@@ -777,6 +787,9 @@ public:
     std::vector<ParagraphManager::TextBox> GetRectsForRange(int32_t start, int32_t end,
         RectHeightStyle heightStyle, RectWidthStyle widthStyle) override;
     PositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y) override;
+    PositionWithAffinity GetCharacterPositionAtCoordinate(int32_t x, int32_t y) override;
+    std::pair<TextRange, TextRange> GetGlyphRangeForCharacterRange(int32_t start, int32_t end) override;
+    std::pair<TextRange, TextRange> GetCharacterRangeForGlyphRange(int32_t start, int32_t end) override;
 
     void OnSelectionMenuOptionsUpdate(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback);
@@ -969,6 +982,10 @@ public:
     void SetExternalDrawCallback(ExternalDrawCallback&& callback)
     {
         externalDrawCallback_ = std::move(callback);
+        auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+        if (textLayoutProperty) {
+            textLayoutProperty->SetIsNewMaterial(externalDrawCallback_ != nullptr);
+        }
     }
 
     const ExternalDrawCallback& GetExternalDrawCallback()
@@ -995,6 +1012,19 @@ public:
         const std::string& content, const std::vector<std::string>& nodeIds, const std::string& configs) override;
     void ResetHighLightValue();
     ACE_FORCE_EXPORT void ReportSelectedText(bool isRegister = false) override;
+    void MarkMeasured(bool isMeasured)
+    {
+        isMeasured_ = isMeasured;
+    }
+
+    bool IsMeasured() const
+    {
+        return isMeasured_;
+    }
+    ACE_FORCE_EXPORT int32_t OnInjectionEvent(const std::string& command) override;
+
+    bool GetFallbackLineSpacingStyleOptimizeFlag();
+    bool SetFallbackLineSpacingAndIncludeFontPadding(bool flag);
 
 protected:
     virtual RefPtr<TextSelectOverlay> GetSelectOverlay();
@@ -1042,7 +1072,7 @@ protected:
     bool TryLinkJump(const RefPtr<SpanItem>& span);
     void ActTextOnClick(GestureEvent& info);
     RectF CalcAIMenuPosition(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc);
-    virtual void AdjustAIEntityRect(RectF& aiRect) {}
+    virtual RectF CalcAIEntityRectWithHandles();
     bool ShowAIEntityMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc = nullptr,
         const ShowSelectOverlayFunc& showSelectOverlayFunc = nullptr);
     void SetOnClickMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc,
@@ -1069,7 +1099,7 @@ protected:
     void InitKeyEvent();
     void UpdateShiftFlag(const KeyEvent& keyEvent);
     bool HandleKeyEvent(const KeyEvent& keyEvent);
-    void HandleOnSelect(KeyCode code);
+    bool HandleOnSelect(KeyCode code);
     void HandleSelectionUp();
     void HandleSelectionDown();
     void HandleSelection(bool isEmojiStart, int32_t end);
@@ -1078,7 +1108,6 @@ protected:
     bool IsSelectableAndCopy();
     void SetResponseRegion(const SizeF& frameSize, const SizeF& boundsSize);
     virtual bool CanStartAITask() const;
-    virtual bool NeedClearAISpanMap(const std::u16string& textForAICache) { return true; };
     virtual bool GetDefaultClipValue() const;
 
     void MarkDirtySelf();
@@ -1195,6 +1224,9 @@ protected:
     bool IsSupportAskCelia();
 
 private:
+    void ReportSelectionChangeEvent(int32_t nodeId, const std::string& dataStr,
+        const std::string& value, int32_t start, int32_t end);
+    bool ReportCommandResult(int32_t nodeId, const std::string& event);
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleSpanLongPressEvent(GestureEvent& info);
     void HandleMouseEvent(const MouseInfo& info);
@@ -1295,6 +1327,8 @@ private:
     void HighlightDisappearAnimation();
     void HighlightAppearAnimation();
     bool HighlightTriggerScrollableParentToScroll(const RectF& highlightRect);
+    float CalculateScrollTargetOffset(
+        const RefPtr<ScrollablePattern>& scrollablePattern, const RectF& highlightInScroll, const RectF& frameRect);
     const RefPtr<ScrollablePattern> FindScrollableParentWithRelativeOffset(OffsetF& offset);
     RectF GetHighlightRect(const std::vector<std::pair<std::vector<RectF>, ParagraphStyle>>& paragraphsRects) const;
     std::u16string GetContentWithPlaceholderSpaceFillter() const;
@@ -1363,6 +1397,7 @@ private:
     bool isRegisteredAreaCallback_ = false;
     OffsetF gestureSelectTextPaintOffset_;
     ExternalDrawCallback externalDrawCallback_;
+    bool isMeasured_ = false;
 
     std::shared_ptr<AnimationUtils::Animation> highlightAppearAnimation_;
     std::shared_ptr<AnimationUtils::Animation> highlightDisappearAnimation_;

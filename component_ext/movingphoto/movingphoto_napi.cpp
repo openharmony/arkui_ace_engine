@@ -74,7 +74,6 @@ napi_value JsCreate(napi_env env, napi_callback_info info)
     napi_value jsData = nullptr;
     napi_get_named_property(env, argv[0], "movingPhoto", &jsData);
     if (!ExtNapiUtils::CheckTypeForNapiValue(env, jsData, napi_object)) {
-        TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "when create movingphoto is null.");
         return ExtNapiUtils::CreateNull(env);
     }
 
@@ -174,7 +173,7 @@ napi_value JsOnComplete(napi_env env, napi_callback_info info)
     napi_value thisVal = nullptr;
     napi_value argv[MAX_ARG_NUM] = { nullptr };
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVal, nullptr));
-    NAPI_ASSERT(env, argc >= 1, "Wrong number of arguments");
+    NAPI_ASSERT(env, argc >= ARG_NUM_ONE, "Wrong number of arguments");
     if (!ExtNapiUtils::CheckTypeForNapiValue(env, argv[0], napi_function)) {
         return ExtNapiUtils::CreateNull(env);
     }

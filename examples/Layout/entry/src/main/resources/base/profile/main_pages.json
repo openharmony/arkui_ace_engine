@@ -1,0 +1,128 @@
+{
+  "src": [
+    "pages/Index",
+    "pages/SizeExample/SizeExampleRouter",
+    "pages/ColumnSplitExample/ColumnSplitExampleRouter",
+    "pages/RowSplitExample/RowSplitExampleRouter",
+    "pages/BlankExample/BlankExampleRouter",
+    "pages/ColumnExample/ColumnExampleRouter",
+    "pages/ExpandSafeAreaExample/ExpandSafeAreaExampleRouter",
+    "pages/FlexExample/FlexExampleRouter",
+    "pages/FolderStackExample/FolderStackExampleRouter",
+    "pages/FoldSplitContainerExample/FoldSplitContainerExampleRouter",
+    "pages/GridColExample/GridColExampleRouter",
+    "pages/GridContainerExample/GridContainerExampleRouter",
+    "pages/GridRowExample/GridRowExampleRouter",
+    "pages/PositionExample/PositionExampleRouter",
+    "pages/RelativeContainerExample/RelativeContainerExampleRouter",
+    "pages/RowExample/RowExampleRouter",
+    "pages/BorderExample/BorderExampleRouter",
+    "pages/LayoutExample/LayoutExampleRouter",
+
+    "pages/SizeExample/SizeExample01",
+    "pages/SizeExample/SizeExample02",
+    "pages/SizeExample/SizeExample03",
+    "pages/SizeExample/SizeExample04",
+    "pages/SizeExample/SizeExample05",
+    "pages/SizeExample/SizeExample06",
+    "pages/SizeExample/SizeExample07",
+    "pages/SizeExample/SizeExample08",
+    "pages/SizeExample/SizeExample09",
+    "pages/SizeExample/SizeExample10",
+    "pages/SizeExample/SizeExample11",
+    "pages/SizeExample/SizeExample12",
+    "pages/SizeExample/SizeExample13",
+    "pages/SizeExample/SizeExample14",
+    "pages/SizeExample/SizeExample15",
+    "pages/SizeExample/SizeExample16",
+    "pages/SizeExample/SizeExample17",
+    "pages/SizeExample/SizeExample18",
+    "pages/SizeExample/SizeExample19",
+
+    "pages/ColumnSplitExample/ColumnSplitExample01",
+    "pages/ColumnSplitExample/ColumnSplitExample02",
+
+    "pages/RowSplitExample/RowSplitExample1",
+
+    "pages/BlankExample/BlankExample01",
+    "pages/BlankExample/BlankExample02",
+    "pages/BlankExample/BlankExample03",
+
+    "pages/ColumnExample/ColumnExample01",
+    "pages/ColumnExample/ColumnExample02",
+
+    "pages/ExpandSafeAreaExample/ExpandSafeAreaExample01",
+    "pages/ExpandSafeAreaExample/ExpandSafeAreaExample02",
+    "pages/ExpandSafeAreaExample/ExpandSafeAreaExample03",
+    "pages/ExpandSafeAreaExample/ExpandSafeAreaExample04",
+    "pages/ExpandSafeAreaExample/ExpandSafeAreaExample05",
+    "pages/ExpandSafeAreaExample/ExpandSafeAreaExample06",
+    "pages/ExpandSafeAreaExample/ExpandSafeAreaExample07",
+    "pages/ExpandSafeAreaExample/ExpandSafeAreaExample08",
+
+    "pages/FlexExample/FlexExample01",
+    "pages/FlexExample/FlexExample02",
+    "pages/FlexExample/FlexExample03",
+    "pages/FlexExample/FlexExample04",
+    "pages/FlexExample/FlexExample05",
+    "pages/FlexExample/FlexExample06",
+    "pages/FlexExample/FlexExample07",
+    "pages/FlexExample/FlexExample08",
+
+    "pages/FolderStackExample/FolderStackExample01",
+    "pages/FolderStackExample/FolderStackExample02",
+    "pages/FolderStackExample/FolderStackExample03",
+    "pages/FolderStackExample/FolderStackExample04",
+    "pages/FolderStackExample/FolderStackExample05",
+
+    "pages/FoldSplitContainerExample/FoldSplitContainerExample01",
+    "pages/FoldSplitContainerExample/FoldSplitContainerExample02",
+    "pages/FoldSplitContainerExample/FoldSplitContainerExample03",
+
+    "pages/GridColExample/GridColExample01",
+    "pages/GridColExample/GridColExample02",
+    "pages/GridColExample/GridColExample03",
+
+    "pages/GridContainerExample/GridContainerExample01",
+
+    "pages/GridRowExample/GridRowExample01",
+    "pages/GridRowExample/GridRowExample02",
+
+    "pages/PositionExample/PositionExample01",
+    "pages/PositionExample/PositionExample02",
+    "pages/PositionExample/PositionExample03",
+    "pages/PositionExample/PositionExample04",
+    "pages/PositionExample/PositionExample05",
+    "pages/PositionExample/PositionExample06",
+    "pages/PositionExample/PositionExample07",
+
+    "pages/RelativeContainerExample/RelativeContainerExample01",
+    "pages/RelativeContainerExample/RelativeContainerExample02",
+    "pages/RelativeContainerExample/RelativeContainerExample03",
+    "pages/RelativeContainerExample/RelativeContainerExample04",
+    "pages/RelativeContainerExample/RelativeContainerExample05",
+    "pages/RelativeContainerExample/RelativeContainerExample06",
+    "pages/RelativeContainerExample/RelativeContainerExample07",
+    "pages/RelativeContainerExample/RelativeContainerExample08",
+    "pages/RelativeContainerExample/RelativeContainerExample09",
+    "pages/RelativeContainerExample/RelativeContainerExample10",
+
+    "pages/RowExample/RowExample01",
+    "pages/RowExample/RowExample02",
+
+    "pages/StackExample/StackExample",
+
+    "pages/MediaqueryExample/MediaqueryExample",
+
+    "pages/BorderExample/BorderExample01",
+    "pages/BorderExample/BorderExample02",
+    "pages/BorderExample/BorderExample03",
+
+    "pages/LayoutExample/LayoutExample01",
+    "pages/LayoutExample/LayoutExample02",
+    "pages/LayoutExample/LayoutExample03",
+    "pages/LayoutExample/LayoutExample04",
+    "pages/LayoutExample/LayoutExample05",
+    "pages/LayoutExample/LayoutExample06"
+  ]
+}

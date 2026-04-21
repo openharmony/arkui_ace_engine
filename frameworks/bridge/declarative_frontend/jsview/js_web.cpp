@@ -51,9 +51,11 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components/web/web_event.h"
+#include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/web/web_model_ng.h"
 
 #include "bridge/js_frontend/engine/common/js_engine.h"
+#include "bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "core/components/web/web_transfer_api.h"
 
 #define ARKWEB_CREATE_JS_OBJECT(nativeClass, jsClass, funName, eventValue)                                     \
@@ -2080,6 +2082,7 @@ public:
         JSClass<JSContextMenuResult>::CustomMethod("pasteAndMatchStyle", &JSContextMenuResult::PasteAndMatchStyle);
         JSClass<JSContextMenuResult>::CustomMethod("requestPasswordAutoFill",
             &JSContextMenuResult::RequestPasswordAutoFill);
+        JSClass<JSContextMenuResult>::CustomMethod("saveImage", &JSContextMenuResult::SaveImage);
         JSClass<JSContextMenuResult>::Bind(
             globalObj, &JSContextMenuResult::Constructor, &JSContextMenuResult::Destructor);
     }
@@ -2160,6 +2163,13 @@ public:
     {
         if (result_) {
             result_->RequestPasswordAutoFill();
+        }
+    }
+
+    void SaveImage(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->SaveImage();
         }
     }
 
@@ -2329,6 +2339,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onGeolocationShow", &JSWeb::OnGeolocationShow);
     JSClass<JSWeb>::StaticMethod("onRequestSelected", &JSWeb::OnRequestFocus);
     JSClass<JSWeb>::StaticMethod("onShowFileSelector", &JSWeb::OnFileSelectorShow);
+    JSClass<JSWeb>::StaticMethod("aiSessionOptions", &JSWeb::AISessionOptions);
     JSClass<JSWeb>::StaticMethod("javaScriptAccess", &JSWeb::JsEnabled);
     JSClass<JSWeb>::StaticMethod("fileExtendAccess", &JSWeb::ContentAccessEnabled);
     JSClass<JSWeb>::StaticMethod("fileAccess", &JSWeb::FileAccessEnabled);
@@ -2425,6 +2436,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onAudioStateChanged", &JSWeb::OnAudioStateChanged);
     JSClass<JSWeb>::StaticMethod("onCameraCaptureStateChange", &JSWeb::OnCameraCaptureStateChanged);
     JSClass<JSWeb>::StaticMethod("onMicrophoneCaptureStateChange", &JSWeb::OnMicrophoneCaptureStateChanged);
+    JSClass<JSWeb>::StaticMethod("onInputmethodAttached", &JSWeb::OnInputMethodAttached);
     JSClass<JSWeb>::StaticMethod("mediaOptions", &JSWeb::MediaOptions);
     JSClass<JSWeb>::StaticMethod("onFirstContentfulPaint", &JSWeb::OnFirstContentfulPaint);
     JSClass<JSWeb>::StaticMethod("onFirstMeaningfulPaint", &JSWeb::OnFirstMeaningfulPaint);
@@ -2458,6 +2470,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onAdsBlocked", &JSWeb::OnAdsBlocked);
     JSClass<JSWeb>::StaticMethod("forceDisplayScrollBar", &JSWeb::ForceDisplayScrollBar);
     JSClass<JSWeb>::StaticMethod("keyboardAvoidMode", &JSWeb::KeyboardAvoidMode);
+    JSClass<JSWeb>::StaticMethod("keyboardAppearance", &JSWeb::KeyboardAppearance);
     JSClass<JSWeb>::StaticMethod("editMenuOptions", &JSWeb::EditMenuOptions);
     JSClass<JSWeb>::StaticMethod("enableHapticFeedback", &JSWeb::EnableHapticFeedback);
     JSClass<JSWeb>::StaticMethod("bindSelectionMenu", &JSWeb::BindSelectionMenu);
@@ -2487,6 +2500,10 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onSafeBrowsingCheckFinish", &JSWeb::OnSafeBrowsingCheckFinish);
     JSClass<JSWeb>::StaticMethod("backToTop", &JSWeb::JSBackToTop);
     JSClass<JSWeb>::StaticMethod("onVerifyPin", &JSWeb::OnVerifyPinRequest);
+    JSClass<JSWeb>::StaticMethod("enableDefaultContextMenu", &JSWeb::EnableDefaultContextMenu);
+    JSClass<JSWeb>::StaticMethod("enableScrollDirectionalLock", &JSWeb::EnableScrollDirectionalLock);
+    JSClass<JSWeb>::StaticMethod("enableDrag", &JSWeb::EnableDrag);
+    JSClass<JSWeb>::StaticMethod("scrollbarLayoutPolicy", &JSWeb::ScrollbarLayoutPolicy);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -2531,8 +2548,8 @@ napi_value WrapNapiValue(napi_env env, const JSRef<JSVal>& obj, void* nativeValu
     if (valueType != napi_object) {
         return undefined;
     }
-    napi_wrap(env, napiValue, nativeValue,
-        [](napi_env env, void *data, void *hint) {}, nullptr, nullptr);
+    napi_wrap_s(env, napiValue, nativeValue,
+        [](napi_env env, void *data, void *hint) {}, nullptr, &WEB_PIXEL_MAP_TYPE_TAG, nullptr);
     return napiValue;
 }
 
@@ -3182,6 +3199,17 @@ void JSWeb::SetCallbackFromController(const JSRef<JSObject> controller)
                 if (!eventInfo) {
                     return;
                 }
+
+                napi_env env = GetNapiEnv();
+                if (!env) {
+                    return;
+                }
+                napi_handle_scope scope = nullptr;
+                auto napi_status = napi_open_handle_scope(env, &scope);
+                if (napi_status != napi_ok) {
+                    return;
+                }
+
                 JSRef<JSObject> obj = JSRef<JSObject>::New();
                 JSRef<JSObject> paramObj = JSClass<JSFileSelectorParam>::NewInstance();
                 auto fileSelectorParam = Referenced::Claim(paramObj->Unwrap<JSFileSelectorParam>());
@@ -3196,6 +3224,8 @@ void JSWeb::SetCallbackFromController(const JSRef<JSObject> controller)
                 obj->SetPropertyObject("fileresult", resultObj);
                 JSRef<JSVal> argv[] = { JSRef<JSVal>::Cast(obj) };
                 auto result = func->Call(webviewController, 1, argv);
+
+                napi_close_handle_scope(env, scope);
             };
     }
 
@@ -3906,7 +3936,7 @@ void JSWeb::OnKeyEvent(const JSCallbackInfo& args)
         if (pipelineContext) {
             pipelineContext->UpdateCurrentActiveNode(node);
         }
-        func->Execute(keyEventInfo);
+        func->Execute(execCtx.vm_, keyEventInfo);
     };
     WebModel::GetInstance()->SetOnKeyEvent(jsCallback);
 }
@@ -4264,6 +4294,78 @@ void JSWeb::OnFileSelectorShow(const JSCallbackInfo& args)
         return false;
     };
     WebModel::GetInstance()->SetOnFileSelectorShow(jsCallback);
+}
+
+void WrapAISessionCallback(const JSRef<JSObject>& option, const std::string& funcName,
+    AISessionCallback& aiSessionCallback)
+{
+    JSRef<JSVal> funcVal = option->GetProperty(funcName.c_str());
+    if (!funcVal->IsFunction()) {
+        return;
+    }
+    aiSessionCallback = [option, func = JSRef<JSFunc>::Cast(funcVal)](const std::string& id,
+            const std::string& params, const std::function<void(uint32_t, const std::string&)>&& callback) {
+        napi_env env = GetNapiEnv();
+        if (!env) {
+            return false;
+        }
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(env, &scope);
+        auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+        auto adapter = runtime->NewFunction(
+            [callback = std::move(callback)](shared_ptr<JsRuntime> runtime, shared_ptr<JsValue> thisObj,
+                    const std::vector<shared_ptr<JsValue>>& args, int32_t argc) -> shared_ptr<JsValue> {
+                if (argc == 2) {
+                    auto state = args[0]->ToInt32(runtime);
+                    auto content = args[1]->ToString(runtime);
+                    callback(state, content);
+                }
+                return runtime->NewUndefined();
+            }
+        );
+        JSRef<JSVal> argv[] = {
+            JSRef<JSVal>::Make(ToJSValue(id)),
+            JSRef<JSVal>::Make(ToJSValue(params)),
+            JSRef<JSVal>::Make(std::static_pointer_cast<ArkJSValue>(adapter)->GetValue(runtime))
+        };
+        JSRef<JSVal> result = func->Call(option, ArraySize(argv), argv);
+        napi_close_handle_scope(env, scope);
+        return result->ToBoolean();
+    };
+}
+
+void JSWeb::AISessionOptions(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsArray()) {
+        for (uint32_t type = 1; type <= MAX_AI_SESSION_TYPE; type++) {
+            WebModel::GetInstance()->SetAISessionOptions(type - 1, nullptr, nullptr, nullptr);
+        }
+        return;
+    }
+    JSRef<JSArray> array = JSRef<JSArray>::Cast(args[0]);
+    for (size_t i = 0; i < array->Length(); i++) {
+        JSRef<JSVal> val = array->GetValueAt(i);
+        if (!val->IsObject()) {
+            continue;
+        }
+        JSRef<JSObject> option = JSRef<JSObject>::Cast(val);
+        JSRef<JSVal> aiSessionType = option->GetProperty("aiSessionType");
+        uint32_t type = 0;
+        if (aiSessionType->IsNumber()) {
+            type = aiSessionType->ToNumber<uint32_t>();
+        }
+        if (type == 0 || type > MAX_AI_SESSION_TYPE) {
+            continue;
+        }
+        AISessionCallback onCreateAISession = nullptr;
+        WrapAISessionCallback(option, "onCreateAISession", onCreateAISession);
+        AISessionCallback onExecuteAIAction = nullptr;
+        WrapAISessionCallback(option, "onExecuteAIAction", onExecuteAIAction);
+        AISessionCallback onDestroyAISession = nullptr;
+        WrapAISessionCallback(option, "onDestroyAISession", onDestroyAISession);
+        WebModel::GetInstance()->SetAISessionOptions(type - 1,
+            std::move(onCreateAISession), std::move(onExecuteAIAction), std::move(onDestroyAISession));
+    }
 }
 
 JSRef<JSVal> ContextMenuEventToJSValue(const ContextMenuEvent& eventInfo)
@@ -4826,7 +4928,7 @@ void JSWeb::OnMouse(const JSCallbackInfo& args)
         if (pipelineContext) {
             pipelineContext->UpdateCurrentActiveNode(node);
         }
-        func->Execute(info);
+        func->Execute(execCtx.vm_, info);
     };
     WebModel::GetInstance()->SetOnMouseEvent(jsCallback);
 }
@@ -5226,7 +5328,10 @@ JSRef<JSVal> WindowNewEventToJSValue(const WebWindowNewEvent& eventInfo)
         return JSRef<JSVal>();
     }
     napi_handle_scope scope = nullptr;
-    napi_open_handle_scope(env, &scope);
+    auto napi_status = napi_open_handle_scope(env, &scope);
+    if (napi_status != napi_ok) {
+        return JSRef<JSVal>();
+    }
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     obj->SetProperty("isAlert", eventInfo.IsAlert());
     obj->SetProperty("isUserTrigger", eventInfo.IsUserTrigger());
@@ -5242,6 +5347,15 @@ JSRef<JSVal> WindowNewEventToJSValue(const WebWindowNewEvent& eventInfo)
 
 JSRef<JSVal> WindowNewExtEventToJSValue(const WebWindowNewExtEvent& eventInfo)
 {
+    napi_env env = GetNapiEnv();
+    if (!env) {
+        return JSRef<JSVal>();
+    }
+    napi_handle_scope scope = nullptr;
+    auto napi_status = napi_open_handle_scope(env, &scope);
+    if (napi_status != napi_ok) {
+        return JSRef<JSVal>();
+    }
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     obj->SetProperty("isAlert", eventInfo.IsAlert());
     obj->SetProperty("isUserTrigger", eventInfo.IsUserTrigger());
@@ -5259,6 +5373,7 @@ JSRef<JSVal> WindowNewExtEventToJSValue(const WebWindowNewExtEvent& eventInfo)
 
     WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(handlerObj), static_cast<void*>(handler.GetRawPtr()));
     obj->SetPropertyObject("handler", handlerObj);
+    napi_close_handle_scope(env, scope);
     return JSRef<JSVal>::Cast(obj);
 }
 
@@ -5371,15 +5486,26 @@ void JSWeb::OnWindowNew(const JSCallbackInfo& args)
         auto webNode = node.Upgrade();
         CHECK_NULL_VOID(webNode);
         ContainerScope scope(webNode->GetInstanceId());
+        napi_env env = GetNapiEnv();
+        if (!env) {
+            return;
+        }
+        napi_handle_scope napi_scope = nullptr;
+        auto napi_status = napi_open_handle_scope(env, &napi_scope);
+        if (napi_status != napi_ok) {
+            return;
+        }
         auto pipelineContext = PipelineContext::GetCurrentContext();
         if (pipelineContext) {
             pipelineContext->UpdateCurrentActiveNode(node);
         }
         auto* eventInfo = TypeInfoHelper::DynamicCast<WebWindowNewEvent>(info.get());
         if (!func || !HandleWindowNewEvent(eventInfo)) {
+            napi_close_handle_scope(env, napi_scope);
             return;
         }
         func->Execute(*eventInfo);
+        napi_close_handle_scope(env, napi_scope);
     };
     WebModel::GetInstance()->SetWindowNewEvent(jsCallback);
 }
@@ -5399,15 +5525,26 @@ void JSWeb::OnWindowNewExt(const JSCallbackInfo& args)
         auto webNode = node.Upgrade();
         CHECK_NULL_VOID(webNode);
         ContainerScope scope(webNode->GetInstanceId());
+        napi_env env = GetNapiEnv();
+        if (!env) {
+            return;
+        }
+        napi_handle_scope napi_scope = nullptr;
+        auto napi_status = napi_open_handle_scope(env, &napi_scope);
+        if (napi_status != napi_ok) {
+            return;
+        }
         auto pipelineContext = PipelineContext::GetCurrentContext();
         if (pipelineContext) {
             pipelineContext->UpdateCurrentActiveNode(node);
         }
         auto* eventInfo = TypeInfoHelper::DynamicCast<WebWindowNewExtEvent>(info.get());
         if (!func || !HandleWindowNewExtEvent(eventInfo)) {
+            napi_close_handle_scope(env, napi_scope);
             return;
         }
         func->Execute(*eventInfo);
+        napi_close_handle_scope(env, napi_scope);
     };
     WebModel::GetInstance()->SetWindowNewExtEvent(jsCallback);
 }
@@ -5610,7 +5747,7 @@ void JSWeb::OnInterceptKeyEvent(const JSCallbackInfo& args)
         if (pipelineContext) {
             pipelineContext->UpdateCurrentActiveNode(node);
         }
-        JSRef<JSVal> obj = func->ExecuteWithValue(keyEventInfo);
+        JSRef<JSVal> obj = func->ExecuteWithValue(execCtx.vm_, keyEventInfo);
         if (obj->IsBoolean()) {
             result = obj->ToBoolean();
         }
@@ -5909,6 +6046,27 @@ void JSWeb::OnMicrophoneCaptureStateChanged(const JSCallbackInfo& args)
         func->Execute(*eventInfo);
     };
     WebModel::GetInstance()->SetMicrophoneCaptureStateChangedId(jsCallback);
+}
+
+void JSWeb::OnInputMethodAttached(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        return;
+    }
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(args[0]));
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = frameNode]() {
+        auto webNode = node.Upgrade();
+        CHECK_NULL_VOID(webNode);
+        ContainerScope scope(webNode->GetInstanceId());
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        if (pipelineContext) {
+            pipelineContext->UpdateCurrentActiveNode(node);
+        }
+        func->Execute();
+    };
+    WebModel::GetInstance()->SetInputMethodAttachedId(std::move(jsCallback));
 }
 
 void JSWeb::MediaOptions(const JSCallbackInfo& args)
@@ -7167,6 +7325,17 @@ void JSWeb::KeyboardAvoidMode(int32_t mode)
     WebModel::GetInstance()->SetKeyboardAvoidMode(avoidMode);
 }
 
+void JSWeb::KeyboardAppearance(int32_t mode)
+{
+    if (mode < static_cast<int32_t>(WebKeyboardAppearanceMode::NONE_IMMERSIVE) ||
+        mode > static_cast<int32_t>(WebKeyboardAppearanceMode::DARK_IMMERSIVE)) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "KeyboardAppearance param err");
+        return;
+    }
+    WebKeyboardAppearanceMode appearanceMode = static_cast<WebKeyboardAppearanceMode>(mode);
+    WebModel::GetInstance()->SetKeyboardAppearanceMode(appearanceMode);
+}
+
 void JSWeb::EditMenuOptions(const JSCallbackInfo& info)
 {
     NG::OnCreateMenuCallback onCreateMenuCallback;
@@ -7652,6 +7821,51 @@ void JSWeb::EnableAutoFill(const JSCallbackInfo& args)
     }
     bool isEnabled = args[0]->ToBoolean();
     WebModel::GetInstance()->SetEnableAutoFill(isEnabled);
+}
+
+void JSWeb::EnableDefaultContextMenu(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsBoolean()) {
+        return;
+    }
+    bool isEnabled = args[0]->ToBoolean();
+    WebModel::GetInstance()->SetEnableDefaultContextMenu(isEnabled);
+}
+
+void JSWeb::EnableScrollDirectionalLock(const JSCallbackInfo& args)
+{
+    if (args.Length() < PARAM_TWO) {
+        return;
+    }
+
+    JSRef<JSVal> objFirst = args[0];
+    JSRef<JSVal> objSecond = args[1];
+    if (!objFirst->IsBoolean() || !objSecond->IsNumber()) {
+        return;
+    }
+
+    bool isEnabled = objFirst->ToBoolean();
+    int32_t type = objSecond->ToNumber<int32_t>();
+    WebModel::GetInstance()->SetEnableScrollDirectionalLock(isEnabled, type);
+}
+
+void JSWeb::EnableDrag(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsBoolean()) {
+        WebModel::GetInstance()->SetEnableDrag(true);
+        return;
+    }
+    bool isEnabled = args[0]->ToBoolean();
+    WebModel::GetInstance()->SetEnableDrag(isEnabled);
+}
+
+void JSWeb::ScrollbarLayoutPolicy(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !(args[0]->IsNumber())) {
+        return;
+    }
+    auto layoutPolicy = static_cast<enum ScrollbarLayoutPolicy>(args[0]->ToNumber<int32_t>());
+    WebModel::GetInstance()->SetScrollbarLayoutPolicy(layoutPolicy);
 }
 
 ARKWEB_CREATE_JS_OBJECT(WebScreenCaptureRequest, JSScreenCaptureRequest, SetEvent, value)

@@ -17,4 +17,11 @@ ace_unittest("hyperlink_test_ng") {
   module_name = "InfoShowSet-Hyperlink"
   type = "new"
   sources = [ "hyperlink_test_ng.cpp" ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "hyperlink_test_core.cpp" ]
+  } else {
+    sources += [ "hyperlink_test_core.cpp" ]
+  }
 }

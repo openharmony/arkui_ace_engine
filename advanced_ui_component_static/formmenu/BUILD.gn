@@ -27,7 +27,9 @@ ohos_shared_library("formmenu_ani") {
     "ability_base:want",
     "form_fwk:fmskit_native",
     "form_fwk:fmskit_provider_client",
-    "form_fwk:form_manager",
+    "form_fwk:form_render_info",
+    "form_fwk:form_common_info",
+    "form_fwk:form_utils",
     "graphic_2d:librender_service_client",
     "runtime_core:ani",
   ]

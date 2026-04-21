@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/canvas/custom_paint_paint_method.h"
 
+#include <algorithm>
 #include <cmath>
 #include <unistd.h>
 
@@ -85,6 +86,64 @@ inline T ConvertStrToEnum(const char* key, const LinearMapNode<T>* map, size_t l
 {
     int64_t index = BinarySearchFindIndex(map, length, key);
     return index != -1 ? map[index].value : defaultValue;
+}
+
+bool HasHdrGradientColor(const std::vector<Ace::GradientColor>& gradientColors)
+{
+    return std::any_of(gradientColors.begin(), gradientColors.end(), [](const auto& gradientColor) {
+        return gradientColor.GetColor().GetHeadRoomColor().has_value();
+    });
+}
+
+std::shared_ptr<RSColorSpace> CreateGradientColorSpace(const std::vector<Ace::GradientColor>& gradientColors)
+{
+    if (gradientColors.empty()) {
+        return RSColorSpace::CreateSRGB();
+    }
+    switch (gradientColors.back().GetColor().GetColorSpace()) {
+        case ColorSpace::DISPLAY_P3:
+            return RSColorSpace::CreateRGB(RSCMSTransferFuncType::SRGB, RSCMSMatrixType::DCIP3);
+        case ColorSpace::BT2020:
+            return RSColorSpace::CreateRGB(RSCMSTransferFuncType::SRGB, RSCMSMatrixType::REC2020);
+        default:
+            return RSColorSpace::CreateSRGB();
+    }
+}
+
+std::vector<RSScalar> CreateGradientPositions(const std::vector<Ace::GradientColor>& gradientColors)
+{
+    std::vector<RSScalar> pos(gradientColors.size(), 0);
+    for (uint32_t i = 0; i < gradientColors.size(); ++i) {
+        pos.at(i) = gradientColors[i].GetDimension().Value();
+    }
+    return pos;
+}
+
+std::vector<RSColor4f> CreateGradientColor4fVector(const std::vector<Ace::GradientColor>& gradientColors)
+{
+    std::vector<RSColor4f> colors(gradientColors.size(), { 0, 0, 0, 0 });
+    for (uint32_t i = 0; i < gradientColors.size(); ++i) {
+        colors.at(i) = RSColor(gradientColors[i].GetColor().GetValue()).GetColor4f();
+    }
+    return colors;
+}
+
+std::vector<RSUIColor> CreateGradientUIColorVector(const std::vector<Ace::GradientColor>& gradientColors)
+{
+    std::vector<RSUIColor> colors(gradientColors.size(), { 0, 0, 0, 1, 1 });
+    for (uint32_t i = 0; i < gradientColors.size(); ++i) {
+        const auto& color = gradientColors[i].GetColor();
+        auto headRoomColor = color.GetHeadRoomColor();
+        if (headRoomColor.has_value()) {
+            const auto& hdrColor = headRoomColor.value();
+            colors.at(i) = RSUIColor(
+                hdrColor.red, hdrColor.green, hdrColor.blue, hdrColor.alpha, hdrColor.headRoom);
+        } else {
+            auto color4f = RSColor(color.GetValue()).GetColor4f();
+            colors.at(i) = RSUIColor(color4f.redF_, color4f.greenF_, color4f.blueF_, color4f.alphaF_);
+        }
+    }
+    return colors;
 }
 } // namespace
 
@@ -237,20 +296,20 @@ std::shared_ptr<RSShaderEffect> CustomPaintPaintMethod::MakeConicGradient(
         auto gradientColors = gradient.GetColors();
         std::stable_sort(gradientColors.begin(), gradientColors.end(),
             [](auto& colorA, auto& colorB) { return colorA.GetDimension() < colorB.GetDimension(); });
-        uint32_t colorsSize = gradientColors.size();
-        std::vector<RSColor4f> colors(colorsSize, { 0, 0, 0, 0 });
-        std::vector<RSScalar> pos(colorsSize, 0);
+        auto pos = CreateGradientPositions(gradientColors);
         double angle = gradient.GetConicGradient().startAngle->Value() / ACE_PI * 180.0;
         RSScalar startAngle = static_cast<RSScalar>(angle);
         matrix.PreRotate(startAngle, centerX, centerY);
-        for (uint32_t i = 0; i < colorsSize; ++i) {
-            const auto& gradientColor = gradientColors[i];
-            colors.at(i) = RSColor(gradientColor.GetColor().GetValue()).GetColor4f();
-            pos.at(i) = gradientColor.GetDimension().Value();
-        }
         auto mode = RSTileMode::CLAMP;
-        shaderEffect = RSShaderEffect::CreateSweepGradient(RSPoint(centerX, centerY), colors, colorSpace, pos, mode,
-            static_cast<RSScalar>(CONIC_START_ANGLE), static_cast<RSScalar>(CONIC_END_ANGLE), &matrix);
+        if (HasHdrGradientColor(gradientColors)) {
+            auto colors = CreateGradientUIColorVector(gradientColors);
+            shaderEffect = RSShaderEffect::CreateSweepGradient(RSPoint(centerX, centerY), colors, colorSpace, pos, mode,
+                static_cast<RSScalar>(CONIC_START_ANGLE), static_cast<RSScalar>(CONIC_END_ANGLE), &matrix);
+        } else {
+            auto colors = CreateGradientColor4fVector(gradientColors);
+            shaderEffect = RSShaderEffect::CreateSweepGradient(RSPoint(centerX, centerY), colors, colorSpace, pos, mode,
+                static_cast<RSScalar>(CONIC_START_ANGLE), static_cast<RSScalar>(CONIC_END_ANGLE), &matrix);
+        }
     }
     return shaderEffect;
 }
@@ -265,38 +324,44 @@ void CustomPaintPaintMethod::UpdatePaintShader(RSPen* pen, RSBrush* brush, const
     auto gradientColors = gradient.GetColors();
     std::stable_sort(gradientColors.begin(), gradientColors.end(),
         [](auto& colorA, auto& colorB) { return colorA.GetDimension() < colorB.GetDimension(); });
-    uint32_t colorsSize = gradientColors.size();
-    std::vector<RSColor4f> colors(colorsSize, { 0, 0, 0, 0 });
-    std::vector<RSScalar> pos(colorsSize, 0);
-    for (uint32_t i = 0; i < colorsSize; ++i) {
-        const auto& gradientColor = gradientColors[i];
-        colors.at(i) = RSColor(gradientColor.GetColor().GetValue()).GetColor4f();
-        pos.at(i) = gradientColor.GetDimension().Value();
-    }
+    auto pos = CreateGradientPositions(gradientColors);
 
     auto mode = RSTileMode::CLAMP;
-
-    std::shared_ptr<RSColorSpace> colorSpace = RSColorSpace::CreateSRGB();
-    ColorSpace colorSpaceType = ColorSpace::SRGB;
-    if (colorsSize > 0) {
-        colorSpaceType = gradientColors.back().GetColor().GetColorSpace();
-    }
-    if (ColorSpace::DISPLAY_P3 == colorSpaceType) {
-        colorSpace = RSColorSpace::CreateRGB(RSCMSTransferFuncType::SRGB, RSCMSMatrixType::DCIP3);
-    }
+    auto colorSpace = CreateGradientColorSpace(gradientColors);
+    bool useHdrColor = HasHdrGradientColor(gradientColors);
     std::shared_ptr<RSShaderEffect> shaderEffect = nullptr;
     if (gradient.GetType() == Ace::GradientType::LINEAR) {
-        shaderEffect = RSShaderEffect::CreateLinearGradient(pts.at(0), pts.at(1), colors, colorSpace, pos, mode);
+        if (useHdrColor) {
+            auto colors = CreateGradientUIColorVector(gradientColors);
+            shaderEffect = RSShaderEffect::CreateLinearGradient(pts.at(0), pts.at(1), colors, colorSpace, pos, mode);
+        } else {
+            auto colors = CreateGradientColor4fVector(gradientColors);
+            shaderEffect = RSShaderEffect::CreateLinearGradient(pts.at(0), pts.at(1), colors, colorSpace, pos, mode);
+        }
     } else if (gradient.GetType() == Ace::GradientType::CONIC) {
         shaderEffect = MakeConicGradient(gradient, colorSpace);
     } else {
         if (gradient.GetInnerRadius() <= 0.0 && beginPoint == endPoint) {
-            shaderEffect = RSShaderEffect::CreateRadialGradient(
-                endPoint, gradient.GetOuterRadius(), colors, colorSpace, pos, mode);
+            if (useHdrColor) {
+                auto colors = CreateGradientUIColorVector(gradientColors);
+                shaderEffect = RSShaderEffect::CreateRadialGradient(
+                    endPoint, gradient.GetOuterRadius(), colors, colorSpace, pos, mode);
+            } else {
+                auto colors = CreateGradientColor4fVector(gradientColors);
+                shaderEffect = RSShaderEffect::CreateRadialGradient(
+                    endPoint, gradient.GetOuterRadius(), colors, colorSpace, pos, mode);
+            }
         } else {
             RSMatrix matrix;
-            shaderEffect = RSShaderEffect::CreateTwoPointConical(beginPoint, gradient.GetInnerRadius(), endPoint,
-                gradient.GetOuterRadius(), colors, colorSpace, pos, mode, &matrix);
+            if (useHdrColor) {
+                auto colors = CreateGradientUIColorVector(gradientColors);
+                shaderEffect = RSShaderEffect::CreateTwoPointConical(beginPoint, gradient.GetInnerRadius(), endPoint,
+                    gradient.GetOuterRadius(), colors, colorSpace, pos, mode, &matrix);
+            } else {
+                auto colors = CreateGradientColor4fVector(gradientColors);
+                shaderEffect = RSShaderEffect::CreateTwoPointConical(beginPoint, gradient.GetInnerRadius(), endPoint,
+                    gradient.GetOuterRadius(), colors, colorSpace, pos, mode, &matrix);
+            }
         }
     }
     if (pen != nullptr) {
@@ -1230,6 +1295,7 @@ void CustomPaintPaintMethod::Path2DSetTransform(const PathArgs& args)
 void CustomPaintPaintMethod::Save()
 {
     CHECK_NULL_VOID(rsCanvas_);
+    saveAntiAliasStates_.emplace_back(std::make_pair(antiAlias_, fontAntiAlias_));
     saveStates_.push_back(state_);
     saveColorFilter_.push_back(colorFilter_);
     saveBlurFilter_.push_back(blurFilter_);
@@ -1239,8 +1305,10 @@ void CustomPaintPaintMethod::Save()
 void CustomPaintPaintMethod::Restore()
 {
     CHECK_NULL_VOID(rsCanvas_);
-    if ((rsCanvas_->GetSaveCount() > DEFAULT_SAVE_COUNT) && (!saveStates_.empty()) && (!saveColorFilter_.empty()) &&
-        (!saveBlurFilter_.empty())) {
+    if ((rsCanvas_->GetSaveCount() > DEFAULT_SAVE_COUNT) && (!saveAntiAliasStates_.empty()) && (!saveStates_.empty()) &&
+        (!saveColorFilter_.empty()) && (!saveBlurFilter_.empty())) {
+        std::tie(antiAlias_, fontAntiAlias_) = saveAntiAliasStates_.back();
+        saveAntiAliasStates_.pop_back();
         state_ = saveStates_.back();
         saveStates_.pop_back();
         colorFilter_ = saveColorFilter_.back();
@@ -1976,6 +2044,8 @@ void CustomPaintPaintMethod::ResetStates()
 {
     smoothingEnabled_ = true;
     smoothingQuality_ = SmoothingQuality::LOW;
+    fontAntiAlias_.reset();
+    antiAlias_ = settingsAntiAlias_;
     state_.fillState = PaintState();
     state_.strokeState = StrokePaintState();
     state_.globalState = GlobalPaintState();
@@ -1987,6 +2057,7 @@ void CustomPaintPaintMethod::ResetStates()
     imageBrush_ = RSBrush();
     rsPath_.Reset();
     rsPath2d_.Reset();
+    std::vector<std::pair<bool, std::optional<bool>>>().swap(saveAntiAliasStates_);
     std::vector<PaintHolder>().swap(saveStates_);
     std::vector<std::shared_ptr<RSColorFilter>>().swap(saveColorFilter_);
     std::vector<std::shared_ptr<RSImageFilter>>().swap(saveBlurFilter_);
@@ -2135,6 +2206,8 @@ bool CustomPaintPaintMethod::UpdateFillParagraph(const std::string& text)
     } else {
         UpdateFillTxtStyle(txtStyle);
     }
+    txtStyle.fontEdging =
+        fontAntiAlias_.value_or(true) ? Rosen::Drawing::FontEdging::ANTI_ALIAS : Rosen::Drawing::FontEdging::ALIAS;
     builder->PushStyle(txtStyle);
     builder->AppendText(StringUtils::Str8ToStr16(text));
     paragraph_ = builder->CreateTypography();
@@ -2189,6 +2262,8 @@ bool CustomPaintPaintMethod::UpdateStrokeParagraph(const std::string& text)
         InitPaintBlend(pen);
     }
     ConvertTxtStyle(state_.strokeState.GetTextStyle(), txtStyle);
+    txtStyle.fontEdging =
+        fontAntiAlias_.value_or(true) ? Rosen::Drawing::FontEdging::ANTI_ALIAS : Rosen::Drawing::FontEdging::ALIAS;
     txtStyle.fontSize = state_.strokeState.GetTextStyle().GetFontSize().Value();
     txtStyle.foregroundPen = pen;
     builder->PushStyle(txtStyle);
@@ -2233,6 +2308,8 @@ void CustomPaintPaintMethod::UpdateStrokeShadowParagraph(
         InitPaintBlend(shadowPen);
     }
     shadowStyle.foregroundPen = shadowPen;
+    shadowStyle.fontEdging =
+        fontAntiAlias_.value_or(true) ? Rosen::Drawing::FontEdging::ANTI_ALIAS : Rosen::Drawing::FontEdging::ALIAS;
     std::unique_ptr<RSParagraphBuilder> shadowBuilder = RSParagraphBuilder::Create(style, fontCollection);
     CHECK_NULL_VOID(shadowBuilder);
     shadowBuilder->PushStyle(shadowStyle);

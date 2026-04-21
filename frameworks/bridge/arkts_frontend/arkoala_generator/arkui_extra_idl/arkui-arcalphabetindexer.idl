@@ -1,0 +1,44 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package arkui.component.idlize;
+
+import arkui.component.common.BlurStyle as BlurStyle;
+import arkui.component.common.Bindable as Bindable;
+import arkui.component.units.Font as Font;
+import arkui.Graphics.LengthMetrics as LengthMetrics;
+import arkui.Graphics.ColorMetrics as ColorMetrics;
+
+callback Callback_I32_Void = void (i32 index);
+
+[Entity=Class]
+interface ArcAlphabetIndexerExtender {
+    static pointer arcAlphabetIndexerConstruct(i32 id, i32 flags);
+    static void setArcAlphabetIndexerInitInfo(pointer node, sequence<String> arrayValue, (i32 or [TypeArguments="i32"] Bindable) selected);
+    static void color(pointer node, (ColorMetrics or undefined) color);
+    static void selectedColor(pointer node, (ColorMetrics or undefined) color);
+    static void popupColor(pointer node, (ColorMetrics or undefined) color);
+    static void selectedBackgroundColor(pointer node, (ColorMetrics or undefined) color);
+    static void popupBackground(pointer node, (ColorMetrics or undefined) color);
+    static void usePopup(pointer node, (boolean or undefined) enabled);
+    static void selectedFont(pointer node, (Font or undefined) font);
+    static void popupFont(pointer node, (Font or undefined) font);
+    static void font(pointer node, (Font or undefined) font);
+    static void itemSize(pointer node, (LengthMetrics or undefined) size);
+    static void selected(pointer node, (i32 or [TypeArguments="i32"] Bindable or undefined) index);
+    static void autoCollapse(pointer node, (boolean or undefined) enable);
+    static void onSelect(pointer node, (Callback_I32_Void or undefined) handler);
+    static void popupBackgroundBlurStyle(pointer node, (BlurStyle or undefined) style);
+};

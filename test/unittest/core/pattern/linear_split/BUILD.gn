@@ -17,4 +17,18 @@ ace_unittest("linear_split_test_ng") {
   type = "new"
   module_name = "ScrollingSet-ArcListAndArcListItem"
   sources = [ "linear_split_test_ng.cpp" ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "linear_split_test_min.cpp",
+      "linear_split_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "linear_split_test_min.cpp",
+      "linear_split_test_core.cpp",
+    ]
+  }
+
 }

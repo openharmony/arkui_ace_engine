@@ -18,7 +18,7 @@
 
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/common_text_constants.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "core/components_ng/base/frame_node.h"
@@ -225,11 +225,12 @@ ArkUINativeModuleValue ButtonBridge::SetFontColor(ArkUIRuntimeCallInfo* runtimeC
     Color color;
     RefPtr<ResourceObject> colorResObj;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj, nodeInfo)) {
+    if (!ArkTSUtils::ParseJsColorAlphaForMaterial(vm, secondArg, color, colorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getButtonModifier()->resetButtonFontColor(nativeNode);
     } else {
         auto colorRawPtr = AceType::RawPtr(colorResObj);
-        GetArkUINodeModifiers()->getButtonModifier()->setButtonFontColorPtr(nativeNode, color.GetValue(), colorRawPtr);
+        GetArkUINodeModifiers()->getButtonModifier()->setButtonFontColorUseColorPtr(
+            nativeNode, reinterpret_cast<ArkUI_InnerColor*>(&color), colorRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }

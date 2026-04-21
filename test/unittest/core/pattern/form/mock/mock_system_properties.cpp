@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +16,20 @@
 #include "base/utils/system_properties.h"
 
 namespace OHOS::Ace {
+constexpr int32_t DEFAULT_FORM_TASK_PRIORITY = 2;
+
 float SystemProperties::GetFontScale()
 {
     return 1.0f;
 }
-} // namespace OHOS::Ace
+
+bool SystemProperties::IsFormSkeletonRSTransactionEnabled()
+{
+    return true;
+}
+
+int32_t SystemProperties::GetFormTaskPriority()
+{
+    return DEFAULT_FORM_TASK_PRIORITY;
+}
+}  // namespace OHOS::Ace

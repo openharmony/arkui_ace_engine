@@ -151,8 +151,7 @@ void SwiperEventHub::FireAnimationEndEvent(int32_t index, const AnimationCallbac
         index, info.currentOffset.has_value(), info.currentOffset.value_or(0.0), info.isForceStop,
         aniStartCalledCount_, swiperId_);
     ACE_SCOPED_TRACE("Swiper FireAnimationEndEvent, index: %d, id: %d", index, swiperId_);
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Swiper.onAnimationEnd",
-        ComponentEventType::COMPONENT_EVENT_SWIPER);
+    ReportComponentChangeEvent("onAnimationEnd", index, info.currentOffset.value_or(0.0f));
     if (!animationEndEvents_.empty()) {
         std::for_each(animationEndEvents_.begin(), animationEndEvents_.end(),
             [index, info](const AnimationEndEventPtr& animationEndEvent) {
@@ -179,8 +178,7 @@ void SwiperEventHub::FireAnimationEndOnForceEvent(int32_t index, const Animation
         };
         return;
     }
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Swiper.onAnimationEnd",
-        ComponentEventType::COMPONENT_EVENT_SWIPER);
+    ReportComponentChangeEvent("onAnimationEnd", index, info.currentOffset.value_or(0.0f));
     if (animationEndEvents_.empty()) {
         --aniStartCalledCount_;
         return;
@@ -231,8 +229,7 @@ void SwiperEventHub::FireJSChangeEvent(int32_t preIndex, int32_t index)
     auto frameNode = GetFrameNode();
     ACE_SCOPED_TRACE("Swiper FireChangeEvent, id: %d, preIndex: %d, index: %d", frameNode ? frameNode->GetId() : -1,
         preIndex, index);
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Swiper.onChange",
-        ComponentEventType::COMPONENT_EVENT_SWIPER);
+    ReportComponentChangeEvent("onChange", index);
     NotifySwiperObserver(frameNode, index);
     if (changeEvents_.empty()) {
         return;
@@ -244,6 +241,25 @@ void SwiperEventHub::FireJSChangeEvent(int32_t preIndex, int32_t index)
         auto event = *changeEvent;
         event(index);
     });
+}
+
+void SwiperEventHub::ReportComponentChangeEvent(
+    const std::string& type, int32_t currentIndex, float offset) const
+{
+    auto result = InspectorJsonUtil::Create();
+    CHECK_NULL_VOID(result);
+    
+    std::string key = tabsId_.has_value() ? "Tabs." + type : "Swiper." + type;
+    result->Put("event", key.data());
+    std::string currentIndexStr = std::to_string(currentIndex);
+    result->Put("currentIndex", currentIndexStr.c_str());
+    if (type == "onAnimationEnd") {
+        std::string offsetStr = std::to_string(offset);
+        result->Put("currentOffset", offsetStr.c_str());
+    }
+    auto nodeId = tabsId_.has_value() ? tabsId_.value() : swiperId_;
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", std::move(result),
+        ComponentEventType::COMPONENT_EVENT_SWIPER);
 }
 
 void SwiperEventHub::NotifySwiperObserver(const RefPtr<FrameNode>& hostNode, int32_t index)

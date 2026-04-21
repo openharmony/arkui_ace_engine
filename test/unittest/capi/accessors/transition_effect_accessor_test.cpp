@@ -40,11 +40,11 @@ public:
 };
 
 /**
- * @tc.name: getRotateTest
+ * @tc.name: rotateTestGetRotate
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TransitionEffectAccessorTest, getRotateTest, TestSize.Level1)
+HWTEST_F(TransitionEffectAccessorTest, rotateTestGetRotate, TestSize.Level1)
 {
     ASSERT_NE(accessor_->rotate, nullptr);
 
@@ -78,11 +78,11 @@ HWTEST_F(TransitionEffectAccessorTest, getRotateTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: getTranslateTest
+ * @tc.name: translateTestGetTranslate
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TransitionEffectAccessorTest, getTranslateTest, TestSize.Level1)
+HWTEST_F(TransitionEffectAccessorTest, translateTestGetTranslate, TestSize.Level1)
 {
     ASSERT_NE(accessor_->translate, nullptr);
     Ark_TranslateOptions value;
@@ -104,11 +104,11 @@ HWTEST_F(TransitionEffectAccessorTest, getTranslateTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: getScaleTest
+ * @tc.name: scaleTestGetScale
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TransitionEffectAccessorTest, getScaleTest, TestSize.Level1)
+HWTEST_F(TransitionEffectAccessorTest, scaleTestGetScale, TestSize.Level1)
 {
     ASSERT_NE(accessor_->scale, nullptr);
     Ark_ScaleOptions value;
@@ -134,11 +134,11 @@ HWTEST_F(TransitionEffectAccessorTest, getScaleTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: getOpacityTest
+ * @tc.name: opacityTestGetOpacity
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TransitionEffectAccessorTest, getOpacityTest, TestSize.Level1)
+HWTEST_F(TransitionEffectAccessorTest, opacityTestGetOpacity, TestSize.Level1)
 {
     const int testValue = 330;
     ASSERT_NE(accessor_->opacity, nullptr);
@@ -154,11 +154,11 @@ HWTEST_F(TransitionEffectAccessorTest, getOpacityTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: getMoveTest
+ * @tc.name: moveTestGetMove
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TransitionEffectAccessorTest, getMoveTest, TestSize.Level1)
+HWTEST_F(TransitionEffectAccessorTest, moveTestGetMove, TestSize.Level1)
 {
     ASSERT_NE(accessor_->move, nullptr);
     Ark_TransitionEdge value = Converter::ArkValue<Ark_TransitionEdge>(NG::TransitionEdge::END);
@@ -173,11 +173,11 @@ HWTEST_F(TransitionEffectAccessorTest, getMoveTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: getAsymmetricTest
+ * @tc.name: asymmetricTestGetAsymmetric
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TransitionEffectAccessorTest, getAsymmetricTest, TestSize.Level1)
+HWTEST_F(TransitionEffectAccessorTest, asymmetricTestGetAsymmetric, TestSize.Level1)
 {
     ASSERT_NE(accessor_->asymmetric, nullptr);
     TransitionEffectPeer* app = PeerUtils::CreatePeer<TransitionEffectPeer>();
@@ -187,11 +187,11 @@ HWTEST_F(TransitionEffectAccessorTest, getAsymmetricTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: getAnimationTest
+ * @tc.name: animationTestGetAnimation
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TransitionEffectAccessorTest, getAnimationTest, TestSize.Level1)
+HWTEST_F(TransitionEffectAccessorTest, animationTestGetAnimation, TestSize.Level1)
 {
     const int testValue = 333;
     ASSERT_NE(accessor_->animation, nullptr);
@@ -207,11 +207,11 @@ HWTEST_F(TransitionEffectAccessorTest, getAnimationTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: getCombineTest
+ * @tc.name: combineTestGetCombine
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TransitionEffectAccessorTest, getCombineTest, TestSize.Level1)
+HWTEST_F(TransitionEffectAccessorTest, combineTestGetCombine, TestSize.Level1)
 {
     ASSERT_NE(accessor_->combine, nullptr);
     auto opacity1 = 444;

@@ -14,12 +14,12 @@
  */
 
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
-#include "test/mock/core/common/mock_udmf.h"
-#include "test/mock/core/render/mock_paragraph.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_udmf.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
@@ -243,6 +243,27 @@ HWTEST_F(RichEditorKeyboardTestNg, RequestCustomKeyboard, TestSize.Level0)
     EXPECT_EQ(richEditorPattern->CloseCustomKeyboard(), true);
     EXPECT_EQ(textFieldManager->UsingCustomKeyboardAvoid(), false);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(apiVersion);
+}
+
+/**
+ * @tc.name: RequestCustomKeyboardBuilder
+ * @tc.desc: test RequestCustomKeyboardBuilder
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardTestNg, RequestCustomKeyboardBuilder, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto oldFunc = richEditorPattern->customKeyboardBuilder_;
+    auto func = []() {};
+
+    richEditorPattern->customKeyboardBuilder_ = func;
+    richEditorPattern->RequestCustomKeyboardBuilder();
+
+    richEditorPattern->customKeyboardBuilder_ = oldFunc;
+    richEditorPattern->RequestCustomKeyboardBuilder();
 }
 
 /**

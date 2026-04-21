@@ -19,7 +19,7 @@
 #include "core/components_ng/pattern/canvas/canvas_paint_method.h"
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
 #include "core/interfaces/native/implementation/drawing_rendering_context_peer_impl.h"
-#include "test/mock/core/pattern/mock_canvas_pattern.h"
+#include "test/mock/frameworks/core/components_ng/pattern/mock_canvas_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -80,14 +80,9 @@ public:
         mockPattern_ = nullptr;
     }
 
-    DrawingRenderingContextPeer* CreatePeerInstanceT(const Opt_LengthMetricsUnit* value)
-    {
-        return accessor_->construct(value);
-    }
-
     void* CreatePeerInstance() override
     {
-        return CreatePeerInstanceT(&DEFAULT_SETTING_UNITS);
+        return accessor_->construct(&DEFAULT_SETTING_UNITS);
     }
 
     void ChangeDensity(const double density)
@@ -106,14 +101,14 @@ public:
 };
 
 /**
- * @tc.name: ctorRenderingContextSettingsPeerTest
+ * @tc.name: constructTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DrawingRenderingContextAccessorTest, ctorTest, TestSize.Level1)
+HWTEST_F(DrawingRenderingContextAccessorTest, constructTest, TestSize.Level1)
 {
     for (const auto& [input, value, expected] : optCanvasUnitTestPlan) {
-        auto peer = CreatePeerInstanceT(&value);
+        auto peer = accessor_->construct(&value);
         auto result = reinterpret_cast<GeneratedModifier::DrawingRenderingContextPeerImpl*>(peer)->GetUnit();
         finalyzer_(peer);
         std::optional<CanvasUnit> units = Converter::OptConvert<Ace::CanvasUnit>(result);
@@ -122,7 +117,7 @@ HWTEST_F(DrawingRenderingContextAccessorTest, ctorTest, TestSize.Level1)
             "Input value is: " << input << ", method: GetRepeat";
     }
     // nullptr
-    auto peer = CreatePeerInstanceT(nullptr);
+    auto peer = accessor_->construct(nullptr);
     auto result = reinterpret_cast<GeneratedModifier::DrawingRenderingContextPeerImpl*>(peer)->GetUnit();
     finalyzer_(peer);
     std::optional<CanvasUnit> units = Converter::OptConvert<Ace::CanvasUnit>(result);

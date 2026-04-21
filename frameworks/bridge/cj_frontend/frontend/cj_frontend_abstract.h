@@ -239,7 +239,7 @@ public:
     void NotifyAppStorage(const std::string& key, const std::string& value) override {}
     void OnLayoutCompleted(const std::string& componentId) override {}
     void OnDrawCompleted(const std::string& componentId) override {}
-    void OnDrawChildrenCompleted(const std::string& componentId) override {}
+    void OnDrawChildrenCompleted(const std::string& componentId, const std::vector<int32_t>& childIds) override {}
     void CallStateMgmtCleanUpIdleTaskFunc(int64_t maxTimeInNs) override;
     bool IsDrawChildrenCallbackFuncExist(const std::string& componentId) override
     {

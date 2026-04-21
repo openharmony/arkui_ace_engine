@@ -878,8 +878,8 @@ void SetRadiusValue(
 void ParseArray([[maybe_unused]] ani_env* env,
     const OHOS::Ace::RefPtr<OHOS::Ace::ShapeRect>& shapeRect, ani_object options)
 {
-    ani_double length;
-    if (ANI_OK != env->Object_GetPropertyByName_Double(static_cast<ani_object>(options), "length", &length)) {
+    ani_size length;
+    if (ANI_OK != env->Array_GetLength(static_cast<ani_array>(options), &length)  || length <= 0) {
         return;
     }
     for (int i = 0; i < static_cast<int32_t>(length); i++) {

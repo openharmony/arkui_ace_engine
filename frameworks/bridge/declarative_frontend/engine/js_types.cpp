@@ -146,6 +146,165 @@ Local<JSValueRef> JsGetHistoricalPoints(panda::JsiRuntimeCallInfo *info)
 
     return valueArray;
 }
+
+Local<JSValueRef> JsGetMouseHistoricalPoints(panda::JsiRuntimeCallInfo* info)
+{
+    Local<JSValueRef> thisObj = info->GetThisRef();
+    auto eventInfo =
+        static_cast<MouseInfo*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(info->GetVM(), 0));
+    if (!eventInfo) {
+        return JSValueRef::Undefined(info->GetVM());
+    }
+
+    const auto& history = eventInfo->GetHistory();
+    Local<ArrayRef> valueArray = ArrayRef::New(info->GetVM(), history.size());
+    uint32_t index = 0;
+    for (const auto& point : history) {
+        Local<ObjectRef> historyObject = ObjectRef::New(info->GetVM());
+        historyObject->Set(info->GetVM(), ToJSValue("x"),
+            ToJSValue(PipelineBase::Px2VpWithCurrentDensity(point.localLocation.GetX())));
+        historyObject->Set(info->GetVM(), ToJSValue("y"),
+            ToJSValue(PipelineBase::Px2VpWithCurrentDensity(point.localLocation.GetY())));
+        historyObject->Set(info->GetVM(), ToJSValue("displayX"),
+            ToJSValue(PipelineBase::Px2VpWithCurrentDensity(point.screenLocation.GetX())));
+        historyObject->Set(info->GetVM(), ToJSValue("displayY"),
+            ToJSValue(PipelineBase::Px2VpWithCurrentDensity(point.screenLocation.GetY())));
+        historyObject->Set(info->GetVM(), ToJSValue("windowX"),
+            ToJSValue(PipelineBase::Px2VpWithCurrentDensity(point.globalLocation.GetX())));
+        historyObject->Set(info->GetVM(), ToJSValue("windowY"),
+            ToJSValue(PipelineBase::Px2VpWithCurrentDensity(point.globalLocation.GetY())));
+        historyObject->Set(info->GetVM(), ToJSValue("globalDisplayX"),
+            ToJSValue(PipelineBase::Px2VpWithCurrentDensity(point.globalDisplayLocation.GetX())));
+        historyObject->Set(info->GetVM(), ToJSValue("globalDisplayY"),
+            ToJSValue(PipelineBase::Px2VpWithCurrentDensity(point.globalDisplayLocation.GetY())));
+        historyObject->Set(info->GetVM(), ToJSValue("timestamp"),
+            ToJSValue(static_cast<double>(point.time.time_since_epoch().count())));
+        ArrayRef::SetValueAt(info->GetVM(), valueArray, index++, historyObject);
+    }
+
+    return valueArray;
+}
+
+namespace {
+bool FindTouchCurrentLocal(const std::list<TouchLocationInfo>& touchList, int32_t fingerId, Offset& out)
+{
+    if (fingerId < 0) {
+        return false;
+    }
+    auto iter = std::find_if(touchList.begin(), touchList.end(), [fingerId](const TouchLocationInfo& item) {
+        return item.GetFingerId() == fingerId;
+    });
+    if (iter == touchList.end()) {
+        return false;
+    }
+    out = iter->GetCurrentLocalLocation();
+    return true;
+}
+
+bool GetTouchEventCurrentLocal(TouchEventInfo* touchEventInfo, Offset& currentLocal)
+{
+    int32_t fingerId = -1;
+    if (!touchEventInfo->GetChangedTouches().empty()) {
+        fingerId = touchEventInfo->GetChangedTouches().back().GetFingerId();
+    } else if (!touchEventInfo->GetTouches().empty()) {
+        fingerId = touchEventInfo->GetTouches().back().GetFingerId();
+    }
+    if (!FindTouchCurrentLocal(touchEventInfo->GetChangedTouches(), fingerId, currentLocal) &&
+        !FindTouchCurrentLocal(touchEventInfo->GetTouches(), fingerId, currentLocal)) {
+        currentLocal = Offset::Zero();
+        return false;
+    }
+    return true;
+}
+
+bool GetBaseGestureEventCurrentLocal(BaseGestureEvent* baseGestureEvent, Offset& currentLocal)
+{
+    const auto& fingerList = baseGestureEvent->GetFingerList();
+    if (fingerList.empty()) {
+        currentLocal = Offset::Zero();
+        return false;
+    }
+
+    if (fingerList.back().currentLocalLocation_) {
+        currentLocal = fingerList.back().currentLocalLocation_();
+        return true;
+    }
+    return false;
+}
+
+bool GetCurrentLocalFromEventInfo(panda::EcmaVM* vm, const panda::Local<panda::ObjectRef>& thisObjRef,
+    BaseEventInfo* eventInfo, Offset& currentLocal)
+{
+    if (auto gestureEvent = TypeInfoHelper::DynamicCast<GestureEvent>(eventInfo); gestureEvent) {
+        currentLocal = gestureEvent->GetCurrentLocalLocation();
+        return true;
+    }
+    if (auto baseGestureEvent = TypeInfoHelper::DynamicCast<BaseGestureEvent>(eventInfo); baseGestureEvent) {
+        return GetBaseGestureEventCurrentLocal(baseGestureEvent, currentLocal);
+    }
+    if (auto mouseInfo = TypeInfoHelper::DynamicCast<MouseInfo>(eventInfo); mouseInfo) {
+        currentLocal = mouseInfo->GetCurrentLocalLocation();
+        return true;
+    }
+    if (auto axisInfo = TypeInfoHelper::DynamicCast<AxisInfo>(eventInfo); axisInfo) {
+        currentLocal = axisInfo->GetCurrentLocalLocation();
+        return true;
+    }
+    if (auto touchEventInfo = TypeInfoHelper::DynamicCast<TouchEventInfo>(eventInfo); touchEventInfo) {
+        return GetTouchEventCurrentLocal(touchEventInfo, currentLocal);
+    }
+    if (auto clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(eventInfo); clickInfo) {
+        currentLocal = clickInfo->GetCurrentLocalLocation();
+        return true;
+    }
+    return false;
+}
+} // namespace
+
+Local<JSValueRef> JsGetCurrentLocalPositionForFinger(panda::JsiRuntimeCallInfo *info)
+{
+    Local<JSValueRef> thisObj = info->GetThisRef();
+    auto thisObjRef = panda::Local<panda::ObjectRef>(thisObj);
+    if (thisObjRef.IsEmpty()) {
+        return JSValueRef::Undefined(info->GetVM());
+    }
+    auto fingerInfo = static_cast<FingerInfo*>(thisObjRef->GetNativePointerField(info->GetVM(), 0));
+    Offset currentLocal = Offset::Zero();
+
+    if (fingerInfo) {
+        if (!fingerInfo->currentLocalLocation_) {
+            return JSValueRef::Undefined(info->GetVM());
+        }
+        currentLocal = fingerInfo->currentLocalLocation_();
+    }
+    
+    auto retObj = ObjectRef::New(info->GetVM());
+    retObj->Set(info->GetVM(), ToJSValue("x"), ToJSValue(PipelineBase::Px2VpWithCurrentDensity(currentLocal.GetX())));
+    retObj->Set(info->GetVM(), ToJSValue("y"), ToJSValue(PipelineBase::Px2VpWithCurrentDensity(currentLocal.GetY())));
+    return retObj;
+}
+
+Local<JSValueRef> JsGetCurrentLocalPosition(panda::JsiRuntimeCallInfo *info)
+{
+    Local<JSValueRef> thisObj = info->GetThisRef();
+    auto thisObjRef = panda::Local<panda::ObjectRef>(thisObj);
+    if (thisObjRef.IsEmpty()) {
+        return JSValueRef::Undefined(info->GetVM());
+    }
+    auto eventInfo = static_cast<BaseEventInfo*>(thisObjRef->GetNativePointerField(info->GetVM(), 0));
+    Offset currentLocal = Offset::Zero();
+
+    if (eventInfo) {
+        if (!GetCurrentLocalFromEventInfo(info->GetVM(), thisObjRef, eventInfo, currentLocal)) {
+            return JSValueRef::Undefined(info->GetVM());
+        }
+    }
+    
+    auto retObj = ObjectRef::New(info->GetVM());
+    retObj->Set(info->GetVM(), ToJSValue("x"), ToJSValue(PipelineBase::Px2VpWithCurrentDensity(currentLocal.GetX())));
+    retObj->Set(info->GetVM(), ToJSValue("y"), ToJSValue(PipelineBase::Px2VpWithCurrentDensity(currentLocal.GetY())));
+    return retObj;
+}
 #endif
 
 } // namespace OHOS::Ace::Framework

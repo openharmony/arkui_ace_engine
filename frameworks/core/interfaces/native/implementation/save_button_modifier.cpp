@@ -117,7 +117,7 @@ void SetOnClickImpl(Ark_NativePointer node,
 #endif
         const auto event = Converter::SyncEvent<Ark_ClickEvent>(info);
         Ark_SaveButtonOnClickResult arkResult = Converter::ArkValue<Ark_SaveButtonOnClickResult>(res);
-        auto error = Converter::ArkValue<Opt_BusinessError>();
+        auto error = Converter::ArkValue<Opt_BusinessErrorInterface_Void>();
         arkCallback.InvokeSync(event.ArkValue(), arkResult, error);
     };
 
@@ -129,6 +129,13 @@ void SetSetIconImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
+    auto convValue = Converter::OptConvert<Converter::SymbolData>(*value);
+    if (convValue.has_value() && convValue->symbol.has_value()) {
+        SecurityComponentModelNG::SetIcon(frameNode, convValue->symbol.value());
+        SaveButtonModelNG::SetSymbolFontFamilies(frameNode, convValue->symbolFamilyName);
+        SaveButtonModelNG::SetSymbolType(frameNode, convValue->symbolType);
+        return;
+    }
     auto info = Converter::OptConvertPtr<ImageSourceInfo>(value);
     SecurityComponentModelNG::SetIcon(frameNode, info);
 }
@@ -205,6 +212,39 @@ void SetUserCancelEventImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<bool>(value);
     SecurityComponentModelNG::SetUserCancelEvent(frameNode, convValue);
 }
+void SetSymbolIconColorImpl(Ark_NativePointer node,
+                            const Opt_Array_ResourceColor* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optColorVec = Converter::OptConvert<std::vector<std::optional<Color>>>(*value);
+    std::vector<Color> colorVec;
+    if (!optColorVec) {
+        return;
+    }
+    for (std::optional<Color> color: *optColorVec) {
+        if (color.has_value()) {
+            colorVec.emplace_back(color.value());
+        }
+    }
+    SaveButtonModelNG::SetSymbolIconColor(frameNode, colorVec);
+}
+void SetSymbolRenderingStrategyImpl(Ark_NativePointer node,
+                                    const Opt_SymbolRenderingStrategy* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<Converter::RenderingStrategy>(value);
+    SaveButtonModelNG::SetSymbolRenderingStrategy(frameNode, EnumToInt(convValue));
+}
+void SetSymbolFontWeightImpl(Ark_NativePointer node,
+                             const Opt_Union_I32_FontWeight_String_Resource* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<Ace::FontWeight>(value);
+    SaveButtonModelNG::SetSymbolFontWeight(frameNode, convValue);
+}
 } // SaveButtonAttributeModifier
 const GENERATED_ArkUISaveButtonModifier* GetSaveButtonModifier()
 {
@@ -218,6 +258,9 @@ const GENERATED_ArkUISaveButtonModifier* GetSaveButtonModifier()
         SaveButtonAttributeModifier::SetIconBorderRadiusImpl,
         SaveButtonAttributeModifier::SetStateEffectImpl,
         SaveButtonAttributeModifier::SetUserCancelEventImpl,
+        SaveButtonAttributeModifier::SetSymbolIconColorImpl,
+        SaveButtonAttributeModifier::SetSymbolRenderingStrategyImpl,
+        SaveButtonAttributeModifier::SetSymbolFontWeightImpl,
     };
     return &ArkUISaveButtonModifierImpl;
 }

@@ -81,6 +81,18 @@ void View::SetOnTouch(TouchEventFunc&& touchEventFunc)
     NG::ViewAbstract::SetOnTouch(reinterpret_cast<AceNode*>(node_->GetHandle()), std::move(touchEventFunc));
 }
 
+void View::AddOnTouch(const RefPtr<NG::TouchEventImpl>& touchEventImpl)
+{
+    CHECK_NULL_VOID(node_);
+    NG::ViewAbstract::AddOnTouch(reinterpret_cast<AceNode*>(node_->GetHandle()), touchEventImpl);
+}
+
+void View::RemoveTouchEvent(const RefPtr<NG::TouchEventImpl>& touchEventImpl)
+{
+    CHECK_NULL_VOID(node_);
+    NG::ViewAbstract::RemoveTouchEvent(reinterpret_cast<AceNode*>(node_->GetHandle()), touchEventImpl);
+}
+
 void View::SetOnClick(GestureEventFunc&& clickEventFunc)
 {
     NG::ViewAbstract::SetOnClick(reinterpret_cast<AceNode*>(node_->GetHandle()), std::move(clickEventFunc));

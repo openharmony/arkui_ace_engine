@@ -21,9 +21,6 @@
 #include <utility>
 #include <vector>
 
-#include "core/interfaces/native/node/view_model.h"
-#include "core/interfaces/native/node/node_timepicker_modifier.h"
-
 #include "base/i18n/date_time_sequence.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/multi_thread.h"
@@ -31,17 +28,15 @@
 #include "compatible/components/picker/picker_base_component.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/components/theme/icon_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/inspector_filter.h"
-#include "core/components_ng/event/click_event.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/picker/datepicker_column_pattern.h"
-#include "core/components_ng/pattern/time_picker/bridge/timepicker_util.h"
+#include "core/components_ng/pattern/dialog/dialog_view.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "core/interfaces/native/node/view_model.h"
+#include "core/interfaces/native/node/node_timepicker_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -71,6 +66,13 @@ constexpr int32_t RATIO_ONE = 1;
 constexpr int32_t SECOND_PAGE = 1;
 constexpr float PICKER_MAXFONTSCALE = 1.0f;
 constexpr float DEFAULT_SIZE_ZERO = 0.0f;
+constexpr int32_t MIN_HOUR = 0;
+constexpr int32_t MAX_HOUR = 23;
+constexpr int32_t MIN_MINUTE = 0;
+constexpr int32_t MAX_MINUTE = 59;
+constexpr int32_t MIN_SECOND = 0;
+constexpr int32_t MAX_SECOND = 59;
+constexpr int32_t MIN_YEAR = 1;
 } // namespace
 bool DatePickerPattern::inited_ = false;
 const std::string DatePickerPattern::empty_;
@@ -89,6 +91,9 @@ void DatePickerPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
     host->GetRenderContext()->UpdateClipEdge(true);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddWindowSizeChangeCallback(host->GetId());
 }
 
 bool DatePickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -141,6 +146,7 @@ bool DatePickerPattern::UpdateFocusStyles(const RefPtr<PickerTheme>& pickerTheme
         buttonConfirmLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(width - buttonSpace.ConvertToPx()), CalcLength(buttonHeight)));
         buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        buttonConfirmLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     } else {
         auto pickerPadding = pickerTheme->GetPickerPadding();
         standardButtonHeight = static_cast<float>((height - pickerPadding * RATE).ConvertToPx());
@@ -216,6 +222,11 @@ void DatePickerPattern::AddIsFocusActiveUpdateEvent()
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     context->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
+}
+
+RefPtr<EventHub> DatePickerPattern::CreateEventHub()
+{
+    return MakeRefPtr<DatePickerEventHub>();
 }
 
 void DatePickerPattern::RemoveIsFocusActiveUpdateEvent()
@@ -403,15 +414,23 @@ void DatePickerPattern::OnModifyDone()
     Pattern::CheckLocalized();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_VOID(windowManager);
+    auto windowMode = windowManager->GetWindowMode();
+    isWindowFullscreen_ = (windowMode == WindowMode::WINDOW_MODE_FULLSCREEN);
+
     auto datePickerRowLayoutProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
     CHECK_NULL_VOID(datePickerRowLayoutProperty);
     if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         ColumnPatternInitHapticController();
         isHapticChanged_ = false;
     }
-    isForceUpdate_ = isForceUpdate_ ||
-        (lunar_ != datePickerRowLayoutProperty->GetLunar().value_or(false)) ||
-        (isLoop_ != datePickerRowLayoutProperty->GetCanLoopValue(true));
+    auto canloop = IsNotSetStartEndDate() ? datePickerRowLayoutProperty->GetCanLoopValue(true) : false;
+    isForceUpdate_ =
+        isForceUpdate_ || (lunar_ != datePickerRowLayoutProperty->GetLunar().value_or(false)) || (isLoop_ != canloop);
     if (isFiredDateChange_ && !isForceUpdate_ && !isDateOrderChange_) {
         isFiredDateChange_ = false;
         return;
@@ -419,7 +438,7 @@ void DatePickerPattern::OnModifyDone()
     ClearFocus();
     isForceUpdate_ = false;
     isDateOrderChange_ = false;
-    isLoop_ = datePickerRowLayoutProperty->GetCanLoopValue(true);
+    isLoop_ = IsNotSetStartEndDate() ? datePickerRowLayoutProperty->GetCanLoopValue(true) : false;
     InitDisabled();
     if (ShowMonthDays()) {
         FlushMonthDaysColumn();
@@ -440,6 +459,11 @@ void DatePickerPattern::OnModifyDone()
             refPtr->ShowTitle(titleId);
         }
     });
+    InitFocusAndSelector();
+}
+
+void DatePickerPattern::InitFocusAndSelector()
+{
     InitFocusKeyEvent();
     SetDefaultFocus();
     InitFocusEvent();
@@ -677,7 +701,7 @@ void DatePickerPattern::OnColorConfigurationUpdate()
 
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-    auto pickerTheme = context->GetTheme<PickerTheme>(host->GetThemeScopeId());
+    auto pickerTheme = host->GetTheme<PickerTheme>(true);
     CHECK_NULL_VOID(pickerTheme);
     auto pickerProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
@@ -715,7 +739,7 @@ void DatePickerPattern::OnColorConfigurationUpdate()
     auto titleLayoutRenderContext = buttonTitleNode->GetRenderContext();
     CHECK_NULL_VOID(titleLayoutRenderContext);
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) ||
-        !titleLayoutRenderContext->IsUniRenderEnabled()) {
+        !DialogView::IsSupportBlurStyle(buttonTitleNode, isShowInSubWindow_)) {
         titleLayoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
     }
     UpdateTitleTextColor(buttonTitleNode, pickerTheme);
@@ -728,6 +752,9 @@ bool DatePickerPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     bool result = false;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, result);
+    if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return result;
+    }
     host->SetNeedCallChildrenUpdate(false);
     auto pickerProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
     CHECK_NULL_RETURN(pickerProperty, result);
@@ -1214,19 +1241,46 @@ bool DatePickerPattern::ReportDateChangeEvent(int32_t nodeId, const std::string&
 {
     auto dataJson = JsonUtil::ParseJsonString(eventData);
     CHECK_NULL_RETURN(dataJson, false);
-    auto params = JsonUtil::Create();
+    auto params = InspectorJsonUtil::CreateObject();
     CHECK_NULL_RETURN(params, false);
     params->Put("year", static_cast<int32_t>(dataJson->GetUInt("year")));
     params->Put("month", static_cast<int32_t>(dataJson->GetUInt("month") + 1)); // month: 1-12
     params->Put("day", static_cast<int32_t>(dataJson->GetUInt("day")));
-    params->Put("hour", static_cast<int32_t>(dataJson->GetUInt("hour")));
-    params->Put("minute", static_cast<int32_t>(dataJson->GetUInt("minute")));
-    auto value = JsonUtil::Create();
+
+    auto value = InspectorJsonUtil::Create();
     CHECK_NULL_RETURN(value, false);
-    value->Put("nodeId", nodeId);
     value->Put(compName.c_str(), eventName.c_str());
     value->Put("params", params);
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", value->ToString(),
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value,
+        ComponentEventType::COMPONENT_EVENT_PICKER);
+    return true;
+}
+
+bool DatePickerPattern::ReportDialogDateChangeEvent(int32_t nodeId, const std::string& compName,
+    const std::string& eventName, const std::string& eventData)
+{
+    auto dataJson = JsonUtil::ParseJsonString(eventData);
+    CHECK_NULL_RETURN(dataJson, false);
+
+    if (!dataJson->Contains("year") || !dataJson->Contains("month") || !dataJson->Contains("day") ||
+        !dataJson->Contains("hour") || !dataJson->Contains("minute")) {
+        return false;
+    }
+
+    auto params = InspectorJsonUtil::CreateObject();
+    CHECK_NULL_RETURN(params, false);
+    params->Put("year", static_cast<int32_t>(dataJson->GetUInt("year")));
+    params->Put("month", static_cast<int32_t>(dataJson->GetUInt("month") + 1));
+    params->Put("day", static_cast<int32_t>(dataJson->GetUInt("day")));
+    params->Put("hour", static_cast<int32_t>(dataJson->GetUInt("hour")));
+    params->Put("minute", static_cast<int32_t>(dataJson->GetUInt("minute")));
+    params->Put("second", 0);
+
+    auto value = InspectorJsonUtil::Create();
+    CHECK_NULL_RETURN(value, false);
+    value->Put(compName.c_str(), eventName.c_str());
+    value->Put("params", params);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value,
         ComponentEventType::COMPONENT_EVENT_PICKER);
     return true;
 }
@@ -1234,12 +1288,14 @@ bool DatePickerPattern::ReportDateChangeEvent(int32_t nodeId, const std::string&
 bool DatePickerPattern::ReportDateChangeEvent(const std::string& compName,
     const std::string& eventName, const std::string& eventData)
 {
-    if (GetIsShowInDialog()) {
-        return false;
-    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    return ReportDateChangeEvent(host->GetId(), compName, eventName, eventData);
+
+    if (GetIsShowInDialog()) {
+        return false;
+    } else  {
+        return ReportDateChangeEvent(host->GetId(), compName, eventName, eventData);
+    }
 }
 
 void DatePickerPattern::FireChangeEvent(bool refresh)
@@ -2236,12 +2292,8 @@ int DatePickerPattern::LunarDateCompare(const LunarDate& left, const LunarDate& 
     return leftEqualRight;
 }
 
-void DatePickerPattern::LunarColumnsBuilding(const LunarDate& current)
+void DatePickerPattern::InitColumnsOrder(RefPtr<FrameNode>* columns) const
 {
-    RefPtr<FrameNode> yearColumn;
-    RefPtr<FrameNode> monthColumn;
-    RefPtr<FrameNode> dayColumn;
-    RefPtr<FrameNode> columns[COLUMNS_SIZE];
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     int index = 0;
@@ -2267,6 +2319,27 @@ void DatePickerPattern::LunarColumnsBuilding(const LunarDate& current)
         columns[order[index]] = GetColumn(child->GetId());
         index++;
     }
+}
+
+void DatePickerPattern::AdjustLunarStartEndMonthDay(
+    const LunarDate& current, uint32_t& month, uint32_t& day, const LunarDate& dateLunar)
+{
+    if (!IsNotSetStartEndDate() && current.year == dateLunar.year) {
+        month = dateLunar.month;
+        if (month == current.month && current.isLeapMonth == dateLunar.isLeapMonth) {
+            day = dateLunar.day;
+        }
+    }
+}
+
+void DatePickerPattern::LunarColumnsBuilding(const LunarDate& current)
+{
+    RefPtr<FrameNode> yearColumn;
+    RefPtr<FrameNode> monthColumn;
+    RefPtr<FrameNode> dayColumn;
+    RefPtr<FrameNode> columns[COLUMNS_SIZE];
+
+    InitColumnsOrder(columns);
     yearColumn = columns[COLUMNS_ZERO];
     monthColumn = columns[COLUMNS_ONE];
     dayColumn = columns[COLUMNS_TWO];
@@ -2281,6 +2354,8 @@ void DatePickerPattern::LunarColumnsBuilding(const LunarDate& current)
     auto endMonth = endDateLunar_.month;
     auto startDay = startDateLunar_.day;
     auto endDay = endDateLunar_.day;
+    auto startLeapMonth = startDateLunar_.isLeapMonth;
+    auto endLeapMonth = endDateLunar_.isLeapMonth;
     uint32_t maxDay = GetLunarMaxDay(current.year, current.month, current.isLeapMonth);
     if (startYear < endYear) {
         startMonth = 1;
@@ -2288,10 +2363,14 @@ void DatePickerPattern::LunarColumnsBuilding(const LunarDate& current)
         startDay = 1;
         endDay = maxDay;
     }
-    if (startYear == endYear && startMonth < endMonth) {
+    if (startYear == endYear && (startMonth < endMonth || (startMonth == endMonth && startLeapMonth != endLeapMonth))) {
         startDay = 1;
         endDay = maxDay;
     }
+    uint32_t currentYear = current.year;
+    uint32_t currentMonth = current.month;
+    AdjustLunarStartEndMonthDay(current, startMonth, startDay, startDateLunar_);
+    AdjustLunarStartEndMonthDay(current, endMonth, endDay, endDateLunar_);
 
     options_[yearColumn].clear();
     for (uint32_t index = startYear; index <= endYear; ++index) {
@@ -2307,20 +2386,26 @@ void DatePickerPattern::LunarColumnsBuilding(const LunarDate& current)
     uint32_t lunarLeapMonth = 0;
     bool hasLeapMonth = GetLunarLeapMonth(current.year, lunarLeapMonth);
     options_[monthColumn].clear();
-    if (startYear == endYear) {
-        options_[monthColumn].resize(startMonth > 0 ? startMonth - 1 : 0, emptyPickerDate_);
+    if (startYear == endYear || startYear == currentYear || endYear == currentYear) {
+        options_[monthColumn].resize(
+            hasLeapMonth && ((startMonth > lunarLeapMonth) || (startMonth == lunarLeapMonth && startLeapMonth))
+                ? startMonth
+                : (startMonth > 0 ? startMonth - 1 : 0),
+            emptyPickerDate_);
     }
     // lunar's month start form startMonth to endMonth
     for (uint32_t index = startMonth; index <= endMonth; ++index) {
-        if (!current.isLeapMonth && current.month == index) {
-            auto datePickerColumnPattern = monthColumn->GetPattern<DatePickerColumnPattern>();
-            CHECK_NULL_VOID(datePickerColumnPattern);
-            datePickerColumnPattern->SetCurrentIndex(options_[monthColumn].size());
-            datePickerColumnPattern->HandleAccessibilityTextChange();
+        if ((index > startMonth) || (index == startMonth && !startLeapMonth)) {
+            if (!current.isLeapMonth && current.month == index) {
+                auto datePickerColumnPattern = monthColumn->GetPattern<DatePickerColumnPattern>();
+                CHECK_NULL_VOID(datePickerColumnPattern);
+                datePickerColumnPattern->SetCurrentIndex(options_[monthColumn].size());
+                datePickerColumnPattern->HandleAccessibilityTextChange();
+            }
+            options_[monthColumn].emplace_back(PickerDateF::CreateMonth(index, true, false));
         }
-        options_[monthColumn].emplace_back(PickerDateF::CreateMonth(index, true, false));
 
-        if (hasLeapMonth && lunarLeapMonth == index) {
+        if (hasLeapMonth && lunarLeapMonth == index && ((index < endMonth) || (index == endMonth && endLeapMonth))) {
             if (current.isLeapMonth && current.month == index) {
                 auto datePickerColumnPattern = monthColumn->GetPattern<DatePickerColumnPattern>();
                 CHECK_NULL_VOID(datePickerColumnPattern);
@@ -2332,7 +2417,9 @@ void DatePickerPattern::LunarColumnsBuilding(const LunarDate& current)
     }
 
     options_[dayColumn].clear();
-    if (startYear == endYear && startMonth == endMonth) {
+    if ((startYear == endYear && startMonth == endMonth) ||
+        (startYear == currentYear && startMonth == currentMonth && startLeapMonth == current.isLeapMonth) ||
+        (endYear == currentYear && endMonth == currentMonth && endLeapMonth == current.isLeapMonth)) {
         options_[dayColumn].resize(startDay > 0 ? startDay - 1 : 0, emptyPickerDate_);
     }
     // lunar's day start from startDay
@@ -2358,6 +2445,17 @@ void DatePickerPattern::LunarColumnsBuilding(const LunarDate& current)
     SetShowLunar(true);
 }
 
+void AdjustSolarStartEndMonthDay(
+    uint32_t currentYear, uint32_t currentMonth, uint32_t& month, uint32_t& day, const PickerDate& dateSolar)
+{
+    if (currentYear == dateSolar.GetYear()) {
+        month = dateSolar.GetMonth();
+        if (month == currentMonth) {
+            day = dateSolar.GetDay();
+        }
+    }
+}
+
 void DatePickerPattern::SolarColumnsBuilding(const PickerDate& current)
 {
     RefPtr<FrameNode> yearColumn;
@@ -2365,31 +2463,8 @@ void DatePickerPattern::SolarColumnsBuilding(const PickerDate& current)
     RefPtr<FrameNode> dayColumn;
 
     RefPtr<FrameNode> columns[COLUMNS_SIZE];
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    int index = 0;
-    int order[COLUMNS_SIZE];
-    if (dateOrder_ == "M-d-y") {
-        order[COLUMNS_ZERO] = INDEX_MONTH;
-        order[COLUMNS_ONE] = INDEX_DAY;
-        order[COLUMNS_TWO] = INDEX_YEAR;
-    } else if (dateOrder_ == "y-d-M") {
-        order[COLUMNS_ZERO] = INDEX_YEAR;
-        order[COLUMNS_ONE] = INDEX_DAY;
-        order[COLUMNS_TWO] = INDEX_MONTH;
-    } else {
-        order[COLUMNS_ZERO] = INDEX_YEAR;
-        order[COLUMNS_ONE] = INDEX_MONTH;
-        order[COLUMNS_TWO] = INDEX_DAY;
-    }
-    for (const auto& stackChild : host->GetChildren()) {
-        CHECK_NULL_VOID(stackChild);
-        auto blendChild = stackChild->GetLastChild();
-        CHECK_NULL_VOID(blendChild);
-        auto child = blendChild->GetLastChild();
-        columns[order[index]] = GetColumn(child->GetId());
-        index++;
-    }
+
+    InitColumnsOrder(columns);
     yearColumn = columns[COLUMNS_ZERO];
     monthColumn = columns[COLUMNS_ONE];
     dayColumn = columns[COLUMNS_TWO];
@@ -2417,6 +2492,10 @@ void DatePickerPattern::SolarColumnsBuilding(const PickerDate& current)
         startDay = 1;
         endDay = maxDay;
     }
+    uint32_t currentYear = current.GetYear();
+    uint32_t currentMonth = current.GetMonth();
+    AdjustSolarStartEndMonthDay(currentYear, currentMonth, startMonth, startDay, startDateSolar_);
+    AdjustSolarStartEndMonthDay(currentYear, currentMonth, endMonth, endDay, endDateSolar_);
 
     options_[yearColumn].clear();
     for (uint32_t year = startYear; year <= endYear; ++year) {
@@ -2430,7 +2509,7 @@ void DatePickerPattern::SolarColumnsBuilding(const PickerDate& current)
     }
 
     options_[monthColumn].clear();
-    if (startYear == endYear) {
+    if (startYear == endYear || startYear == currentYear || endYear == currentYear) {
         options_[monthColumn].resize(startMonth > 0 ? startMonth - 1 : 0, emptyPickerDate_);
     }
     // solar's month start form 1 to 12
@@ -2447,7 +2526,8 @@ void DatePickerPattern::SolarColumnsBuilding(const PickerDate& current)
     }
 
     options_[dayColumn].clear();
-    if (startYear == endYear && startMonth == endMonth) {
+    if ((startYear == endYear && startMonth == endMonth) || (startYear == currentYear && startMonth == currentMonth) ||
+        (endYear == currentYear && endMonth == currentMonth)) {
         options_[dayColumn].resize(startDay - 1, emptyPickerDate_);
     }
     // solar's day start from 1
@@ -2536,6 +2616,38 @@ void DatePickerPattern::LunarMonthDaysColumnBuilding(const LunarDate& current)
     SetShowLunar(true);
 }
 
+void DatePickerPattern::FillSolarMonthDaysOptions(const PickerDate& current, RefPtr<FrameNode>& monthDaysColumn)
+{
+    uint32_t currentYear = current.GetYear();
+    uint32_t startYear = startDateSolar_.GetYear();
+    uint32_t endYear = endDateSolar_.GetYear();
+    uint32_t startMonth = (currentYear == startYear) ? startDateSolar_.GetMonth() : MIN_MONTH;
+    uint32_t endMonth = (currentYear == endYear) ? endDateSolar_.GetMonth() : MAX_MONTH;
+
+    CHECK_NULL_VOID(monthDaysColumn);
+    options_[monthDaysColumn].clear();
+    for (uint32_t index = MIN_MONTH; index <= MAX_MONTH; ++index) {
+        uint32_t maxDay = PickerDate::GetMaxDay(current.GetYear(), index);
+        uint32_t monthStartDay =
+            (currentYear == startYear && index == startDateSolar_.GetMonth()) ? startDateSolar_.GetDay() : MIN_DAY;
+        uint32_t monthEndDay = (currentYear == endYear && index == endDateSolar_.GetMonth())
+                                   ? endDateSolar_.GetDay()
+                                   : PickerDate::GetMaxDay(currentYear, index);
+        for (uint32_t dayIndex = MIN_DAY; dayIndex <= maxDay; ++dayIndex) {
+            if (index == current.GetMonth() && dayIndex == current.GetDay()) {
+                auto datePickerColumnPattern = monthDaysColumn->GetPattern<DatePickerColumnPattern>();
+                CHECK_NULL_VOID(datePickerColumnPattern);
+                datePickerColumnPattern->SetCurrentIndex(options_[monthDaysColumn].size());
+            }
+            if (index >= startMonth && index <= endMonth && dayIndex >= monthStartDay && dayIndex <= monthEndDay) {
+                options_[monthDaysColumn].emplace_back(PickerDateF::CreateMonthDay(index, dayIndex, false, false));
+            } else if (index < startMonth || (index == startMonth && dayIndex < monthStartDay)) {
+                options_[monthDaysColumn].emplace_back(emptyPickerDate_);
+            }
+        }
+    }
+}
+
 void DatePickerPattern::SolarMonthDaysColumnsBuilding(const PickerDate& current)
 {
     RefPtr<FrameNode> monthDaysColumn;
@@ -2569,19 +2681,7 @@ void DatePickerPattern::SolarMonthDaysColumnsBuilding(const PickerDate& current)
     AdjustSolarStartEndDate();
     FillSolarYearOptions(current, yearColumn);
 
-    options_[monthDaysColumn].clear();
-    for (uint32_t index = MIN_MONTH; index <= MAX_MONTH; ++index) {
-        uint32_t maxDay = PickerDate::GetMaxDay(current.GetYear(), index);
-        for (uint32_t dayIndex = MIN_DAY; dayIndex <= maxDay; ++dayIndex) {
-            if (index == current.GetMonth() && dayIndex == current.GetDay()) {
-                auto datePickerColumnPattern = monthDaysColumn->GetPattern<DatePickerColumnPattern>();
-                CHECK_NULL_VOID(datePickerColumnPattern);
-                datePickerColumnPattern->SetCurrentIndex(options_[monthDaysColumn].size());
-                datePickerColumnPattern->HandleAccessibilityTextChange();
-            }
-            options_[monthDaysColumn].emplace_back(PickerDateF::CreateMonthDay(index, dayIndex, false, false));
-        }
-    }
+    FillSolarMonthDaysOptions(current, monthDaysColumn);
 
     auto yearColumnPattern = yearColumn->GetPattern<DatePickerColumnPattern>();
     auto monthDaysColumnPattern = monthDaysColumn->GetPattern<DatePickerColumnPattern>();
@@ -2607,42 +2707,76 @@ void DatePickerPattern::FillSolarYearOptions(const PickerDate& current, RefPtr<F
     }
 }
 
+void DatePickerPattern::ProcessDayOptions(const LunarDate& current, RefPtr<FrameNode>& monthDaysColumn, uint32_t index,
+    bool isLeapMonth, uint32_t lunarLeapMonth)
+{
+    CHECK_NULL_VOID(monthDaysColumn);
+    uint32_t startDay = 1;
+    uint32_t currentYear = current.year;
+    uint32_t startYear = startDateLunar_.year;
+    uint32_t endYear = endDateLunar_.year;
+    uint32_t startDateMonth = (currentYear == startYear) ? startDateLunar_.month : MIN_MONTH;
+    uint32_t endDateMonth = (currentYear == endYear) ? endDateLunar_.month : MAX_MONTH;
+    uint32_t maxDay = GetLunarMaxDay(current.year, index, isLeapMonth);
+    uint32_t monthStartDay = (currentYear == startYear && index == startDateMonth &&
+                                 isLeapMonth == startDateLunar_.isLeapMonth) ? startDateLunar_.day : startDay;
+    uint32_t monthEndDay = (currentYear == endYear && index == endDateMonth && isLeapMonth == endDateLunar_.isLeapMonth)
+                               ? endDateLunar_.day : maxDay;
+    for (uint32_t dayIndex = startDay; dayIndex <= maxDay; ++dayIndex) {
+        if (isLeapMonth == current.isLeapMonth && current.month == index && current.day == dayIndex) {
+            auto datePickerColumnPattern = monthDaysColumn->GetPattern<DatePickerColumnPattern>();
+            CHECK_NULL_VOID(datePickerColumnPattern);
+            datePickerColumnPattern->SetCurrentIndex(options_[monthDaysColumn].size());
+        }
+        LunarDate lunarDate;
+        lunarDate.year = currentYear;
+        lunarDate.month = index;
+        lunarDate.day = dayIndex;
+        lunarDate.isLeapMonth = isLeapMonth;
+        bool isInRange =
+            index >= startDateMonth && index <= endDateMonth && dayIndex >= monthStartDay && dayIndex <= monthEndDay;
+        bool isBeforeStart = index < startDateMonth || (index == startDateMonth && dayIndex < monthStartDay);
+        bool shouldAddDate = false;
+        bool shouldAddEmpty = false;
+        if (IsNotSetStartEndDate()) {
+            shouldAddDate = true;
+        } else if (isInRange && index != lunarLeapMonth) {
+            shouldAddDate = true;
+        } else if (isInRange && index == lunarLeapMonth) {
+            if (!isLeapMonth) {
+                shouldAddDate = (LunarDateCompare(lunarDate, startDateLunar_) >= 0);
+                shouldAddEmpty = !shouldAddDate;
+            } else {
+                shouldAddDate = (LunarDateCompare(lunarDate, endDateLunar_) <= 0);
+            }
+        } else if (isBeforeStart) {
+            shouldAddEmpty = true;
+        }
+        if (shouldAddDate) {
+            options_[monthDaysColumn].emplace_back(PickerDateF::CreateMonthDay(index, dayIndex, true, isLeapMonth));
+        } else if (shouldAddEmpty) {
+            options_[monthDaysColumn].emplace_back(emptyPickerDate_);
+        }
+    }
+}
+
 void DatePickerPattern::FillLunarMonthDaysOptions(const LunarDate& current, RefPtr<FrameNode>& monthDaysColumn)
 {
     uint32_t startMonth = 1;
     uint32_t endMonth = 12;
-    uint32_t startDay = 1;
 
     uint32_t lunarLeapMonth = 0;
     bool hasLeapMonth = GetLunarLeapMonth(current.year, lunarLeapMonth);
     options_[monthDaysColumn].clear();
 
     for (uint32_t index = startMonth; index <= endMonth; ++index) {
-        uint32_t maxDay = GetLunarMaxDay(current.year, index, false);
-        for (uint32_t dayIndex = startDay; dayIndex <= maxDay; ++dayIndex) {
-            if (!current.isLeapMonth && current.month == index && current.day == dayIndex) {
-                auto datePickerColumnPattern = monthDaysColumn->GetPattern<DatePickerColumnPattern>();
-                CHECK_NULL_VOID(datePickerColumnPattern);
-                datePickerColumnPattern->SetCurrentIndex(options_[monthDaysColumn].size());
-                datePickerColumnPattern->HandleAccessibilityTextChange();
-            }
-            options_[monthDaysColumn].emplace_back(PickerDateF::CreateMonthDay(index, dayIndex, true, false));
-        }
+        ProcessDayOptions(current, monthDaysColumn, index, false, lunarLeapMonth);
 
         if (!hasLeapMonth || lunarLeapMonth != index) {
             continue;
         }
 
-        maxDay = GetLunarMaxDay(current.year, index, true);
-        for (uint32_t dayIndex = startDay; dayIndex <= maxDay; ++dayIndex) {
-            if (current.isLeapMonth && current.month == index && current.day == dayIndex) {
-                auto datePickerColumnPattern = monthDaysColumn->GetPattern<DatePickerColumnPattern>();
-                CHECK_NULL_VOID(datePickerColumnPattern);
-                datePickerColumnPattern->SetCurrentIndex(options_[monthDaysColumn].size());
-                datePickerColumnPattern->HandleAccessibilityTextChange();
-            }
-            options_[monthDaysColumn].emplace_back(PickerDateF::CreateMonthDay(index, dayIndex, true, true));
-        }
+        ProcessDayOptions(current, monthDaysColumn, index, true, lunarLeapMonth);
     }
 }
 
@@ -3186,7 +3320,7 @@ void DatePickerPattern::UpdateTextStyleCommon(
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
 
-    if (pipelineContext->IsSystmColorChange()) {
+    if (pipelineContext->IsSystemColorChange()) {
         updateTextColorFunc(textStyle.textColor.value_or(defaultTextStyle.GetTextColor()));
 
         Dimension fontSize = defaultTextStyle.GetFontSize();
@@ -3309,4 +3443,343 @@ void DatePickerPattern::BeforeCreateLayoutWrapper()
     }
 }
 
+bool DatePickerPattern::IsNotSetStartEndDate()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, true);
+    auto dataPickerRowLayoutProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    CHECK_NULL_RETURN(dataPickerRowLayoutProperty, true);
+    auto startDate =
+        LunarToSolar(dataPickerRowLayoutProperty->GetStartDate().value_or(SolarToLunar(startDefaultDateSolar_)));
+    auto endDate = LunarToSolar(dataPickerRowLayoutProperty->GetEndDate().value_or(SolarToLunar(endDefaultDateSolar_)));
+    return startDate == startDefaultDateSolar_ && endDate == endDefaultDateSolar_;
+}
+
+int32_t DatePickerPattern::OnInjectionEvent(const std::string& command)
+{
+    if (GetIsShowInDialog()) {
+        return OnDialogDateInjection(command);
+    } else {
+        return OnDateInjection(command);
+    }
+}
+
+bool DatePickerPattern::IsJsonValid(const std::unique_ptr<JsonValue>& json)
+{
+    CHECK_NULL_RETURN(json, false);
+    return json->IsValid();
+}
+
+bool DatePickerPattern::IsJsonObject(const std::unique_ptr<JsonValue>& json)
+{
+    CHECK_NULL_RETURN(json, false);
+    return json->IsObject();
+}
+
+bool DatePickerPattern::ReportCommandResult(int32_t nodeId, const std::string& event,
+    const std::string& result, const std::string& reason)
+{
+    auto value = InspectorJsonUtil::Create();
+    CHECK_NULL_RETURN(value, false);
+    value->Put("event", event.c_str());
+    value->Put("result", result.c_str());
+    if (!reason.empty()) {
+        value->Put("reason", reason.c_str());
+    }
+
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "DatePickerResult", value,
+        ComponentEventType::COMPONENT_EVENT_PICKER);
+    return true;
+}
+
+bool DatePickerPattern::ValidateDateParameters(const std::unique_ptr<JsonValue>& paramJson,
+    int32_t& year, int32_t& month, int32_t& day)
+{
+    if (!paramJson->Contains("year") || !paramJson->Contains("month") ||
+        !paramJson->Contains("day")) {
+        return false;
+    }
+    auto yearValue = paramJson->GetValue("year");
+    auto monthValue = paramJson->GetValue("month");
+    auto dayValue = paramJson->GetValue("day");
+    if ((yearValue && monthValue && dayValue) &&
+        (yearValue->IsNumber() && monthValue->IsNumber() && dayValue->IsNumber())) {
+        year = yearValue->GetInt();
+        month = monthValue->GetInt();
+        day = dayValue->GetInt();
+        if (year < MIN_YEAR || month < MIN_MONTH || month > MAX_MONTH || day < MIN_DAY ||
+            day > static_cast<int32_t>(PickerDate::GetMaxDay(year, month))) {
+            return false;
+        }
+        PickerDate inputDate(year, month, day);
+        if (DatePickerPattern::SolarDateCompare(inputDate, startDateSolar_) < 0 ||
+            DatePickerPattern::SolarDateCompare(inputDate, endDateSolar_) > 0) {
+            return false;
+        }
+        return true;
+    }
+    return false;
+}
+
+int32_t DatePickerPattern::OnDateInjection(const std::string& command)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, RET_FAILED);
+
+    auto json = JsonUtil::ParseJsonString(command);
+    if (!IsJsonValid(json)) {
+        auto errorMsg = std::string("invalidCommand: ") + command;
+        ReportCommandResult(host->GetId(), "", "fail", errorMsg);
+        return RET_FAILED;
+    }
+    if (!IsJsonObject(json)) {
+        auto errorMsg = std::string("invalidCommand: ") + command;
+        ReportCommandResult(host->GetId(), "", "fail", errorMsg);
+        return RET_FAILED;
+    }
+    std::string cmd = json->GetString("cmd");
+    if (cmd != "setDatePickerTime") {
+        auto errorMsg = std::string("invalidCommand: ") + command;
+        ReportCommandResult(host->GetId(), cmd, "fail", errorMsg);
+        return RET_FAILED;
+    }
+    auto paramJson = json->GetValue("params");
+    if (!IsJsonValid(paramJson) || !IsJsonObject(paramJson)) {
+        auto errorMsg = std::string("invalidParams: ") + command;
+        ReportCommandResult(host->GetId(), cmd, "fail", errorMsg);
+        return RET_FAILED;
+    }
+
+    int32_t year;
+    int32_t month;
+    int32_t day;
+    if (!ValidateDateParameters(paramJson, year, month, day)) {
+        auto errorMsg = std::string("invalidParams: ") + command;
+        ReportCommandResult(host->GetId(), cmd, "fail", errorMsg);
+        return RET_FAILED;
+    }
+    ReportCommandResult(host->GetId(), cmd, "success");
+    PickerDate targetDate(year, month, day);
+    SetSelectDate(targetDate);
+    auto frameNode = GetHost();
+    if (frameNode) {
+        auto layoutProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+        if (layoutProperty) {
+            layoutProperty->UpdateSelectedDate(GetSelectDate());
+        }
+    }
+    OnModifyDone();
+    FireChangeEvent(true);
+    return RET_SUCCESS;
+}
+
+int32_t DatePickerPattern::OnDialogDateInjection(const std::string& command)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, RET_FAILED);
+
+    auto pickerProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    if (!pickerProperty) {
+        auto errorMsg = std::string("pickerProperty Json: ") + command;
+        ReportCommandResult(host->GetId(), "datePickerDialog", "fail", errorMsg);
+        return RET_FAILED;
+    }
+
+    auto json = JsonUtil::ParseJsonString(command);
+    if (!IsJsonValid(json) || !IsJsonObject(json)) {
+        auto errorMsg1 = std::string("invalidCommand Json: ") + command;
+        ReportCommandResult(host->GetId(), "datePickerDialog", "fail", errorMsg1);
+        return RET_FAILED;
+    }
+
+    std::string cmd = json->GetString("cmd");
+    if (cmd != "setDatePickerDialogTime") {
+        auto errorMsg2 = std::string("invalidCommand Json: ") + command;
+        ReportCommandResult(host->GetId(), "datePickerDialog", "fail", errorMsg2);
+        return RET_FAILED;
+    }
+
+    auto paramJson = json->GetValue("params");
+    if (!CheckDialogParamValue(paramJson, command) || !CheckDialogParamDataValid(paramJson, command)) {
+        auto errorMsg3 = std::string("invalidParams Json: ") + command;
+        ReportCommandResult(host->GetId(), "datePickerDialog", "fail", errorMsg3);
+        return RET_FAILED;
+    }
+
+    ReportCommandResult(host->GetId(), "datePickerDialog", "success", "");
+    int32_t year = paramJson->GetInt("year");
+    int32_t month = paramJson->GetInt("month");
+    int32_t day = paramJson->GetInt("day");
+    int32_t hour = paramJson->GetInt("hour");
+    int32_t minute = paramJson->GetInt("minute");
+    int32_t second = paramJson->GetInt("second");
+    SetDatePickerDialogTime(hour, minute, second);
+    SetDatePickerDialogDate(year, month, day);
+
+    PickerDate targetDate(year, month, day);
+    SetSelectDate(targetDate);
+    pickerProperty->UpdateSelectedDate(GetSelectDate());
+
+    if (showMonthDays_) {
+        FlushMonthDaysColumn();
+    } else {
+        FlushColumn();
+    }
+    ShowTitle(GetTitleId());
+    FireChangeEvent(true);
+    return RET_SUCCESS;
+}
+
+void DatePickerPattern::SetDatePickerDialogTime(int32_t hour, int32_t minute, int32_t second)
+{
+    if (!showTime_) {
+        return;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    RefPtr<UINode> pickerRow = nullptr;
+    if (showMonthDays_) {
+        pickerRow = host->GetParent();
+        CHECK_NULL_VOID(pickerRow);
+    } else {
+        auto pickerStack = host->GetParent();
+        CHECK_NULL_VOID(pickerStack);
+        pickerRow = pickerStack->GetLastChild();
+        CHECK_NULL_VOID(pickerRow);
+    }
+
+    if (pickerRow->GetChildren().size() <= 1) {
+        return;
+    }
+    RefPtr<FrameNode> timeNode = AceType::DynamicCast<FrameNode>(pickerRow->GetChildAtIndex(1));
+
+    CHECK_NULL_VOID(timeNode);
+
+    auto* modifier = NG::NodeModifier::GetTimepickerCustomModifier();
+    CHECK_NULL_VOID(modifier);
+
+    PickerTime selectedTime;
+    selectedTime.SetHour(hour);
+    selectedTime.SetMinute(minute);
+    selectedTime.SetSecond(second);
+
+    modifier->setSelectedTime(timeNode, selectedTime);
+    timeNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    timeNode->MarkModifyDone();
+}
+
+void DatePickerPattern::SetDatePickerDialogDate(int32_t year, int32_t month, int32_t day)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    RefPtr<UINode> pickerRow = nullptr;
+    if (showMonthDays_) {
+        pickerRow = host->GetParent();
+        CHECK_NULL_VOID(pickerRow);
+    } else {
+        auto pickerStack = host->GetParent();
+        CHECK_NULL_VOID(pickerStack);
+        pickerRow = pickerStack->GetLastChild();
+        CHECK_NULL_VOID(pickerRow);
+    }
+
+    if (pickerRow->GetChildren().size() <= 0) {
+        return;
+    }
+    RefPtr<FrameNode> dateNode = AceType::DynamicCast<FrameNode>(pickerRow->GetChildAtIndex(0));
+
+    CHECK_NULL_VOID(dateNode);
+
+    PickerDate targetDate(year, month, day);
+    SetSelectDate(targetDate);
+    auto pickerProperty = dateNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
+    pickerProperty->UpdateSelectedDate(GetSelectDate());
+    dateNode->MarkModifyDone();
+}
+
+bool DatePickerPattern::CheckDialogParamValue(const std::unique_ptr<JsonValue>& paramJson,
+    const std::string& command)
+{
+    if (!IsJsonValid(paramJson) || !IsJsonObject(paramJson)) {
+        return false;
+    }
+
+    if (!paramJson->Contains("year") || !paramJson->Contains("month") || !paramJson->Contains("day")
+        || !paramJson->Contains("hour") || !paramJson->Contains("minute") || !paramJson->Contains("second")) {
+        return false;
+    }
+
+    if (!paramJson->GetValue("year")->IsNumber() || !paramJson->GetValue("month")->IsNumber() ||
+        !paramJson->GetValue("day")->IsNumber() || !paramJson->GetValue("hour")->IsNumber() ||
+        !paramJson->GetValue("minute")->IsNumber() || !paramJson->GetValue("second")->IsNumber()) {
+        return false;
+    }
+    return true;
+}
+
+bool DatePickerPattern::CheckDialogParamDataValid(const std::unique_ptr<JsonValue>& paramJson,
+    const std::string& command)
+{
+    if (!IsJsonValid(paramJson) || !IsJsonObject(paramJson)) {
+        return false;
+    }
+
+    int32_t year = paramJson->GetInt("year", -1);
+    int32_t month = paramJson->GetInt("month", -1);
+    int32_t day = paramJson->GetInt("day", -1);
+    int32_t hour = paramJson->GetInt("hour", -1);
+    int32_t minute = paramJson->GetInt("minute", -1);
+    int32_t second = paramJson->GetInt("second", -1);
+    if (year < MIN_YEAR || month < static_cast<int32_t>(MIN_MONTH) ||
+        month > static_cast<int32_t>(MAX_MONTH) || day < static_cast<int32_t>(MIN_DAY)) {
+        return false;
+    }
+
+    uint32_t maxDay = PickerDate::GetMaxDay(year, month);
+    if (day > static_cast<int32_t>(maxDay)) {
+        return false;
+    }
+
+    if (hour < MIN_HOUR || hour > MAX_HOUR || minute < MIN_MINUTE || minute > MAX_MINUTE ||
+        second < MIN_SECOND || second > MAX_SECOND) {
+        return false;
+    }
+
+    PickerDate inputDate(year, month, day);
+    if (!(DatePickerPattern::SolarDateCompare(inputDate, startDateSolar_) >= 0 &&
+        DatePickerPattern::SolarDateCompare(inputDate, endDateSolar_) <= 0)) {
+        return false;
+    }
+    return true;
+}
+
+void DatePickerPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
+{
+    bool oldFullscreen = isWindowFullscreen_;
+    switch (type) {
+        case WindowSizeChangeReason::SPLIT_TO_FULL:
+        case WindowSizeChangeReason::FLOATING_TO_FULL:
+            isWindowFullscreen_ = true;
+            break;
+        case WindowSizeChangeReason::FULL_TO_SPLIT:
+        case WindowSizeChangeReason::FULL_TO_FLOATING:
+            isWindowFullscreen_ = false;
+            break;
+        default:
+            break;
+    }
+    if (oldFullscreen != isWindowFullscreen_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        for (auto& column : datePickerColumns_) {
+            auto columnNode = column.Upgrade();
+            CHECK_NULL_VOID(columnNode);
+            columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

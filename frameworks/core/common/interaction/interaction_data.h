@@ -16,10 +16,28 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_INTERACTION_DATA_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_INTERACTION_DATA_H
 
-#include "base/image/pixel_map.h"
-#include "core/gestures/drag_event.h"
+#include <cmath>
+#include <cstdint>
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
+
+#include "ui/base/referenced.h"
+#include "core/gestures/drag_constants.h"
+
+namespace OHOS {
+
+namespace Media {
+class PixelMap;
+}
+
+}
 
 namespace OHOS::Ace {
+
+class PixelMap;
+
 constexpr float PERCISION { 1E-6 };
 enum class DragCursorStyleCore {
     DEFAULT = 0,
@@ -32,6 +50,21 @@ struct ShadowInfoCore {
     RefPtr<PixelMap> pixelMap;
     int32_t x = -1;
     int32_t y = -1;
+
+    // Constructor to support aggregate-like initialization: {pixelMap, x, y}
+    // Declared here, implemented in interaction_data.cpp
+    ShadowInfoCore();
+    ShadowInfoCore(const RefPtr<PixelMap>& pm, int32_t ox, int32_t oy);
+
+    // Special member functions implemented in interaction_data.cpp with full PixelMap definition
+    ~ShadowInfoCore();
+    ShadowInfoCore(const ShadowInfoCore&);
+    ShadowInfoCore(ShadowInfoCore&&);
+    ShadowInfoCore& operator=(const ShadowInfoCore&);
+    ShadowInfoCore& operator=(ShadowInfoCore&&);
+
+    // Helper method to get PixelMap shared pointer
+    std::shared_ptr<::OHOS::Media::PixelMap> GetPixelMapSharedPtr() const;
 };
 
 struct ShadowOffsetData {
@@ -109,13 +142,13 @@ struct PreviewStyle {
     int32_t radius = -1;
     float scale = -1;
 
-    bool operator == (const PreviewStyle &other) const
+    bool operator==(const PreviewStyle& other) const
     {
         return types == other.types && foregroundColor == other.foregroundColor && opacity == other.opacity &&
                radius == other.radius && fabsf(scale - other.scale) < PERCISION;
     }
 
-    bool operator!=(const PreviewStyle &other) const
+    bool operator!=(const PreviewStyle& other) const
     {
         return !(*this == other);
     }

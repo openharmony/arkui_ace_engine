@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,8 +18,6 @@
 
 #include <cstdint>
 
-#include "core/components/rating/rating_theme.h"
-#include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/rating/rating_accessibility_property.h"
 #include "core/components_ng/pattern/rating/rating_event_hub.h"
@@ -30,7 +28,11 @@
 #include "core/components_ng/pattern/rating/rating_render_property.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/components/theme/app_theme.h"
+
+namespace OHOS::Ace {
+class RatingTheme;
+class IconTheme;
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
 const double DEFAULT_RATING_STEP_SIZE_VALUE = 0.5;
@@ -129,6 +131,7 @@ public:
         const RefPtr<IconTheme>& iconTheme);
     void LoadBackground(const RefPtr<RatingLayoutProperty>& layoutProperty, const RefPtr<RatingTheme>& ratingTheme,
         const RefPtr<IconTheme>& iconTheme);
+    int32_t OnInjectionEvent(const std::string& command) override;
 
 private:
     void OnAttachToFrameNode() override;
@@ -186,6 +189,10 @@ private:
     void FireBuilder();
     RefPtr<FrameNode> BuildContentModifierNode();
     bool IsRatingImageReady(uint32_t imageStateCode);
+    void ReportChangeEvent(const std::string& index);
+    bool ReportInjectionResult(bool isSuccess, const std::string& reason);
+    double AdjustedRatingScore(double value);
+    int32_t HandleRatingChangeInjection(const std::unique_ptr<JsonValue>& commandObj);
 
     std::optional<RatingMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;

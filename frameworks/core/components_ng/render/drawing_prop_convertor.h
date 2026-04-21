@@ -24,6 +24,13 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
+
+// Forward declarations from text_style.h
+enum class EllipsisMode : int;
+enum class FontWeight : int;
+enum class WordBreak : int;
+class TextStyle;
+
 ACE_FORCE_EXPORT RSPoint ToRSPoint(const NG::PointF& point);
 ACE_FORCE_EXPORT RSPen::CapStyle ToRSCapStyle(const LineCap& lineCap);
 ACE_FORCE_EXPORT RSColor ToRSColor(const Color& color);

@@ -33,7 +33,7 @@ struct svgExample005 {
   // Color array for switching
   @State colorArray: (Color | ColorMetrics)[] = [
     this.p3Red, this.sRGBRed, this.p3Green, this.sRGBGreen,
-    this.p3Blue, this.sRGBBlue, Color.Orange, Color.Purple
+    this.p3Blue, this.sRGBBlue, Color.Orange, 0x800080
   ]
 
   @State colorArrayStr: string[] = [

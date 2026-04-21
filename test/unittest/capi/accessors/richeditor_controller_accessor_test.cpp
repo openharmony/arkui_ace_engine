@@ -152,16 +152,13 @@ void AssignArkValue(Ark_RichEditorTextStyle& dst, const OHOS::Ace::TextStyle& st
     dst.decoration = Converter::ArkValue<Opt_DecorationStyleInterface>(decoration, ctx);
 
     dst.textShadow = Converter::ArkUnion<Opt_Union_ShadowOptions_Array_ShadowOptions, Ark_Empty>(nullptr);
-
     dst.letterSpacing = Converter::ArkUnion<Opt_Union_F64_String, Ark_Empty>(nullptr);
-
     dst.lineHeight = Converter::ArkUnion<Opt_Union_F64_String_Resource, Ark_Empty>(nullptr);
-
     dst.halfLeading = Converter::ArkValue<Opt_Boolean>();
-
     dst.fontFeature = Converter::ArkValue<Opt_String>();
-
     dst.textBackgroundStyle = Converter::ArkValue<Opt_TextBackgroundStyle>();
+    dst.strokeWidth = Converter::ArkUnion<Opt_Union_LengthMetrics_F64, Ark_LengthMetrics>(style.GetStrokeWidth(), ctx);
+    dst.strokeColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(style.GetStrokeColor(), ctx);
 }
 
 void AssignArkValue(Ark_RichEditorParagraphStyle& dst, const UpdateParagraphStyle& style)
@@ -331,7 +328,7 @@ HWTEST_F(RichEditorControllerAccessorTest, addSymbolSpanTest, TestSize.Level1)
  * @tc.desc: Check the functionality of addBuilderSpan
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorControllerAccessorTest, AddBuilderSpanTest, TestSize.Level1)
+HWTEST_F(RichEditorControllerAccessorTest, addBuilderSpanTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->addBuilderSpan, nullptr);
 

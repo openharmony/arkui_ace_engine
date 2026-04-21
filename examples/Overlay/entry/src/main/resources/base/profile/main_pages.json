@@ -18,6 +18,17 @@
     "pages/components/dialog/page/AlertDialogTestLevel0_0",
     "pages/components/dialog/page/AlertDialogTestLevel0_1",
     "pages/components/dialog/page/AlertDialogTestLevel0_2",
-    "pages/components/dialog/page/AlertDialogTestLevel0_3"
+    "pages/components/dialog/page/AlertDialogTestLevel0_3",
+    "pages/components/dialog/page/ActionSheetAdvanced_Style",
+    "pages/components/dialog/page/ActionSheetAdvanced_Events",
+    "pages/components/dialog/page/ActionSheetAdvanced_Groups",
+    "pages/components/dialog/page/ActionSheetAdvanced_Icons",
+    "pages/components/dialog/page/AlertDialogExtended_Alignment",
+    "pages/components/dialog/page/AlertDialogExtended_AutoCancel",
+    "pages/components/dialog/page/AlertDialogExtended_ButtonStyle",
+    "pages/components/dialog/page/AlertDialogExtended_Callbacks",
+    "pages/components/dialog/page/AlertDialogExtended_CornerRadius",
+    "pages/components/dialog/page/AlertDialogExtended_Styles",
+    "pages/components/dialog/page/AlertDialogExtended_TextStyle"
   ]
 }

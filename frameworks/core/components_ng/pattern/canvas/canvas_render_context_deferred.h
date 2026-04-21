@@ -34,6 +34,9 @@ public:
     }
     void ResetStates() override;
 
+    std::optional<bool> GetAntialiasExt() const override;
+    void SetAntialiasExtParam(std::optional<bool> isEnabled) override;
+    void ResetAntialiasExt() override;
     TransformParam GetTransform() const override;
     LineDashParam GetLineDash() const override;
     void SaveProperties() override;
@@ -51,6 +54,8 @@ private:
     std::string customNodeName_;
     std::list<std::function<void(CanvasPaintMethod&)>> tasks_;
 
+    std::optional<bool> antialiasExt_;
+    std::vector<std::optional<bool>> antialiasExtStates_;
     RSMatrix matrix_;
     std::vector<RSMatrix> matrixStates_;
     LineDashParam lineDash_;

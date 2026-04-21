@@ -20,11 +20,11 @@ struct WaterFlowDemo {
   }
 
   initList() {
-    let list = new Array<ImgEntity>(40);
+    let list: ImgEntity[] = [];
     for (let i = 0; i < 39; i++) {
-      list[i] = new ImgEntity(this.colors[i % 5])
+      list.push(new ImgEntity(this.colors[i % 5]));
     }
-    list[39] = new ImgEntity(Color.Black, 0, true);
+    list.push(new ImgEntity(Color.Black, 0, true));
     this.itemList.addAllData(list);
   }
 

@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TIMEPICKER_BRIDGE_TIME_PICKER_DYNAMIC_MODULE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TIMEPICKER_BRIDGE_TIME_PICKER_DYNAMIC_MODULE_H
 
-#include "bridge/arkts_frontend/koala_projects/arkoala-arkts/framework/native/src/generated/arkoala_api_generated.h"
+#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 #include "core/common/dynamic_module.h"
 #include "core/components_ng/pattern/time_picker/bridge/timepicker_util.h"
 #include "core/interfaces/native/node/node_textpicker_modifier.h"

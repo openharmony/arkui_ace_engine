@@ -47,6 +47,12 @@ class BuilderNodeCommonBase {
     __JSScopeUtil__.restoreInstanceId();
     return ret;
   }
+  public postInputEventWithStrategy(event: InputEventType, competitionStrategy?: CompetitionStrategy): boolean {
+    __JSScopeUtil__.syncInstanceId(this._JSBuilderNode.getInstanceId());
+    let ret = this._JSBuilderNode.postInputEventWithStrategy(event, competitionStrategy);
+    __JSScopeUtil__.restoreInstanceId();
+    return ret;
+  }
   public dispose(): void {
     if (this.isDisposed()) {
       return;
@@ -77,12 +83,17 @@ class BuilderNodeCommonBase {
   }
 }
 class BuilderNode extends BuilderNodeCommonBase {
-  constructor(uiContext: UIContext, options: RenderOptions) {
+  constructor(uiContext: UIContext, options: RenderOptions, jsBuilderNode?: JSBuilderNode) {
     super();
-    let jsBuilderNode = new JSBuilderNode(uiContext, options);
-    this._JSBuilderNode = jsBuilderNode;
+    if (jsBuilderNode == null || jsBuilderNode == undefined) {
+      this._JSBuilderNode = new JSBuilderNode(uiContext, options);
+    } else {
+      this._JSBuilderNode = jsBuilderNode;
+      this.nodePtr_ = this._JSBuilderNode.getNodePtr();
+    }
     let id = Symbol('BuilderRootFrameNode');
-    BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.set(id, jsBuilderNode);
+    BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.set(
+      id, new WeakRef<JSBuilderNode>(this._JSBuilderNode));
     BuilderNodeFinalizationRegisterProxy.register(this, { name: 'BuilderRootFrameNode', idOfNode: id });
   }
   public build(builder: WrappedBuilder<Object[]>, params?: Object, options?: BuildOptions,): void {
@@ -123,6 +134,23 @@ class JSBuilderNode extends BaseNode {
     this.updateParams_ = null;
     this.activeCount_ = 1;
   }
+  public static createForTrans(uiContext: UIContext, nodePtr: number, frameNodePtr: number): JSBuilderNode {
+    __JSScopeUtil__.syncInstanceId(uiContext.instanceId_);
+    let jsBuilderNode = new JSBuilderNode(uiContext, {});
+    let nativeRef = getUINativeModule().frameNode.createNativeStrongRefWithPtrVal(nodePtr);
+    let frameNode = new BuilderRootFrameNode(uiContext, 'BuilderRootFrameNode', frameNodePtr); 
+    frameNode.setNodePtr(nativeRef, nativeRef.getNativeHandle());
+    frameNode.setRenderNode(nativeRef);
+    frameNode.setBaseNode(jsBuilderNode);
+    frameNode.setBuilderNode(jsBuilderNode);
+    FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.set(frameNode.getUniqueId(), new WeakRef(frameNode));
+
+    jsBuilderNode._nativeRef = nativeRef;
+    jsBuilderNode.nodePtr_ = nativeRef.getNativeHandle();
+    jsBuilderNode.frameNode_ = frameNode;
+    __JSScopeUtil__.restoreInstanceId();
+    return jsBuilderNode;
+  }
   public findProvidePU__(providePropName: string): ObservedPropertyAbstractPU<any> | undefined {
     if (this.__enableBuilderNodeConsume__ && this.__parentViewOfBuildNode) {
       return this.__parentViewOfBuildNode?.deref()?.findProvidePU__(providePropName);
@@ -140,7 +168,7 @@ class JSBuilderNode extends BaseNode {
           }
           else {
             // FIXME fix for mixed V2 - V3 Hierarchies
-            throw new BusinessError(100029, 'aboutToReuseInternal: Reuse not implemented for ViewV2, yet');
+            child.aboutToReuseInternal(param);
           }
         } // if child
       });
@@ -159,7 +187,7 @@ class JSBuilderNode extends BaseNode {
         }
         else {
           // FIXME fix for mixed V2 - V3 Hierarchies
-          throw new BusinessError(100029, 'aboutToRecycleInternal: Recycle not yet implemented for ViewV2');
+          child.aboutToRecycleInternal();
         }
       } // if child
     });
@@ -575,12 +603,16 @@ class JSBuilderNode extends BaseNode {
 }
 
 class ReactiveBuilderNode extends BuilderNodeCommonBase {
-  constructor(uiContext: UIContext, options: RenderOptions) {
+  constructor(uiContext: UIContext, options: RenderOptions, jsBuilderNode?: JSBuilderNode) {
     super();
-    let jsBuilderNode = new ReactiveBuilderNodeBase(uiContext, options);
-    this._JSBuilderNode = jsBuilderNode;
+    if (jsBuilderNode === null || jsBuilderNode === undefined) {
+      this._JSBuilderNode = new ReactiveBuilderNodeBase(uiContext, options);
+    } else {
+      this._JSBuilderNode = jsBuilderNode;
+    }
     let id = Symbol('BuilderRootFrameNode');
-    BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.set(id, jsBuilderNode);
+    BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.set(
+      id, new WeakRef<JSBuilderNode>(this._JSBuilderNode));
     BuilderNodeFinalizationRegisterProxy.register(this, { name: 'BuilderRootFrameNode', idOfNode: id });
   }
   public build(builder: WrappedBuilder<Object[]>, options?: BuildOptions, ...params: Object[]): void {

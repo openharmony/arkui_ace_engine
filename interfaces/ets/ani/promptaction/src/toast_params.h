@@ -39,6 +39,7 @@ bool GetToastShowMode(ani_env* env, ani_object object, OHOS::Ace::NG::ToastShowM
 bool GetToastAlignment(ani_env* env, ani_object object, int32_t& result);
 bool GetToastShadow(ani_env* env, ani_object object, std::optional<OHOS::Ace::Shadow>& result, bool& isTypeStyleShadow);
 bool GetShowToastOptions(ani_env* env, ani_object object, OHOS::Ace::NG::ToastInfo& result);
+bool GetShowToastOptionsInternal(ani_env* env, ani_object object, OHOS::Ace::NG::ToastInfo& result);
 std::function<void(int32_t)> GetToastPromise(std::shared_ptr<PromptActionAsyncContext>& asyncContext);
 
 #endif // INTERFACES_ETS_ANI_PROMPTACTION_SRC_TOAST_PARAMS_H

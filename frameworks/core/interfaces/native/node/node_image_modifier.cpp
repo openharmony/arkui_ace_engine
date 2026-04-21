@@ -16,6 +16,7 @@
 
 #include "effect/color_filter.h"
 
+#include "base/image/drawing_lattice.h"
 #include "core/common/card_scope.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/image/image_component.h"
@@ -527,17 +528,20 @@ void SetFillColor(ArkUINodeHandle node, ArkUI_Uint32 value)
     Color color = Color(value);
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> colorResObj;
-        ResourceParseUtils::CompleteResourceObjectFromColor(colorResObj, color, frameNode->GetTag());
+        ResourceParseUtils::CompleteResourceObjectFromColor(
+            colorResObj, color, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         ImageModelNG::CreateWithResourceObj(frameNode, ImageResourceType::FILL_COLOR, colorResObj);
     }
     ImageModelNG::SetImageFill(frameNode, color);
 }
 
-void SetFillColorWithColorSpace(ArkUINodeHandle node, ArkUI_Uint32 value, ArkUI_Uint32 colorSpace, void* colorRawPtr)
+void SetFillColorWithColorSpace(ArkUINodeHandle node, const ArkUI_InnerColor* colorPtr, void* colorRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelNG::SetImageFill(frameNode, Color(value, static_cast<ColorSpace>(colorSpace)));
+    const auto* realColorPtr = reinterpret_cast<const Color*>(colorPtr);
+    CHECK_NULL_VOID(realColorPtr);
+    ImageModelNG::SetImageFill(frameNode, *realColorPtr);
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> colorResObj;
         if (colorRawPtr) {
@@ -912,11 +916,16 @@ void ResetResizable(ArkUINodeHandle node)
     ImageModelNG::SetResizableSlice(frameNode, defaultImageSlice);
 }
 
-void SetResizableLattice(ArkUINodeHandle node, void* lattice)
+void SetResizableLattice(ArkUINodeHandle node, void* lattice, bool isCapi)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto drawingLattice = DrawingLattice::CreateDrawingLattice(lattice);
+    RefPtr<DrawingLattice> drawingLattice;
+    if (isCapi) {
+        drawingLattice = DrawingLattice::CreateDrawingLatticeFromNative(lattice);
+    } else {
+        drawingLattice = DrawingLattice::CreateDrawingLatticeFromSptr(lattice);
+    }
     if (drawingLattice) {
         ImageModelNG::SetResizableLattice(frameNode, drawingLattice);
     } else {

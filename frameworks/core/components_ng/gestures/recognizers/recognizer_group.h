@@ -59,6 +59,7 @@ public:
     void OnFlushTouchEventsEnd() override;
     virtual RefereeState CheckStates(size_t touchId);
     void ForceReject();
+    void UpdateGestureReferee(const WeakPtr<GestureReferee>& gestureReferee) override;
 
     void RemainChildOnResetStatus()
     {
@@ -74,14 +75,7 @@ public:
         }
     }
 
-    void AttachFrameNode(const WeakPtr<NG::FrameNode>& node) override
-    {
-        TouchEventTarget::AttachFrameNode(node);
-        auto recognizers = GetGroupRecognizer();
-        for (const auto& recognizer : recognizers) {
-            recognizer->AttachFrameNode(node);
-        }
-    }
+    void AttachFrameNode(const WeakPtr<NG::FrameNode>& node) override;
 
     const std::list<RefPtr<NGGestureRecognizer>>& GetGroupRecognizer();
 

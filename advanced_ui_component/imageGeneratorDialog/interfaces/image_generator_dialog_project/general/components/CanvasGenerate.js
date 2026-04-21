@@ -30,7 +30,6 @@ import { ImageGenerateState } from '../types/Declaration';
 import { AIGenerateImpl } from "../utils/AIGenerateImpl";
 import { AIGenerateOptions } from '../utils/AIGenerateOptions';
 import systemDateTime from "@ohos.systemDateTime";
-
 export class GenerateProgress extends ViewV2 {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda, extraInfo) {
         super(parent, elmtId, extraInfo);
@@ -243,7 +242,7 @@ export class GenerateProgress extends ViewV2 {
             if (!this.isGenerateSuccess) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        SymbolGlyph.create({ "id": -1, "type": 40000, params: ['sys.symbol.xmark'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        SymbolGlyph.create({ "id": 125831487, "type": 40000, params: ['sys.symbol.xmark'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
                         SymbolGlyph.fontSize(20);
                         SymbolGlyph.onClick(() => {
                             if (!this.isGenerateSuccess) {
@@ -351,8 +350,8 @@ export class GeneratingArea extends ViewV2 {
                 if (isInitialRender) {
                     let componentCall = new GenerateProgress(this, {
                         currentGenerateState: this.currentGenerateState,
-                        changeCurrentState: this.changeGenerateState,
-                    }, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasGenerate.ets", line: 248, col: 9 });
+                        changeCurrentState: this.changeGenerateState
+                    }, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasGenerate.ets", line: 241, col: 9 });
                     ViewV2.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -372,7 +371,7 @@ export class GeneratingArea extends ViewV2 {
         {
             this.observeComponentCreation2((elmtId, isInitialRender) => {
                 if (isInitialRender) {
-                    let componentCall = new MinimizeButton(this, {}, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasGenerate.ets", line: 252, col: 9 });
+                    let componentCall = new MinimizeButton(this, {}, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasGenerate.ets", line: 245, col: 9 });
                     ViewV2.create(componentCall);
                     let paramsLambda = () => {
                         return {};

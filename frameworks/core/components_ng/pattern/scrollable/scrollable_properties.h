@@ -21,11 +21,18 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
+#include "base/geometry/rect.h"
+#include "base/geometry/shape.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/gestures/gesture_event.h"
 #include "ui/properties/scrollable_properties.h"
+
+namespace OHOS::Ace::NG {
+enum class SceneStatus : int8_t;
+class TouchEventImpl;
+} // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {
 constexpr float DEFAULT_SCROLL_TO_MASS = 1.0f;
@@ -62,6 +69,39 @@ enum class ScrollPagingStatus {
     // enablePaging is true
     VALID,
 };
+
+namespace NG {
+enum class NestedState {
+    GESTURE = 0,
+    CHILD_SCROLL,
+    CHILD_OVER_SCROLL,
+    CHILD_CHECK_OVER_SCROLL,
+};
+
+struct OverScrollOffset {
+    double start;
+    double end;
+};
+
+struct ScrollResult {
+    double remain;
+    bool reachEdge;
+};
+
+enum class ContentClipMode {
+    CONTENT_ONLY, // area excluding margin & padding & SafeAreaPadding
+    BOUNDARY,     // corresponding to FrameRect, area excluding margin
+    SAFE_AREA,    // CONTENT_ONLY area + SafeAreaPadding (which can stack up with ancestor's SafeAreaPadding)
+    CUSTOM,       // inner enum, not present in frontend. Custom shape's offset is relative to FrameOffset.
+    DEFAULT,      // Different scrollable components have different default clip values.
+};
+
+using ContentClip = std::pair<ContentClipMode, RefPtr<ShapeRect>>;
+} // namespace NG
+
+using NestedState = NG::NestedState;
+using OverScrollOffset = NG::OverScrollOffset;
+using ScrollResult = NG::ScrollResult;
 
 enum class SnapType {
     SCROLL_SNAP = 0,

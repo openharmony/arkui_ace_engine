@@ -26,10 +26,10 @@
 #include "interfaces/native/node/node_model.h"
 #include "interfaces/native/node/render_node.h"
 #include "interfaces/native/node/styled_string.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "frameworks/base/error/error_code.h"
 #include "frameworks/core/components_ng/base/ui_node.h"
 
@@ -1417,6 +1417,40 @@ HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest214, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NativeRenderNodeTest215
+ * @tc.desc: Test SetRectShapeOptionValue function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest215, TestSize.Level1)
+{
+    auto rectShape = OH_ArkUI_RenderNodeUtils_CreateRectShapeOption();
+    ASSERT_NE(rectShape, nullptr);
+    OH_ArkUI_RenderNodeUtils_SetRectShapeOptionValue(rectShape, 10.0f, 20.0f, 30.0f, 40.0f);
+    ASSERT_EQ(rectShape->left, 10.0f);
+    ASSERT_EQ(rectShape->top, 20.0f);
+    ASSERT_EQ(rectShape->right, 40.0f);
+    ASSERT_EQ(rectShape->bottom, 60.0f);
+    OH_ArkUI_RenderNodeUtils_DisposeRectShapeOption(rectShape);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest216
+ * @tc.desc: Test SetRoundRectShapeOptionValue function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest216, TestSize.Level1)
+{
+    auto roundRectShape = OH_ArkUI_RenderNodeUtils_CreateRoundRectShapeOption();
+    ASSERT_NE(roundRectShape, nullptr);
+    OH_ArkUI_RenderNodeUtils_SetRoundRectShapeOptionValue(roundRectShape, 11.0f, 21.0f, 31.0f, 41.0f);
+    ASSERT_EQ(roundRectShape->left, 11.0f);
+    ASSERT_EQ(roundRectShape->top, 21.0f);
+    ASSERT_EQ(roundRectShape->right, 42.0f);
+    ASSERT_EQ(roundRectShape->bottom, 62.0f);
+    OH_ArkUI_RenderNodeUtils_DisposeRoundRectShapeOption(roundRectShape);
+}
+
+/**
  * @tc.name: NativeRenderNodeAdopterTest001
  * @tc.desc: Test renderNode function.
  * @tc.type: FUNC
@@ -1631,223 +1665,61 @@ HWTEST_F(NativeRenderNodeTest, NativeRenderNodeAdopterTest010, TestSize.Level1)
 }
 
 /**
- * @tc.name: NativeRenderNodeTest215
- * @tc.desc: Test renderNode with null node handle parameters.
+ * @tc.name: NativeRenderNodeGuardTest001
+ * @tc.desc: Test render node wrapper parameter guard branches.
  * @tc.type: FUNC
  */
-HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest215, TestSize.Level1)
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeGuardTest001, TestSize.Level1)
 {
+    auto renderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(renderNode, nullptr);
+
     ArkUI_RenderNodeHandle child = nullptr;
-    auto result = OH_ArkUI_RenderNodeUtils_AddChild(nullptr, child);
-    ASSERT_NE(result, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(nullptr), ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetChild(renderNode, -1, &child), ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_SetBounds(renderNode, 0, 0, -1, 1), ERROR_CODE_PARAM_OUT_OF_RANGE);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_SetClipToFrame(renderNode, 2), ERROR_CODE_PARAM_OUT_OF_RANGE);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_SetClipToBounds(renderNode, -1), ERROR_CODE_PARAM_OUT_OF_RANGE);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_SetShadowElevation(renderNode, -1.0f), ERROR_CODE_PARAM_OUT_OF_RANGE);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_SetShadowRadius(renderNode, -1.0f), ERROR_CODE_PARAM_OUT_OF_RANGE);
 
-    result = OH_ArkUI_RenderNodeUtils_RemoveChild(nullptr, child);
-    ASSERT_NE(result, ARKUI_ERROR_CODE_NO_ERROR);
-
-    result = OH_ArkUI_RenderNodeUtils_ClearChildren(nullptr);
-    ASSERT_NE(result, ARKUI_ERROR_CODE_NO_ERROR);
-
-    int32_t count = 0;
-    result = OH_ArkUI_RenderNodeUtils_GetChildrenCount(nullptr, &count);
-    ASSERT_NE(result, ARKUI_ERROR_CODE_NO_ERROR);
-
-    result = OH_ArkUI_RenderNodeUtils_DisposeNode(nullptr);
-    ASSERT_NE(result, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(renderNode), ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 /**
- * @tc.name: NativeRenderNodeTest216
- * @tc.desc: Test renderNode with null output parameters.
+ * @tc.name: NativeRenderNodeGuardTest002
+ * @tc.desc: Test render node property getters and empty children query.
  * @tc.type: FUNC
  */
-HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest216, TestSize.Level1)
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeGuardTest002, TestSize.Level1)
 {
     auto renderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
     ASSERT_NE(renderNode, nullptr);
 
-    auto result = OH_ArkUI_RenderNodeUtils_GetFirstChild(renderNode, nullptr);
-    ASSERT_NE(result, ARKUI_ERROR_CODE_NO_ERROR);
+    uint32_t color = 0;
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_SetBackgroundColor(renderNode, 0xFF123456), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetBackgroundColor(renderNode, &color), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_NE(color, 0U);
+    EXPECT_EQ((color >> 24) & 0xFF, 0xFFU);
 
-    result = OH_ArkUI_RenderNodeUtils_GetNextSibling(renderNode, nullptr);
-    ASSERT_NE(result, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_SetPosition(renderNode, 12, 34), ARKUI_ERROR_CODE_NO_ERROR);
+    int32_t x = 0;
+    int32_t y = 0;
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetPosition(renderNode, &x, &y), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(x, 12);
+    EXPECT_EQ(y, 34);
 
-    result = OH_ArkUI_RenderNodeUtils_GetPreviousSibling(renderNode, nullptr);
-    ASSERT_NE(result, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_SetOpacity(renderNode, 0.5f), ARKUI_ERROR_CODE_NO_ERROR);
+    float opacity = 0.0f;
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetOpacity(renderNode, &opacity), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_FLOAT_EQ(opacity, 0.5f);
 
-    result = OH_ArkUI_RenderNodeUtils_GetChild(renderNode, 0, nullptr);
-    ASSERT_NE(result, ARKUI_ERROR_CODE_NO_ERROR);
+    ArkUI_RenderNodeHandle* children = nullptr;
+    int32_t count = -1;
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_GetChildren(renderNode, &children, &count), ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(count, 0);
+    EXPECT_EQ(children, nullptr);
 
-    result = OH_ArkUI_RenderNodeUtils_GetChildrenCount(renderNode, nullptr);
-    ASSERT_NE(result, ARKUI_ERROR_CODE_NO_ERROR);
-
-    OH_ArkUI_RenderNodeUtils_DisposeNode(renderNode);
+    EXPECT_EQ(OH_ArkUI_RenderNodeUtils_DisposeNode(renderNode), ARKUI_ERROR_CODE_NO_ERROR);
 }
-
-/**
- * @tc.name: NativeRenderNodeTest217
- * @tc.desc: Test renderNode complex tree operations.
- * @tc.type: FUNC
- */
-HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest217, TestSize.Level1)
-{
-    auto root = OH_ArkUI_RenderNodeUtils_CreateNode();
-    ASSERT_NE(root, nullptr);
-
-    auto level1 = OH_ArkUI_RenderNodeUtils_CreateNode();
-    ASSERT_NE(level1, nullptr);
-    auto level2 = OH_ArkUI_RenderNodeUtils_CreateNode();
-    ASSERT_NE(level2, nullptr);
-    auto level3 = OH_ArkUI_RenderNodeUtils_CreateNode();
-    ASSERT_NE(level3, nullptr);
-
-    auto result = OH_ArkUI_RenderNodeUtils_AddChild(root, level1);
-    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
-    result = OH_ArkUI_RenderNodeUtils_AddChild(level1, level2);
-    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
-    result = OH_ArkUI_RenderNodeUtils_AddChild(level2, level3);
-    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
-
-    int32_t count = 0;
-    result = OH_ArkUI_RenderNodeUtils_GetChildrenCount(root, &count);
-    ASSERT_EQ(count, 1);
-    result = OH_ArkUI_RenderNodeUtils_GetChildrenCount(level1, &count);
-    ASSERT_EQ(count, 1);
-    result = OH_ArkUI_RenderNodeUtils_GetChildrenCount(level2, &count);
-    ASSERT_EQ(count, 1);
-
-    OH_ArkUI_RenderNodeUtils_DisposeNode(root);
-    OH_ArkUI_RenderNodeUtils_DisposeNode(level1);
-    OH_ArkUI_RenderNodeUtils_DisposeNode(level2);
-    OH_ArkUI_RenderNodeUtils_DisposeNode(level3);
-}
-
-/**
- * @tc.name: NativeRenderNodeTest218
- * @tc.desc: Test renderNode InsertChildAfter with null sibling.
- * @tc.type: FUNC
- */
-HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest218, TestSize.Level1)
-{
-    auto parent = OH_ArkUI_RenderNodeUtils_CreateNode();
-    ASSERT_NE(parent, nullptr);
-
-    auto child1 = OH_ArkUI_RenderNodeUtils_CreateNode();
-    ASSERT_NE(child1, nullptr);
-    auto child2 = OH_ArkUI_RenderNodeUtils_CreateNode();
-    ASSERT_NE(child2, nullptr);
-
-    auto result = OH_ArkUI_RenderNodeUtils_AddChild(parent, child1);
-    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
-
-    result = OH_ArkUI_RenderNodeUtils_InsertChildAfter(parent, child2, nullptr);
-    ASSERT_NE(result, ARKUI_ERROR_CODE_NO_ERROR);
-
-    int32_t count = 0;
-    OH_ArkUI_RenderNodeUtils_GetChildrenCount(parent, &count);
-    ASSERT_EQ(count, 1);
-
-    OH_ArkUI_RenderNodeUtils_DisposeNode(parent);
-}
-
-/**
- * @tc.name: NativeRenderNodeTest219
- * @tc.desc: Test renderNode InsertChildAfter with non-existent sibling.
- * @tc.type: FUNC
- */
-HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest219, TestSize.Level1)
-{
-    auto parent = OH_ArkUI_RenderNodeUtils_CreateNode();
-    ASSERT_NE(parent, nullptr);
-
-    auto child1 = OH_ArkUI_RenderNodeUtils_CreateNode();
-    ASSERT_NE(child1, nullptr);
-    auto child2 = OH_ArkUI_RenderNodeUtils_CreateNode();
-    ASSERT_NE(child2, nullptr);
-    auto siblingNotInTree = OH_ArkUI_RenderNodeUtils_CreateNode();
-    ASSERT_NE(siblingNotInTree, nullptr);
-
-    auto result = OH_ArkUI_RenderNodeUtils_AddChild(parent, child1);
-    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
-
-    result = OH_ArkUI_RenderNodeUtils_InsertChildAfter(parent, child2, siblingNotInTree);
-    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
-
-    int32_t count = 0;
-    OH_ArkUI_RenderNodeUtils_GetChildrenCount(parent, &count);
-    ASSERT_EQ(count, 2);
-
-    OH_ArkUI_RenderNodeUtils_DisposeNode(parent);
-    OH_ArkUI_RenderNodeUtils_DisposeNode(siblingNotInTree);
-}
-
-/**
- * @tc.name: NativeRenderNodeTest220
- * @tc.desc: Test renderNode GetChild with out of bounds index.
- * @tc.type: FUNC
- */
-HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest220, TestSize.Level1)
-{
-    auto parent = OH_ArkUI_RenderNodeUtils_CreateNode();
-    ASSERT_NE(parent, nullptr);
-
-    auto child1 = OH_ArkUI_RenderNodeUtils_CreateNode();
-    ASSERT_NE(child1, nullptr);
-    auto child2 = OH_ArkUI_RenderNodeUtils_CreateNode();
-    ASSERT_NE(child2, nullptr);
-
-    OH_ArkUI_RenderNodeUtils_AddChild(parent, child1);
-    OH_ArkUI_RenderNodeUtils_AddChild(parent, child2);
-
-    ArkUI_RenderNodeHandle resultChild;
-    auto result = OH_ArkUI_RenderNodeUtils_GetChild(parent, -1, &resultChild);
-    ASSERT_NE(result, ARKUI_ERROR_CODE_NO_ERROR);
-
-    result = OH_ArkUI_RenderNodeUtils_GetChild(parent, 10, &resultChild);
-    ASSERT_NE(result, ARKUI_ERROR_CODE_NO_ERROR);
-
-    OH_ArkUI_RenderNodeUtils_DisposeNode(parent);
-}
-
-/**
- * @tc.name: NativeRenderNodeTest221
- * @tc.desc: Test renderNode GetFirstChild on empty node.
- * @tc.type: FUNC
- */
-HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest221, TestSize.Level1)
-{
-    auto renderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
-    ASSERT_NE(renderNode, nullptr);
-
-    ArkUI_RenderNodeHandle child;
-    auto result = OH_ArkUI_RenderNodeUtils_GetFirstChild(renderNode, &child);
-    ASSERT_NE(result, ARKUI_ERROR_CODE_NO_ERROR);
-
-    OH_ArkUI_RenderNodeUtils_DisposeNode(renderNode);
-}
-
-/**
- * @tc.name: NativeRenderNodeTest222
- * @tc.desc: Test renderNode GetNextSibling and GetPreviousSibling on node without siblings.
- * @tc.type: FUNC
- */
-HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest222, TestSize.Level1)
-{
-    auto parent = OH_ArkUI_RenderNodeUtils_CreateNode();
-    ASSERT_NE(parent, nullptr);
-
-    auto onlyChild = OH_ArkUI_RenderNodeUtils_CreateNode();
-    ASSERT_NE(onlyChild, nullptr);
-
-    OH_ArkUI_RenderNodeUtils_AddChild(parent, onlyChild);
-
-    ArkUI_RenderNodeHandle sibling;
-    auto result = OH_ArkUI_RenderNodeUtils_GetNextSibling(onlyChild, &sibling);
-    ASSERT_NE(result, ARKUI_ERROR_CODE_NO_ERROR);
-
-    result = OH_ArkUI_RenderNodeUtils_GetPreviousSibling(onlyChild, &sibling);
-    ASSERT_NE(result, ARKUI_ERROR_CODE_NO_ERROR);
-
-    OH_ArkUI_RenderNodeUtils_DisposeNode(parent);
-}
-
 } // namespace OHOS::Ace

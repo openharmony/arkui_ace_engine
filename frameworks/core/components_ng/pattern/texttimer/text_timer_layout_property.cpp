@@ -15,10 +15,12 @@
 
 #include "core/components_ng/pattern/texttimer/text_timer_layout_property.h"
 #include "core/components_ng/pattern/texttimer/text_timer_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 inline constexpr double DEFAULT_COUNT = 60000.0;
+inline constexpr int32_t DEFAULT_START_TIME = 0;
 inline const std::string DEFAULT_FORMAT = "HH:mm:ss.SS";
 std::string ConvertFontFamily(const std::vector<std::string>& fontFamily)
 {
@@ -70,17 +72,27 @@ void TextTimerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, cons
     if (filter.IsFastFilter()) {
         return;
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
     json->PutExtAttr("format", propFormat_.value_or(DEFAULT_FORMAT).c_str(), filter);
     json->PutExtAttr("isCountDown", propIsCountDown_.value_or(false) ? "true" : "false", filter);
     json->PutExtAttr("count", std::to_string(propInputCount_.value_or(DEFAULT_COUNT)).c_str(), filter);
-    json->PutExtAttr("fontSize", GetFontSize().value_or(Dimension()).ToString().c_str(), filter);
-    json->PutExtAttr("fontColor", GetTextColor().value_or(Color::BLACK).ColorToString().c_str(), filter);
+    json->PutExtAttr(
+        "fontSize", GetFontSize().value_or(theme->GetTextStyle().GetFontSize()).ToString().c_str(), filter);
+    json->PutExtAttr(
+        "fontColor", GetTextColor().value_or(theme->GetTextStyle().GetTextColor()).ColorToString().c_str(), filter);
     json->PutExtAttr("fontWeight",
-        V2::ConvertWrapFontWeightToStirng(GetFontWeight().value_or(FontWeight::NORMAL)).c_str(), filter);
+        V2::ConvertWrapFontWeightToStirng(GetFontWeight().value_or(theme->GetTextStyle().GetFontWeight())).c_str(),
+        filter);
     json->PutExtAttr("fontStyle",
         V2::ConvertWrapFontStyleToStirng(GetItalicFontStyle().value_or(Ace::FontStyle::NORMAL)).c_str(), filter);
     json->PutExtAttr("fontFamily",
         ConvertFontFamily(GetFontFamily().value_or(std::vector<std::string>())).c_str(), filter);
+    json->PutExtAttr("startTime", std::to_string(propStartTime_.value_or(DEFAULT_START_TIME)).c_str(), filter);
 
     auto shadow = GetTextShadow().value_or(std::vector<Shadow> { Shadow() });
     // Determines if there are multiple textShadows

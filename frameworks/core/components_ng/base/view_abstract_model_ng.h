@@ -28,7 +28,6 @@
 #include "base/utils/utils.h"
 #include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/alignment.h"
-#include "core/components/common/properties/border_image.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model.h"
@@ -42,10 +41,12 @@
 #include "core/components_ng/property/property.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace {
 class SpanString;
 class CalcDimensionRect;
+class BorderImage;
 }
 namespace OHOS::Ace::NG {
 constexpr int32_t MAT4_ZERO = 0;
@@ -281,6 +282,10 @@ public:
     void SetPixelStretchEffect(PixStretchEffectOption& option) override
     {
         ViewAbstract::SetPixelStretchEffect(option);
+    }
+    void SetSpatialEffect(const std::optional<SpatialEffectParams>& params) override
+    {
+        ViewAbstract::SetSpatialEffect(params);
     }
     void SetLightUpEffect(double radio) override
     {
@@ -668,27 +673,7 @@ public:
         ViewAbstract::SetOuterBorderStyle(borderStyles);
     }
 
-    void SetBorderImage(const RefPtr<BorderImage>& borderImage, uint8_t bitset) override
-    {
-        CHECK_NULL_VOID(borderImage);
-        if (bitset & BorderImage::SOURCE_BIT) {
-            ViewAbstract::SetBorderImageSource(
-                borderImage->GetSrc(), borderImage->GetBundleName(), borderImage->GetModuleName());
-        }
-        if (bitset & BorderImage::OUTSET_BIT) {
-            ViewAbstract::SetHasBorderImageOutset(true);
-        }
-        if (bitset & BorderImage::SLICE_BIT) {
-            ViewAbstract::SetHasBorderImageSlice(true);
-        }
-        if (bitset & BorderImage::REPEAT_BIT) {
-            ViewAbstract::SetHasBorderImageRepeat(true);
-        }
-        if (bitset & BorderImage::WIDTH_BIT) {
-            ViewAbstract::SetHasBorderImageWidth(true);
-        }
-        ViewAbstract::SetBorderImage(borderImage);
-    }
+    void SetBorderImage(const RefPtr<BorderImage>& borderImage, uint8_t bitset) override;
 
     void SetBorderImageGradient(const NG::Gradient& gradient) override
     {
@@ -1154,6 +1139,11 @@ public:
         ViewAbstract::SetUseUnion(useUnion);
     }
 
+    void SetCenterGravityOptions(const CenterGravityOptions& centerGravityOptions) override
+    {
+        ViewAbstract::SetCenterGravityOptions(centerGravityOptions);
+    }
+
     void SetUseShadowBatching(bool useShadowBatching) override
     {
         ViewAbstract::SetUseShadowBatching(useShadowBatching);
@@ -1188,6 +1178,11 @@ public:
     void SetOnTouchIntercept(NG::TouchInterceptFunc&& touchInterceptFunc) override
     {
         ViewAbstract::SetOnTouchIntercept(std::move(touchInterceptFunc));
+    }
+
+    void SetOnGestureCollectIntercept(NG::OnGestureCollectInterceptFunc&& func) override
+    {
+        ViewAbstract::SetOnGestureCollectIntercept(std::move(func));
     }
 
     void SetShouldBuiltInRecognizerParallelWith(
@@ -1298,6 +1293,16 @@ public:
     void SetOnFocus(OnFocusFunc&& onFocusCallback) override
     {
         ViewAbstract::SetOnFocus(std::move(onFocusCallback));
+    }
+
+    void SetOnNeedSoftkeyboard(OnNeedSoftkeyboardFunc&& onNeedSoftkeyboardCallback) override
+    {
+        ViewAbstract::SetOnNeedSoftkeyboard(std::move(onNeedSoftkeyboardCallback));
+    }
+
+    void ResetOnNeedSoftkeyboard() override
+    {
+        ViewAbstract::ResetOnNeedSoftkeyboard();
     }
 
     void SetOnBlur(OnBlurFunc&& onBlurCallback) override
@@ -1419,7 +1424,8 @@ public:
 
     void SetOnAreaChanged(
         std::function<void(const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin)>&&
-            onAreaChanged) override
+            onAreaChanged,
+        int32_t minInterval) override
     {
         auto areaChangeCallback = [areaChangeFunc = std::move(onAreaChanged)](const RectF& oldRect,
                                       const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin) {
@@ -1427,7 +1433,11 @@ public:
                 Offset(oldOrigin.GetX(), oldOrigin.GetY()), Rect(rect.GetX(), rect.GetY(), rect.Width(), rect.Height()),
                 Offset(origin.GetX(), origin.GetY()));
         };
-        ViewAbstract::SetOnAreaChanged(std::move(areaChangeCallback));
+        if (minInterval > 0) {
+            ViewAbstract::SetOnAreaChangedWithInterval(std::move(areaChangeCallback), minInterval);
+        } else {
+            ViewAbstract::SetOnAreaChanged(std::move(areaChangeCallback));
+        }
     }
 
     void SetOnSizeChanged(
@@ -1571,19 +1581,7 @@ public:
         ViewAbstract::SetKeyboardShortcut(value, keys, std::move(onKeyboardShortcutAction));
     }
 
-    static void ResetKeyboardShortcutAll(FrameNode* frameNode)
-    {
-        CHECK_NULL_VOID(frameNode);
-        auto eventHub = frameNode->GetEventHub<EventHub>();
-        CHECK_NULL_VOID(eventHub);
-        eventHub->ClearSingleKeyboardShortcutAll();
-        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-        CHECK_NULL_VOID(pipeline);
-        auto eventManager = pipeline->GetEventManager();
-        CHECK_NULL_VOID(eventManager);
-        eventManager->DelKeyboardShortcutNode(frameNode->GetId());
-        return;
-    }
+    static void ResetKeyboardShortcutAll(FrameNode* frameNode);
 
     void SetObscured(const std::vector<ObscuredReasons>& reasons) override
     {
@@ -2061,6 +2059,7 @@ public:
     static void RemoveResObj(FrameNode* frameNode, const std::string& key);
     static void BindContextMenuWithLongPress(const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc,
         MenuParam& menuParam, std::function<void()>& previewBuildFunc, bool needDirty = false);
+    static void SetDebugLineSta(UINode* node, const std::string& debugLine);
 
 private:
     bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode);

@@ -68,6 +68,9 @@ template("napi_promptaction_static") {
       ":gen_obj_src_promptaction_abc",
       ":gen_obj_src_promptaction_js",
     ]
+    if (!is_arkui_x) {
+      deps += [ "$ace_root/frameworks/core:ace_container_scope" ]
+    }
     external_deps = []
     if (platform != "" && is_arkui_x) {
       deps += [ "//plugins/libs/napi:napi_$platform" ]

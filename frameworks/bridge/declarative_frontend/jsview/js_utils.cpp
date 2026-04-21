@@ -154,11 +154,6 @@ RefPtr<DrawingColorFilter> CreateDrawingColorFilter(JSRef<JSVal> obj)
     return DrawingColorFilter::CreateDrawingColorFilter(UnwrapNapiValue(obj));
 }
 
-RefPtr<DrawingLattice> CreateDrawingLattice(JSRef<JSVal> obj)
-{
-    return DrawingLattice::CreateDrawingLattice(UnwrapNapiValue(obj));
-}
-
 std::optional<NG::BorderRadiusProperty> HandleDifferentRadius(JsiRef<JSVal> args)
 {
     std::optional<NG::BorderRadiusProperty> prop = std::nullopt;

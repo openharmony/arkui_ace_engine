@@ -16,7 +16,8 @@
 import { int32 } from '@koalaui/common';
 import { RecordData } from '@ohos.base';
 import { default as uiObserver } from '@ohos/arkui/observer';
-import { CustomComponentV2 } from './customComponent';
+import { CustomComponentV2, CustomComponentLifecycle, CustomDelegate } from './customComponent';
+import { __CustomComponentLifecycle__Internal } from './customComponentLifecycle';
 import { InteropNativeModule, SerializerBase, DeserializerBase, KPointer } from '@koalaui/interop';
 import {
     IProvideDecoratedVariable,
@@ -32,6 +33,7 @@ import promptAction from '@ohos/promptAction'
 import { Theme } from '@ohos/arkui/theme';
 import { DecoratedVariableBase } from '../stateManagement/decoratorImpl/decoratorBase';
 import { IDecoratorBaseRegistry } from '../stateManagement/decorator';
+import { IEnvironmentValueBase, IEnvVariable, EnvDecoratedVariable } from '../stateManagement/decoratorImpl/decoratorEnv';
 
 export class ExtendableComponentInternal {
     public static fromPtr(ptr: KPointer): ExtendableComponent {
@@ -58,6 +60,7 @@ export interface IExtendableComponent {
     getDialogController(): promptAction.DialogController | undefined;
     __removeChildWhenDispose__IExtendableComponent_Internal(): void;
     __addMeToParent__IExtendableComponent_Internal(): void;
+    __clearDelegate__Internal(): void;
     isViewActive(): boolean;
     setActiveInternal(active: boolean, isReuse: boolean): void;
     fireAboutToReuse(param?: RecordData): void;
@@ -70,6 +73,17 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
     static current: object | undefined = undefined;
     private activeCount_: number = 1;
 
+    // Lifecycle management
+    @JSONStringifyIgnore
+    private __lifecycle__Internal?: CustomComponentLifecycle;
+
+    __getLifecycle__Internal(): CustomComponentLifecycle {
+        if (!this.__lifecycle__Internal) {
+            this.__lifecycle__Internal = new __CustomComponentLifecycle__Internal(this as Object);
+        }
+        return this.__lifecycle__Internal!;
+    }
+
     private parent_: ExtendableComponent | undefined;
     private providedVars_: Map<string, IProvideDecoratedVariable<object>> = new Map<string, IProvideDecoratedVariable<object>>();
     private providedVarsV2_: Map<string, IProviderDecoratedVariable<object>> = new Map<string, IProviderDecoratedVariable<object>>();
@@ -81,6 +95,19 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
     private activeChangeListenerForInterop_: Set<(active: boolean, isReuse: boolean) => void> = new Set<(active: boolean, isReuse: boolean) => void>();
     private hasBeenRecycled_: boolean = false;
     private ownedStateVariables_: Array<IDecoratorBaseRegistry> | undefined = undefined;
+    private envPropertySet: Set<IEnvVariable> = new Set<IEnvVariable>();
+    private envInstanceId: int32 | undefined;
+
+    public static finalizationRegistry_: FinalizationRegistry<Object> = new FinalizationRegistry<Object>(
+        (destroyProperty: Object) => {
+            if (destroyProperty instanceof IEnvironmentValueBase) {
+                (destroyProperty as IEnvironmentValueBase).offWatchFunc();
+                if (EnvDecoratedVariable.instanceIdSet.size > 0) {
+                    EnvDecoratedVariable.instanceIdSet.clear();
+                }
+            }
+        }
+    );
 
     constructor(useSharedStorage?: boolean, storage?: LocalStorage) {
         this.useSharedStorage_ = useSharedStorage;
@@ -95,8 +122,11 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
         this.ownedStateVariables_!.push(stateVariable);
     }
 
-    __clearStateVariables__Internal(): void {
+    __clearDelegate__Internal(): void {
         this.delegate_ = undefined;
+    }
+
+    __clearStateVariables__Internal(): void {
         if (!this.ownedStateVariables_?.length) {
             return;
         }
@@ -237,7 +267,7 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
     __findProvider__Internal<T>(providedPropName: string): IProviderDecoratedVariable<T> | undefined {
         let parentCom = this.parent_;
         while (parentCom !== undefined) {
-            let provideVar = parentCom.__findProvidedVarV2__Internal(providedPropName);
+            let provideVar = parentCom.__findProvidedVarV2__Internal<Any>(providedPropName);
             if (provideVar !== undefined) {
                 return provideVar as object as IProviderDecoratedVariable<T>;
             }
@@ -252,6 +282,33 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
             return localVar as object as IProvideDecoratedVariable<T>;
         }
         return this.parent_?.__findProvide__Internal<T>(providedPropName);
+    }
+
+    __addEnvInstance__Internal(envProperty: IEnvVariable): void {
+        this.envPropertySet.add(envProperty);
+    }
+
+    checkEnvSetSize(): boolean {
+        return this.envPropertySet.size > 0;
+    }
+
+    getEnvSet(): Set<IEnvVariable> {
+        return this.envPropertySet;
+    }
+
+    getEnvInstance(): int32 | undefined {
+        return this.envInstanceId;
+    }
+
+    setEnvInstance(newInstanceId: int32 | undefined) {
+        this.envInstanceId = newInstanceId;
+    }
+
+    __getDelegate__Internal<T extends ExtendableComponent, T_Options>(): CustomDelegate<T, T_Options> | undefined {
+        if (this.delegate_ instanceof CustomDelegate) {
+            return this.delegate_ as CustomDelegate<T, T_Options>;
+        }
+        return undefined;
     }
 
     getownedStateVariables(): Array<IDecoratorBaseRegistry> | undefined {

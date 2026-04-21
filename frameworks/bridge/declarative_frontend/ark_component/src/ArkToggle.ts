@@ -340,11 +340,15 @@ class ToggleSwitchStyleModifier extends ModifierWithKey<SwitchStyle> {
   }
 
   checkObjectDiff(): boolean {
+    if (isUndefined(this.stageValue.pointRadius) || isUndefined(this.stageValue.unselectedColor) ||
+      isUndefined(this.stageValue.pointColor) || isUndefined(this.stageValue.trackBorderRadius)) {
+        return true;
+      }
     if (!isResource(this.stageValue) && !isResource(this.value)) {
-      return !(this.stageValue.pointRadius === this.value.pointRadius &&
-        this.stageValue.unselectedColor === this.value.unselectedColor &&
-        this.stageValue.pointColor === this.value.pointColor &&
-        this.stageValue.trackBorderRadius === this.value.trackBorderRadius);
+      return !isBaseOrResourceEqual(this.stageValue.pointRadius, this.value.pointRadius) ||
+        !isBaseOrResourceEqual(this.stageValue.unselectedColor, this.value.unselectedColor) ||
+        !isBaseOrResourceEqual(this.stageValue.pointColor, this.value.pointColor) ||
+        !isBaseOrResourceEqual(this.stageValue.trackBorderRadius, this.value.trackBorderRadius);
     } else {
       return true;
     }

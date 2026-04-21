@@ -34,6 +34,8 @@
 
 namespace OHOS::Ace::NG {
 
+class TitleBarNode;
+
 class NavDestinationPatternBase : public Pattern, public FocusView {
     DECLARE_ACE_TYPE(NavDestinationPatternBase, Pattern, FocusView);
 public:

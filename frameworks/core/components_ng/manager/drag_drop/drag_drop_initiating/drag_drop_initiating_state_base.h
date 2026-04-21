@@ -111,7 +111,8 @@ protected:
         DragDropInitiatingParams& params, const RefPtr<PixelMap>& pixelMap, float targetScale);
     void PrepareFinalPixelMapForDragThroughTouch(const RefPtr<PixelMap>& pixelMap, bool immediately);
     void HideEventColumn();
-    void HidePixelMap(bool startDrag = false, double x = 0, double y = 0, bool showAnimation = true);
+    void HidePixelMap(bool startDrag = false, double x = 0, double y = 0, bool showAnimation = true,
+        int32_t currentState = -1);
     bool CheckStatusForPanActionBegin(const RefPtr<FrameNode>& frameNode, const GestureEvent& info);
     void SetTextPixelMap();
     void HideTextAnimation(bool startDrag = false, double globalX = 0, double globalY = 0);

@@ -114,6 +114,16 @@ public:
     void SetTriggerLifecycleFunction(std::function<bool(int32_t)>&& triggerLifecycleFunc);
     bool FireTriggerLifecycleFunc(int32_t eventId);
 
+    bool NeedRebuild() const
+    {
+        return needRebuild_;
+    }
+
+    void ResetNeedRebuild()
+    {
+        needRebuild_ = false;
+    }
+
     enum LifeCycleEvent {
         ON_APPEAR = 0,
         ON_BUILD = 1,

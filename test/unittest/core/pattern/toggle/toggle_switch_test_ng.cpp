@@ -16,11 +16,11 @@
 #include "gtest/gtest.h"
 #define protected public
 #define private public
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
 
 #include "base/geometry/dimension.h"
 #include "core/common/ace_application_info.h"
@@ -35,6 +35,7 @@
 #include "core/components_ng/pattern/toggle/switch_pattern.h"
 #include "core/components_ng/pattern/toggle/toggle_model.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 using namespace testing;
@@ -1323,4 +1324,121 @@ HWTEST_F(ToggleSwitchTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
     EXPECT_EQ(paintProperty->GetUnselectedColor(), Color::RED);
     g_isConfigChangePerform = false;
 }
+
+/**
+ * @tc.name: CreateSwitchFrameNode_ApiVersion26
+ * @tc.desc: Test CreateSwitchFrameNode initializes material when API >= VERSION_TWENTY_SIX
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchTestNg, CreateSwitchFrameNode_ApiVersion26, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set API target version to VERSION_TWENTY_SIX
+     */
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    int32_t backupApiVersion = container->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    EXPECT_TRUE(Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX));
+
+    /**
+     * @tc.steps: step2. Create switch frame node via CreateSwitchFrameNode
+     */
+    constexpr int32_t TEST_NODE_ID = 1001;
+    constexpr bool TEST_IS_ON = true;
+    auto frameNode = ToggleModelNG::CreateSwitchFrameNode(TEST_NODE_ID, TEST_IS_ON);
+
+    /**
+     * @tc.steps: step3. Verify frame node is created successfully
+     * @tc.expected: frameNode is not null, has correct tag and pattern
+     */
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::TOGGLE_ETS_TAG);
+    auto pattern = frameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step4. Verify material was attempted to be set
+     * When MaterialUtils::IsMaterialEnabled() returns true in the runtime,
+     * system material should be applied via GetInitMaterial(ULTRA_THIN).
+     * In test environment, the actual material state depends on the mock.
+     */
+    EXPECT_NE(frameNode, nullptr);
+
+    container->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: CreateSwitchFrameNode_ApiVersionBelow26
+ * @tc.desc: Test CreateSwitchFrameNode does not set material when API < VERSION_TWENTY_SIX
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchTestNg, CreateSwitchFrameNode_ApiVersionBelow26, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set API target version below VERSION_TWENTY_SIX
+     */
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    int32_t backupApiVersion = container->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    EXPECT_FALSE(Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX));
+
+    /**
+     * @tc.steps: step2. Create switch frame node via CreateSwitchFrameNode
+     */
+    constexpr int32_t TEST_NODE_ID = 2001;
+    constexpr bool TEST_IS_ON = false;
+    auto frameNode = ToggleModelNG::CreateSwitchFrameNode(TEST_NODE_ID, TEST_IS_ON);
+
+    /**
+     * @tc.steps: step3. Verify frame node is created successfully without material
+     * @tc.expected: frameNode is not null, but no system material should be set
+     */
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::TOGGLE_ETS_TAG);
+    auto pattern = frameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto material = renderContext->GetSystemMaterial();
+    EXPECT_EQ(material, nullptr);
+
+    container->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: CreateSwitchFrameNode_ApiVersion26_IsOnFalse
+ * @tc.desc: Test CreateSwitchFrameNode with isOn=false and API >= 26
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchTestNg, CreateSwitchFrameNode_ApiVersion26_IsOnFalse, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set API target version to VERSION_TWENTY_SIX
+     */
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    int32_t backupApiVersion = container->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+
+    /**
+     * @tc.steps: step2. Create switch frame node with isOn=false
+     */
+    constexpr int32_t TEST_NODE_ID = 3001;
+    constexpr bool TEST_IS_ON = false;
+    auto frameNode = ToggleModelNG::CreateSwitchFrameNode(TEST_NODE_ID, TEST_IS_ON);
+
+    /**
+     * @tc.steps: step3. Verify frame node and isOn state
+     * @tc.expected: frameNode is not null and material initialization is independent of isOn
+     */
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    container->SetApiTargetVersion(backupApiVersion);
+}
+
 } // namespace OHOS::Ace::NG

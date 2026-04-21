@@ -16,6 +16,9 @@
 
 #include "core/components_ng/pattern/container_modal/container_modal_utils.h"
 
+#include <fstream>
+
+#include "base/log/log_wrapper.h"
 #include "bridge/common/utils/engine_helper.h"
 
 extern const char _binary_customtitle_abc_start[];

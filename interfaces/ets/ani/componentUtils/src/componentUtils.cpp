@@ -20,7 +20,6 @@
 
 #include "base/memory/referenced.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
-#include "frameworks/core/common/container.h"
 #include "frameworks/core/pipeline/pipeline_base.h"
 #include "core/components_ng/base/inspector.h"
 using namespace arkts::ani_signature;

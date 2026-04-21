@@ -19,5 +19,6 @@ group("adapter_unittest") {
     "ohos/capability:capability_unittest",
     "ohos/entrance:entrance_unittest",
     "ohos/osal/system_properties:system_properties_unittest",
+    "ohos/entrance/ui_session:ui_content_stub_unittest",
   ]
 }

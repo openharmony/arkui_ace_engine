@@ -20,6 +20,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
 #include "core/components_ng/pattern/select/select_model_static.h"
+#include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/interfaces/native/implementation/symbol_glyph_modifier_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -220,7 +221,7 @@ MenuParam Convert(const Ark_MenuOutlineOptions& src)
 } // namespace Converter
 namespace {
 std::optional<std::string> ProcessBindableValue(FrameNode* frameNode,
-    const Opt_Union_ResourceStr_Bindable_Bindable* value)
+    const Opt_Union_ResourceStr_Bindable_String_Bindable_Resource* value)
 {
     std::optional<std::string> result;
     Converter::VisitUnionPtr(value,
@@ -236,14 +237,14 @@ std::optional<std::string> ProcessBindableValue(FrameNode* frameNode,
             };
             SelectModelStatic::SetValueChangeEvent(frameNode, std::move(onEvent));
         },
-        [](const Ark_Bindable_Global_Resource_Resource& src) {
+        [](const Ark_Bindable_Resource& src) {
             // Invalid case, should be deleted from SDK
         },
         [] {});
     return result;
 }
 std::optional<int32_t> ProcessBindableSelected(FrameNode* frameNode,
-    const Opt_Union_I32_Resource_Bindable_Bindable* value)
+    const Opt_Union_I32_Resource_Bindable_I32_Bindable_Resource* value)
 {
     std::optional<int32_t> result;
     Converter::VisitUnionPtr(value,
@@ -262,7 +263,7 @@ std::optional<int32_t> ProcessBindableSelected(FrameNode* frameNode,
             };
             SelectModelStatic::SetSelectChangeEvent(frameNode, std::move(onEvent));
         },
-        [](const Ark_Bindable_Global_Resource_Resource& src) {
+        [](const Ark_Bindable_Resource& src) {
             // Invalid case, should be deleted from SDK
         },
         [] {});
@@ -274,9 +275,9 @@ std::optional<int32_t> ProcessBindableSelected(FrameNode* frameNode,
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SelectAttributeModifier {
     void Selected1Impl(Ark_NativePointer node, const Opt_Union_I32_Resource* value);
-    void Font1Impl(Ark_NativePointer node, const Opt_Font* value);
-    void SelectedOptionFont1Impl(Ark_NativePointer node, const Opt_Font* value);
-    void OptionFont1Impl(Ark_NativePointer node, const Opt_Font* value);
+    void Font1Impl(Ark_NativePointer node, const Opt_arkui_component_units_Font* value);
+    void SelectedOptionFont1Impl(Ark_NativePointer node, const Opt_arkui_component_units_Font* value);
+    void OptionFont1Impl(Ark_NativePointer node, const Opt_arkui_component_units_Font* value);
     void Space1Impl(Ark_NativePointer node, const Opt_Length* value);
     void OptionWidth1Impl(Ark_NativePointer node,
         const Opt_Union_Dimension_OptionWidthMode* value);
@@ -306,7 +307,7 @@ void SetSelectOptionsImpl(Ark_NativePointer node,
 } // SelectInterfaceModifier
 namespace SelectAttributeModifier {
 void SetSelectedImpl(Ark_NativePointer node,
-                     const Opt_Union_I32_Resource_Bindable_Bindable* value)
+                     const Opt_Union_I32_Resource_Bindable_I32_Bindable_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -317,7 +318,7 @@ void SetSelectedImpl(Ark_NativePointer node,
     SelectModelStatic::SetSelected(frameNode, convVal);
 }
 void SetValueImpl(Ark_NativePointer node,
-                  const Opt_Union_ResourceStr_Bindable_Bindable* value)
+                  const Opt_Union_ResourceStr_Bindable_String_Bindable_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -325,7 +326,7 @@ void SetValueImpl(Ark_NativePointer node,
     SelectModelStatic::SetValue(frameNode, optValue);
 }
 void SetFontImpl(Ark_NativePointer node,
-                 const Opt_Font* value)
+                 const Opt_arkui_component_units_Font* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -357,7 +358,7 @@ void SetSelectedOptionBgColorImpl(Ark_NativePointer node,
     SelectModelStatic::SetSelectedOptionBgColor(frameNode, Converter::OptConvertPtr<Color>(value));
 }
 void SetSelectedOptionFontImpl(Ark_NativePointer node,
-                               const Opt_Font* value)
+                               const Opt_arkui_component_units_Font* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -390,7 +391,7 @@ void SetOptionBgColorImpl(Ark_NativePointer node,
     SelectModelStatic::SetOptionBgColor(frameNode, Converter::OptConvertPtr<Color>(value));
 }
 void SetOptionFontImpl(Ark_NativePointer node,
-                       const Opt_Font* value)
+                       const Opt_arkui_component_units_Font* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -605,14 +606,8 @@ void SetShowDefaultSelectedIconImpl(Ark_NativePointer node, const Opt_Boolean* v
     auto optConvert = Converter::OptConvertPtr<bool>(value);
     SelectModelStatic::SetShowDefaultSelectedIcon(frameNode, optConvert);
 }
-void SetBackgroundColorImpl(Ark_NativePointer node,
-                            const Opt_ResourceColor* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    SelectModelStatic::SetBackgroundColor(frameNode, Converter::OptConvertPtr<Color>(value));
-}
-void SetKeyboardAvoidModeImpl(Ark_NativePointer node, const Opt_MenuKeyboardAvoidMode* value)
+void SetKeyboardAvoidModeImpl(Ark_NativePointer node,
+                              const Opt_MenuKeyboardAvoidMode* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -627,7 +622,8 @@ void SetMinKeyboardAvoidDistanceImpl(Ark_NativePointer node, const Opt_LengthMet
     Validator::ValidateNonNegative(convValue);
     SelectModelNG::SetMinKeyboardAvoidDistance(frameNode, convValue);
 }
-void SetMenuSystemMaterialImpl(Ark_NativePointer node, const Opt_uiMaterial_Material* value)
+void SetMenuSystemMaterialImpl(Ark_NativePointer node,
+                               const Opt_uiMaterial_Material* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -684,7 +680,6 @@ const GENERATED_ArkUISelectModifier* GetSelectModifier()
         SelectAttributeModifier::SetMenuOutlineImpl,
         SelectAttributeModifier::SetShowInSubWindowImpl,
         SelectAttributeModifier::SetShowDefaultSelectedIconImpl,
-        SelectAttributeModifier::SetBackgroundColorImpl,
         SelectAttributeModifier::SetKeyboardAvoidModeImpl,
         SelectAttributeModifier::SetMinKeyboardAvoidDistanceImpl,
         SelectAttributeModifier::SetMenuSystemMaterialImpl,

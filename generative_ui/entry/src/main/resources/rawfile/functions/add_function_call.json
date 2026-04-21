@@ -1,0 +1,39 @@
+[
+    {
+        "version": "v0.9",
+        "createSurface": {
+            "surfaceId": "main",
+            "catalogId": "https://a2ui.org/specification/v0_9/standard_catalog.json"
+        }
+    },
+    {
+        "version": "v0.9",
+        "updateComponents": {
+            "surfaceId": "main",
+            "components": [
+                {
+                    "id": "root",
+                    "component": "Column",
+                    "children": [
+                        "addButton"
+                    ]
+                },
+                {
+                    "id": "addButton",
+                    "component": "Button",
+                    "label": "点击打开网页",
+                    "text": "点击打开网页",
+                    "action": {
+                        "functionCall": {
+                            "call": "openUrl",
+                            "args": {
+                                "url": "https://developer.xx.com/"
+                            },
+                            "returnType": "void"
+                        }
+                    }
+                }
+            ]
+        }
+    }
+]

@@ -54,11 +54,11 @@ public:
 };
 
 /**
- * @tc.name: interpolateValidTest
+ * @tc.name: interpolateTestValid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ICurveAccessorTest, interpolateValidTest, TestSize.Level1)
+HWTEST_F(ICurveAccessorTest, interpolateTestValid, TestSize.Level1)
 {
     ASSERT_NE(accessor_->interpolate, nullptr);
 
@@ -91,11 +91,11 @@ HWTEST_F(ICurveAccessorTest, interpolateValidTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: interpolateInvalidTest
+ * @tc.name: interpolateTestInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ICurveAccessorTest, interpolateInvalidTest, TestSize.Level1)
+HWTEST_F(ICurveAccessorTest, interpolateTestInvalid, TestSize.Level1)
 {
     ASSERT_NE(accessor_->interpolate, nullptr);
 

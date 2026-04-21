@@ -24,6 +24,7 @@
 #include "core/components/xcomponent/resource/native_texture.h"
 #include "core/components_ng/pattern/xcomponent/inner_xcomponent_controller.h"
 #include "core/pipeline/base/element.h"
+#include "core/pipeline/base/render_component.h"
 
 struct OH_NativeXComponent;
 namespace OHOS::Ace {

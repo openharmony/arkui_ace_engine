@@ -19,9 +19,9 @@
 #define protected public
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#include "test/mock/adapter/mock_ui_session_manager.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/interfaces/inner_api/ui_session/mock_ui_session_manager.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"

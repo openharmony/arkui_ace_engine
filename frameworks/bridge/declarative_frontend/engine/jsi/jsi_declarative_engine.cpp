@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 
+#include <cstdio>
 #include <mutex>
 #include <optional>
 #include <regex>
@@ -38,6 +39,7 @@
 #endif
 #ifdef FORM_SUPPORTED
 #include "extractor.h"
+#include "file_mapper.h"
 #endif
 
 #include "ace_forward_compatibility.h"
@@ -83,6 +85,7 @@
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_base_utils.h"
+#include "frameworks/bridge/js_frontend/frontend_delegate.h"
 #include "frameworks/core/components/xcomponent/xcomponent_component_client.h"
 #include "frameworks/core/components_ng/base/view_stack_processor.h"
 #include "frameworks/core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
@@ -95,8 +98,9 @@ extern const char _binary_jsMockSystemPlugin_abc_end[];
 extern const char _binary_stateMgmt_abc_start[];
 extern const char _binary_jsEnumStyle_abc_start[];
 extern const char _binary_jsUIContext_abc_start[];
+extern const char _binary_arkCommon_abc_start[];
+extern const char _binary_arkDynamicComponent_abc_start[];
 extern const char _binary_arkComponent_abc_start[];
-extern const char _binary_arkTheme_abc_start[];
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 extern const char _binary_jsPreload_abc_start[];
 extern const char _binary_jsPreload_abc_end[];
@@ -105,14 +109,16 @@ extern const char _binary_jsPreload_abc_end[];
 extern const char _binary_stateMgmt_abc_end[];
 extern const char _binary_jsEnumStyle_abc_end[];
 extern const char _binary_jsUIContext_abc_end[];
+extern const char _binary_arkCommon_abc_end[];
+extern const char _binary_arkDynamicComponent_abc_end[];
 extern const char _binary_arkComponent_abc_end[];
-extern const char _binary_arkTheme_abc_end[];
 #else
 extern const char* _binary_stateMgmt_abc_end;
 extern const char* _binary_jsEnumStyle_abc_end;
 extern const char* _binary_jsUIContext_abc_end;
+extern const char* _binary_arkCommon_abc_end;
+extern const char* _binary_arkDynamicComponent_abc_end;
 extern const char* _binary_arkComponent_abc_end;
-extern const char* _binary_arkTheme_abc_end;
 #endif
 
 namespace OHOS::Ace::Framework {
@@ -218,11 +224,44 @@ shared_ptr<JsValue> RequireNativeModuleForCustomRuntime(const shared_ptr<JsRunti
     return runtime->NewNull();
 }
 
+bool EvaluateAbcFile(const shared_ptr<JsRuntime>& runtime, const std::string& filePath)
+{
+    auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    CHECK_NULL_RETURN(arkRuntime, false);
+    FILE* file = fopen(filePath.c_str(), "rb");
+    if (!file) {
+        LOGF("Failed to open the file!");
+        return false;
+    }
+    if (fseek(file, 0, SEEK_END) != 0) {
+        fclose(file);
+        return false;
+    }
+    long fileSize = ftell(file);
+    if (fileSize <= 0 || fseek(file, 0, SEEK_SET) != 0) {
+        fclose(file);
+        return false;
+    }
+    std::vector<uint8_t> content(static_cast<size_t>(fileSize));
+    if (fread(content.data(), 1, content.size(), file) != content.size()) {
+        fclose(file);
+        return false;
+    }
+    fclose(file);
+    return arkRuntime->EvaluateJsCode(content.data(), static_cast<int32_t>(content.size()), filePath);
+}
+
 inline bool PreloadJsEnums(const shared_ptr<JsRuntime>& runtime)
 {
+#if defined(CROSS_PLATFORM)
     std::string str("arkui_binary_jsEnumStyle_abc_loadFile");
     return runtime->EvaluateJsCode(
         (uint8_t*)_binary_jsEnumStyle_abc_start, _binary_jsEnumStyle_abc_end - _binary_jsEnumStyle_abc_start, str);
+#elif defined(PREVIEW)
+    return EvaluateAbcFile(runtime, "./module/arkui/jsEnumStyle.abc");
+#else
+    return EvaluateAbcFile(runtime, "/etc/abc/framework/jsEnumStyle.abc");
+#endif
 }
 
 inline bool PreloadStateManagement(const shared_ptr<JsRuntime>& runtime)
@@ -250,18 +289,31 @@ inline bool PreloadUIContent(const shared_ptr<JsRuntime>& runtime)
     return runtime->EvaluateJsCode(codeStart, codeLength);
 }
 
+inline bool PreloadArkCommon(const shared_ptr<JsRuntime>& runtime)
+{
+    std::string str("arkui_binary_arkCommon_abc_loadFile");
+    return runtime->EvaluateJsCode(
+        (uint8_t*)_binary_arkCommon_abc_start, _binary_arkCommon_abc_end - _binary_arkCommon_abc_start, str);
+}
+
+inline bool PreloadArkDynamicComponent(const shared_ptr<JsRuntime>& runtime)
+{
+    std::string str("arkui_binary_arkDynamicComponent_abc_loadFile");
+    return runtime->EvaluateJsCode((uint8_t*)_binary_arkDynamicComponent_abc_start,
+        _binary_arkDynamicComponent_abc_end - _binary_arkDynamicComponent_abc_start, str);
+}
+
 inline bool PreloadArkComponent(const shared_ptr<JsRuntime>& runtime)
 {
+#if defined(CROSS_PLATFORM)
     std::string str("arkui_binary_arkComponent_abc_loadFile");
     return runtime->EvaluateJsCode(
         (uint8_t*)_binary_arkComponent_abc_start, _binary_arkComponent_abc_end - _binary_arkComponent_abc_start, str);
-}
-
-inline bool PreloadArkTheme(const shared_ptr<JsRuntime>& runtime)
-{
-    std::string str("arkui_binary_arkTheme_abc_loadFile");
-    return runtime->EvaluateJsCode(
-        (uint8_t*)_binary_arkTheme_abc_start, _binary_arkTheme_abc_end - _binary_arkTheme_abc_start, str);
+#elif defined(PREVIEW)
+    return EvaluateAbcFile(runtime, "./module/arkui/arkComponent.abc");
+#else
+    return EvaluateAbcFile(runtime, "/etc/abc/framework/arkComponent.abc");
+#endif
 }
 
 bool PreloadConsole(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& global)
@@ -572,8 +624,9 @@ void JsiDeclarativeEngineInstance::InitJsObject()
             PreloadRequireNative(runtime_, global);
             PreloadStateManagement(runtime_);
             PreloadUIContent(runtime_);
+            PreloadArkCommon(runtime_);
             PreloadArkComponent(runtime_);
-            PreloadArkTheme(runtime_);
+            PreloadArkDynamicComponent(runtime_);
         }
     }
 
@@ -599,8 +652,9 @@ void JsiDeclarativeEngineInstance::InitAceModule()
         PreloadStateManagement(runtime_);
         LOGI("preload js enums in InitAceModule");
         PreloadJsEnums(runtime_);
+        PreloadArkCommon(runtime_);
         PreloadArkComponent(runtime_);
-        PreloadArkTheme(runtime_);
+        PreloadArkDynamicComponent(runtime_);
         PreloadUIContent(runtime_);
     }
 #if defined(PREVIEW)
@@ -742,6 +796,14 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
 
     PreloadUIContent(arkRuntime);
 
+    // preload ark common
+    bool arkCommonResult = PreloadArkCommon(arkRuntime);
+    if (!arkCommonResult) {
+        std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
+        globalRuntime_ = nullptr;
+        return;
+    }
+
     // preload ark component
     bool arkComponentResult = PreloadArkComponent(arkRuntime);
     if (!arkComponentResult) {
@@ -750,9 +812,9 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
         return;
     }
 
-    // preload ark styles
-    bool arkThemeResult = PreloadArkTheme(arkRuntime);
-    if (!arkThemeResult) {
+    // preload ark declarative component
+    bool arkDeclarativeComponentResult = PreloadArkDynamicComponent(arkRuntime);
+    if (!arkDeclarativeComponentResult) {
         std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
         globalRuntime_ = nullptr;
         return;
@@ -883,6 +945,13 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleForCustomRuntime(void* runtim
 
     PreloadUIContent(arkRuntime);
 
+    bool arkCommonResult = PreloadArkCommon(arkRuntime);
+    if (!arkCommonResult) {
+        std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
+        globalRuntime_ = nullptr;
+        return;
+    }
+
     // preload ark component
     bool arkComponentResult = PreloadArkComponent(arkRuntime);
     if (!arkComponentResult) {
@@ -891,9 +960,9 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleForCustomRuntime(void* runtim
         return;
     }
 
-    // preload ark styles
-    bool arkThemeResult = PreloadArkTheme(arkRuntime);
-    if (!arkThemeResult) {
+    // preload ark declarative component
+    bool arkDeclarativeComponentResult = PreloadArkDynamicComponent(arkRuntime);
+    if (!arkDeclarativeComponentResult) {
         std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
         globalRuntime_ = nullptr;
         return;
@@ -1759,6 +1828,17 @@ bool JsiDeclarativeEngine::ExecuteJs(const uint8_t* content, int32_t size)
     return true;
 }
 
+#ifdef FORM_SUPPORTED
+void ReleaseWorkerSafeMemFunc(void* mapper)
+{
+    if (mapper) {
+        AbilityBase::FileMapper* fileMapper = static_cast<AbilityBase::FileMapper*>(mapper);
+        fileMapper->SetAutoReleaseMem(true);
+        delete fileMapper;
+    }
+}
+#endif
+
 bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t cardId)
 {
     auto runtime = engineInstance_->GetJsRuntime();
@@ -1823,12 +1903,17 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
                 TAG_LOGE(AceLogTag::ACE_FORM, "null data");
                 return false;
             }
-            data->SetAutoReleaseMem(true);
             extractor->SetAutoCloseFd(true);
+            arkRuntime->SetReleaseWorkerSafeMemFunc(ReleaseWorkerSafeMemFunc);
             if (arkRuntime->IsStaticOrInvalidFile(data->GetDataPtr(), data->GetDataLen())) {
+                data->SetAutoReleaseMem(true);
                 return false;
             }
-            if (!arkRuntime->ExecuteModuleBuffer(data->GetDataPtr(), data->GetDataLen(), abcPath, true)) {
+            auto fileMapperPtr = data.release();
+            if (!arkRuntime->ExecuteModuleBufferSecure(fileMapperPtr->GetDataPtr(), fileMapperPtr->GetDataLen(),
+                abcPath, true, static_cast<void*>(fileMapperPtr))) {
+                fileMapperPtr->SetAutoReleaseMem(true);
+                delete fileMapperPtr;
                 return false;
             }
         }
@@ -3307,7 +3392,6 @@ void JsiDeclarativeEngine::SetContext(int32_t instanceId, NativeReference* nativ
         napi_close_handle_scope(reinterpret_cast<napi_env>(GetNativeEngine()), scope);
         return;
     }
-    JAVASCRIPT_EXECUTION_SCOPE_STATIC;
     auto localRef = NapiValueToLocalValue(nativeValue->GetNapiValue());
     std::shared_ptr<JsValue> jsValue = std::make_shared<ArkJSValue>(arkRuntime, localRef);
     if (jsValue->IsObject(arkRuntime)) {
@@ -3586,9 +3670,16 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(
         return;
     }
 
-    // preload ark component
-    bool arkComponentResult = PreloadArkComponent(arkRuntime);
-    if (!arkComponentResult) {
+    bool arkCommonResult = PreloadArkCommon(arkRuntime);
+    if (!arkCommonResult) {
+        std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
+        globalRuntime_ = nullptr;
+        return;
+    }
+
+    // preload ark arkDeclarativeComponent
+    bool arkDeclarativeComponentResult = PreloadArkDynamicComponent(arkRuntime);
+    if (!arkDeclarativeComponentResult) {
         std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
         globalRuntime_ = nullptr;
         return;
@@ -3596,14 +3687,6 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(
 
     // preload state management
     isModulePreloaded_ = PreloadStateManagement(arkRuntime);
-
-    // preload ark styles
-    bool arkThemeResult = PreloadArkTheme(arkRuntime);
-    if (!arkThemeResult) {
-        std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
-        globalRuntime_ = nullptr;
-        return;
-    }
 
     {
         std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);

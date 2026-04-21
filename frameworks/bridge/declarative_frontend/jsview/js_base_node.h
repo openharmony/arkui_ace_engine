@@ -24,6 +24,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/manager/post_event/post_event_manager.h"
 #include "frameworks/bridge/declarative_frontend/engine/bindings_defines.h"
 
 namespace OHOS::Ace::Framework {
@@ -47,6 +48,7 @@ public:
     void ProccessNode(bool isSupportExportTexture, bool isSupportLazyBuild);
     void PostTouchEvent(const JSCallbackInfo& info);
     void PostInputEvent(const JSCallbackInfo& info);
+    void PostInputEventWithStrategy(const JSCallbackInfo& info);
     void UpdateStart(const JSCallbackInfo& info);
     void UpdateEnd(const JSCallbackInfo& info);
     void OnRecycleWithBindThis(const JSCallbackInfo& info);
@@ -72,6 +74,13 @@ private:
     void SetNodeFunc(RefPtr<NG::UINode> newNode, const JSCallbackInfo& info);
     void SetUpdateNodeFunc(const JSCallbackInfo& info);
     void GetAndRegisterUpdateInstanceFunc(const JSCallbackInfo& info);
+    int32_t GetStrategy(const JSCallbackInfo& info);
+    void PostTouchEventWithStrategy(const JSCallbackInfo& info, const RefPtr<NG::UINode>& node,
+        const RefPtr<NG::PostEventManager>& postEventManager, int32_t competitionStrategy);
+    void PostMouseEventWithStrategy(const JSCallbackInfo& info, const RefPtr<NG::UINode>& node,
+        const RefPtr<NG::PostEventManager>& postEventManager, int32_t competitionStrategy);
+    void PostAxisEventWithStrategy(const JSCallbackInfo& info, const RefPtr<NG::UINode>& node,
+        const RefPtr<NG::PostEventManager>& postEventManager, int32_t competitionStrategy);
     RefPtr<NG::FrameNode> viewNode_;
     WeakPtr<NG::UINode> realNode_;
     NG::OptionalSizeF size_;

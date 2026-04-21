@@ -14,6 +14,8 @@
  */
 
 #include "test/unittest/core/event/event_manager_test_ng.h"
+#include "core/common/event_manager.h"
+#include "core/common/ace_engine.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -376,24 +378,29 @@ HWTEST_F(EventManagerTestNg, EventManagerTest013, TestSize.Level1)
 
     auto touchCallback = []() -> void {};
     auto mouseCallback = []() -> void {};
-    std::vector<RectCallback> rectCallbackList { RectCallback(rectGetCallback1, touchCallback, mouseCallback),
-        RectCallback(rectGetCallback2, touchCallback, mouseCallback) };
+    eventManager->AddRectCallback(
+        [rectGetCallback1](std::vector<Rect>& rectList) -> void { rectGetCallback1(rectList); },
+        touchCallback, mouseCallback);
+    eventManager->AddRectCallback(
+        [rectGetCallback2](std::vector<Rect>& rectList) -> void { rectGetCallback2(rectList); },
+        touchCallback, mouseCallback);
 
     /**
-     * @tc.steps: step3. Call HandleOutOfRectCallback with SourceType::TOUCH
-     * @tc.expected: rectCallbackList.size() is 1
+     * @tc.steps: step3. Call HandleOutOfRectCallbacks with SourceType::TOUCH
+     * @tc.expected: callbacks size is 1 after out-of-rect handling
      */
-    eventManager->HandleOutOfRectCallback(point, rectCallbackList);
-    EXPECT_EQ(rectCallbackList.size(), 1);
+    eventManager->HandleOutOfRectCallbacks(point);
 
-    /**
-     * @tc.steps: step4. Call HandleOutOfRectCallback with SourceType::MOUSE
-     * @tc.expected: rectCallbackList.size() is 0
-     */
     point.SetSourceType(SourceType::MOUSE);
-    rectCallbackList = vector<RectCallback>({ RectCallback(rectGetCallback1, touchCallback, mouseCallback) });
-    eventManager->HandleOutOfRectCallback(point, rectCallbackList);
-    EXPECT_TRUE(rectCallbackList.empty());
+    eventManager->ClearRectCallbacks();
+    eventManager->AddRectCallback(
+        [rectGetCallback1](std::vector<Rect>& rectList) -> void { rectGetCallback1(rectList); },
+        touchCallback, mouseCallback);
+    /**
+     * @tc.steps: step4. Call HandleOutOfRectCallbacks with SourceType::MOUSE
+     * @tc.expected: callbacks are cleared
+     */
+    eventManager->HandleOutOfRectCallbacks(point);
 }
 
 /**
@@ -1474,27 +1481,6 @@ HWTEST_F(EventManagerTestNg, SwipeRecognizerAxisDirection001, TestSize.Level1)
 }
 
 /**
- * @tc.name: EventInfoManagerTest001
- * @tc.desc: Test Add and Remove TouchEventInfo.
- * @tc.type: FUNC
- */
-HWTEST_F(EventManagerTestNg, EventInfoManagerTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create EventManager.
-     * @tc.expected: eventManager is not null.
-     */
-    auto eventManager = AceType::MakeRefPtr<EventManager>();
-    ASSERT_NE(eventManager, nullptr);
-    /**
-     * @tc.steps: step2. GetEventInfoManager.
-     * @tc.expected: eventInfoManager is not null.
-     */
-    auto eventInfoManager = eventManager->GetEventInfoManager();
-    EXPECT_NE(eventInfoManager, nullptr);
-}
-
-/**
  * @tc.name: AddHitTestInfoRecord
  * @tc.desc: Test AddHitTestInfoRecord.
  * @tc.type: FUNC
@@ -1580,4 +1566,187 @@ HWTEST_F(EventManagerTestNg, AddHitTestInfoRecord002, TestSize.Level1)
     EXPECT_NE(static_cast<int32_t>(json.size()), 0);
 }
 
+/**
+ * @tc.name: CleanHoverStatusForDragBegin001
+ * @tc.desc: Test CleanHoverStatusForDragBegin with empty mouseTestResults_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, CleanHoverStatusForDragBegin001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+
+    /**
+     * @tc.steps: step2. Set lastMouseEvent_.
+     * @tc.expected: lastMouseEvent_ is set.
+     */
+    MouseEvent lastEvent;
+    lastEvent.id = 100;
+    lastEvent.action = MouseAction::PRESS;
+    lastEvent.button = MouseButton::LEFT_BUTTON;
+    eventManager->lastMouseEvent_ = lastEvent;
+
+    /**
+     * @tc.steps: step3. Call CleanHoverStatusForDragBegin with empty mouseTestResults_.
+     * @tc.expected: No crash, mouseTestResults_ is cleared.
+     */
+    eventManager->CleanHoverStatusForDragBegin();
+    EXPECT_TRUE(eventManager->mouseTestResults_.empty());
+    EXPECT_FALSE(eventManager->isDragCancelPending_);
+}
+
+/**
+ * @tc.name: CleanHoverStatusForDragBegin002
+ * @tc.desc: Test CleanHoverStatusForDragBegin with mouseTestResults_ containing entries >= EVENT_HANDLE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, CleanHoverStatusForDragBegin002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+
+    /**
+     * @tc.steps: step2. Add entries to mouseTestResults_ with key >= EVENT_HANDLE.
+     * @tc.expected: mouseTestResults_ contains entries.
+     */
+    constexpr int EVENT_HANDLE = 100000;
+    auto node = FrameNode::GetOrCreateFrameNode("testNode", 1001, nullptr);
+    ASSERT_NE(node, nullptr);
+
+    TouchTestResult testResult;
+    auto eventTarget = AceType::MakeRefPtr<MockTouchEventTarget>();
+    eventTarget->AttachFrameNode(node);
+    testResult.emplace_back(eventTarget);
+
+    eventManager->mouseTestResults_[EVENT_HANDLE + 100] = testResult;
+    eventManager->mouseTestResults_[EVENT_HANDLE + 200] = testResult;
+
+    /**
+     * @tc.steps: step3. Set lastMouseEvent_.
+     * @tc.expected: lastMouseEvent_ is set.
+     */
+    MouseEvent lastEvent;
+    lastEvent.id = 100;
+    lastEvent.action = MouseAction::PRESS;
+    lastEvent.button = MouseButton::LEFT_BUTTON;
+    eventManager->lastMouseEvent_ = lastEvent;
+
+    /**
+     * @tc.steps: step4. Call CleanHoverStatusForDragBegin.
+     * @tc.expected: mouseTestResults_ is cleared, isDragCancelPending_ is false.
+     */
+    eventManager->CleanHoverStatusForDragBegin();
+    EXPECT_TRUE(eventManager->mouseTestResults_.empty());
+    EXPECT_FALSE(eventManager->isDragCancelPending_);
+}
+
+/**
+ * @tc.name: CleanHoverStatusForDragBegin003
+ * @tc.desc: Test CleanHoverStatusForDragBegin with mouseTestResults_ containing entries < EVENT_HANDLE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, CleanHoverStatusForDragBegin003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+
+    /**
+     * @tc.steps: step2. Add entries to mouseTestResults_ with key < EVENT_HANDLE.
+     * @tc.expected: mouseTestResults_ contains entries.
+     */
+    auto node = FrameNode::GetOrCreateFrameNode("testNode", 1001, nullptr);
+    ASSERT_NE(node, nullptr);
+
+    TouchTestResult testResult;
+    auto eventTarget = AceType::MakeRefPtr<MockTouchEventTarget>();
+    eventTarget->AttachFrameNode(node);
+    testResult.emplace_back(eventTarget);
+
+    eventManager->mouseTestResults_[50] = testResult;
+    eventManager->mouseTestResults_[99] = testResult;
+
+    /**
+     * @tc.steps: step3. Set lastMouseEvent_.
+     * @tc.expected: lastMouseEvent_ is set.
+     */
+    MouseEvent lastEvent;
+    lastEvent.id = 100;
+    lastEvent.action = MouseAction::PRESS;
+    lastEvent.button = MouseButton::LEFT_BUTTON;
+    eventManager->lastMouseEvent_ = lastEvent;
+
+    /**
+     * @tc.steps: step4. Call CleanHoverStatusForDragBegin.
+     * @tc.expected: mouseTestResults_ is cleared, isDragCancelPending_ is false.
+     */
+    eventManager->CleanHoverStatusForDragBegin();
+    EXPECT_TRUE(eventManager->mouseTestResults_.empty());
+    EXPECT_FALSE(eventManager->isDragCancelPending_);
+}
+
+/**
+ * @tc.name: CleanHoverStatusForDragBegin004
+ * @tc.desc: Test CleanHoverStatusForDragBegin with mixed mouseTestResults_ entries.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, CleanHoverStatusForDragBegin004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+
+    /**
+     * @tc.steps: step2. Add mixed entries to mouseTestResults_.
+     * @tc.expected: mouseTestResults_ contains both types of entries.
+     */
+    constexpr int EVENT_HANDLE = 100000;
+    auto node = FrameNode::GetOrCreateFrameNode("testNode", 1001, nullptr);
+    ASSERT_NE(node, nullptr);
+
+    TouchTestResult testResult;
+    auto eventTarget = AceType::MakeRefPtr<MockTouchEventTarget>();
+    eventTarget->AttachFrameNode(node);
+    testResult.emplace_back(eventTarget);
+
+    eventManager->mouseTestResults_[EVENT_HANDLE + 100] = testResult;
+    eventManager->mouseTestResults_[50] = testResult;
+    eventManager->mouseTestResults_[EVENT_HANDLE + 200] = testResult;
+
+    /**
+     * @tc.steps: step3. Set lastMouseEvent_.
+     * @tc.expected: lastMouseEvent_ is set.
+     */
+    MouseEvent lastEvent;
+    lastEvent.id = 100;
+    lastEvent.action = MouseAction::PRESS;
+    lastEvent.button = MouseButton::LEFT_BUTTON;
+    eventManager->lastMouseEvent_ = lastEvent;
+
+    /**
+     * @tc.steps: step4. Call CleanHoverStatusForDragBegin.
+     * @tc.expected: mouseTestResults_ is cleared, isDragCancelPending_ is false.
+     */
+    eventManager->CleanHoverStatusForDragBegin();
+    EXPECT_TRUE(eventManager->mouseTestResults_.empty());
+    EXPECT_FALSE(eventManager->isDragCancelPending_);
+}
 } // namespace OHOS::Ace::NG

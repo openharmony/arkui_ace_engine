@@ -24,6 +24,7 @@
 #include "components/list/examples/NormalTextListExample.h"
 #include "components/list/examples/LazyTextListExample.h"
 #include "components/list/examples/ListItemGroupExample.h"
+#include "./grid/GridDragEventMaker.h"
 
 #include "napi/native_api.h"
 #include <arkui/native_interface.h>
@@ -41,7 +42,7 @@ constexpr const char *K_LOG_DOMAIN = "Manager";
 Manager Manager::manager_;
 ArkUI_NativeNodeAPI_1 *Manager::nodeAPI_ = reinterpret_cast<ArkUI_NativeNodeAPI_1 *>(
     OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-
+ 
 std::unordered_map<ArkUI_NodeContentHandle, std::shared_ptr<BaseNode>> Manager::examples_;
 
 // ---------- 通用小工具 ----------
@@ -85,8 +86,8 @@ static napi_value CreateNativeNode(napi_env env, napi_callback_info info, const 
 
     ArkUI_NodeContentHandle content = nullptr;
     if (!GetNodeContentFromArgs(env, info, content)) {
-        OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, ConstIde::K_LOG_DOMAIN, "%{public}s invalid args/content",
-                     who);
+        OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, ConstIde::K_LOG_DOMAIN,
+                     "%{public}s invalid args/content", who);
         return NapiUndefined(env);
     }
 
@@ -205,4 +206,11 @@ napi_value Manager::DestroyListExample(napi_env env, napi_callback_info info)
 
     RemoveExistingIfAny(content);
     return NapiUndefined(env);
+}
+
+// 创建支持拖拽事件的网格节点
+napi_value Manager::CreateGridNativeNodeDragEvent(napi_env env, napi_callback_info info)
+{
+    return CreateNativeNode(env, info, "CreateGridNativeNodeDragEvent",
+                            []() -> ArkUI_NodeHandle { return GridDragEventMaker::CreateNativeNode(); });
 }

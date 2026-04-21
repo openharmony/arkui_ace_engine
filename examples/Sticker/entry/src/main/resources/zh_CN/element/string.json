@@ -1,0 +1,32 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "贴纸样例模块"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "贴纸样例应用"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "贴纸"
+    },
+    {
+      "name": "sticker_add_image",
+      "value": "添加图片"
+    },
+    {
+      "name": "sticker_clear_all",
+      "value": "清除全部"
+    },
+    {
+      "name": "sticker_delete",
+      "value": "删除"
+    },
+    {
+      "name": "sticker_title",
+      "value": "贴纸编辑器"
+    }
+  ]
+}

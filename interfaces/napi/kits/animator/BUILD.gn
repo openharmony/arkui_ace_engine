@@ -13,6 +13,7 @@
 
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/build/ace_controller.gni")
 
 template("napi_animator_static") {
   forward_variables_from(invoker, "*")
@@ -39,7 +40,7 @@ template("napi_animator_static") {
       deps += [ config.libace_target ]
     }
 
-    if (platform != "ohos" || is_asan) {
+    if (platform != "ohos" || is_asan || !ace_engine_feature_enable_libace) {
       if (frame_trace_support) {
         sources +=
             [ "$ace_root/adapter/ohos/osal/frame_trace_adapter_impl.cpp" ]

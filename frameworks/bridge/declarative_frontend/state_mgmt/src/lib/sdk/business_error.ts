@@ -57,6 +57,8 @@ const USE_REUSABLE_V2_IN_COMPONENT: number = 140117;
 const DUPLICATE_PROVIDE_KEY: number = 140114;
 // @State and V1 state decorator
 const ILLEGAL_TYPE_FOR_V1_STATE_VALUE: number = 140115;
+// @Reusable
+const REUSABLE_V1_OLD_TOOLCHAIN: number = 140120;
 // @Env
 const REQUIRE_INTERNAL_ERROR: number = 140121;
 const UNSUPPORTED_KEY_IN_ENV: number = 140000;

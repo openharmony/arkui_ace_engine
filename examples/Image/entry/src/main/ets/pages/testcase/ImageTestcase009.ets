@@ -14,35 +14,51 @@
  */
 
 /**
- * 测试Image组件基础加载功能
+ * 测试 Image 组件基础加载功能
  * 涵盖各种图片格式和加载场景
  */
 import { image } from '@kit.ImageKit'
 import common from '@ohos.app.ability.common';
 import { BusinessError } from '@ohos.base';
 
+interface TestCase {
+  name: string
+  type: string
+  value: Resource | string | null
+}
+
+interface TestResult {
+  name: string
+  status: string
+  duration: number
+}
+
 @Entry
 @Component
 struct ImageBasicLoadTestCase {
   @State imageUrl: string = ''
-  @State imageResource: Resource = $r('app.media.icon')
+  @State imageResource: Resource = $r('app.media.startIcon')
   @State pixelMap: image.PixelMap | undefined = undefined
   @State base64Image: string = ''
   @State loadingState: string = 'idle'
   @State errorMessage: string = ''
   @State currentTestIndex: number = 0
-  @State testResults: Array<{ name: string, status: string, duration: number }> = []
+  @State testResults: Array<TestResult> = []
 
-  private readonly TEST_CASES = [
-    { name: '本地资源加载', type: 'resource', value: $r('app.media.icon') },
-    { name: 'PixelMap加载', type: 'pixelmap', value: null },
+  private readonly TEST_CASES: TestCase[] = [
+    { name: '本地资源加载', type: 'resource', value: $r('app.media.startIcon') },
+    { name: 'PixelMap 加载', type: 'pixelmap', value: null },
     { name: '空资源加载', type: 'empty', value: '' },
-    { name: '无效URL加载', type: 'invalid', value: 'invalid://url' },
+    { name: '无效 URL 加载', type: 'invalid', value: 'invalid://url' },
   ]
 
-  async aboutToAppear() {
-    await this.generateTestPixelMap()
-    this.runAllTests()
+  async aboutToAppear(): Promise<void> {
+    try {
+      await this.generateTestPixelMap()
+      this.runAllTests()
+    } catch (error) {
+      console.error('aboutToAppear error: ' + (error as BusinessError).message)
+    }
   }
 
   private async generateTestPixelMap(): Promise<void> {
@@ -51,7 +67,7 @@ struct ImageBasicLoadTestCase {
       pixelFormat: image.PixelMapFormat.RGBA_8888,
       editable: true
     }
-    
+
     const buffer = new ArrayBuffer(100 * 100 * 4)
     this.pixelMap = await image.createPixelMap(buffer, pixelMapOptions)
   }
@@ -63,7 +79,7 @@ struct ImageBasicLoadTestCase {
     }
   }
 
-  private async runSingleTest(testCase: any): Promise<void> {
+  private async runSingleTest(testCase: TestCase): Promise<void> {
     const startTime = Date.now()
     this.loadingState = 'loading'
     this.errorMessage = ''
@@ -71,13 +87,13 @@ struct ImageBasicLoadTestCase {
     try {
       switch (testCase.type) {
         case 'resource':
-          await this.testResourceLoad(testCase.value)
+          await this.testResourceLoad(testCase.value as Resource)
           break
         case 'network':
-          await this.testNetworkLoad(testCase.value)
+          await this.testNetworkLoad(testCase.value as string)
           break
         case 'base64':
-          await this.testBase64Load(testCase.value)
+          await this.testBase64Load(testCase.value as string)
           break
         case 'pixelmap':
           await this.testPixelMapLoad()
@@ -86,13 +102,13 @@ struct ImageBasicLoadTestCase {
           await this.testEmptyLoad()
           break
         case 'invalid':
-          await this.testInvalidLoad(testCase.value)
+          await this.testInvalidLoad(testCase.value as string)
           break
         case 'large':
-          await this.testLargeImageLoad(testCase.value)
+          await this.testLargeImageLoad(testCase.value as string)
           break
         case 'svg':
-          await this.testSvgLoad(testCase.value)
+          await this.testSvgLoad(testCase.value as string)
           break
       }
 
@@ -127,6 +143,17 @@ struct ImageBasicLoadTestCase {
           reject(error)
         }
       }, 100)
+    })
+  }
+
+  private async testNetworkLoad(url: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      try {
+        this.imageUrl = url
+        setTimeout(resolve, 100)
+      } catch (error) {
+        reject(error)
+      }
     })
   }
 
@@ -170,7 +197,18 @@ struct ImageBasicLoadTestCase {
     return new Promise((resolve, reject) => {
       try {
         this.imageUrl = url
-        setTimeout(() => resolve(), 50) // 应该失败但我们继续
+        setTimeout(() => resolve(), 50)
+      } catch (error) {
+        reject(error)
+      }
+    })
+  }
+
+  private async testLargeImageLoad(url: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      try {
+        this.imageUrl = url
+        setTimeout(resolve, 100)
       } catch (error) {
         reject(error)
       }
@@ -180,7 +218,7 @@ struct ImageBasicLoadTestCase {
   private async testSvgLoad(svgData: string): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
-        this.base64Image = svgData
+        this.base64Image = svgData as string
         setTimeout(resolve, 150)
       } catch (error) {
         reject(error)
@@ -191,11 +229,11 @@ struct ImageBasicLoadTestCase {
   build() {
     Column() {
       Row() {
-        Text('Image基础加载测试')
+        Text('Image 基础加载测试')
           .fontSize(20)
           .fontWeight(FontWeight.Bold)
         Blank()
-        Text(`当前测试: ${this.currentTestIndex + 1}/${this.TEST_CASES.length}`)
+        Text(`当前测试：${this.currentTestIndex + 1}/${this.TEST_CASES.length}`)
           .fontSize(14)
           .fontColor(Color.Gray)
       }
@@ -219,7 +257,7 @@ struct ImageBasicLoadTestCase {
             .padding(8)
 
             Column() {
-              Text('Base64图片')
+              Text('Base64 图片')
                 .fontSize(14)
                 .margin({ bottom: 8 })
               Image(this.base64Image)
@@ -231,7 +269,7 @@ struct ImageBasicLoadTestCase {
             .padding(8)
 
             Column() {
-              Text('PixelMap图片')
+              Text('PixelMap 图片')
                 .fontSize(14)
                 .margin({ bottom: 8 })
               Image(this.pixelMap)
@@ -242,7 +280,7 @@ struct ImageBasicLoadTestCase {
             }
             .padding(8)
           }
-          .margin({ vertical: 16 })
+          .margin({ top: 16, bottom: 16 })
 
           // 加载状态显示
           Row() {
@@ -258,7 +296,7 @@ struct ImageBasicLoadTestCase {
           .padding(8)
 
           if (this.errorMessage) {
-            Text(`错误信息: ${this.errorMessage}`)
+            Text(`错误信息：${this.errorMessage}`)
               .fontSize(12)
               .fontColor(Color.Red)
               .width('100%')
@@ -273,27 +311,27 @@ struct ImageBasicLoadTestCase {
             .fontWeight(FontWeight.Bold)
             .margin({ top: 16, bottom: 8 })
 
-          ForEach(this.testResults, (result: { name: string, status: string, duration: number }) => {
+          ForEach(this.testResults, (result: TestResult) => {
             Row() {
               Circle({ width: 8, height: 8 })
                 .fill(result.status === 'success' ? Color.Green : Color.Red)
                 .margin({ right: 8 })
-              
+
               Text(result.name)
                 .fontSize(14)
                 .layoutWeight(1)
-              
+
               Text(`${result.duration}ms`)
                 .fontSize(12)
                 .fontColor(Color.Gray)
                 .margin({ right: 8 })
-              
+
               Text(result.status)
                 .fontSize(12)
                 .fontColor(result.status === 'success' ? Color.Green : Color.Red)
             }
             .width('100%')
-            .padding({ vertical: 4, horizontal: 8 })
+            .padding({ top: 4, bottom: 4, left: 8, right: 8 })
             .borderRadius(4)
             .backgroundColor(result.status === 'success' ? '#E8F5E8' : '#FFEBEE')
           })

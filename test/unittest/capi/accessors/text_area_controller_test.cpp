@@ -90,11 +90,11 @@ HWTEST_F(TextAreaControllerAccessorTest, caretPositionTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: StopEditingTest
+ * @tc.name: stopEditingTest
  * @tc.desc: check work of stopEditing method
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaControllerAccessorTest, StopEditingTest, TestSize.Level1)
+HWTEST_F(TextAreaControllerAccessorTest, stopEditingTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->stopEditing, nullptr);
 
@@ -105,11 +105,11 @@ HWTEST_F(TextAreaControllerAccessorTest, StopEditingTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetTextSelectionTest
+ * @tc.name: setTextSelectionTest
  * @tc.desc: check work of setTextSelection method
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaControllerAccessorTest, SetTextSelectionTest, TestSize.Level1)
+HWTEST_F(TextAreaControllerAccessorTest, setTextSelectionTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setTextSelection, nullptr);
     std::optional<SelectionOptions> test = SelectionOptions { MenuPolicy::DEFAULT };

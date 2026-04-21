@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PROGRESS_PROGRESS_PAINT_PROPERTY_H
 
 #include "base/geometry/dimension.h"
-#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/property.h"
@@ -102,8 +101,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(GradientColorSetByUser, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CapsuleStyleSetByUser, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CapsuleStyleFontColorSetByUser, bool, PROPERTY_UPDATE_RENDER);
-
-    int32_t GetThemeScopeId() const;
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BorderColorSetByUser, bool, PROPERTY_UPDATE_MEASURE);
 };
 } // namespace OHOS::Ace::NG
 

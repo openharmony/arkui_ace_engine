@@ -17,11 +17,14 @@
 
 namespace OHOS::Ace {
 ContentChangeConfigImpl::ContentChangeConfigImpl(int32_t minReportTime, float textContentRatio,
-    std::string ignoreEventType)
+    std::string ignoreEventType, int32_t minWidth, int32_t minHeight, int32_t reportDelayTime)
 {
     config_.minReportTime = minReportTime;
     config_.textContentRatio = textContentRatio;
     config_.ignoreEventType = ignoreEventType;
+    config_.minWidth = minWidth;
+    config_.minHeight = minHeight;
+    config_.reportDelayTime = reportDelayTime;
 }
 
 ContentChangeConfigImpl::ContentChangeConfigImpl(const ContentChangeConfig& config)
@@ -29,6 +32,9 @@ ContentChangeConfigImpl::ContentChangeConfigImpl(const ContentChangeConfig& conf
     config_.minReportTime = config.minReportTime;
     config_.textContentRatio = config.textContentRatio;
     config_.ignoreEventType = config.ignoreEventType;
+    config_.minWidth = config.minWidth;
+    config_.minHeight = config.minHeight;
+    config_.reportDelayTime = config.reportDelayTime;
 }
 
 bool ContentChangeConfigImpl::Marshalling(Parcel& parcel) const
@@ -42,24 +48,46 @@ bool ContentChangeConfigImpl::Marshalling(Parcel& parcel) const
     if (!parcel.WriteString(config_.ignoreEventType)) {
         return false;
     }
+    if (!parcel.WriteInt32(config_.minWidth)) {
+        return false;
+    }
+    if (!parcel.WriteInt32(config_.minHeight)) {
+        return false;
+    }
+    if (!parcel.WriteInt32(config_.reportDelayTime)) {
+        return false;
+    }
     return true;
 }
 
 ContentChangeConfigImpl* ContentChangeConfigImpl::Unmarshalling(Parcel& parcel)
 {
-    int32_t minReportTime;
+    int32_t minReportTime = 100;
     if (!parcel.ReadInt32(minReportTime)) {
         return nullptr;
     }
-    float textContentRatio;
+    float textContentRatio = 0.15f;
     if (!parcel.ReadFloat(textContentRatio)) {
         return nullptr;
     }
-    std::string ignoreEventType;
+    std::string ignoreEventType = "";
     if (!parcel.ReadString(ignoreEventType)) {
         return nullptr;
     }
-    ContentChangeConfigImpl* configImpl = new ContentChangeConfigImpl(minReportTime, textContentRatio, ignoreEventType);
+    int32_t minWidth = 100;
+    if (!parcel.ReadInt32(minWidth)) {
+        return nullptr;
+    }
+    int32_t minHeight = 100;
+    if (!parcel.ReadInt32(minHeight)) {
+        return nullptr;
+    }
+    int32_t reportDelayTime = 600;
+    if (!parcel.ReadInt32(reportDelayTime)) {
+        return nullptr;
+    }
+    ContentChangeConfigImpl* configImpl = new ContentChangeConfigImpl(
+        minReportTime, textContentRatio, ignoreEventType, minWidth, minHeight, reportDelayTime);
     return configImpl;
 }
 

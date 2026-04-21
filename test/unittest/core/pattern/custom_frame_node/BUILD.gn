@@ -23,4 +23,17 @@ ace_unittest("custom_frame_node_test") {
     "$ace_root/frameworks/core/components_ng/pattern/custom_frame_node/custom_accessibility_session_adapter.cpp",
     "custom_frame_node_test.cpp"
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "custom_frame_node_test_min.cpp",
+      "custom_frame_node_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "custom_frame_node_test_min.cpp",
+      "custom_frame_node_test_core.cpp",
+    ]
+  }
 }

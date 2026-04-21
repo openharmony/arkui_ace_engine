@@ -113,11 +113,11 @@ public:
 };
 
 /**
- * @tc.name: CtorTestFingers
+ * @tc.name: constructTestFingers
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PanGestureInterfaceAccessorTest, CtorTestFingers, TestSize.Level1)
+HWTEST_F(PanGestureInterfaceAccessorTest, constructTestFingers, TestSize.Level1)
 {
     const std::vector<std::pair<int32_t, int32_t>> TEST_PLAN = {
         { -10, DEFAULT_FINGERS },
@@ -166,11 +166,11 @@ HWTEST_F(PanGestureInterfaceAccessorTest, CtorTestFingers, TestSize.Level1)
 }
 
 /**
- * @tc.name: CtorTestGestureOptionsFingers
+ * @tc.name: constructTestGestureOptionsFingers
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PanGestureInterfaceAccessorTest, CtorTestGestureOptionsFingers, TestSize.Level1)
+HWTEST_F(PanGestureInterfaceAccessorTest, constructTestGestureOptionsFingers, TestSize.Level1)
 {
     const std::vector<std::pair<Ark_Number, int32_t>> TEST_PLAN = {
         { Converter::ArkValue<Ark_Number>(-10), DEFAULT_FINGERS },
@@ -201,11 +201,11 @@ HWTEST_F(PanGestureInterfaceAccessorTest, CtorTestGestureOptionsFingers, TestSiz
 }
 
 /**
- * @tc.name: CtorTestDistance
+ * @tc.name: constructTestDistance
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PanGestureInterfaceAccessorTest, CtorTestDistance, TestSize.Level1)
+HWTEST_F(PanGestureInterfaceAccessorTest, constructTestDistance, TestSize.Level1)
 {
     const std::vector<std::pair<double, double>> TEST_PLAN = {
         { -1.0, DEFAULT_DISTANCE.ConvertToPx() },
@@ -254,11 +254,11 @@ HWTEST_F(PanGestureInterfaceAccessorTest, CtorTestDistance, TestSize.Level1)
 }
 
 /**
- * @tc.name: CtorTestGestureOptionsDistance
+ * @tc.name: constructTestGestureOptionsDistance
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PanGestureInterfaceAccessorTest, CtorTestGestureOptionsDistance, TestSize.Level1)
+HWTEST_F(PanGestureInterfaceAccessorTest, constructTestGestureOptionsDistance, TestSize.Level1)
 {
     const std::vector<std::pair<Ark_Number, double>> TEST_PLAN = {
         { Converter::ArkValue<Ark_Number>(-1.0), DEFAULT_DISTANCE.ConvertToPx() },
@@ -290,11 +290,11 @@ HWTEST_F(PanGestureInterfaceAccessorTest, CtorTestGestureOptionsDistance, TestSi
 }
 
 /**
- * @tc.name: CtorTestDirection
+ * @tc.name: constructTestDirection
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PanGestureInterfaceAccessorTest, CtorTestDirection, TestSize.Level1)
+HWTEST_F(PanGestureInterfaceAccessorTest, constructTestDirection, TestSize.Level1)
 {
     const double expectedFingers = 4;
     const double expectedDistance = 4.0;
@@ -337,11 +337,11 @@ HWTEST_F(PanGestureInterfaceAccessorTest, CtorTestDirection, TestSize.Level1)
 }
 
 /**
- * @tc.name: CtorTestGestureOptionsDirection
+ * @tc.name: constructTestGestureOptionsDirection
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PanGestureInterfaceAccessorTest, CtorTestGestureOptionsDirection, TestSize.Level1)
+HWTEST_F(PanGestureInterfaceAccessorTest, constructTestGestureOptionsDirection, TestSize.Level1)
 {
     for (auto& value : TEST_PLAN_DIRECTION) {
         auto options = PeerUtils::CreatePeer<PanGestureOptionsPeer>();
@@ -364,11 +364,11 @@ HWTEST_F(PanGestureInterfaceAccessorTest, CtorTestGestureOptionsDirection, TestS
 }
 
 /**
- * @tc.name: CtorTestInvalid
+ * @tc.name: constructTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PanGestureInterfaceAccessorTest, CtorTestInvalid, TestSize.Level1)
+HWTEST_F(PanGestureInterfaceAccessorTest, constructTestDefaultValues, TestSize.Level1)
 {
     ASSERT_NE(peer_->gesture, nullptr);
     auto fingers = peer_->gesture->GetFingers();
@@ -382,11 +382,11 @@ HWTEST_F(PanGestureInterfaceAccessorTest, CtorTestInvalid, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnActionStartTest
+ * @tc.name: onActionStartTest
  * @tc.desc: setOnAction test
  * @tc.type: FUNC
  */
-HWTEST_F(PanGestureInterfaceAccessorTest, OnActionStartTest, TestSize.Level1)
+HWTEST_F(PanGestureInterfaceAccessorTest, onActionStartTest, TestSize.Level1)
 {
     ASSERT_TRUE(peer_ && peer_->gesture && accessor_);
     static std::optional<CheckEvent> checkEvent = std::nullopt;
@@ -407,11 +407,11 @@ HWTEST_F(PanGestureInterfaceAccessorTest, OnActionStartTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnActionUpdateTest
+ * @tc.name: onActionUpdateTest
  * @tc.desc: setOnAction test
  * @tc.type: FUNC
  */
-HWTEST_F(PanGestureInterfaceAccessorTest, OnActionUpdateTest, TestSize.Level1)
+HWTEST_F(PanGestureInterfaceAccessorTest, onActionUpdateTest, TestSize.Level1)
 {
     ASSERT_TRUE(peer_ && peer_->gesture && accessor_);
     static std::optional<CheckEvent> checkEvent = std::nullopt;
@@ -432,11 +432,11 @@ HWTEST_F(PanGestureInterfaceAccessorTest, OnActionUpdateTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnActionEndTest
+ * @tc.name: onActionEndTest
  * @tc.desc: setOnAction test
  * @tc.type: FUNC
  */
-HWTEST_F(PanGestureInterfaceAccessorTest, OnActionEndTest, TestSize.Level1)
+HWTEST_F(PanGestureInterfaceAccessorTest, onActionEndTest, TestSize.Level1)
 {
     ASSERT_TRUE(peer_ && peer_->gesture && accessor_);
     static std::optional<CheckEvent> checkEvent = std::nullopt;
@@ -457,11 +457,11 @@ HWTEST_F(PanGestureInterfaceAccessorTest, OnActionEndTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnActionCancelTest
+ * @tc.name: onActionCancel0TestOnActionCancel
  * @tc.desc: setOnAction test
  * @tc.type: FUNC
  */
-HWTEST_F(PanGestureInterfaceAccessorTest, OnActionCancelTest, TestSize.Level1)
+HWTEST_F(PanGestureInterfaceAccessorTest, onActionCancel0TestOnActionCancel, TestSize.Level1)
 {
     ASSERT_TRUE(peer_ && peer_->gesture && accessor_);
     static std::optional<CheckEvent> checkEvent = std::nullopt;
@@ -481,11 +481,11 @@ HWTEST_F(PanGestureInterfaceAccessorTest, OnActionCancelTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnActionCancel1Test
+ * @tc.name: onActionCancel1Test
  * @tc.desc: setOnAction test
  * @tc.type: FUNC
  */
-HWTEST_F(PanGestureInterfaceAccessorTest, OnActionCancel1Test, TestSize.Level1)
+HWTEST_F(PanGestureInterfaceAccessorTest, onActionCancel1Test, TestSize.Level1)
 {
     ASSERT_TRUE(peer_ && peer_->gesture && accessor_);
     static std::optional<CheckEvent> checkEvent = std::nullopt;

@@ -21,14 +21,11 @@
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/pattern/slider/slider_content_modifier.h"
-#include "core/components_ng/pattern/slider/slider_paint_property.h"
 #include "core/components_ng/pattern/slider/slider_tip_modifier.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/node_paint_method.h"
-#include "core/components_ng/render/paragraph.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
+class SliderPaintProperty;
 class ACE_EXPORT SliderPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(SliderPaintMethod, NodePaintMethod);
 

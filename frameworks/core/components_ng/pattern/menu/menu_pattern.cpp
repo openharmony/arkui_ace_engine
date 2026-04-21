@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 
+#include "base/subwindow/subwindow_manager.h"
 #include "base/geometry/dimension.h"
 #include "base/log/dump_log.h"
 #include "core/components/common/layout/grid_system_manager.h"
@@ -37,9 +38,11 @@
 #include "core/components_ng/pattern/menu/sub_menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/components_ng/token_theme/token_theme_storage.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_base.h"
@@ -188,7 +191,7 @@ void MenuPattern::OnAttachToFrameNode()
     DisableTabInMenu();
     auto pipelineContext = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipelineContext);
-    InitTheme(host, pipelineContext->GetTheme<SelectTheme>());
+    InitTheme(host, host->GetTheme<SelectTheme>(true));
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
     CHECK_NULL_VOID(targetNode);
     auto eventHub = targetNode->GetEventHub<EventHub>();
@@ -199,6 +202,7 @@ void MenuPattern::OnAttachToFrameNode()
                                               const OffsetF& /* origin */) {
         auto menuNode = menuNodeWk.Upgrade();
         CHECK_NULL_VOID(menuNode);
+        ACE_UINODE_TRACE(menuNode);
         auto menuPattern = menuNode->GetPattern<MenuPattern>();
         CHECK_NULL_VOID(menuPattern);
         auto menuWarpper = menuPattern->GetMenuWrapper();
@@ -303,6 +307,7 @@ void MenuPattern::OnModifyDone()
     }
 
     SetAccessibilityAction();
+    ApplyScrollBarToScrollNode();
 
     if (previewMode_ != MenuPreviewMode::NONE) {
         auto node = host->GetChildren().front();
@@ -314,6 +319,29 @@ void MenuPattern::OnModifyDone()
         auto gestureHub = hub->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
         InitPanEvent(gestureHub);
+    }
+}
+
+void MenuPattern::ApplyScrollBarToScrollNode()
+{
+    CHECK_EQUAL_VOID(scrollBar_.has_value(), false);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    for (const auto& child : host->GetChildren()) {
+        auto childFrame = AceType::DynamicCast<FrameNode>(child);
+        if (childFrame && childFrame->GetTag() == V2::SCROLL_ETS_TAG) {
+            auto scrollPaintProperty = childFrame->GetPaintProperty<ScrollablePaintProperty>();
+            if (scrollPaintProperty) {
+                scrollPaintProperty->UpdateScrollBarMode(scrollBar_.value());
+            }
+            auto scrollPattern = childFrame->GetPattern<ScrollablePattern>();
+            if (scrollPattern) {
+                scrollPattern->SetScrollBar(scrollBar_.value());
+            }
+            childFrame->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            break;
+        }
     }
 }
 
@@ -511,9 +539,7 @@ void InnerMenuPattern::OnModifyDone()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     SetAccessibilityAction();
-    auto pipelineContext = host->GetContextRefPtr();
-    CHECK_NULL_VOID(pipelineContext);
-    auto selecTheme = pipelineContext->GetTheme<SelectTheme>();
+    auto selecTheme = host->GetTheme<SelectTheme>(true);
     CHECK_NULL_VOID(selecTheme);
     if (selecTheme->GetMenuItemNeedFocus()) {
         InitDefaultBorder(host);
@@ -998,6 +1024,41 @@ void MenuPattern::HideMenu(bool isMenuOnTouch, OffsetF position, const HideMenuT
 
 void MenuPattern::DoCloseSubMenus() const
 {
+    // this function is used to destroy a submenu which contains DetachedFreeRootProxy node.
+    if (showedSubMenu_) {
+        RefPtr<FrameNode> parentMenuItem = nullptr;
+        auto showedSubMenuPattern = showedSubMenu_->GetPattern<MenuPattern>();
+
+        auto detachedProxyNode = showedSubMenu_->GetChildAtIndex(0);
+        bool hasDetachedProxy = false;
+        while (detachedProxyNode) {
+            if (detachedProxyNode->GetTag() == DETACHED_FREE_ROOT_PROXY_TAG) {
+                hasDetachedProxy = true;
+                break;
+            }
+            detachedProxyNode = detachedProxyNode->GetChildAtIndex(0);
+        }
+
+        if (showedSubMenuPattern && showedSubMenuPattern->IsSubMenu() && hasDetachedProxy) {
+            auto wrapperMenu = showedSubMenu_->GetParent();
+            if (wrapperMenu) {
+                wrapperMenu->RemoveChild(showedSubMenu_);
+            }
+            showedSubMenu_= nullptr;
+            // save the pointer to the parent menu item before reseting it in SetParentMenuItem
+            parentMenuItem = showedSubMenuPattern->parentMenuItem_;
+            showedSubMenuPattern->SetParentMenuItem(nullptr);
+            showedSubMenuPattern->SetSubMenuShow(false);
+        }
+
+        if (parentMenuItem) {
+            auto parentMenuItemPattern = parentMenuItem->GetPattern<MenuItemPattern>();
+            if (parentMenuItemPattern && parentMenuItemPattern->HasDetachedFreeRootProxy()) {
+                parentMenuItemPattern->HandleCloseSubMenu();
+            }
+        }
+    }
+
     for (auto iter = embeddedMenuItems_.begin(); iter != embeddedMenuItems_.end();) {
         auto& menuItem = *iter;
         auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
@@ -1100,6 +1161,7 @@ void MenuPattern::HideStackMenu() const
     }
     auto menuNode = AceType::DynamicCast<FrameNode>(wrapper->GetFirstChild());
     CHECK_NULL_VOID(menuNode);
+    ACE_UINODE_TRACE(menuNode);
     ShowStackMenuDisappearAnimation(menuNode, host, option);
 }
 
@@ -1261,6 +1323,7 @@ RefPtr<FrameNode> MenuPattern::GetMenuColumn() const
 {
     auto menu = GetHost();
     CHECK_NULL_RETURN(menu, nullptr);
+    ACE_UINODE_TRACE(menu);
     auto scroll = menu->GetChildren().front();
     CHECK_NULL_RETURN(scroll, nullptr);
     auto column = scroll->GetChildren().front();
@@ -2433,8 +2496,10 @@ void MenuPattern::OnColorConfigurationUpdate()
             child->MarkModifyDone();
             child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
+        host->SetNeedCallChildrenUpdate(false);
+    } else {
+        host->SetNeedCallChildrenUpdate(SystemProperties::ConfigChangePerform());
     }
-    host->SetNeedCallChildrenUpdate(false);
 
     auto menuLayoutProperty = GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(menuLayoutProperty);
@@ -2444,6 +2509,71 @@ void MenuPattern::OnColorConfigurationUpdate()
         host->MarkModifyDone();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
+}
+
+bool MenuPattern::UpdateMenuBackBlurStyle(bool userSetBgColor)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    auto menuTheme = host->GetTheme<SelectTheme>(true);
+    CHECK_NULL_RETURN(menuTheme, false);
+    auto menuWrapper = GetMenuWrapper();
+    CHECK_NULL_RETURN(menuWrapper, false);
+    auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_RETURN(wrapperPattern, false);
+    auto menuParams = wrapperPattern->GetMenuParam();
+ 
+    if (renderContext->IsUniRenderEnabled() && (!renderContext->HasBackgroundColor() || !userSetBgColor)) {
+        BlurStyleOption styleOption;
+        MenuView::UpdateStyleOptionColorMode(host->GetLocalColorMode(), styleOption, isColorModeFollowTarget_);
+        if (menuTheme->GetMenuBlendBgColor()) {
+            styleOption.blurStyle = static_cast<BlurStyle>(menuTheme->GetMenuNormalBackgroundBlurStyle());
+            renderContext->UpdateBackgroundColor(menuParams.backgroundColor.value_or(menuTheme->GetBackgroundColor()));
+        } else {
+            styleOption.blurStyle = static_cast<BlurStyle>(menuTheme->GetMenuBackgroundBlurStyle());
+            renderContext->UpdateBackgroundColor(menuParams.backgroundColor.value_or(Color::TRANSPARENT));
+        }
+        renderContext->UpdateBackBlurStyle(menuParams.blurStyleOption.value_or(styleOption));
+    }
+    return true;
+}
+
+bool MenuPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) || !themeScopeId) {
+        return false;
+    }
+    auto menuTheme = host->GetTheme<SelectTheme>(true);
+    CHECK_NULL_RETURN(menuTheme, false);
+    auto menuPattern = host->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(menuPattern, false);
+    auto optionNode = menuPattern->GetOptions();
+    for (const auto& child : optionNode) {
+        auto optionsPattern = child->GetPattern<MenuItemPattern>();
+        if (optionsPattern) {
+            optionsPattern->SetFontColor(menuTheme->GetFontColor());
+        }
+        child->MarkModifyDone();
+        child->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+
+    auto menuLayoutProperty = GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_RETURN(menuLayoutProperty, false);
+    auto pipeline = host->GetContextWithCheck();
+    CHECK_NULL_RETURN(pipeline, false);
+    if (!menuLayoutProperty->GetFontColorSetByUser().value_or(false)) {
+        auto themeFontColor = menuTheme->GetMenuFontColor();
+        menuLayoutProperty->UpdateFontColor(themeFontColor);
+        menuLayoutProperty->UpdateFontColorSetByUser(false);
+    }
+    auto userSetBgColor = menuLayoutProperty->GetIsUserSetBackgroundColor();
+    auto ret = UpdateMenuBackBlurStyle(userSetBgColor);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    return ret;
 }
 
 void MenuPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -2890,13 +3020,13 @@ float MenuPattern::GetSelectMenuWidthFromTheme() const
     return finalWidth;
 }
 
-bool MenuPattern::IsSelectOverlayDefaultModeRightClickMenu()
+bool MenuPattern::IsSelectOverlayShowInSubWindow()
 {
-    CHECK_NULL_RETURN(IsSelectOverlayRightClickMenu(), false);
+    CHECK_NULL_RETURN(IsSelectOverlayRightClickMenu() || IsSelectOverlaySubMenu(), false);
     auto menuWrapper = GetMenuWrapper();
     CHECK_NULL_RETURN(menuWrapper, false);
     auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_RETURN(menuWrapperPattern, false);
-    return !menuWrapperPattern->GetIsSelectOverlaySubWindowWrapper();
+    return menuWrapperPattern->GetIsSelectOverlaySubWindowWrapper();
 }
 } // namespace OHOS::Ace::NG

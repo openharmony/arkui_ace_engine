@@ -17,9 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_IF_ELSE_MODEL_H
 
 #include <cstdint>
-#include <memory>
 #include <list>
-#include <mutex>
+#include <string>
 
 #include "base/utils/macros.h"
 

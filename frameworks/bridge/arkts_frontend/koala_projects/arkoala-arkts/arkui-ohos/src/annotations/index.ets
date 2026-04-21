@@ -44,3 +44,45 @@ export @interface Provide {}
 
 @Retention({policy: "SOURCE"})
 export @interface Consume {}
+
+/**
+ * Component lifecycle decorator for component initialization
+ * Marks a method to be called when component is initialized
+ */
+@Retention({policy: "SOURCE"})
+export @interface ComponentInit {}
+
+/**
+ * Component lifecycle decorator for component appearance
+ * Marks a method to be called when component is about to appear
+ */
+@Retention({policy: "SOURCE"})
+export @interface ComponentAppear {}
+
+/**
+ * Component lifecycle decorator for component build completion
+ * Marks a method to be called after component has been built
+ */
+@Retention({policy: "SOURCE"})
+export @interface ComponentBuilt {}
+
+/**
+ * Component lifecycle decorator for component disappearance
+ * Marks a method to be called when component is about to disappear
+ */
+@Retention({policy: "SOURCE"})
+export @interface ComponentDisappear {}
+
+/**
+ * Component lifecycle decorator for component reuse
+ * Marks a method to be called when component is about to be reused
+ */
+@Retention({policy: "SOURCE"})
+export @interface ComponentReuse {}
+
+/**
+ * Component lifecycle decorator for component recycling
+ * Marks a method to be called when component is about to be recycled
+ */
+@Retention({policy: "SOURCE"})
+export @interface ComponentRecycle {}

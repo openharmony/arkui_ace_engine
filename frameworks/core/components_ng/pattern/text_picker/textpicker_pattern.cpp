@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_picker/textpicker_column_pattern.h"
@@ -238,6 +239,10 @@ void TextPickerPattern::SetButtonIdeaSize()
         if (!useButtonFocusArea_) {
             if (!columnPattern->isHover()) {
                 buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+                auto buttonNodeLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+                if (buttonNodeLayoutProperty) {
+                    buttonNodeLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+                }
             }
         } else {
             UpdateColumnButtonStyles(columnNode, haveFocus_ && (currentFocusButtonNode == buttonNode), false);
@@ -1735,7 +1740,7 @@ void TextPickerPattern::OnColorConfigurationUpdate()
         auto layoutRenderContext = contentRowNode->GetRenderContext();
         CHECK_NULL_VOID(layoutRenderContext);
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) ||
-            !layoutRenderContext->IsUniRenderEnabled()) {
+            !DialogView::IsSupportBlurStyle(contentRowNode, isShowInSubWindow_)) {
             layoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
         }
     }
@@ -1750,6 +1755,9 @@ bool TextPickerPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     bool result = false;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, result);
+    if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return result;
+    }
     host->SetNeedCallChildrenUpdate(false);
     auto context = host->GetContext();
     CHECK_NULL_RETURN(context, result);
@@ -1759,7 +1767,8 @@ bool TextPickerPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     // If they are setted by user, then use the value by user set; Otherwise use the value from withTheme
     // When the "result" is true, mean to notify the framework to Re-render
     if ((!pickerProperty->HasColor()) || (!pickerProperty->HasDisappearColor()) ||
-        (!pickerProperty->HasSelectedColor())) {
+        (!pickerProperty->HasSelectedColor()) || GetDivider().isDefaultColor ||
+        (!pickerProperty->HasSelectedBackgroundColor())) {
         result = true;
     }
     FREE_NODE_CHECK(host, OnThemeScopeUpdate);
@@ -2013,7 +2022,7 @@ void TextPickerPattern::UpdateTextStyleCommon(
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
 
-    if (pipelineContext->IsSystmColorChange()) {
+    if (pipelineContext->IsSystemColorChange()) {
         updateTextColorFunc(textStyle.textColor.value_or(defaultTextStyle.GetTextColor()));
 
         Dimension fontSize = defaultTextStyle.GetFontSize();

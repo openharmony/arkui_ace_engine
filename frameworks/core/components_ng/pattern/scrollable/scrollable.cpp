@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 
 #include "base/log/jank_frame_report.h"
+#include "core/animation/scroll_motion.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
@@ -23,6 +24,7 @@
 #include "core/common/layout_inspector.h"
 #include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
 #include "core/components_ng/pattern/scrollable/scrollable_theme.h"
+#include "core/components_ng/render/animation_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "base/log/event_report.h"
 #include "core/pipeline/base/constants.h"
@@ -572,8 +574,10 @@ void Scrollable::HandleTouchCancel()
     }
     isTouching_ = false;
     ACE_SCOPED_TRACE("HandleTouchCancel, id:%d, tag:%s", nodeId_, nodeTag_.c_str());
-    if (state_ != AnimationState::SPRING && scrollOverCallback_) {
-        ProcessScrollOverCallback(0.0);
+    if (outBoundaryCallback_ && outBoundaryCallback_(false)) {
+        if (state_ != AnimationState::SPRING && scrollOverCallback_) {
+            ProcessScrollOverCallback(0.0);
+        }
     }
 }
 
@@ -746,8 +750,8 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
         }
     }
 #endif
-    auto mainDelta = info.GetMainDelta() + prevRemainDelta_;
-    lastMainDelta_ = mainDelta;
+    lastMainDelta_ = info.GetMainDelta();
+    auto mainDelta = lastMainDelta_ + prevRemainDelta_;
     auto prevMainDelta = isReverseCallback_ && isReverseCallback_() ? -mainDelta : mainDelta;
     mainDelta = Round(prevMainDelta);
     prevRemainDelta_ = prevMainDelta - mainDelta;

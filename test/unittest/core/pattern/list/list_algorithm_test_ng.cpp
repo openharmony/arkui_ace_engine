@@ -20,6 +20,7 @@
 #include "test/unittest/core/pattern/test_ng.h"
 
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
+#include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_item_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
@@ -392,8 +393,8 @@ HWTEST_F(ListAlgorithmTestNg, NoNeedJump001, TestSize.Level1)
 HWTEST_F(ListAlgorithmTestNg, JudgeInOfScreenScrollAutoType001, TestSize.Level1)
 {
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> listItemGroupPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm = AceType::MakeRefPtr<ListLayoutAlgorithm>(2);
     RefPtr<ListLayoutProperty> layoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
     layoutProperty->propStickyStyle_ = V2::StickyStyle::BOTH;
@@ -423,8 +424,8 @@ HWTEST_F(ListAlgorithmTestNg, JudgeInOfScreenScrollAutoType001, TestSize.Level1)
 HWTEST_F(ListAlgorithmTestNg, JudgeInOfScreenScrollAutoType002, TestSize.Level1)
 {
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> listItemGroupPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm = AceType::MakeRefPtr<ListLayoutAlgorithm>(2);
     RefPtr<ListLayoutProperty> layoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
     layoutProperty->propStickyStyle_ = V2::StickyStyle::HEADER;
@@ -456,8 +457,8 @@ HWTEST_F(ListAlgorithmTestNg, JudgeInOfScreenScrollAutoType002, TestSize.Level1)
 HWTEST_F(ListAlgorithmTestNg, JudgeInOfScreenScrollAutoType003, TestSize.Level1)
 {
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> listItemGroupPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm = AceType::MakeRefPtr<ListLayoutAlgorithm>(2);
     RefPtr<ListLayoutProperty> layoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
     layoutProperty->propStickyStyle_ = V2::StickyStyle::HEADER;
@@ -489,8 +490,8 @@ HWTEST_F(ListAlgorithmTestNg, JudgeInOfScreenScrollAutoType003, TestSize.Level1)
 HWTEST_F(ListAlgorithmTestNg, JudgeOutOfScreenScrollAutoType001, TestSize.Level1)
 {
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> listItemGroupPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm = AceType::MakeRefPtr<ListLayoutAlgorithm>(2);
     RefPtr<ListLayoutProperty> layoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
     layoutProperty->propStickyStyle_ = V2::StickyStyle::HEADER;
@@ -528,8 +529,8 @@ HWTEST_F(ListAlgorithmTestNg, JudgeOutOfScreenScrollAutoType001, TestSize.Level1
 HWTEST_F(ListAlgorithmTestNg, JudgeOutOfScreenScrollAutoType002, TestSize.Level1)
 {
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> listItemGroupPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm = AceType::MakeRefPtr<ListLayoutAlgorithm>(2);
     RefPtr<ListLayoutProperty> layoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
     layoutProperty->propStickyStyle_ = V2::StickyStyle::HEADER;
@@ -729,8 +730,8 @@ HWTEST_F(ListAlgorithmTestNg, CheckJumpValid003, TestSize.Level1)
 HWTEST_F(ListAlgorithmTestNg, CheckJumpValid004, TestSize.Level1)
 {
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> listItemGroupPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     listItemGroupPattern->itemStartIndex_ = 2;
     RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm = AceType::MakeRefPtr<ListLayoutAlgorithm>(2);
     RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
@@ -775,8 +776,8 @@ HWTEST_F(ListAlgorithmTestNg, CheckJumpValid004, TestSize.Level1)
 HWTEST_F(ListAlgorithmTestNg, CheckJumpValid005, TestSize.Level1)
 {
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> listItemGroupPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     listItemGroupPattern->itemStartIndex_ = 2;
     RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm = AceType::MakeRefPtr<ListLayoutAlgorithm>(2);
     RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();

@@ -81,6 +81,12 @@ public:
     }
 
     void GetGlyphPositionAtCoordinate(const JSCallbackInfo& args);
+
+    void GetCharacterPositionAtCoordinate(const JSCallbackInfo& args);
+
+    void GetGlyphRangeForCharacterRange(const JSCallbackInfo& args);
+
+    void GetCharacterRangeForGlyphRange(const JSCallbackInfo& args);
  
     void DidExceedMaxLines(const JSCallbackInfo& args);
  

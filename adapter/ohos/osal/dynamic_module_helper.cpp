@@ -22,6 +22,7 @@
 #include "compatible/components/component_loader.h"
 #include "interfaces/inner_api/ace/utils.h"
 
+#include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace {
@@ -69,6 +70,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "ColumnSplit", "linearsplit" },
         { "Counter", "counter" },
         { "DataPanel", "datapanel" },
+        {"TextClock", "textclock"},
         { "FlowItem", "waterflow" },
         { "FolderStack", "folderstack" },
         {"DynamicLayout", "dynamiclayout"},
@@ -127,6 +129,16 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
 #endif
         return module;
     }
+}
+
+bool DynamicModuleHelper::IsDynamicModuleLoaded(const std::string& name)
+{
+    std::lock_guard<std::mutex> lock(moduleMapMutex_);
+    auto iter = moduleMap_.find(name);
+    if (iter != moduleMap_.end()) {
+        return true;
+    }
+    return false;
 }
 
 #ifdef ENABLE_PRELOAD_DYNAMIC_MODULE

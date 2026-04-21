@@ -26,14 +26,19 @@
 #include "bridge/js_frontend/engine/jsi/js_value.h"
 #include "core/common/frontend.h"
 #include "core/common/js_message_dispatcher.h"
-#include "frameworks/bridge/js_frontend/frontend_delegate.h"
+#include "frameworks/bridge/js_frontend/engine/common/group_js_bridge.h"
 
 class NativeEngine;
 class NativeReference;
 typedef struct napi_value__* napi_value;
 
+namespace OHOS::Ace {
+class Component;
+}
+
 namespace OHOS::Ace::Framework {
 class JsAcePage;
+class FrontendDelegate;
 using PixelMapNapiEntry = void* (*)(void*, void*);
 struct JsModule {
     const std::string moduleName;
@@ -70,12 +75,16 @@ protected:
 };
 
 using InspectorFunc = std::function<void()>;
+using InspectorFuncWithParameter = std::function<void(std::vector<int32_t>)>;
 using CounterFunc = std::function<bool()>;
 class InspectorEvent : public virtual AceType {
     DECLARE_ACE_TYPE(InspectorEvent, AceType);
 public:
     explicit InspectorEvent(InspectorFunc&& callback, CounterFunc&& counter)
         : callback_(std::move(callback)), counter_(std::move(counter))
+    {}
+    InspectorEvent(InspectorFuncWithParameter&& callback, CounterFunc&& counter)
+        : callbackWithParameter_(std::move(callback)), counter_(std::move(counter))
     {}
     ~InspectorEvent() override = default;
 
@@ -85,6 +94,14 @@ public:
             callback_();
         }
     }
+
+    void operator()(std::vector<int32_t> params) const
+    {
+        if (callbackWithParameter_) {
+            callbackWithParameter_(params);
+        }
+    }
+
     bool HasCallback() const
     {
         return !counter_();
@@ -92,6 +109,7 @@ public:
 
 private:
     InspectorFunc callback_;
+    InspectorFuncWithParameter callbackWithParameter_;
     CounterFunc counter_;
 };
 
@@ -302,12 +320,26 @@ public:
         }
     }
 
-    void DrawChildrenInspectorCallback(const std::string& componentId)
+    void DrawChildrenInspectorCallback(const std::string& componentId, const std::vector<int32_t>& childIds)
     {
         auto iter = drawChildrenEvents_.find(componentId);
         if (iter != drawChildrenEvents_.end()) {
-            for (auto&& observer : iter->second) {
+            auto childrenCallbacks = iter->second;
+            for (auto&& observer : childrenCallbacks) {
+                if (!observer) {
+                    continue;
+                }
                 (*observer)();
+            }
+        }
+        auto iterWithParameter = drawChildrenWithParameterEvents_.find(componentId);
+        if (iterWithParameter != drawChildrenWithParameterEvents_.end()) {
+            auto childrenWithParameterCallbacks = iterWithParameter->second;
+            for (auto&& observer : childrenWithParameterCallbacks) {
+                if (!observer) {
+                    continue;
+                }
+                (*observer)(childIds);
             }
         }
     }
@@ -516,6 +548,10 @@ public:
         const RefPtr<InspectorEvent>& layoutChildrenEvent, int32_t uniqueId);
     void ACE_EXPORT UnregisterLayoutChildrenInspectorCallback(
         const RefPtr<InspectorEvent>& layoutChildrenEvent, int32_t uniqueId);
+    void ACE_EXPORT RegisterDrawChildrenWithParameterInspectorCallback(
+        const RefPtr<InspectorEvent>& drawChildrenWithParameterEvent, const std::string& componentId);
+    void ACE_EXPORT UnregisterDrawChildrenWithParameterInspectorCallback(
+        const RefPtr<InspectorEvent>& drawChildrenWithParameterEvent, const std::string& componentId);
 
     bool IsLayoutCallBackFuncExist(const std::string& componentId) const
     {
@@ -548,12 +584,19 @@ public:
     bool IsDrawChildrenCallbackFuncExist(const std::string& componentId) const
     {
         auto iter = drawChildrenEvents_.find(componentId);
-        if (iter == drawChildrenEvents_.end()) {
-            return false;
+        auto iterWithParameter = drawChildrenWithParameterEvents_.find(componentId);
+        if (iter != drawChildrenEvents_.end()) {
+            for (const auto& f : iter->second) {
+                if (f && f->HasCallback()) {
+                    return true;
+                }
+            }
         }
-        for (auto& f : iter->second) {
-            if (f && f->HasCallback()) {
-                return true;
+        if (iterWithParameter != drawChildrenWithParameterEvents_.end()) {
+            for (const auto& f : iterWithParameter->second) {
+                if (f && f->HasCallback()) {
+                    return true;
+                }
             }
         }
         return false;
@@ -631,6 +674,7 @@ protected:
     std::map<std::string, std::set<RefPtr<InspectorEvent>>> layoutEvents_;
     std::map<std::string, std::set<RefPtr<InspectorEvent>>> drawEvents_;
     std::map<std::string, std::set<RefPtr<InspectorEvent>>> drawChildrenEvents_;
+    std::map<std::string, std::set<RefPtr<InspectorEvent>>> drawChildrenWithParameterEvents_;
     std::map<std::string, std::set<RefPtr<InspectorEvent>>> layoutChildrenEvents_;
 
     std::map<int32_t, std::set<RefPtr<InspectorEvent>>> uniqueIdLayoutEvents_;

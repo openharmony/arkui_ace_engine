@@ -56,6 +56,7 @@ public:
     static DynamicModuleHelper& GetInstance();
     std::unique_ptr<ComponentLoader> GetLoaderByName(const char* name);
     DynamicModule* GetDynamicModule(const std::string& name);
+    bool IsDynamicModuleLoaded(const std::string& name);
 #ifdef ENABLE_PRELOAD_DYNAMIC_MODULE
     void TriggerPageFaultForPreLoad();
 #endif

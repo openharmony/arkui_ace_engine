@@ -39,7 +39,7 @@ public:
 };
 
 /**
- * @tc.name: invalidateTest
+ * @tc.name: getImageAnalyzerSupportTypesTest
  * @tc.desc:
  * @tc.type: FUNC
  */

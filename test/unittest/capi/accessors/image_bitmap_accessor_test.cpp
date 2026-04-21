@@ -30,7 +30,7 @@ const std::string DEFAULT_STRING_VALUE = "text";
 const int DEFAULT_INT_VALUE = 100;
 const Ark_Int32 DEFAULT_HEIGHT_VALUE = 0;
 const Ark_Int32 DEFAULT_WIDTH_VALUE = 0;
-const auto DEFAULT_RESOURCE = Converter::ArkUnion<Ark_Union_PixelMap_String, Ark_String>(DEFAULT_STRING_VALUE);
+const auto DEFAULT_RESOURCE = Converter::ArkUnion<Ark_Union_image_PixelMap_String, Ark_String>(DEFAULT_STRING_VALUE);
 const auto DEFAULT_METRICS = Converter::ArkValue<Opt_LengthMetricsUnit>(Ace::CanvasUnit::PX);
 
 std::vector<std::tuple<Ark_Number, double>> arkNumberTestPlan = {
@@ -95,14 +95,14 @@ public:
 };
 
 /**
- * @tc.name: close_success
+ * @tc.name: closeTestSuccess
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageBitmapAccessorTest, close_success, TestSize.Level1)
+HWTEST_F(ImageBitmapAccessorTest, closeTestSuccess, TestSize.Level1)
 {
     Converter::ConvContext ctx;
-    auto imageResource = Converter::ArkUnion<Ark_Union_PixelMap_String, Ark_String>(DEFAULT_STRING_VALUE, &ctx);
+    auto imageResource = Converter::ArkUnion<Ark_Union_image_PixelMap_String, Ark_String>(DEFAULT_STRING_VALUE, &ctx);
     auto unit = Converter::ArkValue<Opt_LengthMetricsUnit>();
     peer_ = reinterpret_cast<MockImageBitmapPeer *>(accessor_->construct(&imageResource, &unit));
     bool result = false;
@@ -118,14 +118,14 @@ HWTEST_F(ImageBitmapAccessorTest, close_success, TestSize.Level1)
 }
 
 /**
- * @tc.name: getHeight
+ * @tc.name: getHeightTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageBitmapAccessorTest, getHeight, TestSize.Level1)
+HWTEST_F(ImageBitmapAccessorTest, getHeightTest, TestSize.Level1)
 {
     Converter::ConvContext ctx;
-    auto imageResource = Converter::ArkUnion<Ark_Union_PixelMap_String, Ark_String>(DEFAULT_STRING_VALUE, &ctx);
+    auto imageResource = Converter::ArkUnion<Ark_Union_image_PixelMap_String, Ark_String>(DEFAULT_STRING_VALUE, &ctx);
     auto unit = Converter::ArkValue<Opt_LengthMetricsUnit>();
     peer_ = reinterpret_cast<MockImageBitmapPeer *>(accessor_->construct(&imageResource, &unit));
     ASSERT_NE(peer_, nullptr);
@@ -138,14 +138,14 @@ HWTEST_F(ImageBitmapAccessorTest, getHeight, TestSize.Level1)
 }
 
 /**
- * @tc.name: getWidth
+ * @tc.name: getWidthTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageBitmapAccessorTest, getWidth, TestSize.Level1)
+HWTEST_F(ImageBitmapAccessorTest, getWidthTest, TestSize.Level1)
 {
     Converter::ConvContext ctx;
-    auto imageResource = Converter::ArkUnion<Ark_Union_PixelMap_String, Ark_String>(DEFAULT_STRING_VALUE, &ctx);
+    auto imageResource = Converter::ArkUnion<Ark_Union_image_PixelMap_String, Ark_String>(DEFAULT_STRING_VALUE, &ctx);
     auto unit = Converter::ArkValue<Opt_LengthMetricsUnit>();
     peer_ = reinterpret_cast<MockImageBitmapPeer *>(accessor_->construct(&imageResource, &unit));
     ASSERT_NE(peer_, nullptr);
@@ -158,11 +158,11 @@ HWTEST_F(ImageBitmapAccessorTest, getWidth, TestSize.Level1)
 }
 
 /**
- * @tc.name: closeImpl_NullPointer
+ * @tc.name: closeTestNullPointer
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageBitmapAccessorTest, closeImpl_NullPointer, TestSize.Level1)
+HWTEST_F(ImageBitmapAccessorTest, closeTestNullPointer, TestSize.Level1)
 {
     ASSERT_NE(accessor_->close, nullptr);
 
@@ -170,11 +170,11 @@ HWTEST_F(ImageBitmapAccessorTest, closeImpl_NullPointer, TestSize.Level1)
 }
 
 /**
- * @tc.name: getHeightImpl_NullPointer
+ * @tc.name: getHeightTestNullPointer
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageBitmapAccessorTest, getHeightImpl_NullPointer, TestSize.Level1)
+HWTEST_F(ImageBitmapAccessorTest, getHeightTestNullPointer, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getHeight, nullptr);
 
@@ -183,11 +183,11 @@ HWTEST_F(ImageBitmapAccessorTest, getHeightImpl_NullPointer, TestSize.Level1)
 }
 
 /**
- * @tc.name: getWidthImpl_NullPointer
+ * @tc.name: getWidthTestNullPointer
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageBitmapAccessorTest, getWidthImpl_NullPointer, TestSize.Level1)
+HWTEST_F(ImageBitmapAccessorTest, getWidthTestNullPointer, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getWidth, nullptr);
 
@@ -195,6 +195,8 @@ HWTEST_F(ImageBitmapAccessorTest, getWidthImpl_NullPointer, TestSize.Level1)
     EXPECT_EQ(result, DEFAULT_WIDTH_VALUE);
 }
 
+#ifdef WRONG_GEN_v140
+// DISABLED_TEST: gen140 GENERATED_ArkUIImageBitmapAccessor has no setHeight, setWidth
 /**
  * @tc.name: setHeightTest
  * @tc.desc:
@@ -226,4 +228,6 @@ HWTEST_F(ImageBitmapAccessorTest, setWidthTest, TestSize.Level1)
         EXPECT_FLOAT_EQ (peer_->GetWidth(), expected);
     }
 }
+#endif
+
 } // namespace OHOS::Ace::NG

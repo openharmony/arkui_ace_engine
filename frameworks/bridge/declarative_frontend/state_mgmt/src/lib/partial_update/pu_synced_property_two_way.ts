@@ -232,9 +232,9 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
       stateMgmtConsole.applicationError(error);
       throw new TypeError(error);
     }
-    if (this.source_.__isFake_ObservedPropertyAbstract_Internal()) {
-      this.fakeSourceBackup_ = this.source_;
-    }
+    // Condition removed: backing up source unconditionally for global reuse case
+    this.fakeSourceBackup_ = this.source_;
+
     this.source_ = newSource;
     // register two-way sync to the new source
     this.source_.addSubscriber(this);

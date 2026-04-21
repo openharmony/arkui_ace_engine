@@ -15,6 +15,8 @@
 
 #include "core/components/common/painter/rosen_scroll_fade_painter.h"
 
+#include "base/utils/system_properties.h"
+
 namespace OHOS::Ace {
 
 RefPtr<ScrollFadePainter> ScrollFadePainter::CreatePainter()

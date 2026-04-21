@@ -55,8 +55,10 @@ TextBackgroundStyle JSContainerSpan::ParseTextBackgroundStyle(const JSRef<JSObje
     if ((SystemProperties::ConfigChangePerform() || needResObj) && colorResObj) {
         auto&& updateFunc = [](const RefPtr<ResourceObject>& colorResObj, TextBackgroundStyle& textBackgroundStyle) {
             Color color;
-            ResourceParseUtils::ParseResColor(colorResObj, color);
-            textBackgroundStyle.backgroundColor = color;
+            bool parseState = ResourceParseUtils::ParseResColor(colorResObj, color);
+            if (parseState) {
+                textBackgroundStyle.backgroundColor = color;
+            }
         };
         textBackgroundStyle.AddResource("textBackgroundStyle.color", colorResObj, std::move(updateFunc));
     }

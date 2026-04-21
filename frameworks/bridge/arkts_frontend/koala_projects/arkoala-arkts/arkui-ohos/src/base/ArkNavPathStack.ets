@@ -211,7 +211,7 @@ export class PathStackUtils {
         return pathInfo
     }
     static getParamByIndex(pathStack: NavPathStack, index: number): Object | undefined {
-        const navDestinationId: string = NavExtender.getIdByIndex(pathStack, index as (int32));
+        const navDestinationId: string = NavExtender.getIdByIndex(pathStack, index.toInt());
         let pathInfo = PathStackUtils.getNavPathInfoById(navDestinationId)
         if (pathInfo?.param === null) {
             return undefined
@@ -244,7 +244,7 @@ export class PathStackUtils {
         if (typeof animated === "boolean") {
             animated_value = animated as boolean
         }
-        const index_casted = index as int32
+        const index_casted = index.toInt()
         PathStackUtils.popPage(index_casted)
         NavExtender.popToIndex(pathStack, index_casted, animated_value)
     }

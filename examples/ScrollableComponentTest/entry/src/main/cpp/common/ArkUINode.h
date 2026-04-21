@@ -115,6 +115,13 @@ public:
         children_.insert(it, child);
     }
 
+    // 移除当前节点下的所有子节点
+    void RemoveAll()
+    {
+        children_.clear();
+        nodeApi_->removeAllChildren(nodeHandle_);
+    }
+
     // ---------------- 通用属性 ----------------
 
     void SetWidth(float width)
@@ -178,6 +185,20 @@ public:
             return;
         }
         SetAttributeFloat32(nodeApi_, nodeHandle_, NODE_OPACITY, opacity);
+    }
+
+    // 设置外边距
+    void SetMargin(float margin)
+    {
+        ArkUI_NumberValue value[] = {{.f32 = margin}, {.f32 = margin}, {.f32 = margin}, {.f32 = margin}};
+        ArkUI_AttributeItem item = {value, 4};
+        nodeApi_->setAttribute(nodeHandle_, NODE_MARGIN, &item);
+    }
+
+    // 设置节点标识符
+    void SetId(const char* id)
+    {
+        SetAttributeString(nodeApi_, nodeHandle_, NODE_ID, id);
     }
 
     // ---------------- 事件 ----------------

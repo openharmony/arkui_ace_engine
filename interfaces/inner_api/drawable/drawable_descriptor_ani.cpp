@@ -30,7 +30,11 @@
 
 namespace OHOS::Ace::Ani {
 namespace {
+constexpr char PIXEL_MAP_CONSTRUCTOR[] = "C{@ohos.multimedia.image.image.PixelMap}:";
 constexpr char PIXEL_MAP_DRAWABLE[] = "@ohos.arkui.drawableDescriptor.PixelMapDrawableDescriptor";
+constexpr char LAYERED_CONSTRUCTOR[] =
+    "C{@ohos.arkui.drawableDescriptor.DrawableDescriptor}C{@ohos.arkui.drawableDescriptor.DrawableDescriptor}C{@ohos."
+    "arkui.drawableDescriptor.DrawableDescriptor}:";
 constexpr char LAYERED_DRAWABLE[] = "@ohos.arkui.drawableDescriptor.LayeredDrawableDescriptor";
 constexpr char BACKGROUND_KEY[] = "background";
 constexpr char FOREGROUND_KEY[] = "foreground";
@@ -136,8 +140,16 @@ ani_object CreatePixelMapDrawable(ani_env* env, MediaData& mediaData)
         return obj;
     }
     ani_method ctor;
-    env->Class_FindMethod(cls, "<ctor>", ":", &ctor);
-    env->Object_New(cls, ctor, &obj);
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", PIXEL_MAP_CONSTRUCTOR, &ctor)) {
+        return obj;
+    }
+    ani_ref undefinedArgument;
+    if (ANI_OK != env->GetUndefined(&undefinedArgument)) {
+        return obj;
+    }
+    if (ANI_OK != env->Object_New(cls, ctor, &obj, undefinedArgument)) {
+        return obj;
+    }
     // no media data
     if (mediaData.len <= 0) {
         return obj;
@@ -158,28 +170,19 @@ ani_object CreatePixelMapDrawable(ani_env* env, MediaData& mediaData)
     return obj;
 }
 
-ani_object CreateLayeredDrawableByJsonBuffer(ani_env* env, DrawableInfo& info)
+bool InitLayeredDrawableByJsonBuffer(ani_env* env, DrawableInfo& info, ani_object obj)
 {
-    ani_class cls;
-    ani_object obj = nullptr;
-    auto status = env->FindClass(LAYERED_DRAWABLE, &cls);
-    if (status != ANI_OK) {
-        return obj;
-    }
-    ani_method ctor;
-    env->Class_FindMethod(cls, "<ctor>", ":", &ctor);
-    env->Object_New(cls, ctor, &obj);
     ani_long nativeObj = 0;
     env->Object_GetPropertyByName_Long(obj, "nativeObj", &nativeObj);
     auto* drawable = reinterpret_cast<void*>(nativeObj);
     if (drawable == nullptr) {
-        return obj;
+        return false;
     }
     std::string foreground(FOREGROUND_KEY);
     std::string background(BACKGROUND_KEY);
     auto ids = GetResIdInJson(info.firstBuffer, { foreground, background });
     if (ids.size() < BUFFER_NUMBER) {
-        return obj;
+        return false;
     }
     // initialize foreground and background buffer
     auto resMgr = info.manager;
@@ -193,11 +196,11 @@ ani_object CreateLayeredDrawableByJsonBuffer(ani_env* env, DrawableInfo& info)
         }
     }
     if (datas.size() < BUFFER_NUMBER) {
-        return obj;
+        return false;
     }
     auto modifier = GetArkUIDrawableModifier();
     if (modifier == nullptr) {
-        return obj;
+        return false;
     }
     modifier->setForegroundData(drawable, datas[0].first, datas[0].second);
     modifier->setBackgroundData(drawable, datas[1].first, datas[1].second);
@@ -207,6 +210,32 @@ ani_object CreateLayeredDrawableByJsonBuffer(ani_env* env, DrawableInfo& info)
     auto state = resMgr->GetMediaDataByName(DEFAULT_MASK, maskLen, maskData);
     if (state == Global::Resource::SUCCESS && maskLen > 0) {
         modifier->setMaskData(drawable, maskData.release(), maskLen);
+    }
+    return true;
+}
+
+ani_object CreateLayeredDrawableByJsonBuffer(ani_env* env, DrawableInfo& info)
+{
+    ani_class cls;
+    ani_object obj = nullptr;
+    auto status = env->FindClass(LAYERED_DRAWABLE, &cls);
+    if (status != ANI_OK) {
+        return obj;
+    }
+    ani_method ctor;
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", LAYERED_CONSTRUCTOR, &ctor)) {
+        return obj;
+    }
+    ani_ref undefinedArgument;
+    if (ANI_OK != env->GetUndefined(&undefinedArgument)) {
+        return obj;
+    }
+    if (ANI_OK != env->Object_New(cls, ctor, &obj,
+        undefinedArgument, undefinedArgument, undefinedArgument)) {
+        return obj;
+    }
+    if (!InitLayeredDrawableByJsonBuffer(env, info, obj)) {
+        return obj;
     }
     return obj;
 }
@@ -220,8 +249,16 @@ ani_object CreateLayerdDrawableByTwoBuffer(ani_env* env, DrawableInfo& info)
         return obj;
     }
     ani_method ctor;
-    env->Class_FindMethod(cls, "<ctor>", ":", &ctor);
-    env->Object_New(cls, ctor, &obj);
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", LAYERED_CONSTRUCTOR, &ctor)) {
+        return obj;
+    }
+    ani_ref undefinedArgument;
+    if (ANI_OK != env->GetUndefined(&undefinedArgument)) {
+        return obj;
+    }
+    if (ANI_OK != env->Object_New(cls, ctor, &obj, undefinedArgument, undefinedArgument, undefinedArgument)) {
+        return obj;
+    }
     ani_long nativeObj = 0;
     env->Object_GetPropertyByName_Long(obj, "nativeObj", &nativeObj);
     auto* drawable = reinterpret_cast<void*>(nativeObj);

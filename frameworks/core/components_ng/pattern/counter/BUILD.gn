@@ -21,6 +21,7 @@ build_component_ng("counter_pattern_ng") {
     "counter_model_ng.cpp",
     "counter_model_static.cpp",
     "counter_node.cpp",
+    "counter_pattern.cpp",
   ]
 
   ark_sources = [
@@ -32,8 +33,10 @@ build_component_ng("counter_pattern_ng") {
   if (!is_arkui_x) {
     ark_sources += [
       "bridge/counter_model_impl.cpp",
-      "bridge/counter_static_modifier.cpp",
     ]
+    if (!ace_engine_feature_wearable) {
+        ark_sources += [ "bridge/counter_static_modifier.cpp" ]
+    }
     if (!build_ohos_sdk) {
       deps = [
       "$ace_root/interfaces/inner_api/ui_session:ui_session",

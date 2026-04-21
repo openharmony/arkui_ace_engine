@@ -54,7 +54,6 @@ build_component_ng("waterflow_pattern_ng") {
         "bridge/waterflow/ui_water_flow_event_static_accessor.cpp",
         "bridge/waterflow/water_flow_static_ani_modifier.cpp",
         "bridge/waterflow/water_flow_static_modifier.cpp",
-        "bridge/waterflow/water_flow_static_sections_accessor.cpp",
       ]
     }
     ark_sources += [

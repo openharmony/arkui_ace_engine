@@ -38,7 +38,7 @@ public:
 
     static RefPtr<ElementProxy> Create(const WeakPtr<ElementProxyHost>& host, const RefPtr<Component>& component);
 
-    explicit ElementProxy(const WeakPtr<ElementProxyHost>& host) : Referenced(false), host_(host) {}
+    explicit ElementProxy(const WeakPtr<ElementProxyHost>& host) : Referenced(), host_(host) {}
     ~ElementProxy() override = default;
 
     virtual void Update(const RefPtr<Component>& component, size_t startIndex) = 0;

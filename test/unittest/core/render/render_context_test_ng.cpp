@@ -18,9 +18,10 @@
 #include "base/utils/utils.h"
 #define protected public
 #define private public
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "ui/properties/ui_material.h"
 
+#include "core/components/common/properties/border_image.h"
 #include "core/components_ng/render/debug_boundary_painter.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/components_ng/base/frame_node.h"
@@ -121,7 +122,7 @@ HWTEST_F(RenderContextTestNg, RenderContextTest001, TestSize.Level1)
  * @tc.desc: Test cast to RenderContextTestNg
  * @tc.type: FUNC
  */
-HWTEST_F(RenderContextTestNg, RenderContextTest002, TestSize.Level1)
+HWTEST_F(RenderContextTestNg, RenderContextTest002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Build a object renderContext.
@@ -154,7 +155,7 @@ HWTEST_F(RenderContextTestNg, RenderContextTest002, TestSize.Level1)
  * @tc.desc: Test cast to RenderContextTestNg
  * @tc.type: FUNC
  */
-HWTEST_F(RenderContextTestNg, RenderContextTest003, TestSize.Level1)
+HWTEST_F(RenderContextTestNg, RenderContextTest003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Build a object renderContext.
@@ -192,7 +193,7 @@ HWTEST_F(RenderContextTestNg, RenderContextTest003, TestSize.Level1)
  * @tc.desc: Test cast to RenderContextTestNg
  * @tc.type: FUNC
  */
-HWTEST_F(RenderContextTestNg, RenderContextTest004, TestSize.Level1)
+HWTEST_F(RenderContextTestNg, RenderContextTest004, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Build a object renderContext.
@@ -320,7 +321,7 @@ HWTEST_F(RenderContextTestNg, RenderContextTest007, TestSize.Level1)
  * @tc.desc: Test cast to RenderContextTestNg
  * @tc.type: FUNC
  */
-HWTEST_F(RenderContextTestNg, RenderContextTest008, TestSize.Level1)
+HWTEST_F(RenderContextTestNg, RenderContextTest008, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Build a object renderContext.
@@ -347,7 +348,7 @@ HWTEST_F(RenderContextTestNg, RenderContextTest008, TestSize.Level1)
  * @tc.desc: Test function RequestNextFrame
  * @tc.type: FUNC
  */
-HWTEST_F(RenderContextTestNg, RenderContextTest009, TestSize.Level1)
+HWTEST_F(RenderContextTestNg, RenderContextTest009, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create a frameNode ande update renderContext.
@@ -446,7 +447,7 @@ HWTEST_F(RenderContextTestNg, RenderContextTest011, TestSize.Level1)
  * @tc.desc: Test cast to RenderContextTestNg
  * @tc.type: FUNC
  */
-HWTEST_F(RenderContextTestNg, RenderContextTest012, TestSize.Level1)
+HWTEST_F(RenderContextTestNg, RenderContextTest012, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Build a object renderContext.
@@ -481,7 +482,7 @@ HWTEST_F(RenderContextTestNg, RenderContextTest012, TestSize.Level1)
  * @tc.desc: Test cast to RenderContextTestNg
  * @tc.type: FUNC
  */
-HWTEST_F(RenderContextTestNg, RenderContextTest013, TestSize.Level1)
+HWTEST_F(RenderContextTestNg, RenderContextTest013, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Build a object renderContext.
@@ -505,5 +506,89 @@ HWTEST_F(RenderContextTestNg, RenderContextTest013, TestSize.Level1)
     renderContext.RequestNextFrame(true);
     EXPECT_EQ(srcimages, "common/images/mmm.jpg");
     ASSERT_NE(renderContext.requestFrame_, nullptr);
+}
+
+/**
+ * @tc.name: RequestNextFrameMultiThread001
+ * @tc.desc: Test cast to RequestNextFrameMultiThread
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderContextTestNg, RequestNextFrameMultiThread001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Build a object renderContext.
+     */
+    NG::RenderContext renderContext;
+    auto requestFrame = [](bool isOffScreenNode) {
+        srcimages = "common/images/mmm.jpg";
+    };
+
+    /**
+     * @tc.steps: step2. callback SetHostNode.
+     * @tc.expected: step2. The renderContext.GetHost()() is not null.
+     */
+    auto rowFrameNode =
+        NG::FrameNode::CreateFrameNode(TAG_ROOT, 0, AceType::MakeRefPtr<NG::LinearLayoutPattern>(false));
+    renderContext.SetHostNode(rowFrameNode);
+    ASSERT_NE(renderContext.GetHost(), nullptr);
+
+    /**
+     * @tc.steps: step3. callback RequestNextFrameMultiThread.
+     */
+    renderContext.RequestNextFrameMultiThread(true);
+    EXPECT_EQ(renderContext.requestFrame_, nullptr);
+
+    renderContext.SetRequestFrame(requestFrame);
+    ASSERT_NE(renderContext.requestFrame_, nullptr);
+    rowFrameNode->eventHub_ = nullptr;
+    renderContext.RequestNextFrameMultiThread(true);
+    EXPECT_EQ(rowFrameNode->GetInspectorId().has_value(), false);
+
+    rowFrameNode->UpdateInspectorId("test");
+    renderContext.RequestNextFrameMultiThread(true);
+    EXPECT_EQ(rowFrameNode->GetInspectorId().has_value(), true);
+}
+
+/**
+ * @tc.name: RequestNextFrameMultiThread002
+ * @tc.desc: Test cast to RequestNextFrameMultiThread
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderContextTestNg, RequestNextFrameMultiThread002, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Build a object renderContext.
+     */
+    NG::RenderContext renderContext;
+    auto requestFrame = [](bool isOffScreenNode) {
+        srcimages = "common/images/mmm.jpg";
+    };
+    auto drawCompletedCallback = []() {
+        srcimages = "common/images/mmm.jpg";
+    };
+
+    /**
+     * @tc.steps: step2. callback SetHostNode.
+     * @tc.expected: step2. The renderContext.GetHost()() is not null.
+     */
+    auto rowFrameNode =
+        NG::FrameNode::CreateFrameNode(TAG_ROOT, 0, AceType::MakeRefPtr<NG::LinearLayoutPattern>(false));
+    renderContext.SetHostNode(rowFrameNode);
+    ASSERT_NE(renderContext.GetHost(), nullptr);
+
+    /**
+     * @tc.steps: step3. callback RequestNextFrameMultiThread.
+     */
+    renderContext.SetRequestFrame(requestFrame);
+    ASSERT_NE(renderContext.requestFrame_, nullptr);
+    renderContext.RequestNextFrameMultiThread(true);
+    ASSERT_EQ(rowFrameNode->GetInspectorId().has_value(), false);
+    auto eventhub = rowFrameNode->GetEventHub<NG::EventHub>();
+    ASSERT_EQ(eventhub, true);
+    EXPECT_EQ(eventhub->HasNDKDrawCompletedCallback(), false);
+
+    eventhub->SetNDKDrawCompletedCallback(drawCompletedCallback);
+    renderContext.RequestNextFrameMultiThread(true);
+    EXPECT_EQ(eventhub->HasNDKDrawCompletedCallback(), true);
 }
 } // namespace OHOS::Ace

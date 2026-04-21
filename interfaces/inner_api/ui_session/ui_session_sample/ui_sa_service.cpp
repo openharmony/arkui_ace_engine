@@ -32,14 +32,14 @@ namespace OHOS::Ace {
 namespace {
 const bool REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(&UiSaService::GetInstance());
 const std::string UI_SA_PATH = "/data/service/el1/public/ui_sa/";
+constexpr char WEB_INTERFACE_REQUEST_DOM_TREE[] = "RequestArkWebDomTree";
 constexpr size_t BITS_UINT32 = sizeof(uint32_t) * 8;
 constexpr int32_t PARAMS_OFFSET = 1;
 constexpr int32_t SIMPLIFYTREE_WITH_PARAMCONFIG = 6;
 constexpr int32_t SEND_COMMAND_WITH_NODEID = 3;
 constexpr int32_t SEND_COMMAND_WITHOUT_NODEID = 2;
 constexpr int32_t START_WEB_VIEW_TRANSLATE = 2;
-constexpr int32_t CONTENT_CHANGE_EVENT_WITH_CONFIG = 3;
-constexpr int32_t CONTENT_CHANGE_EVENT_WITH_CONFIG_IGNORE = 4;
+constexpr int32_t CONTENT_CHANGE_EVENT_WITH_CONFIG = 6;
 constexpr int32_t GET_WEB_INFO_BY_REQUEST_PARAMS = 3;
 constexpr int32_t EXE_APP_AI_FUNCTION_PARAMS = 3;
 constexpr int32_t GET_STATE_MGMT_INFO_PARAMS = 4;
@@ -83,6 +83,28 @@ uint32_t ParseComponentChangeEventMask(std::vector<std::string> params)
     }
     return mask;
 }
+
+ContentChangeConfig ParseContentChangeConfig(const std::vector<std::string>& params, bool toFile)
+{
+    ContentChangeConfig config;
+    
+    int32_t paramSize = static_cast<int32_t>(params.size());
+    int32_t effectiveParamCount = toFile ? (paramSize - PARAMS_OFFSET - 1) : (paramSize - PARAMS_OFFSET);
+    
+    bool useCustomConfig = (effectiveParamCount == CONTENT_CHANGE_EVENT_WITH_CONFIG);
+    if (!useCustomConfig) {
+        return config;
+    }
+    
+    config.minReportTime = std::atoi(params[1].c_str());  // 1 : minReportTime
+    config.textContentRatio = std::atof(params[2].c_str());  // 2 : textContentRatio
+    config.ignoreEventType = params[3];  // 3 : ignoreEventType
+    config.minWidth = std::atoi(params[4].c_str());  // 4 : minWidth
+    config.minHeight = std::atoi(params[5].c_str());  // 5 : minHeight
+    config.reportDelayTime = std::atoi(params[6].c_str());  // 6 : reportDelayTime
+
+    return config;
+}
 } // namespace
 
 const std::map<std::string, UiSaService::DumpHandler> UiSaService::DUMP_MAP = {
@@ -102,6 +124,8 @@ const std::map<std::string, UiSaService::DumpHandler> UiSaService::DUMP_MAP = {
     { "GetWebViewCurrentLanguage", &UiSaService::HandleGetWebViewCurrentLanguage },
     { "StartWebViewTranslate", &UiSaService::HandleStartWebViewTranslate },
     { "GetStateMgmtInfo", &UiSaService::HandleGetStateMgmtInfo },
+    { "RegisterTextChangeEventCallback", &UiSaService::HandleRegisterTextChangeEventCallback },
+    { "UnregisterTextChangeEventCallback", &UiSaService::HandleUnregisterTextChangeEventCallback },
 };
 
 UiSaService::UiSaService() : SystemAbility(UI_SA_ID, true) {}
@@ -115,6 +139,7 @@ UiSaService& UiSaService::GetInstance()
 void UiSaService::OnStart()
 {
     Publish(this);
+    eventHandler_ = OHOS::AppExecFwk::EventHandler::Current();
 }
 
 void UiSaService::OnStop() {}
@@ -190,7 +215,7 @@ void UiSaService::HandleConnect(sptr<IUiContentService> service, std::vector<std
         LOGI("through uiSa, connect success, foucs window info = %{public}s", res.c_str());
     };
     if (!service->IsConnect()) {
-        service->Connect(cb);
+        service->Connect(cb, eventHandler_);
     }
 }
 
@@ -257,23 +282,16 @@ void UiSaService::HandleRegisterContentChangeCallback(sptr<IUiContentService> se
         if (toFile && simpleTree.length()) {
             auto filePath = UI_SA_PATH + "arkui_simpleTree_" + GetCurrentTimestampStr() + ".json";
             std::unique_ptr<std::ofstream> ostream = std::make_unique<std::ofstream>(filePath);
-            CHECK_NULL_VOID(ostream);
-            if (!ostream->is_open()) {
+            if (ostream && ostream->is_open()) {
+                ostream->write(simpleTree.c_str(), simpleTree.length());
+                LOGI("[ContentChangeManager] tree is saved to %{public}s", filePath.c_str());
+            } else {
                 LOGW("[ContentChangeManager] filePath is invalid");
-                return;
             }
-            ostream->write(simpleTree.c_str(), simpleTree.length());
-            LOGI("[ContentChangeManager] tree is saved to %{public}s", filePath.c_str());
         }
     };
-    ContentChangeConfig config;
-    int32_t time = std::atoi((params.size() >= CONTENT_CHANGE_EVENT_WITH_CONFIG ? params[1] : "100").c_str());
-    float ratio = std::atof((params.size() >= CONTENT_CHANGE_EVENT_WITH_CONFIG ? params[2] : "0.15").c_str());
-    std::string ignore = (params.size() > CONTENT_CHANGE_EVENT_WITH_CONFIG_IGNORE ||
-        (params.size() == CONTENT_CHANGE_EVENT_WITH_CONFIG_IGNORE && !toFile)) ? params[3] : "";
-    config.minReportTime = time;
-    config.textContentRatio = ratio;
-    config.ignoreEventType = ignore;
+
+    ContentChangeConfig config = ParseContentChangeConfig(params, toFile);
     service->RegisterContentChangeCallback(config, contentChangeCallback);
     LOGI("[ContentChangeManager] call RegisterContentChangeCallback");
 }
@@ -362,6 +380,17 @@ void UiSaService::HandleGetWebInfoByRequest(sptr<IUiContentService> service, std
             LOGI("[GetWebInfoByRequest] finishCallback result=%{public}s", result.substr(0, 200).c_str());
             LOGI("[GetWebInfoByRequest] finishCallback result.length=%{public}zu", result.length());
             LOGI("[GetWebInfoByRequest] finishCallback code=%{public}d", code);
+            if (request == WEB_INTERFACE_REQUEST_DOM_TREE) {
+                auto filePath = UI_SA_PATH + "arkweb_tree_" + GetCurrentTimestampStr() + ".json";
+                std::unique_ptr<std::ofstream> ostream = std::make_unique<std::ofstream>(filePath);
+                CHECK_NULL_VOID(ostream);
+                if (!ostream->is_open()) {
+                    LOGW("[GetWebInfoByRequest] filePath is invalid");
+                    return;
+                }
+                ostream->write(result.c_str(), result.length());
+                LOGI("[GetWebInfoByRequest] arkWeb tree is saved to %{public}s", filePath.c_str());
+            }
         };
         service->GetWebInfoByRequest(webId, request, finishCallback);
         LOGI("[GetWebInfoByRequest] call GetWebInfoById");
@@ -385,6 +414,22 @@ void UiSaService::HandleUnregisterComponentChangeEventCallback(
 {
     service->UnregisterComponentChangeEventCallback();
     LOGI("[ComponentChangeEvent] call UnregisterComponentChangeEventCallback");
+}
+
+void UiSaService::HandleRegisterTextChangeEventCallback(
+    sptr<IUiContentService> service, std::vector<std::string> params)
+{
+    auto eventCallback = [](std::string data) {
+        LOGI("[TextChangeEventCallback] data = %{public}s", data.c_str());
+    };
+    service->RegisterTextChangeEventCallback(eventCallback);
+}
+
+void UiSaService::HandleUnregisterTextChangeEventCallback(
+    sptr<IUiContentService> service, std::vector<std::string> params)
+{
+    service->UnregisterTextChangeEventCallback();
+    LOGI("[TextChangeEvent] call UnregisterTextChangeEventCallback");
 }
 
 void UiSaService::HandleExeAppAIFunction(sptr<IUiContentService> service, std::vector<std::string> params)
@@ -436,15 +481,17 @@ void UiSaService::HandleGetStateMgmtInfo(sptr<IUiContentService> service, std::v
         std::string componentName = params[1];
         std::string propertyName = params[2];
         std::string jsonPath = params[3];
+        int32_t onlyVisible = std::atoi(params[4].c_str());
         auto finishCallback = [](std::vector<std::string> results) {
             LOGI("[GetStateMgmtInfo] finishCallback results.size=%{public}zu", results.size());
             for (const auto& result : results) {
                 LOGI("[GetStateMgmtInfo] finishCallback result=%{public}s", result.c_str());
             }
         };
-        service->GetStateMgmtInfo(componentName, propertyName, jsonPath, finishCallback);
+        service->GetStateMgmtInfo(componentName, propertyName, jsonPath, finishCallback, onlyVisible);
         LOGI("[GetStateMgmtInfo] call GetStateMgmtInfo componentName=%{public}s, propertyName=%{public}s, "
-            "jsonPath=%{public}s", componentName.c_str(), propertyName.c_str(), jsonPath.c_str());
+             "jsonPath=%{public}s, onlyVisible=%{public}d",
+            componentName.c_str(), propertyName.c_str(), jsonPath.c_str(), onlyVisible);
     }
 }
 } // namespace OHOS::Ace

@@ -20,6 +20,7 @@
 
 #include "base/geometry/axis.h"
 #include "base/utils/macros.h"
+#include "base/log/dump_log.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_layout_property.h"
@@ -77,6 +78,18 @@ public:
         return GetCachedCountValue(defCachedCount_);
     }
 
+    void UpdateContentClip(std::optional<ContentClip> contentClip) override
+    {
+        if (contentClip_ != contentClip) {
+            contentClip_ = contentClip;
+            UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
+        }
+    }
+
+    void DumpInfo();
+
+    void DumpInfo(std::unique_ptr<JsonValue>& json);
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
@@ -106,6 +119,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CacheRange, CacheRange, PROPERTY_UPDATE_MEASURE_SELF);
 
     int32_t defCachedCount_ = 1;
+    std::optional<ContentClip> contentClip_;
 protected:
     void Clone(RefPtr<LayoutProperty> layoutProperty) const override;
 };

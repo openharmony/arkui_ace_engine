@@ -29,6 +29,8 @@ namespace OHOS::Ace::Ani {
         ani_object textModifierAni);
     ani_long ExtractorsToInputMethodExtraConfigPtr(ani_env* env, [[maybe_unused]] ani_object obj,
         ani_object extraConfigObj);
+    ani_long ExtractorsToTextParagraphPtr(ani_env* env, [[maybe_unused]] ani_object obj, ani_object textParagraphObj);
+    ani_object ExtractorsFromTextParagraphPtr(ani_env* env, [[maybe_unused]]ani_object aniClass, ani_long pointer);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_TEXT_BASE_MODIFIER_MODULE_H

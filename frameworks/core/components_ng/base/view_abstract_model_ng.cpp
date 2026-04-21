@@ -17,7 +17,10 @@
 
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
+#include "core/common/event_manager.h"
 #include "core/common/vibrator/vibrator_utils.h"
+#include "core/components/common/properties/border_image.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/gestures/long_press_gesture.h"
@@ -218,6 +221,7 @@ bool ViewAbstractModelNG::CheckMenuIsShow(
     CHECK_NULL_RETURN(overlayManager, false);
     auto menuNode = overlayManager->GetMenuNode(targetId);
     CHECK_NULL_RETURN(menuNode, false);
+    ACE_UINODE_TRACE(menuNode);
     auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_RETURN(wrapperPattern, false);
     if (menuParam.hasTransitionEffect) {
@@ -295,6 +299,7 @@ void UpdateIsShowStatusForMenu(int32_t targetId, bool isShow)
     CHECK_NULL_VOID(overlayManager);
     auto menuNode = overlayManager->GetMenuNode(targetId);
     CHECK_NULL_VOID(menuNode);
+    ACE_UINODE_TRACE(menuNode);
     auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
     wrapperPattern->SetIsShowFromUser(isShow);
@@ -319,6 +324,7 @@ void BindContextMenuSingle(
         auto overlayManager = pipeline->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
         auto menuNode = overlayManager->GetMenuNode(targetId);
+        ACE_UINODE_TRACE(menuNode);
         if (menuNode) {
             TAG_LOGI(AceLogTag::ACE_OVERLAY, "menuNode already exist");
             auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
@@ -605,6 +611,7 @@ static bool SetMenuTransitionEffect(const RefPtr<FrameNode>& targetNode, const M
         auto overlayManager = pipeline->GetOverlayManager();
         CHECK_NULL_RETURN(overlayManager, false);
         auto menuNode = overlayManager->GetMenuNode(targetId);
+        ACE_UINODE_TRACE(menuNode);
         if (menuNode) {
             TAG_LOGI(AceLogTag::ACE_OVERLAY, "menuNode already exist");
             auto menuWrapperPattern = menuNode->GetPattern<NG::MenuWrapperPattern>();
@@ -1431,6 +1438,12 @@ void ViewAbstractModelNG::SetAccessibilityStateDescription(FrameNode* frameNode,
     accessibilityProperty->SetAccessibilityStateDescription(stateDescription);
 }
 
+void ViewAbstractModelNG::SetDebugLineSta(UINode* node, const std::string& debugLine)
+{
+    CHECK_NULL_VOID(node);
+    node->SetDebugLine(debugLine);
+}
+
 std::string ViewAbstractModelNG::PopupTypeStr(const PopupType& type)
 {
     switch (type) {
@@ -1774,4 +1787,39 @@ void ViewAbstractModelNG::ResetAccessibilityActionOptions()
     CHECK_NULL_VOID(frameNode);
     ResetAccessibilityActionOptions(frameNode);
 }
+void ViewAbstractModelNG::ResetKeyboardShortcutAll(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearSingleKeyboardShortcutAll();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto eventManager = pipeline->GetEventManager();
+    CHECK_NULL_VOID(eventManager);
+    eventManager->DelKeyboardShortcutNode(frameNode->GetId());
+}
+
+void ViewAbstractModelNG::SetBorderImage(const RefPtr<BorderImage>& borderImage, uint8_t bitset)
+{
+    CHECK_NULL_VOID(borderImage);
+    if (bitset & BorderImage::SOURCE_BIT) {
+        ViewAbstract::SetBorderImageSource(
+            borderImage->GetSrc(), borderImage->GetBundleName(), borderImage->GetModuleName());
+    }
+    if (bitset & BorderImage::OUTSET_BIT) {
+        ViewAbstract::SetHasBorderImageOutset(true);
+    }
+    if (bitset & BorderImage::SLICE_BIT) {
+        ViewAbstract::SetHasBorderImageSlice(true);
+    }
+    if (bitset & BorderImage::REPEAT_BIT) {
+        ViewAbstract::SetHasBorderImageRepeat(true);
+    }
+    if (bitset & BorderImage::WIDTH_BIT) {
+        ViewAbstract::SetHasBorderImageWidth(true);
+    }
+    ViewAbstract::SetBorderImage(borderImage);
+}
+
 } // namespace OHOS::Ace::NG

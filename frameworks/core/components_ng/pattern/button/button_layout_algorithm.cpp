@@ -15,8 +15,11 @@
 
 #include "core/components_ng/pattern/button/button_layout_algorithm.h"
 
+#include "base/memory/referenced.h"
+#include "core/components/button/button_theme.h"
 #include "core/components/toggle/toggle_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -33,6 +36,7 @@ void ButtonLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto pattern = host->GetPattern<ButtonPattern>();
     CHECK_NULL_VOID(pattern);
     auto buttonLayoutProperty = DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -106,6 +110,8 @@ bool ButtonLayoutAlgorithm::ProcessLayoutPolicyIsNotNoMatch(std::optional<NG::La
 void ButtonLayoutAlgorithm::HandleChildLayoutConstraint(
     LayoutWrapper* layoutWrapper, LayoutConstraintF& layoutConstraint)
 {
+    auto host = layoutWrapper->GetHostNode();
+    ACE_UINODE_TRACE(host);
     auto buttonLayoutProperty = DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(buttonLayoutProperty);
     if (!buttonLayoutProperty->HasLabel()) {
@@ -180,6 +186,7 @@ void ButtonLayoutAlgorithm::HandleAdaptiveText(LayoutWrapper* layoutWrapper, Lay
     CHECK_NULL_VOID(buttonLayoutProperty);
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto* context = host->GetContextWithCheck();
     CHECK_NULL_VOID(context);
     auto buttonTheme = context->GetTheme<ButtonTheme>();
@@ -233,6 +240,7 @@ void ButtonLayoutAlgorithm::HandleBorderRadius(LayoutWrapper* layoutWrapper)
 {
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto buttonLayoutProperty = DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(buttonLayoutProperty);
     auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
@@ -380,6 +388,7 @@ void ButtonLayoutAlgorithm::MeasureCircleButton(LayoutWrapper* layoutWrapper)
 {
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto context = frameNode->GetRenderContext();
     CHECK_NULL_VOID(context);
     const auto& radius = context->GetBorderRadius();
@@ -418,6 +427,7 @@ float ButtonLayoutAlgorithm::GetDefaultHeight(LayoutWrapper* layoutWrapper)
     CHECK_NULL_RETURN(layoutProperty, 0.0);
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, 0.0);
+    ACE_UINODE_TRACE(frameNode);
     auto* context = frameNode->GetContext();
     CHECK_NULL_RETURN(context, 0.0);
     auto buttonTheme = context->GetTheme<ButtonTheme>();
@@ -437,6 +447,7 @@ float ButtonLayoutAlgorithm::GetDefaultBorderRadius(LayoutWrapper* layoutWrapper
     CHECK_NULL_RETURN(layoutProperty, 0.0f);
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, 0.0f);
+    ACE_UINODE_TRACE(frameNode);
     auto* context = frameNode->GetContext();
     CHECK_NULL_RETURN(context, 0.0f);
     auto buttonTheme = context->GetTheme<ButtonTheme>();
@@ -461,6 +472,7 @@ bool ButtonLayoutAlgorithm::NeedAgingMeasure(LayoutWrapper* layoutWrapper)
     }
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(host, false);
+    ACE_UINODE_TRACE(host);
     auto pattern = host->GetPattern<ButtonPattern>();
     CHECK_NULL_RETURN(pattern, false);
     if (!pattern->GetHasCustomPadding()) {

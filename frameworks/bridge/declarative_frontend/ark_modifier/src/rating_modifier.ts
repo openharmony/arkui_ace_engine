@@ -13,12 +13,57 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
-class RatingModifier extends ArkRatingComponent implements AttributeModifier<RatingAttribute> {
+class LazyArkRatingComponent extends ArkComponent {
+  static module: RatingComponentModule | undefined = undefined;
+  constructor(nativePtr: KNode, classType: ModifierType) {
+   super(nativePtr, classType);
+   if (LazyArkRatingComponent.module === undefined) {
+     LazyArkRatingComponent.module = globalThis.requireNapi('arkui.components.arkrating');
+   }
+
+   this.lazyComponent = LazyArkRatingComponent.module.createComponent(nativePtr, classType);
+  }
+
+  setMap(): void {
+   this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+
+  initialize(value) {
+    this.lazyComponent.initialize(value);
+    return this;
+  }
+
+  stars(value: number): this {
+   this.lazyComponent.stars(value);
+   return this;
+  }
+
+  stepSize(angle: number): this {
+   this.lazyComponent.stepSize(angle);
+   return this;
+  }
+
+  starStyle(angle: StarStyleOptions): this {
+   this.lazyComponent.starStyle(angle);
+   return this;
+  }
+
+  onChange(angle: OnRatingChangeCallback): this {
+   this.lazyComponent.onChange(angle);
+   return this;
+  }
+
+  contentModifier(value: ContentModifier<RatingConfiguration>): this {
+   this.lazyComponent.contentModifier(value);
+   return this;
+  }
+}
+class RatingModifier extends LazyArkRatingComponent implements AttributeModifier<RatingAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
 
   applyNormalAttribute(instance: RatingAttribute): void {

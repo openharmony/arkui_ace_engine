@@ -1,0 +1,58 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package arkui.component.idlize;
+import arkui.component.common.ChildrenMainSize as ChildrenMainSize;
+import arkui.component.common.OnWillScrollCallback as OnWillScrollCallback;
+import arkui.component.common.OnScrollCallback as OnScrollCallback;
+import arkui.component.enums.CrownSensitivity as CrownSensitivity;
+import arkui.component.enums.BarState as BarState;
+import arkui.component.scroll.Scroller as Scroller;
+import arkui.component.units.VoidCallback as VoidCallback;
+import arkui.Graphics.LengthMetrics as LengthMetrics;
+import arkui.Graphics.ColorMetrics as ColorMetrics;
+import arkui.ComponentContent.ComponentContentBase as ComponentContentBase;
+import arkui.component.listItem.SwipeActionOptions as SwipeActionOptions;
+import ohos.arkui.ArcList.ArcScrollIndexHandler as ArcScrollIndexHandler;
+import ohos.arkui.ArcList.ArkListOptions as ArkListOptions;
+[Entity=Class]
+interface ArcListExtender {
+    static pointer arcListConstructor(i32 id);
+    static void setArkListOptions(pointer node, optional ArkListOptions options);
+    static void digitalCrownSensitivity(pointer node, optional CrownSensitivity sensitivity);
+    static void space(pointer node, optional LengthMetrics space);
+    static void scrollBar(pointer node, optional BarState status);
+    static void scrollBarColor(pointer node, optional ColorMetrics color);
+    static void scrollBarWidth(pointer node, optional LengthMetrics width);
+    static void cachedCount(pointer node, optional i32 count);
+    static void chainAnimation(pointer node, optional boolean enable);
+    //static void childrenMainSize(pointer node, optional ChildrenMainSize size); // use hook instead
+    static void enableScrollInteraction(pointer node, optional boolean enable);
+    static void fadingEdge(pointer node, optional boolean enable);
+    static void friction(pointer node, optional f64 friction);
+    static void flingSpeedLimit(pointer node, optional f64 speed);
+    static void onScrollIndex(pointer node, optional ArcScrollIndexHandler handler);
+    static void onReachStart(pointer node, optional VoidCallback handler);
+    static void onReachEnd(pointer node, optional VoidCallback handler);
+    static void onScrollStart(pointer node, optional VoidCallback handler);
+    static void onScrollStop(pointer node, optional VoidCallback handler);
+    static void onWillScroll(pointer node, optional OnWillScrollCallback handler);
+    static void onDidScroll(pointer node, optional OnScrollCallback handler);
+};
+[Entity=Class]
+interface ArcListItemExtender {
+    static pointer arcListItemConstructor(i32 id);
+    static void autoScale(pointer node, optional boolean enable);
+    static void swipeAction(pointer node, optional SwipeActionOptions options);
+};

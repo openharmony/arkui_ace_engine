@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/stage/force_split/parallel_stage_pattern.h"
 
 #include "core/components/navigation_bar/navigation_bar_theme.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/stage/force_split/parallel_page_pattern.h"
@@ -24,31 +25,31 @@
 namespace OHOS::Ace::NG {
 
 namespace {
-constexpr Dimension DIVIDER_WIDTH = 1.0_vp;
+constexpr Dimension DIVIDER_WIDTH = 1.0_px;
 
-void LogPrimaryChange(const WeakPtr<FrameNode>& prePage, const RefPtr<FrameNode>& newPage)
+void LogHomePageChange(const WeakPtr<FrameNode>& prePage, const RefPtr<FrameNode>& newPage)
 {
-    auto prePrimaryPage = prePage.Upgrade();
-    if (prePrimaryPage == newPage) {
+    auto preHomePage = prePage.Upgrade();
+    if (preHomePage == newPage) {
         return;
     }
-    bool hasPrePage = prePrimaryPage != nullptr;
+    bool hasPrePage = preHomePage != nullptr;
     bool hasCurPage = newPage != nullptr;
     if (hasPrePage && hasCurPage) {
-        TAG_LOGI(AceLogTag::ACE_ROUTER, "set PrimaryPage to new one");
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "set HomePage to new one");
         return;
     }
     if (hasPrePage) {
-        TAG_LOGI(AceLogTag::ACE_ROUTER, "clear PrimaryPage");
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "clear HomePage");
     } else {
-        TAG_LOGI(AceLogTag::ACE_ROUTER, "set PrimaryPage");
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "set HomePage");
     }
 }
 }
 
-void ParallelStagePattern::SetPrimaryPage(const RefPtr<FrameNode>& pageNode)
+void ParallelStagePattern::SetHomePage(const RefPtr<FrameNode>& pageNode)
 {
-    auto originNode = primaryPageNode_.Upgrade();
+    auto originNode = homePageNode_.Upgrade();
     if (originNode) {
         auto originPattern = originNode->GetPattern<ParallelPagePattern>();
         CHECK_NULL_VOID(originPattern);
@@ -59,31 +60,17 @@ void ParallelStagePattern::SetPrimaryPage(const RefPtr<FrameNode>& pageNode)
         CHECK_NULL_VOID(pagePattern);
         pagePattern->InitOnTouchEvent();
     }
-    LogPrimaryChange(primaryPageNode_, pageNode);
-    primaryPageNode_ = pageNode;
-    auto hostNode = AceType::DynamicCast<FrameNode>(GetHost());
+    LogHomePageChange(homePageNode_, pageNode);
+    homePageNode_ = pageNode;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hostNode = AceType::DynamicCast<FrameNode>(host);
     if (pageNode == nullptr) {
-        TAG_LOGI(AceLogTag::ACE_ROUTER, "set primary page nullptr");
-        if (hasDividerNode_) {
-            hostNode->RemoveChild(dividerNode_);
-            hasDividerNode_ = false;
-        }
-        return;
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "set home page nullptr");
+    } else {
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "update home page: %{public}d", pageNode->GetId());
     }
-    TAG_LOGI(AceLogTag::ACE_ROUTER, "update primary page: %{public}d", pageNode->GetId());
-    if (mode_ != PageMode::SPLIT) {
-        if (hasDividerNode_) {
-            hostNode->RemoveChild(dividerNode_);
-            hasDividerNode_ = false;
-        }
-        return;
-    }
-    if (!hasDividerNode_) {
-        CreateDividerNodeIfNeeded();
-        TAG_LOGD(AceLogTag::ACE_ROUTER, "add dividerNode after setPrimaryPage");
-        hostNode->AddChild(dividerNode_, 0);
-        hasDividerNode_ = true;
-    }
+    UpdateDividerNodeIfNeeded(hostNode, false);
 }
 
 void ParallelStagePattern::FireModeChangeCallback()
@@ -95,7 +82,9 @@ void ParallelStagePattern::FireModeChangeCallback()
 
 void ParallelStagePattern::OnAttachToMainTree()
 {
-    auto hostNode = AceType::DynamicCast<FrameNode>(GetHost());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hostNode = AceType::DynamicCast<FrameNode>(host);
     CHECK_NULL_VOID(hostNode);
     auto pipeline = hostNode->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -117,7 +106,9 @@ bool ParallelStagePattern::CalculateMode()
 {
     // calculate mode
     PageMode splitMode = PageMode::STACK;
-    auto hostNode = AceType::DynamicCast<FrameNode>(GetHost());
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto hostNode = AceType::DynamicCast<FrameNode>(host);
     auto pipelineContext = hostNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, false);
     auto forceSplitMgr = AceType::DynamicCast<ForceSplitManager>(pipelineContext->GetForceSplitManager());
@@ -128,16 +119,9 @@ bool ParallelStagePattern::CalculateMode()
         auto container = Container::GetContainer(pipelineContext->GetInstanceId());
         CHECK_NULL_RETURN(container, false);
         bool isMainWindow = container->IsMainWindow();
-        auto windowManager = pipelineContext->GetWindowManager();
-        CHECK_NULL_RETURN(windowManager, false);
-        auto windowMode = windowManager->GetWindowMode();
-        bool isInSplitScreenMode =
-            windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-            windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
-        splitMode = (isMainWindow && !isInSplitScreenMode) ? PageMode::SPLIT : PageMode::STACK;
-        TAG_LOGI(AceLogTag::ACE_ROUTER,
-            "calc splitMode, isMainWindow: %{public}d, windowMode: %{public}d, isInSplitScreenMode: %{public}d, "
-            "resultMode: %{public}d", isMainWindow, windowMode, isInSplitScreenMode, static_cast<int32_t>(splitMode));
+        splitMode = isMainWindow ? PageMode::SPLIT : PageMode::STACK;
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "calc splitMode, isMainWindow: %{public}d, resultMode: %{public}d",
+            isMainWindow, static_cast<int32_t>(splitMode));
     }
     if (mode_ == splitMode) {
         return false;
@@ -147,33 +131,7 @@ bool ParallelStagePattern::CalculateMode()
     if (forceSplitMgr->IsForceSplitSupported(true)) {
         pipelineContext->SetIsCurrentInForceSplitMode(mode_ == PageMode::SPLIT);
     }
-    if (mode_ == PageMode::SPLIT) {
-        // show placeholder page
-        auto primaryNode = primaryPageNode_.Upgrade();
-        if (primaryNode) {
-            auto primaryPattern = primaryNode->GetPattern<PagePattern>();
-            if (primaryPattern) {
-                primaryPattern->ResetPageTransitionEffect();
-            }
-        }
-        // primary page is set, need to attach divider node
-        if (!hasDividerNode_ && primaryNode) {
-            CreateDividerNodeIfNeeded();
-            TAG_LOGD(AceLogTag::ACE_ROUTER, "add dividerNode after changeMode");
-            hostNode->AddChild(dividerNode_, 0);
-            hasDividerNode_ = true;
-        }
-        // current page is free page, don't need to show divider node
-        if (hasDividerNode_ && !primaryNode) {
-            hostNode->RemoveChild(dividerNode_);
-            hasDividerNode_ = false;
-        }
-    } else {
-        if (hasDividerNode_) {
-            hostNode->RemoveChild(dividerNode_);
-            hasDividerNode_ = false;
-        }
-    }
+    UpdateDividerNodeIfNeeded(hostNode);
     FireModeChangeCallback();
     hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     return true;
@@ -191,7 +149,9 @@ void ParallelStagePattern::OnDirectionConfigurationUpdate()
 
 void ParallelStagePattern::OnDetachFromMainTree()
 {
-    auto hostNode = AceType::DynamicCast<FrameNode>(GetHost());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hostNode = AceType::DynamicCast<FrameNode>(host);
     CHECK_NULL_VOID(hostNode);
     do {
         CHECK_NULL_BREAK(relatedPage_);
@@ -216,13 +176,47 @@ void ParallelStagePattern::OnDetachFromMainTree()
     mgr->RemoveForceSplitStateListener(id);
 }
 
+Color ParallelStagePattern::GetDividerNodeColor(RefPtr<FrameNode> hostNode)
+{
+    CHECK_NULL_RETURN(hostNode, Color());
+    auto pipeline = hostNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, Color());
+    auto theme = pipeline->GetTheme<NavigationBarTheme>();
+    auto themeColor = theme->GetNavigationDividerColor();
+    auto forceSplitMgr = pipeline->GetForceSplitManager();
+    CHECK_NULL_RETURN(forceSplitMgr, themeColor);
+    if (forceSplitMgr->IsForceSplitEnable(true)) {
+        auto splitColor = forceSplitMgr->GetSplitDividerColor();
+        if (pipeline->GetColorMode() == ColorMode::LIGHT && splitColor.first.has_value()) {
+            return splitColor.first.value();
+        }
+        if (pipeline->GetColorMode() == ColorMode::DARK && splitColor.second.has_value()) {
+            return splitColor.second.value();
+        }
+    }
+    return themeColor;
+}
+
+void ParallelStagePattern::OnColorConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hostNode = AceType::DynamicCast<FrameNode>(host);
+    CHECK_NULL_VOID(hostNode);
+    if (dividerNode_) {
+        dividerNode_->GetRenderContext()->UpdateBackgroundColor(GetDividerNodeColor(hostNode));
+    }
+}
+
 void ParallelStagePattern::CreateDividerNodeIfNeeded()
 {
     if (dividerNode_) {
         return;
     }
     int32_t dividerNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto hostNode = AceType::DynamicCast<FrameNode>(GetHost());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hostNode = AceType::DynamicCast<FrameNode>(host);
     dividerNode_ = FrameNode::GetOrCreateFrameNode(
         V2::DIVIDER_ETS_TAG, dividerNodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
     auto dividerLayoutProperty = dividerNode_->GetLayoutProperty<DividerLayoutProperty>();
@@ -230,14 +224,11 @@ void ParallelStagePattern::CreateDividerNodeIfNeeded()
     dividerLayoutProperty->UpdateStrokeWidth(DIVIDER_WIDTH);
     dividerLayoutProperty->UpdateVertical(true);
     // set divider color
-    auto pipeline = hostNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<NavigationBarTheme>();
     auto dividerRenderProperty = dividerNode_->GetPaintProperty<DividerRenderProperty>();
     CHECK_NULL_VOID(dividerRenderProperty);
     dividerRenderProperty->UpdateDividerColor(Color::TRANSPARENT);
     // set background color can expand to safe area
-    dividerNode_->GetRenderContext()->UpdateBackgroundColor(theme->GetNavigationDividerColor());
+    dividerNode_->GetRenderContext()->UpdateBackgroundColor(GetDividerNodeColor(hostNode));
 }
 
 void ParallelStagePattern::OnWindowShow()
@@ -251,6 +242,90 @@ void ParallelStagePattern::OnWindowHide()
 {
     if (windowStateChangeCallback_) {
         windowStateChangeCallback_(false);
+    }
+}
+
+bool ParallelStagePattern::IsVirtualStackBasedSplit() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_RETURN(forceSplitMgr, false);
+    return forceSplitMgr->CanPushPageToPrimary();
+}
+
+void ParallelStagePattern::UpdateDividerNodeIfNeeded(
+    const RefPtr<FrameNode>& hostNode, bool needResetHomeTransitionEffect)
+{
+    if (IsVirtualStackBasedSplit()) {
+        UpdateDividerNodeInVirtualStackBasedSplit(hostNode);
+        return;
+    }
+    UpdateDividerNode(hostNode, needResetHomeTransitionEffect);
+}
+
+void ParallelStagePattern::UpdateDividerNodeInVirtualStackBasedSplit(const RefPtr<FrameNode>& hostNode)
+{
+    CHECK_NULL_VOID(hostNode);
+    if (mode_ == PageMode::STACK) {
+        if (hasDividerNode_) {
+            hostNode->RemoveChild(dividerNode_);
+            hasDividerNode_ = false;
+        }
+        return;
+    }
+    if (hasDividerNode_) {
+        return;
+    }
+    // In the current router split model, split mode always means two columns are active:
+    // even before home page detection, left side still shows stack pages and right side shows placeholder/related page.
+    CreateDividerNodeIfNeeded();
+    if (dividerNode_) {
+        auto renderContext = dividerNode_->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateBackgroundColor(GetDividerNodeColor(hostNode));
+    }
+    TAG_LOGD(AceLogTag::ACE_ROUTER, "add dividerNode for split mode");
+    hostNode->AddChild(dividerNode_, 0);
+    hasDividerNode_ = true;
+}
+
+void ParallelStagePattern::UpdateDividerNode(
+    const RefPtr<FrameNode>& hostNode, bool needResetHomeTransitionEffect)
+{
+    if (mode_ == PageMode::SPLIT) {
+        // show placeholder page
+        auto homePage = homePageNode_.Upgrade();
+        if (homePage && needResetHomeTransitionEffect) {
+            auto homePattern = homePage->GetPattern<PagePattern>();
+            if (homePattern) {
+                homePattern->ResetPageTransitionEffect();
+            }
+        }
+        // home page is set, need to attach divider node
+        if (!hasDividerNode_ && homePage) {
+            CreateDividerNodeIfNeeded();
+            if (dividerNode_) {
+                auto renderContext = dividerNode_->GetRenderContext();
+                CHECK_NULL_VOID(renderContext);
+                renderContext->UpdateBackgroundColor(GetDividerNodeColor(hostNode));
+            }
+            TAG_LOGD(AceLogTag::ACE_ROUTER, "add dividerNode for split display");
+            hostNode->AddChild(dividerNode_, 0);
+            hasDividerNode_ = true;
+        }
+        // current page is free page, don't need to show divider node
+        if (hasDividerNode_ && !homePage) {
+            hostNode->RemoveChild(dividerNode_);
+            hasDividerNode_ = false;
+        }
+    } else {
+        if (hasDividerNode_) {
+            hostNode->RemoveChild(dividerNode_);
+            hasDividerNode_ = false;
+        }
     }
 }
 } // namespace OHOS::Ace::NG

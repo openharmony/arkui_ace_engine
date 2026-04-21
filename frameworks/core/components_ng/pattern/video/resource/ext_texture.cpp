@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,9 @@
 
 #include "base/log/log.h"
 #include "base/utils/utils.h"
+#ifdef RS_ENABLE_VK
+#include "render_service_base/include/platform/common/rs_system_properties.h"
+#endif
 
 namespace OHOS::Ace {
 const char TEXTURE_ERRORCODE_CREATEFAIL[] = "error_texture_000001";
@@ -32,6 +35,9 @@ const char TEXTURE_WIDTH[] = "textureWidth";
 const char INSTANCE_ID[] = "instanceId";
 const char ATTACH_TO_GLCONTEXT[] = "attachToGLContext";
 const char UPDATE_TEXTURE_IMAGE[] = "updateTextureImage";
+#if defined(ANDROID_PLATFORM)
+const char GET_TEXTURE_ID[] = "getTextureId";
+#endif
 
 const char SET_TEXTURE_BOUNDS[] = "setTextureBounds";
 const char TEXTURE_LEFT[] = "textureLeft";
@@ -40,6 +46,10 @@ const char ATTACH_NATIVE_WINDOW[] = "attachNativeWindow";
 const char NATIVE_WINDOW[] = "nativeWindow";
 const char TEXTURE_METHOD_ONCHANGED[] = "onChanged";
 const char TEXTURE_IS_VIDEO[] = "textureIsVideo";
+#if defined(ANDROID_PLATFORM)
+const char USE_IMAGE_READER[] = "useImageReader";
+const char BOOL_TRUE[] = "true";
+#endif
 
 ExtTexture::~ExtTexture()
 {
@@ -47,22 +57,22 @@ ExtTexture::~ExtTexture()
     CHECK_NULL_VOID(context);
     auto resRegister = context->GetPlatformResRegister();
     CHECK_NULL_VOID(resRegister);
+    const auto refreshHash = MakeEventHash(TEXTURE_METHOD_REFRESH);
+    const auto onChangedHash = MakeEventHash(TEXTURE_METHOD_ONCHANGED);
     auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::PLATFORM);
     if (platformTaskExecutor.IsRunOnCurrentThread()) {
-        resRegister->UnregisterEvent(MakeEventHash(TEXTURE_METHOD_REFRESH));
-        resRegister->UnregisterEvent(MakeEventHash(TEXTURE_METHOD_ONCHANGED));
+        resRegister->UnregisterEvent(refreshHash);
+        resRegister->UnregisterEvent(onChangedHash);
     } else {
         WeakPtr<PlatformResRegister> weak = resRegister;
-        platformTaskExecutor.PostTask([eventHash = MakeEventHash(TEXTURE_METHOD_REFRESH), weak] {
-            auto resRegister = weak.Upgrade();
-            CHECK_NULL_VOID(resRegister);
-            resRegister->UnregisterEvent(eventHash);
-        }, "ArkUIVideoExtTextureUnregisterEvent");
-        platformTaskExecutor.PostTask([eventHash = MakeEventHash(TEXTURE_METHOD_ONCHANGED), weak] {
-            auto resRegister = weak.Upgrade();
-            CHECK_NULL_VOID(resRegister);
-            resRegister->UnregisterEvent(eventHash);
-        }, "ArkUIVideoExtTextureUnregisterEvent");
+        platformTaskExecutor.PostTask(
+            [weak, refreshHash, onChangedHash]() {
+                auto resRegister = weak.Upgrade();
+                CHECK_NULL_VOID(resRegister);
+                resRegister->UnregisterEvent(refreshHash);
+                resRegister->UnregisterEvent(onChangedHash);
+            },
+            "ArkUIVideoExtTextureUnregisterEvent");
     }
 }
 
@@ -88,6 +98,11 @@ void ExtTexture::CreateTexture(const std::function<void(int64_t)>& onCreate)
     CHECK_NULL_VOID(resRegister);
     std::stringstream paramStream;
     paramStream << "type" << PARAM_EQUALS << patternType_;
+#if defined(RS_ENABLE_VK) && defined(ANDROID_PLATFORM)
+    if (OHOS::Rosen::RSSystemProperties::IsUseVulkan()) {
+        paramStream << PARAM_AND << USE_IMAGE_READER << PARAM_EQUALS << BOOL_TRUE;
+    }
+#endif
     std::string textureParam = paramStream.str();
     id_ = resRegister->CreateResource(type_, textureParam);
     if (id_ == INVALID_ID) {
@@ -184,8 +199,6 @@ void ExtTexture::SetBounds(int64_t textureId, int32_t left, int32_t top, int32_t
 
 void* ExtTexture::AttachNativeWindow()
 {
-    std::stringstream paramStream;
-    
     void* nativeWindow = nullptr;
     CallSyncResRegisterMethod(MakeMethodHash(ATTACH_NATIVE_WINDOW), PARAM_NONE,
         [this, &nativeWindow](std::string& result) {
@@ -200,5 +213,27 @@ void ExtTexture::GetTextureIsVideo(int32_t& type)
         [this, &type](std::string& result) {
             type = GetIntParam(result, "type");
     });
+}
+
+void ExtTexture::SetSizeSync(int64_t textureId, int32_t textureWidth, int32_t textureHeight, int32_t left, int32_t top)
+{
+#if defined(ANDROID_PLATFORM)
+    std::stringstream paramStream;
+    paramStream << TEXTURE_ID << PARAM_EQUALS << textureId << PARAM_AND
+                << TEXTURE_WIDTH << PARAM_EQUALS << textureWidth << PARAM_AND
+                << TEXTURE_HEIGHT << PARAM_EQUALS << textureHeight;
+    std::string param = paramStream.str();
+    CallSyncResRegisterMethod(MakeMethodHash(SET_TEXTURE_SIZE), param);
+#endif
+}
+
+void ExtTexture::GetTextureId(int32_t& textureId)
+{
+#if defined(ANDROID_PLATFORM)
+    CallSyncResRegisterMethod(MakeMethodHash(GET_TEXTURE_ID), PARAM_NONE,
+        [this, &textureId](std::string& result) {
+            textureId = GetIntParam(result, TEXTURE_ID);
+    });
+#endif
 }
 } // namespace OHOS::Ace

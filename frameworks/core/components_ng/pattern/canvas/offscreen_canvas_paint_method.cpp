@@ -232,6 +232,11 @@ std::string OffscreenCanvasPaintMethod::ToDataURL(const std::string& type, const
 #endif
 }
 
+std::optional<bool> OffscreenCanvasPaintMethod::GetAntialiasExt() const
+{
+    return fontAntiAlias_;
+}
+
 TransformParam OffscreenCanvasPaintMethod::GetTransform() const
 {
     TransformParam param;

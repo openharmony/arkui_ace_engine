@@ -124,6 +124,14 @@ void ListComponent::SetNestedScroll(int32_t forward, int32_t backward)
     _nodeAPI->setAttribute(_component, NODE_SCROLL_NESTED_SCROLL, &item);
 }
 
+    void ListComponent::SetScrollSnapAlign(int align /*ARKUI_SCROLL_SNAP_ALIGN_**/)
+    {
+        ArkUI_NumberValue v0{};
+        v0.i32 = align;
+        ArkUI_AttributeItem it{&v0, 1};
+        _nodeAPI->setAttribute(_component, NODE_LIST_SCROLL_SNAP_ALIGN, &it);
+    }
+
 void ListComponent::SetListDirection(int32_t direction)
 {
     ArkUI_NumberValue value[] = { { .i32 = direction } };

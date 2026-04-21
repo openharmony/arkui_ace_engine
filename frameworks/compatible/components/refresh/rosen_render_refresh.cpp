@@ -15,6 +15,7 @@
 
 #include "compatible/components/refresh/rosen_render_refresh.h"
 
+#include "core/components/display/render_display.h"
 #include "render_service_client/core/ui/rs_node.h"
 
 #include "core/pipeline/base/rosen_render_context.h"

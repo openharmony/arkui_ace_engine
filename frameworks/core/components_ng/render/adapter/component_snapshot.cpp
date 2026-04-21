@@ -428,6 +428,22 @@ void HandleCreateSyncNode(const RefPtr<FrameNode>& node, const RefPtr<PipelineCo
     pipeline->FlushMessages();
 }
 
+SnapshotSizeLimitation ComponentSnapshot::GetSizeLimitation()
+{
+    auto& rsInterface = Rosen::RSInterfaces::GetInstance();
+    uint32_t width = 0;
+    uint32_t height = 0;
+    rsInterface.GetMaxGpuBufferSize(width, height);
+
+    SnapshotSizeLimitation limitation;
+    limitation.maxWidth = static_cast<int32_t>(width);
+    limitation.maxHeight = static_cast<int32_t>(height);
+    if (limitation.maxWidth <= 0 || limitation.maxHeight <= 0) {
+        return { -1, -1 };
+    }
+    return { limitation.maxWidth, limitation.maxHeight };
+}
+
 std::shared_ptr<Rosen::RSNode> ComponentSnapshot::GetRsNode(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_RETURN(node, nullptr);
@@ -599,6 +615,8 @@ void ComponentSnapshot::Create(
                 TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Flush UI tasks with flag");
                 auto pipeline = node->GetContext();
                 CHECK_NULL_VOID(pipeline);
+                auto rsUIContext = GetRSUIContext(AceType::Claim(pipeline));
+                SetRSUIContext(node, rsUIContext);
                 pipeline->FlushUITasks();
                 pipeline->FlushModifier();
                 pipeline->FlushMessages();
@@ -824,16 +842,16 @@ void ComponentSnapshot::SetRSUIContext(
     if (frameNode->GetAttachedContext()) {
         return;
     }
+    auto context = AceType::DynamicCast<RosenRenderContext>(frameNode->GetRenderContext());
+    CHECK_NULL_VOID(context);
+    auto rsNode = context->GetRSNode();
+    CHECK_NULL_VOID(rsNode);
+    rsNode->SetRSUIContext(rsUIContext);
     auto children = frameNode->GetChildren();
     for (const auto& child : children) {
         CHECK_NULL_VOID(child);
         auto childFrameNode = AceType::DynamicCast<FrameNode>(child);
         CHECK_NULL_VOID(childFrameNode);
-        auto context = AceType::DynamicCast<RosenRenderContext>(childFrameNode->GetRenderContext());
-        CHECK_NULL_VOID(context);
-        auto rsNode = context->GetRSNode();
-        CHECK_NULL_VOID(rsNode);
-        rsNode->SetRSUIContext(rsUIContext);
         SetRSUIContext(childFrameNode, rsUIContext);
     }
 }

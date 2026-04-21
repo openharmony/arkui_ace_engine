@@ -41,6 +41,8 @@ public:
         std::function<void(NG::LayoutWrapper* layoutWrapper)>&& onMeasureSize,
         std::function<void(NG::LayoutWrapper* layoutWrapper)>&& onPlaceChildren,
         std::function<void(NG::LayoutWrapper* layoutWrapper)>&& updateParamFunc);
+    static SizeF DidDefaultMeasure(const RefPtr<OHOS::Ace::NG::CustomMeasureLayoutNode>& frameNode);
+    static void DidDefaultLayout(const RefPtr<OHOS::Ace::NG::CustomMeasureLayoutNode>& frameNode);
 };
 
 } // namespace OHOS::Ace::NG

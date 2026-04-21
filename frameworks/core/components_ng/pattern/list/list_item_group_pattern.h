@@ -19,17 +19,19 @@
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
+#include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/list/list_children_main_size.h"
 #include "core/components_ng/pattern/list/list_item_group_accessibility_property.h"
-#include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
+#include "core/components_ng/pattern/list/list_item_group_layout_info.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_property.h"
-#include "core/components_ng/pattern/list/list_item_pattern.h"
-#include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_position_map.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/syntax/shallow_builder.h"
 
 namespace OHOS::Ace::NG {
+
+class ListItemGroupLayoutAlgorithm;
 
 struct ListItemGroupPaintInfo {
     TextDirection layoutDirection = TextDirection::LTR;
@@ -74,8 +76,9 @@ class ACE_EXPORT ListItemGroupPattern : public Pattern {
 
 public:
     explicit ListItemGroupPattern(
-        const RefPtr<ShallowBuilder>& shallowBuilder, V2::ListItemGroupStyle listItemGroupStyle)
-        : shallowBuilder_(shallowBuilder), listItemGroupStyle_(listItemGroupStyle)
+        const RefPtr<ShallowBuilder>& shallowBuilder, V2::ListItemGroupOptions options)
+        : shallowBuilder_(shallowBuilder), listItemGroupStyle_(options.style),
+          headerStyle_(options.headerStyle), footerStyle_(options.footerStyle)
     {}
     ~ListItemGroupPattern() override = default;
 
@@ -157,6 +160,10 @@ public:
         auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
         CHECK_NULL_VOID(accessibilityProperty);
         accessibilityProperty->SetIsHeaderOrFooter(true);
+        
+        if (headerStyle_ == V2::ListItemGroupHeaderFooterStyle::FLOATING) {
+            ApplyHeaderFooterStyle(frameNode);
+        }
     }
 
     void AddFooter(const RefPtr<NG::UINode>& footer)
@@ -192,6 +199,10 @@ public:
         auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
         CHECK_NULL_VOID(accessibilityProperty);
         accessibilityProperty->SetIsHeaderOrFooter(true);
+        
+        if (footerStyle_ == V2::ListItemGroupHeaderFooterStyle::FLOATING) {
+            ApplyHeaderFooterStyle(frameNode);
+        }
     }
 
     void RemoveHeader()
@@ -246,7 +257,7 @@ public:
         return false;
     }
 
-    const ListItemGroupLayoutAlgorithm::PositionMap& GetItemPosition()
+    const ListItemGroupPositionMap& GetItemPosition()
     {
         return itemPosition_;
     }
@@ -374,6 +385,17 @@ public:
     }
 
     void SetListItemGroupStyle(V2::ListItemGroupStyle style);
+    void SetHeaderStyle(V2::ListItemGroupHeaderFooterStyle style);
+    void SetFooterStyle(V2::ListItemGroupHeaderFooterStyle style);
+    V2::ListItemGroupHeaderFooterStyle GetHeaderStyle()
+    {
+        return headerStyle_;
+    }
+    V2::ListItemGroupHeaderFooterStyle GetFooterStyle()
+    {
+        return footerStyle_;
+    }
+    void ApplyHeaderFooterStyle(const RefPtr<FrameNode>& node);
     RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize();
     void UpdateChildrenMainSizeRoundingMode();
     void UpdateChildrenMainSizeRoundingModeMultiThread();
@@ -383,6 +405,8 @@ public:
     RefPtr<FrameNode> GetListFrameNode() const;
     VisibleContentInfo GetStartListItemIndex();
     VisibleContentInfo GetEndListItemIndex();
+    VisibleContentInfo GetStartListItemIndex(float startPosFromMargin);
+    VisibleContentInfo GetEndListItemIndex(float endPosFromMargin);
     void ResetChildrenSize();
     bool IsInViewport(int32_t index) const;
 
@@ -501,6 +525,8 @@ private:
     RefPtr<ListPositionMap> posMap_;
     RefPtr<ListChildrenMainSize> childrenSize_;
     V2::ListItemGroupStyle listItemGroupStyle_ = V2::ListItemGroupStyle::NONE;
+    V2::ListItemGroupHeaderFooterStyle headerStyle_ = V2::ListItemGroupHeaderFooterStyle::NONE;
+    V2::ListItemGroupHeaderFooterStyle footerStyle_ = V2::ListItemGroupHeaderFooterStyle::NONE;
 
     int32_t indexInList_ = 0;
 
@@ -526,11 +552,11 @@ private:
     bool reCache_ = false;
     int32_t backwardCachedIndex_ = INT_MAX;
     int32_t forwardCachedIndex_ = -1;
-    ListItemGroupLayoutAlgorithm::PositionMap cachedItemPosition_;
+    ListItemGroupPositionMap cachedItemPosition_;
     float adjustRefPos_ = 0.0f;
     float adjustTotalSize_ = 0.0f;
 
-    ListItemGroupLayoutAlgorithm::PositionMap itemPosition_;
+    ListItemGroupPositionMap itemPosition_;
     float spaceWidth_ = 0.0f;
     Axis axis_ = Axis::VERTICAL;
     int32_t lanes_ = 1;

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_EVENT_TOUCH_EVENT_H
 #define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_EVENT_TOUCH_EVENT_H
 
+#include <functional>
 #include <utility>
 
 #include "ui/base/geometry/offset.h"
@@ -75,8 +76,9 @@ struct TouchEvent final : public PointerEvent {
     double size = 0.0;
     int64_t deviceId = 0;
     uint64_t modifierKeyState = 0;
-    TimeStamp pressedTime;
-    TimeStamp processTime;
+    TimeStamp sensorTime = {};
+    TimeStamp pressedTime = {};
+    TimeStamp processTime = {};
     TouchType type = TouchType::UNKNOWN;
     TouchType pullType = TouchType::UNKNOWN;
     std::optional<float> tiltX;
@@ -90,6 +92,7 @@ struct TouchEvent final : public PointerEvent {
     int32_t targetDisplayId = 0;
     SourceType sourceType = SourceType::NONE;
     SourceTool sourceTool = SourceTool::UNKNOWN;
+    SourceTool primitiveSourceTool = SourceTool::UNKNOWN;
     int32_t touchEventId = 0;
     int32_t operatingHand = 0;
     // Coordinates relative to the upper-left corner of the current component
@@ -113,8 +116,11 @@ struct TouchEvent final : public PointerEvent {
     bool isInjected = false;
     bool isPrivacyMode = false;
     bool isPassThroughMode = false;
+    bool isGenerate = false;
     int32_t xReverse = 0;
     int32_t yReverse = 0;
+    int32_t eventHandleId = 0;
+    bool isNewReferee = false;
     TouchEvent()
     {
         eventType = UIInputEventType::TOUCH;
@@ -140,6 +146,7 @@ struct TouchEvent final : public PointerEvent {
     TouchEvent& SetSourceType(SourceType sourceType);
     TouchEvent& SetSourceTool(SourceTool sourceTool);
     TouchEvent& SetTouchEventId(int32_t touchEventId);
+    TouchEvent& SetEventHandleId(int32_t eventHandleId);
     TouchEvent& SetIsInterpolated(bool isInterpolated);
     TouchEvent& SetPointers(std::vector<TouchPoint> pointers);
     TouchEvent& SetPointerEvent(std::shared_ptr<const MMI::PointerEvent> pointerEvent);
@@ -178,6 +185,8 @@ class ACE_FORCE_EXPORT TouchLocationInfo : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(TouchLocationInfo, TypeInfoBase);
 
 public:
+    using CurrentLocalLocationGetter = std::function<Offset()>;
+
     explicit TouchLocationInfo(int32_t fingerId) : BaseEventInfo("default")
     {
         fingerId_ = fingerId;
@@ -202,6 +211,18 @@ public:
     const Offset& GetLocalLocation() const
     {
         return localLocation_;
+    }
+    Offset GetCurrentLocalLocation() const
+    {
+        if (currentLocalLocationGetter_) {
+            return currentLocalLocationGetter_();
+        }
+        return localLocation_;
+    }
+    TouchLocationInfo& SetCurrentLocalLocationGetter(CurrentLocalLocationGetter&& currentLocalLocationGetter)
+    {
+        currentLocalLocationGetter_ = std::move(currentLocalLocationGetter);
+        return *this;
     }
     const Offset& GetGlobalLocation() const
     {
@@ -237,6 +258,7 @@ private:
     // Different from global location, The local location refers to the location of the contact point relative to the
     // current node which has the recognizer.
     Offset localLocation_;
+    CurrentLocalLocationGetter currentLocalLocationGetter_;
     Offset screenLocation_;
     // The location where the touch point touches the screen when there are multiple screens.
     Offset globalDisplayLocation_;
@@ -299,6 +321,31 @@ private:
 using TouchEventFunc = std::function<void(TouchEventInfo&)>;
 using OnTouchEventCallback = std::function<void(const TouchEventInfo&)>;
 using CatchTouchEventCallback = std::function<void()>;
+
+namespace NG {
+class TouchEventImpl : public virtual AceType {
+    DECLARE_ACE_TYPE(TouchEventImpl, AceType);
+public:
+    explicit TouchEventImpl(TouchEventFunc&& callback) : callback_(std::move(callback)) {}
+    TouchEventImpl(const TouchEventFunc& callback) : callback_(callback) {}
+    ~TouchEventImpl() override = default;
+
+    const TouchEventFunc& GetTouchEventCallback() const
+    {
+        return callback_;
+    }
+
+    void operator()(TouchEventInfo& info) const
+    {
+        if (callback_) {
+            callback_(info);
+        }
+    }
+
+private:
+    TouchEventFunc callback_;
+};
+} // namespace NG
 
 } // namespace OHOS::Ace
 

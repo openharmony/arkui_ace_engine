@@ -20,11 +20,11 @@
 
 #define private public
 #define protected public
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_frontend.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_frontend.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
@@ -77,6 +77,29 @@ const std::string LONGEST_CONTENT = "新建文件夹";
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
 constexpr int32_t EXPECT_CALL_TWICE_TIMES = 2;
 constexpr int32_t EXPECT_CALL_THREE_TIMES = 3;
+
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == DragBarTheme::TypeId()) {
+        return AceType::MakeRefPtr<DragBarTheme>();
+    } else if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == DialogTheme::TypeId()) {
+        return AceType::MakeRefPtr<DialogTheme>();
+    } else if (type == PickerTheme::TypeId()) {
+        return AceType::MakeRefPtr<PickerTheme>();
+    } else if (type == SelectTheme::TypeId()) {
+        return AceType::MakeRefPtr<SelectTheme>();
+    } else if (type == MenuTheme::TypeId()) {
+        return AceType::MakeRefPtr<MenuTheme>();
+    } else if (type == ToastTheme::TypeId()) {
+        return AceType::MakeRefPtr<ToastTheme>();
+    } else if (type == SheetTheme::TypeId()) {
+        return AceType::MakeRefPtr<SheetTheme>();
+    } else {
+        return nullptr;
+    }
+}
 } // namespace
 
 class MockAccessibilityManager : public AccessibilityManager {
@@ -129,6 +152,7 @@ protected:
     static RefPtr<FrameNode> CreateTargetNode();
     static void CreateSheetStyle(SheetStyle& sheetStyle);
     void CreateSheetBuilder();
+    static RefPtr<Theme> CreateTheme(ThemeType type);
     int32_t minPlatformVersion_ = 0;
 };
 
@@ -142,6 +166,29 @@ void OverlayManagerMenuTestNg::TearDown()
     PipelineBase::GetCurrentContext()->SetMinPlatformVersion(minPlatformVersion_);
 }
 
+RefPtr<Theme> OverlayManagerMenuTestNg::CreateTheme(ThemeType type)
+{
+    if (type == DragBarTheme::TypeId()) {
+        return AceType::MakeRefPtr<DragBarTheme>();
+    } else if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == DialogTheme::TypeId()) {
+        return AceType::MakeRefPtr<DialogTheme>();
+    } else if (type == PickerTheme::TypeId()) {
+        return AceType::MakeRefPtr<PickerTheme>();
+    } else if (type == SelectTheme::TypeId()) {
+        return AceType::MakeRefPtr<SelectTheme>();
+    } else if (type == MenuTheme::TypeId()) {
+        return AceType::MakeRefPtr<MenuTheme>();
+    } else if (type == ToastTheme::TypeId()) {
+        return AceType::MakeRefPtr<ToastTheme>();
+    } else if (type == SheetTheme::TypeId()) {
+        return AceType::MakeRefPtr<SheetTheme>();
+    } else {
+        return nullptr;
+    }
+}
+
 void OverlayManagerMenuTestNg::SetUpTestCase()
 {
     MockPipelineContext::SetUp();
@@ -153,27 +200,14 @@ void OverlayManagerMenuTestNg::SetUpTestCase()
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
     MockPipelineContext::GetCurrentContext()->SetMinPlatformVersion((int32_t)PlatformVersion::VERSION_ELEVEN);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-        if (type == DragBarTheme::TypeId()) {
-            return AceType::MakeRefPtr<DragBarTheme>();
-        } else if (type == IconTheme::TypeId()) {
-            return AceType::MakeRefPtr<IconTheme>();
-        } else if (type == DialogTheme::TypeId()) {
-            return AceType::MakeRefPtr<DialogTheme>();
-        } else if (type == PickerTheme::TypeId()) {
-            return AceType::MakeRefPtr<PickerTheme>();
-        } else if (type == SelectTheme::TypeId()) {
-            return AceType::MakeRefPtr<SelectTheme>();
-        } else if (type == MenuTheme::TypeId()) {
-            return AceType::MakeRefPtr<MenuTheme>();
-        } else if (type == ToastTheme::TypeId()) {
-            return AceType::MakeRefPtr<ToastTheme>();
-        } else if (type == SheetTheme::TypeId()) {
-            return AceType::MakeRefPtr<SheetTheme>();
-        } else {
-            return nullptr;
-        }
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly([](ThemeType type, int32_t) -> RefPtr<Theme> {
+        return GetTheme(type);
     });
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        return GetTheme(type);
+    });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 void OverlayManagerMenuTestNg::TearDownTestCase()
@@ -253,6 +287,7 @@ HWTEST_F(OverlayManagerMenuTestNg, MenuTest001, TestSize.Level1)
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     ASSERT_NE(menuPattern, nullptr);
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     /**
@@ -293,6 +328,7 @@ HWTEST_F(OverlayManagerMenuTestNg, MenuTest002, TestSize.Level1)
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     ASSERT_NE(menuPattern, nullptr);
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     /**
@@ -338,6 +374,7 @@ HWTEST_F(OverlayManagerMenuTestNg, MenuTest003, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
     overlayManager->HideMenu(menuNode, targetId);
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     EXPECT_TRUE(menuManager->menuMap_.empty());
@@ -399,6 +436,7 @@ HWTEST_F(OverlayManagerMenuTestNg, MenuTest004, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, nullptr);
     overlayManager->ShowMenuInSubWindow(targetId, MENU_OFFSET, nullptr);
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     EXPECT_TRUE(menuManager->menuMap_.empty());
@@ -421,6 +459,7 @@ HWTEST_F(OverlayManagerMenuTestNg, MenuTest004, TestSize.Level1)
     overlayManager->CleanMenuInSubWindow(targetId);
     overlayManager->FocusOverlayNode(menuNode, false);
     EXPECT_FALSE(menuManager->menuMap_.empty());
+    menuManager->HideMenu(menuNode, overlayManager, targetId, true, HideMenuType::WRAPPER_LOSE_FOCUS);
     EXPECT_FALSE(overlayManager->RemoveOverlayInSubwindow());
     EXPECT_TRUE(overlayManager->RemoveAllModalInOverlay());
     EXPECT_FALSE(overlayManager->RemoveOverlay(false));
@@ -470,6 +509,7 @@ HWTEST_F(OverlayManagerMenuTestNg, MenuTest005, TestSize.Level1)
      */
     EXPECT_EQ(rootNode->GetChildren().size(), 1);
     EXPECT_EQ(menuWrapperNode->GetChildren().size(), 2);
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->PopMenuAnimation(menuWrapperNode, overlayManager, true);
@@ -570,6 +610,7 @@ HWTEST_F(OverlayManagerMenuTestNg, MenuTest007, TestSize.Level1)
     auto focusHub = menuWrapperNode->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
     menuPattern->SetPreviewMode(MenuPreviewMode::CUSTOM);
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     /**
@@ -672,6 +713,7 @@ HWTEST_F(OverlayManagerMenuTestNg, MenuTest009, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
     overlayManager->HideMenu(menuNode, targetId);
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     EXPECT_TRUE(menuManager->menuMap_.empty());
@@ -735,6 +777,7 @@ HWTEST_F(OverlayManagerMenuTestNg, MenuTest010, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, nullptr);
     overlayManager->ShowMenuInSubWindow(targetId, MENU_OFFSET, nullptr);
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     EXPECT_TRUE(menuManager->menuMap_.empty());
@@ -849,7 +892,9 @@ HWTEST_F(OverlayManagerMenuTestNg, MenuTest012, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
     selectTheme->menuAnimationDuration_ = 100;
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(selectTheme));
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     AnimationOption option;
@@ -899,6 +944,7 @@ HWTEST_F(OverlayManagerMenuTestNg, HandleMenuDisappearCallbackNoCallback, TestSi
      * @tc.steps: step3. Call HandleMenuDisappearCallback
      * @tc.expected: Basic operations execute but callback condition fails
      */
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->HandleMenuDisappearCallback(menuWrapper);
@@ -946,6 +992,7 @@ HWTEST_F(OverlayManagerMenuTestNg, HandleMenuDisappearCallbackWithMainPipelineAn
      * @tc.steps: step3. Call HandleMenuDisappearCallback
      * @tc.expected: All operations execute including pipeline flush due to both conditions being true
      */
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->HandleMenuDisappearCallback(menuWrapper);
@@ -991,6 +1038,7 @@ HWTEST_F(OverlayManagerMenuTestNg, HandleMenuDisappearCallbackMenuStatusChangeCa
      * @tc.steps: step3. Call HandleMenuDisappearCallback
      * @tc.expected: Status and disappear state are updated correctly
      */
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->HandleMenuDisappearCallback(menuWrapper);
@@ -1021,6 +1069,7 @@ HWTEST_F(OverlayManagerMenuTestNg, HandleMenuDisappearCallbackComprehensiveBranc
      * @tc.steps: step3. Call HandleMenuDisappearCallback with various conditions
      * @tc.expected: All branches execute correctly
      */
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->HandleMenuDisappearCallback(nullptr);
@@ -1089,6 +1138,7 @@ HWTEST_F(OverlayManagerMenuTestNg, HandleMenuDisappearCallbackMainPipelineExists
      * @tc.steps: step3. Call HandleMenuDisappearCallback
      * @tc.expected: Basic operations execute, pipeline branch is taken but callback condition fails
      */
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->HandleMenuDisappearCallback(menuWrapper);
@@ -1135,6 +1185,7 @@ HWTEST_F(OverlayManagerMenuTestNg, HandleMenuDisappearCallbackMainPipelineExists
      * @tc.steps: step3. Call HandleMenuDisappearCallback
      * @tc.expected: All operations execute including pipeline flush due to both conditions being true
      */
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->HandleMenuDisappearCallback(menuWrapper);
@@ -1171,6 +1222,7 @@ HWTEST_F(OverlayManagerMenuTestNg, HandleMenuDisappearCallbackStateChangeCallbac
      * @tc.steps: step2. Call HandleMenuDisappearCallback
      * @tc.expected: CallMenuStateChangeCallback is invoked with "false"
      */
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->HandleMenuDisappearCallback(menuWrapper);
@@ -1213,6 +1265,7 @@ HWTEST_F(OverlayManagerMenuTestNg, HandleMenuDisappearCallback_InvalidMainPipeli
      * @tc.expected: The function executes correctly, updates menu status, and calls the callback
      */
     MockPipelineContext::TearDown();
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->HandleMenuDisappearCallback(menuWrapper);
@@ -1243,6 +1296,7 @@ HWTEST_F(OverlayManagerMenuTestNg, CheckSelectSubWindowToClose_NullMenu_Test, Te
     ASSERT_NE(overlayManager, nullptr);
     bool expandDisplay = true;
 
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     bool result = menuManager->CheckSelectSubWindowToClose(nullMenu, overlayManager, expandDisplay);
@@ -1273,6 +1327,7 @@ HWTEST_F(OverlayManagerMenuTestNg, CheckSelectSubWindowToClose_NullOverlayManage
     RefPtr<OverlayManager> nullOverlayManager = nullptr;
     bool expandDisplay = true;
 
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     bool result = menuManager->CheckSelectSubWindowToClose(menu, nullOverlayManager, expandDisplay);
@@ -1303,6 +1358,7 @@ HWTEST_F(OverlayManagerMenuTestNg, CheckSelectSubWindowToClose_MenuWithNoChildre
     ASSERT_NE(overlayManager, nullptr);
     bool expandDisplay = true;
 
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     bool result = menuManager->CheckSelectSubWindowToClose(menu, overlayManager, expandDisplay);
@@ -1335,6 +1391,7 @@ HWTEST_F(OverlayManagerMenuTestNg, CheckSelectSubWindowToClose_InvalidMenuPatter
     ASSERT_NE(overlayManager, nullptr);
     bool expandDisplay = true;
 
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     bool result = menuManager->CheckSelectSubWindowToClose(menu, overlayManager, expandDisplay);
@@ -1372,6 +1429,7 @@ HWTEST_F(OverlayManagerMenuTestNg, CheckSelectSubWindowToClose_NullMenuLayoutPro
     ASSERT_NE(overlayManager, nullptr);
     bool expandDisplay = true;
 
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     bool result = menuManager->CheckSelectSubWindowToClose(menu, overlayManager, expandDisplay);
@@ -1404,6 +1462,7 @@ HWTEST_F(OverlayManagerMenuTestNg, CheckSelectSubWindowToClose_ExpandDisplayFals
     ASSERT_NE(overlayManager, nullptr);
     bool expandDisplay = false;
 
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     bool result = menuManager->CheckSelectSubWindowToClose(menu, overlayManager, expandDisplay);
@@ -1440,6 +1499,7 @@ HWTEST_F(OverlayManagerMenuTestNg, CheckSelectSubWindowToClose_NonSelectTargetTa
     ASSERT_NE(overlayManager, nullptr);
     bool expandDisplay = true;
 
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     bool result = menuManager->CheckSelectSubWindowToClose(menu, overlayManager, expandDisplay);
@@ -1479,6 +1539,7 @@ HWTEST_F(OverlayManagerMenuTestNg, CheckSelectSubWindowToClose_ShowInSubWindowFa
     ASSERT_NE(overlayManager, nullptr);
     bool expandDisplay = true;
 
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     bool result = menuManager->CheckSelectSubWindowToClose(menu, overlayManager, expandDisplay);
@@ -1515,6 +1576,7 @@ HWTEST_F(OverlayManagerMenuTestNg, HideAllMenusWithoutAnimation001, TestSize.Lev
     ASSERT_NE(overlayManager, nullptr);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, nullptr);
     overlayManager->ShowMenuInSubWindow(targetId, MENU_OFFSET, nullptr);
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     EXPECT_TRUE(menuManager->menuMap_.empty());
@@ -1605,6 +1667,7 @@ HWTEST_F(OverlayManagerMenuTestNg, CallMenuDisappearWithStatus001, TestSize.Leve
 
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     ASSERT_NE(overlayManager, nullptr);
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->CallMenuDisappearWithStatus(menuWrapper);
@@ -1649,6 +1712,7 @@ HWTEST_F(OverlayManagerMenuTestNg, CallMenuDisappearOnlyNewLifeCycle, TestSize.L
 
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     ASSERT_NE(overlayManager, nullptr);
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->CallMenuDisappearWithStatus(menuWrapper);
@@ -1707,6 +1771,7 @@ HWTEST_F(OverlayManagerMenuTestNg, HandleAccessibilityPageEventControl_Accessibi
     menuWrapperNode->MountToParent(rootNode);
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     ASSERT_NE(overlayManager, nullptr);
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->SendToAccessibility(menuWrapperNode, AceType::WeakClaim(AceType::RawPtr(overlayManager)), false);
@@ -1741,6 +1806,7 @@ HWTEST_F(OverlayManagerMenuTestNg, HandleAccessibilityPageEventControl_AddAndRem
     EXPECT_CALL(*frontend, GetAccessibilityManager()).WillRepeatedly(Return(accessibilityManager));
     pipeline->weakFrontend_ = AceType::WeakClaim(AceType::RawPtr(frontend));
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->menuMap_[1] = menuWrapperNode;

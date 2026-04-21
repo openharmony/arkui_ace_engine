@@ -31,7 +31,7 @@ struct ImageExample062 {
 
       Stack() {
         if (this.imageLoaded) {
-          Image($r('app.media.png'))
+          Image($r('app.media.startIcon'))
             .width(200)
             .height(200)
         } else {

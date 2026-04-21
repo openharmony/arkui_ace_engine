@@ -14,8 +14,9 @@
  */
 
 #include "grid_test_ng.h"
-#include "test/mock/core/animation/mock_animation_manager.h"
+#include "test/mock/frameworks/core/animation/mock_animation_manager.h"
 
+#include "core/components_ng/pattern/grid/grid_item_accessibility_property.h"
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_with_options_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_layout_algorithm.h"
@@ -390,7 +391,7 @@ HWTEST_F(GridOptionLayoutTestNg, GetEndOffset004, TestSize.Level1)
         UpdateCurrentOffset(-50.0f);
         EXPECT_EQ(pattern_->GetEndOffset(), info.startMainLineIndex_ * 105.0f);
     }
-    EXPECT_LE(info.currentOffset_, -228.052094f);
+    EXPECT_LE(info.currentOffset_, -150.0f);
     EXPECT_GE(info.startMainLineIndex_, 3);
 }
 

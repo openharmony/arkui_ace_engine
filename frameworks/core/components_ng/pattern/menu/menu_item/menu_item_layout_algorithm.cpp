@@ -43,9 +43,7 @@ void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     auto hostNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(hostNode);
-    auto pipeline = hostNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = hostNode->GetTheme<SelectTheme>(true);
     CHECK_NULL_VOID(theme);
 
     horInterval_ = static_cast<float>(theme->GetMenuItemHorIntervalPadding().ConvertToPx());
@@ -104,6 +102,7 @@ void MenuItemLayoutAlgorithm::CheckNeedMatchParent(LayoutWrapper* layoutWrapper,
     std::optional<LayoutConstraintF>& layoutConstraint)
 {
     auto menuNode = layoutWrapper->GetHostNode();
+    ACE_UINODE_TRACE(menuNode);
     auto menuItemPattern = menuNode ? menuNode->GetPattern<MenuItemPattern>() : nullptr;
     SubMenuExpandingMode expandingMode = menuItemPattern ? menuItemPattern->GetExpandingMode()
         : SubMenuExpandingMode::STACK;
@@ -164,9 +163,7 @@ std::pair<float, float> MenuItemLayoutAlgorithm::MeasureRightRow(LayoutWrapper* 
         CHECK_EQUAL_RETURN(children.empty(), true, defaultPair);
         auto itemNode = layoutWrapper->GetHostNode();
         CHECK_NULL_RETURN(itemNode, defaultPair);
-        auto pipeline = itemNode->GetContext();
-        CHECK_NULL_RETURN(pipeline, defaultPair);
-        auto theme = pipeline->GetTheme<SelectTheme>();
+        auto theme = itemNode->GetTheme<SelectTheme>(true);
         CHECK_NULL_RETURN(theme, defaultPair);
         float iconContentPadding = static_cast<float>(theme->GetIconContentPadding().ConvertToPx());
         float spaceWidth = childConstraint.maxSize.Width();
@@ -267,7 +264,7 @@ void MenuItemLayoutAlgorithm::CalcLeftRowMinWidth(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(itemNode);
     auto pipeline = itemNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = itemNode->GetTheme<SelectTheme>(true);
     CHECK_NULL_VOID(theme);
     float iconContentPadding = static_cast<float>(theme->GetIconContentPadding().ConvertToPx());
     float leftRowMinWidth = 0.0f;
@@ -366,7 +363,7 @@ void MenuItemLayoutAlgorithm::MeasureRow(LayoutWrapper* layoutWrapper, const Ref
     
     float spaceWidth = constraint.maxSize.Width();
     float rowWidth = 0.0f;
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = itemNode->GetTheme<SelectTheme>(true);
     CHECK_NULL_VOID(theme);
     float rowHeight = 0.0f;
     rowHeight = isOption_ && !showDefaultSelectedIcon_ ? 0.0f : (
@@ -429,6 +426,7 @@ void MenuItemLayoutAlgorithm::UpdateSelfSize(LayoutWrapper* layoutWrapper,
 {
     CHECK_NULL_VOID(layoutWrapper);
     auto menuNode = layoutWrapper->GetHostNode();
+    ACE_UINODE_TRACE(menuNode);
     auto menuItemPattern = menuNode ? menuNode->GetPattern<MenuItemPattern>() : nullptr;
     auto isEmbedded = menuItemPattern ? menuItemPattern->IsEmbedded() : false;
     auto expandingMode = menuItemPattern ? menuItemPattern->GetExpandingMode() : SubMenuExpandingMode::SIDE;
@@ -501,7 +499,7 @@ float MenuItemLayoutAlgorithm::GetMenuItemVerticalPadding(LayoutWrapper* layoutW
     CHECK_NULL_RETURN(hostNode, ret);
     auto pipeline = hostNode->GetContext();
     CHECK_NULL_RETURN(pipeline, ret);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = hostNode->GetTheme<SelectTheme>(true);
     CHECK_NULL_RETURN(theme, ret);
     return theme->GetMenuItemVerticalPadding().ConvertToPx();
 }

@@ -23,7 +23,7 @@
 #undef private
 
 #include "cJSON.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/web/web_dom_document.h"
@@ -68,5 +68,33 @@ HWTEST_F(WebPatternAgentTest, HighlightSpecifiedContent001, TestSize.Level1)
     std::string configs = "test string";
     webPattern->HighlightSpecifiedContent(content, nodeIds, configs);
 #endif
+}
+
+/**
+ * @tc.name: GetLayoutModeStr001
+ * @tc.desc: Test GetLayoutModeStr with NONE mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternAgentTest, GetLayoutModeStr001, TestSize.Level1)
+{
+    auto webPattern = AceType::MakeRefPtr<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->SetLayoutMode(WebLayoutMode::NONE);
+    auto result = webPattern->GetLayoutModeStr();
+    EXPECT_EQ(result, "NONE");
+}
+
+/**
+ * @tc.name: GetLayoutModeStr002
+ * @tc.desc: Test GetLayoutModeStr with FIT_CONTENT mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternAgentTest, GetLayoutModeStr002, TestSize.Level1)
+{
+    auto webPattern = AceType::MakeRefPtr<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->SetLayoutMode(WebLayoutMode::FIT_CONTENT);
+    auto result = webPattern->GetLayoutModeStr();
+    EXPECT_EQ(result, "FIT_CONTENT");
 }
 }

@@ -18,6 +18,7 @@
 
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
+#include "core/components/common/properties/text_style.h"
 
 namespace OHOS::Ace::NG {
 
@@ -43,7 +44,7 @@ public:
             return theme;
         }
 
-    private:
+    protected:
         void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<RefreshThemeNG>& theme) const
         {
             RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_REFRESH);
@@ -90,10 +91,11 @@ public:
 protected:
     RefreshThemeNG() = default;
 
+    TextStyle textStyle_;
+
 private:
     Dimension loadingDistance_;
     Dimension progressDiameter_;
-    TextStyle textStyle_;
     Color progressColor_;
     float ratio_ = 5.0f;
 };

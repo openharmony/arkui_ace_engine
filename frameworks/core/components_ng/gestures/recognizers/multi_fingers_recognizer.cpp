@@ -15,6 +15,8 @@
 
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 
+#include "base/log/log_wrapper.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/gestures/recognizers/recognizer_group.h"
 
 namespace OHOS::Ace::NG {
@@ -71,18 +73,27 @@ void MultiFingersRecognizer::UpdateFingerListInfo()
             continue;
         }
         PointF localPoint(point.second.x, point.second.y);
-        TransformForRecognizer(
-            localPoint, GetAttachedNode(), false, isPostEventResult_, point.second.postEventNodeId);
+        TransformForRecognizer(localPoint, GetAttachedNode(), false, isPostEventResult_, point.second.postEventNodeId);
         auto originalId = point.second.GetOriginalReCovertId();
         auto currentTimeStamp = point.second.GetTimeStamp().time_since_epoch().count();
-        
         auto it = latestTimeStamps.find(originalId);
         if (it == latestTimeStamps.end() || static_cast<uint64_t>(currentTimeStamp) > it->second) {
             latestTimeStamps[originalId] = currentTimeStamp;
-
+            auto frameNodeWeak = GetAttachedNode();
+            auto localOffset = Offset(localPoint.GetX(), localPoint.GetY());
+            auto computeCurrentLocal = [frameNodeWeak, isPost = isPostEventResult_, postId =
+                point.second.postEventNodeId, globalOffset = point.second.GetOffset(), localOffset]() -> Offset {
+                if (frameNodeWeak.Upgrade() == nullptr) {
+                    return localOffset;
+                }
+                PointF currentLocalPoint(globalOffset.GetX(), globalOffset.GetY());
+                NGGestureRecognizer::Transform(currentLocalPoint, frameNodeWeak, true, isPost, postId);
+                return Offset(currentLocalPoint.GetX(), currentLocalPoint.GetY());
+            };
             FingerInfo fingerInfo = { originalId, point.second.operatingHand,
                 point.second.GetOffset(), Offset(localPoint.GetX(), localPoint.GetY()), point.second.GetScreenOffset(),
-                point.second.GetGlobalDisplayOffset(), point.second.sourceType, point.second.sourceTool };
+                point.second.GetGlobalDisplayOffset(), point.second.sourceType,
+                point.second.sourceTool, computeCurrentLocal };
             latestTouchPoints[originalId] = fingerInfo;
         }
         if (maxTimeStamp <= currentTimeStamp && point.second.pointers.size() >= touchPoints_.size()) {
@@ -180,6 +191,10 @@ void MultiFingersRecognizer::UpdateTouchPointWithAxisEvent(const AxisEvent& even
     touchPoints_[event.id].pointers = { point };
     touchPoints_[event.id].pointerEvent = event.pointerEvent;
     touchPoints_[event.id].targetDisplayId = event.targetDisplayId;
+    if (event.eventHandleId > 0) {
+        touchPoints_[event.id].passThrough = event.passThrough;
+        touchPoints_[event.id].postEventNodeId = event.postEventNodeId;
+    }
 }
 
 std::string MultiFingersRecognizer::DumpGestureInfo() const

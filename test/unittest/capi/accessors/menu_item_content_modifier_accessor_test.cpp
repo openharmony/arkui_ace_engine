@@ -49,13 +49,17 @@ static constexpr int TEST_OBJ_ID = 1001;
 static constexpr int TEST_BUILDER_ID = 1002;
 static constexpr bool TEST_DEFAULT_SELECTED = false;
 static constexpr int TEST_DEFAULT_INDEX = 0;
+static constexpr std::string TEST_TEXT = "XXX";
+static constexpr std::string TEST_ICON = "YYY";
+
+static void NoOpResource(InteropInt32) {}
 
 /**
- * @tc.name: menuItemContentModifierHelperAccessorTest
+ * @tc.name: contentModifierMenuItemTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemContentModifierHelperAccessor, menuItemContentModifierHelperAccessorTest, TestSize.Level1)
+HWTEST_F(MenuItemContentModifierHelperAccessor, contentModifierMenuItemTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->contentModifierMenuItem, nullptr);
     /**
@@ -72,7 +76,10 @@ HWTEST_F(MenuItemContentModifierHelperAccessor, menuItemContentModifierHelperAcc
     ASSERT_NE(pattern, nullptr);
     pattern->SetMenuNode(wrapperNode);
 
-    SelectParam param = {.text = "XXX", .icon = "YYY"};
+    SelectParam param = {
+        .text = TEST_TEXT,
+        .icon = TEST_ICON
+    };
     std::vector<SelectParam> params = {param};
     auto mn = pattern->GetMenuNode();
     ASSERT_NE(mn, nullptr);
@@ -80,15 +87,15 @@ HWTEST_F(MenuItemContentModifierHelperAccessor, menuItemContentModifierHelperAcc
     ASSERT_NE(menuPattern, nullptr);
     menuPattern->SetSelectProperties(params);
 
-    struct CheckEvent {
-        int32_t nodeId;
-        int32_t objId;
-        bool selected;
-        int index;
-    };
+    struct CheckEvent { int32_t nodeId; int32_t objId; bool selected; int index; };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
-    auto obj = Converter::ArkCreate<Ark_Object>(TEST_OBJ_ID);
+    // In gen140 ArkCreate<Ark_Object> is deleted; create Ark_Object manually for test id.
+    Ark_Object obj = {};
+    obj.resource.resourceId = static_cast<InteropInt32>(TEST_OBJ_ID);
+    obj.resource.hold = &NoOpResource;
+    obj.resource.release = &NoOpResource;
+
     /**
      * @tc.steps: step2. create modifierCallback.
      */

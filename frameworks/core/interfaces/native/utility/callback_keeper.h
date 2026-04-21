@@ -25,6 +25,8 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 
+#include "patch.h"
+
 namespace OHOS::Ace::NG {
 template<typename TCallbackType>
 class AutoCallbackHolder {

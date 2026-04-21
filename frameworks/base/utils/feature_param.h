@@ -35,6 +35,8 @@ public:
     static bool IsPageOverflowEnabled();
     static bool IsRnOverflowEnable();
     static bool IsDialogCorrectionEnabled();
+    static std::string GetArkWebAutoLayoutConfig();
+    static bool IsSmartLayoutEnabled();
 };
 } // namespace OHOS::Ace
 

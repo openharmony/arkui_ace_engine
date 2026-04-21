@@ -30,7 +30,7 @@ struct ImageExample073 {
 
       Flex({ wrap: FlexWrap.Wrap, justifyContent: FlexAlign.SpaceBetween }) {
         ForEach(Array.from({ length: this.imageCount }), (_, index) => {
-          Image($r('app.media.png'))
+          Image($r('app.media.startIcon'))
             .width('45%')
             .aspectRatio(1)
             .objectFit(ImageFit.Cover)

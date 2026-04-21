@@ -26,12 +26,12 @@
 
 #define private public
 #define protected public
-#include "test/mock/base/mock_subwindow.h"
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/subwindow/mock_subwindow.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/log/dump_log.h"
 #include "base/subwindow/subwindow_manager.h"
@@ -48,14 +48,18 @@
 #include "core/components_ng/pattern/dialog/dialog_layout_algorithm.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components/common/properties/ui_material.h"
 #include "test/unittest/core/event/frame_node_on_tree.h"
+#include "core/common/ace_engine.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -104,6 +108,14 @@ void DialogPatternAdditionalTestNg::SetUpTestCase()
             return nullptr;
         }
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            if (type == DialogTheme::TypeId()) {
+                return AceType::MakeRefPtr<DialogTheme>();
+            } else {
+                return nullptr;
+            }
+        });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
@@ -1003,6 +1015,24 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgCreateButto
     ASSERT_NE(buttonNode, nullptr);
 }
 
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgCreateButtonTextProperty001, TestSize.Level1)
+{
+    auto backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto buttonNode = pattern->CreateButtonText(TITLE, "");
+    ASSERT_NE(buttonNode, nullptr);
+    auto textLayoutProperty = buttonNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_TRUE(textLayoutProperty->GetEnableSmallLanguageTruncationValue(false));
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
 /**
  * @tc.name: DialogPatternAdditionalTestNgBuildMenu001
  * @tc.desc: Test DialogPattern BuildMenu
@@ -1383,5 +1413,428 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternTestRegisterButtonOnKeyEven
     pattern->RegisterButtonOnKeyEvent(buttonInfo, button, -1);
     auto focusHub = button->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
+}
+
+/**
+ * @tc.name: SetDialogSystemMaterial001
+ * @tc.desc: Test SetDialogSystemMaterial with null columnNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, SetDialogSystemMaterial001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DialogProperties with valid systemMaterial
+     * @tc.expected: DialogProperties created successfully
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    DialogProperties props;
+    auto uiMaterial = AceType::MakeRefPtr<UiMaterial>();
+    uiMaterial->SetType(static_cast<int32_t>(MaterialType::SEMI_TRANSPARENT));
+    props.systemMaterial = uiMaterial;
+
+    /**
+     * @tc.steps: step2. Call SetDialogSystemMaterial with null columnNode
+     * @tc.expected: Function returns early without crash
+     */
+    RefPtr<FrameNode> nullNode = nullptr;
+    pattern->UpdateContentRenderContext(nullNode, props);
+    // Test passes if no crash occurs
+}
+
+/**
+ * @tc.name: SetDialogSystemMaterial002
+ * @tc.desc: Test SetDialogSystemMaterial with null systemMaterial
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, SetDialogSystemMaterial002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode and DialogProperties with null systemMaterial
+     * @tc.expected: Objects created successfully
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    DialogProperties props;
+    props.systemMaterial = nullptr;
+
+    /**
+     * @tc.steps: step2. Call SetDialogSystemMaterial with null systemMaterial
+     * @tc.expected: Function returns without executing material logic
+     */
+    pattern->UpdateContentRenderContext(frameNode, props);
+    // Test passes if no crash occurs
+}
+
+/**
+ * @tc.name: SetDialogSystemMaterial003
+ * @tc.desc: Test SetDialogSystemMaterial with material type less than NONE
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, SetDialogSystemMaterial003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode and DialogProperties with invalid material type
+     * @tc.expected: Objects created successfully
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    DialogProperties props;
+    auto uiMaterial = AceType::MakeRefPtr<UiMaterial>();
+    uiMaterial->SetType(static_cast<int32_t>(MaterialType::NONE) - 1); // Invalid: less than NONE
+    props.systemMaterial = uiMaterial;
+
+    /**
+     * @tc.steps: step2. Call SetDialogSystemMaterial with invalid material type
+     * @tc.expected: Function returns without executing material logic
+     */
+    pattern->UpdateContentRenderContext(frameNode, props);
+    // Test passes if no crash occurs
+}
+
+/**
+ * @tc.name: SetDialogSystemMaterial004
+ * @tc.desc: Test SetDialogSystemMaterial with material type greater than MAX
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, SetDialogSystemMaterial004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode and DialogProperties with invalid material type
+     * @tc.expected: Objects created successfully
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    DialogProperties props;
+    auto uiMaterial = AceType::MakeRefPtr<UiMaterial>();
+    uiMaterial->SetType(static_cast<int32_t>(MaterialType::MAX) + 1); // Invalid: greater than MAX
+    props.systemMaterial = uiMaterial;
+
+    /**
+     * @tc.steps: step2. Call SetDialogSystemMaterial with invalid material type
+     * @tc.expected: Function returns without executing material logic
+     */
+    pattern->UpdateContentRenderContext(frameNode, props);
+    // Test passes if no crash occurs
+}
+
+/**
+ * @tc.name: SetDialogSystemMaterial005
+ * @tc.desc: Test SetDialogSystemMaterial with null renderContext
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, SetDialogSystemMaterial005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode without renderContext and valid DialogProperties
+     * @tc.expected: Objects created successfully
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    DialogProperties props;
+    auto uiMaterial = AceType::MakeRefPtr<UiMaterial>();
+    uiMaterial->SetType(static_cast<int32_t>(MaterialType::SEMI_TRANSPARENT));
+    props.systemMaterial = uiMaterial;
+
+    /**
+     * @tc.steps: step2. Mock null renderContext scenario
+     * @tc.expected: Function handles null renderContext gracefully
+     */
+    // Note: In normal conditions, FrameNode always has a renderContext
+    // This test verifies the CHECK_NULL_VOID guard in the function
+    auto renderContext = frameNode->GetRenderContext();
+    if (renderContext) {
+        // If renderContext exists, the function should proceed normally
+        pattern->UpdateContentRenderContext(frameNode, props);
+    }
+    // Test passes if no crash occurs
+}
+
+/**
+ * @tc.name: SetDialogSystemMaterial006
+ * @tc.desc: Test SetDialogSystemMaterial with valid parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, SetDialogSystemMaterial006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode with all valid parameters
+     * @tc.expected: Objects created successfully
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    DialogProperties props;
+    auto uiMaterial = AceType::MakeRefPtr<UiMaterial>();
+    uiMaterial->SetType(static_cast<int32_t>(MaterialType::NONE));
+    props.systemMaterial = uiMaterial;
+
+    /**
+     * @tc.steps: step2. Call SetDialogSystemMaterial with MaterialType::NONE
+     * @tc.expected: Function executes material logic successfully
+     */
+    pattern->UpdateContentRenderContext(frameNode, props);
+
+    /**
+     * @tc.steps: step3. Verify renderContext was updated
+     * @tc.expected: renderContext should exist and be valid
+     */
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+}
+
+/**
+ * @tc.name: SetDialogSystemMaterial007
+ * @tc.desc: Test SetDialogSystemMaterial with MaterialType::SEMI_TRANSPARENT
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, SetDialogSystemMaterial007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode with all valid parameters
+     * @tc.expected: Objects created successfully
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    DialogProperties props;
+    auto uiMaterial = AceType::MakeRefPtr<UiMaterial>();
+    uiMaterial->SetType(static_cast<int32_t>(MaterialType::SEMI_TRANSPARENT));
+    props.systemMaterial = uiMaterial;
+
+    /**
+     * @tc.steps: step2. Call SetDialogSystemMaterial with MaterialType::SEMI_TRANSPARENT
+     * @tc.expected: Function executes material logic successfully
+     */
+    pattern->UpdateContentRenderContext(frameNode, props);
+
+    /**
+     * @tc.steps: step3. Verify renderContext was updated
+     * @tc.expected: renderContext should exist and be valid
+     */
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+}
+
+/**
+ * @tc.name: DialogPatternAddForceSplitRatioListener001
+ * @tc.desc: Test AddForceSplitRatioListener registers listener in ForceSplitManager.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAddForceSplitRatioListener001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialog node with DialogPattern.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Get ForceSplitManager and listener before add.
+     */
+    auto pipeline = frameNode->GetContextRefPtr();
+    ASSERT_NE(pipeline, nullptr);
+    auto forceSplitMgr = AceType::DynamicCast<ForceSplitManager>(pipeline->GetForceSplitManager());
+    ASSERT_NE(forceSplitMgr, nullptr);
+    EXPECT_EQ(forceSplitMgr->forceSplitRatioListeners_.size(), 1u);
+
+    /**
+     * @tc.steps: step3. Call AddForceSplitRatioListener.
+     * @tc.expected: listener is registered in forceSplitRatioListeners_.
+     */
+    pattern->AddForceSplitRatioListener();
+    EXPECT_EQ(forceSplitMgr->forceSplitRatioListeners_.size(), 1u);
+    EXPECT_TRUE(forceSplitMgr->forceSplitRatioListeners_.find(frameNode->GetId()) !=
+        forceSplitMgr->forceSplitRatioListeners_.end());
+}
+
+/**
+ * @tc.name: DialogPatternAddForceSplitRatioListener002
+ * @tc.desc: Test AddForceSplitRatioListener with null host (no host set).
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAddForceSplitRatioListener002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DialogPattern without attaching to a host node.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    auto pattern = AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr);
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call AddForceSplitRatioListener without host.
+     * @tc.expected: no crash, CHECK_NULL_VOID(host) returns early.
+     */
+    pattern->AddForceSplitRatioListener();
+}
+
+/**
+ * @tc.name: DialogPatternRemoveForceSplitRatioListener001
+ * @tc.desc: Test RemoveForceSplitRatioListener removes listener from ForceSplitManager.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternRemoveForceSplitRatioListener001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialog node and add listener first.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto pipeline = frameNode->GetContextRefPtr();
+    ASSERT_NE(pipeline, nullptr);
+    auto forceSplitMgr = AceType::DynamicCast<ForceSplitManager>(pipeline->GetForceSplitManager());
+    ASSERT_NE(forceSplitMgr, nullptr);
+
+    pattern->AddForceSplitRatioListener();
+    EXPECT_EQ(forceSplitMgr->forceSplitRatioListeners_.size(), 1u);
+
+    /**
+     * @tc.steps: step2. Call RemoveForceSplitRatioListener.
+     * @tc.expected: listener is removed from forceSplitRatioListeners_.
+     */
+    pattern->RemoveForceSplitRatioListener();
+    EXPECT_EQ(forceSplitMgr->forceSplitRatioListeners_.size(), 0u);
+    EXPECT_TRUE(forceSplitMgr->forceSplitRatioListeners_.find(frameNode->GetId()) ==
+        forceSplitMgr->forceSplitRatioListeners_.end());
+}
+
+/**
+ * @tc.name: DialogPatternRemoveForceSplitRatioListener002
+ * @tc.desc: Test RemoveForceSplitRatioListener with null host (no host set).
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternRemoveForceSplitRatioListener002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DialogPattern without attaching to a host node.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    auto pattern = AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr);
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call RemoveForceSplitRatioListener without host.
+     * @tc.expected: no crash, CHECK_NULL_VOID(host) returns early.
+     */
+    pattern->RemoveForceSplitRatioListener();
+}
+
+/**
+ * @tc.name: DialogPatternRemoveForceSplitRatioListener003
+ * @tc.desc: Test RemoveForceSplitRatioListener when listener was never added.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternRemoveForceSplitRatioListener003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialog node but do NOT call AddForceSplitRatioListener.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto pipeline = frameNode->GetContextRefPtr();
+    ASSERT_NE(pipeline, nullptr);
+    auto forceSplitMgr = AceType::DynamicCast<ForceSplitManager>(pipeline->GetForceSplitManager());
+    ASSERT_NE(forceSplitMgr, nullptr);
+
+    /**
+     * @tc.steps: step2. Call RemoveForceSplitRatioListener without prior add.
+     * @tc.expected: no crash, listeners map stays empty.
+     */
+    pattern->RemoveForceSplitRatioListener();
+    EXPECT_EQ(forceSplitMgr->forceSplitRatioListeners_.size(), 0u);
+}
+
+/**
+ * @tc.name: DialogPatternForceSplitRatioListenerCallback001
+ * @tc.desc: Test the listener callback triggers MarkDirtyNode on host.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternForceSplitRatioListenerCallback001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialog node and add listener.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto pipeline = frameNode->GetContextRefPtr();
+    ASSERT_NE(pipeline, nullptr);
+    auto forceSplitMgr = AceType::DynamicCast<ForceSplitManager>(pipeline->GetForceSplitManager());
+    ASSERT_NE(forceSplitMgr, nullptr);
+
+    pattern->AddForceSplitRatioListener();
+    ASSERT_EQ(forceSplitMgr->forceSplitRatioListeners_.size(), 1u);
+
+    /**
+     * @tc.steps: step2. Invoke the registered callback with a splitRatio value.
+     * @tc.expected: no crash, the callback executes MarkDirtyNode on the host.
+     */
+    auto it = forceSplitMgr->forceSplitRatioListeners_.find(frameNode->GetId());
+    ASSERT_TRUE(it != forceSplitMgr->forceSplitRatioListeners_.end());
+    ASSERT_TRUE(it->second);
+    it->second(0.6f);
 }
 } // namespace OHOS::Ace::NG

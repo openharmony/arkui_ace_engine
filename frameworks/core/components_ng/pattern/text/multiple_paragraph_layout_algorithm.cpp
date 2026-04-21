@@ -30,6 +30,9 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/position_property.h"
+#ifdef ENABLE_ROSEN_BACKEND
+#include "core/components_ng/render/adapter/rosen_render_context.h"
+#endif
 #include "core/components_ng/render/font_collection.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/utils.h"
@@ -61,6 +64,34 @@ float GetContentOffsetY(LayoutWrapper* layoutWrapper)
         offsetY += Alignment::GetAlignPosition(size, content->GetRect().GetSize(), align).GetY();
     }
     return offsetY;
+}
+
+void UpdateSymbolHdrHeadRoomToRenderContext(const RefPtr<FrameNode>& frameNode, TextPattern& pattern,
+    TextStyle& textStyle)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() != V2::SYMBOL_ETS_TAG) {
+        return;
+    }
+    const auto& symbolColorInfo = textStyle.GetAndUpdateSymbolColorInfo();
+    auto lastTextStyle = pattern.GetTextStyle();
+    const auto& lastSymbolColorInfo = lastTextStyle.GetAndUpdateSymbolColorInfo();
+    bool needUpdateHdrHeadRoom = symbolColorInfo.hasHdr != lastSymbolColorInfo.hasHdr;
+    if (!needUpdateHdrHeadRoom && symbolColorInfo.hasHdr) {
+        needUpdateHdrHeadRoom = !NearEqual(symbolColorInfo.maxHeadRoom, lastSymbolColorInfo.maxHeadRoom);
+    }
+    if (needUpdateHdrHeadRoom) {
+        const auto headRoom = symbolColorInfo.hasHdr ? symbolColorInfo.maxHeadRoom : 1.0f;
+#ifdef ENABLE_ROSEN_BACKEND
+        auto renderContext = AceType::DynamicCast<RosenRenderContext>(frameNode->GetRenderContext());
+        if (renderContext) {
+            renderContext->SetHDRColorHeadRoom(headRoom);
+        }
+#endif
+        if (SystemProperties::GetTextTraceEnabled()) {
+            ACE_TEXT_SCOPED_TRACE("UpdateSymbolHdrHeadRoomToRenderContext[headRoom:%f]", headRoom);
+        }
+    }
 }
 } // namespace
 
@@ -110,7 +141,8 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     }
     UpdateFontFamilyWithSymbol(textStyle, fontFamilies, frameNode->GetTag() == V2::SYMBOL_ETS_TAG);
     UpdateSymbolStyle(textStyle, frameNode->GetTag() == V2::SYMBOL_ETS_TAG);
-    auto textColor = textLayoutProperty->GetTextColorValue(textTheme->GetTextStyle().GetTextColor());
+    auto layoutTextColor = textLayoutProperty->GetTextColorValue(textTheme->GetTextStyle().GetTextColor());
+    auto textColor = layoutTextColor;
     auto lineThicknessScale = textLayoutProperty->GetLineThicknessScale().value_or(1.0f);
     textStyle.SetLineThicknessScale(lineThicknessScale);
     if (contentModifier) {
@@ -120,6 +152,7 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
         }
         contentModifier->SetFontReady(false);
     }
+    UpdateSymbolHdrHeadRoomToRenderContext(frameNode, *pattern, textStyle);
     UpdateShaderStyle(textLayoutProperty, textStyle);
     textStyle.SetHalfLeading(textLayoutProperty->GetHalfLeadingValue(pipeline->GetHalfLeading()));
     textStyle.SetEnableAutoSpacing(textLayoutProperty->GetEnableAutoSpacingValue(false));
@@ -133,10 +166,11 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     textStyle.SetLineHeightMultiply(textLayoutProperty->GetLineHeightMultiply());
     textStyle.SetMinimumLineHeight(textLayoutProperty->GetMinimumLineHeight());
     textStyle.SetMaximumLineHeight(textLayoutProperty->GetMaximumLineHeight());
+    textStyle.SetOrphanCharOptimization(textLayoutProperty->GetOrphanCharOptimizationValue(false));
     textStyle.SetIncludeFontPadding(textLayoutProperty->GetIncludeFontPaddingValue(false));
     textStyle.SetFallbackLineSpacing(textLayoutProperty->GetFallbackLineSpacingValue(false));
     // Determines whether a foreground color is set or inherited.
-    UpdateTextColorIfForeground(frameNode, textStyle, textColor);
+    UpdateTextColorIfForeground(frameNode, textStyle, layoutTextColor, textColor);
     inheritTextStyle_ = textStyle;
 }
 
@@ -368,20 +402,21 @@ void MultipleParagraphLayoutAlgorithm::FontRegisterCallback(
     }
 }
 
-void MultipleParagraphLayoutAlgorithm::UpdateTextColorIfForeground(
-    const RefPtr<FrameNode>& frameNode, TextStyle& textStyle, const Color& textColor)
+void MultipleParagraphLayoutAlgorithm::UpdateTextColorIfForeground(const RefPtr<FrameNode>& frameNode,
+    TextStyle& textStyle, const Color& layoutTextColor, const Color& currentTextColor)
 {
     auto renderContext = frameNode->GetRenderContext();
     if (renderContext->HasForegroundColor()) {
-        if (renderContext->GetForegroundColorValue().GetValue() != textColor.GetValue()) {
+        if (renderContext->GetForegroundColorValue().GetValue() != layoutTextColor.GetValue() &&
+            renderContext->GetForegroundColorValue().GetValue() != currentTextColor.GetValue()) {
             textStyle.SetTextColor(Color::FOREGROUND);
         } else {
-            textStyle.SetTextColor(textColor);
+            textStyle.SetTextColor(currentTextColor);
         }
     } else if (renderContext->HasForegroundColorStrategy()) {
         textStyle.SetTextColor(Color::FOREGROUND);
     } else {
-        textStyle.SetTextColor(textColor);
+        textStyle.SetTextColor(currentTextColor);
     }
 }
 
@@ -469,13 +504,15 @@ void MultipleParagraphLayoutAlgorithm::SetPropertyToModifier(const RefPtr<TextLa
     }
     auto lineHeight = layoutProperty->GetLineHeight();
     if (lineHeight.has_value()) {
-        if (lineHeight->Unit() == DimensionUnit::PERCENT) {
-            modifier->SetLineHeight(lineHeight.value(), textStyle, true);
-        } else {
-            modifier->SetLineHeight(lineHeight.value(), textStyle);
-        }
+        modifier->SetLineHeight(lineHeight.value(), textStyle, lineHeight->Unit() == DimensionUnit::PERCENT);
     } else {
         modifier->SetLineHeight(textStyle.GetLineHeight(), textStyle, true);
+    }
+    auto fontVariations = layoutProperty->GetFontVariations();
+    if (fontVariations.has_value() && !fontVariations.value().empty()) {
+        modifier->SetFontVariations(fontVariations.value());
+    } else {
+        modifier->SetFontVariations(textStyle.GetFontVariations(), true);
     }
 }
 
@@ -642,8 +679,8 @@ bool MultipleParagraphLayoutAlgorithm::ImageSpanMeasure(const RefPtr<ImageSpanIt
     return imageSpanItem->UpdatePlaceholderRun(placeholderStyle);
 }
 
-bool MultipleParagraphLayoutAlgorithm::CustomSpanMeasure(
-    const RefPtr<CustomSpanItem>& customSpanItem, LayoutWrapper* layoutWrapper)
+bool MultipleParagraphLayoutAlgorithm::CustomSpanMeasure(const RefPtr<CustomSpanItem>& customSpanItem,
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_RETURN(layoutWrapper, false);
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
@@ -664,7 +701,14 @@ bool MultipleParagraphLayoutAlgorithm::CustomSpanMeasure(
     }
     if (customSpanItem->onMeasure.has_value()) {
         auto onMeasure = customSpanItem->onMeasure.value();
-        CustomSpanMetrics customSpanMetrics = onMeasure({ fontSize });
+        // RichEditor may adjust paragraph width later via LayoutPolicy.
+        auto maxWidth = GetCustomSpanMeasureMaxWidth(contentConstraint, layoutWrapper);
+        std::optional<LayoutCalPolicy> layoutPolicy;
+        auto layoutPolicyValue = TextBase::GetLayoutCalPolicy(layoutWrapper, true);
+        if (layoutPolicyValue != LayoutCalPolicy::NO_MATCH) {
+            layoutPolicy = layoutPolicyValue;
+        }
+        CustomSpanMetrics customSpanMetrics = onMeasure({ fontSize, maxWidth, layoutPolicy });
         width = static_cast<float>(customSpanMetrics.width * context->GetDipScale());
         height = static_cast<float>(
             customSpanMetrics.height.value_or(fontSize / context->GetFontScale()) * context->GetDipScale());
@@ -695,7 +739,8 @@ bool MultipleParagraphLayoutAlgorithm::PlaceholderSpanMeasure(const RefPtr<Place
     return placeholderSpanItem->UpdatePlaceholderRun(placeholderStyle);
 }
 
-void MultipleParagraphLayoutAlgorithm::MeasureChildren(LayoutWrapper* layoutWrapper, const TextStyle& textStyle)
+void MultipleParagraphLayoutAlgorithm::MeasureChildren(
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, const TextStyle& textStyle)
 {
     CHECK_NULL_VOID(!spans_.empty());
     CHECK_NULL_VOID(layoutWrapper);
@@ -737,7 +782,7 @@ void MultipleParagraphLayoutAlgorithm::MeasureChildren(LayoutWrapper* layoutWrap
                     if (!customSpanItem) {
                         continue;
                     }
-                    needReCreateParagraph |= CustomSpanMeasure(customSpanItem, layoutWrapper);
+                    needReCreateParagraph |= CustomSpanMeasure(customSpanItem, contentConstraint, layoutWrapper);
                     if (customSpanItem->isFrameNode) {
                         ++iterItems; // CAPI custom span is frameNode，need to move the iterator backwards
                     }

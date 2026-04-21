@@ -17,10 +17,11 @@ import { __context, StateManager, remember, scheduleCallback, GlobalStateManager
 import { int32 } from '@koalaui/common';
 import { WrappedBuilder, CustomBuilderT } from "./builder"
 import { NavigationRouterMap, NavDestinationBuilder } from "#handwritten"
-import { InteropNativeModule } from '@koalaui/interop'
+import { InteropNativeModule, SerializerBase, RuntimeType, KPointer } from '@koalaui/interop'
+import { ArkUIGeneratedNativeModule } from "#components"
 import { default as uiObserver } from '@ohos/arkui/observer';
 import { ArkStructBase } from '../ArkStructBase';
-import { ArkUIAniModule } from 'arkui.ani';
+import { ArkUIAniModule, ArkUIAniCustomNodeModule } from 'arkui.ani';
 import { ConstraintSizeOptions } from './units';
 import { ContextRecord } from 'arkui/base/UIContextImpl';
 import { ExtendableComponent, IExtendableComponent } from './extendableComponent';
@@ -32,12 +33,12 @@ import { UIContext } from '@ohos/arkui/UIContext';
 import { RouterImpl } from 'arkui/base/Router';
 import promptAction from '@ohos/promptAction';
 import { RecordData } from "@ohos.base"
-import { UIContextImpl } from "arkui/base/UIContextImpl"
 import { UIContextUtil } from "arkui/base/UIContextUtil"
 import { ObserveSingleton } from '../stateManagement/base/observeSingleton';
 import { ArkThemeScopeManager } from '../theme/ArkThemeScopeManager';
 import { transferTypeName } from '../stateManagement/storage/persistenceV2';
 import { ArkCustomComponentRootPeer } from './staticComponents';
+import { ArkUIObjectFinalizationRegisterProxy } from '../base/ArkUIObjectFinalizationRegisterProxy';
 /** @custom_components_common_method_imports */
 
 export class ReuseObject {
@@ -118,9 +119,28 @@ export interface PageLifeCycle {
 }
 
 export interface LayoutCallbacks {
-    onPlaceChildren(selfLayoutInfo: GeometryInfo, children: Array<Layoutable>, constraint: ConstraintSizeOptions): void {}
+    onPlaceChildren(selfLayoutInfo: GeometryInfo, children: Array<Layoutable>, constraint: ConstraintSizeOptions): void {
+        try {
+            const currentComponent = this as Any as (ExtendableComponent | undefined);
+            const peerNode = currentComponent?.__getPeerNode__Internal();
+            if (peerNode) {
+                ArkUIAniCustomNodeModule._CustomNode_CallDefaultLayout(peerNode!.peer.ptr);
+            }
+        } catch(e) {
+            console.log('customComponent onPlaceChildren err', e);
+        }
+    }
     onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>, constraint: ConstraintSizeOptions): SizeResult {
-        return {width: 0, height: 0} as SizeResult
+        try {
+            const currentComponent = this as Any as (ExtendableComponent | undefined);
+            const peerNode = currentComponent?.__getPeerNode__Internal();
+            if (peerNode) {
+                return ArkUIAniCustomNodeModule._CustomNode_CallDefaultMeasure(peerNode!.peer.ptr) as SizeResult;
+            }
+        } catch(e) {
+            console.log('customComponent onMeasureSize err', e);
+        }
+        return {width: 0, height: 0} as SizeResult;
     }
 }
 
@@ -131,6 +151,8 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     /** @memo */
     private styles: ((instance: T) => void) | undefined;
     private executedAboutToDisappear: boolean = false;
+    private sourceLine: string = '';
+    private moduleName: string | undefined = undefined;
 
     constructor(
         uiContext: UIContext | undefined,
@@ -145,14 +167,24 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         this.styles = styles;
         ArkThemeScopeManager.getInstance().registerThemeScopeComponent(this);
     }
+
+    __getLifecycle__Internal(): CustomComponentLifecycle {
+        return this.instance.__getLifecycle__Internal();
+    }
  
     /** @memo:intrinsic */
     callStyles(): void {
-        const customComponentInstance = this.instance as BaseCustomComponent<T_Options>;
-        customComponentInstance.__set__commonStyle__Internal(new Array<(instance: CommonMethod) => void>());
+        if (this.instance instanceof BaseCustomComponent) {
+            const customComponentInstance = this.instance as BaseCustomComponent<T_Options>;
+            customComponentInstance.__set__commonStyle__Internal(new Array<(instance: CommonMethod) => void>());
+        }
         this.styles?.(this.instance as T)
     }
- 
+
+    setDebugLine(sourceLine: string, moduleName?: string): void {
+        this.sourceLine = sourceLine;
+        this.moduleName = moduleName;
+    }
     getInstance(): ExtendableComponent {
         return this.instance;
     }
@@ -201,6 +233,10 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         this.instance.__removeAllChild__Internal();
     }
 
+    __clearDelegate__Internal(): void {
+        this.instance.__clearDelegate__Internal();
+    }
+
     __addMeToParent__IExtendableComponent_Internal(): void {
         this.instance.__addMeToParent__Internal();
     }
@@ -233,12 +269,17 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     }
     aboutToDisappear(): void {
         if (!this.executedAboutToDisappear) {
+            this.instance.__getLifecycle__Internal()?.trigger(LifeCycleEvent.ON_DISAPPEAR);
             this.instance.aboutToDisappear();
             this.executedAboutToDisappear = true;
             this.aboutToBeDeletedInternal();
         }
     }
     aboutToBeDeletedInternal(): void {
+        if (ArkUIObjectFinalizationRegisterProxy.callbackFunc_ && this.instance instanceof BaseCustomComponent) {
+            ArkUIObjectFinalizationRegisterProxy.call(new WeakRef<object>(this.instance),
+                `${Type.of(this.instance)}[${this.getUniqueId()}] is in process of destruction`);
+        }
         this.instance.__clearStateVariables__Internal();
     }
     onDidBuild(): void {
@@ -334,6 +375,22 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     override __aboutToRecycle_Internal(): void {
         this.instance.__aboutToRecycle_Internal();
     }
+    
+    override __debugLine_Internal(ptr: KPointer): void {
+        if (this.sourceLine == '') {
+            return;
+        }
+        const thisSerializer: SerializerBase = SerializerBase.hold();
+        if (this.moduleName !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT);
+            const moduleNameTmpValue = this.moduleName!;
+            thisSerializer.writeString(moduleNameTmpValue);
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED);
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setDebugLine(ptr, this.sourceLine, thisSerializer.asBuffer(), thisSerializer.length());
+        thisSerializer.release();
+    }
 
     switchHasBeenRecycle(recycle: boolean): void {
         this.instance.__switchHasBeenRecycle_Ineternal(recycle);
@@ -351,6 +408,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
                     this.__updateStruct((this._initializers as (() => T_Options) | undefined)?.());
                 });
                 reusable.aboutToReuse(new ReuseObject(param))
+                this.instance.__getLifecycle__Internal().trigger(LifeCycleEvent.ON_REUSE, new ReuseObject(param));
                 this.switchNodeFreeze();
                 this.updateUISync();
                 return;
@@ -360,6 +418,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
                     this.__updateStruct((this._initializers as (() => T_Options) | undefined)?.());
                 });
                 reusable.aboutToReuse(new ReuseObject({} as Record<string, RecordData> as RecordData));
+                this.instance.__getLifecycle__Internal().trigger(LifeCycleEvent.ON_REUSE, new ReuseObject({} as Record<string, RecordData> as RecordData));
             } else {
                 const component = this.instance as BaseCustomComponent<T_Options>;
                 const data: T_Options = initializers as T_Options;
@@ -368,6 +427,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
                     this.__updateStruct((this._initializers as (() => T_Options) | undefined)?.());
                 });
                 reusable.aboutToReuse(new ReuseObject(params));
+                this.instance.__getLifecycle__Internal().trigger(LifeCycleEvent.ON_REUSE, new ReuseObject(params));
             }
             this.switchNodeFreeze();
             this.updateUISync();
@@ -378,6 +438,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
             reusable.resetStateVarsOnReuse(initializers0);
             this.instance.__unfreezeWhenReuse__Internal();
             reusable.aboutToReuse();
+            this.instance.__getLifecycle__Internal().trigger(LifeCycleEvent.ON_REUSE);
             this.switchNodeFreeze();
             this.updateUISync();
         } else {
@@ -390,6 +451,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
             const component = this.instance as BaseCustomComponent<T_Options>;
             ObserveSingleton.instance.applyTaskDelayMutableStateChange(() => {
                 component.aboutToRecycle(); // aboutToRecycle can change variable
+                this.instance.__getLifecycle__Internal().trigger(LifeCycleEvent.ON_RECYCLE);
             });
             this.instance.__freezeWhenRecycle__Internal();
             this.switchNodeFreeze();
@@ -402,6 +464,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         const manager = GlobalStateManager.instance;
         manager.syncChanges();
         manager.updateSnapshot();
+        this.reuseForceAddRefFlag = !this.reuseForceAddRefFlag;
         // should it contain BuilderNode and LazyItems
         const peer = this.getPeerNode() as ArkCustomComponentRootPeer | undefined;
         peer?.recompute();
@@ -504,6 +567,10 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         const classPath = Class.of(this.instance).getName();
         return classPath.substring(classPath.lastIndexOf('.') + 1);
     }
+
+    getName(): string {
+        return transferTypeName(Class.of(this.instance).getName());
+    }
 }
 
 function createInstance<T extends ExtendableComponent, T_Options>(
@@ -563,6 +630,15 @@ export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent
         this.__commonStyles = val;
     }
 
+    override debugLine(sourceLine: string, moduleName?: string): this {
+        const delegate = this.__getDelegate__Internal<BaseCustomComponent<T_Options>, T_Options>();
+        if (!delegate) {
+            return this;
+        }
+        delegate.setDebugLine(sourceLine, moduleName);
+        return this;
+    }
+
     override __is_CustomComponent__Internal(): boolean {
         return true;
     }
@@ -605,10 +681,6 @@ export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent
         return this.__commonStyles? (this.__commonStyles as Array<(instance: CommonMethod) => void>).length > 0 : false;
     }
 
-    // manually override CommonMethod methods so it has no effects.
-    override id(value: string | undefined): this {
-        return this;
-    }
     override reuseId(value: string | undefined): this {
         return this;
     }
@@ -650,6 +722,10 @@ interface ReusableV2LifeCycle<T_Options> {
     aboutToReuse(): void;
 }
 
+export interface CustomComponentInvokeOptions {
+    sClass?: Class
+}
+
 export abstract class CustomComponentV2<T extends CustomComponentV2<T, T_Options>, T_Options> extends BaseCustomComponent<T_Options> implements ReusableV2LifeCycle<T_Options> {
     /** @memo */
     static _invokeImpl<S extends CustomComponentV2<S, S_Options>, S_Options>(
@@ -661,16 +737,30 @@ export abstract class CustomComponentV2<T extends CustomComponentV2<T, T_Options
         /** @memo */
         content?: () => void
     ): void {
+        CustomComponentV2._invokeImpl<S, S_Options>(style, factory, initializers, reuseKey, content, undefined);
+    }
+
+    /** @memo */
+    static _invokeImpl<S extends CustomComponentV2<S, S_Options>, S_Options>(
+        /** @memo */
+        style: ((instance: S) => void) | undefined,
+        factory: () => S,
+        initializers?: () => S_Options,
+        reuseKey?: () => string,
+        /** @memo */
+        content?: () => void,
+        options?: CustomComponentInvokeOptions
+    ): void {
         const context: StateManager = __context() as StateManager;
         const data: ContextRecord | undefined = context.contextData ? context.contextData as ContextRecord : undefined
         const uiContext = data?.uiContext;
         const reuseKeyValue = remember(() => {
             if (reuseKey) {
-                let key: string | undefined | null = reuseKey() as string | undefined | null; // this means reusekey should be only calculated once
-                if (!key) { // include '' empty string
-                    key = transferTypeName((Type.of(factory) as FunctionType).getResultType().toString());
+                let key: string = reuseKey(); // this means reusekey should be only calculated once
+                if (!key && options?.sClass) { // include '' empty string
+                    key = transferTypeName(options!.sClass!.getName());
                 }
-                return key as string;
+                return key;
             }
             return undefined;
         });
@@ -706,4 +796,44 @@ export interface NavInterface {
     pagePath: string;
     pageFullPath: string;
     integratedHsp: string;
+}
+
+/**
+ * Lifecycle state enumeration for custom components
+ */
+export enum CustomComponentLifecycleState {
+    INIT = 0,          // Initial state, component not initialized
+    APPEARED = 1,       // Component has appeared (aboutToAppear called)
+    BUILT = 2,          // Component has been built and rendered
+    RECYCLED = 3,       // Component has been recycled (reusable component)
+    DISAPPEARED = 4      // Component has disappeared
+}
+
+/**
+ * Lifecycle observer interface
+ */
+export interface CustomComponentLifecycleObserver {
+    aboutToAppear(): void {};
+    onDidBuild(): void {};
+    aboutToDisappear(): void {};
+    aboutToReuse(params?: ReuseObject): void {};
+    aboutToRecycle(): void {};
+}
+
+export interface CustomComponentLifecycle {
+    getCurrentState(): CustomComponentLifecycleState;
+    addObserver(observer: CustomComponentLifecycleObserver): void;
+    removeObserver(observer: CustomComponentLifecycleObserver): void;
+    trigger(event: LifeCycleEvent, params?: ReuseObject): boolean;
+}
+
+/**
+ * Lifecycle event enumeration
+ */
+export enum LifeCycleEvent {
+    ON_APPEAR = 0,       // Triggered when component appears
+    ON_BUILD = 1,         // Triggered after component build
+    ON_RECYCLE = 2,       // Triggered when component is recycled
+    ON_REUSE = 3,         // Triggered when component is reused
+    ON_DISAPPEAR = 4      // Triggered when component disappears
 }

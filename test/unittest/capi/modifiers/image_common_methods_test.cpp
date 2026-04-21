@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 
-#include "image_common_methods_test.h"
-
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "image_common_methods_test.h"
 
 namespace OHOS::Ace::NG {
 using namespace Converter;

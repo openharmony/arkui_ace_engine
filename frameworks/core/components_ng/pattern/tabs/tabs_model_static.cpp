@@ -159,9 +159,7 @@ RefPtr<SwiperController> TabsModelStatic::GetSwiperController(const RefPtr<Frame
 {
     auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
     swiperPaintProperty->UpdateEdgeEffect(EdgeEffect::SPRING);
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_RETURN(pipelineContext, nullptr);
-    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    auto tabTheme = swiperNode->GetTheme<TabTheme>(true);
     CHECK_NULL_RETURN(tabTheme, nullptr);
     swiperPaintProperty->UpdateDuration(tabTheme->GetTabContentAnimationDuration());
     swiperPaintProperty->UpdateCurve(TabBarPhysicalCurve);

@@ -38,7 +38,7 @@ struct ImageExample063 {
           Text(this.errorMessage)
             .fontSize(14)
             .fontColor(Color.Gray)
-          Image($r('app.media.app_icon'))
+          Image($r('app.media.startIcon'))
             .width(100)
             .height(100)
             .margin({ top: 10 })
@@ -49,7 +49,7 @@ struct ImageExample063 {
         .backgroundColor('#ffe0e0')
         .borderRadius(10)
       } else {
-        Image($r('app.media.png'))
+        Image($r('app.media.startIcon'))
           .width(200)
           .height(200)
           .onError((error) => {

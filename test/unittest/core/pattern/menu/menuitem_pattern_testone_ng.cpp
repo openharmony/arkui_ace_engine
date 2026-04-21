@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,13 +20,13 @@
 #define private public
 #define protected public
 
-#include "test/mock/base/mock_system_properties.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/rosen/testing_canvas.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
+#include "test/mock/frameworks/core/rosen/mock_canvas.h"
+#include "test/mock/frameworks/core/rosen/testing_canvas.h"
 
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/grid_system_manager.h"
@@ -104,6 +104,7 @@ void MenuItemPatternTestOneNg::SetUp()
     MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     MockContainer::SetUp();
 }
@@ -112,6 +113,17 @@ void MenuItemPatternTestOneNg::MockPipelineContextGetTheme()
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly([](ThemeType type, int32_t) -> RefPtr<Theme> {
+        if (type == TextTheme::TypeId()) {
+            return AceType::MakeRefPtr<TextTheme>();
+        } else if (type == IconTheme::TypeId()) {
+            return AceType::MakeRefPtr<IconTheme>();
+        } else if (type == SelectTheme::TypeId()) {
+            return AceType::MakeRefPtr<SelectTheme>();
+        } else {
+            return AceType::MakeRefPtr<MenuTheme>();
+        }
+    });
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
         if (type == TextTheme::TypeId()) {
             return AceType::MakeRefPtr<TextTheme>();
@@ -1359,6 +1371,13 @@ HWTEST_F(MenuItemPatternTestOneNg, InitFocusEvent003, TestSize.Level1)
     auto textTheme = AceType::MakeRefPtr<TextTheme>();
     auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
     selectTheme->optionApplyFocusedStyle_ = 1;
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly([=](ThemeType type, int32_t) -> RefPtr<Theme> {
+        if (type == TextTheme::TypeId()) {
+            return textTheme;
+        } else {
+            return selectTheme;
+        }
+    });
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([=](ThemeType type) -> RefPtr<Theme> {
         if (type == TextTheme::TypeId()) {
             return textTheme;
@@ -1486,5 +1505,154 @@ HWTEST_F(MenuItemPatternTestOneNg, CreateCheckMarkNode001, TestSize.Level1)
     ASSERT_NE(checkMarkLayoutProps, nullptr);
     auto type = checkMarkLayoutProps->GetVisibility().value_or(VisibleType::VISIBLE);
     EXPECT_EQ(type, VisibleType::INVISIBLE);
+}
+
+/**
+ * @tc.name: ReportEvent001
+ * @tc.desc: Testing the ReportEvent001 method has a parent container.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, ReportEvent001, TestSize.Level1)
+{
+    MenuItemModelNG MenuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.labelInfo = "label";
+    MenuItemModelInstance.Create(itemOption);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+
+    auto selectId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto menuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        [selectId]() { return AceType::MakeRefPtr<MenuPattern>(selectId, V2::SELECT_ETS_TAG, MenuType::MENU); });
+    ASSERT_NE(menuNode, nullptr);
+
+    itemPattern->SetMenu(menuNode);
+    itemPattern->ReportEvent();
+}
+
+/**
+ * @tc.name: ReportEvent002
+ * @tc.desc: Testing the ReportEvent002 method has a parent container.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, ReportEvent002, TestSize.Level1)
+{
+    MenuItemModelNG MenuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.labelInfo = "label";
+    MenuItemModelInstance.Create(itemOption);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+
+    auto selectId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto menuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        [selectId]() { return AceType::MakeRefPtr<MenuPattern>(selectId, V2::SELECT_ETS_TAG, MenuType::MENU); });
+    ASSERT_NE(menuNode, nullptr);
+
+    itemPattern->SetMenu(menuNode);
+    itemPattern->isOptionPattern_ = true;
+    itemPattern->ReportEvent();
+}
+
+/**
+ * @tc.name: ApplyOptionThemeStyles001
+ * @tc.desc: Verify ApplyOptionThemeStyles().
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, ApplyOptionThemeStyles001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    MenuItemModelNG MenuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.labelInfo = "label";
+    MenuItemModelInstance.Create(itemOption);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+
+    auto textId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, textId, AceType::MakeRefPtr<TextPattern>());
+    itemPattern->SetTextNode(textNode);
+
+    auto selectId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto selectNode = FrameNode::GetOrCreateFrameNode(
+        V2::SELECT_ETS_TAG, selectId, []() { return AceType::MakeRefPtr<SelectPattern>(); });
+    auto menuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        [selectId]() { return AceType::MakeRefPtr<MenuPattern>(selectId, V2::SELECT_ETS_TAG, MenuType::MENU); });
+    ASSERT_NE(selectNode, nullptr);
+    ASSERT_NE(menuNode, nullptr);
+    itemPattern->SetMenu(menuNode);
+
+    itemPattern->isSelected_ = false;
+    auto selectPaintProperty = selectNode->GetPaintProperty<SelectPaintProperty>();
+    ASSERT_NE(selectPaintProperty, nullptr);
+    auto selectTheme = itemPattern->GetCurrentSelectTheme();
+    ASSERT_NE(selectTheme, nullptr);
+    auto itemLayoutProperty = itemPattern->GetPaintProperty<MenuItemPaintProperty>();
+    ASSERT_NE(itemLayoutProperty, nullptr);
+    itemLayoutProperty->UpdateOptionBgColor(Color::RED);
+    itemLayoutProperty->UpdateOptionFontColor(Color::RED);
+
+    ASSERT_EQ(itemPattern->bgColor_.has_value(), false);
+    itemPattern->ApplyOptionThemeStyles(selectPaintProperty);
+    EXPECT_EQ(itemPattern->bgColor_.value(), selectTheme->GetBackgroundColor());
+}
+
+/**
+ * @tc.name: ApplySelectedThemeStyles001
+ * @tc.desc: Verify ApplySelectedThemeStyles().
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, ApplySelectedThemeStyles001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    MenuItemModelNG MenuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.labelInfo = "label";
+    MenuItemModelInstance.Create(itemOption);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+
+    auto textId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, textId, AceType::MakeRefPtr<TextPattern>());
+    itemPattern->SetTextNode(textNode);
+
+    auto selectId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto selectNode = FrameNode::GetOrCreateFrameNode(
+        V2::SELECT_ETS_TAG, selectId, []() { return AceType::MakeRefPtr<SelectPattern>(); });
+    auto menuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        [selectId]() { return AceType::MakeRefPtr<MenuPattern>(selectId, V2::SELECT_ETS_TAG, MenuType::MENU); });
+    ASSERT_NE(selectNode, nullptr);
+    ASSERT_NE(menuNode, nullptr);
+    itemPattern->SetMenu(menuNode);
+
+    itemPattern->isSelected_ = true;
+    auto selectPaintProperty = selectNode->GetPaintProperty<SelectPaintProperty>();
+    ASSERT_NE(selectPaintProperty, nullptr);
+    auto selectTheme = itemPattern->GetCurrentSelectTheme();
+    ASSERT_NE(selectTheme, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->SetIsSelectMenuBackgroundColorJsview(false);
+    auto renderContext = menuNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateBackgroundColor(Color::RED);
+    auto itemLayoutProperty = itemPattern->GetPaintProperty<MenuItemPaintProperty>();
+    ASSERT_NE(itemLayoutProperty, nullptr);
+    itemLayoutProperty->UpdateSelectedOptionBgColor(Color::RED);
+    itemLayoutProperty->UpdateSelectedOptionFontColor(Color::RED);
+
+    ASSERT_EQ(itemPattern->bgColor_.has_value(), false);
+    ASSERT_NE(renderContext->GetBackgroundColorValue(), selectTheme->GetBackgroundColor());
+    itemPattern->ApplySelectedThemeStyles(selectPaintProperty, menuNode);
+    EXPECT_EQ(itemPattern->bgColor_.value(), selectTheme->GetSelectedColor());
+    EXPECT_EQ(renderContext->GetBackgroundColorValue(), selectTheme->GetBackgroundColor());
 }
 } // namespace OHOS::Ace::NG

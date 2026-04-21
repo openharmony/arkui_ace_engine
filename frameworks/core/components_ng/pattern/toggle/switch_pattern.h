@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,6 @@
 
 #include "base/geometry/axis.h"
 #include "base/geometry/size.h"
-#include "base/memory/referenced.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
@@ -29,7 +28,6 @@
 #include "core/components_ng/pattern/toggle/switch_paint_property.h"
 #include "core/components_ng/pattern/toggle/toggle_base_pattern.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
-#include "core/components/theme/app_theme.h"
 
 namespace OHOS::Ace::NG {
 
@@ -74,6 +72,7 @@ public:
         paintMethod_->SetDragOffsetX(dragOffsetX_);
         paintMethod_->SetTouchHoverAnimationType(touchHoverType_);
         paintMethod_->SetIsDragEvent(isDragEvent_);
+        paintMethod_->SetHasSystemMaterial(HasSystemMaterial());
         paintMethod_->SetShowHoverEffect(showHoverEffect_);
         paintMethod_->SetUseContentModifier(UseContentModifier());
         return paintMethod_;
@@ -161,6 +160,10 @@ public:
     {
         return true;
     }
+    int32_t OnInjectionEvent(const std::string& command) override;
+
+    bool HasSystemMaterial() const;
+    bool IsHighGradeMaterial() const;
 
 private:
     void OnAttachToFrameNode() override;
@@ -172,7 +175,7 @@ private:
     RefPtr<Curve> GetCurve() const;
     int32_t GetDuration() const;
     int32_t nodeId_ = -1;
-    void UpdateChangeEvent() const;
+    void UpdateChangeEvent();
     void OnChange();
     void OnTouchDown();
     void OnTouchUp();
@@ -187,6 +190,10 @@ private:
     void HandleEnabled();
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitClickEvent();
+    void HandleLongPress();
+    void StartLongPressTimer();
+    void HandleHighGradeLongPress();
+    void HandleLowGradeLongPress();
     void InitTouchEvent();
     void InitMouseEvent();
     void InitFocusEvent();
@@ -203,6 +210,35 @@ private:
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd();
 
+    // Drag frame node management
+    void CreateDragFrameNode();
+    void CreateDragPointNode();
+    void CreateBlurCoverNode();
+    void UpdateMaterialNodePosition();
+    float CalculatePointCenterX(float pointRadius, float actualGap) const;
+    void ShowMaterialNode();
+    void HideMaterialNode();
+    bool PredictFinalToggleState() const;
+    void CalculateHideTargetPosition(float& targetFrameX, float& targetFrameY,
+        float& targetPointNodeX, float& targetPointNodeY);
+    void ResetMaterialNodeAppearance(const RefPtr<RenderContext>& pointRC,
+        const RefPtr<RenderContext>& blurRC);
+    void AnimateHighGradeHide(const RefPtr<RenderContext>& pointRC,
+        const RefPtr<RenderContext>& blurRC, const RefPtr<SwitchModifier>& switchModifier,
+        float targetFrameX, float targetFrameY, float targetPointNodeX, float targetPointNodeY);
+    void AnimateToDragState();
+    float GetPointRadius() const;
+    float GetActualGap() const;
+
+    void ApplyDragFrameNodeSystemMaterial();
+    void ResetHostMaterialEffects();
+
+    // Drag animation helpers
+    AnimationOption CreateDragAnimationOption() const;
+    BlurStyleOption CreateDragBlurStyleOption() const;
+    AnimationOption CreateLowGradeSpringOption() const;
+    void HideMaterialNodes();
+
     bool IsOutOfBoundary(double mainOffset) const;
     void OnClick();
     void AddHotZoneRect();
@@ -214,6 +250,9 @@ private:
     void InitDefaultMargin();
     void ResetDefaultMargin();
     RefPtr<FrameNode> BuildContentModifierNode();
+    bool ParseCommand(const std::string& command, bool& isOn);
+    void ReportChangeEvent(bool isOn);
+    bool ReportInjectionResult(bool isSuccess, const std::string& reason);
     std::optional<SwitchMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;
 
@@ -245,6 +284,13 @@ private:
     TextDirection direction_ = TextDirection::AUTO;
     bool isDragEvent_ = false;
     RefPtr<SwitchPaintMethod> paintMethod_;
+    RefPtr<FrameNode> dragFrameNode_;
+    RefPtr<FrameNode> dragPointNode_;
+    RefPtr<FrameNode> blurCoverNode_;
+    bool isDragActive_ = false;
+    bool isFrameNodeVisible_ = false;
+    CancelableCallback<void()> longPressTask_;
+
     ACE_DISALLOW_COPY_AND_MOVE(SwitchPattern);
     std::function<void(bool)> isFocusActiveUpdateEvent_;
     Dimension hotZoneHorizontalSize_;

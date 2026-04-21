@@ -21,6 +21,9 @@
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/list/list_position_map.h"
 #include "core/components_ng/syntax/lazy_for_each_model.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_2_caches.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -39,8 +42,8 @@ public:
 HWTEST_F(ListPositionMapTestNg, CalculateUINode001, TestSize.Level1)
 {
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> listItemGroupPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     listItemGroupPattern->itemStartIndex_ = 2;
     auto listNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, listItemGroupPattern);
     ASSERT_NE(listNode, nullptr);
@@ -66,8 +69,8 @@ HWTEST_F(ListPositionMapTestNg, CalculateUINode001, TestSize.Level1)
 HWTEST_F(ListPositionMapTestNg, CalculateUINode002, TestSize.Level1)
 {
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> listItemGroupPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     listItemGroupPattern->itemStartIndex_ = 2;
     auto listNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, listItemGroupPattern);
     ASSERT_NE(listNode, nullptr);
@@ -114,14 +117,14 @@ HWTEST_F(ListPositionMapTestNg, CalculateUINode002, TestSize.Level1)
 HWTEST_F(ListPositionMapTestNg, CalculateUINode003, TestSize.Level1)
 {
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> listItemGroupPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     listItemGroupPattern->itemStartIndex_ = 2;
     auto listNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, listItemGroupPattern);
     ASSERT_NE(listNode, nullptr);
     auto node = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, listItemGroupPattern);
     ASSERT_NE(node, nullptr);
-    std::function<std::pair<RIDType, uint32_t>(IndexType)> onGetRid4Index = [](int32_t index) {
+    std::function<std::pair<RIDType, uint32_t>(IndexType, bool)> onGetRid4Index = [](int32_t index, bool inAnimation) {
         return std::make_pair(2, 0);
     };
     std::function<void(IndexType, IndexType)> onRecycleItems = [](int32_t start, int32_t end) {};
@@ -156,8 +159,8 @@ HWTEST_F(ListPositionMapTestNg, CalculateUINode003, TestSize.Level1)
 HWTEST_F(ListPositionMapTestNg, CalculateUINode004, TestSize.Level1)
 {
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> listItemGroupPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     listItemGroupPattern->itemStartIndex_ = 2;
     auto listNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, listItemGroupPattern);
     ASSERT_NE(listNode, nullptr);
@@ -202,8 +205,8 @@ HWTEST_F(ListPositionMapTestNg, GetStartIndexAndPos001, TestSize.Level1)
 HWTEST_F(ListPositionMapTestNg, GetLazyForEachChildIsGroup001, TestSize.Level1)
 {
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> listItemGroupPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     listItemGroupPattern->itemStartIndex_ = 2;
     auto listNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, listItemGroupPattern);
     ASSERT_NE(listNode, nullptr);
@@ -231,8 +234,8 @@ HWTEST_F(ListPositionMapTestNg, GetLazyForEachChildIsGroup001, TestSize.Level1)
 HWTEST_F(ListPositionMapTestNg, GetLazyForEachChildIsGroup002, TestSize.Level1)
 {
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> listItemGroupPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     listItemGroupPattern->itemStartIndex_ = 2;
     auto listNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, listItemGroupPattern);
     ASSERT_NE(listNode, nullptr);
@@ -260,8 +263,8 @@ HWTEST_F(ListPositionMapTestNg, GetLazyForEachChildIsGroup002, TestSize.Level1)
 HWTEST_F(ListPositionMapTestNg, GetLazyForEachChildIsGroup003, TestSize.Level1)
 {
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> listItemGroupPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     listItemGroupPattern->itemStartIndex_ = 2;
     auto listNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, listItemGroupPattern);
     ASSERT_NE(listNode, nullptr);
@@ -376,8 +379,8 @@ HWTEST_F(ListPositionMapTestNg, CalculateGroupNode001, TestSize.Level1)
 HWTEST_F(ListPositionMapTestNg, UpdatePosMap001, TestSize.Level1)
 {
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> listItemGroupPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm = AceType::MakeRefPtr<ListLayoutAlgorithm>(2);
     RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
     listItemGroupPattern->itemStartIndex_ = 2;

@@ -14,6 +14,7 @@
  */
 
 #include "inspect_divider.h"
+#include "base/utils/system_properties.h"
 
 namespace OHOS::Ace::Framework {
 InspectDivider::InspectDivider(NodeId nodeId, const std::string& nodeName) : InspectNode(nodeId, nodeName) {

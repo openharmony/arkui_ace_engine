@@ -138,10 +138,7 @@ public:
         return direction_ == FlexDirection::COLUMN_REVERSE;
     }
 
-    RefPtr<ScrollableController> GetScrollPositionController() const
-    {
-        return positionController_;
-    }
+    RefPtr<ScrollableController> GetScrollPositionController() const;
 
     void SetDirection(FlexDirection direction)
     {
@@ -405,12 +402,18 @@ public:
     {
         return contentStartOffset_;
     }
+    float GetContentEndOffset() const override
+    {
+        return contentEndOffset_;
+    }
 
     bool FreeOverScrollWithDelta(Axis axis, double delta) override;
 
     void ProcessFreeScrollOverDrag(const OffsetF velocity) override;
 
     bool TryFreeScroll(double offset, Axis axis) override;
+
+    void FillReportOnItemStopParams(std::unique_ptr<JsonValue>& params) override;
 
 protected:
     void DoJump(float position, int32_t source = SCROLL_FROM_JUMP);

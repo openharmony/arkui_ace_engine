@@ -37,7 +37,7 @@ HWTEST_F(SliderModifierTest, setEnableHapticFeedbackTestEnableHapticFeedbackInva
         modifier_->setEnableHapticFeedback(node_, &inputValueEnableHapticFeedback);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setEnableHapticFeedback, attribute: enableHapticFeedback";
     };
 
@@ -53,13 +53,13 @@ HWTEST_F(SliderModifierTest, setEnableHapticFeedbackTestEnableHapticFeedbackInva
 HWTEST_F(SliderModifierTest, setShowTipsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_TIPS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_TIPS_DEFAULT_VALUE) << "Default value for attribute 'showTips'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SHOW_TIPS_DEFAULT_VALUE)) << "Default value for attribute 'showTips'";
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTENT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_CONTENT_DEFAULT_VALUE) << "Default value for attribute 'content'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_CONTENT_DEFAULT_VALUE)) << "Default value for attribute 'content'";
 }
 
 /*
@@ -85,7 +85,7 @@ HWTEST_F(SliderModifierTest, setShowTipsTestShowTipsValidValues, TestSize.Level1
         modifier_->setShowTips(node_, &inputValueShowTips, &inputValueContent);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_TIPS_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setShowTips, attribute: showTips";
     };
 
@@ -118,7 +118,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setShowTipsTestShowTipsInvalidValues, Test
         modifier_->setShowTips(node_, &inputValueShowTips, &inputValueContent);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_TIPS_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_TIPS_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_SHOW_TIPS_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setShowTips, attribute: showTips";
     };
 
@@ -149,7 +149,8 @@ HWTEST_F(SliderModifierTest, setShowTipsTestContentValidValues, TestSize.Level1)
         modifier_->setShowTips(node_, &inputValueShowTips, &inputValueContent);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTENT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setShowTips, attribute: content";
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
+            "Input value is: " << input << ", method: setShowTips, attribute: content";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
@@ -184,7 +185,7 @@ HWTEST_F(SliderModifierTest, setShowTipsTestContentInvalidValues, TestSize.Level
         modifier_->setShowTips(node_, &inputValueShowTips, &inputValueContent);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTENT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_CONTENT_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_CONTENT_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setShowTips, attribute: content";
     };
 

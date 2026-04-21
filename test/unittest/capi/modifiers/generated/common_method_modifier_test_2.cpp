@@ -39,9 +39,9 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setMarkAnchorTestMarkAnchorPositionY
         WriteToUnion<Ark_Position>(WriteTo(inputValueMarkAnchor)).y = value;
         modifier_->setMarkAnchor(node_, &inputValueMarkAnchor);
         auto jsonValue = GetJsonValue(node_);
-        auto resultMarkAnchor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MARK_ANCHOR_NAME);
+        auto resultMarkAnchor = GetAttrObject(jsonValue, ATTRIBUTE_MARK_ANCHOR_NAME);
         auto resultStr = GetAttrValue<std::string>(resultMarkAnchor, ATTRIBUTE_MARK_ANCHOR_I_Y_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_MARK_ANCHOR_I_Y_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_MARK_ANCHOR_I_Y_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setMarkAnchor, attribute: markAnchor.Position.y";
     };
 
@@ -72,33 +72,33 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setEnabledTestPlaceholder, TestSize.
 }
 
 void valueCheckResult(std::unique_ptr<JsonValue>& resultStart, std::unique_ptr<JsonValue>& resultEnd,
-                      std::unique_ptr<JsonValue>& resultMiddle, std::unique_ptr<JsonValue>& resultTop,
-                      std::unique_ptr<JsonValue>& resultBottom, std::unique_ptr<JsonValue>& resultCenter,
-                      std::unique_ptr<JsonValue> resultBias)
+    std::unique_ptr<JsonValue>& resultMiddle, std::unique_ptr<JsonValue>& resultTop,
+    std::unique_ptr<JsonValue>& resultBottom, std::unique_ptr<JsonValue>& resultCenter,
+    std::unique_ptr<JsonValue> resultBias)
 {
-    std::string resultStr;
+    std::optional<std::string> resultStr;
     auto valueCheck = [&resultStr](std::unique_ptr<JsonValue>& jsonValue, const std::string& attrName,
-        const std::string& expectedStr, const std::string& errMsg,) {
+                          const std::string& expectedStr, const std::string& errMsg) {
         resultStr = GetAttrValue<std::string>(jsonValue, attrName);
-        EXPECT_EQ(resultStr, expectedStr) << errMsg;
+        EXPECT_THAT(resultStr, Optional(expectedStr)) << errMsg;
     };
     valueCheck(resultStart, ATTRIBUTE_ALIGN_RULES_I_START_I_ANCHOR_NAME,
         ATTRIBUTE_ALIGN_RULES_I_START_I_ANCHOR_DEFAULT_VALUE, "Default value for attribute 'alignRules.start.anchor'");
     valueCheck(resultStart, ATTRIBUTE_ALIGN_RULES_I_START_I_ALIGN_NAME,
         ATTRIBUTE_ALIGN_RULES_I_START_I_ALIGN_DEFAULT_VALUE, "Default value for attribute 'alignRules.start.align'");
-    valueCheck(resultEnd, ATTRIBUTE_ALIGN_RULES_I_END_I_ANCHOR_NAME,
-        ATTRIBUTE_ALIGN_RULES_I_END_I_ANCHOR_DEFAULT_VALUE, "Default value for attribute 'alignRules.end.anchor'");
-    valueCheck(resultEnd, ATTRIBUTE_ALIGN_RULES_I_END_I_ALIGN_NAME,
-        ATTRIBUTE_ALIGN_RULES_I_END_I_ALIGN_DEFAULT_VALUE, "Default value for attribute 'alignRules.end.align'");
+    valueCheck(resultEnd, ATTRIBUTE_ALIGN_RULES_I_END_I_ANCHOR_NAME, ATTRIBUTE_ALIGN_RULES_I_END_I_ANCHOR_DEFAULT_VALUE,
+        "Default value for attribute 'alignRules.end.anchor'");
+    valueCheck(resultEnd, ATTRIBUTE_ALIGN_RULES_I_END_I_ALIGN_NAME, ATTRIBUTE_ALIGN_RULES_I_END_I_ALIGN_DEFAULT_VALUE,
+        "Default value for attribute 'alignRules.end.align'");
     valueCheck(resultMiddle, ATTRIBUTE_ALIGN_RULES_I_MIDDLE_I_ANCHOR_NAME,
         ATTRIBUTE_ALIGN_RULES_I_MIDDLE_I_ANCHOR_DEFAULT_VALUE,
         "Default value for attribute 'alignRules.middle.anchor'");
     valueCheck(resultMiddle, ATTRIBUTE_ALIGN_RULES_I_MIDDLE_I_ALIGN_NAME,
         ATTRIBUTE_ALIGN_RULES_I_MIDDLE_I_ALIGN_DEFAULT_VALUE, "Default value for attribute 'alignRules.middle.align'");
-    valueCheck(resultTop, ATTRIBUTE_ALIGN_RULES_I_TOP_I_ANCHOR_NAME,
-        ATTRIBUTE_ALIGN_RULES_I_TOP_I_ANCHOR_DEFAULT_VALUE, "Default value for attribute 'alignRules.top.anchor'");
-    valueCheck(resultTop, ATTRIBUTE_ALIGN_RULES_I_TOP_I_ALIGN_NAME,
-        ATTRIBUTE_ALIGN_RULES_I_TOP_I_ALIGN_DEFAULT_VALUE, "Default value for attribute 'alignRules.top.align'");
+    valueCheck(resultTop, ATTRIBUTE_ALIGN_RULES_I_TOP_I_ANCHOR_NAME, ATTRIBUTE_ALIGN_RULES_I_TOP_I_ANCHOR_DEFAULT_VALUE,
+        "Default value for attribute 'alignRules.top.anchor'");
+    valueCheck(resultTop, ATTRIBUTE_ALIGN_RULES_I_TOP_I_ALIGN_NAME, ATTRIBUTE_ALIGN_RULES_I_TOP_I_ALIGN_DEFAULT_VALUE,
+        "Default value for attribute 'alignRules.top.align'");
     valueCheck(resultBottom, ATTRIBUTE_ALIGN_RULES_I_BOTTOM_I_ANCHOR_NAME,
         ATTRIBUTE_ALIGN_RULES_I_BOTTOM_I_ANCHOR_DEFAULT_VALUE,
         "Default value for attribute 'alignRules.bottom.anchor'");
@@ -125,22 +125,14 @@ void valueCheckResult(std::unique_ptr<JsonValue>& resultStart, std::unique_ptr<J
 HWTEST_P(CommonMethodModifierTest, setAlignRules1TestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultAlignRules =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
-    std::unique_ptr<JsonValue> resultStart =
-        GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_START_NAME);
-    std::unique_ptr<JsonValue> resultEnd =
-        GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_END_NAME);
-    std::unique_ptr<JsonValue> resultMiddle =
-        GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_MIDDLE_NAME);
-    std::unique_ptr<JsonValue> resultTop =
-        GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_TOP_NAME);
-    std::unique_ptr<JsonValue> resultBottom =
-        GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_BOTTOM_NAME);
-    std::unique_ptr<JsonValue> resultCenter =
-        GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_CENTER_NAME);
-    std::unique_ptr<JsonValue> resultBias =
-        GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_BIAS_NAME);
+    std::unique_ptr<JsonValue> resultAlignRules = GetAttrObject(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
+    std::unique_ptr<JsonValue> resultStart = GetAttrObject(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_START_NAME);
+    std::unique_ptr<JsonValue> resultEnd = GetAttrObject(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_END_NAME);
+    std::unique_ptr<JsonValue> resultMiddle = GetAttrObject(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_MIDDLE_NAME);
+    std::unique_ptr<JsonValue> resultTop = GetAttrObject(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_TOP_NAME);
+    std::unique_ptr<JsonValue> resultBottom = GetAttrObject(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_BOTTOM_NAME);
+    std::unique_ptr<JsonValue> resultCenter = GetAttrObject(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_CENTER_NAME);
+    std::unique_ptr<JsonValue> resultBias = GetAttrObject(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_BIAS_NAME);
     valueCheckResult(resultStart, resultEnd, resultMiddle, resultTop, resultBottom, resultCenter, resultBias);
 }
 
@@ -183,11 +175,10 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setAlignRules1TestAlignRulesStartAnc
         WriteTo(WriteTo(inputValueAlignRules).start).anchor = value;
         modifier_->setAlignRules1(node_, &inputValueAlignRules);
         auto jsonValue = GetJsonValue(node_);
-        auto resultAlignRules = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
-        auto resultStart =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_START_NAME);
+        auto resultAlignRules = GetAttrObject(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
+        auto resultStart = GetAttrObject(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_START_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStart, ATTRIBUTE_ALIGN_RULES_I_START_I_ANCHOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setAlignRules1, attribute: alignRules.start.anchor";
     };
 
@@ -235,11 +226,10 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setAlignRules1TestAlignRulesStartAli
         WriteTo(WriteTo(inputValueAlignRules).start).align = value;
         modifier_->setAlignRules1(node_, &inputValueAlignRules);
         auto jsonValue = GetJsonValue(node_);
-        auto resultAlignRules = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
-        auto resultStart =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_START_NAME);
+        auto resultAlignRules = GetAttrObject(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
+        auto resultStart = GetAttrObject(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_START_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStart, ATTRIBUTE_ALIGN_RULES_I_START_I_ALIGN_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setAlignRules1, attribute: alignRules.start.align";
     };
 
@@ -287,11 +277,10 @@ HWTEST_P(CommonMethodModifierTest, setAlignRules1TestAlignRulesStartAlignInvalid
         WriteTo(WriteTo(inputValueAlignRules).start).align = value;
         modifier_->setAlignRules1(node_, &inputValueAlignRules);
         auto jsonValue = GetJsonValue(node_);
-        auto resultAlignRules = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
-        auto resultStart =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_START_NAME);
+        auto resultAlignRules = GetAttrObject(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
+        auto resultStart = GetAttrObject(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_START_NAME);
         auto resultStr = GetAttrValue<std::string>(resultStart, ATTRIBUTE_ALIGN_RULES_I_START_I_ALIGN_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ALIGN_RULES_I_START_I_ALIGN_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ALIGN_RULES_I_START_I_ALIGN_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setAlignRules1, attribute: alignRules.start.align";
     };
 
@@ -339,10 +328,10 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setAlignRules1TestAlignRulesEndAncho
         WriteTo(WriteTo(inputValueAlignRules).end).anchor = value;
         modifier_->setAlignRules1(node_, &inputValueAlignRules);
         auto jsonValue = GetJsonValue(node_);
-        auto resultAlignRules = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
-        auto resultEnd = GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_END_NAME);
+        auto resultAlignRules = GetAttrObject(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
+        auto resultEnd = GetAttrObject(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_END_NAME);
         auto resultStr = GetAttrValue<std::string>(resultEnd, ATTRIBUTE_ALIGN_RULES_I_END_I_ANCHOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setAlignRules1, attribute: alignRules.end.anchor";
     };
 
@@ -390,10 +379,10 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setAlignRules1TestAlignRulesEndAlign
         WriteTo(WriteTo(inputValueAlignRules).end).align = value;
         modifier_->setAlignRules1(node_, &inputValueAlignRules);
         auto jsonValue = GetJsonValue(node_);
-        auto resultAlignRules = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
-        auto resultEnd = GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_END_NAME);
+        auto resultAlignRules = GetAttrObject(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
+        auto resultEnd = GetAttrObject(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_END_NAME);
         auto resultStr = GetAttrValue<std::string>(resultEnd, ATTRIBUTE_ALIGN_RULES_I_END_I_ALIGN_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setAlignRules1, attribute: alignRules.end.align";
     };
 
@@ -441,10 +430,10 @@ HWTEST_P(CommonMethodModifierTest, setAlignRules1TestAlignRulesEndAlignInvalidVa
         WriteTo(WriteTo(inputValueAlignRules).end).align = value;
         modifier_->setAlignRules1(node_, &inputValueAlignRules);
         auto jsonValue = GetJsonValue(node_);
-        auto resultAlignRules = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
-        auto resultEnd = GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_END_NAME);
+        auto resultAlignRules = GetAttrObject(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
+        auto resultEnd = GetAttrObject(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_END_NAME);
         auto resultStr = GetAttrValue<std::string>(resultEnd, ATTRIBUTE_ALIGN_RULES_I_END_I_ALIGN_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ALIGN_RULES_I_END_I_ALIGN_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ALIGN_RULES_I_END_I_ALIGN_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setAlignRules1, attribute: alignRules.end.align";
     };
 
@@ -492,11 +481,10 @@ HWTEST_P(CommonMethodModifierTest, setAlignRules1TestAlignRulesMiddleAnchorValid
         WriteTo(WriteTo(inputValueAlignRules).middle).anchor = value;
         modifier_->setAlignRules1(node_, &inputValueAlignRules);
         auto jsonValue = GetJsonValue(node_);
-        auto resultAlignRules = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
-        auto resultMiddle =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_MIDDLE_NAME);
+        auto resultAlignRules = GetAttrObject(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
+        auto resultMiddle = GetAttrObject(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_MIDDLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultMiddle, ATTRIBUTE_ALIGN_RULES_I_MIDDLE_I_ANCHOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setAlignRules1, attribute: alignRules.middle.anchor";
     };
 
@@ -544,11 +532,10 @@ HWTEST_P(CommonMethodModifierTest, setAlignRules1TestAlignRulesMiddleAlignValidV
         WriteTo(WriteTo(inputValueAlignRules).middle).align = value;
         modifier_->setAlignRules1(node_, &inputValueAlignRules);
         auto jsonValue = GetJsonValue(node_);
-        auto resultAlignRules = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
-        auto resultMiddle =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_MIDDLE_NAME);
+        auto resultAlignRules = GetAttrObject(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
+        auto resultMiddle = GetAttrObject(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_MIDDLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultMiddle, ATTRIBUTE_ALIGN_RULES_I_MIDDLE_I_ALIGN_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setAlignRules1, attribute: alignRules.middle.align";
     };
 
@@ -596,11 +583,10 @@ HWTEST_P(CommonMethodModifierTest, setAlignRules1TestAlignRulesMiddleAlignInvali
         WriteTo(WriteTo(inputValueAlignRules).middle).align = value;
         modifier_->setAlignRules1(node_, &inputValueAlignRules);
         auto jsonValue = GetJsonValue(node_);
-        auto resultAlignRules = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
-        auto resultMiddle =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_MIDDLE_NAME);
+        auto resultAlignRules = GetAttrObject(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
+        auto resultMiddle = GetAttrObject(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_MIDDLE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultMiddle, ATTRIBUTE_ALIGN_RULES_I_MIDDLE_I_ALIGN_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ALIGN_RULES_I_MIDDLE_I_ALIGN_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ALIGN_RULES_I_MIDDLE_I_ALIGN_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setAlignRules1, attribute: alignRules.middle.align";
     };
 
@@ -648,10 +634,10 @@ HWTEST_P(CommonMethodModifierTest, setAlignRules1TestAlignRulesTopAnchorValidVal
         WriteTo(WriteTo(inputValueAlignRules).top).anchor = value;
         modifier_->setAlignRules1(node_, &inputValueAlignRules);
         auto jsonValue = GetJsonValue(node_);
-        auto resultAlignRules = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
-        auto resultTop = GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_TOP_NAME);
+        auto resultAlignRules = GetAttrObject(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
+        auto resultTop = GetAttrObject(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_TOP_NAME);
         auto resultStr = GetAttrValue<std::string>(resultTop, ATTRIBUTE_ALIGN_RULES_I_TOP_I_ANCHOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setAlignRules1, attribute: alignRules.top.anchor";
     };
 
@@ -699,10 +685,10 @@ HWTEST_P(CommonMethodModifierTest, setAlignRules1TestAlignRulesTopAlignValidValu
         WriteTo(WriteTo(inputValueAlignRules).top).align = value;
         modifier_->setAlignRules1(node_, &inputValueAlignRules);
         auto jsonValue = GetJsonValue(node_);
-        auto resultAlignRules = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
-        auto resultTop = GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_TOP_NAME);
+        auto resultAlignRules = GetAttrObject(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
+        auto resultTop = GetAttrObject(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_TOP_NAME);
         auto resultStr = GetAttrValue<std::string>(resultTop, ATTRIBUTE_ALIGN_RULES_I_TOP_I_ALIGN_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setAlignRules1, attribute: alignRules.top.align";
     };
 
@@ -750,10 +736,10 @@ HWTEST_P(CommonMethodModifierTest, setAlignRules1TestAlignRulesTopAlignInvalidVa
         WriteTo(WriteTo(inputValueAlignRules).top).align = value;
         modifier_->setAlignRules1(node_, &inputValueAlignRules);
         auto jsonValue = GetJsonValue(node_);
-        auto resultAlignRules = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
-        auto resultTop = GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_TOP_NAME);
+        auto resultAlignRules = GetAttrObject(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
+        auto resultTop = GetAttrObject(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_TOP_NAME);
         auto resultStr = GetAttrValue<std::string>(resultTop, ATTRIBUTE_ALIGN_RULES_I_TOP_I_ALIGN_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ALIGN_RULES_I_TOP_I_ALIGN_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ALIGN_RULES_I_TOP_I_ALIGN_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setAlignRules1, attribute: alignRules.top.align";
     };
 
@@ -801,11 +787,10 @@ HWTEST_P(CommonMethodModifierTest, setAlignRules1TestAlignRulesBottomAnchorValid
         WriteTo(WriteTo(inputValueAlignRules).bottom).anchor = value;
         modifier_->setAlignRules1(node_, &inputValueAlignRules);
         auto jsonValue = GetJsonValue(node_);
-        auto resultAlignRules = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
-        auto resultBottom =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_BOTTOM_NAME);
+        auto resultAlignRules = GetAttrObject(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
+        auto resultBottom = GetAttrObject(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_BOTTOM_NAME);
         auto resultStr = GetAttrValue<std::string>(resultBottom, ATTRIBUTE_ALIGN_RULES_I_BOTTOM_I_ANCHOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setAlignRules1, attribute: alignRules.bottom.anchor";
     };
 
@@ -853,11 +838,10 @@ HWTEST_P(CommonMethodModifierTest, setAlignRules1TestAlignRulesBottomAlignValidV
         WriteTo(WriteTo(inputValueAlignRules).bottom).align = value;
         modifier_->setAlignRules1(node_, &inputValueAlignRules);
         auto jsonValue = GetJsonValue(node_);
-        auto resultAlignRules = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
-        auto resultBottom =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_BOTTOM_NAME);
+        auto resultAlignRules = GetAttrObject(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
+        auto resultBottom = GetAttrObject(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_BOTTOM_NAME);
         auto resultStr = GetAttrValue<std::string>(resultBottom, ATTRIBUTE_ALIGN_RULES_I_BOTTOM_I_ALIGN_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setAlignRules1, attribute: alignRules.bottom.align";
     };
 
@@ -905,11 +889,10 @@ HWTEST_P(CommonMethodModifierTest, setAlignRules1TestAlignRulesBottomAlignInvali
         WriteTo(WriteTo(inputValueAlignRules).bottom).align = value;
         modifier_->setAlignRules1(node_, &inputValueAlignRules);
         auto jsonValue = GetJsonValue(node_);
-        auto resultAlignRules = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
-        auto resultBottom =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_BOTTOM_NAME);
+        auto resultAlignRules = GetAttrObject(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
+        auto resultBottom = GetAttrObject(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_BOTTOM_NAME);
         auto resultStr = GetAttrValue<std::string>(resultBottom, ATTRIBUTE_ALIGN_RULES_I_BOTTOM_I_ALIGN_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ALIGN_RULES_I_BOTTOM_I_ALIGN_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ALIGN_RULES_I_BOTTOM_I_ALIGN_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setAlignRules1, attribute: alignRules.bottom.align";
     };
 
@@ -957,11 +940,10 @@ HWTEST_P(CommonMethodModifierTest, setAlignRules1TestAlignRulesCenterAnchorValid
         WriteTo(WriteTo(inputValueAlignRules).center).anchor = value;
         modifier_->setAlignRules1(node_, &inputValueAlignRules);
         auto jsonValue = GetJsonValue(node_);
-        auto resultAlignRules = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
-        auto resultCenter =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_CENTER_NAME);
+        auto resultAlignRules = GetAttrObject(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
+        auto resultCenter = GetAttrObject(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_CENTER_NAME);
         auto resultStr = GetAttrValue<std::string>(resultCenter, ATTRIBUTE_ALIGN_RULES_I_CENTER_I_ANCHOR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setAlignRules1, attribute: alignRules.center.anchor";
     };
 
@@ -1009,11 +991,10 @@ HWTEST_P(CommonMethodModifierTest, setAlignRules1TestAlignRulesCenterAlignValidV
         WriteTo(WriteTo(inputValueAlignRules).center).align = value;
         modifier_->setAlignRules1(node_, &inputValueAlignRules);
         auto jsonValue = GetJsonValue(node_);
-        auto resultAlignRules = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
-        auto resultCenter =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_CENTER_NAME);
+        auto resultAlignRules = GetAttrObject(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
+        auto resultCenter = GetAttrObject(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_CENTER_NAME);
         auto resultStr = GetAttrValue<std::string>(resultCenter, ATTRIBUTE_ALIGN_RULES_I_CENTER_I_ALIGN_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setAlignRules1, attribute: alignRules.center.align";
     };
 
@@ -1061,11 +1042,10 @@ HWTEST_P(CommonMethodModifierTest, setAlignRules1TestAlignRulesCenterAlignInvali
         WriteTo(WriteTo(inputValueAlignRules).center).align = value;
         modifier_->setAlignRules1(node_, &inputValueAlignRules);
         auto jsonValue = GetJsonValue(node_);
-        auto resultAlignRules = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
-        auto resultCenter =
-            GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_CENTER_NAME);
+        auto resultAlignRules = GetAttrObject(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
+        auto resultCenter = GetAttrObject(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_CENTER_NAME);
         auto resultStr = GetAttrValue<std::string>(resultCenter, ATTRIBUTE_ALIGN_RULES_I_CENTER_I_ALIGN_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ALIGN_RULES_I_CENTER_I_ALIGN_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ALIGN_RULES_I_CENTER_I_ALIGN_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setAlignRules1, attribute: alignRules.center.align";
     };
 
@@ -1113,10 +1093,10 @@ HWTEST_P(CommonMethodModifierTest, setAlignRules1TestAlignRulesBiasHorizontalVal
         WriteTo(WriteTo(inputValueAlignRules).bias).horizontal = value;
         modifier_->setAlignRules1(node_, &inputValueAlignRules);
         auto jsonValue = GetJsonValue(node_);
-        auto resultAlignRules = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
-        auto resultBias = GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_BIAS_NAME);
+        auto resultAlignRules = GetAttrObject(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
+        auto resultBias = GetAttrObject(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_BIAS_NAME);
         auto resultStr = GetAttrValue<std::string>(resultBias, ATTRIBUTE_ALIGN_RULES_I_BIAS_I_HORIZONTAL_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setAlignRules1, attribute: alignRules.bias.horizontal";
     };
 
@@ -1164,10 +1144,10 @@ HWTEST_P(CommonMethodModifierTest, setAlignRules1TestAlignRulesBiasHorizontalInv
         WriteTo(WriteTo(inputValueAlignRules).bias).horizontal = value;
         modifier_->setAlignRules1(node_, &inputValueAlignRules);
         auto jsonValue = GetJsonValue(node_);
-        auto resultAlignRules = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
-        auto resultBias = GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_BIAS_NAME);
+        auto resultAlignRules = GetAttrObject(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
+        auto resultBias = GetAttrObject(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_BIAS_NAME);
         auto resultStr = GetAttrValue<std::string>(resultBias, ATTRIBUTE_ALIGN_RULES_I_BIAS_I_HORIZONTAL_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ALIGN_RULES_I_BIAS_I_HORIZONTAL_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ALIGN_RULES_I_BIAS_I_HORIZONTAL_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setAlignRules1, attribute: alignRules.bias.horizontal";
     };
 
@@ -1214,10 +1194,10 @@ HWTEST_P(CommonMethodModifierTest, setAlignRules1TestAlignRulesBiasVerticalValid
         WriteTo(WriteTo(inputValueAlignRules).bias).vertical = value;
         modifier_->setAlignRules1(node_, &inputValueAlignRules);
         auto jsonValue = GetJsonValue(node_);
-        auto resultAlignRules = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
-        auto resultBias = GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_BIAS_NAME);
+        auto resultAlignRules = GetAttrObject(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
+        auto resultBias = GetAttrObject(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_BIAS_NAME);
         auto resultStr = GetAttrValue<std::string>(resultBias, ATTRIBUTE_ALIGN_RULES_I_BIAS_I_VERTICAL_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setAlignRules1, attribute: alignRules.bias.vertical";
     };
 
@@ -1265,10 +1245,10 @@ HWTEST_P(CommonMethodModifierTest, setAlignRules1TestAlignRulesBiasVerticalInval
         WriteTo(WriteTo(inputValueAlignRules).bias).vertical = value;
         modifier_->setAlignRules1(node_, &inputValueAlignRules);
         auto jsonValue = GetJsonValue(node_);
-        auto resultAlignRules = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
-        auto resultBias = GetAttrValue<std::unique_ptr<JsonValue>>(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_BIAS_NAME);
+        auto resultAlignRules = GetAttrObject(jsonValue, ATTRIBUTE_ALIGN_RULES_NAME);
+        auto resultBias = GetAttrObject(resultAlignRules, ATTRIBUTE_ALIGN_RULES_I_BIAS_NAME);
         auto resultStr = GetAttrValue<std::string>(resultBias, ATTRIBUTE_ALIGN_RULES_I_BIAS_I_VERTICAL_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ALIGN_RULES_I_BIAS_I_VERTICAL_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ALIGN_RULES_I_BIAS_I_VERTICAL_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setAlignRules1, attribute: alignRules.bias.vertical";
     };
 
@@ -1654,10 +1634,10 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setReuseIdTestPlaceholder, TestSize.
 HWTEST_P(CommonMethodModifierTest, setRenderFitTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RENDER_FIT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_RENDER_FIT_DEFAULT_VALUE) << "Default value for attribute 'renderFit'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_RENDER_FIT_DEFAULT_VALUE)) << "Default value for attribute 'renderFit'";
 }
 
 /*
@@ -1680,7 +1660,7 @@ HWTEST_P(CommonMethodModifierTest, setRenderFitTestRenderFitValidValues, TestSiz
         modifier_->setRenderFit(node_, &inputValueRenderFit);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RENDER_FIT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setRenderFit, attribute: renderFit";
     };
 
@@ -1709,7 +1689,7 @@ HWTEST_P(CommonMethodModifierTest, setRenderFitTestRenderFitInvalidValues, TestS
         modifier_->setRenderFit(node_, &inputValueRenderFit);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RENDER_FIT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_RENDER_FIT_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_RENDER_FIT_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setRenderFit, attribute: renderFit";
     };
 
@@ -1836,13 +1816,14 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setFocusScopeIdTestPlaceholder, Test
 HWTEST_P(CommonMethodModifierTest, setFocusScopePriorityTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FOCUS_SCOPE_ID_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_FOCUS_SCOPE_ID_DEFAULT_VALUE) << "Default value for attribute 'focusScopeId'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_FOCUS_SCOPE_ID_DEFAULT_VALUE)) <<
+        "Default value for attribute 'focusScopeId'";
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FOCUS_SCOPE_PRIORITY_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_FOCUS_SCOPE_PRIORITY_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_FOCUS_SCOPE_PRIORITY_DEFAULT_VALUE)) <<
         "Default value for attribute 'focusScopePriority'";
 }
 
@@ -1870,7 +1851,7 @@ HWTEST_P(CommonMethodModifierTest, setFocusScopePriorityTestFocusScopeIdValidVal
         modifier_->setFocusScopePriority(node_, &inputValueFocusScopeId, &inputValueFocusScopePriority);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FOCUS_SCOPE_ID_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setFocusScopePriority, attribute: focusScopeId";
     };
 
@@ -1904,7 +1885,7 @@ HWTEST_P(CommonMethodModifierTest, DISABLED_setFocusScopePriorityTestFocusScopeI
         modifier_->setFocusScopePriority(node_, &inputValueFocusScopeId, &inputValueFocusScopePriority);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FOCUS_SCOPE_ID_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_FOCUS_SCOPE_ID_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_FOCUS_SCOPE_ID_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setFocusScopePriority, attribute: focusScopeId";
     };
 
@@ -1936,7 +1917,7 @@ HWTEST_P(CommonMethodModifierTest, setFocusScopePriorityTestFocusScopePriorityVa
         modifier_->setFocusScopePriority(node_, &inputValueFocusScopeId, &inputValueFocusScopePriority);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FOCUS_SCOPE_PRIORITY_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setFocusScopePriority, attribute: focusScopePriority";
     };
 
@@ -1970,7 +1951,7 @@ HWTEST_P(CommonMethodModifierTest, setFocusScopePriorityTestFocusScopePriorityIn
         modifier_->setFocusScopePriority(node_, &inputValueFocusScopeId, &inputValueFocusScopePriority);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FOCUS_SCOPE_PRIORITY_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_FOCUS_SCOPE_PRIORITY_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_FOCUS_SCOPE_PRIORITY_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setFocusScopePriority, attribute: focusScopePriority";
     };
 

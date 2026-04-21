@@ -17,10 +17,12 @@
 #define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_TEXT_CLOCK_MODIFIER_H
 
 #include "core/interfaces/native/node/node_api.h"
+#include "core/components_ng/pattern/text_clock/bridge/text_clock_custom_modifier.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUITextClockModifier* GetTextClockModifier();
 const CJUITextClockModifier* GetCJUITextClockModifier();
+const ArkUITextClockCustomModifier* GetTextClockCustomModifier();
 } // namespace OHOS::Ace::NG::NodeModifier
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_TEXT_CLOCK_MODIFIER_H

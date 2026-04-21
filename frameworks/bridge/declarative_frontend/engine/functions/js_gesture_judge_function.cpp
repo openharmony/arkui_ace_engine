@@ -18,8 +18,10 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_should_built_in_recognizer_parallel_with_function.h"
+#include "core/common/event_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/gestures/base_gesture_event.h"
+#include "frameworks/bridge/declarative_frontend/engine/js_types.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::Framework {
@@ -140,7 +142,9 @@ void JsGestureJudgeFunction::CollectTouchEventTarget(
 
 JSRef<JSObject> JsGestureJudgeFunction::CreateFingerInfo(const FingerInfo& fingerInfo)
 {
-    JSRef<JSObject> fingerInfoObj = JSRef<JSObject>::New();
+    JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+    objectTemplate->SetInternalFieldCount(1);
+    JSRef<JSObject> fingerInfoObj = objectTemplate->NewInstance();
     const OHOS::Ace::Offset& globalLocation = fingerInfo.globalLocation_;
     const OHOS::Ace::Offset& localLocation = fingerInfo.localLocation_;
     const OHOS::Ace::Offset& screenLocation = fingerInfo.screenLocation_;
@@ -157,6 +161,9 @@ JSRef<JSObject> JsGestureJudgeFunction::CreateFingerInfo(const FingerInfo& finge
         "globalDisplayX", PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetX()));
     fingerInfoObj->SetProperty<double>(
         "globalDisplayY", PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetY()));
+    fingerInfoObj->SetPropertyObject("getCurrentLocalPosition",
+        JSRef<JSFunc>::New<FunctionCallback>(JsGetCurrentLocalPositionForFinger));
+    fingerInfoObj->Wrap<FingerInfo>(const_cast<FingerInfo*>(&fingerInfo));
     return fingerInfoObj;
 }
 
@@ -280,8 +287,8 @@ JSRef<JSObject> JsGestureJudgeFunction::CreateGestureEventObject(
 
     JSRef<JSArray> fingerArr = JSRef<JSArray>::New();
     const std::list<FingerInfo>& fingerList = info->GetFingerList();
-    std::list<FingerInfo> notTouchFingerList;
     int32_t maxFingerId = -1;
+    std::vector<JSRef<JSObject>> notTouchFingers;
     for (const FingerInfo& fingerInfo : fingerList) {
         JSRef<JSObject> element = CreateFingerInfo(fingerInfo);
         if (fingerInfo.sourceType_ == SourceType::TOUCH && fingerInfo.sourceTool_ == SourceTool::FINGER) {
@@ -290,12 +297,11 @@ JSRef<JSObject> JsGestureJudgeFunction::CreateGestureEventObject(
                 maxFingerId = fingerInfo.fingerId_;
             }
         } else {
-            notTouchFingerList.emplace_back(fingerInfo);
+            notTouchFingers.emplace_back(element);
         }
     }
     auto idx = maxFingerId + 1;
-    for (const FingerInfo& fingerInfo : notTouchFingerList) {
-        JSRef<JSObject> element = CreateFingerInfo(fingerInfo);
+    for (const auto& element : notTouchFingers) {
         fingerArr->SetValueAt(idx++, element);
     }
     obj->SetPropertyObject("fingerList", fingerArr);
@@ -311,22 +317,21 @@ JSRef<JSObject> JsGestureJudgeFunction::CreateFingerInfosObject(
 {
     JSRef<JSArray> fingerArr = JSRef<JSArray>::New();
     const std::list<FingerInfo>& fingerList = info->GetFingerList();
-    std::list<FingerInfo> notTouchFingerList;
     std::vector<JSRef<JSObject>> validFingers;
+    std::vector<JSRef<JSObject>> notTouchFingers;
     for (const FingerInfo& fingerInfo : fingerList) {
         JSRef<JSObject> element = CreateFingerInfo(fingerInfo);
         if (fingerInfo.sourceType_ == SourceType::TOUCH && fingerInfo.sourceTool_ == SourceTool::FINGER) {
             validFingers.emplace_back(element);
         } else {
-            notTouchFingerList.emplace_back(fingerInfo);
+            notTouchFingers.emplace_back(element);
         }
     }
     for (size_t i = 0; i < validFingers.size(); ++i) {
         fingerArr->SetValueAt(i, validFingers[i]);
     }
     auto idx = validFingers.size();
-    for (const FingerInfo& fingerInfo : notTouchFingerList) {
-        JSRef<JSObject> element = CreateFingerInfo(fingerInfo);
+    for (const auto& element : notTouchFingers) {
         fingerArr->SetValueAt(idx++, element);
     }
     obj->SetPropertyObject("fingerInfos", fingerArr);

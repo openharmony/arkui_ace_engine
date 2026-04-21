@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/unittest/core/gestures/gestures_common_test_ng.h"
 #include "ui/base/referenced.h"
 
@@ -2247,5 +2247,199 @@ HWTEST_F(LongPressRecognizerTestNg, TriggerGestureJudgeCallbackTest003, TestSize
     targetComponent->SetOnGestureJudgeBegin(gestureJudgeFunc);
     longPressRecognizer->HandleOverdueDeadline(true);
     EXPECT_EQ(longPressRecognizer->disposal_, GestureDisposal::NONE);
+}
+
+/**
+ * @tc.name: LongPressRecognizerDumpTest001
+ * @tc.desc: Test LongPressRecognizer function: Dump
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerDumpTest001, TestSize.Level1)
+{
+    RefPtr<LongPressRecognizer> longPressRecognizer =
+        AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, FINGER_NUMBER, true, true, false);
+    auto dump = longPressRecognizer->Dump();
+    EXPECT_NE(dump, nullptr);
+    EXPECT_THAT(dump->customInfo, HasSubstr("duration:"));
+    EXPECT_THAT(dump->customInfo, HasSubstr("isForDrag:"));
+    EXPECT_THAT(dump->customInfo, HasSubstr("repeat:"));
+    EXPECT_THAT(dump->customInfo, HasSubstr("fingers:"));
+    EXPECT_THAT(dump->customInfo, HasSubstr("allowableMovement:"));
+}
+ 
+/**
+ * @tc.name: LongPressRecognizerDumpTest002
+ * @tc.desc: Test LongPressRecognizer function: Dump with different settings
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerDumpTest002, TestSize.Level1)
+{
+    RefPtr<LongPressRecognizer> longPressRecognizer =
+        AceType::MakeRefPtr<LongPressRecognizer>(1000, 2, false, false, true, 50.0);
+    auto dump = longPressRecognizer->Dump();
+    EXPECT_NE(dump, nullptr);
+    EXPECT_THAT(dump->customInfo, HasSubstr("duration: 1000"));
+    EXPECT_THAT(dump->customInfo, HasSubstr("fingers: 2"));
+}
+ 
+/**
+ * @tc.name: LongPressRecognizerRemoteRepeatTimerTest001
+ * @tc.desc: Test LongPressRecognizer function: RemoteRepeatTimer
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerRemoteRepeatTimerTest001, TestSize.Level1)
+{
+    RefPtr<LongPressRecognizer> longPressRecognizer =
+        AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, FINGER_NUMBER, true);
+    longPressRecognizer->longPressFingerCountForSequence_ = 2;
+    longPressRecognizer->fingers_ = 1;
+    longPressRecognizer->RemoteRepeatTimer();
+    EXPECT_EQ(longPressRecognizer->longPressFingerCountForSequence_, 1);
+}
+ 
+/**
+ * @tc.name: LongPressRecognizerRemoteRepeatTimerTest002
+ * @tc.desc: Test LongPressRecognizer function: RemoteRepeatTimer when finger count less than required
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerRemoteRepeatTimerTest002, TestSize.Level1)
+{
+    RefPtr<LongPressRecognizer> longPressRecognizer =
+        AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, FINGER_NUMBER, true);
+    longPressRecognizer->longPressFingerCountForSequence_ = 0;
+    longPressRecognizer->fingers_ = 2;
+    longPressRecognizer->longPressFingerCountForSequence_ = 1;
+    longPressRecognizer->RemoteRepeatTimer();
+    EXPECT_EQ(longPressRecognizer->longPressFingerCountForSequence_, 0);
+}
+ 
+/**
+ * @tc.name: LongPressRecognizerForceCleanRecognizerTest001
+ * @tc.desc: Test LongPressRecognizer function: ForceCleanRecognizer
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerForceCleanRecognizerTest001, TestSize.Level1)
+{
+    RefPtr<LongPressRecognizer> longPressRecognizer =
+        AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, FINGER_NUMBER, true);
+    longPressRecognizer->longPressFingerCountForSequence_ = 2;
+    longPressRecognizer->isOnActionTriggered_ = true;
+    longPressRecognizer->ForceCleanRecognizer();
+    EXPECT_EQ(longPressRecognizer->longPressFingerCountForSequence_, 0);
+    EXPECT_EQ(longPressRecognizer->isOnActionTriggered_, false);
+}
+ 
+/**
+ * @tc.name: LongPressRecognizerUpdateGestureEventInfoTest001
+ * @tc.desc: Test LongPressRecognizer function: UpdateGestureEventInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerUpdateGestureEventInfoTest001, TestSize.Level1)
+{
+    RefPtr<LongPressRecognizer> longPressRecognizer =
+        AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, FINGER_NUMBER, true);
+    TouchEvent touchEvent;
+    touchEvent.tiltX = 10.0;
+    touchEvent.tiltY = 20.0;
+    touchEvent.rollAngle = 30.0;
+    touchEvent.sourceTool = SourceTool::FINGER;
+    longPressRecognizer->touchPoints_[0] = touchEvent;
+    longPressRecognizer->lastTouchEvent_ = touchEvent;
+    longPressRecognizer->deviceId_ = 123;
+    longPressRecognizer->inputEventType_ = InputEventType::TOUCH_SCREEN;
+    auto info = std::make_shared<LongPressGestureEvent>();
+    longPressRecognizer->UpdateGestureEventInfo(info);
+    EXPECT_EQ(info->GetDeviceId(), 123);
+    EXPECT_TRUE(info->GetTiltX().has_value());
+    EXPECT_TRUE(info->GetTiltY().has_value());
+    EXPECT_TRUE(info->GetRollAngle().has_value());
+}
+ 
+/**
+ * @tc.name: LongPressRecognizerGetDragEventActuatorTest001
+ * @tc.desc: Test LongPressRecognizer function: GetDragEventActuator with null target
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerGetDragEventActuatorTest001, TestSize.Level1)
+{
+    RefPtr<LongPressRecognizer> longPressRecognizer =
+        AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+    auto result = longPressRecognizer->GetDragEventActuator();
+    EXPECT_EQ(result, nullptr);
+}
+ 
+/**
+ * @tc.name: LongPressRecognizerSetAllowableMovementTest001
+ * @tc.desc: Test LongPressRecognizer function: SetAllowableMovement and GetAllowableMovement
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerSetAllowableMovementTest001, TestSize.Level1)
+{
+    RefPtr<LongPressRecognizer> longPressRecognizer =
+        AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+    longPressRecognizer->SetAllowableMovement(50.0);
+    EXPECT_EQ(longPressRecognizer->GetAllowableMovement(), 50.0);
+    longPressRecognizer->SetAllowableMovement(100.0);
+    EXPECT_EQ(longPressRecognizer->GetAllowableMovement(), 100.0);
+}
+ 
+/**
+ * @tc.name: LongPressRecognizerSetDurationTest001
+ * @tc.desc: Test LongPressRecognizer function: SetDuration and GetDuration
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerSetDurationTest001, TestSize.Level1)
+{
+    RefPtr<LongPressRecognizer> longPressRecognizer =
+        AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+    longPressRecognizer->SetDuration(1000);
+    EXPECT_EQ(longPressRecognizer->GetDuration(), 1000);
+    longPressRecognizer->SetDuration(2000);
+    EXPECT_EQ(longPressRecognizer->GetDuration(), 2000);
+}
+ 
+/**
+ * @tc.name: LongPressRecognizerSetIsRepeatTest001
+ * @tc.desc: Test LongPressRecognizer function: SetIsRepeat and GetIsRepeat
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerSetIsRepeatTest001, TestSize.Level1)
+{
+    RefPtr<LongPressRecognizer> longPressRecognizer =
+        AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+    longPressRecognizer->SetIsRepeat(true);
+    EXPECT_EQ(longPressRecognizer->GetIsRepeat(), true);
+    longPressRecognizer->SetIsRepeat(false);
+    EXPECT_EQ(longPressRecognizer->GetIsRepeat(), false);
+}
+ 
+/**
+ * @tc.name: LongPressRecognizerHasThumbnailCallbackTest001
+ * @tc.desc: Test LongPressRecognizer function: HasThumbnailCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerHasThumbnailCallbackTest001, TestSize.Level1)
+{
+    RefPtr<LongPressRecognizer> longPressRecognizer =
+        AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+    EXPECT_EQ(longPressRecognizer->HasThumbnailCallback(), false);
+    std::function<void(Offset)> callback = [](Offset) {};
+    longPressRecognizer->SetThumbnailCallback(std::move(callback));
+    EXPECT_EQ(longPressRecognizer->HasThumbnailCallback(), true);
+}
+ 
+/**
+ * @tc.name: LongPressRecognizerHasActionTest001
+ * @tc.desc: Test LongPressRecognizer function: HasAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerHasActionTest001, TestSize.Level1)
+{
+    RefPtr<LongPressRecognizer> longPressRecognizer =
+        AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+    EXPECT_EQ(longPressRecognizer->HasAction(), false);
+    auto callback = [](const GestureEvent&) {};
+    longPressRecognizer->SetOnAction(callback);
+    EXPECT_EQ(longPressRecognizer->HasAction(), true);
 }
 } // namespace OHOS::Ace::NG

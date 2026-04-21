@@ -17,4 +17,11 @@ ace_unittest("form_link_test") {
   type = "new"
   module_name = "ScrollingSet-Refresh"
   sources = [ "form_link_test.cpp" ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "form_link_test_core.cpp" ]
+  } else {
+    sources += [ "form_link_test_core.cpp" ]
+  }
 }

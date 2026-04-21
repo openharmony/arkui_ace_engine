@@ -17,11 +17,72 @@
 
 #include "base/log/dump_log.h"
 #include "base/utils/multi_thread.h"
+#include "core/components_ng/base/inspector_filter.h"
+#include "core/components_ng/pattern/grid/grid_item_accessibility_property.h"
+#include "core/components_ng/pattern/grid/grid_item_event_hub.h"
+#include "core/components_ng/pattern/grid/grid_item_layout_algorithm.h"
+#include "core/components_ng/pattern/grid/grid_item_layout_property.h"
+#include "core/components_ng/pattern/grid/grid_item_theme.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
+#include "core/components_ng/syntax/shallow_builder.h"
 namespace OHOS::Ace::NG {
 namespace {
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 } // namespace
+
+GridItemPattern::GridItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder) : shallowBuilder_(shallowBuilder) {}
+
+GridItemPattern::GridItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder, GridItemStyle gridItemStyle)
+    : shallowBuilder_(shallowBuilder), gridItemStyle_(gridItemStyle)
+{}
+
+GridItemPattern::~GridItemPattern() = default;
+
+RefPtr<LayoutAlgorithm> GridItemPattern::CreateLayoutAlgorithm()
+{
+    return MakeRefPtr<GridItemLayoutAlgorithm>();
+}
+
+RefPtr<LayoutProperty> GridItemPattern::CreateLayoutProperty()
+{
+    return MakeRefPtr<GridItemLayoutProperty>();
+}
+
+RefPtr<EventHub> GridItemPattern::CreateEventHub()
+{
+    return MakeRefPtr<GridItemEventHub>();
+}
+
+RefPtr<AccessibilityProperty> GridItemPattern::CreateAccessibilityProperty()
+{
+    return MakeRefPtr<GridItemAccessibilityProperty>();
+}
+
+FocusPattern GridItemPattern::GetFocusPattern() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, FocusPattern());
+    auto theme = host->GetTheme<GridItemTheme>(true);
+    CHECK_NULL_RETURN(theme, FocusPattern());
+    auto focusColor = theme->GetGridItemFocusColor();
+    FocusPaintParam focusPaintParam;
+    focusPaintParam.SetPaintColor(focusColor);
+    return { FocusType::SCOPE, true, FocusStyleType::CUSTOM_REGION, focusPaintParam };
+}
+
+void GridItemPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    Pattern::ToJsonValue(json, filter);
+    if (filter.IsFastFilter()) {
+        json->PutFixedAttr("selectable", selectable_ ? "true" : "false", filter, FIXED_ATTR_SELECTABLE);
+        return;
+    }
+    json->PutExtAttr("style", gridItemStyle_ == GridItemStyle::NONE ? "NONE" : "PLAIN", filter);
+    json->PutExtAttr("forceRebuild", forceRebuild_ ? "true" : "false", filter);
+    json->PutFixedAttr("selectable", selectable_ ? "true" : "false", filter, FIXED_ATTR_SELECTABLE);
+    json->PutExtAttr("selected", isSelected_ ? "true" : "false", filter);
+}
+
 void GridItemPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -60,6 +121,34 @@ void GridItemPattern::OnModifyDone()
         InitHoverEvent();
         InitPressEvent();
     }
+    if (!isFocusBorderColorInitialized_) {
+        auto gridItemTheme = host->GetTheme<GridItemTheme>(true);
+        CHECK_NULL_VOID(gridItemTheme);
+        std::unique_ptr<FocusPaintParam> paintParams = std::make_unique<FocusPaintParam>();
+        paintParams->SetPaintColor(gridItemTheme->GetGridItemFocusColor());
+        focusHub->SetFocusPaintParamsPtr(paintParams);
+        isFocusBorderColorInitialized_ = true;
+    }
+}
+
+bool GridItemPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return false;
+    }
+    auto gridItemTheme = host->GetTheme<GridItemTheme>(true);
+    CHECK_NULL_RETURN(gridItemTheme, false);
+
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    std::unique_ptr<FocusPaintParam> paintParams = std::make_unique<FocusPaintParam>();
+    paintParams->SetPaintColor(gridItemTheme->GetGridItemFocusColor());
+    focusHub->SetFocusPaintParamsPtr(paintParams);
+
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    return false;
 }
 
 void GridItemPattern::MarkIsSelected(bool isSelected)
@@ -140,9 +229,9 @@ void GridItemPattern::BeforeCreateLayoutWrapper()
 Color GridItemPattern::GetBlendGgColor()
 {
     Color color = Color::TRANSPARENT;
-    auto pipeline = GetContext();
-    CHECK_NULL_RETURN(pipeline, color);
-    auto theme = pipeline->GetTheme<GridItemTheme>();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, color);
+    auto theme = host->GetTheme<GridItemTheme>(true);
     CHECK_NULL_RETURN(theme, color);
     if (isPressed_) {
         color = color.BlendColor(theme->GetGridItemPressColor());

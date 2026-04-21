@@ -101,7 +101,7 @@ HWTEST_F(TextInputModifierTest, setCaretPositionTestCaretPositionValidValues, Te
             modifier_->setCaretPosition(node_, &testValue);
             auto jsonValue = GetJsonValue(node_);
             auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CARET_POSITION_NAME);
-            EXPECT_EQ(resultStr, std::to_string(index)) <<
+            EXPECT_THAT(resultStr, Eq(std::to_string(index))) <<
                 "Input value is: " << input << ", method: setCaretPosition, attribute: caretPosition: "
                 << index;
         }
@@ -110,7 +110,7 @@ HWTEST_F(TextInputModifierTest, setCaretPositionTestCaretPositionValidValues, Te
             modifier_->setCaretPosition(node_, &testValue);
             auto jsonValue = GetJsonValue(node_);
             auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CARET_POSITION_NAME);
-            EXPECT_EQ(resultStr, std::to_string(index)) <<
+            EXPECT_THAT(resultStr, Eq(std::to_string(index))) <<
                 "Input value is: " << input << ", method: setCaretPosition (reverse), attribute: caretPosition: "
                 << index;
         }
@@ -121,7 +121,7 @@ HWTEST_F(TextInputModifierTest, setCaretPositionTestCaretPositionValidValues, Te
             auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CARET_POSITION_NAME);
             std::string expectedResult =
                 invalidIndex < 0 ? ATTRIBUTE_CARET_POSITION_DEFAULT_VALUE : std::to_string(textLength);
-            EXPECT_EQ(resultStr, expectedResult) <<
+            EXPECT_THAT(resultStr, Eq(expectedResult)) <<
                 "Input value is: " << input
                 << ", method: setCaretPosition exceed than Text length, attribute: caretPosition: " << invalidIndex;
         }
@@ -278,7 +278,7 @@ HWTEST_F(TextInputModifierTest, setTextInputOptionsTest, TestSize.Level1)
     const std::string textTestValue = "Text 512";
 
     Ark_TextInputOptions options;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     auto placeholder = ArkUnion<Ark_ResourceStr, Ark_String>(placeholderTestValue);
     auto text = ArkUnion<Ark_ResourceStr, Ark_String>(textTestValue);
@@ -294,10 +294,10 @@ HWTEST_F(TextInputModifierTest, setTextInputOptionsTest, TestSize.Level1)
     auto jsonValue = GetJsonValue(node_);
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PLACEHOLDER_NAME);
-    EXPECT_EQ(resultStr, placeholderTestValue);
+    EXPECT_THAT(resultStr, Eq(placeholderTestValue));
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_NAME);
-    EXPECT_EQ(resultStr, textTestValue);
+    EXPECT_THAT(resultStr, Eq(textTestValue));
 }
 
 /*
@@ -308,7 +308,7 @@ HWTEST_F(TextInputModifierTest, setTextInputOptionsTest, TestSize.Level1)
 HWTEST_F(TextInputModifierTest, setTextInputOptionsTestController, TestSize.Level1)
 {
     Ark_TextInputOptions options;
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     auto controllerAccessor = GeneratedModifier::GetTextInputControllerAccessor();
     ASSERT_NE(controllerAccessor, nullptr);
@@ -345,7 +345,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setOnEditChangeTest, TestSize.Level1)
     auto onEditChange = [](const Ark_Int32 resourceId, Ark_Boolean parameter) {
         checkData = { resourceId, Converter::Convert<bool>(parameter) };
     };
-    auto arkCallback = Converter::ArkCallback<Opt_Callback_Boolean_Void>(onEditChange, id);
+    auto arkCallback = Converter::ArkCallback<Opt_arkui_component_common_Callback_Boolean_Void>(onEditChange, id);
     modifier_->setOnEditChange(node_, &arkCallback);
     eventHub->FireOnEditChanged(true);
     ASSERT_TRUE(checkData.has_value());
@@ -374,7 +374,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setOnSecurityStateChangeTest, TestSize.
     auto onEditChange = [](const Ark_Int32 resourceId, Ark_Boolean parameter) {
         checkData = { resourceId, Converter::Convert<bool>(parameter) };
     };
-    auto arkCallback = Converter::ArkCallback<Opt_Callback_Boolean_Void>(onEditChange, id);
+    auto arkCallback = Converter::ArkCallback<Opt_arkui_component_common_Callback_Boolean_Void>(onEditChange, id);
     modifier_->setOnSecurityStateChange(node_, &arkCallback);
     eventHub->FireOnSecurityStateChanged(true);
     ASSERT_TRUE(checkData.has_value());
@@ -606,8 +606,8 @@ HWTEST_F(TextInputModifierTest, DISABLED_setInputFilterTest, TestSize.Level1)
     ASSERT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->nodeId, id);
     EXPECT_EQ(checkEvent->error, ERROR_TEXT);
-    auto attrValue = GetStringAttribute(node_, ATTRIBUTE_INPUT_FILTER_NAME);
-    EXPECT_EQ(attrValue, STR_TEST_TEXT);
+    auto attrValue = GetAttrValue<std::string>(node_, ATTRIBUTE_INPUT_FILTER_NAME);
+    EXPECT_THAT(attrValue, Eq(STR_TEST_TEXT));
     checkEvent.reset();
     modifier_->setInputFilter(node_, &sendResource2, &arkCallback);
     EXPECT_FALSE(checkEvent.has_value());
@@ -615,17 +615,17 @@ HWTEST_F(TextInputModifierTest, DISABLED_setInputFilterTest, TestSize.Level1)
     ASSERT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->nodeId, id);
     EXPECT_EQ(checkEvent->error, ERROR_TEXT2);
-    attrValue = GetStringAttribute(node_, ATTRIBUTE_INPUT_FILTER_NAME);
-    EXPECT_EQ(attrValue, STR_TEST_TEXT2);
+    attrValue = GetAttrValue<std::string>(node_, ATTRIBUTE_INPUT_FILTER_NAME);
+    EXPECT_THAT(attrValue, Eq(STR_TEST_TEXT2));
 }
 
 #ifdef WRONG_OLD_CALLBACK
 /*
- * @tc.name: setOnChangeEventTextImpl
+ * @tc.name: set_onChangeEvent_textTestValidCallback
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, setOnChangeEventTextImpl, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, set_onChangeEvent_textTestValidCallback, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();

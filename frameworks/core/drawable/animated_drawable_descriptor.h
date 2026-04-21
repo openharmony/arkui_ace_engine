@@ -32,6 +32,11 @@ class ACE_FORCE_EXPORT AnimatedDrawableDescriptor : public DrawableDescriptor {
     DECLARE_ACE_TYPE(AnimatedDrawableDescriptor, DrawableDescriptor);
 
 public:
+    enum class AnimationStopMode : int32_t {
+        FIRST_FRAME = 0,
+        LAST_FRAME = 1,
+    };
+
     AnimatedDrawableDescriptor() = default;
     ~AnimatedDrawableDescriptor() override = default;
 
@@ -77,6 +82,16 @@ public:
         return autoPlay_;
     }
 
+    void SetStopMode(AnimationStopMode stopMode)
+    {
+        stopMode_ = stopMode;
+    }
+
+    AnimationStopMode GetStopMode() const
+    {
+        return stopMode_;
+    }
+
     void SetTotalDuration(const int32_t totalDuration);
 
     void SetIterations(const int32_t iterations);
@@ -102,7 +117,10 @@ private:
 
     void CreateAnimator(int32_t nodeId);
 
+    FillMode ToFillMode() const;
+
     bool autoPlay_ = true;
+    AnimationStopMode stopMode_ = AnimationStopMode::FIRST_FRAME;
     int32_t totalDuration_ = -1;
     uint32_t frameCount_ = 0;
     int32_t iterations_ = 1;

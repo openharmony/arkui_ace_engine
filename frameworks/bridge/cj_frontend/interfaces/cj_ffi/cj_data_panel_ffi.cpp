@@ -73,8 +73,7 @@ NG::DataPanelModelNG* GetDataPanelModel()
 {
     auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("DataPanel");
     if (module == nullptr) {
-        LOGF("Can't find data_panel dynamic module");
-        abort();
+        LOGF_ABORT("Can't find data_panel dynamic module");
     }
     return reinterpret_cast<NG::DataPanelModelNG*>(module->GetModel());
 }

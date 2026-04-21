@@ -94,6 +94,7 @@ public:
         value->propSetPopupSelectedColorByUser_ = CloneSetPopupSelectedColorByUser();
         value->propSetPopupItemBackgroundColorByUser_ = CloneSetPopupItemBackgroundColorByUser();
         value->propSetPopupBackgroundColorByUser_ = CloneSetPopupBackgroundColorByUser();
+        value->propSetPopupBackgroundBlurStyleByUser_ = CloneSetPopupBackgroundBlurStyleByUser();
         return value;
     }
 
@@ -130,6 +131,7 @@ public:
         ResetSetPopupSelectedColorByUser();
         ResetSetPopupItemBackgroundColorByUser();
         ResetSetPopupBackgroundColorByUser();
+        ResetSetPopupBackgroundBlurStyleByUser();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
@@ -164,6 +166,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SetPopupBackgroundColorByUser, bool, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SetPopupSelectedColorByUser, bool, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SetPopupItemBackgroundColorByUser, bool, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SetPopupBackgroundBlurStyleByUser, bool, PROPERTY_UPDATE_NORMAL);
 
 private:
     static std::unique_ptr<JsonValue> ToJsonObjectValue(const TextStyle& textStyle);

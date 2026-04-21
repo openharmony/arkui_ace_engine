@@ -26,26 +26,26 @@ using namespace TestConst::Web;
 HWTEST_F(WebModifierTest, DISABLED_setWebOptionsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultValue = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_VALUE_NAME);
-    std::string resultStr;
+    std::unique_ptr<JsonValue> resultValue = GetAttrObject(jsonValue, ATTRIBUTE_VALUE_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(resultValue, ATTRIBUTE_VALUE_I_SRC_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_VALUE_I_SRC_DEFAULT_VALUE) << "Default value for attribute 'value.src'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_VALUE_I_SRC_DEFAULT_VALUE)) << "Default value for attribute 'value.src'";
 
     resultStr = GetAttrValue<std::string>(resultValue, ATTRIBUTE_VALUE_I_CONTROLLER_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_VALUE_I_CONTROLLER_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_VALUE_I_CONTROLLER_DEFAULT_VALUE)) <<
         "Default value for attribute 'value.controller'";
 
     resultStr = GetAttrValue<std::string>(resultValue, ATTRIBUTE_VALUE_I_RENDER_MODE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_VALUE_I_RENDER_MODE_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_VALUE_I_RENDER_MODE_DEFAULT_VALUE)) <<
         "Default value for attribute 'value.renderMode'";
 
     resultStr = GetAttrValue<std::string>(resultValue, ATTRIBUTE_VALUE_I_INCOGNITO_MODE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_VALUE_I_INCOGNITO_MODE_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_VALUE_I_INCOGNITO_MODE_DEFAULT_VALUE)) <<
         "Default value for attribute 'value.incognitoMode'";
 
     resultStr = GetAttrValue<std::string>(resultValue, ATTRIBUTE_VALUE_I_SHARED_RENDER_PROCESS_TOKEN_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_VALUE_I_SHARED_RENDER_PROCESS_TOKEN_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_VALUE_I_SHARED_RENDER_PROCESS_TOKEN_DEFAULT_VALUE)) <<
         "Default value for attribute 'value.sharedRenderProcessToken'";
 }
 
@@ -67,10 +67,10 @@ HWTEST_F(WebModifierTest, DISABLED_setWebOptionsTestValidValues, TestSize.Level1
 HWTEST_F(WebModifierTest, setJavaScriptAccessTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_JAVA_SCRIPT_ACCESS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_JAVA_SCRIPT_ACCESS_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_JAVA_SCRIPT_ACCESS_DEFAULT_VALUE)) <<
         "Default value for attribute 'javaScriptAccess'";
 }
 
@@ -94,7 +94,7 @@ HWTEST_F(WebModifierTest, setJavaScriptAccessTestJavaScriptAccessValidValues, Te
         modifier_->setJavaScriptAccess(node_, inputValueJavaScriptAccess);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_JAVA_SCRIPT_ACCESS_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setJavaScriptAccess, attribute: javaScriptAccess";
     };
 
@@ -111,10 +111,10 @@ HWTEST_F(WebModifierTest, setJavaScriptAccessTestJavaScriptAccessValidValues, Te
 HWTEST_F(WebModifierTest, setFileAccessTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FILE_ACCESS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_FILE_ACCESS_DEFAULT_VALUE) << "Default value for attribute 'fileAccess'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_FILE_ACCESS_DEFAULT_VALUE)) << "Default value for attribute 'fileAccess'";
 }
 
 /*
@@ -137,7 +137,7 @@ HWTEST_F(WebModifierTest, setFileAccessTestFileAccessValidValues, TestSize.Level
         modifier_->setFileAccess(node_, inputValueFileAccess);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FILE_ACCESS_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setFileAccess, attribute: fileAccess";
     };
 
@@ -154,10 +154,10 @@ HWTEST_F(WebModifierTest, setFileAccessTestFileAccessValidValues, TestSize.Level
 HWTEST_F(WebModifierTest, setOnlineImageAccessTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ONLINE_IMAGE_ACCESS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ONLINE_IMAGE_ACCESS_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ONLINE_IMAGE_ACCESS_DEFAULT_VALUE)) <<
         "Default value for attribute 'onlineImageAccess'";
 }
 
@@ -181,7 +181,7 @@ HWTEST_F(WebModifierTest, setOnlineImageAccessTestOnlineImageAccessValidValues, 
         modifier_->setOnlineImageAccess(node_, inputValueOnlineImageAccess);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ONLINE_IMAGE_ACCESS_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setOnlineImageAccess, attribute: onlineImageAccess";
     };
 
@@ -198,10 +198,10 @@ HWTEST_F(WebModifierTest, setOnlineImageAccessTestOnlineImageAccessValidValues, 
 HWTEST_F(WebModifierTest, setDomStorageAccessTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DOM_STORAGE_ACCESS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DOM_STORAGE_ACCESS_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_DOM_STORAGE_ACCESS_DEFAULT_VALUE)) <<
         "Default value for attribute 'domStorageAccess'";
 }
 
@@ -225,7 +225,7 @@ HWTEST_F(WebModifierTest, setDomStorageAccessTestDomStorageAccessValidValues, Te
         modifier_->setDomStorageAccess(node_, inputValueDomStorageAccess);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DOM_STORAGE_ACCESS_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setDomStorageAccess, attribute: domStorageAccess";
     };
 
@@ -242,10 +242,11 @@ HWTEST_F(WebModifierTest, setDomStorageAccessTestDomStorageAccessValidValues, Te
 HWTEST_F(WebModifierTest, setImageAccessTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_IMAGE_ACCESS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_IMAGE_ACCESS_DEFAULT_VALUE) << "Default value for attribute 'imageAccess'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_IMAGE_ACCESS_DEFAULT_VALUE)) <<
+        "Default value for attribute 'imageAccess'";
 }
 
 /*
@@ -268,7 +269,7 @@ HWTEST_F(WebModifierTest, setImageAccessTestImageAccessValidValues, TestSize.Lev
         modifier_->setImageAccess(node_, inputValueImageAccess);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_IMAGE_ACCESS_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setImageAccess, attribute: imageAccess";
     };
 
@@ -285,10 +286,10 @@ HWTEST_F(WebModifierTest, setImageAccessTestImageAccessValidValues, TestSize.Lev
 HWTEST_F(WebModifierTest, setMixedModeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIXED_MODE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MIXED_MODE_DEFAULT_VALUE) << "Default value for attribute 'mixedMode'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_MIXED_MODE_DEFAULT_VALUE)) << "Default value for attribute 'mixedMode'";
 }
 
 /*
@@ -311,7 +312,7 @@ HWTEST_F(WebModifierTest, setMixedModeTestMixedModeValidValues, TestSize.Level1)
         modifier_->setMixedMode(node_, inputValueMixedMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIXED_MODE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setMixedMode, attribute: mixedMode";
     };
 
@@ -340,7 +341,7 @@ HWTEST_F(WebModifierTest, setMixedModeTestMixedModeInvalidValues, TestSize.Level
         modifier_->setMixedMode(node_, inputValueMixedMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIXED_MODE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_MIXED_MODE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_MIXED_MODE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setMixedMode, attribute: mixedMode";
     };
 
@@ -357,10 +358,10 @@ HWTEST_F(WebModifierTest, setMixedModeTestMixedModeInvalidValues, TestSize.Level
 HWTEST_F(WebModifierTest, setZoomAccessTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ZOOM_ACCESS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ZOOM_ACCESS_DEFAULT_VALUE) << "Default value for attribute 'zoomAccess'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_ZOOM_ACCESS_DEFAULT_VALUE)) << "Default value for attribute 'zoomAccess'";
 }
 
 /*
@@ -383,7 +384,7 @@ HWTEST_F(WebModifierTest, setZoomAccessTestZoomAccessValidValues, TestSize.Level
         modifier_->setZoomAccess(node_, inputValueZoomAccess);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ZOOM_ACCESS_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setZoomAccess, attribute: zoomAccess";
     };
 
@@ -400,10 +401,10 @@ HWTEST_F(WebModifierTest, setZoomAccessTestZoomAccessValidValues, TestSize.Level
 HWTEST_F(WebModifierTest, setGeolocationAccessTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_GEOLOCATION_ACCESS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_GEOLOCATION_ACCESS_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_GEOLOCATION_ACCESS_DEFAULT_VALUE)) <<
         "Default value for attribute 'geolocationAccess'";
 }
 
@@ -427,7 +428,7 @@ HWTEST_F(WebModifierTest, setGeolocationAccessTestGeolocationAccessValidValues, 
         modifier_->setGeolocationAccess(node_, inputValueGeolocationAccess);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_GEOLOCATION_ACCESS_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setGeolocationAccess, attribute: geolocationAccess";
     };
 
@@ -444,28 +445,27 @@ HWTEST_F(WebModifierTest, setGeolocationAccessTestGeolocationAccessValidValues, 
 HWTEST_F(WebModifierTest, DISABLED_setJavaScriptProxyTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultJavaScriptProxy =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_JAVA_SCRIPT_PROXY_NAME);
-    std::string resultStr;
+    std::unique_ptr<JsonValue> resultJavaScriptProxy = GetAttrObject(jsonValue, ATTRIBUTE_JAVA_SCRIPT_PROXY_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(resultJavaScriptProxy, ATTRIBUTE_JAVA_SCRIPT_PROXY_I_NAME_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_JAVA_SCRIPT_PROXY_I_NAME_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_JAVA_SCRIPT_PROXY_I_NAME_DEFAULT_VALUE)) <<
         "Default value for attribute 'javaScriptProxy.name'";
 
     resultStr = GetAttrValue<std::string>(resultJavaScriptProxy, ATTRIBUTE_JAVA_SCRIPT_PROXY_I_METHOD_LIST_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_JAVA_SCRIPT_PROXY_I_METHOD_LIST_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_JAVA_SCRIPT_PROXY_I_METHOD_LIST_DEFAULT_VALUE)) <<
         "Default value for attribute 'javaScriptProxy.methodList'";
 
     resultStr = GetAttrValue<std::string>(resultJavaScriptProxy, ATTRIBUTE_JAVA_SCRIPT_PROXY_I_CONTROLLER_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_JAVA_SCRIPT_PROXY_I_CONTROLLER_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_JAVA_SCRIPT_PROXY_I_CONTROLLER_DEFAULT_VALUE)) <<
         "Default value for attribute 'javaScriptProxy.controller'";
 
     resultStr = GetAttrValue<std::string>(resultJavaScriptProxy, ATTRIBUTE_JAVA_SCRIPT_PROXY_I_ASYNC_METHOD_LIST_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_JAVA_SCRIPT_PROXY_I_ASYNC_METHOD_LIST_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_JAVA_SCRIPT_PROXY_I_ASYNC_METHOD_LIST_DEFAULT_VALUE)) <<
         "Default value for attribute 'javaScriptProxy.asyncMethodList'";
 
     resultStr = GetAttrValue<std::string>(resultJavaScriptProxy, ATTRIBUTE_JAVA_SCRIPT_PROXY_I_PERMISSION_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_JAVA_SCRIPT_PROXY_I_PERMISSION_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_JAVA_SCRIPT_PROXY_I_PERMISSION_DEFAULT_VALUE)) <<
         "Default value for attribute 'javaScriptProxy.permission'";
 }
 
@@ -487,10 +487,10 @@ HWTEST_F(WebModifierTest, DISABLED_setJavaScriptProxyTestValidValues, TestSize.L
 HWTEST_F(WebModifierTest, DISABLED_setPasswordTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PASSWORD_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_PASSWORD_DEFAULT_VALUE) << "Default value for attribute 'password'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_PASSWORD_DEFAULT_VALUE)) << "Default value for attribute 'password'";
 }
 
 /*
@@ -513,7 +513,7 @@ HWTEST_F(WebModifierTest, DISABLED_setPasswordTestPasswordValidValues, TestSize.
         modifier_->setPassword(node_, inputValuePassword);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PASSWORD_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setPassword, attribute: password";
     };
 
@@ -530,10 +530,10 @@ HWTEST_F(WebModifierTest, DISABLED_setPasswordTestPasswordValidValues, TestSize.
 HWTEST_F(WebModifierTest, setCacheModeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CACHE_MODE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_CACHE_MODE_DEFAULT_VALUE) << "Default value for attribute 'cacheMode'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_CACHE_MODE_DEFAULT_VALUE)) << "Default value for attribute 'cacheMode'";
 }
 
 /*
@@ -556,7 +556,7 @@ HWTEST_F(WebModifierTest, DISABLED_setCacheModeTestCacheModeValidValues, TestSiz
         modifier_->setCacheMode(node_, inputValueCacheMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CACHE_MODE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setCacheMode, attribute: cacheMode";
     };
 
@@ -585,7 +585,7 @@ HWTEST_F(WebModifierTest, setCacheModeTestCacheModeInvalidValues, TestSize.Level
         modifier_->setCacheMode(node_, inputValueCacheMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CACHE_MODE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_CACHE_MODE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_CACHE_MODE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setCacheMode, attribute: cacheMode";
     };
 
@@ -602,10 +602,10 @@ HWTEST_F(WebModifierTest, setCacheModeTestCacheModeInvalidValues, TestSize.Level
 HWTEST_F(WebModifierTest, setDarkModeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DARK_MODE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DARK_MODE_DEFAULT_VALUE) << "Default value for attribute 'darkMode'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_DARK_MODE_DEFAULT_VALUE)) << "Default value for attribute 'darkMode'";
 }
 
 /*
@@ -628,7 +628,7 @@ HWTEST_F(WebModifierTest, setDarkModeTestDarkModeValidValues, TestSize.Level1)
         modifier_->setDarkMode(node_, inputValueDarkMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DARK_MODE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setDarkMode, attribute: darkMode";
     };
 
@@ -657,7 +657,7 @@ HWTEST_F(WebModifierTest, setDarkModeTestDarkModeInvalidValues, TestSize.Level1)
         modifier_->setDarkMode(node_, inputValueDarkMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DARK_MODE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_DARK_MODE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_DARK_MODE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setDarkMode, attribute: darkMode";
     };
 
@@ -674,10 +674,11 @@ HWTEST_F(WebModifierTest, setDarkModeTestDarkModeInvalidValues, TestSize.Level1)
 HWTEST_F(WebModifierTest, setForceDarkAccessTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FORCE_DARK_ACCESS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_FORCE_DARK_ACCESS_DEFAULT_VALUE) << "Default value for attribute 'forceDarkAccess'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_FORCE_DARK_ACCESS_DEFAULT_VALUE)) <<
+        "Default value for attribute 'forceDarkAccess'";
 }
 
 /*
@@ -700,7 +701,7 @@ HWTEST_F(WebModifierTest, setForceDarkAccessTestForceDarkAccessValidValues, Test
         modifier_->setForceDarkAccess(node_, inputValueForceDarkAccess);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FORCE_DARK_ACCESS_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setForceDarkAccess, attribute: forceDarkAccess";
     };
 
@@ -717,16 +718,15 @@ HWTEST_F(WebModifierTest, setForceDarkAccessTestForceDarkAccessValidValues, Test
 HWTEST_F(WebModifierTest, setMediaOptionsTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultMediaOptions =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MEDIA_OPTIONS_NAME);
-    std::string resultStr;
+    std::unique_ptr<JsonValue> resultMediaOptions = GetAttrObject(jsonValue, ATTRIBUTE_MEDIA_OPTIONS_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(resultMediaOptions, ATTRIBUTE_MEDIA_OPTIONS_I_RESUME_INTERVAL_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MEDIA_OPTIONS_I_RESUME_INTERVAL_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_MEDIA_OPTIONS_I_RESUME_INTERVAL_DEFAULT_VALUE)) <<
         "Default value for attribute 'mediaOptions.resumeInterval'";
 
     resultStr = GetAttrValue<std::string>(resultMediaOptions, ATTRIBUTE_MEDIA_OPTIONS_I_AUDIO_EXCLUSIVE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MEDIA_OPTIONS_I_AUDIO_EXCLUSIVE_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_MEDIA_OPTIONS_I_AUDIO_EXCLUSIVE_DEFAULT_VALUE)) <<
         "Default value for attribute 'mediaOptions.audioExclusive'";
 }
 
@@ -752,9 +752,9 @@ HWTEST_F(WebModifierTest, setMediaOptionsTestMediaOptionsResumeIntervalValidValu
         inputValueMediaOptions.resumeInterval = value;
         modifier_->setMediaOptions(node_, &inputValueMediaOptions);
         auto jsonValue = GetJsonValue(node_);
-        auto resultMediaOptions = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MEDIA_OPTIONS_NAME);
+        auto resultMediaOptions = GetAttrObject(jsonValue, ATTRIBUTE_MEDIA_OPTIONS_NAME);
         auto resultStr = GetAttrValue<std::string>(resultMediaOptions, ATTRIBUTE_MEDIA_OPTIONS_I_RESUME_INTERVAL_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setMediaOptions, attribute: mediaOptions.resumeInterval";
     };
 
@@ -785,9 +785,9 @@ HWTEST_F(WebModifierTest, setMediaOptionsTestMediaOptionsResumeIntervalInvalidVa
         inputValueMediaOptions.resumeInterval = value;
         modifier_->setMediaOptions(node_, &inputValueMediaOptions);
         auto jsonValue = GetJsonValue(node_);
-        auto resultMediaOptions = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MEDIA_OPTIONS_NAME);
+        auto resultMediaOptions = GetAttrObject(jsonValue, ATTRIBUTE_MEDIA_OPTIONS_NAME);
         auto resultStr = GetAttrValue<std::string>(resultMediaOptions, ATTRIBUTE_MEDIA_OPTIONS_I_RESUME_INTERVAL_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_MEDIA_OPTIONS_I_RESUME_INTERVAL_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_MEDIA_OPTIONS_I_RESUME_INTERVAL_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setMediaOptions, attribute: mediaOptions.resumeInterval";
     };
 
@@ -817,9 +817,9 @@ HWTEST_F(WebModifierTest, setMediaOptionsTestMediaOptionsAudioExclusiveValidValu
         inputValueMediaOptions.audioExclusive = value;
         modifier_->setMediaOptions(node_, &inputValueMediaOptions);
         auto jsonValue = GetJsonValue(node_);
-        auto resultMediaOptions = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MEDIA_OPTIONS_NAME);
+        auto resultMediaOptions = GetAttrObject(jsonValue, ATTRIBUTE_MEDIA_OPTIONS_NAME);
         auto resultStr = GetAttrValue<std::string>(resultMediaOptions, ATTRIBUTE_MEDIA_OPTIONS_I_AUDIO_EXCLUSIVE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setMediaOptions, attribute: mediaOptions.audioExclusive";
     };
 
@@ -850,9 +850,9 @@ HWTEST_F(WebModifierTest, setMediaOptionsTestMediaOptionsAudioExclusiveInvalidVa
         inputValueMediaOptions.audioExclusive = value;
         modifier_->setMediaOptions(node_, &inputValueMediaOptions);
         auto jsonValue = GetJsonValue(node_);
-        auto resultMediaOptions = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MEDIA_OPTIONS_NAME);
+        auto resultMediaOptions = GetAttrObject(jsonValue, ATTRIBUTE_MEDIA_OPTIONS_NAME);
         auto resultStr = GetAttrValue<std::string>(resultMediaOptions, ATTRIBUTE_MEDIA_OPTIONS_I_AUDIO_EXCLUSIVE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_MEDIA_OPTIONS_I_AUDIO_EXCLUSIVE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_MEDIA_OPTIONS_I_AUDIO_EXCLUSIVE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setMediaOptions, attribute: mediaOptions.audioExclusive";
     };
 
@@ -868,10 +868,10 @@ HWTEST_F(WebModifierTest, setMediaOptionsTestMediaOptionsAudioExclusiveInvalidVa
 HWTEST_F(WebModifierTest, DISABLED_setTableDataTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TABLE_DATA_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TABLE_DATA_DEFAULT_VALUE) << "Default value for attribute 'tableData'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_TABLE_DATA_DEFAULT_VALUE)) << "Default value for attribute 'tableData'";
 }
 
 /*
@@ -894,7 +894,7 @@ HWTEST_F(WebModifierTest, DISABLED_setTableDataTestTableDataValidValues, TestSiz
         modifier_->setTableData(node_, inputValueTableData);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TABLE_DATA_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setTableData, attribute: tableData";
     };
 
@@ -911,10 +911,10 @@ HWTEST_F(WebModifierTest, DISABLED_setTableDataTestTableDataValidValues, TestSiz
 HWTEST_F(WebModifierTest, DISABLED_setWideViewModeAccessTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WIDE_VIEW_MODE_ACCESS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_WIDE_VIEW_MODE_ACCESS_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_WIDE_VIEW_MODE_ACCESS_DEFAULT_VALUE)) <<
         "Default value for attribute 'wideViewModeAccess'";
 }
 
@@ -938,7 +938,7 @@ HWTEST_F(WebModifierTest, DISABLED_setWideViewModeAccessTestWideViewModeAccessVa
         modifier_->setWideViewModeAccess(node_, inputValueWideViewModeAccess);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WIDE_VIEW_MODE_ACCESS_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setWideViewModeAccess, attribute: wideViewModeAccess";
     };
 
@@ -955,10 +955,10 @@ HWTEST_F(WebModifierTest, DISABLED_setWideViewModeAccessTestWideViewModeAccessVa
 HWTEST_F(WebModifierTest, setOverviewModeAccessTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OVERVIEW_MODE_ACCESS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_OVERVIEW_MODE_ACCESS_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_OVERVIEW_MODE_ACCESS_DEFAULT_VALUE)) <<
         "Default value for attribute 'overviewModeAccess'";
 }
 
@@ -982,7 +982,7 @@ HWTEST_F(WebModifierTest, setOverviewModeAccessTestOverviewModeAccessValidValues
         modifier_->setOverviewModeAccess(node_, inputValueOverviewModeAccess);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OVERVIEW_MODE_ACCESS_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setOverviewModeAccess, attribute: overviewModeAccess";
     };
 
@@ -999,10 +999,11 @@ HWTEST_F(WebModifierTest, setOverviewModeAccessTestOverviewModeAccessValidValues
 HWTEST_F(WebModifierTest, setOverScrollModeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OVER_SCROLL_MODE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_OVER_SCROLL_MODE_DEFAULT_VALUE) << "Default value for attribute 'overScrollMode'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_OVER_SCROLL_MODE_DEFAULT_VALUE)) <<
+        "Default value for attribute 'overScrollMode'";
 }
 
 /*
@@ -1025,7 +1026,7 @@ HWTEST_F(WebModifierTest, setOverScrollModeTestOverScrollModeValidValues, TestSi
         modifier_->setOverScrollMode(node_, inputValueOverScrollMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OVER_SCROLL_MODE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setOverScrollMode, attribute: overScrollMode";
     };
 
@@ -1054,7 +1055,7 @@ HWTEST_F(WebModifierTest, setOverScrollModeTestOverScrollModeInvalidValues, Test
         modifier_->setOverScrollMode(node_, inputValueOverScrollMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OVER_SCROLL_MODE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_OVER_SCROLL_MODE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_OVER_SCROLL_MODE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setOverScrollMode, attribute: overScrollMode";
     };
 
@@ -1071,10 +1072,10 @@ HWTEST_F(WebModifierTest, setOverScrollModeTestOverScrollModeInvalidValues, Test
 HWTEST_F(WebModifierTest, DISABLED_setBlurOnKeyboardHideModeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BLUR_ON_KEYBOARD_HIDE_MODE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_BLUR_ON_KEYBOARD_HIDE_MODE_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_BLUR_ON_KEYBOARD_HIDE_MODE_DEFAULT_VALUE)) <<
         "Default value for attribute 'blurOnKeyboardHideMode'";
 }
 
@@ -1098,7 +1099,7 @@ HWTEST_F(WebModifierTest, DISABLED_setBlurOnKeyboardHideModeTestBlurOnKeyboardHi
         modifier_->setBlurOnKeyboardHideMode(node_, inputValueBlurOnKeyboardHideMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BLUR_ON_KEYBOARD_HIDE_MODE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setBlurOnKeyboardHideMode, attribute: blurOnKeyboardHideMode";
     };
 
@@ -1128,7 +1129,7 @@ HWTEST_F(WebModifierTest, DISABLED_setBlurOnKeyboardHideModeTestBlurOnKeyboardHi
         modifier_->setBlurOnKeyboardHideMode(node_, inputValueBlurOnKeyboardHideMode);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BLUR_ON_KEYBOARD_HIDE_MODE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_BLUR_ON_KEYBOARD_HIDE_MODE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_BLUR_ON_KEYBOARD_HIDE_MODE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setBlurOnKeyboardHideMode, attribute: blurOnKeyboardHideMode";
     };
 
@@ -1145,10 +1146,11 @@ HWTEST_F(WebModifierTest, DISABLED_setBlurOnKeyboardHideModeTestBlurOnKeyboardHi
 HWTEST_F(WebModifierTest, setTextZoomAtioTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_ZOOM_ATIO_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_ZOOM_ATIO_DEFAULT_VALUE) << "Default value for attribute 'textZoomAtio'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_TEXT_ZOOM_ATIO_DEFAULT_VALUE)) <<
+        "Default value for attribute 'textZoomAtio'";
 }
 
 /*
@@ -1171,7 +1173,7 @@ HWTEST_F(WebModifierTest, setTextZoomAtioTestTextZoomAtioValidValues, TestSize.L
         modifier_->setTextZoomAtio(node_, &inputValueTextZoomAtio);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_ZOOM_ATIO_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setTextZoomAtio, attribute: textZoomAtio";
     };
 
@@ -1188,10 +1190,11 @@ HWTEST_F(WebModifierTest, setTextZoomAtioTestTextZoomAtioValidValues, TestSize.L
 HWTEST_F(WebModifierTest, setTextZoomRatioTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_ZOOM_RATIO_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_TEXT_ZOOM_RATIO_DEFAULT_VALUE) << "Default value for attribute 'textZoomRatio'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_TEXT_ZOOM_RATIO_DEFAULT_VALUE)) <<
+        "Default value for attribute 'textZoomRatio'";
 }
 
 /*
@@ -1214,7 +1217,7 @@ HWTEST_F(WebModifierTest, setTextZoomRatioTestTextZoomRatioValidValues, TestSize
         modifier_->setTextZoomRatio(node_, &inputValueTextZoomRatio);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_ZOOM_RATIO_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setTextZoomRatio, attribute: textZoomRatio";
     };
 
@@ -1231,10 +1234,11 @@ HWTEST_F(WebModifierTest, setTextZoomRatioTestTextZoomRatioValidValues, TestSize
 HWTEST_F(WebModifierTest, setDatabaseAccessTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DATABASE_ACCESS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DATABASE_ACCESS_DEFAULT_VALUE) << "Default value for attribute 'databaseAccess'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_DATABASE_ACCESS_DEFAULT_VALUE)) <<
+        "Default value for attribute 'databaseAccess'";
 }
 
 /*
@@ -1257,7 +1261,7 @@ HWTEST_F(WebModifierTest, setDatabaseAccessTestDatabaseAccessValidValues, TestSi
         modifier_->setDatabaseAccess(node_, inputValueDatabaseAccess);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DATABASE_ACCESS_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setDatabaseAccess, attribute: databaseAccess";
     };
 
@@ -1274,10 +1278,11 @@ HWTEST_F(WebModifierTest, setDatabaseAccessTestDatabaseAccessValidValues, TestSi
 HWTEST_F(WebModifierTest, setInitialScaleTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_INITIAL_SCALE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_INITIAL_SCALE_DEFAULT_VALUE) << "Default value for attribute 'initialScale'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_INITIAL_SCALE_DEFAULT_VALUE)) <<
+        "Default value for attribute 'initialScale'";
 }
 
 /*
@@ -1300,7 +1305,7 @@ HWTEST_F(WebModifierTest, setInitialScaleTestInitialScaleValidValues, TestSize.L
         modifier_->setInitialScale(node_, &inputValueInitialScale);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_INITIAL_SCALE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setInitialScale, attribute: initialScale";
     };
 
@@ -1317,10 +1322,10 @@ HWTEST_F(WebModifierTest, setInitialScaleTestInitialScaleValidValues, TestSize.L
 HWTEST_F(WebModifierTest, setUserAgentTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_USER_AGENT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_USER_AGENT_DEFAULT_VALUE) << "Default value for attribute 'userAgent'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_USER_AGENT_DEFAULT_VALUE)) << "Default value for attribute 'userAgent'";
 }
 
 /*
@@ -1343,7 +1348,7 @@ HWTEST_F(WebModifierTest, setUserAgentTestUserAgentValidValues, TestSize.Level1)
         modifier_->setUserAgent(node_, &inputValueUserAgent);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_USER_AGENT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setUserAgent, attribute: userAgent";
     };
 
@@ -1360,10 +1365,11 @@ HWTEST_F(WebModifierTest, setUserAgentTestUserAgentValidValues, TestSize.Level1)
 HWTEST_F(WebModifierTest, setMetaViewportTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_META_VIEWPORT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_META_VIEWPORT_DEFAULT_VALUE) << "Default value for attribute 'metaViewport'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_META_VIEWPORT_DEFAULT_VALUE)) <<
+        "Default value for attribute 'metaViewport'";
 }
 
 /*
@@ -1386,7 +1392,7 @@ HWTEST_F(WebModifierTest, setMetaViewportTestMetaViewportValidValues, TestSize.L
         modifier_->setMetaViewport(node_, inputValueMetaViewport);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_META_VIEWPORT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setMetaViewport, attribute: metaViewport";
     };
 
@@ -1403,10 +1409,10 @@ HWTEST_F(WebModifierTest, setMetaViewportTestMetaViewportValidValues, TestSize.L
 HWTEST_F(WebModifierTest, setMediaPlayGestureAccessTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MEDIA_PLAY_GESTURE_ACCESS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MEDIA_PLAY_GESTURE_ACCESS_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_MEDIA_PLAY_GESTURE_ACCESS_DEFAULT_VALUE)) <<
         "Default value for attribute 'mediaPlayGestureAccess'";
 }
 
@@ -1430,7 +1436,7 @@ HWTEST_F(WebModifierTest, setMediaPlayGestureAccessTestMediaPlayGestureAccessVal
         modifier_->setMediaPlayGestureAccess(node_, inputValueMediaPlayGestureAccess);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MEDIA_PLAY_GESTURE_ACCESS_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setMediaPlayGestureAccess, attribute: mediaPlayGestureAccess";
     };
 
@@ -1447,10 +1453,10 @@ HWTEST_F(WebModifierTest, setMediaPlayGestureAccessTestMediaPlayGestureAccessVal
 HWTEST_F(WebModifierTest, setMultiWindowAccessTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MULTI_WINDOW_ACCESS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MULTI_WINDOW_ACCESS_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_MULTI_WINDOW_ACCESS_DEFAULT_VALUE)) <<
         "Default value for attribute 'multiWindowAccess'";
 }
 
@@ -1474,7 +1480,7 @@ HWTEST_F(WebModifierTest, setMultiWindowAccessTestMultiWindowAccessValidValues, 
         modifier_->setMultiWindowAccess(node_, inputValueMultiWindowAccess);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MULTI_WINDOW_ACCESS_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setMultiWindowAccess, attribute: multiWindowAccess";
     };
 
@@ -1491,10 +1497,11 @@ HWTEST_F(WebModifierTest, setMultiWindowAccessTestMultiWindowAccessValidValues, 
 HWTEST_F(WebModifierTest, setWebStandardFontTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WEB_STANDARD_FONT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_WEB_STANDARD_FONT_DEFAULT_VALUE) << "Default value for attribute 'webStandardFont'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_WEB_STANDARD_FONT_DEFAULT_VALUE)) <<
+        "Default value for attribute 'webStandardFont'";
 }
 
 /*
@@ -1517,7 +1524,7 @@ HWTEST_F(WebModifierTest, setWebStandardFontTestWebStandardFontValidValues, Test
         modifier_->setWebStandardFont(node_, &inputValueWebStandardFont);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WEB_STANDARD_FONT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setWebStandardFont, attribute: webStandardFont";
     };
 
@@ -1534,10 +1541,11 @@ HWTEST_F(WebModifierTest, setWebStandardFontTestWebStandardFontValidValues, Test
 HWTEST_F(WebModifierTest, setWebSerifFontTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WEB_SERIF_FONT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_WEB_SERIF_FONT_DEFAULT_VALUE) << "Default value for attribute 'webSerifFont'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_WEB_SERIF_FONT_DEFAULT_VALUE)) <<
+        "Default value for attribute 'webSerifFont'";
 }
 
 /*
@@ -1560,7 +1568,7 @@ HWTEST_F(WebModifierTest, setWebSerifFontTestWebSerifFontValidValues, TestSize.L
         modifier_->setWebSerifFont(node_, &inputValueWebSerifFont);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WEB_SERIF_FONT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setWebSerifFont, attribute: webSerifFont";
     };
 
@@ -1577,10 +1585,10 @@ HWTEST_F(WebModifierTest, setWebSerifFontTestWebSerifFontValidValues, TestSize.L
 HWTEST_F(WebModifierTest, setWebSansSerifFontTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WEB_SANS_SERIF_FONT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_WEB_SANS_SERIF_FONT_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_WEB_SANS_SERIF_FONT_DEFAULT_VALUE)) <<
         "Default value for attribute 'webSansSerifFont'";
 }
 
@@ -1604,7 +1612,7 @@ HWTEST_F(WebModifierTest, setWebSansSerifFontTestWebSansSerifFontValidValues, Te
         modifier_->setWebSansSerifFont(node_, &inputValueWebSansSerifFont);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WEB_SANS_SERIF_FONT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setWebSansSerifFont, attribute: webSansSerifFont";
     };
 
@@ -1621,10 +1629,11 @@ HWTEST_F(WebModifierTest, setWebSansSerifFontTestWebSansSerifFontValidValues, Te
 HWTEST_F(WebModifierTest, setWebFixedFontTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WEB_FIXED_FONT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_WEB_FIXED_FONT_DEFAULT_VALUE) << "Default value for attribute 'webFixedFont'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_WEB_FIXED_FONT_DEFAULT_VALUE)) <<
+        "Default value for attribute 'webFixedFont'";
 }
 
 /*
@@ -1647,7 +1656,7 @@ HWTEST_F(WebModifierTest, setWebFixedFontTestWebFixedFontValidValues, TestSize.L
         modifier_->setWebFixedFont(node_, &inputValueWebFixedFont);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WEB_FIXED_FONT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setWebFixedFont, attribute: webFixedFont";
     };
 
@@ -1664,10 +1673,11 @@ HWTEST_F(WebModifierTest, setWebFixedFontTestWebFixedFontValidValues, TestSize.L
 HWTEST_F(WebModifierTest, setWebFantasyFontTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WEB_FANTASY_FONT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_WEB_FANTASY_FONT_DEFAULT_VALUE) << "Default value for attribute 'webFantasyFont'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_WEB_FANTASY_FONT_DEFAULT_VALUE)) <<
+        "Default value for attribute 'webFantasyFont'";
 }
 
 /*
@@ -1690,7 +1700,7 @@ HWTEST_F(WebModifierTest, setWebFantasyFontTestWebFantasyFontValidValues, TestSi
         modifier_->setWebFantasyFont(node_, &inputValueWebFantasyFont);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WEB_FANTASY_FONT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setWebFantasyFont, attribute: webFantasyFont";
     };
 
@@ -1707,10 +1717,11 @@ HWTEST_F(WebModifierTest, setWebFantasyFontTestWebFantasyFontValidValues, TestSi
 HWTEST_F(WebModifierTest, setWebCursiveFontTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WEB_CURSIVE_FONT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_WEB_CURSIVE_FONT_DEFAULT_VALUE) << "Default value for attribute 'webCursiveFont'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_WEB_CURSIVE_FONT_DEFAULT_VALUE)) <<
+        "Default value for attribute 'webCursiveFont'";
 }
 
 /*
@@ -1733,7 +1744,7 @@ HWTEST_F(WebModifierTest, setWebCursiveFontTestWebCursiveFontValidValues, TestSi
         modifier_->setWebCursiveFont(node_, &inputValueWebCursiveFont);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WEB_CURSIVE_FONT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setWebCursiveFont, attribute: webCursiveFont";
     };
 
@@ -1750,10 +1761,10 @@ HWTEST_F(WebModifierTest, setWebCursiveFontTestWebCursiveFontValidValues, TestSi
 HWTEST_F(WebModifierTest, setDefaultFixedFontSizeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DEFAULT_FIXED_FONT_SIZE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DEFAULT_FIXED_FONT_SIZE_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_DEFAULT_FIXED_FONT_SIZE_DEFAULT_VALUE)) <<
         "Default value for attribute 'defaultFixedFontSize'";
 }
 
@@ -1777,7 +1788,7 @@ HWTEST_F(WebModifierTest, setDefaultFixedFontSizeTestDefaultFixedFontSizeValidVa
         modifier_->setDefaultFixedFontSize(node_, &inputValueDefaultFixedFontSize);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DEFAULT_FIXED_FONT_SIZE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setDefaultFixedFontSize, attribute: defaultFixedFontSize";
     };
 
@@ -1794,10 +1805,11 @@ HWTEST_F(WebModifierTest, setDefaultFixedFontSizeTestDefaultFixedFontSizeValidVa
 HWTEST_F(WebModifierTest, setDefaultFontSizeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DEFAULT_FONT_SIZE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DEFAULT_FONT_SIZE_DEFAULT_VALUE) << "Default value for attribute 'defaultFontSize'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_DEFAULT_FONT_SIZE_DEFAULT_VALUE)) <<
+        "Default value for attribute 'defaultFontSize'";
 }
 
 /*
@@ -1820,7 +1832,7 @@ HWTEST_F(WebModifierTest, setDefaultFontSizeTestDefaultFontSizeValidValues, Test
         modifier_->setDefaultFontSize(node_, &inputValueDefaultFontSize);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DEFAULT_FONT_SIZE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setDefaultFontSize, attribute: defaultFontSize";
     };
 
@@ -1837,10 +1849,11 @@ HWTEST_F(WebModifierTest, setDefaultFontSizeTestDefaultFontSizeValidValues, Test
 HWTEST_F(WebModifierTest, setMinFontSizeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_FONT_SIZE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MIN_FONT_SIZE_DEFAULT_VALUE) << "Default value for attribute 'minFontSize'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_MIN_FONT_SIZE_DEFAULT_VALUE)) <<
+        "Default value for attribute 'minFontSize'";
 }
 
 /*
@@ -1863,7 +1876,7 @@ HWTEST_F(WebModifierTest, setMinFontSizeTestMinFontSizeValidValues, TestSize.Lev
         modifier_->setMinFontSize(node_, &inputValueMinFontSize);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_FONT_SIZE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setMinFontSize, attribute: minFontSize";
     };
 
@@ -1880,10 +1893,10 @@ HWTEST_F(WebModifierTest, setMinFontSizeTestMinFontSizeValidValues, TestSize.Lev
 HWTEST_F(WebModifierTest, setMinLogicalFontSizeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_LOGICAL_FONT_SIZE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MIN_LOGICAL_FONT_SIZE_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_MIN_LOGICAL_FONT_SIZE_DEFAULT_VALUE)) <<
         "Default value for attribute 'minLogicalFontSize'";
 }
 
@@ -1907,7 +1920,7 @@ HWTEST_F(WebModifierTest, setMinLogicalFontSizeTestMinLogicalFontSizeValidValues
         modifier_->setMinLogicalFontSize(node_, &inputValueMinLogicalFontSize);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_LOGICAL_FONT_SIZE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setMinLogicalFontSize, attribute: minLogicalFontSize";
     };
 
@@ -1924,10 +1937,10 @@ HWTEST_F(WebModifierTest, setMinLogicalFontSizeTestMinLogicalFontSizeValidValues
 HWTEST_F(WebModifierTest, setDefaultTextEncodingFormatTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DEFAULT_TEXT_ENCODING_FORMAT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DEFAULT_TEXT_ENCODING_FORMAT_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_DEFAULT_TEXT_ENCODING_FORMAT_DEFAULT_VALUE)) <<
         "Default value for attribute 'defaultTextEncodingFormat'";
 }
 
@@ -1952,7 +1965,7 @@ HWTEST_F(
         modifier_->setDefaultTextEncodingFormat(node_, &inputValueDefaultTextEncodingFormat);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DEFAULT_TEXT_ENCODING_FORMAT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input
             << ", method: setDefaultTextEncodingFormat, attribute: defaultTextEncodingFormat";
     };
@@ -1970,10 +1983,10 @@ HWTEST_F(
 HWTEST_F(WebModifierTest, setForceDisplayScrollBarTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FORCE_DISPLAY_SCROLL_BAR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_FORCE_DISPLAY_SCROLL_BAR_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_FORCE_DISPLAY_SCROLL_BAR_DEFAULT_VALUE)) <<
         "Default value for attribute 'forceDisplayScrollBar'";
 }
 
@@ -1997,7 +2010,7 @@ HWTEST_F(WebModifierTest, setForceDisplayScrollBarTestForceDisplayScrollBarValid
         modifier_->setForceDisplayScrollBar(node_, inputValueForceDisplayScrollBar);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FORCE_DISPLAY_SCROLL_BAR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setForceDisplayScrollBar, attribute: forceDisplayScrollBar";
     };
 
@@ -2014,10 +2027,11 @@ HWTEST_F(WebModifierTest, setForceDisplayScrollBarTestForceDisplayScrollBarValid
 HWTEST_F(WebModifierTest, setBlockNetworkTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BLOCK_NETWORK_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_BLOCK_NETWORK_DEFAULT_VALUE) << "Default value for attribute 'blockNetwork'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_BLOCK_NETWORK_DEFAULT_VALUE)) <<
+        "Default value for attribute 'blockNetwork'";
 }
 
 /*
@@ -2040,7 +2054,7 @@ HWTEST_F(WebModifierTest, setBlockNetworkTestBlockNetworkValidValues, TestSize.L
         modifier_->setBlockNetwork(node_, inputValueBlockNetwork);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BLOCK_NETWORK_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setBlockNetwork, attribute: blockNetwork";
     };
 
@@ -2057,10 +2071,10 @@ HWTEST_F(WebModifierTest, setBlockNetworkTestBlockNetworkValidValues, TestSize.L
 HWTEST_F(WebModifierTest, setHorizontalScrollBarAccessTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HORIZONTAL_SCROLL_BAR_ACCESS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_HORIZONTAL_SCROLL_BAR_ACCESS_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_HORIZONTAL_SCROLL_BAR_ACCESS_DEFAULT_VALUE)) <<
         "Default value for attribute 'horizontalScrollBarAccess'";
 }
 
@@ -2084,7 +2098,7 @@ HWTEST_F(WebModifierTest, setHorizontalScrollBarAccessTestHorizontalScrollBarAcc
         modifier_->setHorizontalScrollBarAccess(node_, inputValueHorizontalScrollBarAccess);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HORIZONTAL_SCROLL_BAR_ACCESS_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input
             << ", method: setHorizontalScrollBarAccess, attribute: horizontalScrollBarAccess";
     };
@@ -2102,10 +2116,10 @@ HWTEST_F(WebModifierTest, setHorizontalScrollBarAccessTestHorizontalScrollBarAcc
 HWTEST_F(WebModifierTest, setVerticalScrollBarAccessTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VERTICAL_SCROLL_BAR_ACCESS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_VERTICAL_SCROLL_BAR_ACCESS_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_VERTICAL_SCROLL_BAR_ACCESS_DEFAULT_VALUE)) <<
         "Default value for attribute 'verticalScrollBarAccess'";
 }
 
@@ -2129,8 +2143,9 @@ HWTEST_F(WebModifierTest, setVerticalScrollBarAccessTestVerticalScrollBarAccessV
         modifier_->setVerticalScrollBarAccess(node_, inputValueVerticalScrollBarAccess);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VERTICAL_SCROLL_BAR_ACCESS_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input <<
-                                          ", method: setVerticalScrollBarAccess, attribute: verticalScrollBarAccess";
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
+            "Input value is: " << input
+            << ", method: setVerticalScrollBarAccess, attribute: verticalScrollBarAccess";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
@@ -2146,10 +2161,11 @@ HWTEST_F(WebModifierTest, setVerticalScrollBarAccessTestVerticalScrollBarAccessV
 HWTEST_F(WebModifierTest, setPinchSmoothTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PINCH_SMOOTH_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_PINCH_SMOOTH_DEFAULT_VALUE) << "Default value for attribute 'pinchSmooth'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_PINCH_SMOOTH_DEFAULT_VALUE)) <<
+        "Default value for attribute 'pinchSmooth'";
 }
 
 } // namespace OHOS::Ace::NG

@@ -32,4 +32,12 @@ void UnionEffectContainerModelNG::Create(const UnionEffectContainerOptions& opti
     CHECK_NULL_VOID(pattern);
     pattern->SetSpacing(options.spacing);
 }
+
+void UnionEffectContainerModelNG::SetUnionMode(UnionMode unionMode)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(UnionMode, unionMode);
+}
 } // namespace OHOS::Ace::NG

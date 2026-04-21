@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
-#include "test/mock/core/animation/mock_animation_manager.h"
+#include "test/mock/frameworks/core/animation/mock_animation_manager.h"
 #include "water_flow_test_ng.h"
 
+#include "core/animation/velocity_motion.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
@@ -1212,5 +1213,24 @@ HWTEST_F(WaterFlowScrollerTestNg, HorizontalFocus001, TestSize.Level1)
     next = pattern_->GetNextFocusNode(FocusStep::DOWN, GetChildFocusHub(frameNode_, 0)).Upgrade();
     auto cmp = GetChildFocusHub(frameNode_, 1);
     EXPECT_EQ(AceType::RawPtr(next), AceType::RawPtr(cmp));
+}
+
+/**
+ * @tc.name: GetBindingFrameNodeId001
+ * @tc.desc: Test GetBindingFrameNodeId returns valid node id for WaterFlow component
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowScrollerTestNg, GetBindingFrameNodeId001, TestSize.Level1)
+{
+    CreateWaterFlow();
+    CreateWaterFlowItems();
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Get the binding frame node id from controller
+     * @tc.expected: The node id should match the waterflow frame node's id
+     */
+    auto nodeId = positionController_->GetBindingFrameNodeId();
+    EXPECT_EQ(nodeId, frameNode_->GetId());
 }
 } // namespace OHOS::Ace::NG

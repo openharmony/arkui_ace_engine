@@ -18,12 +18,15 @@
 #include "base/log/event_report.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/feature_param.h"
+#include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/property/position_property.h"
 #include "core/components_ng/property/templates_parser.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1208,6 +1211,10 @@ float GridScrollLayoutAlgorithm::MeasureRecordedItems(float mainSize, float cros
 {
     currentMainLineIndex_ = info_.startMainLineIndex_ - 1;
     float mainLength = info_.currentOffset_;
+    // already at start line && canOverScrollStart_ = false, do not use offset for mainLength
+    if (info_.startMainLineIndex_ == 0 && GreatNotEqual(mainLength, 0) && !canOverScrollStart_) {
+        mainLength = 0;
+    }
     UseCurrentLines(mainSize, crossSize, layoutWrapper, mainLength);
     return mainLength;
 }
@@ -1233,6 +1240,17 @@ inline void UpdateStartIndexByStartLine(GridLayoutInfo& info_)
     }
 }
 } // namespace
+
+bool GridScrollLayoutAlgorithm::IsNextExistLineHeightZero(const int32_t currentLine) const
+{
+    const int32_t nextLine = currentLine + 1;
+    const auto gridIt = info_.gridMatrix_.find(nextLine);
+    const auto heightIt = info_.lineHeightMap_.find(nextLine);
+    if (gridIt == info_.gridMatrix_.end() || heightIt == info_.lineHeightMap_.end()) {
+        return false;
+    }
+    return NearZero(heightIt->second);
+}
 
 bool GridScrollLayoutAlgorithm::MeasureExistingLine(
     int32_t line, float& mainLength, int32_t& endIdx, bool isScrollableSpringMotionRunning)
@@ -1313,7 +1331,11 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
     auto pattern = host->GetPattern<GridPattern>();
     CHECK_NULL_RETURN(pattern, runOutOfRecord);
     auto isScrollableSpringMotionRunning = pattern->IsScrollableSpringMotionRunning();
-    while (LessNotEqual(mainLength, mainSize)) {
+    while (LessNotEqual(mainLength, mainSize) ||
+                (NearEqual(mainLength, mainSize) && IsNextExistLineHeightZero(currentMainLineIndex_))) {
+        if (NearEqual(mainLength, mainSize)) {
+            TAG_LOGI(AceLogTag::ACE_GRID, "Measure next grid item with height zero.");
+        }
         if (!MeasureExistingLine(++currentMainLineIndex_, mainLength, tempEndIndex, isScrollableSpringMotionRunning)) {
             runOutOfRecord = true;
             break;
@@ -1660,7 +1682,7 @@ float GridScrollLayoutAlgorithm::FillNewLineBackward(
         info_.endIndex_ = currentIndex;
         currentIndex++;
         doneFillLine = true;
-        if (!reverse && !syncLoad_ && layoutWrapper->ReachResponseDeadline()) {
+        if (HaveToMeasureInNextFrame(reverse, layoutWrapper)) {
             measureInNextFrame_ = true;
             break;
         }
@@ -2631,5 +2653,10 @@ float GridScrollLayoutAlgorithm::GetContentHeight(LayoutWrapper* layoutWrapper)
         return info_.GetContentHeight(options.value(), info_.childrenCount_, mainGap_);
     }
     return info_.GetContentHeight(mainGap_);
+}
+
+bool GridScrollLayoutAlgorithm::HaveToMeasureInNextFrame(bool reverse, LayoutWrapper* layoutWrapper) const
+{
+    return !reverse && !syncLoad_ && layoutWrapper->ReachResponseDeadline() && info_.endIndex_ >= moveToEndLineIndex_;
 }
 } // namespace OHOS::Ace::NG

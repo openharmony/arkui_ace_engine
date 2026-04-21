@@ -14,6 +14,7 @@
  */
 
 #include "core/pipeline_ng/ui_task_scheduler.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include <unistd.h>
 
@@ -219,7 +220,7 @@ void UITaskScheduler::FlushPostponedLayoutTask(bool forceUseMainThread)
         if (!container || container->IsInDestroying()) {
             continue;
         }
-        if (!container->PostponedTaskForIgnore()) {
+        if (!container->PostponedTaskForIgnore(bundle->type)) {
             container->CreateLayoutTask(forceUseMainThread, LayoutType::LAYOUT_FOR_IGNORE);
         }
     }

@@ -20,8 +20,9 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/security_component/save_button/save_button_common.h"
 #include "core/components_ng/pattern/security_component/security_component_common.h"
+#include "core/components_ng/pattern/symbol/symbol_source_info.h"
 #include "core/components_ng/property/property.h"
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/event/mouse_event.h"
 #include "core/image/image_source_info.h"
 
@@ -46,6 +47,11 @@ public:
         value->propSecurityComponentDescription_ = CloneSecurityComponentDescription();
         value->propIconStyle_ = CloneIconStyle();
         value->propSymbolIconStyle_ = CloneSymbolIconStyle();
+        value->propSymbolFontWeight_ = CloneSymbolFontWeight();
+        value->propSymbolFontFamilies_ = CloneSymbolFontFamilies();
+        value->propSymbolType_ = CloneSymbolType();
+        value->propSymbolRenderingStrategy_ = CloneSymbolRenderingStrategy();
+        value->propSymbolSourceInfo_ = CloneSymbolSourceInfo();
         value->propIconSize_ = CloneIconSize();
         value->propIconCalcSize_ = CloneIconCalcSize();
         value->propIconBorderRadius_ = CloneIconBorderRadius();
@@ -98,6 +104,11 @@ public:
         ResetTextContent();
         ResetImageSourceInfo();
         ResetSymbolIconSize();
+        ResetSymbolFontWeight();
+        ResetSymbolFontFamilies();
+        ResetSymbolRenderingStrategy();
+        ResetSymbolType();
+        ResetSymbolSourceInfo();
         ResetFontSize();
         ResetStateEffect();
         ResetTipPosition();
@@ -141,6 +152,11 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextContent, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageSourceInfo, ImageSourceInfo, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SymbolIconSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SymbolFontWeight, FontWeight, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SymbolRenderingStrategy, uint32_t, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SymbolFontFamilies, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SymbolType, SymbolType, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SymbolSourceInfo, SymbolSourceInfo, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StateEffect, bool, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TipPosition, TipPosition, PROPERTY_UPDATE_NORMAL);

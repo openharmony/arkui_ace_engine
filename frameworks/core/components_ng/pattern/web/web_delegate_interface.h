@@ -115,6 +115,7 @@ public:
     virtual int GetWebId() = 0;
     virtual void MaximizeResize() = 0;
     virtual void UpdateOptimizeParserBudgetEnabled(const bool enable) = 0;
+    virtual void UpdateKeyboardAppearanceMode(const WebKeyboardAppearanceMode& mode) = 0;
 };
 }
 #endif

@@ -24,7 +24,6 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/pattern/text/span/tlv_util.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
-#include "core/components_ng/pattern/text/text_model.h"
 
 namespace OHOS::Ace {
 
@@ -91,6 +90,7 @@ public:
     static std::vector<RefPtr<NG::Paragraph>> GetLayoutInfo(const RefPtr<SpanString>& spanStr,
         std::optional<double>& maxWidth);
     RefPtr<LineHeightSpan> ToLineHeightSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
+    RefPtr<LineSpacingSpan> ToLineSpacingSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
     RefPtr<BackgroundColorSpan> ToBackgroundColorSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
     RefPtr<ParagraphStyleSpan> ToParagraphStyleSpan(
         const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);

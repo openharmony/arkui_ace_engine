@@ -211,8 +211,12 @@ export struct TipsDialog {
           }
           .padding({ top: TIP_TEXT_TOP_PADDING() })
         } else {
-          WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
-            this.checkBoxPart();
+          Column() {
+            if (this.checkTips !== null && this.checkTips !== undefined) {
+              WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
+                this.checkBoxPart();
+              }
+            }
           }
         }
       });
@@ -222,7 +226,7 @@ export struct TipsDialog {
   @Builder
   checkBoxPart(): void {
     Row() {
-      if (this.checkTips !== null) {
+      if (this.checkTips !== null && this.checkTips !== undefined) {
         Checkbox({ name: '', group: 'checkboxGroup' }).select(this.isChecked)
           .onChange((checked: boolean) => {
             this.isChecked = checked;
@@ -243,6 +247,8 @@ export struct TipsDialog {
           .focusable(false)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .fallbackLineSpacing(true)
+          .wordBreak(WordBreak.HYPHENATION)
+          .orphanCharOptimization(true)
       }
     }
     .accessibilityGroup(true)
@@ -310,6 +316,8 @@ export struct TipsDialog {
               .textOverflow({ overflow: TextOverflow.Ellipsis })
               .width('100%')
               .fallbackLineSpacing(true)
+              .wordBreak(WordBreak.HYPHENATION)
+              .orphanCharOptimization(true)
           }
           .padding({ bottom: $r('sys.float.padding_level8') })
         }
@@ -332,6 +340,8 @@ export struct TipsDialog {
                 }
               })
               .fallbackLineSpacing(true)
+              .wordBreak(WordBreak.HYPHENATION)
+              .orphanCharOptimization(true)
           }
         }
       }
@@ -508,6 +518,8 @@ export struct SelectDialog {
               .fontColor(this.fontColorWithTheme)
               .textOverflow({ overflow: TextOverflow.Ellipsis })
               .fallbackLineSpacing(true)
+              .wordBreak(WordBreak.HYPHENATION)
+              .orphanCharOptimization(true)
           }.paddingContentStyle().width('100%')
         }
         List() {
@@ -523,6 +535,8 @@ export struct SelectDialog {
                       .layoutWeight(1)
                       .direction(i18n.isRTL(i18n.System.getSystemLanguage()) ? Direction.Rtl : Direction.Ltr)
                       .fallbackLineSpacing(true)
+                      .wordBreak(WordBreak.HYPHENATION)
+                      .orphanCharOptimization(true)
                     Radio({ value: 'item.title', group: 'radioGroup' })
                       .size({ width: CHECKBOX_CONTAINER_LENGTH, height: CHECKBOX_CONTAINER_LENGTH })
                       .checked(this.selectedIndex === index)
@@ -764,6 +778,8 @@ export struct ConfirmDialog {
             })
             .width('100%')
             .fallbackLineSpacing(true)
+            .wordBreak(WordBreak.HYPHENATION)
+            .orphanCharOptimization(true)
         }
         .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) })
         .width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`)
@@ -797,6 +813,8 @@ export struct ConfirmDialog {
         .layoutWeight(1)
         .textOverflow({ overflow: TextOverflow.Ellipsis })
         .fallbackLineSpacing(true)
+        .wordBreak(WordBreak.HYPHENATION)
+        .orphanCharOptimization(true)
     }
     .accessibilityGroup(true)
     .accessibilityText(getCheckTipsAccessibilityText(this.getUIContext(), this.checkTips, this.isChecked))
@@ -942,6 +960,8 @@ export struct AlertDialog {
             }
           })
           .fallbackLineSpacing(true)
+          .wordBreak(WordBreak.HYPHENATION)
+          .orphanCharOptimization(true)
       }
       .fadingEdge(IS_FADEOUT_ENABLE(), { fadingEdgeLength: LengthMetrics.vp(FADEOUT_GRADIENT_WIDTH) })
       .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
@@ -1220,8 +1240,8 @@ struct CustomDialogContentComponent {
   aboutToAppear(): void {
     try {
       let uiContext: UIContext = this.getUIContext();
-      this.isFollowingSystemFontScale = uiContext?.isFollowingSystemFontScale();
-      this.appMaxFontScale = uiContext?.getMaxFontScale();
+      this.isFollowingSystemFontScale = uiContext?.isFollowingSystemFontScale() ?? false;
+      this.appMaxFontScale = uiContext?.getMaxFontScale() ?? 3.2;
     } catch (err) {
       let code: number = (err as BusinessError)?.code;
       let message: string = (err as BusinessError)?.message;
@@ -1330,6 +1350,8 @@ struct CustomDialogContentComponent {
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .width('100%')
           .fallbackLineSpacing(true)
+          .wordBreak(WordBreak.HYPHENATION)
+          .orphanCharOptimization(true)
       }
       .width('100%')
 
@@ -1350,6 +1372,8 @@ struct CustomDialogContentComponent {
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .width('100%')
           .fallbackLineSpacing(true)
+          .wordBreak(WordBreak.HYPHENATION)
+          .orphanCharOptimization(true)
       }
       .width('100%')
     }
@@ -1503,6 +1527,16 @@ struct CustomDialogContentComponent {
     };
   }
 
+  private getButtonLabelStyle(buttonOptions: ButtonOptions): LabelStyle {
+    return {
+      maxLines: 1,
+      overflow: IS_FADEOUT_ENABLE() ? TextOverflow.MARQUEE : TextOverflow.Ellipsis,
+      maxFontSize: this.buttonMaxFontSize,
+      minFontSize: this.buttonMinFontSize,
+      textAlign: buttonOptions.textAlign ?? TextAlign.Start
+    }
+  }
+
   @Builder
   buildSingleButton(buttonOptions: ButtonOptions): void {
     if (this.isNewPropertiesHighPriority(buttonOptions)) {
@@ -1510,46 +1544,26 @@ struct CustomDialogContentComponent {
         .setButtonProperties(buttonOptions, this.isHasDefaultFocus, this.isAllFocusFalse, this.controller)
         .role(buttonOptions.role ?? ButtonRole.NORMAL)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
-        .labelStyle({
-          maxLines: 1,
-          overflow: IS_FADEOUT_ENABLE() ? TextOverflow.MARQUEE : TextOverflow.Ellipsis,
-          maxFontSize: this.buttonMaxFontSize,
-          minFontSize: this.buttonMinFontSize
-        })
+        .labelStyle(this.getButtonLabelStyle(buttonOptions))
     } else if (buttonOptions.background !== undefined && buttonOptions.fontColor !== undefined) {
       Button(buttonOptions.value)
         .setButtonProperties(buttonOptions, this.isHasDefaultFocus, this.isAllFocusFalse, this.controller)
         .backgroundColor(buttonOptions.background)
         .fontColor(buttonOptions.fontColor)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
-        .labelStyle({
-          maxLines: 1,
-          overflow: IS_FADEOUT_ENABLE() ? TextOverflow.MARQUEE : TextOverflow.Ellipsis,
-          maxFontSize: this.buttonMaxFontSize,
-          minFontSize: this.buttonMinFontSize
-        })
+        .labelStyle(this.getButtonLabelStyle(buttonOptions))
     } else if (buttonOptions.background !== undefined) {
       Button(buttonOptions.value)
         .setButtonProperties(buttonOptions, this.isHasDefaultFocus, this.isAllFocusFalse, this.controller)
         .backgroundColor(buttonOptions.background)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
-        .labelStyle({
-          maxLines: 1,
-          overflow: IS_FADEOUT_ENABLE() ? TextOverflow.MARQUEE : TextOverflow.Ellipsis,
-          maxFontSize: this.buttonMaxFontSize,
-          minFontSize: this.buttonMinFontSize
-        })
+        .labelStyle(this.getButtonLabelStyle(buttonOptions))
     } else {
       Button(buttonOptions.value)
         .setButtonProperties(buttonOptions, this.isHasDefaultFocus, this.isAllFocusFalse, this.controller)
         .fontColor(buttonOptions.fontColor)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
-        .labelStyle({
-          maxLines: 1,
-          overflow: IS_FADEOUT_ENABLE() ? TextOverflow.MARQUEE : TextOverflow.Ellipsis,
-          maxFontSize: this.buttonMaxFontSize,
-          minFontSize: this.buttonMinFontSize
-        })
+        .labelStyle(this.getButtonLabelStyle(buttonOptions))
     }
   }
 
@@ -1582,7 +1596,7 @@ struct CustomDialogContentComponent {
         ForEach(this.buttons.slice(0, VERTICAL_BUTTON_MAX_COUNT), (item: ButtonOptions, index: number) => {
           this.buildButtonWithDivider(this.buttons?.length === HORIZON_BUTTON_MAX_COUNT ?
             HORIZON_BUTTON_MAX_COUNT - index - 1 : index);
-        }, (item: ButtonOptions) => item.value.toString());
+        }, (item: ButtonOptions) => item.value?.toString() ?? JSON.stringify(item));
       }
     }
   }
@@ -1751,7 +1765,16 @@ function isDefaultFocus(singleButton: ButtonOptions, isHasDefaultFocus: boolean,
  */
 function getNumberByResourceId(resourceId: number, defaultValue: number, allowZero?: boolean): number {
   try {
-    let sourceValue: number = resourceManager.getSystemResourceManager().getNumber(resourceId);
+    let currentDeviceType: resourceManager.DeviceType | undefined = 
+      resourceManager.getSysResourceManager()?.getConfigurationSync()?.deviceType;
+    let systemConfiguration: resourceManager.Configuration =
+      resourceManager.getSystemResourceManager()?.getConfigurationSync();
+    if (currentDeviceType !== undefined && systemConfiguration !== undefined) {
+      systemConfiguration.deviceType = currentDeviceType;
+    }
+    let sourceValue: number = resourceManager.getSystemResourceManager()
+      ?.getOverrideResourceManager(systemConfiguration)
+      ?.getNumber(resourceId);
     if (sourceValue > 0 || allowZero) {
       return sourceValue;
     } else {
@@ -1957,6 +1980,8 @@ export struct LoadingDialog {
           })
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .fallbackLineSpacing(true)
+          .wordBreak(WordBreak.HYPHENATION)
+          .orphanCharOptimization(true)
         LoadingProgress()
           .color(this.loadingProgressIconColorWithTheme)
           .width(LOADING_PROGRESS_WIDTH)

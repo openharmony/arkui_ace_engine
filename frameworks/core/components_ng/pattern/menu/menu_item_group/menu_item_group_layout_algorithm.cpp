@@ -32,6 +32,7 @@ void RecordItemsAndGroups(const RefPtr<FrameNode>& host)
     CHECK_NULL_VOID(pattern);
     auto menu = pattern->GetMenu();
     CHECK_NULL_VOID(menu);
+    ACE_UINODE_TRACE(menu);
     auto menuPattern = menu->GetPattern<InnerMenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     menuPattern->RecordItemsAndGroups();
@@ -188,7 +189,7 @@ void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     RecordItemsAndGroups(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = host->GetTheme<SelectTheme>(true);
     CHECK_NULL_VOID(theme);
     SizeF menuItemGroupSize;
     float maxChildrenWidth = 0.0f;
@@ -253,7 +254,7 @@ void MenuItemGroupLayoutAlgorithm::LayoutHeader(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(hostNode);
     auto pipeline = hostNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = hostNode->GetTheme<SelectTheme>(true);
     CHECK_NULL_VOID(theme);
     auto headerHeight = wrapper->GetGeometryNode()->GetFrameSize().Height();
     auto minItemHeight = static_cast<float>(theme->GetOptionMinHeight().ConvertToPx());
@@ -276,7 +277,7 @@ void MenuItemGroupLayoutAlgorithm::LayoutFooter(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(hostNode);
     auto pipeline = hostNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = hostNode->GetTheme<SelectTheme>(true);
     CHECK_NULL_VOID(theme);
 
     auto minItemHeight = static_cast<float>(theme->GetOptionMinHeight().ConvertToPx());
@@ -326,6 +327,7 @@ std::list<WeakPtr<UINode>> MenuItemGroupLayoutAlgorithm::GetItemsAndGroups(const
     CHECK_NULL_RETURN(pattern, itemsAndGroups);
     auto menu = pattern->GetMenu();
     CHECK_NULL_RETURN(menu, itemsAndGroups);
+    ACE_UINODE_TRACE(menu);
     auto menuPattern = menu->GetPattern<InnerMenuPattern>();
     CHECK_NULL_RETURN(menuPattern, itemsAndGroups);
     return menuPattern->GetItemsAndGroups();
@@ -367,7 +369,7 @@ void MenuItemGroupLayoutAlgorithm::UpdateHeaderAndFooterMargin(LayoutWrapper* la
 
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    auto selectTheme = host->GetTheme<SelectTheme>(true);
     CHECK_NULL_VOID(selectTheme);
     auto iconWidth = selectTheme->GetIconSideLength();
     auto iconContentPadding = selectTheme->GetIconContentPadding();

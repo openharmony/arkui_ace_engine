@@ -90,11 +90,11 @@ public:
 };
 
 /**
- * @tc.name: CtorTestFingers
+ * @tc.name: constructTestFingers
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TapGestureInterfaceAccessorTest, CtorTestFingers, TestSize.Level1)
+HWTEST_F(TapGestureInterfaceAccessorTest, constructTestFingers, TestSize.Level1)
 {
     const double distance = 10.0;
     bool isFingerCountLimited = true;
@@ -142,11 +142,11 @@ HWTEST_F(TapGestureInterfaceAccessorTest, CtorTestFingers, TestSize.Level1)
 }
 
 /**
- * @tc.name: CtorTestCount
+ * @tc.name: constructTestCount
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TapGestureInterfaceAccessorTest, CtorTestCount, TestSize.Level1)
+HWTEST_F(TapGestureInterfaceAccessorTest, constructTestCount, TestSize.Level1)
 {
     const int32_t fingerCount = 3;
     const double distance = 10.0;
@@ -194,11 +194,11 @@ HWTEST_F(TapGestureInterfaceAccessorTest, CtorTestCount, TestSize.Level1)
 }
 
 /**
- * @tc.name: CtorTestDistance
+ * @tc.name: constructTestDistance
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TapGestureInterfaceAccessorTest, CtorTestDistance, TestSize.Level1)
+HWTEST_F(TapGestureInterfaceAccessorTest, constructTestDistance, TestSize.Level1)
 {
     const int32_t fingerCount = 3;
     const int32_t count = 5;
@@ -246,11 +246,11 @@ HWTEST_F(TapGestureInterfaceAccessorTest, CtorTestDistance, TestSize.Level1)
 }
 
 /**
- * @tc.name: CtorTestDistanceInvalid
+ * @tc.name: constructTestDistanceInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TapGestureInterfaceAccessorTest, CtorTestDistanceInvalid, TestSize.Level1)
+HWTEST_F(TapGestureInterfaceAccessorTest, constructTestDistanceInvalid, TestSize.Level1)
 {
     const std::vector<std::pair<Ark_Number, double>> TEST_PLAN = {
         { Converter::ArkValue<Ark_Number>(-1.0), DEFAULT_DISTANCE },
@@ -302,11 +302,11 @@ HWTEST_F(TapGestureInterfaceAccessorTest, CtorTestDistanceInvalid, TestSize.Leve
 }
 
 /**
- * @tc.name: CtorTestFingerCountLimited
+ * @tc.name: constructTestFingerCountLimited
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TapGestureInterfaceAccessorTest, CtorTestFingerCountLimited, TestSize.Level1)
+HWTEST_F(TapGestureInterfaceAccessorTest, constructTestFingerCountLimited, TestSize.Level1)
 {
     const std::vector<std::pair<Ark_Boolean, bool>> TEST_PLAN = {
         { Converter::ArkValue<Ark_Boolean>(true), true },
@@ -358,11 +358,11 @@ HWTEST_F(TapGestureInterfaceAccessorTest, CtorTestFingerCountLimited, TestSize.L
 }
 
 /**
- * @tc.name: CtorTestInvalid
+ * @tc.name: constructTestInvalid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TapGestureInterfaceAccessorTest, CtorTestInvalid, TestSize.Level1)
+HWTEST_F(TapGestureInterfaceAccessorTest, constructTestInvalid, TestSize.Level1)
 {
     auto peer = accessor_->construct(nullptr);
     ASSERT_NE(peer, nullptr);

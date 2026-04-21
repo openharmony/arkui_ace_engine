@@ -361,5 +361,7 @@ function exportView() {
 function exportViewDialog() {
   globalThis.TimePickerDialog = JSTimePickerDialog;
 }
-
-export default { ArkTimePickerComponent, createComponent, exportComponent, exportView, exportViewDialog};
+function loadComponent() {}
+export default { ArkTimePickerComponent, createComponent, exportComponent, exportView, exportViewDialog,
+    loadComponent
+};

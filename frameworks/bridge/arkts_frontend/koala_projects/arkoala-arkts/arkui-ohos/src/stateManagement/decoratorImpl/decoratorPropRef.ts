@@ -25,7 +25,7 @@ import { FactoryInternal } from '../base/iFactoryInternal';
 import { StateUpdateLoop } from '../base/stateUpdateLoop';
 import { uiUtils } from '../base/uiUtilsImpl';
 import { CompatibleStateChangeCallback, getObservedObject, isDynamicObject } from '../../component/interop';
-import { StateMgmtDFX } from '../tools/stateMgmtDFX';
+import { StateMgmtDFX, ObservedObjectRegistry } from '../tools/stateMgmtDFX';
 
 export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> implements IPropRefDecoratedVariable<T> {
     sourceValue: T;
@@ -47,6 +47,9 @@ export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
             this.isForceRender = true;
         });
         this.registerCallbackForPropertyChange(initValue);
+
+        // Register the relationship between this PropRef variable and the observed object it uses
+        this.registerToObservedObject(initValue);
     }
 
     get(): T {
@@ -56,6 +59,8 @@ export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         if (shouldAddRef) {
             ObserveSingleton.instance.setV1RenderId(value as NullableObject);
             uiUtils.builtinContainersAddRefAnyKey(value);
+            this.selfTrack();
+            ObservedObjectRegistry.get(StateMgmtDFX.getObservedObjectFromValue(value))?.addV1InnerRef();
         }
         return value;
     }
@@ -77,6 +82,10 @@ export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         }
         this.unregisterWatchFromObservedObjectChanges(oldValue);
         this.registerWatchForObservedObjectChanges(this.localValue.get(false));
+
+        // Update ObservedObjectRegistry registration
+        this.updateObservedObjectRegistration(oldValue, value);
+
         if (this.setProxyValue) {
             this.setProxyValue!(value);
         }
@@ -96,6 +105,10 @@ export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
             }
             this.unregisterWatchFromObservedObjectChanges(sourceValue);
             this.registerWatchForObservedObjectChanges(value);
+
+            // Update ObservedObjectRegistry registration
+            this.updateObservedObjectRegistration(sourceValue, value);
+
             this.sourceValue = value;
             if (sourceValue !== newValue) {
                 this.unregisterCallbackForPropertyChange(sourceValue);
@@ -155,5 +168,14 @@ export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
 
     public fireChange(): void {
         this.localValue.fireChange();
+    }
+
+    public aboutToBeDeletedInternal(): void {
+        // Unregister from the observed object before deletion
+        const currentValue = this.localValue.get(false);
+        this.unregisterFromObservedObject(currentValue);
+
+        // Call parent's cleanup
+        super.aboutToBeDeletedInternal();
     }
 }

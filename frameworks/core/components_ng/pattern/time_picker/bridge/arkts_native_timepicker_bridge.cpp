@@ -20,6 +20,7 @@
 #include "ui/base/ace_type.h"
 
 #include "base/log/ace_scoring_log.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_time_picker_theme.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/dynamic_module_helper.h"
@@ -240,7 +241,8 @@ void ParseSelectedDateTimeObject(ArkUIRuntimeCallInfo* runtimeCallInfo, const pa
     }
     panda::Local<panda::FunctionRef> func = changeEventVal->ToObject(vm);
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto changeEvent = [vm, func = panda::CopyableGlobal(vm, func), node = targetNode](const BaseEventInfo* info) {
+    std::function<void(const BaseEventInfo*)> changeEvent = [vm, func = panda::CopyableGlobal(vm, func),
+        node = targetNode](const BaseEventInfo* info) {
         CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
@@ -288,17 +290,26 @@ void SetDefaultAttributes()
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
     auto selectedStyle = theme->GetOptionStyle(true, false);
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        textStyle.textColor = selectedStyle.GetTextColor();
+    }
     textStyle.fontSize = selectedStyle.GetFontSize();
     textStyle.fontWeight = selectedStyle.GetFontWeight();
     GetArkUINodeModifiers()->getTimepickerModifier()->setJSSelectedTextStyle(
         reinterpret_cast<void*>(AceType::RawPtr(theme)), reinterpret_cast<void*>(&textStyle));
     auto disappearStyle = theme->GetDisappearOptionStyle();
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        textStyle.textColor = disappearStyle.GetTextColor();
+    }
     textStyle.fontSize = disappearStyle.GetFontSize();
     textStyle.fontWeight = disappearStyle.GetFontWeight();
     GetArkUINodeModifiers()->getTimepickerModifier()->setJSDisappearTextStyle(
         reinterpret_cast<void*>(AceType::RawPtr(theme)), reinterpret_cast<void*>(&textStyle));
 
     auto normalStyle = theme->GetOptionStyle(false, false);
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        textStyle.textColor = normalStyle.GetTextColor();
+    }
     textStyle.fontSize = normalStyle.GetFontSize();
     textStyle.fontWeight = normalStyle.GetFontWeight();
     GetArkUINodeModifiers()->getTimepickerModifier()->setJSNormalTextStyle(
@@ -316,6 +327,9 @@ ArkUINativeModuleValue SetJSTextStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
     PickerTextStyle textStyle;
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        Framework::JSTimePickerTheme::ObtainTextStyle(textStyle);
+    }
     ParseTextStyle(runtimeCallInfo, textStyle, "textStyleTime");
     GetArkUINodeModifiers()->getTimepickerModifier()->setJSNormalTextStyle(
         reinterpret_cast<void*>(AceType::RawPtr(theme)), reinterpret_cast<void*>(&textStyle));
@@ -333,6 +347,9 @@ ArkUINativeModuleValue SetJSSelectedTextStyle(ArkUIRuntimeCallInfo* runtimeCallI
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
     PickerTextStyle textStyle;
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        Framework::JSTimePickerTheme::ObtainSelectedTextStyle(textStyle);
+    }
     ParseTextStyle(runtimeCallInfo, textStyle, "selectedTextStyleTime");
     GetArkUINodeModifiers()->getTimepickerModifier()->setJSSelectedTextStyle(
         reinterpret_cast<void*>(AceType::RawPtr(theme)), reinterpret_cast<void*>(&textStyle));
@@ -353,6 +370,9 @@ ArkUINativeModuleValue SetJSDisappearTextStyle(ArkUIRuntimeCallInfo* runtimeCall
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
     PickerTextStyle textStyle;
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        Framework::JSTimePickerTheme::ObtainTextStyle(textStyle);
+    }
     ParseTextStyle(runtimeCallInfo, textStyle, "disappearTextStyleTime");
     GetArkUINodeModifiers()->getTimepickerModifier()->setJSDisappearTextStyle(
         reinterpret_cast<void*>(AceType::RawPtr(theme)), reinterpret_cast<void*>(&textStyle));
@@ -580,7 +600,10 @@ ArkUINativeModuleValue TimePickerBridge::CreateTimePicker(ArkUIRuntimeCallInfo* 
                 reinterpret_cast<void*>(&parseSelectedTime));
         }
     }
-    SetDefaultAttributes();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) ||
+        (!Framework::JSTimePickerTheme::ApplyTheme())) {
+        SetDefaultAttributes();
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -593,6 +616,7 @@ ArkUINativeModuleValue TimePickerBridge::SetTimepickerBackgroundColor(ArkUIRunti
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_EQUAL_RETURN(GetNativeNode(nativeNode, firstArg, vm), false, panda::JSValueRef::Undefined(vm));
     if (IsJsView(firstArg, vm)) {
+        nativeNode = nodePtr(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         Color color = Color::TRANSPARENT;
         if (SystemProperties::ConfigChangePerform()) {
             RefPtr<ResourceObject> colorResObj;
@@ -600,10 +624,12 @@ ArkUINativeModuleValue TimePickerBridge::SetTimepickerBackgroundColor(ArkUIRunti
             GetArkUINodeModifiers()->getTimepickerModifier()->setBackgroundColorWithResourceObj(
                 color.GetValue(), reinterpret_cast<void*>(AceType::RawPtr(colorResObj)));
         } else {
+            RefPtr<ResourceObject> colorResObj;
             ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color);
-            GetArkUINodeModifiers()->getTimepickerModifier()->setBackgroundColor(color.GetValue());
+            auto bgColorRawPtr = AceType::RawPtr(colorResObj);
+            GetArkUINodeModifiers()->getCommonModifier()->setBackgroundColorWithColorSpace(
+                nativeNode, color.GetValue(), color.GetColorSpace(), bgColorRawPtr);
         }
-        nativeNode = nodePtr(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         GetArkUINodeModifiers()->getTimepickerModifier()->setTimepickerBackgroundColor(nativeNode, color.GetValue());
     } else {
         uint32_t color = secondArg->Uint32Value(vm);
@@ -1130,6 +1156,7 @@ ArkUINativeModuleValue TimePickerBridge::SetOnEnterSelectedArea(ArkUIRuntimeCall
         ACE_SCORING_EVENT("datePicker.onEnterSelectedArea");
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(index);
+        CHECK_NULL_VOID(eventInfo);
         panda::Local<panda::JSValueRef> params[] = { DatePickerChangeEventToJSValue(vm, *eventInfo) };
         auto result = func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
         ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);

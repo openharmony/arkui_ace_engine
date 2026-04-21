@@ -15,8 +15,11 @@
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
 
 #include "base/subwindow/subwindow_manager.h"
+#include "core/common/ace_engine.h"
+#include "core/common/container.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProperties,
@@ -31,6 +34,7 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
         TAG_LOGE(AceLogTag::ACE_DIALOG, "Container is null.");
         return;
     }
+    ACE_CONTAINER_TRACE(container);
 
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -54,6 +58,7 @@ void CustomDialogControllerModelNG::SetOpenDialogInTask(const RefPtr<OverlayMana
         TAG_LOGE(AceLogTag::ACE_DIALOG, "set open dialog in task, manager or container is null.");
         return;
     }
+    ACE_UINODE_TRACE(dialog);
     dialogProperties.onStatusChanged = [&isShown](bool isShownStatus) {
         if (!isShownStatus) {
             isShown = isShownStatus;
@@ -142,6 +147,7 @@ RefPtr<UINode> CustomDialogControllerModelNG::SetOpenDialogWithNode(DialogProper
     ContainerScope scope(Container::CurrentIdSafely());
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, nullptr);
+    ACE_CONTAINER_TRACE(container);
     if (container->IsSubContainer() && !dialogProperties.isShowInSubWindow) {
         auto currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
         container = AceEngine::Get().GetContainer(currentId);
@@ -161,6 +167,7 @@ RefPtr<UINode> CustomDialogControllerModelNG::SetOpenDialogWithNode(DialogProper
     }
     dialogProperties.isUserCreatedDialog = true;
     RefPtr<NG::FrameNode> dialog;
+    ACE_UINODE_TRACE(dialog);
     if (dialogProperties.isShowInSubWindow) {
         dialog = SubwindowManager::GetInstance()->ShowDialogNGWithNode(dialogProperties, customNode);
         CHECK_NULL_RETURN(dialog, nullptr);
@@ -229,6 +236,7 @@ TaskExecutor::Task CustomDialogControllerModelNG::ParseCloseDialogTask(const Wea
             return;
         }
         RefPtr<NG::FrameNode> dialog;
+        ACE_UINODE_TRACE(dialog);
         while (!dialogs.empty()) {
             dialog = AceType::DynamicCast<NG::FrameNode>(dialogs.back().Upgrade());
             if (dialog && !dialog->IsRemoving()) {
@@ -260,6 +268,7 @@ TaskExecutor::Task CustomDialogControllerModelNG::ParseCloseDialogTask(const Wea
 void CustomDialogControllerModelNG::SetCloseDialogForNDK(FrameNode* dialogNode)
 {
     CHECK_NULL_VOID(dialogNode);
+    ACE_UINODE_TRACE(dialogNode);
     dialogNode->SetIsUseTransitionAnimator(true);
     auto dialogRef = AceType::Claim(dialogNode);
     if (!Container::Current()) {
@@ -295,6 +304,7 @@ void CustomDialogControllerModelNG::SetCloseDialogForNDK(FrameNode* dialogNode)
 PromptActionCommonState CustomDialogControllerModelNG::GetState(std::vector<WeakPtr<AceType>>& dialogs, bool& hasBind)
 {
     RefPtr<NG::FrameNode> dialog;
+    ACE_UINODE_TRACE(dialog);
     PromptActionCommonState state = PromptActionCommonState::UNINITIALIZED;
     if (hasBind) {
         state = PromptActionCommonState::INITIALIZED;

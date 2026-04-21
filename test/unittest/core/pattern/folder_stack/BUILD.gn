@@ -20,4 +20,17 @@ ace_unittest("folder_stack_test_ng") {
     "folder_stack_multithread_test_ng.cpp",
     "folder_stack_test_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "folder_stack_test_min.cpp",
+      "folder_stack_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "folder_stack_test_min.cpp",
+      "folder_stack_test_core.cpp",
+    ]
+  }
 }

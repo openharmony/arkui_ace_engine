@@ -31,24 +31,30 @@
 #include "core/common/recorder/event_recorder.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/dialog/dialog_layout_algorithm.h"
+#include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_model_ng.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_algorithm.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
+#include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
@@ -66,6 +72,7 @@
 #include "core/event/touch_event.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -128,6 +135,7 @@ void DialogPattern::OnAttachToFrameNodeImpl()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddWindowSizeChangeCallback(host->GetId());
@@ -151,6 +159,7 @@ void DialogPattern::RegisterHoverModeChangeCallback()
         CHECK_NULL_VOID(pattern);
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
+        ACE_UINODE_TRACE(host);
         auto context = host->GetContext();
         CHECK_NULL_VOID(context);
         auto window = context->GetWindow();
@@ -172,6 +181,7 @@ void DialogPattern::RegisterHoverModeChangeCallback()
     };
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto hoverModeCallId = context->RegisterHalfFoldHoverChangedCallback(std::move(hoverModeChangeCallback));
@@ -281,6 +291,7 @@ void DialogPattern::HandleClick(const GestureEvent& info)
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto props = host->GetLayoutProperty<DialogLayoutProperty>();
     CHECK_NULL_VOID(props);
     auto globalOffset = host->GetPaintRectOffset(false, true);
@@ -317,13 +328,14 @@ void DialogPattern::PopDialog(int32_t buttonIdx = -1)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto overlayManager = GetOverlayManager(host);
     CHECK_NULL_VOID(overlayManager);
 
     if (host->IsRemoving()) {
         return;
     }
-
+    ReportDestroy(buttonIdx);
     auto hub = host->GetEventHub<DialogEventHub>();
     if (buttonIdx != -1) {
         hub->FireSuccessEvent(buttonIdx, host);
@@ -365,6 +377,41 @@ void DialogPattern::RecordEvent(int32_t btnIndex) const
     Recorder::EventRecorder::Get().OnEvent(std::move(builder));
 }
 
+bool CheckIsEnableMaterial(const DialogProperties& dialogProperties)
+{
+    if (dialogProperties.shadow.has_value() || dialogProperties.backgroundColor.has_value() ||
+    dialogProperties.backgroundBlurStyle.has_value() ||
+    dialogProperties.blurStyleOption.has_value() || dialogProperties.effectOption.has_value() ||
+    dialogProperties.borderWidth.has_value() || dialogProperties.borderColor.has_value() ||
+    dialogProperties.borderStyle.has_value()) {
+        return false;
+    }
+    return true;
+}
+
+void SetDialogSystemMaterial(const RefPtr<FrameNode>& columnNode, const DialogProperties& dialogProperties)
+{
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return;
+    }
+    CHECK_NULL_VOID(columnNode);
+    if (!MaterialUtils::IsMaterialEnabled() && !CheckIsEnableMaterial(dialogProperties) &&
+        !dialogProperties.systemMaterial) {
+        return;
+    }
+    auto material = MaterialUtils::GetInitMaterial(UiMaterialStyle::THICK);
+    if (dialogProperties.systemMaterial) {
+        material = dialogProperties.systemMaterial;
+    }
+    if (!MaterialUtils::IsEnableMaterialParam(material)) {
+        return;
+    }
+    auto renderContext = columnNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackBlurStyle(std::nullopt);
+    ViewAbstract::SetSystemMaterial(AceType::RawPtr(columnNode), AceType::RawPtr(material));
+}
+
 void UpdateAdditionalContentRenderContext(const RefPtr<FrameNode>& contentNode,
     const DialogProperties& props, bool isCustomBorder, RefPtr<DialogTheme> dialogTheme)
 {
@@ -399,19 +446,21 @@ void UpdateAdditionalContentRenderContext(const RefPtr<FrameNode>& contentNode,
         Shadow shadow = Shadow::CreateShadow(static_cast<ShadowStyle>(dialogTheme->GetShadowDialog()));
         contentRenderContext->UpdateBackShadow(shadow);
     }
+    SetDialogSystemMaterial(contentNode, props);
     contentRenderContext->SetClipToBounds(true);
 }
 
 // set render context properties of content frame
 void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode, const DialogProperties& props)
 {
+    CHECK_NULL_VOID(contentNode);
     auto contentRenderContext = contentNode->GetRenderContext();
     CHECK_NULL_VOID(contentRenderContext);
     contentRenderContext_ = contentRenderContext;
     auto pipeLineContext = contentNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeLineContext);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
-        contentRenderContext->IsUniRenderEnabled() && props.isSysBlurStyle) {
+        DialogView::IsSupportBlurStyle(contentNode, dialogProperties_.isShowInSubWindow) && props.isSysBlurStyle) {
         BlurStyleOption styleOption;
         if (props.blurStyleOption.has_value()) {
             styleOption = props.blurStyleOption.value();
@@ -513,6 +562,7 @@ RefPtr<FrameNode> DialogPattern::CreateDialogScroll(const DialogProperties& dial
     auto scroll = FrameNode::CreateFrameNode(
         V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
     CHECK_NULL_RETURN(scroll, nullptr);
+    ACE_UINODE_TRACE(scroll);
     auto props = scroll->GetLayoutProperty<ScrollLayoutProperty>();
     props->UpdateAxis(Axis::VERTICAL);
     props->UpdateAlignment(Alignment::CENTER_LEFT);
@@ -538,6 +588,7 @@ void DialogPattern::BuildChild(const DialogProperties& props)
     auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     CHECK_NULL_VOID(contentColumn);
+    ACE_UINODE_TRACE(contentColumn);
     if (!props.title.empty() || !props.subtitle.empty()) {
         auto title = BuildTitle(props);
         CHECK_NULL_VOID(title);
@@ -587,6 +638,7 @@ void DialogPattern::BuildChild(const DialogProperties& props)
         bool hasTitle = !props.title.empty() || !props.subtitle.empty();
         auto menu = BuildMenu(props.buttons, hasTitle);
         CHECK_NULL_VOID(menu);
+        ACE_UINODE_TRACE(menu);
         menu->MountToParent(contentColumn);
     } else {
         // build buttons
@@ -598,6 +650,7 @@ void DialogPattern::BuildChild(const DialogProperties& props)
     }
 
     auto dialog = GetHost();
+    ACE_UINODE_TRACE(dialog);
     contentColumn->MountToParent(dialog);
     AddExtraMaskNode(props);
     UpdateTextFontScale();
@@ -617,20 +670,21 @@ void DialogPattern::AddExtraMaskNode(const DialogProperties& props)
 {
     auto dialog = GetHost();
     CHECK_NULL_VOID(dialog);
+    ACE_UINODE_TRACE(dialog);
     auto pipeline = dialog->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
-    CHECK_NULL_VOID(dialogTheme);
+    CHECK_NULL_VOID(dialogTheme_);
     auto needAddMaskNode = props.maskTransitionEffect != nullptr || props.dialogTransitionEffect != nullptr;
     if (needAddMaskNode && props.isModal && !props.isShowInSubWindow) {
         auto extraMaskNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
         CHECK_NULL_VOID(extraMaskNode);
+        ACE_UINODE_TRACE(extraMaskNode);
         auto extraMaskNodeContext = extraMaskNode->GetRenderContext();
         CHECK_NULL_VOID(extraMaskNodeContext);
         auto maskLayoutProps = extraMaskNode->GetLayoutProperty<LinearLayoutProperty>();
         CHECK_NULL_VOID(maskLayoutProps);
-        extraMaskNodeContext->UpdateBackgroundColor(props.maskColor.value_or(dialogTheme->GetMaskColorEnd()));
+        extraMaskNodeContext->UpdateBackgroundColor(props.maskColor.value_or(dialogTheme_->GetMaskColorEnd()));
         extraMaskNodeContext->UpdateZIndex(-1);
         extraMaskNode->MountToParent(dialog);
         extraMaskNode_ = extraMaskNode;
@@ -648,6 +702,7 @@ void DialogPattern::BuildCustomChild(const DialogProperties& props, const RefPtr
     }
     customNode->MountToParent(contentWrapper);
     auto dialog = GetHost();
+    ACE_UINODE_TRACE(dialog);
     contentWrapper->MountToParent(dialog);
     AddExtraMaskNode(props);
 }
@@ -661,8 +716,10 @@ RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogPr
 {
     auto title = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ACE_UINODE_TRACE(title);
     auto titleProp = AceType::DynamicCast<TextLayoutProperty>(title->GetLayoutProperty());
     CHECK_NULL_RETURN(titleProp, nullptr);
+    titleProp->UpdateEnableSmallLanguageTruncation(true);
     titleProp->UpdateMaxLines(DIALOG_TITLE_MAXLINES);
     titleProp->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     std::string titleContent = dialogProperties.title.empty() ? dialogProperties.subtitle : dialogProperties.title;
@@ -676,6 +733,9 @@ RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogPr
         titleProp->UpdateAdaptMinFontSize(ADAPT_TITLE_MIN_FONT_SIZE);
         titleProp->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
         titleProp->UpdateMaxLines(ADAPT_TITLE_MAX_LINES);
+        if (title->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            titleProp->UpdateOrphanCharOptimization(true);
+        }
     }
     PaddingProperty titlePadding;
     auto paddingInTheme = (dialogProperties.content.empty() && dialogProperties.buttons.empty())
@@ -725,8 +785,10 @@ RefPtr<FrameNode> DialogPattern::BuildSubTitle(const DialogProperties& dialogPro
 {
     auto subtitle = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ACE_UINODE_TRACE(subtitle);
     auto titleProp = AceType::DynamicCast<TextLayoutProperty>(subtitle->GetLayoutProperty());
     CHECK_NULL_RETURN(titleProp, nullptr);
+    titleProp->UpdateEnableSmallLanguageTruncation(true);
     auto titleStyle = dialogTheme_->GetSubTitleTextStyle();
     titleProp->UpdateMaxLines(DIALOG_TITLE_MAXLINES);
     titleProp->UpdateTextOverflow(TextOverflow::ELLIPSIS);
@@ -738,6 +800,9 @@ RefPtr<FrameNode> DialogPattern::BuildSubTitle(const DialogProperties& dialogPro
         titleProp->UpdateAdaptMinFontSize(ADAPT_SUBTITLE_MIN_FONT_SIZE);
         titleProp->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
         titleProp->UpdateMaxLines(ADAPT_TITLE_MAX_LINES);
+        if (subtitle->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            titleProp->UpdateOrphanCharOptimization(true);
+        }
     }
     PaddingProperty titlePadding;
     titlePadding.left = CalcLength(DIALOG_SUBTITLE_PADDING_LEFT);
@@ -752,6 +817,7 @@ RefPtr<FrameNode> DialogPattern::BuildSubTitle(const DialogProperties& dialogPro
     auto subtitleRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     CHECK_NULL_RETURN(subtitleRow, nullptr);
+    ACE_UINODE_TRACE(subtitleRow);
     auto subtitleRowProps = subtitleRow->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(subtitleRowProps, nullptr);
     subtitleRowProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
@@ -786,15 +852,26 @@ RefPtr<FrameNode> DialogPattern::BuildTitle(const DialogProperties& dialogProper
     return titleRow;
 }
 
+void DialogPattern::UpdateContentTextProperty(
+    const RefPtr<FrameNode>& contentNode, const RefPtr<TextLayoutProperty>& contentProp)
+{
+    contentProp->UpdateEnableSmallLanguageTruncation(true);
+    if (contentNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        contentProp->UpdateOrphanCharOptimization(true);
+    }
+    // textAlign always align start. When text line count 1 and title doesn't exist, set text center position.
+    contentProp->UpdateTextAlign(TextAlign::START);
+}
+
 RefPtr<FrameNode> DialogPattern::BuildContent(const DialogProperties& props)
 {
     // Make Content node
     auto contentNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ACE_UINODE_TRACE(contentNode);
     auto contentProp = AceType::DynamicCast<TextLayoutProperty>(contentNode->GetLayoutProperty());
     CHECK_NULL_RETURN(contentProp, nullptr);
-    // textAlign always align start. When text line count 1 and title doesn't exist, set text center position.
-    contentProp->UpdateTextAlign(TextAlign::START);
+    UpdateContentTextProperty(contentNode, contentProp);
     contentProp->UpdateContent(props.content);
     auto contentStyle = dialogTheme_->GetContentTextStyle();
     contentProp->UpdateFontSize(contentStyle.GetFontSize());
@@ -845,6 +922,7 @@ void DialogPattern::BindCloseCallBack(const RefPtr<GestureEventHub>& hub, int32_
     auto closeCallback = [weak = WeakClaim(RawPtr(host)), buttonIdx](GestureEvent& /*info*/) {
         auto dialog = weak.Upgrade();
         CHECK_NULL_VOID(dialog);
+        ACE_UINODE_TRACE(dialog);
         dialog->GetPattern<DialogPattern>()->PopDialog(buttonIdx);
     };
 
@@ -903,6 +981,7 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
     auto buttonNode = FrameNode::CreateFrameNode(
         V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<ButtonPattern>());
     CHECK_NULL_RETURN(buttonNode, nullptr);
+    ACE_UINODE_TRACE(buttonNode);
     UpdateDialogButtonProperty(buttonNode, index, isVertical, length);
     // parse button text color and background color
     std::string textColor;
@@ -954,13 +1033,16 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
     auto renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
     renderContext->UpdateBackgroundColor(bgColor.value());
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_RETURN(buttonLayoutProperty, nullptr);
+    buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
 
     // set button default height
     auto layoutProps = buttonNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProps, nullptr);
-    auto pipeline = buttonNode->GetContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto theme = pipeline->GetTheme<ButtonTheme>();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto theme = host->GetTheme<ButtonTheme>(true);
     CHECK_NULL_RETURN(theme, nullptr);
     if (!isSuitableForElderly_) {
         layoutProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(theme->GetHeight())));
@@ -979,6 +1061,7 @@ void DialogPattern::RegisterButtonOnKeyEvent(const ButtonInfo& params, RefPtr<Fr
             event.action == KeyAction::DOWN) {
             auto dialog = weak.Upgrade();
             CHECK_NULL_RETURN(dialog, false);
+            ACE_UINODE_TRACE(dialog);
             if (params.action) {
                 auto actionFunc = params.action->GetGestureEventFunc();
                 GestureEvent info;
@@ -1112,6 +1195,7 @@ void DialogPattern::AddButtonAndDivider(
         }
         auto buttonNode = CreateButton(buttons[i], i, false, isVertical, length);
         CHECK_NULL_VOID(buttonNode);
+        ACE_UINODE_TRACE(buttonNode);
         auto buttonPattern = buttonNode->GetPattern<ButtonPattern>();
         CHECK_NULL_VOID(buttonPattern);
         buttonPattern->SetSkipColorConfigurationUpdate();
@@ -1128,6 +1212,7 @@ RefPtr<FrameNode> DialogPattern::CreateButtonText(const std::string& text, const
     textNode->GetOrCreateFocusHub()->SetFocusable(true);
     auto textProps = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textProps, nullptr);
+    textProps->UpdateEnableSmallLanguageTruncation(true);
     textProps->UpdateContent(text);
     textProps->UpdateFontWeight(FontWeight::MEDIUM);
     textProps->UpdateMaxLines(1);
@@ -1145,9 +1230,7 @@ RefPtr<FrameNode> DialogPattern::CreateButtonText(const std::string& text, const
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, textNode);
-    auto context = host->GetContext();
-    CHECK_NULL_RETURN(context, textNode);
-    auto textTheme = context->GetTheme<TextTheme>();
+    auto textTheme = host->GetTheme<TextTheme>(true);
     CHECK_NULL_RETURN(textTheme, textNode);
     if (textTheme->GetIsTextFadeout()) {
         textProps->UpdateTextOverflow(TextOverflow::MARQUEE);
@@ -1192,11 +1275,12 @@ RefPtr<FrameNode> DialogPattern::BuildSheetItem(const ActionSheetInfo& item)
     if (item.action) {
         hub->AddClickEvent(item.action);
         auto recordEvent = [weak = WeakClaim(this), title = item.title](GestureEvent& info) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->storedSheetTitle_ = title;
             if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
                 return;
             }
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
             Recorder::EventParamsBuilder builder;
             builder.SetEventType(Recorder::EventType::DIALOG_SELECT)
                 .SetText(title)
@@ -1222,6 +1306,11 @@ RefPtr<FrameNode> DialogPattern::BuildSheetInfoTitle(const std::string& title)
     // update text style
     auto style = dialogTheme_->GetContentTextStyle();
     auto props = titleNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(props, nullptr);
+    props->UpdateEnableSmallLanguageTruncation(true);
+    if (titleNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        props->UpdateOrphanCharOptimization(true);
+    }
     props->UpdateContent(title);
     props->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     props->UpdateAdaptMaxFontSize(style.GetFontSize());
@@ -1291,11 +1380,13 @@ RefPtr<FrameNode> DialogPattern::BuildMenu(const std::vector<ButtonInfo>& button
 {
     auto menu = FrameNode::CreateFrameNode(
         V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<LinearLayoutPattern>(true));
+    ACE_UINODE_TRACE(menu);
     menuNode_ = menu;
     // column -> button
     const size_t size = buttons.size();
     for (size_t i = 0; i < size; ++i) {
         RefPtr<FrameNode> button;
+        ACE_UINODE_TRACE(button);
         uint32_t val = size > 0 ? size - 1 : 0;
         if (i != val) {
             button = CreateButton(buttons[i], i, false, isSuitableForElderly_, size);
@@ -1369,13 +1460,13 @@ void DialogPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
     focusHub->SetOnBlurInternal(std::move(onBlur));
 }
 
-Shadow GetDefaultShadow(ShadowStyle style, const RefPtr<FrameNode>& frameNode)
+Shadow DialogPattern::GetDefaultShadow(ShadowStyle style, const RefPtr<FrameNode>& frameNode)
 {
     Shadow shadow = Shadow::CreateShadow(ShadowStyle::None);
     CHECK_NULL_RETURN(frameNode, shadow);
     auto pipeline = frameNode->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, shadow);
-    auto shadowTheme = pipeline->GetTheme<ShadowTheme>();
+    auto shadowTheme = frameNode->GetTheme<ShadowTheme>(true);
     CHECK_NULL_RETURN(shadowTheme, shadow);
     auto colorMode = pipeline->GetColorMode();
     shadow = shadowTheme->GetShadow(style, colorMode);
@@ -1446,24 +1537,43 @@ void DialogPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     }
     auto context = host->GetRenderContext();
     CHECK_NULL_VOID(context);
-    json->PutExtAttr("uniRender", context->IsUniRenderEnabled() ? "true" : "false", filter);
+    json->PutExtAttr("uniRender",
+        DialogView::IsSupportBlurStyle(host, dialogProperties_.isShowInSubWindow) ? "true" : "false", filter);
 }
 
 void DialogPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    auto dialogTheme = context->GetTheme<DialogTheme>();
-    CHECK_NULL_VOID(dialogTheme);
-    dialogTheme_ = dialogTheme;
+    UpdateDialogTheme();
     UpdateTitleAndContentColor();
     UpdateMaskColor();
-    UpdateWrapperBackgroundStyle(host, dialogTheme);
+    UpdateWrapperBackgroundStyle(host, dialogTheme_);
     UpdateButtonsProperty();
     OnModifyDone();
     host->MarkDirtyNode();
+}
+
+bool DialogPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return false;
+    }
+    OnColorConfigurationUpdate();
+    return true;
+}
+
+void DialogPattern::UpdateDialogTheme()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (dialogThemeNode_) {
+        host->AllowUseParentTheme(false);
+        host->SetThemeScopeId(dialogThemeNode_->GetThemeScopeIdForTheme(true));
+    }
+    dialogTheme_ = host->GetTheme<DialogTheme>(true);
 }
 
 void DialogPattern::UpdateMaskColor()
@@ -1662,6 +1772,7 @@ void DialogPattern::UpdateButtonsProperty()
             if (buttonNode->GetTag() != V2::BUTTON_ETS_TAG) {
                 continue;
             }
+            ACE_UINODE_TRACE(buttonNode);
             auto buttonFrameNode = DynamicCast<FrameNode>(buttonNode);
             UpdateButtonsPropertyForEachButton(buttonFrameNode, btnIndex);
             ++btnIndex;
@@ -1732,6 +1843,7 @@ bool DialogPattern::NeedsButtonDirectionChange(const std::vector<ButtonInfo>& bu
         if (child->GetTag() == V2::BUTTON_ETS_TAG) {
             auto buttonNode = AceType::DynamicCast<FrameNode>(child);
             CHECK_NULL_RETURN(buttonNode, false);
+            ACE_UINODE_TRACE(buttonNode);
             auto buttonTextNode = DynamicCast<FrameNode>(buttonNode->GetFirstChild());
             CHECK_NULL_RETURN(buttonTextNode, false);
             auto textGeometryNode = buttonTextNode->GetGeometryNode();
@@ -1792,17 +1904,12 @@ void DialogPattern::CheckScrollHeightIsNegative(
 void DialogPattern::UpdateDeviceOrientation(const DeviceOrientation& deviceOrientation)
 {
     if (deviceOrientation_ != deviceOrientation) {
-        deviceOrientation_ = deviceOrientation;
         CHECK_NULL_VOID(buttonContainer_);
+        OnFontConfigurationUpdate();
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        auto container = AceEngine::Get().GetContainer(host->GetInstanceId());
-        CHECK_NULL_VOID(container);
-        container->IsFloatingWindowStatus();
-        // The floating window does not require remeasure.
-        CHECK_NULL_VOID(!container->IsFloatingWindowStatus());
-        OnFontConfigurationUpdate();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        deviceOrientation_ = deviceOrientation;
     }
 }
 
@@ -1881,6 +1988,7 @@ void DialogPattern::UpdateTextFontScale()
         if (child->GetTag() == V2::BUTTON_ETS_TAG) {
             auto buttonNode = AceType::DynamicCast<FrameNode>(child);
             CHECK_NULL_VOID(buttonNode);
+            ACE_UINODE_TRACE(buttonNode);
             auto buttonTextNode = DynamicCast<FrameNode>(buttonNode->GetFirstChild());
             CHECK_NULL_VOID(buttonTextNode);
             auto textProp = AceType::DynamicCast<TextLayoutProperty>(buttonTextNode->GetLayoutProperty());
@@ -1980,8 +2088,8 @@ void DialogPattern::UpdateWrapperBackgroundStyle(const RefPtr<FrameNode>& host, 
     auto colRenderContext = col->GetRenderContext();
     CHECK_NULL_VOID(colRenderContext);
     if (!dialogProperties_.customStyle && !dialogProperties_.backgroundColor.has_value() &&
-        (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) || !colRenderContext->IsUniRenderEnabled() ||
-            !dialogProperties_.isSysBlurStyle)) {
+    (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) ||
+    !DialogView::IsSupportBlurStyle(host, dialogProperties_.isShowInSubWindow) || !dialogProperties_.isSysBlurStyle)) {
         colRenderContext->UpdateBackgroundColor(dialogTheme->GetBackgroundColor());
     }
     if (colRenderContext->GetBackBlurStyle().has_value()) {
@@ -2447,6 +2555,7 @@ void DialogPattern::OnAttachToMainTree()
 void DialogPattern::OnAttachToMainTreeImpl()
 {
     AddFollowParentWindowLayoutNode();
+    AddForceSplitRatioListener();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto parentNode = AceType::DynamicCast<FrameNode>(host->GetParent());
@@ -2476,6 +2585,7 @@ void DialogPattern::OnDetachFromMainTreeImpl()
         dialogProperties_.destroyCallback(customNode_);
     }
     RemoveFollowParentWindowLayoutNode();
+    RemoveForceSplitRatioListener();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
@@ -2547,5 +2657,448 @@ void DialogPattern::RemoveFollowParentWindowLayoutNode()
     auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(containerId, SubwindowType::TYPE_DIALOG);
     CHECK_NULL_VOID(subwindow);
     subwindow->RemoveFollowParentWindowLayoutNode(host->GetId());
+}
+
+void DialogPattern::AddForceSplitRatioListener()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto forceSplitMgr = AceType::DynamicCast<ForceSplitManager>(pipeline->GetForceSplitManager());
+    CHECK_NULL_VOID(forceSplitMgr);
+    forceSplitMgr->AddForceSplitRatioListener(
+        host->GetId(), [weakHost = AceType::WeakClaim(AceType::RawPtr(host))](float splitRatio) {
+        auto host = weakHost.Upgrade();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    });
+}
+
+void DialogPattern::RemoveForceSplitRatioListener()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto forceSplitMgr = AceType::DynamicCast<ForceSplitManager>(pipeline->GetForceSplitManager());
+    CHECK_NULL_VOID(forceSplitMgr);
+    forceSplitMgr->RemoveForceSplitRatioListener(host->GetId());
+}
+
+int32_t DialogPattern::OnInjectionEvent(const std::string& command)
+{
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "OnInjectionEvent input:%{public}s!", command.c_str());
+    auto json = JsonUtil::ParseJsonString(command);
+    if (!json || json->IsNull()) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "not JSON format!");
+        return RET_FAILED;
+    }
+    auto cmdType = json->GetString("cmd");
+    if (cmdType == "alertDialogButtonClick") {
+        auto ret = HandleAlertDialogButtonClickCmd(json);
+        if (!ret) {
+            return RET_FAILED;
+        }
+    } else if (cmdType == "actionSheetClick") {
+        auto ret = HandleActionSheetClickCmd(json);
+        if (ret != RET_SUCCESS) {
+            return RET_FAILED;
+        }
+    } else if (cmdType == "actionMenuClick") {
+        auto ret = HandleActionMenuButtonClickCmd(json);
+        if (ret != RET_SUCCESS) {
+            return RET_FAILED;
+        }
+    } else {
+        return RET_FAILED;
+    }
+    return RET_SUCCESS;
+}
+
+std::vector<RefPtr<FrameNode>> DialogPattern::GetButtons()
+{
+    std::vector<RefPtr<FrameNode>> result;
+    CHECK_NULL_RETURN(buttonContainer_, result);
+    for (const auto& buttonNode : buttonContainer_->GetChildren()) {
+        if (buttonNode->GetTag() != V2::BUTTON_ETS_TAG) {
+            continue;
+        }
+        ACE_UINODE_TRACE(buttonNode);
+        auto buttonFrameNode = DynamicCast<FrameNode>(buttonNode);
+        result.push_back(buttonFrameNode);
+    }
+    return result;
+}
+
+bool DialogPattern::HandleAlertDialogButtonClickCmd(const std::unique_ptr<JsonValue>& json)
+{
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "HandleAlertDialogButtonClickCmd enter!");
+    if (!json || json->IsNull()) {
+        ReportAlertDialogOnInjectionEvent(false, "Incorrect JSON format!", -1);
+        return false;
+    }
+    auto params = json->GetValue("params");
+    if (!params || !params->IsObject()) {
+        ReportAlertDialogOnInjectionEvent(false, "Incorrect JSON format!", -1);
+        return false;
+    }
+    auto jsonIndex = params->GetValue("buttonIndex");
+    if (!jsonIndex || !jsonIndex->IsNumber()) {
+        ReportAlertDialogOnInjectionEvent(false,
+            "The buttonIndex field is not found in the JSON object or the field type is incorrect.!", -1);
+        return false;
+    }
+    auto btnIndex = jsonIndex->GetInt();
+    if (dialogProperties_.type != DialogType::ALERT_DIALOG) {
+        ReportAlertDialogOnInjectionEvent(false, "The dialog box type does not match!", btnIndex);
+        return false;
+    }
+    CHECK_NULL_RETURN(buttonContainer_, false);
+    auto btnNodes = GetButtons();
+    TAG_LOGD(AceLogTag::ACE_DIALOG,
+        "btnNodes num:%{public}zu,btnIndex:%{public}d! ", btnNodes.size(), btnIndex);
+    if (btnIndex < 0 || static_cast<size_t>(btnIndex) >= btnNodes.size()) {
+        ReportAlertDialogOnInjectionEvent(false,
+            "The index value exceeds the actual total number of buttons!", btnIndex);
+        return false;
+    }
+    auto buttonFrameNode = DynamicCast<FrameNode>(btnNodes.at(btnIndex));
+    CHECK_NULL_RETURN(buttonFrameNode, false);
+    RefPtr<GestureEventHub> gestureHub = buttonFrameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureHub, false);
+    gestureHub->ActClick();
+    ReportAlertDialogOnInjectionEvent(true, "", btnIndex, buttonFrameNode);
+    return true;
+}
+
+void DialogPattern::ReportAlertDialogOnInjectionEvent(bool result, std::string reason,
+    int32_t btnIndex, RefPtr<FrameNode> btnNode)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto nodeId = host->GetId();
+    CHECK_NULL_VOID(buttonContainer_);
+    std::string btnText;
+    if (btnIndex >= 0 && static_cast<size_t>(btnIndex) < dialogProperties_.buttons.size()) {
+        btnText = dialogProperties_.buttons.at(btnIndex).text;
+    }
+    auto jsonResult = InspectorJsonUtil::CreateObject();
+    CHECK_NULL_VOID(jsonResult);
+    jsonResult->Put("dialogNodeId", nodeId);
+    jsonResult->Put("event", "alertDialogButtonClick");
+    if (result) {
+        jsonResult->Put("result", "success");
+    } else {
+        jsonResult->Put("result", "fail");
+        jsonResult->Put("reason", reason.c_str());
+    }
+    jsonResult->Put("buttonText", btnText.c_str());
+    jsonResult->Put("buttonIndex", btnIndex);
+    auto json = InspectorJsonUtil::Create();
+    json->Put("alertDialogButtonClickResult", jsonResult);
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "[DIALOG]Report info:%{public}s.", json->ToString().c_str());
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", json->ToString().c_str(),
+        ComponentEventType::COMPONENT_EVENT_DIALOG);
+}
+
+void DialogPattern::ReportShow()
+{
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "[DIALOG]Report show event.");
+    if (dialogProperties_.type == DialogType::ALERT_DIALOG) {
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("onVisibleChange", "show",
+            ComponentEventType::COMPONENT_EVENT_DIALOG);
+    } else if (dialogProperties_.type == DialogType::ACTION_SHEET) {
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("onVisibleChange", "ActionSheet.show",
+            ComponentEventType::COMPONENT_EVENT_DIALOG);
+    } else if (dialogProperties_.isMenu) {
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("onVisibleChange", "ActionMenu.show",
+            ComponentEventType::COMPONENT_EVENT_DIALOG);
+    }
+}
+
+void DialogPattern::ReportDestroy(int32_t buttonIdx)
+{
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "[DIALOG]ReportDestroy buttonIdx:%{public}d,hasReportDestroy:%{public}d",
+        buttonIdx, hasReportDestroy);
+    if (!hasReportDestroy) {
+        hasReportDestroy = true;
+    } else {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (dialogProperties_.type == DialogType::ALERT_DIALOG) {
+        std::string btnText;
+        if (buttonIdx >= 0 && static_cast<size_t>(buttonIdx) < dialogProperties_.buttons.size()) {
+            btnText = dialogProperties_.buttons.at(buttonIdx).text;
+        }
+        auto json = InspectorJsonUtil::Create();
+        json->Put("buttonText", btnText.c_str());
+        json->Put("autoCancel", false);
+        TAG_LOGD(AceLogTag::ACE_DIALOG, "[DIALOG]ReportDestroy report:%{public}s", json->ToString().c_str());
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent(host->GetId(),
+            "destroy", json, ComponentEventType::COMPONENT_EVENT_DIALOG);
+    }
+    if (dialogProperties_.type == DialogType::ACTION_SHEET) {
+        std::string title = "";
+        std::string buttonText = "";
+        if (buttonIdx == SHEET_INFO_IDX) {
+            title = storedSheetTitle_;
+        } else if (buttonIdx >= 0 && static_cast<size_t>(buttonIdx) < dialogProperties_.buttons.size()) {
+            buttonText = dialogProperties_.buttons.at(buttonIdx).text;
+        }
+        auto json = InspectorJsonUtil::Create();
+        json->Put("sheetTitle", title.c_str());
+        json->Put("buttonText", buttonText.c_str());
+        json->Put("autoCancel", false);
+        TAG_LOGD(AceLogTag::ACE_DIALOG, "[DIALOG]ReportDestroy report:%{public}s", json->ToString().c_str());
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent(host->GetId(),
+            "ActionSheet.destroy", json, ComponentEventType::COMPONENT_EVENT_DIALOG);
+    }
+    if (dialogProperties_.isMenu) {
+        ReportDestroyActionMenu(buttonIdx);
+    }
+}
+
+void DialogPattern::ReportDestroyAutoCancel()
+{
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "[DIALOG]ReportDestroyAutoCancel hasReportDestroy:%{public}d", hasReportDestroy);
+    if (!hasReportDestroy) {
+        hasReportDestroy = true;
+    } else {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (dialogProperties_.type == DialogType::ALERT_DIALOG) {
+        auto json = InspectorJsonUtil::Create();
+        json->Put("autoCancel", true);
+        TAG_LOGD(AceLogTag::ACE_DIALOG,
+            "[DIALOG]ReportDestroyAutoCancel report:%{public}s", json->ToString().c_str());
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent(host->GetId(),
+            "destroy", json, ComponentEventType::COMPONENT_EVENT_DIALOG);
+    }
+    if (dialogProperties_.type == DialogType::ACTION_SHEET) {
+        auto json = InspectorJsonUtil::Create();
+        json->Put("autoCancel", true);
+        TAG_LOGD(AceLogTag::ACE_DIALOG,
+            "[DIALOG]ReportDestroyAutoCancel report:%{public}s", json->ToString().c_str());
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent(host->GetId(),
+            "ActionSheet.destroy", json, ComponentEventType::COMPONENT_EVENT_DIALOG);
+    }
+}
+
+void DialogPattern::ReportDestroyActionMenu(int32_t buttonIdx)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto upgradedMenuNode = menuNode_.Upgrade();
+    CHECK_NULL_VOID(upgradedMenuNode);
+    auto menuCount = upgradedMenuNode->GetChildren().size();
+    if (buttonIdx < static_cast<int32_t>(-1) || buttonIdx >= static_cast<int32_t>(menuCount)) {
+        return;
+    }
+    int findIndex = buttonIdx;
+    if (buttonIdx == static_cast<int32_t>(-1)) {
+        // click cancel button
+        findIndex = static_cast<int32_t>(menuCount) - 1;
+    }
+    auto btnRow = DynamicCast<FrameNode>(upgradedMenuNode->GetChildAtIndex(findIndex));
+    CHECK_NULL_VOID(btnRow);
+    auto buttonNode = DynamicCast<FrameNode>(btnRow->GetFirstChild());
+    CHECK_NULL_VOID(buttonNode);
+    auto textNode = DynamicCast<FrameNode>(buttonNode->GetFirstChild());
+    CHECK_NULL_VOID(textNode);
+    auto textPattern = textNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    auto textDisplay = UtfUtils::Str16ToStr8(textPattern->GetTextForDisplay());
+    auto json = InspectorJsonUtil::Create();
+    json->Put("buttonText", textDisplay.c_str());
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "[DIALOG]PopDialog menu:%{public}s.", json->ToString().c_str());
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(host->GetId(),
+        "ActionMenu.destroy", json, ComponentEventType::COMPONENT_EVENT_DIALOG);
+}
+
+void DialogPattern::ReportActionSheetOnInjectionEvent(bool result,
+    std::string reason, int32_t sheetIndex, int32_t buttonIndex)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto nodeId = host->GetId();
+    auto sheetContainer = contentNodeMap_[DialogContentNode::SHEET];
+    CHECK_NULL_VOID(sheetContainer);
+    auto sheetCount = sheetContainer->GetChildren().size();
+    std::string title = "";
+    std::string buttonText = "";
+    if (sheetIndex >= 0 && sheetIndex < static_cast<int32_t>(sheetCount)) {
+        title = dialogProperties_.sheetsInfo.at(sheetIndex).title;
+    }
+    if (buttonIndex >= 0 && static_cast<size_t>(buttonIndex) < dialogProperties_.buttons.size()) {
+        buttonText = dialogProperties_.buttons.at(buttonIndex).text;
+    }
+    auto actionSheetResult = InspectorJsonUtil::CreateObject();
+    CHECK_NULL_VOID(actionSheetResult);
+    actionSheetResult->Put("nodeId", nodeId);
+    actionSheetResult->Put("event", "actionSheetClick");
+    if (result) {
+        actionSheetResult->Put("result", "success");
+    } else {
+        actionSheetResult->Put("result", "fail");
+        actionSheetResult->Put("failReason", reason.c_str());
+    }
+    actionSheetResult->Put("sheetTitle", title.c_str());
+    actionSheetResult->Put("sheetIndex", sheetIndex);
+    actionSheetResult->Put("buttonText", buttonText.c_str());
+    actionSheetResult->Put("buttonIndex", buttonIndex);
+    auto json = InspectorJsonUtil::Create();
+    json->Put("actionSheetClickResult", actionSheetResult);
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "ReportActionSheetOnInjectionEvent report: %{public}s!", json->ToString().c_str());
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", json->ToString().c_str(),
+        ComponentEventType::COMPONENT_EVENT_DIALOG);
+}
+
+int32_t DialogPattern::HandleActionSheetClick(int32_t index)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, RET_FAILED);
+    auto sheetContainer = contentNodeMap_[DialogContentNode::SHEET];
+    CHECK_NULL_RETURN(sheetContainer, RET_FAILED);
+    auto sheetCount = sheetContainer->GetChildren().size();
+    if (index < 0 || index >= static_cast<int32_t>(sheetCount)) {
+        ReportActionSheetOnInjectionEvent(false, "sheet index out of range", index, -1);
+        return RET_FAILED;
+    }
+    auto sheetFrameNode = AceType::DynamicCast<FrameNode>(sheetContainer->GetChildAtIndex(index));
+    CHECK_NULL_RETURN(sheetFrameNode, RET_FAILED);
+    auto row = AceType::DynamicCast<FrameNode>(sheetFrameNode->GetFirstChild());
+    CHECK_NULL_RETURN(row, RET_FAILED);
+    auto sheetHub = row->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(sheetHub, RET_FAILED);
+    sheetHub->ActClick();
+    ReportActionSheetOnInjectionEvent(true, "", index, -1);
+    return RET_SUCCESS;
+}
+
+int32_t DialogPattern::HandleActionButtonClick(int32_t index)
+{
+    CHECK_NULL_RETURN(buttonContainer_, RET_FAILED);
+    auto btnNodes = GetButtons();
+    TAG_LOGD(AceLogTag::ACE_DIALOG,
+        "btnNodes num:%{public}zu, btnIndex:%{public}d! ", btnNodes.size(), index);
+    if (index < 0 || static_cast<size_t>(index) >= btnNodes.size()) {
+        ReportActionSheetOnInjectionEvent(false, "button index out of range", -1, index);
+        return RET_FAILED;
+    }
+    auto buttonFrameNode = DynamicCast<FrameNode>(btnNodes.at(index));
+    CHECK_NULL_RETURN(buttonFrameNode, RET_FAILED);
+    RefPtr<GestureEventHub> gestureHub = buttonFrameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureHub, RET_FAILED);
+    gestureHub->ActClick();
+    ReportActionSheetOnInjectionEvent(true, "", -1, index);
+    return RET_SUCCESS;
+}
+
+int32_t DialogPattern::HandleActionSheetClickCmd(const std::unique_ptr<JsonValue>& json)
+{
+    if (!json || json->IsNull()) {
+        ReportActionSheetOnInjectionEvent(false, "Incorrect JSON format!", -1, -1);
+        return RET_FAILED;
+    }
+    auto params = json->GetValue("params");
+    if (!params || !params->IsObject()) {
+        ReportActionSheetOnInjectionEvent(false, "Incorrect JSON format!", -1, -1);
+        return RET_FAILED;
+    }
+    auto clickType = params->GetString("clickType", "");
+    if (clickType != "sheet" && clickType != "button") {
+        ReportActionSheetOnInjectionEvent(false, "click type invalid!", -1, -1);
+        return RET_FAILED;
+    }
+    auto index = params->GetValue("index");
+    if (!index || !index->IsNumber()) {
+        ReportActionSheetOnInjectionEvent(false,
+            "The Index field is not found in the JSON object or the field type is incorrect.", -1, -1);
+        return RET_FAILED;
+    }
+    auto indexValue = index->GetInt();
+    if (dialogProperties_.type != DialogType::ACTION_SHEET) {
+        ReportActionSheetOnInjectionEvent(false, "The dialog box type does not match!", indexValue, -1);
+        return RET_FAILED;
+    }
+    if (clickType == "sheet") {
+        return HandleActionSheetClick(indexValue);
+    }
+    return HandleActionButtonClick(indexValue);
+}
+
+int32_t DialogPattern::HandleActionMenuButtonClickCmd(const std::unique_ptr<JsonValue>& json)
+{
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "HandleActionMenuButtonClickCmd enter!");
+    if (!json || json->IsNull()) {
+        ReportActionMenuOnInjectionEvent(false, "Incorrect JSON format!", "");
+        return RET_FAILED;
+    }
+    auto params = json->GetValue("params");
+    if (!params || !params->IsObject()) {
+        ReportActionMenuOnInjectionEvent(false, "Incorrect JSON format!", "");
+        return RET_FAILED;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, RET_FAILED);
+    if (!dialogProperties_.isMenu) {
+        ReportActionMenuOnInjectionEvent(false, "dialog is not action menu!", "");
+        return RET_FAILED;
+    }
+    auto upgradedMenuNode = menuNode_.Upgrade();
+    CHECK_NULL_RETURN(upgradedMenuNode, RET_FAILED);
+    auto menuCount = upgradedMenuNode->GetChildren().size();
+    auto index = params->GetInt("buttonIndex", -1);
+    if (index < static_cast<int32_t>(-1) || index >= static_cast<int32_t>(menuCount)) {
+        ReportActionMenuOnInjectionEvent(false, "index out of range", "");
+        return RET_FAILED;
+    }
+    int findIndex = index;
+    if (index == static_cast<int32_t>(-1)) {
+        // click cancel button
+        findIndex = static_cast<int32_t>(menuCount) - 1;
+    }
+    auto btnRow = DynamicCast<FrameNode>(upgradedMenuNode->GetChildAtIndex(findIndex));
+    CHECK_NULL_RETURN(btnRow, RET_FAILED);
+    auto buttonNode = DynamicCast<FrameNode>(btnRow->GetFirstChild());
+    CHECK_NULL_RETURN(buttonNode, RET_FAILED);
+    auto textNode = DynamicCast<FrameNode>(buttonNode->GetFirstChild());
+    auto textPattern = textNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, RET_FAILED);
+    auto hub = buttonNode->GetOrCreateGestureEventHub();
+    auto textDisplay = UtfUtils::Str16ToStr8(textPattern->GetTextForDisplay());
+    CHECK_NULL_RETURN(hub, RET_FAILED);
+    hub->ActClick();
+    ReportActionMenuOnInjectionEvent(true, "success", textDisplay);
+    return RET_SUCCESS;
+}
+
+void DialogPattern::ReportActionMenuOnInjectionEvent(bool result, const std::string& reason, const std::string& text)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto nodeId = host->GetId();
+    auto clickResult = InspectorJsonUtil::CreateObject();
+    CHECK_NULL_VOID(clickResult);
+    clickResult->Put("nodeId", nodeId);
+    clickResult->Put("event", "actionMenuClick");
+    if (result) {
+        clickResult->Put("result", "success");
+    } else {
+        clickResult->Put("result", "fail");
+        clickResult->Put("failReason", reason.c_str());
+    }
+    clickResult->Put("menuText", text.c_str());
+    auto json = InspectorJsonUtil::Create();
+    json->Put("actionMenuClickResult", clickResult);
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "[DIALOG]ReportActionMenuOnInjectionEvent:%{public}s",
+        json->ToString().c_str());
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", json->ToString().c_str(),
+        ComponentEventType::COMPONENT_EVENT_DIALOG);
 }
 } // namespace OHOS::Ace::NG

@@ -41,6 +41,7 @@ public:
     virtual void SetAlignment(Alignment align) = 0;
     virtual void SetHasHeight() = 0;
     virtual void SetHasWidth() = 0;
+    virtual void SetSyncLoad(bool enable) = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STACK_STACK_MODEL_H

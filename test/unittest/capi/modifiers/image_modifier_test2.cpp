@@ -15,10 +15,9 @@
 
 #include <gtest/gtest.h>
 
-#include "arkoala_api_generated.h"
+#include "modifier_test_base.h"
 #include "generated/test_fixtures.h"
 #include "generated/type_helpers.h"
-#include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 #include "point_light_test.h"
 
@@ -73,15 +72,15 @@ HWTEST_F(ImageModifierTest2, setAltTestDefaultValues, TestSize.Level1)
 {
     auto jsonValue = GetJsonValue(node_);
     auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ALT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ALT_DEFAULT_VALUE);
+    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_ALT_DEFAULT_VALUE));
 }
 
 /*
- * @tc.name: setAlt_ArkStringUnion_Test
+ * @tc.name: setAltTestArkStringUnion
  * @tc.desc: Check functionality of ImageModifier.setAlt
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest2, setAlt_ArkStringUnion_Test, TestSize.Level1)
+HWTEST_F(ImageModifierTest2, setAltTestArkStringUnion, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAlt, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -92,15 +91,15 @@ HWTEST_F(ImageModifierTest2, setAlt_ArkStringUnion_Test, TestSize.Level1)
     modifier_->setAlt(frameNode, &inputStr);
     auto fullJson = GetJsonValue(node_);
     auto resultStr = GetAttrValue<std::string>(fullJson, ATTRIBUTE_ALT_NAME);
-    EXPECT_EQ(resultStr, expectedStr);
+    EXPECT_THAT(resultStr, Eq(expectedStr));
 }
 
 /*
- * @tc.name: setAlt_ArkResourceUnion_Test
+ * @tc.name: setAltTestArkResourceUnion
  * @tc.desc: Check functionality of ImageModifier.setAlt
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest2, setAlt_ArkResourceUnion_Test, TestSize.Level1)
+HWTEST_F(ImageModifierTest2, setAltTestArkResourceUnion, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAlt, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -113,15 +112,15 @@ HWTEST_F(ImageModifierTest2, setAlt_ArkResourceUnion_Test, TestSize.Level1)
     modifier_->setAlt(frameNode, &inputArkResource);
     auto fullJson = GetJsonValue(node_);
     auto resultStr = GetAttrValue<std::string>(fullJson, ATTRIBUTE_ALT_NAME);
-    EXPECT_EQ(resultStr, expectedStr);
+    EXPECT_THAT(resultStr, Eq(expectedStr));
 }
 
 /*
- * @tc.name: setAlt_PixelMapUnion_Test
+ * @tc.name: setAltTestPixelMapUnion
  * @tc.desc: Check functionality of ImageModifier.setAlt
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest2, setAlt_PixelMapUnion_Test, TestSize.Level1)
+HWTEST_F(ImageModifierTest2, setAltTestPixelMapUnion, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAlt, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -147,11 +146,11 @@ HWTEST_F(ImageModifierTest2, setAlt_PixelMapUnion_Test, TestSize.Level1)
 }
 
 /**
- * @tc.name: setImageMatrixTestDefualtValue
+ * @tc.name: setImageMatrixTestDefaultValue
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest2, setImageMatrixTestDefualtValue, TestSize.Level1)
+HWTEST_F(ImageModifierTest2, setImageMatrixTestDefaultValue, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);

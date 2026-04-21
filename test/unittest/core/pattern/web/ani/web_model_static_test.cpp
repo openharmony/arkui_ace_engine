@@ -24,7 +24,7 @@
 #define protected public
 #include "core/components_ng/pattern/web/ani/web_pattern_static.h"
 #undef protected
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
@@ -343,6 +343,32 @@ HWTEST_F(WebModelStaticTest, SetMultiWindowAccessEnabled001, TestSize.Level1)
 
     WebModelStatic::SetMultiWindowAccessEnabled(AccessibilityManager::RawPtr(frameNode), true);
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckMultiWindowAccessEnabled(true), true);
+#endif
+}
+
+/**
+ * @tc.name: SetKeyboardAppearance01
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetKeyboardAppearance01, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
+    ASSERT_NE(webPatternStatic, nullptr);
+
+    std::optional<WebKeyboardAppearanceMode> mode;
+    WebModelStatic::SetKeyboardAppearance(AccessibilityManager::RawPtr(frameNode), mode);
+
+    mode = WebKeyboardAppearanceMode::LIGHT_IMMERSIVE;
+    WebModelStatic::SetKeyboardAppearance(AccessibilityManager::RawPtr(frameNode), mode);
+    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->GetKeyboardAppearanceMode(),
+            WebKeyboardAppearanceMode::LIGHT_IMMERSIVE);
 #endif
 }
 
@@ -713,6 +739,7 @@ HWTEST_F(WebModelStaticTest, SetMinFontSize001, TestSize.Level1)
 
     WebModelStatic::SetMinFontSize(AccessibilityManager::RawPtr(frameNode), DEFAULT_MINFONT_SIZE);
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckMinFontSize(DEFAULT_MINFONT_SIZE), true);
+    EXPECT_EQ(webPatternStatic->HasMinFontSize(), true);
 #endif
 }
 
@@ -734,6 +761,7 @@ HWTEST_F(WebModelStaticTest, SetDefaultFontSize001, TestSize.Level1)
 
     WebModelStatic::SetDefaultFontSize(AccessibilityManager::RawPtr(frameNode), DEFAULT_DEFAULTFONT_SIZE);
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckDefaultFontSize(DEFAULT_DEFAULTFONT_SIZE), true);
+    EXPECT_EQ(webPatternStatic->HasDefaultFontSize(), true);
 #endif
 }
 
@@ -756,6 +784,7 @@ HWTEST_F(WebModelStaticTest, SetDefaultFixedFontSize001, TestSize.Level1)
     WebModelStatic::SetDefaultFixedFontSize(AccessibilityManager::RawPtr(frameNode), DEFAULT_DEFAULTFIXEDFONT_SIZE);
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckDefaultFixedFontSize(DEFAULT_DEFAULTFIXEDFONT_SIZE),
               true);
+    EXPECT_EQ(webPatternStatic->HasDefaultFixedFontSize(), true);
 #endif
 }
 
@@ -777,6 +806,7 @@ HWTEST_F(WebModelStaticTest, SetWebSansSerifFont001, TestSize.Level1)
 
     WebModelStatic::SetWebSansSerifFont(AccessibilityManager::RawPtr(frameNode), "test");
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckWebSansSerifFont("test"), true);
+    EXPECT_EQ(webPatternStatic->HasWebSansSerifFont(), true);
 #endif
 }
 
@@ -798,6 +828,7 @@ HWTEST_F(WebModelStaticTest, SetWebSerifFont001, TestSize.Level1)
 
     WebModelStatic::SetWebSerifFont(AccessibilityManager::RawPtr(frameNode), "test");
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckWebSerifFont("test"), true);
+    EXPECT_EQ(webPatternStatic->HasWebSerifFont(), true);
 #endif
 }
 
@@ -819,6 +850,7 @@ HWTEST_F(WebModelStaticTest, SetWebStandardFont001, TestSize.Level1)
 
     WebModelStatic::SetWebStandardFont(AccessibilityManager::RawPtr(frameNode), "test");
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckWebStandardFont("test"), true);
+    EXPECT_EQ(webPatternStatic->HasWebStandardFont(), true);
 #endif
 }
 
@@ -861,6 +893,7 @@ HWTEST_F(WebModelStaticTest, SetWebCursiveFont001, TestSize.Level1)
 
     WebModelStatic::SetWebCursiveFont(AccessibilityManager::RawPtr(frameNode), "test");
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckWebCursiveFont("test"), true);
+    EXPECT_EQ(webPatternStatic->HasWebCursiveFont(), true);
 #endif
 }
 
@@ -882,6 +915,7 @@ HWTEST_F(WebModelStaticTest, SetWebFantasyFont001, TestSize.Level1)
 
     WebModelStatic::SetWebFantasyFont(AccessibilityManager::RawPtr(frameNode), "test");
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckWebFantasyFont("test"), true);
+    EXPECT_EQ(webPatternStatic->HasWebFantasyFont(), true);
 #endif
 }
 
@@ -904,6 +938,7 @@ HWTEST_F(WebModelStaticTest, SetWebFixedFont001, TestSize.Level1)
 
     WebModelStatic::SetWebFixedFont(AccessibilityManager::RawPtr(frameNode), "test");
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckWebFixedFont("test"), true);
+    EXPECT_EQ(webPatternStatic->HasWebFixedFont(), true);
 #endif
 }
 
@@ -1716,6 +1751,34 @@ HWTEST_F(WebModelStaticTest, SetScreenCaptureRequestEventId009, TestSize.Level1)
         screenCaptureRequestEventId);
     AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
         ->propOnScreenCaptureRequestEvent_(nullptr);
+    EXPECT_NE(callCount, 0);
+#endif
+}
+
+/**
+ * @tc.name: SetOnVerifyPinRequest001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetOnVerifyPinRequest001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    auto callback = [&callCount](const BaseEventInfo* info) {
+        callCount++;
+        return true;
+    };
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    WebModelStatic::SetOnVerifyPinRequest(AccessibilityManager::RawPtr(frameNode), callback);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    webEventHub->FireOnVerifyPinRequestEvent(mockEventInfo);
     EXPECT_NE(callCount, 0);
 #endif
 }
@@ -3046,6 +3109,51 @@ HWTEST_F(WebModelStaticTest, SetEnableAutoFill001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetEnableDefaultContextMenu001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetEnableDefaultContextMenu001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
+    ASSERT_NE(webPatternStatic, nullptr);
+
+    WebModelStatic::SetEnableDefaultContextMenu(AccessibilityManager::RawPtr(frameNode), false);
+    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckEnableDefaultContextMenu(false), true);
+
+    WebModelStatic::SetEnableDefaultContextMenu(AccessibilityManager::RawPtr(frameNode), true);
+    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckEnableDefaultContextMenu(true), true);
+#endif
+}
+
+/**
+ * @tc.name: SetEnableScrollDirectionalLock001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetEnableScrollDirectionalLock001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
+    ASSERT_NE(webPatternStatic, nullptr);
+    std::optional<bool> enable = false;
+    std::optional<ScrollDirectionalLockType> type = ScrollDirectionalLockType::ALL;
+    WebModelStatic::SetEnableScrollDirectionalLock(AccessibilityManager::RawPtr(frameNode), enable, type);
+#endif
+}
+
+/**
  * @tc.name: SetForceEnableZoom001
  * @tc.desc: Test web_model_static.cpp
  * @tc.type: FUNC
@@ -3246,6 +3354,58 @@ HWTEST_F(WebModelStaticTest, SetMicrophoneCaptureStateChangedId001, TestSize.Lev
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->FireOnMicrophoneCaptureStateChangedEvent(mockEventInfo);
+    EXPECT_TRUE(callbackCalled);
+#endif
+}
+
+/**
+ * @tc.name: SetScrollbarLayoutPolicy001
+ * @tc.desc: Test web_model_static.cpp SetScrollbarLayoutPolicy
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetScrollbarLayoutPolicy001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
+    ASSERT_NE(webPatternStatic, nullptr);
+
+    WebModelStatic::SetScrollbarLayoutPolicy(AccessibilityManager::RawPtr(frameNode), ScrollbarLayoutPolicy::CONTENT);
+    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->GetScrollbarLayoutPolicy(), ScrollbarLayoutPolicy::CONTENT);
+
+    WebModelStatic::SetScrollbarLayoutPolicy(AccessibilityManager::RawPtr(frameNode), ScrollbarLayoutPolicy::SYSTEM);
+    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->GetScrollbarLayoutPolicy(), ScrollbarLayoutPolicy::SYSTEM);
+#endif
+}
+
+/**
+ * @tc.name: SetInputMethodAttachedId001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetInputMethodAttachedId001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    bool callbackCalled = false;
+    WebModelStatic::SetInputMethodAttachedId(
+        AccessibilityManager::RawPtr(frameNode),
+        [&callbackCalled]() { callbackCalled = true; });
+    auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
+    ASSERT_NE(webPatternStatic, nullptr);
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->FireOnInputMethodAttachedEvent(mockEventInfo);
     EXPECT_TRUE(callbackCalled);
 #endif
 }

@@ -1,0 +1,23 @@
+{
+    "target": [
+        "arkui.component",
+        "arkui.AttributeUpdater"
+    ],
+    "banned": [
+        "ohos.inputMethod",
+        "ohos.request"
+    ],
+    "main": {
+        "additionalPackages": [
+            "arkui.component.idlize",
+            "arkui.component.navigator",
+            "api.internal.component.ets",
+            "arkui.stateManagement.internal",
+            "arkui.AttributeUpdaterFlag",
+            "arkui.PeerNode"
+        ]
+    },
+    "tsLikePackages": {
+        "arkui": "@ohos.arkui.component"
+    }
+}

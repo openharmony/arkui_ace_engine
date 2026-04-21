@@ -26,9 +26,9 @@
 #include "frameworks/core/accessibility/accessibility_manager.h"
 #include "frameworks/core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "frameworks/core/common/window_animation_config.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include <ui/rs_surface_node.h>
 #include <ui/rs_ui_director.h>
 
@@ -106,7 +106,7 @@ void UIExtensionManagerNg::ValidSessionWrapper(RefPtr<UIExtensionPattern> patter
     RegisterSecurityUIExtensionInFocus
  * @tc.type: FUNC
  */
-HWTEST_F(UIExtensionManagerNg, UIExtensionManager001, TestSize.Level1)
+HWTEST_F(UIExtensionManagerNg, UIExtensionManager001, TestSize.Level0)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     /**
@@ -160,7 +160,7 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager001, TestSize.Level1)
     UnWrapExtensionAbilityId/ApplyExtensionId/RecycleExtensionId
  * @tc.type: FUNC
  */
-HWTEST_F(UIExtensionManagerNg, UIExtensionManager002, TestSize.Level1)
+HWTEST_F(UIExtensionManagerNg, UIExtensionManager002, TestSize.Level0)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     /**
@@ -212,7 +212,7 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager002, TestSize.Level1)
     IsShowPlaceholder/RemoveDestroyedUIExtension/NotifySizeChangeReason
  * @tc.type: FUNC
  */
-HWTEST_F(UIExtensionManagerNg, UIExtensionManager003, TestSize.Level1)
+HWTEST_F(UIExtensionManagerNg, UIExtensionManager003, TestSize.Level0)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     /**

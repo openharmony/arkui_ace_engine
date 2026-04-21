@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,8 +23,8 @@
 
 #define protected public
 #define private public
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
@@ -238,6 +238,7 @@ void ButtonFunctionTestNg::SetUpTestCase()
 
     buttonTheme->heightMap_.emplace(std::pair<ControlSize, Dimension>(ControlSize::SMALL, DEFAULT_HEIGTH));
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(buttonTheme));
 }
 
 void ButtonFunctionTestNg::TearDownTestCase()
@@ -1517,5 +1518,377 @@ HWTEST_F(ButtonFunctionTestNg, ButtonFunctionTest020, TestSize.Level1)
 
     EXPECT_EQ(buttonLayoutProperty->GetButtonRoleValue(), ButtonRole::NORMAL);
     EXPECT_EQ(buttonLayoutProperty->GetButtonStyleValue(), ButtonStyleMode::NORMAL);
+}
+
+/**
+ * @tc.name: IsDefaultResponseRegionExpandingNeeded001
+ * @tc.desc: Test ButtonPattern::IsDefaultResponseRegionExpandingNeeded with no user-defined height.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestNg, IsDefaultResponseRegionExpandingNeeded001, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.typeValue = std::make_optional(ButtonType::CAPSULE);
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    const auto& calcLayoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+    if (calcLayoutConstraint && calcLayoutConstraint->selfIdealSize.has_value()) {
+        EXPECT_FALSE(calcLayoutConstraint->selfIdealSize->Height().has_value());
+    }
+
+    EXPECT_FALSE(buttonPattern->IsDefaultResponseRegionExpandingNeeded(SourceType::TOUCH));
+}
+
+/**
+ * @tc.name: IsDefaultResponseRegionExpandingNeeded002
+ * @tc.desc: Test ButtonPattern::IsDefaultResponseRegionExpandingNeeded with user-defined width only.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestNg, IsDefaultResponseRegionExpandingNeeded002, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.typeValue = std::make_optional(ButtonType::CAPSULE);
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(BUTTON_WIDTH), std::nullopt));
+
+    const auto& calcLayoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+    ASSERT_NE(calcLayoutConstraint, nullptr);
+    ASSERT_TRUE(calcLayoutConstraint->selfIdealSize.has_value());
+    EXPECT_FALSE(calcLayoutConstraint->selfIdealSize->Height().has_value());
+
+    EXPECT_TRUE(buttonPattern->IsDefaultResponseRegionExpandingNeeded(SourceType::TOUCH));
+}
+
+/**
+ * @tc.name: IsDefaultResponseRegionExpandingNeeded003
+ * @tc.desc: Test ButtonPattern::IsDefaultResponseRegionExpandingNeeded with user-defined height.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestNg, IsDefaultResponseRegionExpandingNeeded003, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.typeValue = std::make_optional(ButtonType::CAPSULE);
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(DEFAULT_HEIGTH)));
+
+    const auto& calcLayoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+    ASSERT_NE(calcLayoutConstraint, nullptr);
+    ASSERT_TRUE(calcLayoutConstraint->selfIdealSize.has_value());
+    ASSERT_TRUE(calcLayoutConstraint->selfIdealSize->Height().has_value());
+
+    EXPECT_FALSE(buttonPattern->IsDefaultResponseRegionExpandingNeeded(SourceType::TOUCH));
+}
+
+/**
+ * @tc.name: ExpandDefaultResponseRegion001
+ * @tc.desc: Test ButtonPattern::ExpandDefaultResponseRegion geometry behavior.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestNg, ExpandDefaultResponseRegion001, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.typeValue = std::make_optional(ButtonType::CAPSULE);
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+
+    RectF smallRect(10.0f, 20.0f, BUTTON_WIDTH, 10.0f);
+    auto expandedRect = buttonPattern->ExpandDefaultResponseRegion(smallRect);
+    EXPECT_EQ(expandedRect.Width(), smallRect.Width());
+
+    RectF enoughRect(10.0f, 20.0f, BUTTON_WIDTH, 100.0f);
+    auto unmodifiedRect = buttonPattern->ExpandDefaultResponseRegion(enoughRect);
+    EXPECT_EQ(unmodifiedRect.Height(), enoughRect.Height());
+    EXPECT_EQ(unmodifiedRect.GetY(), enoughRect.GetY());
+}
+
+/**
+ * @tc.name: ButtonOnInjectionEventTest001
+ * @tc.desc: Test ButtonPattern::OnInjectionEvent success path and ReportButtonClickResult
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestNg, ButtonOnInjectionEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create button and get frameNode
+     */
+    TestProperty testProperty;
+    testProperty.typeValue = std::make_optional(ButtonType::CAPSULE);
+    testProperty.stateEffectValue = std::make_optional(STATE_EFFECT);
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get button pattern
+     * @tc.expected: step2. pattern is not null
+     */
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+
+    /**
+     * @tc.steps: step3. test valid command with onButtonClick
+     * @tc.expected: step3. OnInjectionEvent returns RET_SUCCESS
+     */
+    std::string validCommand = R"({"cmd":"onButtonClick"})";
+    int32_t result = buttonPattern->OnInjectionEvent(validCommand);
+    EXPECT_EQ(result, RET_SUCCESS);
+
+    /**
+     * @tc.steps: step4. test command with extra fields
+     * @tc.expected: step4. OnInjectionEvent returns RET_SUCCESS (extra fields ignored)
+     */
+    std::string extraFieldsCommand = R"({"cmd":"onButtonClick","extra":"data","timestamp":12345})";
+    result = buttonPattern->OnInjectionEvent(extraFieldsCommand);
+    EXPECT_EQ(result, RET_SUCCESS);
+
+    /**
+     * @tc.steps: step5. call ReportButtonClickResult directly
+     * @tc.expected: step5. function executes without crash
+     */
+    buttonPattern->ReportButtonClickResult();
+}
+
+/**
+ * @tc.name: ButtonOnInjectionEventTest002
+ * @tc.desc: Test ButtonPattern::OnInjectionEvent with null host and invalid commands
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestNg, ButtonOnInjectionEventTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create button and get frameNode
+     */
+    TestProperty testProperty;
+    testProperty.typeValue = std::make_optional(ButtonType::CAPSULE);
+    testProperty.stateEffectValue = std::make_optional(STATE_EFFECT);
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get button pattern
+     * @tc.expected: step2. pattern is not null
+     */
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+
+    /**
+     * @tc.steps: step3. test invalid JSON commands
+     * @tc.expected: step3. all return RET_FAILED
+     */
+    std::vector<std::string> invalidCommands = {
+        "invalid json string",
+        "",
+        "{}",
+        "{cmd:onButtonClick}"
+    };
+    
+    for (const auto& cmd : invalidCommands) {
+        int32_t result = buttonPattern->OnInjectionEvent(cmd);
+        EXPECT_EQ(result, RET_FAILED);
+    }
+
+    /**
+     * @tc.steps: step4. test wrong command types
+     * @tc.expected: step4. all return RET_FAILED
+     */
+    std::vector<std::string> wrongCommands = {
+        R"({"cmd":"onOtherEvent"})",
+        R"({"data":"value"})",
+        R"({"cmd":""})",
+        R"({"cmd":123})"
+    };
+    
+    for (const auto& cmd : wrongCommands) {
+        int32_t result = buttonPattern->OnInjectionEvent(cmd);
+        EXPECT_EQ(result, RET_FAILED);
+    }
+}
+
+/**
+ * @tc.name: ButtonOnInjectionEventTest003
+ * @tc.desc: Test ButtonPattern::OnInjectionEvent and ReportButtonClickResult with null host
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestNg, ButtonOnInjectionEventTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create button pattern without host
+     */
+    auto buttonPattern = AceType::MakeRefPtr<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call OnInjectionEvent with valid command
+     * @tc.expected: step2. returns RET_FAILED due to null host
+     */
+    std::string validCommand = R"({"cmd":"onButtonClick"})";
+    int32_t result = buttonPattern->OnInjectionEvent(validCommand);
+    EXPECT_EQ(result, RET_FAILED);
+    
+    /**
+     * @tc.steps: step3. call OnInjectionEvent with invalid command
+     * @tc.expected: step3. returns RET_FAILED (host null check happens before JSON parse)
+     */
+    result = buttonPattern->OnInjectionEvent("invalid");
+    EXPECT_EQ(result, RET_FAILED);
+    
+    /**
+     * @tc.steps: step4. call ReportButtonClickResult with null host
+     * @tc.expected: step4. function returns early without crash
+     */
+    buttonPattern->ReportButtonClickResult();
+}
+
+/**
+ * @tc.name: ButtonOnInjectionEventTest004
+ * @tc.desc: Test ButtonPattern::OnInjectionEvent with multiple buttons
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestNg, ButtonOnInjectionEventTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create first button
+     */
+    TestProperty testProperty;
+    testProperty.typeValue = std::make_optional(ButtonType::CAPSULE);
+    auto frameNode1 = CreateLabelButtonParagraph("Button1", testProperty);
+    ASSERT_NE(frameNode1, nullptr);
+    
+    /**
+     * @tc.steps: step2. create second button
+     */
+    auto frameNode2 = CreateLabelButtonParagraph("Button2", testProperty);
+    ASSERT_NE(frameNode2, nullptr);
+
+    /**
+     * @tc.steps: step3. get button patterns
+     */
+    auto buttonPattern1 = frameNode1->GetPattern<ButtonPattern>();
+    auto buttonPattern2 = frameNode2->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern1, nullptr);
+    ASSERT_NE(buttonPattern2, nullptr);
+
+    /**
+     * @tc.steps: step4. test valid command on both buttons
+     * @tc.expected: step4. both return RET_SUCCESS
+     */
+    std::string validCmd = R"({"cmd":"onButtonClick"})";
+    EXPECT_EQ(buttonPattern1->OnInjectionEvent(validCmd), RET_SUCCESS);
+    EXPECT_EQ(buttonPattern2->OnInjectionEvent(validCmd), RET_SUCCESS);
+
+    /**
+     * @tc.steps: step5. test invalid command on both buttons
+     * @tc.expected: step5. both return RET_FAILED
+     */
+    std::string invalidCmd = "invalid";
+    EXPECT_EQ(buttonPattern1->OnInjectionEvent(invalidCmd), RET_FAILED);
+    EXPECT_EQ(buttonPattern2->OnInjectionEvent(invalidCmd), RET_FAILED);
+
+    /**
+     * @tc.steps: step6. test wrong command on both buttons
+     * @tc.expected: step6. both return RET_FAILED
+     */
+    std::string wrongCmd = R"({"cmd":"wrong"})";
+    EXPECT_EQ(buttonPattern1->OnInjectionEvent(wrongCmd), RET_FAILED);
+    EXPECT_EQ(buttonPattern2->OnInjectionEvent(wrongCmd), RET_FAILED);
+}
+
+/**
+ * @tc.name: ButtonOnInjectionEventTest005
+ * @tc.desc: Test disabled button
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestNg, ButtonOnInjectionEventTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create disabled button
+     */
+    TestProperty testProperty;
+    testProperty.typeValue = std::make_optional(ButtonType::CAPSULE);
+    testProperty.stateEffectValue = std::make_optional(STATE_EFFECT);
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get button pattern and event hub
+     */
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step3. disable the button
+     */
+    eventHub->SetEnabled(false);
+
+    /**
+     * @tc.steps: step4. send injection command to disabled button
+     * @tc.expected: step4. returns RET_FAILED because button is disabled
+     */
+    std::string validCmd = R"({"cmd":"onButtonClick"})";
+    int32_t result = buttonPattern->OnInjectionEvent(validCmd);
+    EXPECT_EQ(result, RET_FAILED);
+}
+
+/**
+ * @tc.name: ButtonOnInjectionEventTest006
+ * @tc.desc: Test geometryNode is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestNg, ButtonOnInjectionEventTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create button
+     */
+    TestProperty testProperty;
+    testProperty.typeValue = std::make_optional(ButtonType::CAPSULE);
+    testProperty.stateEffectValue = std::make_optional(STATE_EFFECT);
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get button pattern
+     */
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+
+    /**
+     * @tc.steps: step3. set geometryNode to null
+     */
+    frameNode->SetGeometryNode(nullptr);
+
+    /**
+     * @tc.steps: step4. send injection command
+     * @tc.expected: step4. returns RET_SUCCESS (should handle null geometryNode gracefully)
+     */
+    std::string validCmd = R"({"cmd":"onButtonClick"})";
+    int32_t result = buttonPattern->OnInjectionEvent(validCmd);
+    EXPECT_EQ(result, RET_SUCCESS);
 }
 } // namespace OHOS::Ace::NG

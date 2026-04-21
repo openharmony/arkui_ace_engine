@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/divider/divider_layout_algorithm.h"
 
 #include "core/components/divider/divider_theme.h"
+#include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 
 namespace OHOS::Ace::NG {
@@ -28,7 +29,7 @@ std::optional<SizeF> DividerLayoutAlgorithm::MeasureContent(
     auto dividerLayoutProperty = DynamicCast<DividerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(dividerLayoutProperty, std::nullopt);
 
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
     auto theme = pipeline->GetTheme<DividerTheme>();
     CHECK_NULL_RETURN(theme, std::nullopt);

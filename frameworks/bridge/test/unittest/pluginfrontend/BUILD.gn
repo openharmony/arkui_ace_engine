@@ -20,7 +20,7 @@ ohos_unittest("PluginFrontendDelegateTest") {
   module_out_path = module_output_path
 
   sources = [
-    "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
+    "$ace_root/test/mock/frameworks/base/mock_lifecycle_checkable.cpp",
     "plugin_frontend_delegate_test.cpp",
   ]
 

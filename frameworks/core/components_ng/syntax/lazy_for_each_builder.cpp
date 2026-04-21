@@ -14,7 +14,9 @@
  */
 
 #include "core/components_ng/syntax/lazy_for_each_builder.h"
+#include "core/components_ng/base/inspector.h"
 #include "core/components_ng/pattern/recycle_view/recycle_dummy_node.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
     std::pair<std::string, RefPtr<UINode>> LazyForEachBuilder::GetChildByIndex(
@@ -782,6 +784,11 @@ namespace OHOS::Ace::NG {
         result = ProcessPreBuildingIndex(cache, deadline, itemConstraint, canRunLongPredictTask, idleIndexes);
         if (!result) {
             expiringItem_.swap(cache);
+            ProcessOffscreenNodesNotInExpiring(cache);
+            if (GetLazyForEachReleaseStrategy() == LazyForEachReleaseStrategy::PROGRESSIVE) {
+                CollectNodesForDelayedRelease(cache);
+                RemovingExpiringItem(deadline);
+            }
             return result;
         }
 
@@ -792,7 +799,32 @@ namespace OHOS::Ace::NG {
             }
         }
         expiringItem_.swap(cache);
+        ProcessOffscreenNodesNotInExpiring(cache);
+        if (GetLazyForEachReleaseStrategy() == LazyForEachReleaseStrategy::PROGRESSIVE) {
+            CollectNodesForDelayedRelease(cache);
+            RemovingExpiringItem(deadline);
+        }
         return result;
+    }
+
+    void LazyForEachBuilder::ProcessOffscreenNodesNotInExpiring(
+        const std::unordered_map<std::string, LazyForEachCacheChild>& cache)
+    {
+        for (const auto& [key, node] : cache) {
+            if (expiringItem_.find(key) == expiringItem_.end()) {
+                ProcessOffscreenNode(node.second, true);
+            }
+        }
+    }
+
+    void LazyForEachBuilder::CollectNodesForDelayedRelease(
+        const std::unordered_map<std::string, LazyForEachCacheChild>& cache)
+    {
+        for (const auto& [key, node] : cache) {
+            if (expiringItem_.find(key) == expiringItem_.end()) {
+                removingNodeList_[node.second->GetId()] = node.second;
+            }
+        }
     }
 
     void LazyForEachBuilder::RecordOutOfBoundaryNodes(int32_t index)
@@ -864,11 +896,13 @@ namespace OHOS::Ace::NG {
         int32_t count = GetTotalCount();
         UpdateHistoricalTotalCount(count);
         bool needBuild = false;
-        for (auto& [index, node] : cachedItems_) {
+        for (auto iter = cachedItems_.begin(); iter != cachedItems_.end();) {
+            auto& [index, node] = *iter;
             bool isInRange = (index < count) && ((start <= end && start <= index && end >= index) ||
                 (start > end && (index <= end || index >= start)));
             if (!isInRange) {
                 if (!node.second) {
+                    expiringItem_.find(node.first) == expiringItem_.end() ? iter = cachedItems_.erase(iter) : ++iter;
                     continue;
                 }
                 auto frameNode = AceType::DynamicCast<FrameNode>(node.second->GetFrameChildByIndex(0, true));
@@ -882,6 +916,7 @@ namespace OHOS::Ace::NG {
                     ProcessOffscreenNode(tempNode, true);
                 }
                 needBuild = true;
+                ++iter;
                 continue;
             }
             if (node.second) {
@@ -889,6 +924,7 @@ namespace OHOS::Ace::NG {
                 if (frameNode) {
                     frameNode->SetActive(true);
                 }
+                ++iter;
                 continue;
             }
             auto keyIter = expiringItem_.find(node.first);
@@ -901,6 +937,7 @@ namespace OHOS::Ace::NG {
                 }
             }
             needBuild = true;
+            ++iter;
         }
         return needBuild;
     }
@@ -1200,6 +1237,28 @@ namespace OHOS::Ace::NG {
         }
     }
 
+    void LazyForEachBuilder::RemovingExpiringItem(int64_t deadline)
+    {
+        if (removingNodeList_.empty()) {
+            return;
+        }
+        // step 2: release nodes while enough time for average release
+        int64_t startTimeStamp = 0;
+        int64_t endTimeStamp = 0;
+        int64_t averageTime = 0;
+        int64_t totalTime = 0;
+        int32_t count = 0;
+        do {
+            startTimeStamp = GetSysTimestamp();
+            auto ite = removingNodeList_.begin();
+            removingNodeList_.erase(ite);
+            endTimeStamp = GetSysTimestamp();
+            count++;
+            totalTime += endTimeStamp - startTimeStamp;
+            averageTime = totalTime / count;
+        } while (!removingNodeList_.empty() && deadline - endTimeStamp > averageTime);
+    }
+
     std::string LazyForEachBuilder::DumpHashKey()
     {
         std::string cachedItemInfo;
@@ -1235,6 +1294,84 @@ namespace OHOS::Ace::NG {
             cachedNodes.pop_back();
             DumpLog::GetInstance().AddDesc(
                 std::string("CachedItems: ").append("[").append(cachedNodes).append("]"));
+        }
+    }
+
+    void LazyForEachBuilder::InvalidIndexOfChangedData(size_t index)
+    {
+        for (auto& [key, child] : expiringItem_) {
+            if (static_cast<size_t>(child.first) == index) {
+                child.first = -1;
+                break;
+            }
+        }
+    }
+
+    void LazyForEachBuilder::SetFlagForGeneratedItem(PropertyChangeFlag propertyChangeFlag)
+    {
+        for (const auto& item : cachedItems_) {
+            if (!item.second.second) {
+                continue;
+            }
+            item.second.second->ForceUpdateLayoutPropertyFlag(propertyChangeFlag);
+        }
+    }
+
+    bool LazyForEachBuilder::ProcessPreBuildingIndex(std::unordered_map<std::string, LazyForEachCacheChild>& cache,
+        int64_t deadline, const std::optional<LayoutConstraintF>& itemConstraint, bool canRunLongPredictTask,
+        std::set<int32_t>& idleIndexes)
+    {
+        if (idleIndexes.find(preBuildingIndex_) == idleIndexes.end()) {
+            preBuildingIndex_ = -1;
+            return true;
+        }
+        idleIndexes.erase(preBuildingIndex_);
+        return PreBuildByIndex(preBuildingIndex_, cache, deadline, itemConstraint, canRunLongPredictTask);
+    }
+
+    void LazyForEachBuilder::LoadCacheByIndex(std::unordered_map<std::string, LazyForEachCacheChild>& cache,
+        std::set<int32_t>& idleIndexes, const LazyForEachCacheChild& node, const std::string& key,
+        const std::set<int32_t>::iterator& iter,
+        std::unordered_map<std::string, LazyForEachCacheChild>::iterator& expiringIter)
+    {
+        ProcessOffscreenNode(node.second, false);
+
+        if (node.first == preBuildingIndex_) {
+            cache.try_emplace(key, node);
+        } else {
+            cache.try_emplace(key, std::move(node));
+            cachedItems_.try_emplace(node.first, LazyForEachChild(key, nullptr));
+            idleIndexes.erase(iter);
+        }
+
+        expiringIter++;
+    }
+
+    void LazyForEachBuilder::LoadCacheByKey(std::unordered_map<std::string, LazyForEachCacheChild>& cache,
+        std::set<int32_t>& idleIndexes, const LazyForEachCacheChild& node, const std::string& key,
+        std::unordered_map<std::string, LazyForEachCacheChild>::iterator& expiringIter)
+    {
+        NotifyDataDeleted(node.second, static_cast<size_t>(node.first), true);
+        ProcessOffscreenNode(node.second, true);
+        NotifyItemDeleted(RawPtr(node.second), key);
+
+        if (node.second) {
+            node.second->DetachFromMainTree();
+        }
+        if (DeleteExpiringItemImmediately()) {
+            expiringIter = expiringItem_.erase(expiringIter);
+        } else {
+            expiringIter++;
+        }
+    }
+
+    void LazyForEachBuilder::ClearAllOffscreenNode()
+    {
+        for (auto& [key, node] : expiringItem_) {
+            ProcessOffscreenNode(node.second, true);
+        }
+        for (auto& [key, node] : cachedItems_) {
+            ProcessOffscreenNode(node.second, true);
         }
     }
 

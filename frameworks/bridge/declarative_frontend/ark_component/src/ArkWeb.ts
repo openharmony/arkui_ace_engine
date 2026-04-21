@@ -1639,6 +1639,20 @@ class WebOnMicrophoneCaptureStateChangeModifier extends ModifierWithKey<(OnMicro
   }
 }
 
+class WebOnInputMethodAttachedModifier extends ModifierWithKey<() => void> {
+  constructor(value: () => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webOnInputMethodAttachedModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetOnInputMethodAttached(node);
+    } else {
+      getUINativeModule().web.setOnInputMethodAttached(node, this.value);
+    }
+  }
+}
+
 class WebEnableAutoFillModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -1649,6 +1663,117 @@ class WebEnableAutoFillModifier extends ModifierWithKey<boolean> {
       getUINativeModule().web.resetEnableAutoFill(node);
     } else {
       getUINativeModule().web.setEnableAutoFill(node, this.value);
+    }
+  }
+}
+
+class WebEnableDefaultContextMenuModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webEnableDefaultContextMenu');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetEnableDefaultContextMenu(node);
+    } else {
+      getUINativeModule().web.setEnableDefaultContextMenu(node, this.value);
+    }
+  }
+}
+
+class WebAiSessionOptionsModifier extends ModifierWithKey<Array<AISessionEvent>> {
+  constructor(value: Array<AISessionEvent>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webAiSessionOptionsModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetAiSessionOptions(node);
+    } else {
+      getUINativeModule().web.setAiSessionOptions(node, this.value);
+    }
+  }
+}
+
+class WebEnableScrollDirectionalLockModifier extends ModifierWithKey<ArkEnableScrollDirectionalLock> {
+  constructor(value: ArkEnableScrollDirectionalLock) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webEnableScrollDirectionalLockModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetEnableScrollDirectionalLock(node);
+    } else {
+      getUINativeModule().web.setEnableScrollDirectionalLock(node, this.value.value, this.value.type);
+    }
+  }
+}
+
+class WebEnableNativeMediaPlayerModifier extends ModifierWithKey<NativeMediaPlayerConfig> {
+  constructor(value: NativeMediaPlayerConfig) {
+      super(value);
+  }
+  static identity: Symbol = Symbol('webEnableNativeMediaPlayerModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+      if (reset) {
+          getUINativeModule().web.resetEnableNativeMediaPlayer(node);
+      } else {
+          getUINativeModule().web.setEnableNativeMediaPlayer(node, this.value);
+      }
+  }
+}
+
+class WebEnableWebAVSessionModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+      super(value);
+  }
+  static identity: Symbol = Symbol('webEnableWebAVSessionModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+      if (reset) {
+          getUINativeModule().web.resetEnableWebAVSession(node);
+      } else {
+          getUINativeModule().web.setEnableWebAVSession(node, this.value);
+      }
+    }
+}
+class WebEnableDragModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webEnableDrag');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetEnableDrag(node);
+    } else {
+      getUINativeModule().web.setEnableDrag(node, this.value);
+    }
+  }
+}
+
+class WebScrollbarLayoutPolicyModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webScrollbarLayoutPolicy');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetScrollbarLayoutPolicy(node);
+    } else {
+      getUINativeModule().web.setScrollbarLayoutPolicy(node, this.value);
+    }
+  }
+}
+
+class WebKeyboardAppearanceModifier extends ModifierWithKey<WebKeyboardAppearanceMode> {
+  constructor(value: WebKeyboardAppearanceMode) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('WebKeyboardAppearanceModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetKeyboardAppearance(node);
+    } else {
+      getUINativeModule().web.setKeyboardAppearance(node, this.value);
     }
   }
 }
@@ -2216,6 +2341,55 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   }
   enableAutoFill(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, WebEnableAutoFillModifier.identity, WebEnableAutoFillModifier, value);
+    return this;
+  }
+
+  enableDrag(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, WebEnableDragModifier.identity, WebEnableDragModifier, value);
+    return this;
+  }
+
+  enableDefaultContextMenu(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, WebEnableDefaultContextMenuModifier.identity, WebEnableDefaultContextMenuModifier, value);
+    return this;
+  }
+  aiSessionOptions(value: Array<AISessionEvent>): this {
+    modifierWithKey(this._modifiersWithKeys, WebAiSessionOptionsModifier.identity, WebAiSessionOptionsModifier, value);
+    return this;
+  }
+  enableScrollDirectionalLock(value: boolean, type: number): this {
+    let arkEnableScrollDirectionalLock = new ArkEnableScrollDirectionalLock();
+    if (!isUndefined(value) && !isNull(value)) {
+      arkEnableScrollDirectionalLock.value = value;
+    }
+    if (!isUndefined(type) && !isNull(type)) {
+      arkEnableScrollDirectionalLock.type = type;
+    }
+    if (arkEnableScrollDirectionalLock.value === undefined && arkEnableScrollDirectionalLock.type === undefined) {
+      modifierWithKey(this._modifiersWithKeys, WebEnableScrollDirectionalLockModifier.identity, WebEnableScrollDirectionalLockModifier, undefined);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, WebEnableScrollDirectionalLockModifier.identity, WebEnableScrollDirectionalLockModifier, arkEnableScrollDirectionalLock);
+    }
+    return this;
+  }
+  enableNativeMediaPlayer(config: NativeMediaPlayerConfig): this {
+    modifierWithKey(this._modifiersWithKeys, WebEnableNativeMediaPlayerModifier.identity, WebEnableNativeMediaPlayerModifier, config);
+    return this;
+  }
+  enableWebAVSession(enabled: boolean): this {
+      modifierWithKey(this._modifiersWithKeys, WebEnableWebAVSessionModifier.identity, WebEnableWebAVSessionModifier, enabled);
+      return this;
+  }
+  scrollbarLayoutPolicy(value: number): this {
+    modifierWithKey(this._modifiersWithKeys, WebScrollbarLayoutPolicyModifier.identity, WebScrollbarLayoutPolicyModifier, value);
+    return this;
+  }
+  onInputmethodAttached(callback: () => void): this {
+    modifierWithKey(this._modifiersWithKeys, WebOnInputMethodAttachedModifier.identity, WebOnInputMethodAttachedModifier, callback);
+    return this;
+  }
+  keyboardAppearance(mode: WebKeyboardAppearanceMode): this {
+    modifierWithKey(this._modifiersWithKeys, WebKeyboardAppearanceModifier.identity, WebKeyboardAppearanceModifier, mode);
     return this;
   }
 }

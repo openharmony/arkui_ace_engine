@@ -19,6 +19,7 @@
 #include "base/utils/date_util.h"
 #include "core/components_ng/pattern/calendar/calendar_model_ng.h"
 #include "core/components_ng/pattern/calendar/calendar_month_pattern.h"
+#include "core/common/container.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_event_hub.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_pattern.h"
@@ -26,6 +27,7 @@
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -49,14 +51,16 @@ constexpr size_t ACCEPT_BUTTON_FONT_COLOR_INDEX = 2;
 constexpr size_t ACCEPT_BUTTON_BACKGROUND_COLOR_INDEX = 3;
 constexpr size_t OPTION_CANCEL_BUTTON_INDEX = 0;
 constexpr size_t OPTION_ACCEPT_BUTTON_INDEX = 1;
+constexpr uint32_t MIN_MONTH = 1;
+constexpr uint32_t MIN_DAY = 1;
 } // namespace
 
 FocusPattern CalendarDialogPattern::GetFocusPattern() const
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, FocusPattern());
-    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
-    RefPtr<CalendarTheme> calendarTheme = pipeline->GetTheme<CalendarTheme>();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, FocusPattern());
+    auto pickerTheme = host->GetTheme<PickerTheme>(true);
+    RefPtr<CalendarTheme> calendarTheme = host->GetTheme<CalendarTheme>(true);
     CHECK_NULL_RETURN(pickerTheme, FocusPattern());
     CHECK_NULL_RETURN(calendarTheme, FocusPattern());
     auto focusColor = pickerTheme->GetFocusColor();
@@ -79,10 +83,26 @@ void CalendarDialogPattern::OnModifyDone()
     InitTitleArrowsEvent();
     InitEntryChangeEvent();
 
-    UpdateTitleArrowsImage();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const bool isTargetApi26Plus = host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX);
+    const bool freezeTitleArrowsInThemeScope =
+        isTargetApi26Plus && host && host->GetThemeScopeId() != 0 && hasInitTitleArrowsColor_;
+    // Target API 26+: non-default theme scope (e.g. WithTheme) should keep title arrow images and tint
+    // colors stable after the first color apply; skip both updates on repeated OnModifyDone so system
+    // dark/light switches do not swap resources or override the scoped palette.
+    // Below target API 26: freezeTitleArrowsInThemeScope is always false; always refresh both.
+    if (!freezeTitleArrowsInThemeScope) {
+        UpdateTitleArrowsImage();
+    }
     UpdateOptionsButton();
     UpdateDialogBackgroundColor();
-    UpdateTitleArrowsColor();
+    if (!freezeTitleArrowsInThemeScope) {
+        UpdateTitleArrowsColor();
+        if (isTargetApi26Plus) {
+            hasInitTitleArrowsColor_ = true;
+        }
+    }
     UpdateOptionsButtonColor();
 }
 
@@ -115,9 +135,7 @@ void CalendarDialogPattern::UpdateDialogBackgroundColor()
     CHECK_NULL_VOID(host);
     auto wrapperNode = AceType::DynamicCast<FrameNode>(host->GetParent());
     CHECK_NULL_VOID(wrapperNode);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    RefPtr<CalendarTheme> theme = host->GetTheme<CalendarTheme>(true);
     auto contentRenderContext = wrapperNode->GetRenderContext();
     CHECK_NULL_VOID(contentRenderContext);
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
@@ -131,9 +149,7 @@ void CalendarDialogPattern::UpdateTitleArrowsColor()
     CHECK_NULL_VOID(host);
     auto title = host->GetChildAtIndex(TITLE_NODE_INDEX);
     CHECK_NULL_VOID(title);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    RefPtr<CalendarTheme> theme = host->GetTheme<CalendarTheme>(true);
     CHECK_NULL_VOID(theme);
 
     for (const auto& child : title->GetChildren()) {
@@ -195,6 +211,11 @@ void CalendarDialogPattern::UpdateTitleArrowsImage()
 void CalendarDialogPattern::UpdateImage(
     const RefPtr<FrameNode>& buttonNode, const InternalResource::ResourceId& resourceId)
 {
+    CHECK_NULL_VOID(buttonNode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto theme = host->GetTheme<CalendarTheme>(true);
+    CHECK_NULL_VOID(theme);
     auto image = buttonNode->GetChildren().front();
     CHECK_NULL_VOID(image);
     auto imageNode = AceType::DynamicCast<FrameNode>(image);
@@ -213,9 +234,7 @@ void CalendarDialogPattern::UpdateOptionsButton()
     CHECK_NULL_VOID(host);
     auto options = host->GetChildAtIndex(OPTIONS_NODE_INDEX);
     CHECK_NULL_VOID(options);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    auto dialogTheme = host->GetTheme<DialogTheme>(true);
     CHECK_NULL_VOID(dialogTheme);
 
     size_t buttonIndex = OPTION_CANCEL_BUTTON_INDEX;
@@ -243,11 +262,9 @@ void CalendarDialogPattern::UpdateOptionsButtonColor()
     CHECK_NULL_VOID(host);
     auto options = host->GetChildAtIndex(OPTIONS_NODE_INDEX);
     CHECK_NULL_VOID(options);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto calendarTheme = pipeline->GetTheme<CalendarTheme>();
+    auto calendarTheme = host->GetTheme<CalendarTheme>(true);
     CHECK_NULL_VOID(calendarTheme);
-    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    auto pickerTheme = host->GetTheme<PickerTheme>(true);
     CHECK_NULL_VOID(pickerTheme);
 
     size_t buttonIndex = OPTION_CANCEL_BUTTON_INDEX;
@@ -603,6 +620,15 @@ bool CalendarDialogPattern::HandleCalendarNodeKeyEvent(const KeyEvent& event)
                 focusedDayIndex--;
             }
 
+            while (IsIndexInCurrentMonth(focusedDayIndex, currentMonthData) &&
+                !IsDateInRange(currentMonthData.days[focusedDayIndex])) {
+                if (textDirection == TextDirection::RTL) {
+                    focusedDayIndex++;
+                } else {
+                    focusedDayIndex--;
+                }
+            }
+
             PaintMonthFocusState(focusedDayIndex);
             return true;
         }
@@ -613,11 +639,24 @@ bool CalendarDialogPattern::HandleCalendarNodeKeyEvent(const KeyEvent& event)
                 focusedDayIndex++;
             }
 
+            while (IsIndexInCurrentMonth(focusedDayIndex, currentMonthData) &&
+                !IsDateInRange(currentMonthData.days[focusedDayIndex])) {
+                if (textDirection == TextDirection::RTL) {
+                    focusedDayIndex--;
+                } else {
+                    focusedDayIndex++;
+                }
+            }
+
             PaintMonthFocusState(focusedDayIndex);
             return true;
         }
         case KeyCode::KEY_DPAD_UP: {
             focusedDayIndex -= WEEK_DAYS;
+            while (IsIndexInCurrentMonth(focusedDayIndex, currentMonthData) &&
+                !IsDateInRange(currentMonthData.days[focusedDayIndex])) {
+                focusedDayIndex -= WEEK_DAYS;
+            }
             if (IsIndexInCurrentMonth(focusedDayIndex, currentMonthData)) {
                 focusedDay_ = currentMonthData.days[focusedDayIndex];
                 PaintCurrentMonthFocusState();
@@ -627,6 +666,10 @@ bool CalendarDialogPattern::HandleCalendarNodeKeyEvent(const KeyEvent& event)
         }
         case KeyCode::KEY_DPAD_DOWN: {
             focusedDayIndex += WEEK_DAYS;
+            while (IsIndexInCurrentMonth(focusedDayIndex, currentMonthData) &&
+                !IsDateInRange(currentMonthData.days[focusedDayIndex])) {
+                focusedDayIndex += WEEK_DAYS;
+            }
             if (IsIndexInCurrentMonth(focusedDayIndex, currentMonthData)) {
                 focusedDay_ = currentMonthData.days[focusedDayIndex];
                 PaintCurrentMonthFocusState();
@@ -673,6 +716,20 @@ bool CalendarDialogPattern::HandleCalendarNodeKeyEvent(const KeyEvent& event)
             break;
     }
     return false;
+}
+
+bool CalendarDialogPattern::IsDateInRange(const CalendarDay& day)
+{
+    PickerDate date;
+    date.SetYear(day.month.year);
+    date.SetMonth(day.month.month);
+    date.SetDay(day.day);
+    for (const auto& range : currentSettingData_.disabledDateRange) {
+        if (PickerDate::IsDateInRange(date, range.first, range.second)) {
+            return false;
+        }
+    }
+    return PickerDate::IsDateInRange(date, currentSettingData_.startDate, currentSettingData_.endDate);
 }
 
 void CalendarDialogPattern::PaintMonthFocusState(int32_t focusedDayIndex)
@@ -1153,6 +1210,7 @@ void CalendarDialogPattern::FireChangeByKeyEvent(PickerDate& selectedDay)
     auto eventHub = monthNode->GetEventHub<CalendarEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->UpdateSelectedChangeEvent(selectedDay.ToString(true));
+    ReportChangeEvent("CalendarPickerDialog", "onChange", selectedDay.ToString(true));
 }
 
 CalendarMonth CalendarDialogPattern::GetNextMonth(const CalendarMonth& calendarMonth)
@@ -1333,7 +1391,7 @@ void CalendarDialogPattern::OnLanguageConfigurationUpdate()
         CHECK_NULL_VOID(monthFrameNode);
         auto pipelineContext = GetContext();
         CHECK_NULL_VOID(pipelineContext);
-        RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+        RefPtr<CalendarTheme> theme = host->GetTheme<CalendarTheme>(true);
         CHECK_NULL_VOID(theme);
 
         auto fontSizeScale = pipelineContext->GetFontScale();
@@ -1342,7 +1400,11 @@ void CalendarDialogPattern::OnLanguageConfigurationUpdate()
             ACE_UPDATE_NODE_PAINT_PROPERTY(
                 CalendarPaintProperty, WeekFontSize, theme->GetCalendarSmallDayFontSize(), monthFrameNode);
         } else {
-            if (fontSizeScale < theme->GetCalendarPickerLargeScale() || CalendarDialogView::CheckOrientationChange()) {
+            const bool skipDialogDayGridAging =
+                monthFrameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
+                CalendarDialogView::SkipCalendarPickerDayGridAgingAdapt(pipelineContext);
+            if (fontSizeScale < theme->GetCalendarPickerLargeScale() || CalendarDialogView::CheckOrientationChange() ||
+                skipDialogDayGridAging) {
                 ACE_UPDATE_NODE_PAINT_PROPERTY(CalendarPaintProperty, WeekFontSize, fontSize, monthFrameNode);
             } else {
                 fontSizeScale = fontSizeScale > theme->GetCalendarPickerLargerScale()
@@ -1364,9 +1426,7 @@ void CalendarDialogPattern::OnFontScaleConfigurationUpdate()
     CHECK_NULL_VOID(titleNode);
     auto layoutProps = titleNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(layoutProps);
-    auto pipelineContext = GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto calendarTheme = pipelineContext->GetTheme<CalendarTheme>();
+    auto calendarTheme = host->GetTheme<CalendarTheme>(true);
     CHECK_NULL_VOID(calendarTheme);
     auto scrollNode = host->GetChildAtIndex(CALENDAR_NODE_INDEX);
     CHECK_NULL_VOID(scrollNode);
@@ -1428,9 +1488,7 @@ void CalendarDialogPattern::UpdateCaretInfoToController()
     CHECK_NULL_VOID(titleNode);
     auto layoutProps = titleNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(layoutProps);
-    auto pipelineContext = GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto calendarTheme = pipelineContext->GetTheme<CalendarTheme>();
+    auto calendarTheme = host->GetTheme<CalendarTheme>(true);
     CHECK_NULL_VOID(calendarTheme);
     auto scrollNode = host->GetChildAtIndex(CALENDAR_NODE_INDEX);
     CHECK_NULL_VOID(calendarTheme);
@@ -1485,9 +1543,14 @@ void CalendarDialogPattern::OnColorConfigurationUpdate()
 {
     auto titleNode = titleNode_.Upgrade();
     CHECK_NULL_VOID(titleNode);
-    auto pipelineContext = titleNode->GetContextRefPtr();
-    CHECK_NULL_VOID(pipelineContext);
-    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    // Target API 26+: non-default theme scope (e.g. WithTheme) keeps the dialog title in the originally
+    // scoped palette and ignores subsequent system dark/light configuration updates here.
+    // Below target API 26: always apply configuration-driven title color refresh.
+    if (titleNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
+        titleNode->GetThemeScopeId() != 0) {
+        return;
+    }
+    RefPtr<CalendarTheme> theme = titleNode->GetTheme<CalendarTheme>(true);
     CHECK_NULL_VOID(theme);
     auto textLayoutProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
@@ -1539,4 +1602,121 @@ void CalendarDialogPattern::MarkMonthNodeDirty()
     }
 }
 
+int32_t CalendarDialogPattern::OnInjectionEvent(const std::string& command)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, RET_FAILED);
+
+    auto json = JsonUtil::ParseJsonString(command);
+    if (!IsJsonValid(json) || !IsJsonObject(json)) {
+        auto errorMsg1 = std::string("invalidCommand Json: ") + command;
+        ReportCommandResultEvent(host->GetId(), "setCalendarPickerDialogTime", false, errorMsg1);
+        return RET_FAILED;
+    }
+
+    auto cmd = json->GetString("cmd");
+    if (cmd != "setCalendarPickerDialogTime") {
+        auto errorMsg2 = std::string("invalidCommand Json: ") + command;
+        ReportCommandResultEvent(host->GetId(), "setCalendarPickerDialogTime", false, errorMsg2);
+        return RET_FAILED;
+    }
+
+    auto paramJson = json->GetValue("params");
+    if (!IsJsonValid(paramJson) || !IsJsonObject(paramJson)) {
+        auto errorMsg3 = std::string("invalidParams Json: ") + command;
+        ReportCommandResultEvent(host->GetId(), "setCalendarPickerDialogTime", false, errorMsg3);
+        return RET_FAILED;
+    }
+
+    if (!CheckCalendarParamDate(paramJson, command)) {
+        auto errorMsg4 = std::string("invalidParams Json: ") + command;
+        ReportCommandResultEvent(host->GetId(), "setCalendarPickerDialogTime", false, errorMsg4);
+        return RET_FAILED;
+    }
+
+    ReportCommandResultEvent(host->GetId(), "setCalendarPickerDialogTime", true, "");
+    int32_t year = paramJson->GetInt("year");
+    int32_t month = paramJson->GetInt("month");
+    int32_t day = paramJson->GetInt("day");
+    PickerDate targetDate(year, month, day);
+    currentSettingData_.selectedDate = targetDate;
+    HandleEntryChange(targetDate.ToString(true));
+    ReportChangeEvent("CalendarPickerDialog", "onChange", targetDate.ToString(true));
+    return RET_SUCCESS;
+}
+
+bool CalendarDialogPattern::ReportCommandResultEvent(int32_t nodeId, const std::string& event,
+    bool isSuccess, const std::string& reason)
+{
+    auto value = InspectorJsonUtil::Create();
+    CHECK_NULL_RETURN(value, false);
+
+    value->Put("event", event.c_str());
+    if (isSuccess) {
+        value->Put("result", "success");
+    } else {
+        value->Put("result", "fail");
+        value->Put("reason", reason.c_str());
+    }
+
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "CalendarPickerDialogResult", value, 0);
+    return true;
+}
+
+bool CalendarDialogPattern::ReportChangeEvent(const std::string& compName,
+    const std::string& eventName, const std::string& eventData)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    PickerDate pickerDate;
+    CHECK_NULL_RETURN(CalendarDialogView::GetReportChangeEventDate(pickerDate, eventData), false);
+    CHECK_NULL_RETURN(CalendarDialogView::CanReportChangeEvent(reportedPickerDate_, pickerDate), false);
+    return CalendarDialogView::ReportChangeEvent(host->GetId(), compName, eventName, pickerDate);
+}
+
+bool CalendarDialogPattern::IsJsonValid(const std::unique_ptr<JsonValue>& json)
+{
+    CHECK_NULL_RETURN(json, false);
+    return json->IsValid();
+}
+
+bool CalendarDialogPattern::IsJsonObject(const std::unique_ptr<JsonValue>& json)
+{
+    CHECK_NULL_RETURN(json, false);
+    return json->IsObject();
+}
+
+bool CalendarDialogPattern::CheckCalendarParamDate(const std::unique_ptr<JsonValue>& paramJson,
+    const std::string& command)
+{
+    if (!IsJsonValid(paramJson) || !IsJsonObject(paramJson)) {
+        return false;
+    }
+
+    if (!paramJson->Contains("year") || !paramJson->Contains("month")
+        || !paramJson->Contains("day")) {
+        return false;
+    }
+    if ((paramJson->GetValue("year")->IsNumber() && paramJson->GetValue("month")->IsNumber() &&
+        paramJson->GetValue("day")->IsNumber())) {
+        int32_t year = paramJson->GetInt("year");
+        int32_t month = paramJson->GetInt("month");
+        int32_t day = paramJson->GetInt("day");
+        if (year < MIN_YEAR || month < MIN_MONTH || month > MAX_MONTH || day < MIN_DAY) {
+            return false;
+        }
+
+        uint32_t maxDay = PickerDate::GetMaxDay(year, month);
+        if (day > static_cast<int32_t>(maxDay)) {
+            return false;
+        }
+
+        PickerDate targetDate(year, month, day);
+        if (!PickerDate::IsDateInRange(targetDate, currentSettingData_.startDate, currentSettingData_.endDate)) {
+            return false;
+        }
+        return true;
+    }
+    return false;
+}
 } // namespace OHOS::Ace::NG

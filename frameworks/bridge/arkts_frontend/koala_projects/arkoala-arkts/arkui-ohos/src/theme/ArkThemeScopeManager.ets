@@ -32,7 +32,7 @@ import { GlobalStateManager, IncrementalNode, ComputableState } from "@koalaui/r
 import { findPeerNode } from "arkui/PeerNode";
 import { KPointer } from '@koalaui/interop';
 import { ThemeOps } from 'arkui/component/idlize';
-import { UIContextImpl } from 'arkui/base/UIContextImpl';
+import { UIContext } from "@ohos/arkui/UIContext"
 import { UIContextUtil } from 'arkui/base/UIContextUtil';
 
 export interface WithThemeScopeItem {
@@ -311,7 +311,7 @@ export class ArkThemeScopeManager {
      * @param withThemeOptions WithTheme container`s options
      */
     onScopeEnter(withThemeId: number, withThemeOptions: WithThemeOptions, theme: ArkThemeBase) {
-        this.themeOptionsMap.set(withThemeId as int32, withThemeOptions);
+        this.themeOptionsMap.set(withThemeId.toInt(), withThemeOptions);
         // save theme scope id on scope enter
         this.lastThemeScopeId = withThemeId;
         if (this.handledIsFirstRender === true) {
@@ -604,7 +604,7 @@ export class ArkThemeScopeManager {
     public applyWithThemeForCompatibleComponent(view: ESValue):void {
         const currentThemeOptions = this.currentThemeOptions();
         if (!currentThemeOptions) {
-            const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+            const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
             if (uiContext.isUpdateConfiguration()) {
                 view.invokeMethod('forceCompleteRerender', true);
             }
@@ -647,7 +647,7 @@ export class ArkThemeScopeManager {
         if (handledColorMode.isNull() || handledColorMode.isUndefined()) {
             return;
         }
-        const colorModeValue = handledColorMode.toNumber() as int32;
+        const colorModeValue = handledColorMode.toNumber().toInt();
         let colorMode = ThemeColorMode.SYSTEM;
         if (colorModeValue === 0) {
             colorMode = ThemeColorMode.SYSTEM;
@@ -660,7 +660,7 @@ export class ArkThemeScopeManager {
     }
 
     public executeReload(node: ComputableState<IncrementalNode>): void {
-        const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
         if (uiContext.isUpdateConfiguration()) {
             node.forceCompleteRerender();
         }

@@ -18,6 +18,9 @@
 #include "movingphotoview_ani.h"
 
 namespace OHOS::Ace {
+namespace {
+static constexpr int32_t US_CONVERT = 1000;
+}
 
 std::unique_ptr<NG::MovingPhotoModelNG> NG::MovingPhotoModelNG::instance_ = nullptr;
 std::mutex NG::MovingPhotoModelNG::mutex_;
@@ -240,8 +243,8 @@ void MovingPhotoAni::SetAutoPlayPeriod([[maybe_unused]] ani_env *env, [[maybe_un
     CHECK_NULL_VOID(movingPhotoNode);
     double startTime = static_cast<double>(startTimeAni);
     double endTime = static_cast<double>(endTimeAni);
-    NG::MovingPhotoModelNG::AutoPlayPeriod(movingPhotoNode, static_cast<int64_t>(startTime),
-        static_cast<int64_t>(endTime));
+    NG::MovingPhotoModelNG::AutoPlayPeriod(movingPhotoNode, static_cast<int64_t>(startTime * US_CONVERT),
+        static_cast<int64_t>(endTime * US_CONVERT));
 }
 
 void MovingPhotoAni::SetAutoPlay([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class object, ani_long nodeptr,
@@ -345,7 +348,8 @@ void MovingPhotoAni::SetPlaybackPeriod([[maybe_unused]] ani_env *env, [[maybe_un
     NG::MovingPhotoController* controller = reinterpret_cast<NG::MovingPhotoController*>(nodeptr);
     double startTime = static_cast<double>(startTimeAni);
     double endTime = static_cast<double>(endTimeAni);
-    controller->SetPlaybackPeriod(static_cast<int64_t>(startTime), static_cast<int64_t>(endTime));
+    controller->SetPlaybackPeriod(static_cast<int64_t>(startTime * US_CONVERT),
+        static_cast<int64_t>(endTime * US_CONVERT));
 }
 
 void MovingPhotoAni::EnableAutoPlay([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_class object, ani_long nodeptr,
@@ -406,11 +410,18 @@ void MovingPhotoAni::SetMovingPhotoViewOptions([[maybe_unused]] ani_env *env, [[
 void MovingPhotoAni::SetMovingPhotoUri(ani_env *env, NG::MovingPhotoNode* movingPhotoNode, ani_object obj)
 {
     ani_ref fn_ref;
-    if (ANI_OK != env->Object_CallMethodByName_Ref(obj, "getUri", ":C{std.core.String}", &fn_ref)) {
+    if (ANI_OK != env->Object_CallMethodByName_Ref(obj, "getUri", ":X{C{std.core.Null}C{std.core.String}}", &fn_ref)) {
         return;
     }
-    std::string imageUriStr = AniUtils::AniStringToStdString(env, static_cast<ani_string>(fn_ref));
-    NG::MovingPhotoModelNG::SetImageSrc(movingPhotoNode, imageUriStr);
+    ani_class stringClass {};
+    ani_object ani_obj = static_cast<ani_object>(fn_ref);
+    env->FindClass("std.core.String", &stringClass);
+    ani_boolean isString = ANI_FALSE;
+    env->Object_InstanceOf(ani_obj, stringClass, &isString);
+    if (isString) {
+        std::string imageUriStr = AniUtils::AniStringToStdString(env, static_cast<ani_string>(fn_ref));
+        NG::MovingPhotoModelNG::SetImageSrc(movingPhotoNode, imageUriStr);
+    }
 }
 
 MovingPhotoFormat MovingPhotoAni::ParsePixelMapFormat(ani_env *env, ani_object options)

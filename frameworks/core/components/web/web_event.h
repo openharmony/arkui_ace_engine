@@ -1750,6 +1750,7 @@ public:
 
     virtual void Cancel() const = 0;
     virtual void CopyImage() const = 0;
+    virtual void SaveImage() const = 0;
     virtual void Copy() const = 0;
     virtual void Paste() const = 0;
     virtual void Cut() const = 0;
@@ -2505,6 +2506,14 @@ public:
 private:
     int32_t originalState_ = 0;
     int32_t newState_ = 0;
+};
+
+class ACE_EXPORT InputMethodAttachedEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(InputMethodAttachedEvent, BaseEventInfo);
+
+public:
+    InputMethodAttachedEvent() : BaseEventInfo("InputMethodAttached") {}
+    ~InputMethodAttachedEvent() = default;
 };
 } // namespace OHOS::Ace
 

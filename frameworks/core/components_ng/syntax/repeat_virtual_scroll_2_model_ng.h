@@ -30,7 +30,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT RepeatVirtualScroll2ModelNG : public RepeatVirtualScroll2Model {
 public:
     void Create(uint32_t arrLen, uint32_t totalCount,
-        const std::function<std::pair<uint32_t, uint32_t>(int32_t)>& onGetRid4Index,
+        const std::function<std::pair<uint32_t, uint32_t>(int32_t, bool)>& onGetRid4Index,
         const std::function<void(int32_t, int32_t)>& onRecycleItems,
         const std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)>& onActiveRange,
         const std::function<void(int32_t, int32_t)>& onMoveFromTo, const std::function<void()>& onPurge,
@@ -51,6 +51,10 @@ public:
         std::function<void(int32_t)>&& onDragStart, std::function<void(int32_t, int32_t)>&& onMoveThrough,
         std::function<void(int32_t)>&& onDrop) override;
     void SetCreateByTemplate(bool isCreatedByTemplate) override;
+    virtual bool IsAllowAnimation(int32_t repeatElmtId) override;
+    virtual bool IsImplicitAnimationOpen() override;
+    virtual bool IsChildInAnimation(int32_t repeatElmtId, uint32_t rid) override;
+    virtual bool IsChildOnMainTree(int32_t repeatElmtId, uint32_t rid) override;
 };
 
 } // namespace OHOS::Ace::NG

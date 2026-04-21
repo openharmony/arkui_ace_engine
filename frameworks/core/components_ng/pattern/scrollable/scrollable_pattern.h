@@ -20,37 +20,50 @@
 #include <vector>
 
 #include "base/geometry/axis.h"
-#include "core/animation/bezier_variable_velocity_motion.h"
-#include "core/animation/select_motion.h"
-#include "core/animation/spring_curve.h"
-#include "core/animation/velocity_motion.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/event/drag_event.h"
-#include "core/components_ng/event/input_event_hub.h"
 #include "core/components_ng/event/scrollable_event.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
-#include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
-#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
-#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
-#include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
-#include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
-#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
-#include "core/components_ng/pattern/scrollable/refresh_coordination.h"
-#include "core/components_ng/pattern/scrollable/scrollable_controller.h"
-#include "core/components_ng/pattern/scrollable/scrollable_coordination_event.h"
-#include "core/components_ng/pattern/scrollable/scrollable_paint_method.h"
-#include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
+#include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
-#include "core/components_ng/pattern/scrollable/scrollable_theme.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
+#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
+#include "core/components_ng/pattern/scrollable/scrollable_controller.h"
 #include "core/components_ng/render/animation_utils.h"
-#include "core/event/mouse_event.h"
 #ifdef SUPPORT_DIGITAL_CROWN
 #include "core/event/crown_event.h"
 #endif
 #include "core/event/statusbar/statusbar_event_proxy.h"
+#include "core/components/scroll/scroll_controller_base.h"
+
+namespace OHOS::Ace {
+class BezierVariableVelocityMotion;
+class ScrollControllerBase;
+class SelectMotion;
+class VelocityMotion;
+enum class ScrollAlign : int;
+enum class ScrollEdgeType : size_t;
+}
+
 namespace OHOS::Ace::NG {
 class InspectorFilter;
+class GestureEventHub;
+class InputEvent;
+class InputEventHub;
+class NavDestinationPatternBase;
+class RefreshCoordination;
+enum class RefreshCoordinationMode : char;
+class Scrollable;
+class ScrollableController;
+class ScrollablePaintMethod;
+class ScrollBar;
+struct ScrollBarProperty;
+class ScrollBarOverlayModifier;
+class ScrollBarProxy;
+class ScrollEdgeEffect;
+class SheetPresentationPattern;
+class TouchEventImpl;
 #ifndef WEARABLE_PRODUCT
 constexpr double FRICTION = 0.6;
 constexpr double API11_FRICTION = 0.7;
@@ -90,6 +103,16 @@ struct ScrollOffsetAbility {
     float contentStartOffset = 0.0f;
     float contentEndOffset = 0.0f;
 };
+struct ScrollOnInjectionEventInfo {
+    bool isScrollByRatio = false;
+    bool isScrollByOffset = false;
+    bool isScrollByTargetId = false;
+    int reportEventId = 0;
+    int32_t targetId = -1;
+    float ratio = 0.0f;
+    double scrollOffset = 0.0;
+};
+
 class ACE_FORCE_EXPORT ScrollablePattern : public NestableScrollContainer, public virtual StatusBarClickListener {
     DECLARE_ACE_TYPE(ScrollablePattern, NestableScrollContainer);
 
@@ -191,6 +214,8 @@ public:
     virtual bool CanOverScrollWithDelta(double delta, bool isNestScroller = false);
 
     virtual void OnTouchDown(const TouchEventInfo& info);
+
+    void OnTouchpadInteraction(PointF point);
 
     virtual void ProcessFreeScrollOverDrag(const OffsetF velocity) {};
 
@@ -449,6 +474,10 @@ public:
     /* ============================================================================== */
 
     virtual float GetContentStartOffset() const
+    {
+        return 0.0f;
+    }
+    virtual float GetContentEndOffset() const
     {
         return 0.0f;
     }
@@ -899,6 +928,15 @@ public:
 
     void OnStatusBarClick() override;
 
+    void SetIsAllowMouse(bool enableScrollWithMouse)
+    {
+        isAllowMouse_ = enableScrollWithMouse;
+    }
+    virtual bool GetIsAllowMouse() const
+    {
+        return isAllowMouse_;
+    }
+
     void GetRepeatCountInfo(
         RefPtr<UINode> node, int32_t& repeatDifference, int32_t& firstRepeatCount, int32_t& totalChildCount);
 
@@ -950,13 +988,13 @@ public:
         return scrollBar_;
     }
 
-    static double GetDefaultFriction();
-
     bool IsInitialized() const
     {
         return isInitialized_;
     }
     void ProcessScrollOverDrag(double velocity, bool isNestScroller);
+
+    static double GetDefaultFriction();
 
     void SetCanOverScroll(bool val);
 
@@ -1063,6 +1101,8 @@ protected:
 
     bool GetCanOverScroll() const;
     bool lastCanOverScroll_ = false;
+    bool lastScrollFromInjection_ = false;
+    bool isAllowMouse_ = false;
 
     void CheckScrollBarOff();
 
@@ -1071,11 +1111,26 @@ protected:
         return isBackToTopRunning_;
     }
 
-    std::string ParseCommand(const std::string& command, int& reportEventId, float& moveRatio, bool& isScrollByRatio);
+    std::string ParseCommand(const std::string& command, ScrollOnInjectionEventInfo& scrollOnInjectionEventInfo);
     void ReportScroll(bool isJump, ScrollError error, int32_t reportEventId);
     int32_t OnInjectionEventByRatio(const std::string& command);
     ScrollError ScrollByRatio(bool reverse, float ratio);
     void HandleScrollByRatio(bool isScrollByRatio, bool reverse, float ratio, int reportEventId);
+    void HandleScrollByOffset(double scrollOffset, int reportEventId);
+    void HandleScrollByTargetId(int32_t targetId, int reportEventId);
+
+    virtual int32_t GetFirstIndex() const
+    {
+        return -1;
+    }
+
+    virtual void FillReportOnItemStopParams(std::unique_ptr<JsonValue>& params);
+    void ReportOnItemScrollStop(const std::string& event);
+
+    void SetLastScrollFromInjection(bool val)
+    {
+        lastScrollFromInjection_ = val;
+    }
 
 #ifdef SUPPORT_DIGITAL_CROWN
     void SetDigitalCrownEvent();
@@ -1089,6 +1144,12 @@ private:
 
     void RegisterScrollBarEventTask();
     void RegisterScrollBarOverDragEventTask();
+    void RegisterScrollBarMarginCallback();
+    std::pair<double, double> GetAutoAdjustAvoidOffset();
+    void CalcPaddingAvoidDistByMainAxis(
+        const std::unique_ptr<PaddingProperty>& property, std::pair<double, double>& offset, bool isRtl);
+    void CalcBorderWidthAvoidDistByMainAxis(
+        const std::unique_ptr<BorderWidthProperty>& property, std::pair<double, double>& offset, bool isRtl);
     bool OnScrollPosition(double& offset, int32_t source);
     void ProcessNavBarReactOnStart();
     float ProcessNavBarReactOnUpdate(float offset);
@@ -1109,6 +1170,7 @@ private:
         const std::list<WeakPtr<NGGestureRecognizer>>& activeRecognizers);
     bool IsNeedPreventRecognizer(const RefPtr<NGGestureRecognizer>& recognizer,
         bool isChild, bool isHitTestBlock) const;
+    bool IsInComponent(PointF point);
 
     // select with mouse
     virtual void MultiSelectWithoutKeyboard(const RectF& selectedZone) {};
@@ -1198,14 +1260,7 @@ private:
     // Scrollable::UpdateScrollPosition
     bool HandleScrollImpl(float offset, int32_t source);
     void NotifyMoved(bool value);
-    void CreateRefreshCoordination()
-    {
-        if (!refreshCoordination_) {
-            auto host = GetHost();
-            CHECK_NULL_VOID(host);
-            refreshCoordination_ = AceType::MakeRefPtr<RefreshCoordination>(host);
-        }
-    }
+    void CreateRefreshCoordination();
     float GetVelocity() const;
     bool NeedSplitScroll(OverScrollOffset& overOffsets, int32_t source);
     RefreshCoordinationMode CoordinateWithRefresh(double& offset, int32_t source, bool isAtTop);

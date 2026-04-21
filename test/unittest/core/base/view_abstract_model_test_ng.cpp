@@ -16,11 +16,11 @@
 #define protected public
 #define private public
 
-#include "test/mock/base/mock_subwindow.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/base/subwindow/mock_subwindow.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/memory/referenced.h"
 #include "base/subwindow/subwindow_manager.h"
@@ -847,6 +847,7 @@ HWTEST_F(ViewAbstractModelTestNg, ViewAbstractModelTestNg015, TestSize.Level1)
     auto targetId = targetNode->GetId();
     auto menu =
         FrameNode::CreateFrameNode("targetNode", targetId, AceType::MakeRefPtr<MenuWrapperPattern>(targetId), false);
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->menuMap_[targetId] = menu;
@@ -886,6 +887,7 @@ HWTEST_F(ViewAbstractModelTestNg, ViewAbstractModelTestNg016, TestSize.Level1)
     auto targetId = targetNode->GetId();
     auto menu =
         FrameNode::CreateFrameNode("targetNode", targetId, AceType::MakeRefPtr<MenuWrapperPattern>(targetId), false);
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->menuMap_[targetId] = menu;
@@ -946,6 +948,7 @@ HWTEST_F(ViewAbstractModelTestNg, ViewAbstractModelTestNg017, TestSize.Level1)
     auto targetId = targetNode->GetId();
     auto menu =
         FrameNode::CreateFrameNode("targetNode", targetId, AceType::MakeRefPtr<MenuWrapperPattern>(targetId), false);
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->menuMap_[targetId] = menu;
@@ -1000,6 +1003,7 @@ HWTEST_F(ViewAbstractModelTestNg, ViewAbstractModelTestNg018, TestSize.Level1)
     auto targetId = targetNode->GetId();
     auto menu =
         FrameNode::CreateFrameNode("targetNode", targetId, AceType::MakeRefPtr<MenuWrapperPattern>(targetId), false);
+    overlayManager->CheckMenuManager();
     auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
     ASSERT_NE(menuManager, nullptr);
     menuManager->menuMap_[targetId] = menu;

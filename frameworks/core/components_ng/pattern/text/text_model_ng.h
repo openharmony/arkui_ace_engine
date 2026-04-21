@@ -21,7 +21,7 @@
 
 #include "interfaces/native/node/styled_string.h"
 
-#include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_enums.h"
 #include "core/components_ng/pattern/text/text_model.h"
 
 namespace OHOS::Ace::NG {
@@ -43,6 +43,8 @@ public:
     void SetFontWeight(FontWeight value) override;
     void SetVariableFontWeight(int32_t value) override;
     void SetEnableVariableFontWeight(bool value) override;
+    void SetFontVariations(const FONT_VARIATIONS_LIST& value) override;
+    void ResetFontVariations() override;
     void SetMinFontScale(const float value) override;
     void SetMaxFontScale(const float value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;
@@ -88,6 +90,7 @@ public:
     void ClearOnClick() override;
     void SetRemoteMessage(std::function<void()>&& event) override;
     void SetCopyOption(CopyOptions copyOption) override;
+    void SetOnWillCopy(std::function<bool(const std::u16string&)>&& func) override;
     void SetOnCopy(std::function<void(const std::u16string&)>&& func) override;
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
     void BindSelectionMenu(TextSpanType& spanType, TextResponseType& responseType, std::function<void()>& buildFunc,
@@ -109,6 +112,7 @@ public:
     void SetFallbackLineSpacing(bool enabled) override;
     void SetLineThicknessScale(float value) override;
     void SetOptimizeTrailingSpace(bool trim) override;
+    void SetOrphanCharOptimization(bool isOrphanChar) override;
     void SetCompressLeadingPunctuation(bool enabled) override;
     void SetGradientShaderStyle(NG::Gradient& gradient) override;
     void SetColorShaderStyle(const Color& value) override;
@@ -124,6 +128,8 @@ public:
     static void SetFontWeight(FrameNode* frameNode, Ace::FontWeight value);
     static void SetVariableFontWeight(FrameNode* frameNode, int32_t value);
     static void SetEnableVariableFontWeight(FrameNode* frameNode, bool value);
+    static void SetFontVariations(FrameNode* frameNode, const FONT_VARIATIONS_LIST& value);
+    static void ResetFontVariations(FrameNode* frameNode);
     static void SetMinFontScale(FrameNode* frameNode, const float value);
     static void SetMaxFontScale(FrameNode* frameNode, const float value);
     static void SetItalicFontStyle(FrameNode* frameNode, Ace::FontStyle value);
@@ -224,6 +230,7 @@ public:
     static bool GetTextDetectEnable(FrameNode* frameNode);
     static std::string GetTextDetectConfig(FrameNode* frameNode);
     static FONT_FEATURES_LIST GetFontFeature(FrameNode* frameNode);
+    static FONT_VARIATIONS_LIST GetFontVariations(FrameNode* frameNode);
     static TextSelectableMode GetTextSelectableMode(FrameNode* frameNode);
     static Color GetCaretColor(FrameNode* frameNode);
     static void ResetCaretColor(FrameNode* frameNode);
@@ -233,6 +240,7 @@ public:
     static void SetTextSelection(FrameNode* frameNode, int32_t startIndex, int32_t endIndex);
     static void SetTextSelectableMode(FrameNode* frameNode, TextSelectableMode value);
     static void SetTextDetectConfig(FrameNode* frameNode, const TextDetectConfig& textDetectConfig);
+    static void SetOnWillCopy(FrameNode* frameNode, std::function<bool(const std::u16string&)>&& func);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func);
     static void ResetOnCopy(FrameNode* frameNode);
     static void SetOnTextSelectionChange(FrameNode* frameNode, std::function<void(int32_t, int32_t)>&& func);
@@ -249,6 +257,11 @@ public:
     static std::vector<ParagraphManager::TextBox> GetRectsForRange(FrameNode* frameNode, int32_t start, int32_t end,
         RectHeightStyle heightStyle, RectWidthStyle widthStyle);
     static PositionWithAffinity GetGlyphPositionAtCoordinate(FrameNode* frameNode, double dx, double dy);
+    static PositionWithAffinity GetCharacterPositionAtCoordinate(FrameNode* frameNode, double dx, double dy);
+    static std::pair<TextRange, TextRange> GetGlyphRangeForCharacterRange(
+        FrameNode* frameNode, int32_t start, int32_t end);
+    static std::pair<TextRange, TextRange> GetCharacterRangeForGlyphRange(
+        FrameNode* frameNode, int32_t start, int32_t end);
     static TextLineMetrics GetLineMetrics(FrameNode* frameNode, int32_t lineNumber);
     static void SetEnableAutoSpacing(FrameNode* frameNode, bool enabled);
     static bool GetEnableAutoSpacing(FrameNode* frameNode);
@@ -259,6 +272,8 @@ public:
     static void SetLineThicknessScale(FrameNode* frameNode, float value);
     static void SetOptimizeTrailingSpace(FrameNode* frameNode, bool trim);
     static bool GetOptimizeTrailingSpace(FrameNode* frameNode);
+    static void SetOrphanCharOptimization(FrameNode* frameNode, bool isOrphanChar);
+    static bool GetOrphanCharOptimization(FrameNode* frameNode);
     static void SetCompressLeadingPunctuation(FrameNode* frameNode, bool enabled);
     static bool GetCompressLeadingPunctuation(FrameNode* frameNode);
     static void SetGradientStyle(FrameNode* frameNode, NG::Gradient& gradient);
@@ -279,8 +294,9 @@ public:
     static void SetSelectedDragPreviewStyle(FrameNode* frameNode, const Color& value);
     static void ResetSelectedDragPreviewStyle(FrameNode* frameNode);
     static void SetExternalDrawCallback(
-        FrameNode* frameNode, std::function<bool(float, float, float, float)>&& callback);
+        FrameNode* frameNode, std::function<bool(const ExternalDrawCallbackInfo&)>&& callback);
     static std::optional<void*> GetInnerParagraph(FrameNode* frameNode);
+    static void SetStyledString(FrameNode* frameNode, SpanString* value);
 };
 } // namespace OHOS::Ace::NG
 

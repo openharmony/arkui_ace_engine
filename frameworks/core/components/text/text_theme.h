@@ -26,6 +26,7 @@ namespace OHOS::Ace {
 namespace {
 constexpr float DRAG_BACKGROUND_OPACITY = 0.95f;
 constexpr float URL_DISA_OPACITY = 0.4f;
+constexpr double DEFAULT_TEXT_OPACITY = 0.9;
 } // namespace
 
 /**
@@ -68,6 +69,9 @@ public:
                 LOGW("find pattern of text fail");
                 return;
             }
+            theme->textClockFontColor_ =
+                pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::BLACK)
+                    .BlendOpacity(pattern->GetAttr<double>(PATTERN_TEXT_COLOR_ALPHA, DEFAULT_TEXT_OPACITY));
             theme->textStyle_.SetTextColor(pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::BLACK)
                                                .BlendOpacity(pattern->GetAttr<double>(PATTERN_TEXT_COLOR_ALPHA, 0.9)));
             theme->textStyle_.SetFontSize(pattern->GetAttr<Dimension>("text_font_size", 0.0_vp));
@@ -121,6 +125,11 @@ public:
     const Color& GetCaretColor() const
     {
         return caretColor_;
+    }
+
+    const Color& GetTextClockFontColor() const
+    {
+        return textClockFontColor_;
     }
 
     const Color& GetSelectedColor() const
@@ -201,11 +210,12 @@ public:
 protected:
     TextTheme() = default;
     TextStyle textStyle_;
+    Color textClockFontColor_ = Color::BLACK;
+    Color dragBackgroundColor_ = Color::WHITE;
 
 private:
     Color caretColor_;
     Color selectedColor_;
-    Color dragBackgroundColor_ = Color::WHITE;
     bool draggable_ = false;
     double linearSplitChildMinSize_ = 20.0;
     bool isShowHandle_ = false;

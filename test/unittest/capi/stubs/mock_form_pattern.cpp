@@ -101,4 +101,8 @@ bool FormPattern::OnAccessibilityStateChange(bool state)
 void FormPattern::OnColorConfigurationUpdate()
 {
 }
+
+void FormPattern::ProcessCheckForm()
+{
+}
 } // namespace OHOS::Ace::NG

@@ -24,8 +24,12 @@
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_wrapper.h"
 #include "core/common/resource/resource_object.h"
+#include "ui/resource/node_info.h"
 
 namespace OHOS::Ace {
+namespace NG {
+class UINode;
+} // namespace NG
 
 enum class ResourceType : uint32_t {
     COLOR = 10001,
@@ -47,13 +51,15 @@ class ACE_FORCE_EXPORT ResourceParseUtils final : public AceType {
 
 public:
     static void CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj,
-        Color& color, const std::string& nodeTag);
-    static void CompleteResObjFromColorWithAllowForceDark(
-        RefPtr<ResourceObject>& resObj, Color& color, const std::string& nodeTag, bool allowForceDark);
+        Color& color, const NG::NodeInfo& nodeInfo);
     static RefPtr<ThemeConstants> GetThemeConstants(const RefPtr<ResourceObject>& resObj);
     static bool ParseResString(const RefPtr<ResourceObject>& resObj, std::string& result);
     static bool ParseResString(const RefPtr<ResourceObject>& resObj, std::u16string& result);
-    static bool ParseResColor(const RefPtr<ResourceObject>& resObj, Color& result);
+    /**
+     * @param adaptMaterial Indicates whether the new material is adapted to special resources for color inversion.
+     * If the value is true, the color resolved from special resources will carry a non-NONE placeholder.
+     */
+    static bool ParseResColor(const RefPtr<ResourceObject>& resObj, Color& result, bool adaptMaterial = false);
     static bool ParseResColorWithColorMode(const RefPtr<ResourceObject>& resObj, Color& result,
         const ColorMode& colorMode);
     static bool ParseResourceToDouble(const RefPtr<ResourceObject>& resObj, double& result);
@@ -121,6 +127,8 @@ public:
     {
         return needReload_;
     }
+
+    static NG::NodeInfo MakeNativeNodeInfo(NG::UINode* uiNode);
 
 private:
     static void InvertColorWithResource(const RefPtr<ResourceObject>& resObj, Color& result,

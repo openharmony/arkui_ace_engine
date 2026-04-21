@@ -14,7 +14,7 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("text_test_ng") {
-  module_name = "ImageSet-Image"
+  module_name = "TextSet-Text"
   type = "new"
   sources = [
     "paragraph_manager_test_ng.cpp",
@@ -22,6 +22,7 @@ ace_unittest("text_test_ng") {
     "text_arkoala_test.cpp",
     "text_base.cpp",
     "text_pattern_test_ng.cpp",
+    "text_pattern_test_ng_two.cpp",
     "text_test_ng.cpp",
     "text_testeight_ng.cpp",
     "text_testeleven_ng.cpp",
@@ -36,15 +37,30 @@ ace_unittest("text_test_ng") {
     "text_testtwelve_ng.cpp",
     "typed_text_test_ng.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [
+      "text_test_min.cpp",
+      "text_test_core.cpp",
+    ]
+  } else {
+    sources += [
+      "text_test_min.cpp",
+      "text_test_core.cpp",
+    ]
+  }
+
   defines = [ "ENABLE_ROSEN_BACKEND" ]
   cflags = [ "-fno-access-control" ]
 }
 
 ace_unittest("text_test_ng_addition") {
-  module_name = "FormAndSelection-Select"
+  module_name = "TextSet-Text"
   type = "new"
   sources = [
     "text_base.cpp",
+    "text_pattern_multi_thread_test_ng.cpp",
     "text_test_ng_eight.cpp",
     "text_test_ng_eleven.cpp",
     "text_test_ng_five.cpp",
@@ -56,13 +72,22 @@ ace_unittest("text_test_ng_addition") {
     "text_test_ng_ten.cpp",
     "text_test_ng_three.cpp",
     "text_test_ng_two.cpp",
+    "text_scroll_bar_2d_test.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "text_test_min.cpp" ]
+  } else {
+    sources += [ "text_test_min.cpp" ]
+  }
+
   defines = [ "ENABLE_ROSEN_BACKEND" ]
   cflags = [ "-fno-access-control" ]
 }
 
 ace_unittest("span_test_ng") {
-  module_name = "Gesture-BasicAndCombinationGesture"
+  module_name = "TextSet-Span"
   type = "new"
   sources = [
     "span_accessibility_test_ng.cpp",
@@ -73,12 +98,20 @@ ace_unittest("span_test_ng") {
     "span_test_ng.cpp",
     "text_base.cpp",
   ]
+
+  if (!ace_enable_full_test_suite) {
+    sources = []
+    sources = [ "text_test_min.cpp" ]
+  } else {
+    sources += [ "text_test_min.cpp" ]
+  }
+
   defines = [ "ENABLE_ROSEN_BACKEND" ]
   cflags = [ "-fno-access-control" ]
 }
 
 ace_unittest("text_test_nullptr") {
-  module_name = "TextSet-Span"
+  module_name = "TextSet-TextSelection"
   type = "new"
   sources = [
     "text_base.cpp",

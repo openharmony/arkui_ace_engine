@@ -14,9 +14,13 @@
  */
 
 #include "test/unittest/core/manager/drag_drop_manager_test_ng.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
+#include "core/common/event_manager.h"
 
 #include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
-#include "test/mock/base/mock_task_executor.h"
+
+#include "test/mock/frameworks/base/subwindow/mock_subwindow.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -26,13 +30,13 @@ void DragDropManagerTestNgPlus::SetUpTestCase()
     MockPipelineContext::SetUp();
     MockContainer::SetUp(NG::PipelineContext::GetCurrentContext());
 }
- 
+
 void DragDropManagerTestNgPlus::TearDownTestCase()
 {
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
 }
- 
+
 /**
  * @tc.name: DragDropManagerTestNgPlus001
  * @tc.desc: Test FindTargetInChildNodes and CheckFrameNodeCanDrop
@@ -52,7 +56,7 @@ HWTEST_F(DragDropManagerTestNgPlus, DragDropManagerTestNgPlus001, TestSize.Level
     ASSERT_NE(frameNodeDC, nullptr);
     frameNodeDC->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
     frameNodeDC->SetActive(true);
- 
+
     /**
      * @tc.steps: step2. test function FindTargetInChildNodes.
      */
@@ -64,7 +68,7 @@ HWTEST_F(DragDropManagerTestNgPlus, DragDropManagerTestNgPlus001, TestSize.Level
     hitFrameNodes.push_back(frameNodeDC);
     auto result = dragDropManager->FindTargetInChildNodes(frameNodeDC, hitFrameNodes, true);
     EXPECT_NE(result, nullptr);
- 
+
     /**
      * @tc.steps: step3. create isolated component and test function FindTargetInChildNodes.
      */
@@ -76,14 +80,14 @@ HWTEST_F(DragDropManagerTestNgPlus, DragDropManagerTestNgPlus001, TestSize.Level
     frameNodeIC->SetActive(true);
     auto eventHubIC = frameNodeIC->GetEventHub<EventHub>();
     ASSERT_TRUE(eventHubIC);
- 
+
     frameNodeIC->SetGeometryNode(geometryNode);
     dragDropManager->AddGridDragFrameNode(frameNodeIC->GetId(), frameNodeIC);
     hitFrameNodes.pop_back();
     hitFrameNodes.push_back(frameNodeIC);
     result = dragDropManager->FindTargetInChildNodes(frameNodeIC, hitFrameNodes, true);
     EXPECT_NE(result, nullptr);
- 
+
     /**
      * @tc.steps: step4. test CheckFrameNodeCanDrop.
      */
@@ -91,14 +95,14 @@ HWTEST_F(DragDropManagerTestNgPlus, DragDropManagerTestNgPlus001, TestSize.Level
         NODE_TAG, frameNodeDCId, AceType::MakeRefPtr<Pattern>());
     auto dropResult = dragDropManager->CheckFrameNodeCanDrop(frameNodeDC);
     EXPECT_TRUE(dropResult);
-    
+
     dropResult = dragDropManager->CheckFrameNodeCanDrop(frameNodeIC);
     EXPECT_TRUE(dropResult);
- 
+
     dropResult = dragDropManager->CheckFrameNodeCanDrop(frameNode);
     EXPECT_FALSE(dropResult);
 }
- 
+
 /**
  * @tc.name: DragDropManagerTestNgPlus002
  * @tc.desc: Test IsUIExtensionOrDynamicComponent
@@ -122,14 +126,14 @@ HWTEST_F(DragDropManagerTestNgPlus, DragDropManagerTestNgPlus002, TestSize.Level
     point.y = 1;
     auto container = MockContainer::Current();
     ASSERT_NE(container, nullptr);
- 
+
     dragDropManager->HandleOnDragEnd(point, EXTRA_INFO, frameNodeDC);
     EXPECT_NE(DragDropBehaviorReporter::GetInstance().stopResult_, DragStopResult::GET_UDKEY_FAIL);
- 
+
     dragDropManager->HandleOnDragEnd(point, EXTRA_INFO, frameNodeIC);
     EXPECT_NE(DragDropBehaviorReporter::GetInstance().stopResult_, DragStopResult::GET_UDKEY_FAIL);
 }
- 
+
 /**
  * @tc.name: DragDropManagerTestNgPlus003
  * @tc.desc: Test OnDragEnd
@@ -163,7 +167,7 @@ HWTEST_F(DragDropManagerTestNgPlus, DragDropManagerTestNgPlus003, TestSize.Level
     dragDropManager->OnDragEnd(pointerEvent, EXTRA_INFO, frameNode);
     EXPECT_EQ(dragFrameNode, dragDropManager->preTargetFrameNode_);
 }
- 
+
 /**
  * @tc.name: DragDropManagerTestNgPlus004
  * @tc.desc: Test IsAnyDraggableHit Funcition When iter == touchTestResults.end() Is False AND iter->second.empty() Is
@@ -231,7 +235,7 @@ HWTEST_F(DragDropManagerTestNgPlus, DragDropManagerTestNgPlus005, TestSize.Level
     DragDropGlobalController::GetInstance().requestId_ = 0;
     DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(true);
     dragDropManager->PostStopDrag(frameNode, pointerEvent, dragEvent, "");
-    EXPECT_TRUE(DragDropGlobalController::GetInstance().IsOnOnDropPhase());
+    EXPECT_FALSE(DragDropGlobalController::GetInstance().IsOnOnDropPhase());
 
     DragDropGlobalController::GetInstance().requestId_ = 1;
     dragDropManager->PostStopDrag(frameNode, pointerEvent, dragEvent, "");
@@ -298,4 +302,577 @@ HWTEST_F(DragDropManagerTestNgPlus, ShouldSkipDragMoveOutForSubwindow001, TestSi
     auto ret = dragDropManager->ShouldSkipDragMoveOutForSubwindow();
     ASSERT_EQ(ret, false);
 }
+
+/**
+ * @tc.name: PostStopDrag001
+ * @tc.desc: Test PostStopDrag with null dragFrameNode
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgPlus, PostStopDrag001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create dragEvent and pointerEvent
+     */
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+    DragPointerEvent pointerEvent;
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. call PostStopDrag with null dragFrameNode
+     * @tc.expected: step2. return false
+     */
+    auto result = dragDropManager->PostStopDrag(nullptr, pointerEvent, dragEvent, "");
+    EXPECT_FALSE(result);
 }
+
+/**
+ * @tc.name: PostStopDrag002
+ * @tc.desc: Test PostStopDrag with null dragEvent
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgPlus, PostStopDrag002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pointerEvent
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    DragPointerEvent pointerEvent;
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. call PostStopDrag with null dragEvent
+     * @tc.expected: step2. return false
+     */
+    auto result = dragDropManager->PostStopDrag(frameNode, pointerEvent, nullptr, "");
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: PostStopDrag003
+ * @tc.desc: Test PostStopDrag with null pipeline context
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgPlus, PostStopDrag003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode, dragEvent and pointerEvent
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+    DragPointerEvent pointerEvent;
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. clear current pipeline context
+     */
+    MockPipelineContext::TearDown();
+
+    /**
+     * @tc.steps: step3. call PostStopDrag with null pipeline context
+     * @tc.expected: step3. return false
+     */
+    auto result = dragDropManager->PostStopDrag(frameNode, pointerEvent, dragEvent, "");
+    EXPECT_FALSE(result);
+
+    /**
+     * @tc.steps: step4. restore pipeline context for cleanup
+     */
+    MockPipelineContext::SetUp();
+    MockContainer::SetUp(NG::PipelineContext::GetCurrentContext());
+}
+
+/**
+ * @tc.name: PostStopDrag004
+ * @tc.desc: Test PostStopDrag with null taskScheduler
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgPlus, PostStopDrag004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode, dragEvent and pointerEvent
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+    DragPointerEvent pointerEvent;
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. set pipeline context but with null taskScheduler
+     */
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->taskExecutor_ = nullptr;
+
+    /**
+     * @tc.steps: step3. call PostStopDrag with null taskScheduler
+     * @tc.expected: step3. return false
+     */
+    auto result = dragDropManager->PostStopDrag(frameNode, pointerEvent, dragEvent, "");
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: PostStopDrag005
+ * @tc.desc: Test PostStopDrag when IsPrePendingDone is true
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgPlus, PostStopDrag005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode, dragEvent and pointerEvent
+     */
+    auto mockTaskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockPipelineContext::GetCurrentContext()->taskExecutor_ = mockTaskExecutor;
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    DragPointerEvent pointerEvent;
+
+    /**
+     * @tc.steps: step2. set up drag event and state
+     */
+    dragEvent->SetRequestIdentify(1);
+    DragDropGlobalController::GetInstance().requestId_ = 1;
+    DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(true);
+
+    /**
+     * @tc.steps: step3. call PostStopDrag when IsPrePendingDone is true
+     * @tc.expected: step3. return true and callback is executed directly
+     */
+    auto result = dragDropManager->PostStopDrag(frameNode, pointerEvent, dragEvent, "");
+    EXPECT_TRUE(result);
+    EXPECT_FALSE(DragDropGlobalController::GetInstance().IsOnOnDropPhase());
+}
+
+/**
+ * @tc.name: PostStopDrag006
+ * @tc.desc: Test PostStopDrag when IsPrePendingDone is false
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgPlus, PostStopDrag006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode, dragEvent and pointerEvent
+     */
+    auto mockTaskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockPipelineContext::GetCurrentContext()->taskExecutor_ = mockTaskExecutor;
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    DragPointerEvent pointerEvent;
+
+    /**
+     * @tc.steps: step2. set up drag event and state, ensure PrePendingDone is false
+     */
+    dragEvent->SetRequestIdentify(1);
+    DragDropGlobalController::GetInstance().requestId_ = 1;
+    DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(true);
+
+    /**
+     * @tc.steps: step3. call PostStopDrag when IsPrePendingDone is false
+     * @tc.expected: step3. task should be posted with delay
+     */
+    auto result = dragDropManager->PostStopDrag(frameNode, pointerEvent, dragEvent, "");
+    // The result depends on RequestDragEndCallback return value
+    // The task should be posted with delay when IsPrePendingDone is false
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: PostStopDrag007
+ * @tc.desc: Test PostStopDrag when IsOnOnDropPhase is false in task execution
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgPlus, PostStopDrag007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode, dragEvent and pointerEvent
+     */
+    auto mockTaskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockPipelineContext::GetCurrentContext()->taskExecutor_ = mockTaskExecutor;
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    DragPointerEvent pointerEvent;
+
+    /**
+     * @tc.steps: step2. set up drag event with IsOnOnDropPhase false
+     */
+    dragEvent->SetRequestIdentify(1);
+    DragDropGlobalController::GetInstance().requestId_ = 1;
+    DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(false);
+
+    /**
+     * @tc.steps: step3. call PostStopDrag when IsOnOnDropPhase is false
+     * @tc.expected: step3. task should not execute HandleStopDrag
+     */
+    auto result = dragDropManager->PostStopDrag(frameNode, pointerEvent, dragEvent, "");
+    // When IsOnOnDropPhase is false, the task lambda returns early without executing HandleStopDrag
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: PostStopDrag008
+ * @tc.desc: Test PostStopDrag when IsCurrentDrag returns false
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgPlus, PostStopDrag008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode, dragEvent and pointerEvent
+     */
+    auto mockTaskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockPipelineContext::GetCurrentContext()->taskExecutor_ = mockTaskExecutor;
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    DragPointerEvent pointerEvent;
+
+    /**
+     * @tc.steps: step2. set up drag event with mismatched requestId
+     */
+    dragEvent->SetRequestIdentify(1);
+    DragDropGlobalController::GetInstance().requestId_ = 2; // Mismatched requestId
+    DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(true);
+
+    /**
+     * @tc.steps: step3. call PostStopDrag when IsCurrentDrag returns false
+     * @tc.expected: step3. task should not execute HandleStopDrag
+     */
+    auto result = dragDropManager->PostStopDrag(frameNode, pointerEvent, dragEvent, "");
+    // When IsCurrentDrag returns false, the task lambda returns early without executing HandleStopDrag
+    EXPECT_TRUE(result);
+    EXPECT_FALSE(DragDropGlobalController::GetInstance().IsOnOnDropPhase());
+}
+
+/**
+ * @tc.name: PostStopDrag009
+ * @tc.desc: Test PostStopDrag with preResult having value
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgPlus, PostStopDrag009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode, dragEvent and pointerEvent
+     */
+    auto mockTaskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockPipelineContext::GetCurrentContext()->taskExecutor_ = mockTaskExecutor;
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    DragPointerEvent pointerEvent;
+
+    /**
+     * @tc.steps: step2. set up drag event and preResult
+     */
+    dragEvent->SetRequestIdentify(1);
+    DragDropGlobalController::GetInstance().requestId_ = 1;
+    DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(true);
+
+    /**
+     * @tc.steps: step3. call PostStopDrag with preResult having value
+     * @tc.expected: step3. callback should be called with preResult value
+     */
+    auto result = dragDropManager->PostStopDrag(frameNode, pointerEvent, dragEvent, "");
+    EXPECT_TRUE(result);
+    EXPECT_FALSE(DragDropGlobalController::GetInstance().IsOnOnDropPhase());
+}
+
+/**
+ * @tc.name: PostStopDrag010
+ * @tc.desc: Test PostStopDrag with preResult having no value
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgPlus, PostStopDrag010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode, dragEvent and pointerEvent
+     */
+    auto mockTaskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockPipelineContext::GetCurrentContext()->taskExecutor_ = mockTaskExecutor;
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    DragPointerEvent pointerEvent;
+
+    /**
+     * @tc.steps: step2. set up drag event and reset preResult
+     */
+    dragEvent->SetRequestIdentify(1);
+    DragDropGlobalController::GetInstance().requestId_ = 1;
+    DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(true);
+
+    /**
+     * @tc.steps: step3. call PostStopDrag with preResult having no value
+     * @tc.expected: step3. callback should be called with DRAG_FAIL
+     */
+    auto result = dragDropManager->PostStopDrag(frameNode, pointerEvent, dragEvent, "");
+    EXPECT_TRUE(result);
+    EXPECT_FALSE(DragDropGlobalController::GetInstance().IsOnOnDropPhase());
+}
+
+/**
+ * @tc.name: PostStopDrag011
+ * @tc.desc: Test PostStopDrag with extraParams
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgPlus, PostStopDrag011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode, dragEvent and pointerEvent
+     */
+    auto mockTaskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockPipelineContext::GetCurrentContext()->taskExecutor_ = mockTaskExecutor;
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    DragPointerEvent pointerEvent;
+    std::string extraParams = "test_extra_params";
+
+    /**
+     * @tc.steps: step2. set up drag event and state
+     */
+    dragEvent->SetRequestIdentify(1);
+    DragDropGlobalController::GetInstance().requestId_ = 1;
+    DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(true);
+
+    /**
+     * @tc.steps: step3. call PostStopDrag with extraParams
+     * @tc.expected: step3. should handle extraParams correctly
+     */
+    auto result = dragDropManager->PostStopDrag(frameNode, pointerEvent, dragEvent, extraParams);
+    EXPECT_TRUE(result);
+    EXPECT_FALSE(DragDropGlobalController::GetInstance().IsOnOnDropPhase());
+}
+
+/**
+ * @tc.name: PostStopDrag012
+ * @tc.desc: Test PostStopDrag resets drag cursor style
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgPlus, PostStopDrag012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode, dragEvent and pointerEvent
+     */
+    auto mockTaskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockPipelineContext::GetCurrentContext()->taskExecutor_ = mockTaskExecutor;
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    DragPointerEvent pointerEvent;
+
+    /**
+     * @tc.steps: step2. set up drag event and set initial cursor style
+     */
+    dragEvent->SetRequestIdentify(1);
+    DragDropGlobalController::GetInstance().requestId_ = 1;
+    DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(true);
+    dragDropManager->dragCursorStyleCore_ = DragCursorStyleCore::COPY;
+
+    /**
+     * @tc.steps: step3. call PostStopDrag
+     * @tc.expected: step3. dragCursorStyleCore_ should be reset to DEFAULT
+     */
+    dragDropManager->PostStopDrag(frameNode, pointerEvent, dragEvent, "");
+    EXPECT_EQ(dragDropManager->dragCursorStyleCore_, DragCursorStyleCore::DEFAULT);
+}
+
+/**
+ * @tc.name: PostStopDrag013
+ * @tc.desc: Test PostStopDrag with DragBehavior
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgPlus, PostStopDrag013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode, dragEvent and pointerEvent
+     */
+    auto mockTaskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockPipelineContext::GetCurrentContext()->taskExecutor_ = mockTaskExecutor;
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    DragPointerEvent pointerEvent;
+
+    /**
+     * @tc.steps: step2. set up drag event with DragBehavior
+     */
+    dragEvent->SetRequestIdentify(1);
+    dragEvent->SetDragBehavior(DragBehavior::MOVE);
+    DragDropGlobalController::GetInstance().requestId_ = 1;
+    DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(true);
+
+    /**
+     * @tc.steps: step3. call PostStopDrag with DragBehavior
+     * @tc.expected: step3. should handle DragBehavior correctly
+     */
+    auto result = dragDropManager->PostStopDrag(frameNode, pointerEvent, dragEvent, "");
+    EXPECT_TRUE(result);
+    EXPECT_FALSE(DragDropGlobalController::GetInstance().IsOnOnDropPhase());
+}
+
+/**
+ * @tc.name: DoDragStartAnimationVsyncTime001
+ * @tc.desc: Test DoDragStartAnimation get vsync time from main pipeline when ShouldSkipDragMoveOutForSubwindow is true
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgPlus, DoDragStartAnimationVsyncTime001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a dragDropManager and setup.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(frameNode);
+    ASSERT_NE(overlayManager, nullptr);
+
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+
+    GestureEvent event;
+    PreparedInfoForDrag data;
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    uint64_t currentVsyncTime = pipeline->GetVsyncTime();
+
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    ASSERT_NE(mainPipeline, nullptr);
+    uint64_t mainVsyncTime = mainPipeline->GetVsyncTime();
+    (void)mainVsyncTime;
+
+    /**
+     * @tc.steps: step2. call DoDragStartAnimation with normal context.
+     * @tc.expected: vsync time is set from current pipeline.
+     */
+    dragDropManager->DoDragStartAnimation(overlayManager, event, gestureHub, data);
+    uint64_t vsyncTime = DragDropGlobalController::GetInstance().GetStartDragVsyncTime();
+    EXPECT_EQ(vsyncTime, currentVsyncTime);
+}
+
+/**
+ * @tc.name: DoDragStartAnimationVsyncTime002
+ * @tc.desc: Test DoDragStartAnimation get vsync time from main pipeline when ShouldSkipDragMoveOutForSubwindow is true
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgPlus, DoDragStartAnimationVsyncTime002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a dragDropManager and setup.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(frameNode);
+    ASSERT_NE(overlayManager, nullptr);
+
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+
+    GestureEvent event;
+    PreparedInfoForDrag data;
+
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    ASSERT_NE(mainPipeline, nullptr);
+    uint64_t mainVsyncTime = mainPipeline->GetVsyncTime();
+
+    /**
+     * @tc.steps: step2. setup subwindow context to trigger ShouldSkipDragMoveOutForSubwindow.
+     */
+    Container::UpdateCurrent(MIN_SUBCONTAINER_ID);
+
+    auto subwindow = AceType::MakeRefPtr<MockSubwindow>();
+    SubwindowManager::GetInstance()->AddSubwindow(MIN_SUBCONTAINER_ID, SubwindowType::TYPE_MENU, subwindow);
+    subwindow->SetReceiveDragEventEnabled(false);
+
+    /**
+     * @tc.steps: step3. call DoDragStartAnimation with subwindow context.
+     * @tc.expected: vsync time is set from main pipeline.
+     */
+    dragDropManager->DoDragStartAnimation(overlayManager, event, gestureHub, data);
+    uint64_t vsyncTime = DragDropGlobalController::GetInstance().GetStartDragVsyncTime();
+    EXPECT_EQ(vsyncTime, mainVsyncTime);
+
+    /**
+     * @tc.steps: step4. cleanup.
+     */
+    Container::UpdateCurrent(DEFAULT_INSTANCE_ID);
+    SubwindowManager::GetInstance()->RemoveSubwindow(MIN_SUBCONTAINER_ID, SubwindowType::TYPE_MENU);
+}
+} // namespace OHOS::Ace::NG

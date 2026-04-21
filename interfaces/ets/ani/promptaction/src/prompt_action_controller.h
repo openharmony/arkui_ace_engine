@@ -36,6 +36,7 @@ public:
         node_ = node;
         auto dialogNode = node_.Upgrade();
         CHECK_NULL_VOID(dialogNode);
+        ACE_UINODE_TRACE(dialogNode);
         auto pattern = dialogNode->GetPattern<NG::DialogPattern>();
         CHECK_NULL_VOID(pattern);
         if (PromptActionCommonState::UNINITIALIZED == pattern->GetState()) {

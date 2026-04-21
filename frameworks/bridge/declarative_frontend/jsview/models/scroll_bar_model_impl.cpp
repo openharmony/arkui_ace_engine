@@ -16,6 +16,7 @@
 
 #include "base/geometry/axis.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components/display/display_component.h"
 
 namespace OHOS::Ace::Framework {
 namespace {

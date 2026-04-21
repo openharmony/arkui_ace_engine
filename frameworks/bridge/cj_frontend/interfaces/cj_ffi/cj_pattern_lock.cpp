@@ -53,8 +53,7 @@ NG::PatternLockModelNG* GetPatternLockModel()
 {
     auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("PatternLock");
     if (module == nullptr) {
-        LOGF("Can't find patternlock dynamic module");
-        abort();
+        LOGF_ABORT("Can't find patternlock dynamic module");
     }
     return reinterpret_cast<NG::PatternLockModelNG*>(module->GetModel());
 }

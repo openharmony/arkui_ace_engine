@@ -618,6 +618,7 @@ void UiSessionManagerOhos::ReportSelectText()
 
 void UiSessionManagerOhos::SendSpecifiedContentOffsets(const std::vector<std::pair<float, float>>& offsets)
 {
+    std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     for (auto& pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
         if (reportService != nullptr) {
@@ -822,21 +823,31 @@ void UiSessionManagerOhos::SendPixelMap(const std::vector<std::pair<int32_t, std
 
 void UiSessionManagerOhos::SendCommand(const std::string& command)
 {
-    if (sendCommandFunction_) {
-        auto json = InspectorJsonUtil::ParseJsonString(command);
-        if (!json || json->IsNull()) {
-            LOGW("SendCommand ParseJsonString failed");
-            return;
-        }
+    auto json = InspectorJsonUtil::ParseJsonString(command);
+    if (!json || json->IsNull()) {
+        LOGW("SendCommand ParseJsonString failed");
+        return;
+    }
 
-        int32_t value = json->GetInt("cmd");
-        sendCommandFunction_(value);
+    auto value = json->GetValue("cmd");
+    if (sendCommandFunction_ && value && value->IsNumber()) {
+        int32_t cmdNumber = value->GetInt();
+        sendCommandFunction_(cmdNumber);
+    } else if (relaxedCommandFunction_) {
+        relaxedCommandFunction_(command);
+    } else {
+        LOGW("SendCommand failed");
     }
 }
 
 void UiSessionManagerOhos::SaveSendCommandFunction(SendCommandFunction&& function)
 {
     sendCommandFunction_ = std::move(function);
+}
+
+void UiSessionManagerOhos::SaveRelaxedCommandFunction(RelaxedCommandFunction&& function)
+{
+    relaxedCommandFunction_ = std::move(function);
 }
 
 void UiSessionManagerOhos::RegisterPipeLineExeAppAIFunction(
@@ -920,12 +931,12 @@ void UiSessionManagerOhos::SetStopContentChangeDetectCallback(std::function<void
     stopContentChangeDetectCallback_ = stopCallback;
 }
 
-void UiSessionManagerOhos::GetStateMgmtInfo(
-    const std::string& componentName, const std::string& propertyName, const std::string& jsonPath)
+void UiSessionManagerOhos::GetStateMgmtInfo(const std::string& componentName, const std::string& propertyName,
+    const std::string& jsonPath, bool onlyVisible)
 {
     std::unique_lock<std::mutex> lock(mutex_);
     if (getStateMgmtInfoFunction_) {
-        getStateMgmtInfoFunction_(componentName, propertyName, jsonPath);
+        getStateMgmtInfoFunction_(componentName, propertyName, jsonPath, onlyVisible);
     }
 }
 

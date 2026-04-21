@@ -152,11 +152,11 @@ public:
 };
 
 /**
- * @tc.name: LayoutTest
+ * @tc.name: layoutTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutableAccessorTest, LayoutTest, TestSize.Level1)
+HWTEST_F(LayoutableAccessorTest, layoutTest, TestSize.Level1)
 {
     Ark_Position position {
         .x = Converter::ArkValue<Opt_Length>("70vp"),
@@ -173,11 +173,11 @@ HWTEST_F(LayoutableAccessorTest, LayoutTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetMarginTest
+ * @tc.name: getMarginTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutableAccessorTest, GetMarginTest, TestSize.Level1)
+HWTEST_F(LayoutableAccessorTest, getMarginTest, TestSize.Level1)
 {
     MarginProperty margin = {
         .top = CalcLength(70.0f, DimensionUnit::VP),
@@ -194,11 +194,11 @@ HWTEST_F(LayoutableAccessorTest, GetMarginTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetMarginTestRTL
+ * @tc.name: getMarginTestRTL
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutableAccessorTest, GetMarginTestRTL, TestSize.Level1)
+HWTEST_F(LayoutableAccessorTest, getMarginTestRTL, TestSize.Level1)
 {
     MarginProperty margin = {
         .left = CalcLength(40.0f, DimensionUnit::VP),
@@ -212,11 +212,11 @@ HWTEST_F(LayoutableAccessorTest, GetMarginTestRTL, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetPaddingTest
+ * @tc.name: getPaddingTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutableAccessorTest, GetPaddingTest, TestSize.Level1)
+HWTEST_F(LayoutableAccessorTest, getPaddingTest, TestSize.Level1)
 {
     PaddingProperty padding = {
         .top = CalcLength(70.0f, DimensionUnit::VP),
@@ -233,11 +233,11 @@ HWTEST_F(LayoutableAccessorTest, GetPaddingTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetBorderWidthTest
+ * @tc.name: getBorderWidthTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutableAccessorTest, GetBorderWidthTest, TestSize.Level1)
+HWTEST_F(LayoutableAccessorTest, getBorderWidthTest, TestSize.Level1)
 {
     BorderWidthProperty borderWidth = {
         .topDimen = Dimension(6.0, DimensionUnit::VP),
@@ -254,11 +254,11 @@ HWTEST_F(LayoutableAccessorTest, GetBorderWidthTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetBorderWidthTestRTL
+ * @tc.name: getBorderWidthTestRTL
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutableAccessorTest, GetBorderWidthTestRTL, TestSize.Level1)
+HWTEST_F(LayoutableAccessorTest, getBorderWidthTestRTL, TestSize.Level1)
 {
     BorderWidthProperty borderWidth = {
         .leftDimen = Dimension(10.0, DimensionUnit::VP),
@@ -272,11 +272,11 @@ HWTEST_F(LayoutableAccessorTest, GetBorderWidthTestRTL, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetMeasureResultTest
+ * @tc.name: getMeasureResultTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutableAccessorTest, GetMeasureResultTest, TestSize.Level1)
+HWTEST_F(LayoutableAccessorTest, getMeasureResultTest, TestSize.Level1)
 {
     layoutWrapper_->childLayoutWrapper_->Measure({});
     Ark_MeasureResult measureResult = accessor_->getMeasureResult(peer_);
@@ -285,11 +285,11 @@ HWTEST_F(LayoutableAccessorTest, GetMeasureResultTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetUniqueIdTest
+ * @tc.name: getUniqueIdTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LayoutableAccessorTest, GetUniqueIdTest, TestSize.Level1)
+HWTEST_F(LayoutableAccessorTest, getUniqueIdTest, TestSize.Level1)
 {
     Opt_Number id = accessor_->getUniqueId(peer_);
     auto res = Converter::OptConvert<int32_t>(id);

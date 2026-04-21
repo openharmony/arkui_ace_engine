@@ -67,7 +67,7 @@ std::vector<Dimension> ValidateDimensionArray(std::optional<std::vector<std::opt
     return out;
 }
 
-std::optional<float> ProcessBindableZoomScale(FrameNode* frameNode, const Opt_Union_F64_Bindable *value)
+std::optional<float> ProcessBindableZoomScale(FrameNode* frameNode, const Opt_Union_F64_Bindable_F64 *value)
 {
     std::optional<float> result;
     Converter::VisitUnionPtr(value,
@@ -141,7 +141,7 @@ void SetMinZoomScaleImpl(Ark_NativePointer node,
     ScrollModelStatic::SetMinZoomScale(frameNode, Converter::OptConvertPtr<float>(value).value_or(1.0f));
 }
 void SetZoomScaleImpl(Ark_NativePointer node,
-                      const Opt_Union_F64_Bindable* value)
+                      const Opt_Union_F64_Bindable_F64* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -305,7 +305,7 @@ void SetScrollBarImpl(Ark_NativePointer node,
     ScrollModelStatic::SetScrollBar(frameNode, displayMode);
 }
 void SetScrollBarColorImpl(Ark_NativePointer node,
-                           const Opt_Union_Color_I32_String_Resource* value)
+                           const Opt_Union_arkui_component_enums_Color_I32_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

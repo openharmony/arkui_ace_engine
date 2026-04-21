@@ -534,6 +534,11 @@ public:
     {
         return isEnableHaptic_;
     }
+    
+    void SetIsShowInSubwindow(bool isShowInSubWindow)
+    {
+        isShowInSubWindow_ = isShowInSubWindow;
+    }
 
     void ColumnPatternInitHapticController();
     void UpdateUserSetSelectColor();
@@ -555,7 +560,7 @@ public:
         auto pipelineContext = host->GetContext();
         CHECK_NULL_VOID(pipelineContext);
 
-        if (pipelineContext->IsSystmColorChange() && host->GetRerenderable()) {
+        if (pipelineContext->IsSystemColorChange() && host->GetRerenderable()) {
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
     }
@@ -671,6 +676,7 @@ private:
     Color backgroundColor_ = Color::WHITE;
     bool resizeFlag_ = false;
     bool isShowInDialog_ = false;
+    bool isShowInSubWindow_ = false;
     bool canloop_ = true;
 
     bool hasUserDefinedDisappearFontFamily_ = false;

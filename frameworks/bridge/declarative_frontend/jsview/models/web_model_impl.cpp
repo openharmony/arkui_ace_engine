@@ -15,6 +15,9 @@
 
 #include "bridge/declarative_frontend/jsview/models/web_model_impl.h"
 
+#include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components/focusable/focusable_component.h"
+
 namespace OHOS::Ace::Framework {
 void WebModelImpl::Create(const std::string& src, const RefPtr<WebController>& webController,
     RenderMode /* renderMode */, bool incognitoMode, const std::string& sharedRenderProcessToken,
@@ -740,13 +743,6 @@ void WebModelImpl::SetOptimizeParserBudgetEnabled(bool enable)
     webComponent->SetOptimizeParserBudgetEnabled(enable);
 }
 
-void WebModelImpl::SetBypassVsyncCondition(WebBypassVsyncCondition condition)
-{
-    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    CHECK_NULL_VOID(webComponent);
-    webComponent->SetBypassVsyncCondition(condition);
-}
-
 void WebModelImpl::SetOnLoadStarted(std::function<void(const BaseEventInfo* info)>&& jsCallback)
 {
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -762,7 +758,14 @@ void WebModelImpl::SetOnLoadFinished(std::function<void(const BaseEventInfo* inf
     auto eventMarker = EventMarker(std::move(jsCallback));
     webComponent->SetOnLoadFinishedEventId(eventMarker);
 }
- 
+
+void WebModelImpl::SetBypassVsyncCondition(WebBypassVsyncCondition condition)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetBypassVsyncCondition(condition);
+}
+
 void WebModelImpl::SetForceEnableZoom(bool isForceEnableZoom)
 {
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());

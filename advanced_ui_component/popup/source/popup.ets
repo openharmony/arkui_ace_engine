@@ -50,6 +50,7 @@ interface ButtonTheme {
   fontWeight: FontWeight;
   hoverColor: ResourceColor;
   backgroundColor: ResourceColor;
+  responseRegion: Length;
 }
 
 interface MessageTheme {
@@ -69,6 +70,7 @@ interface CloseButtonTheme {
   symbolStyle: SymbolGlyphModifier;
   symbolSize: string;
   accessibilityMessage: Resource;
+  responseRegion: Length;
 }
 
 interface WindowsTheme {
@@ -128,7 +130,8 @@ export const defaultTheme: PopupTheme = {
     minFontSize: 9,
     fontWeight: FontWeight.Medium,
     hoverColor: $r('sys.color.ohos_id_color_hover'),
-    backgroundColor: $r('sys.color.ohos_id_color_background_transparent')
+    backgroundColor: $r('sys.color.ohos_id_color_background_transparent'),
+    responseRegion: $r('sys.float.popup_button_response_region')
   },
   message: {
     fontSize: $r('sys.float.ohos_id_text_size_body2'),
@@ -163,7 +166,8 @@ export const defaultTheme: PopupTheme = {
     hoverColor: $r('sys.color.ohos_id_color_hover'),
     backgroundColor: $r('sys.color.ohos_id_color_background_transparent'),
     symbolSize: '18vp',
-    accessibilityMessage: $r('sys.string.off_used_for_accessibility_text')
+    accessibilityMessage: $r('sys.string.off_used_for_accessibility_text'),
+    responseRegion: $r('sys.float.popup_close_button_response_region')
   },
 };
 
@@ -283,6 +287,8 @@ export struct PopupComponent {
   @State secondButtonBackgroundColor: ResourceColor = $r('sys.color.ohos_id_color_background_transparent');
   @State closeButtonFillColorWithTheme: ResourceColor = $r('sys.color.icon_secondary');
   @State scrollMaxHeight: number | undefined = undefined;
+  @State firstButtonHeight: number = 0;
+  @State secondButtonHeight: number = 0;
   private listener = mediaquery.matchMediaSync('(orientation: landscape)')
 
   private getIconWidth(): Dimension {
@@ -497,6 +503,43 @@ export struct PopupComponent {
     return this.theme.button.fontWeight
   }
 
+  private getBtnResponseRegion(actualWidth: number, actualHeight: number, minSizeVp: number): Rectangle | undefined {
+    if (actualWidth === 0 || actualHeight === 0 || minSizeVp <= 0) {
+      return undefined;
+    }
+
+    let needExpandWidth = actualWidth === -1 ? false : (actualWidth < minSizeVp);
+    let needExpandHeight = actualHeight < minSizeVp;
+
+    if (!needExpandWidth && !needExpandHeight) {
+      return undefined;
+    }
+
+    let regionWidth = needExpandWidth ? minSizeVp : '100%';
+    let regionHeight = needExpandHeight ? minSizeVp : '100%';
+    let offsetX = needExpandWidth ? (minSizeVp - actualWidth) / 2 : 0;
+    let offsetY = needExpandHeight ? (minSizeVp - actualHeight) / 2 : 0;
+
+    return {
+      x: -offsetX,
+      y: -offsetY,
+      width: regionWidth,
+      height: regionHeight
+    };
+  }
+
+  private getCloseBtnResponseRegion(): Rectangle | undefined {
+    let responseRegionValue = this.toVp(this.theme.closeButton.responseRegion);
+    return this.getBtnResponseRegion(this.theme.closeButton.size.width as number,
+      this.theme.closeButton.size.height as number, responseRegionValue)
+  }
+
+  private getNormalBtnResponseRegion(height: number): Rectangle | undefined {
+    let responseRegionValue = this.toVp(this.theme.button.responseRegion);
+    return this.getBtnResponseRegion(-1, height, responseRegionValue)
+  }
+
+
   private getWindowsPadding(): LocalizedPadding {
     let top = this.theme.windows.padding.top;
     let bottom =
@@ -693,7 +736,8 @@ export struct PopupComponent {
 
   private getTitleTextAlign(): TextAlign {
     let titleAlign = TextAlign.Start;
-    if ((Configuration.getLocale().dir === 'rtl') && this.popupDirection === Direction.Auto) {
+    if ((Configuration.getLocale().dir === 'rtl') && 
+      (this.popupDirection === Direction.Auto || this.popupDirection === undefined)) {
       titleAlign = TextAlign.End;
     }
     return titleAlign
@@ -744,6 +788,7 @@ export struct PopupComponent {
               .backgroundColor(this.closeButtonBackgroundColor)
               .flexShrink(0)
               .accessibilityText(this.theme.closeButton.accessibilityMessage)
+              .responseRegion(this.getCloseBtnResponseRegion())
               .onHover((isHover: boolean) => {
                 if (isHover) {
                   this.closeButtonBackgroundColor = this.getCloseButtonHoverColor()
@@ -773,6 +818,7 @@ export struct PopupComponent {
               .fontColor(this.getMessageFontColor())
               .fontWeight(this.getMessageFontWeight())
               .constraintSize({ minHeight: this.getCloseButtonHeight() })
+              .textAlign(this.getTitleTextAlign())
               .onAreaChange((_, rect) => {
                 this.textHeight = rect.height as number
                 this.setScrollMaxHeight(undefined);
@@ -818,6 +864,10 @@ export struct PopupComponent {
                   this.buttons?.[0]?.action();
                 }
               })
+              .onAreaChange((_, rect) => {
+                this.firstButtonHeight = rect.height as number;
+              })
+              .responseRegion(this.getNormalBtnResponseRegion(this.firstButtonHeight))
             }
             if (this.buttons?.[1]?.text !== '' && this.buttons?.[1]?.text !== void (0)) {
               Button() {
@@ -849,6 +899,10 @@ export struct PopupComponent {
                   this.buttons?.[1]?.action();
                 }
               })
+              .onAreaChange((_, rect) => {
+                this.secondButtonHeight = rect.height as number;
+              })
+              .responseRegion(this.getNormalBtnResponseRegion(this.secondButtonHeight))
             }
           }
           .direction(this.popupDirection)
@@ -880,6 +934,7 @@ export struct PopupComponent {
                 .fontColor(this.getMessageFontColor())
                 .fontWeight(this.getMessageFontWeight())
                 .constraintSize({ maxWidth: this.messageMaxWeight, minHeight: this.getCloseButtonHeight() })
+                .textAlign(this.getTitleTextAlign())
                 .onAreaChange((_, rect) => {
                   this.textHeight = rect.height as number
                   this.setScrollMaxHeight(undefined);
@@ -911,6 +966,7 @@ export struct PopupComponent {
               .backgroundColor(this.closeButtonBackgroundColor)
               .flexShrink(0)
               .accessibilityText(this.theme.closeButton.accessibilityMessage)
+              .responseRegion(this.getCloseBtnResponseRegion())
               .onHover((isHover: boolean) => {
                 if (isHover) {
                   this.closeButtonBackgroundColor = this.getCloseButtonHoverColor()
@@ -959,6 +1015,10 @@ export struct PopupComponent {
                   this.buttons?.[0]?.action();
                 }
               })
+              .onAreaChange((_, rect) => {
+                this.firstButtonHeight = rect.height as number;
+              })
+              .responseRegion(this.getNormalBtnResponseRegion(this.firstButtonHeight))
             }
             if (this.buttons?.[1]?.text !== '' && this.buttons?.[1]?.text !== void (0)) {
               Button() {
@@ -990,6 +1050,10 @@ export struct PopupComponent {
                   this.buttons?.[1]?.action();
                 }
               })
+              .onAreaChange((_, rect) => {
+                this.secondButtonHeight = rect.height as number;
+              })
+              .responseRegion(this.getNormalBtnResponseRegion(this.secondButtonHeight))
             }
           }
           .direction(this.popupDirection)

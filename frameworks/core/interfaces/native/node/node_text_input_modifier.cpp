@@ -71,7 +71,8 @@ void SetTextInputCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* colo
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         if (!colorRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
         }
@@ -141,7 +142,8 @@ void SetTextInputPlaceholderColor(ArkUINodeHandle node, ArkUI_Uint32 color, void
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         if (!colorRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject *>(colorRawPtr));
         }
@@ -760,7 +762,8 @@ void SetTextInputSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 colo
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         if (!resRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
         }
@@ -908,7 +911,8 @@ void SetTextInputFontColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRa
         CHECK_NULL_VOID(pattern);
         RefPtr<ResourceObject> resObj;
         if (!resRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
         }
@@ -1043,8 +1047,15 @@ void SetTextInputCancelButton(ArkUINodeHandle node, ArkUI_Int32 style, const str
         } else {
             pattern->UnRegisterResource("cancelButtonIconSize");
         }
+        RefPtr<ResourceObject> colorResObj;
         if (imageIconRes && imageIconRes->colorObj) {
-            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(imageIconRes->colorObj));
+            colorResObj = AceType::Claim(reinterpret_cast<ResourceObject*>(imageIconRes->colorObj));
+        } else {
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                colorResObj, iconColor, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
+        }
+        if (colorResObj) {
+            auto resObj = colorResObj;
             pattern->RegisterResource<Color>("cancelButtonIconColor", resObj, iconColor);
         } else {
             pattern->UnRegisterResource("cancelButtonIconColor");
@@ -1301,7 +1312,8 @@ void SetTextInputBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color, void*
     RefPtr<ResourceObject> resObj;
     if (SystemProperties::ConfigChangePerform()) {
         if (!resRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
         }
@@ -1616,7 +1628,7 @@ void ResetTextInputKeyboardAppearance(ArkUINodeHandle node)
 
 void SetTextInputNormalUnderlineColor(ArkUINodeHandle node, ArkUI_Uint32 normalColor, void* resRawPtr)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetNormalUnderlineColor(frameNode, Color(normalColor));
     if (SystemProperties::ConfigChangePerform()) {
@@ -1641,7 +1653,8 @@ void SetTextInputUserUnderlineColorRegister(FrameNode* frameNode, ArkUIUserUnder
         if (colorObj && subColorObj) {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject *>(subColorObj));
         } else {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         }
         if (resObj) {
             pattern->RegisterResource<Color>(key, resObj, result);
@@ -1887,7 +1900,7 @@ void ResetTextInputTextOverflow(ArkUINodeHandle node)
 
 int32_t GetTextInputTextOverflow(ArkUINodeHandle node)
 {
-    int defaultTextOverflow = static_cast<int32_t>(TextOverflow::DEFAULT);
+    int32_t defaultTextOverflow = static_cast<int32_t>(TextOverflow::NONE);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, defaultTextOverflow);
     return static_cast<int32_t>(TextFieldModelNG::GetTextOverflow(frameNode));
@@ -2193,6 +2206,25 @@ void ResetTextInputOnContentScroll(ArkUINodeHandle node)
     TextFieldModelNG::SetOnContentScroll(frameNode, nullptr);
 }
 
+void SetTextInputOnWillCopy(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto func = reinterpret_cast<std::function<bool(const std::u16string&)>*>(callback);
+        TextFieldModelNG::SetOnWillCopy(frameNode, std::move(*func));
+    } else {
+        TextFieldModelNG::SetOnWillCopy(frameNode, nullptr);
+    }
+}
+
+void ResetTextInputOnWillCopy(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnWillCopy(frameNode, nullptr);
+}
+
 void SetTextInputOnCopy(ArkUINodeHandle node, void* callback)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2210,6 +2242,25 @@ void ResetTextInputOnCopy(ArkUINodeHandle node)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetOnCopy(frameNode, nullptr);
+}
+
+void SetTextInputOnWillCut(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto func = reinterpret_cast<std::function<bool(const std::u16string&)>*>(callback);
+        TextFieldModelNG::SetOnWillCut(frameNode, std::move(*func));
+    } else {
+        TextFieldModelNG::SetOnWillCut(frameNode, nullptr);
+    }
+}
+
+void ResetTextInputOnWillCut(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnWillCut(frameNode, nullptr);
 }
 
 void SetTextInputOnCut(ArkUINodeHandle node, void* callback)
@@ -2758,6 +2809,27 @@ void TextInputDeleteBackward(ArkUINodeHandle node)
     TextFieldModelNG::DeleteBackward(frameNode);
 }
 
+void SetTextInputOrphanCharOptimization(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOrphanCharOptimization(frameNode, value);
+}
+
+ArkUI_Int32 GetTextInputOrphanCharOptimization(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return static_cast<ArkUI_Int32>(TextFieldModelNG::GetOrphanCharOptimization(frameNode));
+}
+
+void ResetTextInputOrphanCharOptimization(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOrphanCharOptimization(frameNode, false);
+}
+
 void SetTextInputCompressLeadingPunctuation(ArkUINodeHandle node, ArkUI_Bool trim)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2829,7 +2901,8 @@ void SetTextInputSelectedDragPreviewStyle(ArkUINodeHandle node, ArkUI_Uint32 col
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         if (!resRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
         }
@@ -3037,8 +3110,12 @@ const ArkUITextInputModifier* GetTextInputModifier()
         .resetTextInputOnTextSelectionChange = ResetTextInputOnTextSelectionChange,
         .setTextInputOnContentScroll = SetTextInputOnContentScroll,
         .resetTextInputOnContentScroll = ResetTextInputOnContentScroll,
+        .setTextInputOnWillCopy = SetTextInputOnWillCopy,
+        .resetTextInputOnWillCopy = ResetTextInputOnWillCopy,
         .setTextInputOnCopy = SetTextInputOnCopy,
         .resetTextInputOnCopy = ResetTextInputOnCopy,
+        .setTextInputOnWillCut = SetTextInputOnWillCut,
+        .resetTextInputOnWillCut = ResetTextInputOnWillCut,
         .setTextInputOnCut = SetTextInputOnCut,
         .resetTextInputOnCut = ResetTextInputOnCut,
         .setTextInputOnPaste = SetTextInputOnPaste,
@@ -3102,6 +3179,9 @@ const ArkUITextInputModifier* GetTextInputModifier()
         .setTextInputOnWillAttachIME = SetTextInputOnWillAttachIME,
         .resetTextInputOnWillAttachIME = ResetTextInputOnWillAttachIME,
         .textInputDeleteBackward = TextInputDeleteBackward,
+        .setTextInputOrphanCharOptimization = SetTextInputOrphanCharOptimization,
+        .getTextInputOrphanCharOptimization = GetTextInputOrphanCharOptimization,
+        .resetTextInputOrphanCharOptimization = ResetTextInputOrphanCharOptimization,
         .setTextInputCompressLeadingPunctuation = SetTextInputCompressLeadingPunctuation,
         .getTextInputCompressLeadingPunctuation = GetTextInputCompressLeadingPunctuation,
         .resetTextInputCompressLeadingPunctuation = ResetTextInputCompressLeadingPunctuation,
@@ -3415,7 +3495,9 @@ void SetOnTextInputPaste(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_TEXT_INPUT_PASTE;
         event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(utf8Str.c_str());
+        event.textInputEvent.preventDefault = 1;
         SendArkUISyncEvent(&event);
+        commonEvent.SetPreventDefault(!static_cast<bool>(event.textInputEvent.preventDefault));
     };
     TextFieldModelNG::SetOnPasteWithEvent(frameNode, std::move(onPaste));
 }
@@ -3507,45 +3589,69 @@ void ResetOnTextInputChange(ArkUINodeHandle node)
 {
     GetTextInputModifier()->resetTextInputOnChange(node);
 }
+
 void ResetTextInputOnSubmit(ArkUINodeHandle node)
 {
     GetTextInputModifier()->resetTextInputOnSubmitWithEvent(node);
 }
+
 void ResetOnTextInputCut(ArkUINodeHandle node)
 {
     GetTextInputModifier()->resetTextInputOnCut(node);
 }
+
 void ResetOnTextInputPaste(ArkUINodeHandle node)
 {
     GetTextInputModifier()->resetTextInputOnPaste(node);
 }
+
 void ResetOnTextInputSelectionChange(ArkUINodeHandle node)
 {
     GetTextInputModifier()->resetTextInputOnTextSelectionChange(node);
 }
+
 void ResetOnTextInputEditChange(ArkUINodeHandle node)
 {
     GetTextInputModifier()->resetTextInputOnEditChange(node);
 }
+
 void ResetOnTextInputContentSizeChange(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetOnContentSizeChange(frameNode, nullptr);
 }
+
 void ResetOnTextInputInputFilterError(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetInputFilterError(frameNode, nullptr);
 }
+
 void ResetTextInputOnTextContentScroll(ArkUINodeHandle node)
 {
     GetTextInputModifier()->resetTextInputOnContentScroll(node);
 }
+
 void ResetOnTextInputWillChange(ArkUINodeHandle node)
 {
     GetTextInputModifier()->resetTextInputOnWillChange(node);
+}
+
+void ResetOnTextInputWillCopy(ArkUINodeHandle node)
+{
+    GetTextInputModifier()->resetTextInputOnWillCopy(node);
+}
+
+void ResetOnTextInputCopy(ArkUINodeHandle node)
+{
+    GetTextInputModifier()->resetTextInputOnCopy(node);
+}
+
+void ResetOnTextInputWillCut(ArkUINodeHandle node)
+{
+    GetTextInputModifier()->resetTextInputOnWillCut(node);
 }
 
 void SetTextInputOnWillInsert(ArkUINodeHandle node, void* extraParam)
@@ -3606,6 +3712,58 @@ void SetTextInputOnWillDelete(ArkUINodeHandle node, void* extraParam)
         return event.mixedEvent.numberReturnData[0].i32;
     };
     TextFieldModelNG::SetOnWillDeleteEvent(frameNode, std::move(onWillDelete));
+}
+
+void SetOnTextInputWillCopy(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto func = [node, extraParam](const std::u16string& str) -> bool {
+        ArkUINodeEvent nodeEvent;
+        std::string utf8Str = UtfUtils::Str16DebugToStr8(str);
+        nodeEvent.kind = TEXT_INPUT;
+        nodeEvent.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        nodeEvent.textInputEvent.subKind = ON_TEXT_INPUT_WILL_COPY;
+        nodeEvent.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(utf8Str.c_str());
+        nodeEvent.textInputEvent.preventDefault = 1;
+        SendArkUISyncEvent(&nodeEvent);
+        return static_cast<bool>(nodeEvent.textInputEvent.preventDefault);
+    };
+    TextFieldModelNG::SetOnWillCopy(frameNode, std::move(func));
+}
+
+void SetOnTextInputCopy(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto func = [node, extraParam](const std::u16string& str) {
+        ArkUINodeEvent nodeEvent;
+        std::string utf8Str = UtfUtils::Str16DebugToStr8(str);
+        nodeEvent.kind = TEXT_INPUT;
+        nodeEvent.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        nodeEvent.textInputEvent.subKind = ON_TEXT_INPUT_COPY;
+        nodeEvent.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(utf8Str.c_str());
+        SendArkUISyncEvent(&nodeEvent);
+    };
+    TextFieldModelNG::SetOnCopy(frameNode, std::move(func));
+}
+
+void SetOnTextInputWillCut(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto func = [node, extraParam](const std::u16string& str) -> bool {
+        ArkUINodeEvent nodeEvent;
+        std::string utf8Str = UtfUtils::Str16DebugToStr8(str);
+        nodeEvent.kind = TEXT_INPUT;
+        nodeEvent.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        nodeEvent.textInputEvent.subKind = ON_TEXT_INPUT_WILL_CUT;
+        nodeEvent.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(utf8Str.c_str());
+        nodeEvent.textInputEvent.preventDefault = 1;
+        SendArkUISyncEvent(&nodeEvent);
+        return static_cast<bool>(nodeEvent.textInputEvent.preventDefault);
+    };
+    TextFieldModelNG::SetOnWillCut(frameNode, std::move(func));
 }
 
 void SetTextInputOnDidDelete(ArkUINodeHandle node, void* extraParam)

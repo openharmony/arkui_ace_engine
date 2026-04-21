@@ -169,7 +169,8 @@ void SetTextStyleWithWeightEnumBase(ArkUINodeHandle node, uint32_t color, float 
         textStyle.textColorSetByUser = true;
         RefPtr<ResourceObject> colorResObj;
         Color result = Color(color);
-        ResourceParseUtils::CompleteResourceObjectFromColor(colorResObj, result, frameNode->GetTag());
+        ResourceParseUtils::CompleteResourceObjectFromColor(
+            colorResObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         if (colorResObj) {
             textStyle.textColor = result;
             textStyle.textColorResObj = colorResObj;
@@ -281,9 +282,7 @@ void ResetTextStyle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    RefPtr<CalendarTheme> calendarTheme = pipeline->GetTheme<CalendarTheme>();
+    RefPtr<CalendarTheme> calendarTheme = frameNode->GetTheme<CalendarTheme>(true);
     CHECK_NULL_VOID(calendarTheme);
     NG::PickerTextStyle textStyle;
     textStyle.fontSize = calendarTheme->GetEntryFontSize();
@@ -541,9 +540,7 @@ void ResetCalendarPickerBorder(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
 
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    RefPtr<CalendarTheme> calendarTheme = pipeline->GetTheme<CalendarTheme>();
+    RefPtr<CalendarTheme> calendarTheme = frameNode->GetTheme<CalendarTheme>(true);
     CHECK_NULL_VOID(calendarTheme);
     ViewAbstract::SetBorderWidth(frameNode, calendarTheme->GetEntryBorderWidth());
     ViewAbstract::SetBorderColor(frameNode, calendarTheme->GetEntryBorderColor());

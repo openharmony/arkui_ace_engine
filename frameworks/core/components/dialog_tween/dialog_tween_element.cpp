@@ -89,7 +89,7 @@ void DialogTweenElement::OnBlur()
 bool DialogTweenElement::OnKeyEvent(const KeyEvent& keyEvent)
 {
     if ((keyEvent.code == KeyCode::KEY_BACK || keyEvent.code == KeyCode::KEY_ESCAPE) &&
-        keyEvent.action == KeyAction::UP) {
+        (keyEvent.action == KeyAction::UP || keyEvent.action == KeyAction::CANCEL)) {
         const auto& dialog = AceType::DynamicCast<RenderDialogTween>(renderNode_);
         if (dialog) {
             return dialog->PopDialog();

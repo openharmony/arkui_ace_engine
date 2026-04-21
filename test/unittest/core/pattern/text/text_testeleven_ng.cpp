@@ -23,7 +23,8 @@
 #define private public
 #include "core/components_ng/pattern/text_field/content_controller.h"
 #undef private
-#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -352,6 +353,193 @@ HWTEST_F(TextTestNg, BackgroundColorSpanRemoveSpanStyle002, TestSize.Level1)
     spanItem->backgroundStyle = backgroundStyle;
     backgroundColorSpan.RemoveSpanStyle(spanItem);
     EXPECT_FALSE(spanItem->backgroundStyle.has_value());
+}
+
+/**
+ * @tc.name: LineHeightSpanIsAttributesEqual001
+ * @tc.desc: test IsAttributesEqual with different span type
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, LineHeightSpanIsAttributesEqual001, TestSize.Level1)
+{
+    Dimension lineHeight(20.0, DimensionUnit::VP);
+    LineHeightSpan lineHeightSpan = LineHeightSpan(lineHeight);
+    auto spanBase = AceType::MakeRefPtr<MockSpanBase>();
+    bool result = lineHeightSpan.IsAttributesEqual(spanBase);
+    EXPECT_FALSE(result);
+}
+/**
+ * @tc.name: LineHeightSpanIsAttributesEqual002
+ * @tc.desc: test IsAttributesEqual with different lineHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, LineHeightSpanIsAttributesEqual002, TestSize.Level1)
+{
+    Dimension lineHeight1(20.0, DimensionUnit::VP);
+    Dimension lineHeight2(30.0, DimensionUnit::VP);
+    LineHeightSpan lineHeightSpan1 = LineHeightSpan(lineHeight1);
+    auto lineHeightSpan2 = AceType::MakeRefPtr<LineHeightSpan>(lineHeight2);
+    bool result = lineHeightSpan1.IsAttributesEqual(lineHeightSpan2);
+    EXPECT_FALSE(result);
+}
+/**
+ * @tc.name: LineHeightSpanIsAttributesEqual003
+ * @tc.desc: test IsAttributesEqual with different lineHeightMultiple has_value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, LineHeightSpanIsAttributesEqual003, TestSize.Level1)
+{
+    Dimension lineHeight(20.0, DimensionUnit::VP);
+    LineHeightSpan lineHeightSpan1 = LineHeightSpan(lineHeight);
+    std::optional<double> lineHeightMultiple = 1.5;
+    auto lineHeightSpan2 = AceType::MakeRefPtr<LineHeightSpan>(lineHeight, lineHeightMultiple);
+    bool result = lineHeightSpan1.IsAttributesEqual(lineHeightSpan2);
+    EXPECT_FALSE(result);
+}
+/**
+ * @tc.name: LineHeightSpanIsAttributesEqual004
+ * @tc.desc: test IsAttributesEqual with different lineHeightMultiple value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, LineHeightSpanIsAttributesEqual004, TestSize.Level1)
+{
+    Dimension lineHeight(20.0, DimensionUnit::VP);
+    std::optional<double> lineHeightMultiple1 = 1.5;
+    std::optional<double> lineHeightMultiple2 = 2.0;
+    LineHeightSpan lineHeightSpan1 = LineHeightSpan(lineHeight, lineHeightMultiple1);
+    auto lineHeightSpan2 = AceType::MakeRefPtr<LineHeightSpan>(lineHeight, lineHeightMultiple2);
+    bool result = lineHeightSpan1.IsAttributesEqual(lineHeightSpan2);
+    EXPECT_FALSE(result);
+}
+/**
+ * @tc.name: LineHeightSpanIsAttributesEqual005
+ * @tc.desc: test IsAttributesEqual with same attributes
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, LineHeightSpanIsAttributesEqual005, TestSize.Level1)
+{
+    Dimension lineHeight(20.0, DimensionUnit::VP);
+    std::optional<double> lineHeightMultiple = 1.5;
+    LineHeightSpan lineHeightSpan1 = LineHeightSpan(lineHeight, lineHeightMultiple);
+    auto lineHeightSpan2 = AceType::MakeRefPtr<LineHeightSpan>(lineHeight, lineHeightMultiple);
+    bool result = lineHeightSpan1.IsAttributesEqual(lineHeightSpan2);
+    EXPECT_TRUE(result);
+}
+/**
+ * @tc.name: LineHeightSpanAddLineHeightStyle001
+ * @tc.desc: test AddLineHeightStyle without lineHeightMultiple
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, LineHeightSpanAddLineHeightStyle001, TestSize.Level1)
+{
+    Dimension lineHeight(20.0, DimensionUnit::VP);
+    LineHeightSpan lineHeightSpan = LineHeightSpan(lineHeight);
+    auto spanItem = AceType::MakeRefPtr<NG::SpanItem>();
+    spanItem->textLineStyle = std::make_unique<TextLineStyle>();
+    lineHeightSpan.AddLineHeightStyle(spanItem);
+    EXPECT_TRUE(spanItem->textLineStyle != nullptr);
+}
+/**
+ * @tc.name: LineHeightSpanAddLineHeightStyle002
+ * @tc.desc: test AddLineHeightStyle with lineHeightMultiple
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, LineHeightSpanAddLineHeightStyle002, TestSize.Level1)
+{
+    Dimension lineHeight(20.0, DimensionUnit::VP);
+    std::optional<double> lineHeightMultiple = 1.5;
+    LineHeightSpan lineHeightSpan = LineHeightSpan(lineHeight, lineHeightMultiple);
+    auto spanItem = AceType::MakeRefPtr<NG::SpanItem>();
+    spanItem->textLineStyle = std::make_unique<TextLineStyle>();
+    lineHeightSpan.AddLineHeightStyle(spanItem);
+    EXPECT_TRUE(spanItem->textLineStyle != nullptr);
+}
+/**
+ * @tc.name: LineHeightSpanRemoveLineHeightStyle001
+ * @tc.desc: test RemoveLineHeightStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, LineHeightSpanRemoveLineHeightStyle001, TestSize.Level1)
+{
+    Dimension lineHeight(20.0, DimensionUnit::VP);
+    LineHeightSpan lineHeightSpan = LineHeightSpan(lineHeight);
+    auto spanItem = AceType::MakeRefPtr<NG::SpanItem>();
+    spanItem->textLineStyle = std::make_unique<TextLineStyle>();
+    lineHeightSpan.RemoveLineHeightStyle(spanItem);
+    EXPECT_TRUE(spanItem->textLineStyle != nullptr);
+}
+/**
+ * @tc.name: LineSpacingSpanApplyToSpanItem001
+ * @tc.desc: test ApplyToSpanItem with ADD operation
+ * @tc.type: FUNC
+    */
+HWTEST_F(TextTestNg, LineSpacingSpanApplyToSpanItem001, TestSize.Level1)
+{
+    Dimension lineSpacing(10.0, DimensionUnit::VP);
+    LineSpacingSpan lineSpacingSpan = LineSpacingSpan(lineSpacing);
+    auto spanItem = AceType::MakeRefPtr<NG::SpanItem>();
+    spanItem->textLineStyle = std::make_unique<TextLineStyle>();
+    lineSpacingSpan.ApplyToSpanItem(spanItem, SpanOperation::ADD);
+    EXPECT_TRUE(spanItem->textLineStyle != nullptr);
+}
+/**
+ * @tc.name: LineSpacingSpanApplyToSpanItem002
+ * @tc.desc: test ApplyToSpanItem with REMOVE operation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, LineSpacingSpanApplyToSpanItem002, TestSize.Level1)
+{
+    Dimension lineSpacing(10.0, DimensionUnit::VP);
+    LineSpacingSpan lineSpacingSpan = LineSpacingSpan(lineSpacing);
+    auto spanItem = AceType::MakeRefPtr<NG::SpanItem>();
+    spanItem->textLineStyle = std::make_unique<TextLineStyle>();
+    lineSpacingSpan.ApplyToSpanItem(spanItem, SpanOperation::REMOVE);
+    EXPECT_TRUE(spanItem->textLineStyle != nullptr);
+}
+/**
+ * @tc.name: LineSpacingSpanAddLineSpacingStyle001
+ * @tc.desc: test AddLineSpacingStyle with options
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, LineSpacingSpanAddLineSpacingStyle001, TestSize.Level1)
+{
+    Dimension lineSpacing(10.0, DimensionUnit::VP);
+    LineSpacingOptions options;
+    options.onlyBetweenLines = true;
+    std::optional<LineSpacingOptions> lineSpacingOptions = options;
+    LineSpacingSpan lineSpacingSpan = LineSpacingSpan(lineSpacing, lineSpacingOptions);
+    auto spanItem = AceType::MakeRefPtr<NG::SpanItem>();
+    spanItem->textLineStyle = std::make_unique<TextLineStyle>();
+    lineSpacingSpan.AddLineSpacingStyle(spanItem);
+    EXPECT_TRUE(spanItem->textLineStyle != nullptr);
+}
+/**
+ * @tc.name: LineSpacingSpanAddLineSpacingStyle002
+ * @tc.desc: test AddLineSpacingStyle without options
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, LineSpacingSpanAddLineSpacingStyle002, TestSize.Level1)
+{
+    Dimension lineSpacing(10.0, DimensionUnit::VP);
+    LineSpacingSpan lineSpacingSpan = LineSpacingSpan(lineSpacing);
+    auto spanItem = AceType::MakeRefPtr<NG::SpanItem>();
+    spanItem->textLineStyle = std::make_unique<TextLineStyle>();
+    lineSpacingSpan.AddLineSpacingStyle(spanItem);
+    EXPECT_TRUE(spanItem->textLineStyle != nullptr);
+}
+/**
+ * @tc.name: LineSpacingSpanRemoveLineSpacingStyle001
+ * @tc.desc: test RemoveLineSpacingStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, LineSpacingSpanRemoveLineSpacingStyle001, TestSize.Level1)
+{
+    Dimension lineSpacing(10.0, DimensionUnit::VP);
+    LineSpacingSpan lineSpacingSpan = LineSpacingSpan(lineSpacing);
+    auto spanItem = AceType::MakeRefPtr<NG::SpanItem>();
+    spanItem->textLineStyle = std::make_unique<TextLineStyle>();
+    lineSpacingSpan.RemoveLineSpacingStyle(spanItem);
+    EXPECT_TRUE(spanItem->textLineStyle != nullptr);
 }
 
 /**

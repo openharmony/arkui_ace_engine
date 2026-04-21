@@ -49,11 +49,11 @@ private:
 };
 
 /**
- * @tc.name: GetStopPropagationTest
+ * @tc.name: getStopPropagationTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TouchEventAccessorTest, GetStopPropagationTest, TestSize.Level1)
+HWTEST_F(TouchEventAccessorTest, getStopPropagationTest, TestSize.Level1)
 {
     TouchEventInfo* eventInfo = peer_->GetEventInfo();
     ASSERT_NE(eventInfo, nullptr);
@@ -67,11 +67,11 @@ HWTEST_F(TouchEventAccessorTest, GetStopPropagationTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetPreventDefaultTest
+ * @tc.name: getPreventDefaultTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TouchEventAccessorTest, GetPreventDefaultTest, TestSize.Level1)
+HWTEST_F(TouchEventAccessorTest, getPreventDefaultTest, TestSize.Level1)
 {
     TouchEventInfo* eventInfo = peer_->GetEventInfo();
     ASSERT_NE(eventInfo, nullptr);
@@ -95,11 +95,11 @@ HWTEST_F(TouchEventAccessorTest, GetPreventDefaultTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetTypeTest
+ * @tc.name: getTypeTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TouchEventAccessorTest, GetTypeTest, TestSize.Level1)
+HWTEST_F(TouchEventAccessorTest, getTypeTest, TestSize.Level1)
 {
     for (auto& [value, expected]: getTypeTestPlan) {
         TouchEventInfo* eventInfo = peer_->GetEventInfo();
@@ -116,11 +116,11 @@ HWTEST_F(TouchEventAccessorTest, GetTypeTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetHistoricalPointsTest
+ * @tc.name: getHistoricalPointsTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TouchEventAccessorTest, DISABLED_GetHistoricalPointsTest, TestSize.Level1)
+HWTEST_F(TouchEventAccessorTest, DISABLED_getHistoricalPointsTest, TestSize.Level1)
 {
     TouchEventInfo* eventInfo = peer_->GetEventInfo();
     ASSERT_NE(eventInfo, nullptr);
@@ -168,11 +168,11 @@ HWTEST_F(TouchEventAccessorTest, DISABLED_GetHistoricalPointsTest, TestSize.Leve
 }
 
 /**
- * @tc.name: GetTouchesTest
+ * @tc.name: getTouchesTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TouchEventAccessorTest, DISABLED_GetTouchesTest, TestSize.Level1)
+HWTEST_F(TouchEventAccessorTest, DISABLED_getTouchesTest, TestSize.Level1)
 {
     TouchEventInfo* eventInfo = peer_->GetEventInfo();
     ASSERT_NE(eventInfo, nullptr);
@@ -211,11 +211,11 @@ HWTEST_F(TouchEventAccessorTest, DISABLED_GetTouchesTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetChangedTouchesTest
+ * @tc.name: getChangedTouchesTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TouchEventAccessorTest, DISABLED_GetChangedTouchesTest, TestSize.Level1)
+HWTEST_F(TouchEventAccessorTest, DISABLED_getChangedTouchesTest, TestSize.Level1)
 {
     TouchEventInfo* eventInfo = peer_->GetEventInfo();
     ASSERT_NE(eventInfo, nullptr);

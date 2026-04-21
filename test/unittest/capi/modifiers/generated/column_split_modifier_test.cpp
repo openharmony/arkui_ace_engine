@@ -60,10 +60,10 @@ public:
 HWTEST_F(ColumnSplitModifierTest, setResizeableTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RESIZEABLE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_RESIZEABLE_DEFAULT_VALUE) << "Default value for attribute 'resizeable'";
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_RESIZEABLE_DEFAULT_VALUE)) << "Default value for attribute 'resizeable'";
 }
 
 /*
@@ -86,7 +86,7 @@ HWTEST_F(ColumnSplitModifierTest, setResizeableTestResizeableValidValues, TestSi
         modifier_->setResizeable(node_, &inputValueResizeable);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RESIZEABLE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setResizeable, attribute: resizeable";
     };
 
@@ -115,7 +115,7 @@ HWTEST_F(ColumnSplitModifierTest, DISABLED_setResizeableTestResizeableInvalidVal
         modifier_->setResizeable(node_, &inputValueResizeable);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RESIZEABLE_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_RESIZEABLE_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_RESIZEABLE_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setResizeable, attribute: resizeable";
     };
 
@@ -131,16 +131,15 @@ HWTEST_F(ColumnSplitModifierTest, DISABLED_setResizeableTestResizeableInvalidVal
 HWTEST_F(ColumnSplitModifierTest, DISABLED_setDividerTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultDivider =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DIVIDER_NAME);
-    std::string resultStr;
+    std::unique_ptr<JsonValue> resultDivider = GetAttrObject(jsonValue, ATTRIBUTE_DIVIDER_NAME);
+    std::optional<std::string> resultStr;
 
     resultStr = GetAttrValue<std::string>(resultDivider, ATTRIBUTE_DIVIDER_I_START_MARGIN_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DIVIDER_I_START_MARGIN_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_DIVIDER_I_START_MARGIN_DEFAULT_VALUE)) <<
         "Default value for attribute 'divider.startMargin'";
 
     resultStr = GetAttrValue<std::string>(resultDivider, ATTRIBUTE_DIVIDER_I_END_MARGIN_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DIVIDER_I_END_MARGIN_DEFAULT_VALUE) <<
+    EXPECT_THAT(resultStr, Optional(ATTRIBUTE_DIVIDER_I_END_MARGIN_DEFAULT_VALUE)) <<
         "Default value for attribute 'divider.endMargin'";
 }
 
@@ -166,9 +165,9 @@ HWTEST_F(ColumnSplitModifierTest, setDividerTestDividerStartMarginValidValues, T
         WriteTo(inputValueDivider).startMargin = value;
         modifier_->setDivider(node_, &inputValueDivider);
         auto jsonValue = GetJsonValue(node_);
-        auto resultDivider = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DIVIDER_NAME);
+        auto resultDivider = GetAttrObject(jsonValue, ATTRIBUTE_DIVIDER_NAME);
         auto resultStr = GetAttrValue<std::string>(resultDivider, ATTRIBUTE_DIVIDER_I_START_MARGIN_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setDivider, attribute: divider.startMargin";
     };
 
@@ -205,9 +204,9 @@ HWTEST_F(ColumnSplitModifierTest, setDividerTestDividerStartMarginInvalidValues,
         WriteTo(inputValueDivider).startMargin = value;
         modifier_->setDivider(node_, &inputValueDivider);
         auto jsonValue = GetJsonValue(node_);
-        auto resultDivider = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DIVIDER_NAME);
+        auto resultDivider = GetAttrObject(jsonValue, ATTRIBUTE_DIVIDER_NAME);
         auto resultStr = GetAttrValue<std::string>(resultDivider, ATTRIBUTE_DIVIDER_I_START_MARGIN_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_DIVIDER_I_START_MARGIN_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_DIVIDER_I_START_MARGIN_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setDivider, attribute: divider.startMargin";
     };
 
@@ -239,9 +238,9 @@ HWTEST_F(ColumnSplitModifierTest, setDividerTestDividerEndMarginValidValues, Tes
         WriteTo(inputValueDivider).endMargin = value;
         modifier_->setDivider(node_, &inputValueDivider);
         auto jsonValue = GetJsonValue(node_);
-        auto resultDivider = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DIVIDER_NAME);
+        auto resultDivider = GetAttrObject(jsonValue, ATTRIBUTE_DIVIDER_NAME);
         auto resultStr = GetAttrValue<std::string>(resultDivider, ATTRIBUTE_DIVIDER_I_END_MARGIN_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
+        EXPECT_THAT(resultStr, Optional(expectedStr)) <<
             "Input value is: " << input << ", method: setDivider, attribute: divider.endMargin";
     };
 
@@ -278,9 +277,9 @@ HWTEST_F(ColumnSplitModifierTest, setDividerTestDividerEndMarginInvalidValues, T
         WriteTo(inputValueDivider).endMargin = value;
         modifier_->setDivider(node_, &inputValueDivider);
         auto jsonValue = GetJsonValue(node_);
-        auto resultDivider = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DIVIDER_NAME);
+        auto resultDivider = GetAttrObject(jsonValue, ATTRIBUTE_DIVIDER_NAME);
         auto resultStr = GetAttrValue<std::string>(resultDivider, ATTRIBUTE_DIVIDER_I_END_MARGIN_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_DIVIDER_I_END_MARGIN_DEFAULT_VALUE) <<
+        EXPECT_THAT(resultStr, Optional(ATTRIBUTE_DIVIDER_I_END_MARGIN_DEFAULT_VALUE)) <<
             "Input value is: " << input << ", method: setDivider, attribute: divider.endMargin";
     };
 
