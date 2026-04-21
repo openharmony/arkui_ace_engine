@@ -35,6 +35,7 @@
 #include "core/components_ng/pattern/overlay/content_cover_param.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
+#include "core/components_ng/pattern/overlay/overlay_options.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/overlay/group_manager.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
@@ -656,6 +657,9 @@ public:
     void AddFrameNodeToOverlay(const RefPtr<NG::FrameNode>& node, std::optional<int32_t> index = std::nullopt);
     RefPtr<FrameNode> CreateOverlayNodeWithOrder(std::optional<double> levelOrder);
     void AddFrameNodeWithOrder(const RefPtr<FrameNode>& node, std::optional<double> levelOrder);
+    bool TopNodeIsModelUEC();
+    void OpenOrderOverlay(const RefPtr<FrameNode>& node, const OrderOverlayOptions& options,
+        const std::function<void(int32_t)>&& callback);
     void RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node);
     void RemoveFrameNodeWithOrder(const RefPtr<NG::FrameNode>& node);
     void ShowNodeOnOverlay(const RefPtr<NG::FrameNode>& node);
