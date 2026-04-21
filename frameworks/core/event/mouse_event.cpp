@@ -402,6 +402,12 @@ MouseEvent MouseEvent::CloneWith(float scale) const
     mouseEvent.pointerEvent = pointerEvent;
     mouseEvent.originalId = originalId;
     mouseEvent.pressedKeyCodes_ = pressedKeyCodes_;
+    mouseEvent.history.reserve(history.size());
+    for (const auto& historyEvent : history) {
+        auto clonedHistoryEvent = historyEvent.CloneWith(scale);
+        clonedHistoryEvent.history.clear();
+        mouseEvent.history.emplace_back(std::move(clonedHistoryEvent));
+    }
     mouseEvent.isInjected = isInjected;
     mouseEvent.isPrivacyMode = isPrivacyMode;
     mouseEvent.mockFlushEvent = mockFlushEvent;
