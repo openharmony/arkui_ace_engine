@@ -618,12 +618,7 @@ void TextPickerDialogView::UpdateConfirmButtonTextLayoutProperty(
         ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize()));
     textLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
 
-    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto fontManager = pipeline->GetFontManager();
-    CHECK_NULL_VOID(fontManager);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
-        fontManager->GetFallbackLineSpacingStyleOptimizeFlag()) {
+    if (IsEnableFallbackLineSpacingStyleOptimize()) {
         textLayoutProperty->UpdateIncludeFontPadding(true);
         textLayoutProperty->UpdateFallbackLineSpacing(true);
     }
@@ -647,12 +642,7 @@ void TextPickerDialogView::UpdateCancelButtonTextLayoutProperty(
         ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize()));
     textCancelLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
 
-    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto fontManager = pipeline->GetFontManager();
-    CHECK_NULL_VOID(fontManager);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
-        fontManager->GetFallbackLineSpacingStyleOptimizeFlag()) {
+    if (IsEnableFallbackLineSpacingStyleOptimize()) {
         textCancelLayoutProperty->UpdateIncludeFontPadding(true);
         textCancelLayoutProperty->UpdateFallbackLineSpacing(true);
     }
@@ -670,12 +660,7 @@ void TextPickerDialogView::UpdateForwardButtonTextLayoutProperty(
         ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize()));
     textForwardLayoutProperty->UpdateFontWeight(pickerThemeOptionStyle.GetFontWeight());
 
-    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto fontManager = pipeline->GetFontManager();
-    CHECK_NULL_VOID(fontManager);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
-        fontManager->GetFallbackLineSpacingStyleOptimizeFlag()) {
+    if (IsEnableFallbackLineSpacingStyleOptimize()) {
         textForwardLayoutProperty->UpdateIncludeFontPadding(true);
         textForwardLayoutProperty->UpdateFallbackLineSpacing(true);
     }
@@ -693,12 +678,7 @@ void TextPickerDialogView::UpdateBackwardButtonTextLayoutProperty(
         ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize()));
     textBackwardLayoutProperty->UpdateFontWeight(pickerThemeOptionStyle.GetFontWeight());
 
-    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto fontManager = pipeline->GetFontManager();
-    CHECK_NULL_VOID(fontManager);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
-        fontManager->GetFallbackLineSpacingStyleOptimizeFlag()) {
+    if (IsEnableFallbackLineSpacingStyleOptimize()) {
         textBackwardLayoutProperty->UpdateIncludeFontPadding(true);
         textBackwardLayoutProperty->UpdateFallbackLineSpacing(true);
     }
@@ -1788,6 +1768,16 @@ const Dimension TextPickerDialogView::ConvertFontSizeLimit(
         }
     }
     return fontSizeValueResult;
+}
+
+bool TextPickerDialogView::IsEnableFallbackLineSpacingStyleOptimize()
+{
+    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto fontManager = pipeline->GetFontManager();
+    CHECK_NULL_RETURN(fontManager, false);
+    return Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
+        fontManager->GetFallbackLineSpacingStyleOptimizeFlag();
 }
 
 void TextPickerDialogView::GetUserSettingLimit()
