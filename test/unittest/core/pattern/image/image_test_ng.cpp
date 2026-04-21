@@ -20,6 +20,7 @@
 
 #include "base/image/image_defines.h"
 #include "core/components_ng/pattern/image/image_layout_algorithm.h"
+#include "core/components/theme/icon_theme.h"
 
 namespace OHOS::Ace::NG {
 
