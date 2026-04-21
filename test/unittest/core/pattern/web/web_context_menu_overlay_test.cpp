@@ -18,6 +18,8 @@
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
+#include "interfaces/inner_api/ace/ai/data_detector_interface.h"
+#define private public // NOLINT
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components/web/web_event.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -25,6 +27,7 @@
 #include "core/components_ng/pattern/text/base_text_select_overlay.h"
 #include "core/components_ng/pattern/web/web_context_menu_overlay.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
+#undef private
 #include "core/components_v2/inspector/inspector_constants.h"
 
 using namespace testing;
@@ -168,7 +171,7 @@ HWTEST_F(WebContextMenuOverlayTest, CheckHandleVisible_001, TestSize.Level1)
 
 /**
  * @tc.name: GetFirstHandleInfo_001
- * @tc.desc: Test GetFirstHandleInfo with null pattern.
+ * @tc.desc: Test GetFirstHandleInfo with null pattern returns valid handle info with isShow=false.
  * @tc.type: FUNC
  */
 HWTEST_F(WebContextMenuOverlayTest, GetFirstHandleInfo_001, TestSize.Level1)
@@ -177,7 +180,8 @@ HWTEST_F(WebContextMenuOverlayTest, GetFirstHandleInfo_001, TestSize.Level1)
     WebContextMenuOverlay overlay(textBase);
 
     std::optional<SelectHandleInfo> result = overlay.GetFirstHandleInfo();
-    EXPECT_EQ(result, std::nullopt);
+    ASSERT_TRUE(result.has_value());
+    EXPECT_FALSE(result.value().isShow);
 }
 
 /**
@@ -206,7 +210,7 @@ HWTEST_F(WebContextMenuOverlayTest, GetFirstHandleInfo_002, TestSize.Level1)
 
 /**
  * @tc.name: GetSecondHandleInfo_001
- * @tc.desc: Test GetSecondHandleInfo with null pattern.
+ * @tc.desc: Test GetSecondHandleInfo with null pattern returns valid handle info with isShow=false.
  * @tc.type: FUNC
  */
 HWTEST_F(WebContextMenuOverlayTest, GetSecondHandleInfo_001, TestSize.Level1)
@@ -215,7 +219,8 @@ HWTEST_F(WebContextMenuOverlayTest, GetSecondHandleInfo_001, TestSize.Level1)
     WebContextMenuOverlay overlay(textBase);
 
     std::optional<SelectHandleInfo> result = overlay.GetSecondHandleInfo();
-    EXPECT_EQ(result, std::nullopt);
+    ASSERT_TRUE(result.has_value());
+    EXPECT_FALSE(result.value().isShow);
 }
 
 /**
@@ -317,7 +322,7 @@ HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_003, TestSize.Level1)
     std::shared_ptr<BaseEventInfo> eventInfo = std::make_shared<ContextMenuEvent>(mockMenuParam, menuResult);
     webPattern->OnContextMenuShow(eventInfo);
 
-    EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(1).WillOnce(Return("text"));
+    EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(2).WillRepeatedly(Return("text"));
 
     SelectMenuInfo selectMenuInfo;
     SelectOverlayDirtyFlag dirtyFlag = DIRTY_COPY_ALL_ITEM;
@@ -328,6 +333,11 @@ HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_003, TestSize.Level1)
     EXPECT_TRUE(selectMenuInfo.showCopyAll);
     EXPECT_EQ(selectMenuInfo.menuType, OptionMenuType::MOUSE_MENU);
     EXPECT_FALSE(selectMenuInfo.showCameraInput);
+    EXPECT_FALSE(selectMenuInfo.showSearch);
+    EXPECT_FALSE(selectMenuInfo.showTranslate);
+    EXPECT_FALSE(selectMenuInfo.showShare);
+    EXPECT_FALSE(selectMenuInfo.showAIWrite);
+    EXPECT_FALSE(selectMenuInfo.isAskCeliaEnabled);
 }
 
 /**
@@ -360,15 +370,20 @@ HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_004, TestSize.Level1)
     std::shared_ptr<BaseEventInfo> eventInfo = std::make_shared<ContextMenuEvent>(mockMenuParam, menuResult);
     webPattern->OnContextMenuShow(eventInfo);
 
-    EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(1).WillOnce(Return(""));
+    EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(2).WillRepeatedly(Return(""));
 
     SelectMenuInfo selectMenuInfo;
     SelectOverlayDirtyFlag dirtyFlag = DIRTY_COPY_ALL_ITEM;
     overlay.OnUpdateMenuInfo(selectMenuInfo, dirtyFlag);
     EXPECT_FALSE(selectMenuInfo.showCut);
-    EXPECT_TRUE(selectMenuInfo.showCopy);
+    EXPECT_FALSE(selectMenuInfo.showCopy);
     EXPECT_FALSE(selectMenuInfo.showPaste);
     EXPECT_TRUE(selectMenuInfo.showCopyAll);
+    EXPECT_FALSE(selectMenuInfo.showSearch);
+    EXPECT_FALSE(selectMenuInfo.showTranslate);
+    EXPECT_FALSE(selectMenuInfo.showShare);
+    EXPECT_FALSE(selectMenuInfo.showAIWrite);
+    EXPECT_FALSE(selectMenuInfo.isAskCeliaEnabled);
 }
 
 /**
@@ -402,7 +417,7 @@ HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_005, TestSize.Level1)
     std::shared_ptr<BaseEventInfo> eventInfo = std::make_shared<ContextMenuEvent>(mockMenuParam, menuResult);
     webPattern->OnContextMenuShow(eventInfo);
 
-    EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(1).WillOnce(Return("Hello"));
+    EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(2).WillRepeatedly(Return("Hello"));
 
     SelectMenuInfo selectMenuInfo;
     SelectOverlayDirtyFlag dirtyFlag = DIRTY_COPY_ALL_ITEM;
@@ -410,7 +425,11 @@ HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_005, TestSize.Level1)
     EXPECT_FALSE(selectMenuInfo.showCut);
     EXPECT_TRUE(selectMenuInfo.showCopy);
     EXPECT_FALSE(selectMenuInfo.showPaste);
-    EXPECT_FALSE(selectMenuInfo.showCopyAll);
+    EXPECT_TRUE(selectMenuInfo.showCopyAll);
+    EXPECT_FALSE(selectMenuInfo.showSearch);
+    EXPECT_FALSE(selectMenuInfo.showTranslate);
+    EXPECT_FALSE(selectMenuInfo.showShare);
+    EXPECT_FALSE(selectMenuInfo.showAIWrite);
 }
 
 /**
@@ -495,7 +514,7 @@ HWTEST_F(WebContextMenuOverlayTest, GetSelectedText_002, TestSize.Level1)
 
 /**
  * @tc.name: GetSelectedText_003
- * @tc.desc: Test GetSelectedText with valid contextMenuParam.
+ * @tc.desc: Test GetSelectedText with valid pattern uses GetSelectInfo.
  * @tc.type: FUNC
  */
 HWTEST_F(WebContextMenuOverlayTest, GetSelectedText_003, TestSize.Level1)
@@ -517,9 +536,8 @@ HWTEST_F(WebContextMenuOverlayTest, GetSelectedText_003, TestSize.Level1)
     std::shared_ptr<BaseEventInfo> eventInfo = std::make_shared<ContextMenuEvent>(mockMenuParam, menuResult);
     webPattern->OnContextMenuShow(eventInfo);
 
-    EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(1).WillOnce(Return("HelloWorld"));
     std::string result = overlay.GetSelectedText();
-    EXPECT_EQ(result, "HelloWorld");
+    EXPECT_TRUE(result.empty());
 }
 
 /**
@@ -548,7 +566,7 @@ HWTEST_F(WebContextMenuOverlayTest, OnMenuItemAction_002, TestSize.Level1)
 
     SelectMenuInfo selectMenuInfo;
     SelectOverlayDirtyFlag dirtyFlag = DIRTY_COPY_ALL_ITEM;
-    EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(1).WillOnce(Return("text"));
+    EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(2).WillRepeatedly(Return("text"));
     overlay.OnUpdateMenuInfo(selectMenuInfo, dirtyFlag);
 
     OptionMenuActionId actionId = OptionMenuActionId::COPY;
@@ -701,9 +719,156 @@ HWTEST_F(WebContextMenuOverlayTest, OnMenuItemAction_008, TestSize.Level1)
     std::shared_ptr<BaseEventInfo> eventInfo = std::make_shared<ContextMenuEvent>(mockMenuParam, mockMenuResult);
     webPattern->OnContextMenuShow(eventInfo);
 
+    OptionMenuActionId actionId = OptionMenuActionId::CAMERA_INPUT;
+    OptionMenuType type = OptionMenuType::MOUSE_MENU;
+    overlay.OnMenuItemAction(actionId, type);
+}
+
+/**
+ * @tc.name: OnMenuItemAction_009
+ * @tc.desc: Test OnMenuItemAction with TRANSLATE action does not call Cancel.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebContextMenuOverlayTest, OnMenuItemAction_009, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() {
+        return AceType::MakeRefPtr<WebPattern>();
+    });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    WeakPtr<TextBase> textBase = Referenced::WeakClaim(Referenced::RawPtr(webPattern));
+    WebContextMenuOverlay overlay(textBase);
+
+    auto mockMenuParam = AceType::MakeRefPtr<MockWebContextMenuParam>();
+    auto mockMenuResult = AceType::MakeRefPtr<MockContextMenuResult>();
+    std::shared_ptr<BaseEventInfo> eventInfo = std::make_shared<ContextMenuEvent>(mockMenuParam, mockMenuResult);
+    webPattern->OnContextMenuShow(eventInfo);
+
+    OptionMenuActionId actionId = OptionMenuActionId::TRANSLATE;
+    OptionMenuType type = OptionMenuType::MOUSE_MENU;
+    overlay.OnMenuItemAction(actionId, type);
+}
+
+/**
+ * @tc.name: OnMenuItemAction_010
+ * @tc.desc: Test OnMenuItemAction with SEARCH action.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebContextMenuOverlayTest, OnMenuItemAction_010, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() {
+        return AceType::MakeRefPtr<WebPattern>();
+    });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    WeakPtr<TextBase> textBase = Referenced::WeakClaim(Referenced::RawPtr(webPattern));
+    WebContextMenuOverlay overlay(textBase);
+
+    auto mockMenuParam = AceType::MakeRefPtr<MockWebContextMenuParam>();
+    auto mockMenuResult = AceType::MakeRefPtr<MockContextMenuResult>();
+    std::shared_ptr<BaseEventInfo> eventInfo = std::make_shared<ContextMenuEvent>(mockMenuParam, mockMenuResult);
+    webPattern->OnContextMenuShow(eventInfo);
+
+    OptionMenuActionId actionId = OptionMenuActionId::SEARCH;
+    OptionMenuType type = OptionMenuType::MOUSE_MENU;
+    EXPECT_CALL(*mockMenuResult, Cancel).Times(1);
+    overlay.OnMenuItemAction(actionId, type);
+}
+
+/**
+ * @tc.name: OnMenuItemAction_011
+ * @tc.desc: Test OnMenuItemAction with SHARE action does not call Cancel.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebContextMenuOverlayTest, OnMenuItemAction_011, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() {
+        return AceType::MakeRefPtr<WebPattern>();
+    });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    WeakPtr<TextBase> textBase = Referenced::WeakClaim(Referenced::RawPtr(webPattern));
+    WebContextMenuOverlay overlay(textBase);
+
+    auto mockMenuParam = AceType::MakeRefPtr<MockWebContextMenuParam>();
+    auto mockMenuResult = AceType::MakeRefPtr<MockContextMenuResult>();
+    std::shared_ptr<BaseEventInfo> eventInfo = std::make_shared<ContextMenuEvent>(mockMenuParam, mockMenuResult);
+    webPattern->OnContextMenuShow(eventInfo);
+
+    OptionMenuActionId actionId = OptionMenuActionId::SHARE;
+    OptionMenuType type = OptionMenuType::MOUSE_MENU;
+    overlay.OnMenuItemAction(actionId, type);
+}
+
+/**
+ * @tc.name: OnMenuItemAction_012
+ * @tc.desc: Test OnMenuItemAction with AI_WRITE action.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebContextMenuOverlayTest, OnMenuItemAction_012, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() {
+        return AceType::MakeRefPtr<WebPattern>();
+    });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    WeakPtr<TextBase> textBase = Referenced::WeakClaim(Referenced::RawPtr(webPattern));
+    WebContextMenuOverlay overlay(textBase);
+
+    auto mockMenuParam = AceType::MakeRefPtr<MockWebContextMenuParam>();
+    auto mockMenuResult = AceType::MakeRefPtr<MockContextMenuResult>();
+    std::shared_ptr<BaseEventInfo> eventInfo = std::make_shared<ContextMenuEvent>(mockMenuParam, mockMenuResult);
+    webPattern->OnContextMenuShow(eventInfo);
+
     OptionMenuActionId actionId = OptionMenuActionId::AI_WRITE;
     OptionMenuType type = OptionMenuType::MOUSE_MENU;
-    // Should enter default case, no action expected
+    EXPECT_CALL(*mockMenuResult, Cancel).Times(1);
+    overlay.OnMenuItemAction(actionId, type);
+}
+
+/**
+ * @tc.name: OnMenuItemAction_013
+ * @tc.desc: Test OnMenuItemAction with ASK_CELIA action.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebContextMenuOverlayTest, OnMenuItemAction_013, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() {
+        return AceType::MakeRefPtr<WebPattern>();
+    });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    WeakPtr<TextBase> textBase = Referenced::WeakClaim(Referenced::RawPtr(webPattern));
+    WebContextMenuOverlay overlay(textBase);
+
+    auto mockMenuParam = AceType::MakeRefPtr<MockWebContextMenuParam>();
+    auto mockMenuResult = AceType::MakeRefPtr<MockContextMenuResult>();
+    std::shared_ptr<BaseEventInfo> eventInfo = std::make_shared<ContextMenuEvent>(mockMenuParam, mockMenuResult);
+    webPattern->OnContextMenuShow(eventInfo);
+
+    OptionMenuActionId actionId = OptionMenuActionId::ASK_CELIA;
+    OptionMenuType type = OptionMenuType::MOUSE_MENU;
+    EXPECT_CALL(*mockMenuResult, Cancel).Times(1);
     overlay.OnMenuItemAction(actionId, type);
 }
 
@@ -920,11 +1085,15 @@ HWTEST_F(WebContextMenuOverlayTest, FilterSupportedMenuItems_001, TestSize.Level
     menuItemList.push_back(item2);
 
     NG::MenuItemParam item3;
-    item3.menuOptionsParam.id = "unsupported_item";
+    item3.menuOptionsParam.id = OH_DEFAULT_SEARCH;
     menuItemList.push_back(item3);
 
+    NG::MenuItemParam item4;
+    item4.menuOptionsParam.id = "unsupported_item";
+    menuItemList.push_back(item4);
+
     auto result = overlay.FilterSupportedMenuItems(menuItemList);
-    EXPECT_EQ(result.size(), 2);  // Only supported items
+    EXPECT_EQ(result.size(), 3);
 }
 
 /**
@@ -987,8 +1156,28 @@ HWTEST_F(WebContextMenuOverlayTest, FilterSupportedMenuItems_003, TestSize.Level
     item4.menuOptionsParam.id = OH_DEFAULT_SELECT_ALL;
     menuItemList.push_back(item4);
 
+    NG::MenuItemParam item5;
+    item5.menuOptionsParam.id = OH_DEFAULT_TRANSLATE;
+    menuItemList.push_back(item5);
+
+    NG::MenuItemParam item6;
+    item6.menuOptionsParam.id = OH_DEFAULT_SEARCH;
+    menuItemList.push_back(item6);
+
+    NG::MenuItemParam item7;
+    item7.menuOptionsParam.id = OH_DEFAULT_SHARE;
+    menuItemList.push_back(item7);
+
+    NG::MenuItemParam item8;
+    item8.menuOptionsParam.id = OH_DEFAULT_AI_WRITE;
+    menuItemList.push_back(item8);
+
+    NG::MenuItemParam item9;
+    item9.menuOptionsParam.id = OH_DEFAULT_ASK_CELIA;
+    menuItemList.push_back(item9);
+
     auto result = overlay.FilterSupportedMenuItems(menuItemList);
-    EXPECT_EQ(result.size(), 4);
+    EXPECT_EQ(result.size(), 9);
 }
 
 /**
@@ -1245,7 +1434,7 @@ HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_006, TestSize.Level1)
     std::shared_ptr<BaseEventInfo> eventInfo = std::make_shared<ContextMenuEvent>(mockMenuParam, menuResult);
     webPattern->OnContextMenuShow(eventInfo);
 
-    EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(1).WillOnce(Return("text"));
+    EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(2).WillRepeatedly(Return("text"));
 
     SelectMenuInfo selectMenuInfo;
     SelectOverlayDirtyFlag dirtyFlag = DIRTY_COPY_ALL_ITEM;
@@ -1254,6 +1443,9 @@ HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_006, TestSize.Level1)
     EXPECT_TRUE(selectMenuInfo.showCopy);
     EXPECT_FALSE(selectMenuInfo.showPaste);
     EXPECT_TRUE(selectMenuInfo.showCopyAll);
+    EXPECT_FALSE(selectMenuInfo.showSearch);
+    EXPECT_FALSE(selectMenuInfo.showTranslate);
+    EXPECT_FALSE(selectMenuInfo.showShare);
 }
 
 /**
@@ -1290,7 +1482,7 @@ HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_007, TestSize.Level1)
     std::shared_ptr<BaseEventInfo> eventInfo = std::make_shared<ContextMenuEvent>(mockMenuParam, menuResult);
     webPattern->OnContextMenuShow(eventInfo);
 
-    EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(1).WillOnce(Return(""));
+    EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(2).WillRepeatedly(Return(""));
 
     SelectMenuInfo selectMenuInfo;
     SelectOverlayDirtyFlag dirtyFlag = DIRTY_COPY_ALL_ITEM;
@@ -1299,6 +1491,9 @@ HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_007, TestSize.Level1)
     EXPECT_FALSE(selectMenuInfo.showCopy);
     EXPECT_TRUE(selectMenuInfo.showPaste);
     EXPECT_TRUE(selectMenuInfo.showCopyAll);
+    EXPECT_FALSE(selectMenuInfo.showSearch);
+    EXPECT_FALSE(selectMenuInfo.showTranslate);
+    EXPECT_FALSE(selectMenuInfo.showShare);
 }
 
 /**
@@ -1331,7 +1526,7 @@ HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_008, TestSize.Level1)
     std::shared_ptr<BaseEventInfo> eventInfo = std::make_shared<ContextMenuEvent>(mockMenuParam, menuResult);
     webPattern->OnContextMenuShow(eventInfo);
 
-    EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(1).WillOnce(Return(""));
+    EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(2).WillRepeatedly(Return(""));
 
     SelectMenuInfo selectMenuInfo;
     SelectOverlayDirtyFlag dirtyFlag = DIRTY_COPY_ALL_ITEM;
@@ -1372,7 +1567,7 @@ HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_009, TestSize.Level1)
     std::shared_ptr<BaseEventInfo> eventInfo = std::make_shared<ContextMenuEvent>(mockMenuParam, menuResult);
     webPattern->OnContextMenuShow(eventInfo);
 
-    EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(1).WillOnce(Return(""));
+    EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(2).WillRepeatedly(Return(""));
 
     SelectMenuInfo selectMenuInfo;
     SelectOverlayDirtyFlag dirtyFlag = DIRTY_COPY_ALL_ITEM;
@@ -1413,7 +1608,7 @@ HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_010, TestSize.Level1)
     std::shared_ptr<BaseEventInfo> eventInfo = std::make_shared<ContextMenuEvent>(mockMenuParam, menuResult);
     webPattern->OnContextMenuShow(eventInfo);
 
-    EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(1).WillOnce(Return(""));
+    EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(2).WillRepeatedly(Return(""));
 
     SelectMenuInfo selectMenuInfo;
     SelectOverlayDirtyFlag dirtyFlag = DIRTY_COPY_ALL_ITEM;
@@ -1457,7 +1652,7 @@ HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_011, TestSize.Level1)
     std::shared_ptr<BaseEventInfo> eventInfo = std::make_shared<ContextMenuEvent>(mockMenuParam, menuResult);
     webPattern->OnContextMenuShow(eventInfo);
 
-    EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(1).WillOnce(Return("text"));
+    EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(2).WillRepeatedly(Return("text"));
 
     SelectMenuInfo selectMenuInfo;
     SelectOverlayDirtyFlag dirtyFlag = DIRTY_COPY_ALL_ITEM;
@@ -1569,7 +1764,7 @@ HWTEST_F(WebContextMenuOverlayTest, OnMenuItemAction_003_Updated, TestSize.Level
 
     SelectMenuInfo selectMenuInfo;
     SelectOverlayDirtyFlag dirtyFlag = DIRTY_COPY_ALL_ITEM;
-    EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(1).WillOnce(Return(""));
+    EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(2).WillRepeatedly(Return(""));
     overlay.OnUpdateMenuInfo(selectMenuInfo, dirtyFlag);
 
     OptionMenuActionId actionId = OptionMenuActionId::COPY;
@@ -1609,7 +1804,7 @@ HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_ShowCopyAll_WithSelectAllFl
     std::shared_ptr<BaseEventInfo> eventInfo = std::make_shared<ContextMenuEvent>(mockMenuParam, menuResult);
     webPattern->OnContextMenuShow(eventInfo);
 
-    EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(1).WillOnce(Return(""));
+    EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(2).WillRepeatedly(Return(""));
 
     SelectMenuInfo selectMenuInfo;
     SelectOverlayDirtyFlag dirtyFlag = DIRTY_COPY_ALL_ITEM;
@@ -1648,7 +1843,7 @@ HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_ShowCopyAll_WithSelectAllFl
     std::shared_ptr<BaseEventInfo> eventInfo = std::make_shared<ContextMenuEvent>(mockMenuParam, menuResult);
     webPattern->OnContextMenuShow(eventInfo);
 
-    EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(1).WillOnce(Return(""));
+    EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(2).WillRepeatedly(Return(""));
 
     SelectMenuInfo selectMenuInfo;
     SelectOverlayDirtyFlag dirtyFlag = DIRTY_COPY_ALL_ITEM;
@@ -1686,7 +1881,7 @@ HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_ShowCopyAll_WithoutSelectAl
     std::shared_ptr<BaseEventInfo> eventInfo = std::make_shared<ContextMenuEvent>(mockMenuParam, menuResult);
     webPattern->OnContextMenuShow(eventInfo);
 
-    EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(1).WillOnce(Return(""));
+    EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(2).WillRepeatedly(Return(""));
 
     SelectMenuInfo selectMenuInfo;
     SelectOverlayDirtyFlag dirtyFlag = DIRTY_COPY_ALL_ITEM;
@@ -1727,12 +1922,272 @@ HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_NoShowCopyAll_WithoutSelect
     std::shared_ptr<BaseEventInfo> eventInfo = std::make_shared<ContextMenuEvent>(mockMenuParam, menuResult);
     webPattern->OnContextMenuShow(eventInfo);
 
-    EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(1).WillOnce(Return("text"));
+    EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(2).WillRepeatedly(Return("text"));
 
     SelectMenuInfo selectMenuInfo;
     SelectOverlayDirtyFlag dirtyFlag = DIRTY_COPY_ALL_ITEM;
     overlay.OnUpdateMenuInfo(selectMenuInfo, dirtyFlag);
     EXPECT_FALSE(selectMenuInfo.showCopyAll);
+}
+
+/**
+ * @tc.name: OnUpdateMenuInfo_012
+ * @tc.desc: Test OnUpdateMenuInfo with whitespace-only selection text (showSearch/showTranslate false).
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebContextMenuOverlayTest, OnUpdateMenuInfo_012, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() {
+        return AceType::MakeRefPtr<WebPattern>();
+    });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    WeakPtr<TextBase> textBase = Referenced::WeakClaim(Referenced::RawPtr(webPattern));
+    WebContextMenuOverlay overlay(textBase);
+
+    auto mockMenuParam = AceType::MakeRefPtr<MockWebContextMenuParam>();
+    mockMenuParam->SetEditStateFlags(0);
+    mockMenuParam->SetIsEditable(false);
+    mockMenuParam->SetLinkUrl("");
+    mockMenuParam->SetMediaType(static_cast<int>(
+        OHOS::NWeb::NWebContextMenuParams::ContextMenuMediaType::CM_MT_NONE));
+
+    RefPtr<ContextMenuResult> menuResult = nullptr;
+    std::shared_ptr<BaseEventInfo> eventInfo = std::make_shared<ContextMenuEvent>(mockMenuParam, menuResult);
+    webPattern->OnContextMenuShow(eventInfo);
+
+    EXPECT_CALL(*mockMenuParam, GetSelectionText).Times(2).WillRepeatedly(Return("   "));
+
+    SelectMenuInfo selectMenuInfo;
+    SelectOverlayDirtyFlag dirtyFlag = DIRTY_COPY_ALL_ITEM;
+    overlay.OnUpdateMenuInfo(selectMenuInfo, dirtyFlag);
+    EXPECT_FALSE(selectMenuInfo.showSearch);
+    EXPECT_FALSE(selectMenuInfo.showTranslate);
+    EXPECT_FALSE(selectMenuInfo.showShare);
+    EXPECT_FALSE(selectMenuInfo.isAskCeliaEnabled);
+}
+
+/**
+ * @tc.name: FilterSupportedMenuItems_004
+ * @tc.desc: Test FilterSupportedMenuItems with new supported items (translate, share, ai_write, ask_celia).
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebContextMenuOverlayTest, FilterSupportedMenuItems_004, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() {
+        return AceType::MakeRefPtr<WebPattern>();
+    });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    WeakPtr<TextBase> textBase = Referenced::WeakClaim(Referenced::RawPtr(webPattern));
+    WebContextMenuOverlay overlay(textBase);
+
+    std::vector<NG::MenuItemParam> menuItemList;
+    NG::MenuItemParam item1;
+    item1.menuOptionsParam.id = OH_DEFAULT_TRANSLATE;
+    menuItemList.push_back(item1);
+
+    NG::MenuItemParam item2;
+    item2.menuOptionsParam.id = OH_DEFAULT_SHARE;
+    menuItemList.push_back(item2);
+
+    NG::MenuItemParam item3;
+    item3.menuOptionsParam.id = OH_DEFAULT_AI_WRITE;
+    menuItemList.push_back(item3);
+
+    NG::MenuItemParam item4;
+    item4.menuOptionsParam.id = OH_DEFAULT_ASK_CELIA;
+    menuItemList.push_back(item4);
+
+    NG::MenuItemParam item5;
+    item5.menuOptionsParam.id = "unsupported_item";
+    menuItemList.push_back(item5);
+
+    auto result = overlay.FilterSupportedMenuItems(menuItemList);
+    EXPECT_EQ(result.size(), 4);
+}
+
+/**
+ * @tc.name: HandleOnAskCelia_NoAskCeliaOption
+ * @tc.desc: Test HandleOnAskCelia when menuOptionAndAction has no askCelia tag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebContextMenuOverlayTest, HandleOnAskCelia_NoAskCeliaOption, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() {
+        return AceType::MakeRefPtr<WebPattern>();
+    });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    WeakPtr<TextBase> textBase = Referenced::WeakClaim(Referenced::RawPtr(webPattern));
+    WebContextMenuOverlay overlay(textBase);
+
+    auto mockMenuParam = AceType::MakeRefPtr<MockWebContextMenuParam>();
+    auto mockMenuResult = AceType::MakeRefPtr<MockContextMenuResult>();
+    std::shared_ptr<BaseEventInfo> eventInfo = std::make_shared<ContextMenuEvent>(mockMenuParam, mockMenuResult);
+    webPattern->OnContextMenuShow(eventInfo);
+
+    webPattern->textDetectResult_.menuOptionAndAction.clear();
+    OptionMenuActionId actionId = OptionMenuActionId::ASK_CELIA;
+    OptionMenuType type = OptionMenuType::MOUSE_MENU;
+    EXPECT_CALL(*mockMenuResult, Cancel).Times(1);
+    overlay.OnMenuItemAction(actionId, type);
+}
+
+/**
+ * @tc.name: HandleOnAskCelia_EmptyActionList
+ * @tc.desc: Test HandleOnAskCelia when askCelia action list is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebContextMenuOverlayTest, HandleOnAskCelia_EmptyActionList, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() {
+        return AceType::MakeRefPtr<WebPattern>();
+    });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    WeakPtr<TextBase> textBase = Referenced::WeakClaim(Referenced::RawPtr(webPattern));
+    WebContextMenuOverlay overlay(textBase);
+
+    auto mockMenuParam = AceType::MakeRefPtr<MockWebContextMenuParam>();
+    auto mockMenuResult = AceType::MakeRefPtr<MockContextMenuResult>();
+    std::shared_ptr<BaseEventInfo> eventInfo = std::make_shared<ContextMenuEvent>(mockMenuParam, mockMenuResult);
+    webPattern->OnContextMenuShow(eventInfo);
+
+    const std::string askCeliaTag = "askCelia";
+    webPattern->textDetectResult_.menuOptionAndAction[askCeliaTag] = {};
+    OptionMenuActionId actionId = OptionMenuActionId::ASK_CELIA;
+    OptionMenuType type = OptionMenuType::MOUSE_MENU;
+    EXPECT_CALL(*mockMenuResult, Cancel).Times(1);
+    overlay.OnMenuItemAction(actionId, type);
+}
+
+/**
+ * @tc.name: HandleOnAskCelia_WrongFuncType
+ * @tc.desc: Test HandleOnAskCelia when func variant holds wrong type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebContextMenuOverlayTest, HandleOnAskCelia_WrongFuncType, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() {
+        return AceType::MakeRefPtr<WebPattern>();
+    });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    WeakPtr<TextBase> textBase = Referenced::WeakClaim(Referenced::RawPtr(webPattern));
+    WebContextMenuOverlay overlay(textBase);
+
+    auto mockMenuParam = AceType::MakeRefPtr<MockWebContextMenuParam>();
+    auto mockMenuResult = AceType::MakeRefPtr<MockContextMenuResult>();
+    std::shared_ptr<BaseEventInfo> eventInfo = std::make_shared<ContextMenuEvent>(mockMenuParam, mockMenuResult);
+    webPattern->OnContextMenuShow(eventInfo);
+
+    const std::string askCeliaTag = "askCelia";
+    std::function<std::string()> wrongFunc = []() { return ""; };
+    webPattern->textDetectResult_.menuOptionAndAction[askCeliaTag] =
+        { { "id", wrongFunc } };
+    OptionMenuActionId actionId = OptionMenuActionId::ASK_CELIA;
+    OptionMenuType type = OptionMenuType::MOUSE_MENU;
+    EXPECT_CALL(*mockMenuResult, Cancel).Times(1);
+    overlay.OnMenuItemAction(actionId, type);
+}
+
+/**
+ * @tc.name: HandleOnAskCelia_NullFunc
+ * @tc.desc: Test HandleOnAskCelia when func is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebContextMenuOverlayTest, HandleOnAskCelia_NullFunc, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() {
+        return AceType::MakeRefPtr<WebPattern>();
+    });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    WeakPtr<TextBase> textBase = Referenced::WeakClaim(Referenced::RawPtr(webPattern));
+    WebContextMenuOverlay overlay(textBase);
+
+    auto mockMenuParam = AceType::MakeRefPtr<MockWebContextMenuParam>();
+    auto mockMenuResult = AceType::MakeRefPtr<MockContextMenuResult>();
+    std::shared_ptr<BaseEventInfo> eventInfo = std::make_shared<ContextMenuEvent>(mockMenuParam, mockMenuResult);
+    webPattern->OnContextMenuShow(eventInfo);
+
+    const std::string askCeliaTag = "askCelia";
+    std::function<void(int, std::string)> nullFunc = nullptr;
+    webPattern->textDetectResult_.menuOptionAndAction[askCeliaTag] =
+        { { "id", nullFunc } };
+    OptionMenuActionId actionId = OptionMenuActionId::ASK_CELIA;
+    OptionMenuType type = OptionMenuType::MOUSE_MENU;
+    EXPECT_CALL(*mockMenuResult, Cancel).Times(1);
+    overlay.OnMenuItemAction(actionId, type);
+}
+
+/**
+ * @tc.name: HandleOnAskCelia_Success
+ * @tc.desc: Test HandleOnAskCelia when func is valid and executes successfully.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebContextMenuOverlayTest, HandleOnAskCelia_Success, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() {
+        return AceType::MakeRefPtr<WebPattern>();
+    });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    WeakPtr<TextBase> textBase = Referenced::WeakClaim(Referenced::RawPtr(webPattern));
+    WebContextMenuOverlay overlay(textBase);
+
+    auto mockMenuParam = AceType::MakeRefPtr<MockWebContextMenuParam>();
+    auto mockMenuResult = AceType::MakeRefPtr<MockContextMenuResult>();
+    std::shared_ptr<BaseEventInfo> eventInfo = std::make_shared<ContextMenuEvent>(mockMenuParam, mockMenuResult);
+    webPattern->OnContextMenuShow(eventInfo);
+
+    const std::string askCeliaTag = "askCelia";
+    bool funcCalled = false;
+    int calledArg0 = 0;
+    std::string calledArg1;
+    std::function<void(int, std::string)> validFunc = [&funcCalled, &calledArg0, &calledArg1](
+                                                           int flag, std::string text) {
+        funcCalled = true;
+        calledArg0 = flag;
+        calledArg1 = text;
+    };
+    webPattern->textDetectResult_.menuOptionAndAction[askCeliaTag] =
+        { { "id", validFunc } };
+    OptionMenuActionId actionId = OptionMenuActionId::ASK_CELIA;
+    OptionMenuType type = OptionMenuType::MOUSE_MENU;
+    EXPECT_CALL(*mockMenuResult, Cancel).Times(1);
+    overlay.OnMenuItemAction(actionId, type);
+    EXPECT_TRUE(funcCalled);
+    EXPECT_EQ(calledArg0, 1);
 }
 
 } // namespace OHOS::Ace::NG

@@ -1140,6 +1140,7 @@ private:
     void ShowContextSelectOverlay(const RectF& firstHandle, const RectF& secondHandle,
         TextResponseType responseType = TextResponseType::RIGHT_CLICK, bool handleReverse = false);
     void CloseContextSelectionMenu();
+    void CloseDefaultContextMenu();
     RectF ComputeMouseClippedSelectionBounds(int32_t x, int32_t y, int32_t w, int32_t h);
     void RegistVirtualKeyBoardListener(const RefPtr<PipelineContext> &context);
     bool IsNeedResizeVisibleViewport();

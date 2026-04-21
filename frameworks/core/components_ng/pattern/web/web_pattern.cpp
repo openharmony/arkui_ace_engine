@@ -747,6 +747,10 @@ void WebPattern::CloseContextSelectionMenu()
     if (contextSelectOverlay_ && contextSelectOverlay_->IsCurrentMenuVisibile()) {
         contextSelectOverlay_->CloseOverlay(true, CloseReason::CLOSE_REASON_NORMAL);
     }
+}
+
+void WebPattern::CloseDefaultContextMenu()
+{
     if (contextMenuOverlay_ && contextMenuOverlay_->IsCurrentMenuVisibile()) {
         contextMenuOverlay_->CloseOverlay(true, CloseReason::CLOSE_REASON_NORMAL);
     }
@@ -1420,6 +1424,7 @@ void WebPattern::OnCloseContextMenu()
 {
     isAILinkMenuShow_ = false;
     CloseContextSelectionMenu();
+    CloseDefaultContextMenu();
     RemovePreviewMenuNode();
     curContextMenuResult_ = false;
 }
@@ -3497,6 +3502,7 @@ bool WebPattern::HandleKeyEvent(const KeyEvent& keyEvent)
         if (isKeyNull) {
             TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern Handle Escape");
             CloseContextSelectionMenu();
+            CloseDefaultContextMenu();
         }
     }
     bool ret = false;
@@ -5011,6 +5017,7 @@ void WebPattern::InitInOfflineMode()
     SetActiveStatusInner(false, true);
     delegate_->HideWebView();
     CloseContextSelectionMenu();
+    CloseDefaultContextMenu();
 }
 
 bool WebPattern::IsNeedResizeVisibleViewport()
@@ -5265,6 +5272,7 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
 {
     if (!fromOverlay) {
         CloseContextSelectionMenu();
+        CloseDefaultContextMenu();
     }
     isTouchUpEvent_ = false;
     InitTouchEventListener();
@@ -7427,6 +7435,7 @@ void WebPattern::OnWindowHide()
     SetActiveStatusInner(false);
     delegate_->HideWebView();
     CloseContextSelectionMenu();
+    CloseDefaultContextMenu();
     needOnFocus_ = false;
     isWindowShow_ = false;
 }
