@@ -1851,6 +1851,7 @@ void FormPattern::FireFormSurfaceNodeCallback(
 
     auto formNode = DynamicCast<FormNode>(host);
     CHECK_NULL_VOID(formNode);
+    formNode->ClearAccessibilityChildTreeRegisterFlag();
     formNode->NotifyAccessibilityChildTreeRegister();
 
     if (isEnableSkeleton && !isTransparencyEnable_) {
