@@ -208,6 +208,7 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, con
             styleOption.blurStyle = static_cast<BlurStyle>(selectTheme->GetMenuBackgroundBlurStyle());
             renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
         }
+        MenuView::UpdateStyleOptionColorMode(menuNode->GetLocalColorMode(), styleOption, isColorModeFollowTarget);
         renderContext->UpdateBackBlurStyle(styleOption);
     }
 
@@ -1877,15 +1878,24 @@ void MenuView::UpdateMenuBorderEffect(
 void MenuView::UpdateStyleOptionColorMode(const OHOS::Ace::ColorMode colorMode, BlurStyleOption& styleOption,
     bool isColorModeFollowTarget)
 {
-    if (!isColorModeFollowTarget) {
-        return;
-    }
-    if (colorMode == OHOS::Ace::ColorMode::LIGHT) {
-        styleOption.colorMode = OHOS::Ace::ThemeColorMode::LIGHT;
-    } else if (colorMode == OHOS::Ace::ColorMode::DARK) {
-        styleOption.colorMode = OHOS::Ace::ThemeColorMode::DARK;
+    styleOption.colorMode = OHOS::Ace::ThemeColorMode::SYSTEM;
+    if (isColorModeFollowTarget) {
+        if (colorMode == OHOS::Ace::ColorMode::LIGHT) {
+            styleOption.colorMode = OHOS::Ace::ThemeColorMode::LIGHT;
+        }
+        if (colorMode == OHOS::Ace::ColorMode::DARK) {
+            styleOption.colorMode = OHOS::Ace::ThemeColorMode::DARK;
+        }
     } else {
-        styleOption.colorMode = OHOS::Ace::ThemeColorMode::SYSTEM;
+        auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+        CHECK_NULL_VOID(pipelineContext);
+        auto currentColorMode = pipelineContext->GetColorMode();
+        if (currentColorMode == OHOS::Ace::ColorMode::LIGHT) {
+            styleOption.colorMode = OHOS::Ace::ThemeColorMode::LIGHT;
+        }
+        if (currentColorMode == OHOS::Ace::ColorMode::DARK) {
+            styleOption.colorMode = OHOS::Ace::ThemeColorMode::DARK;
+        }
     }
 }
 
@@ -1943,7 +1953,7 @@ void MenuView::UpdateMenuBackgroundStyle(const RefPtr<FrameNode>& menuNode, cons
             menuNodeRenderContext->UpdateBackgroundEffect(std::nullopt);
         }
         if (menuNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
-            UpdateStyleOptionColorMode(menuNode->GetLocalColorMode(), styleOption, true);
+            UpdateStyleOptionColorMode(menuNode->GetLocalColorMode(), styleOption, menuParam.isColorModeFollowTarget);
         }
         menuNodeRenderContext->UpdateBackBlurStyle(styleOption);
         menuNodeRenderContext->UpdateBackgroundColor(color);
