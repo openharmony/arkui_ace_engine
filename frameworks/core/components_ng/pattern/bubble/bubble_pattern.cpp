@@ -930,7 +930,8 @@ void BubblePattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("targetSize: " + dumpInfo_.targetSize.ToString());
     DumpLog::GetInstance().AddDesc("touchRegion: " + dumpInfo_.touchRegion.ToString());
     DumpLog::GetInstance().AddDesc("avoid top: " + std::to_string(dumpInfo_.top)
-        + ", bottom: " + std::to_string(dumpInfo_.bottom));
+        + ", bottom: " + std::to_string(dumpInfo_.bottom)
+        + ", need avoid window button: " + std::to_string(dumpInfo_.needAvoidWindowButtonHeight));
     DumpLog::GetInstance().AddDesc("userOffset: " + dumpInfo_.userOffset.ToString());
     DumpLog::GetInstance().AddDesc("targetSpace: " + dumpInfo_.targetSpace.ToString());
     DumpLog::GetInstance().AddDesc("originPlacement: " + dumpInfo_.originPlacement);

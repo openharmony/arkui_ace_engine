@@ -347,7 +347,8 @@ BubbleLayoutAlgorithm::BubbleLayoutAlgorithm(int32_t id, const std::string& tag,
         Placement::BOTTOM_LEFT, Placement::BOTTOM_RIGHT };
 }
 
-void BubbleLayoutAlgorithm::UpdateBubbleMaxSize(LayoutWrapper* layoutWrapper, bool showInSubWindow)
+void BubbleLayoutAlgorithm::UpdateBubbleMaxSize(
+    const RefPtr<BubbleLayoutProperty>& layoutProp, LayoutWrapper* layoutWrapper, bool showInSubWindow)
 {
     CHECK_EQUAL_VOID(isTips_, true);
     CHECK_NULL_VOID(layoutWrapper);
@@ -363,7 +364,12 @@ void BubbleLayoutAlgorithm::UpdateBubbleMaxSize(LayoutWrapper* layoutWrapper, bo
     CHECK_NULL_VOID(childProp);
     auto bubblePattern = bubbleNode->GetPattern<BubblePattern>();
     if (bubblePattern) {
-        floatButtonsHeight_ = bubblePattern->GetWindowButtonRect(bubbleNode).Height();
+        auto floatButtonsHeight = bubblePattern->GetWindowButtonRect(bubbleNode).Height();
+        if (layoutProp->GetPositionOffset().value_or(OffsetF()).NonOffset()) {
+            floatButtonsHeight_ = floatButtonsHeight;
+        } else {
+            dumpInfo_.needAvoidWindowButtonHeight = floatButtonsHeight;
+        }
     }
     auto maxSize = GetPopupMaxWidthAndHeight(showInSubWindow, bubbleNode);
     popupMaxWidth_ = maxSize.Width();
@@ -502,7 +508,7 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     bool showInSubWindow = bubbleLayoutProperty->GetShowInSubWindowValue(false);
     useCustom_ = bubbleLayoutProperty->GetUseCustom().value_or(false);
     isTips_ = bubbleLayoutProperty->GetIsTips().value_or(false);
-    UpdateBubbleMaxSize(layoutWrapper, showInSubWindow);
+    UpdateBubbleMaxSize(bubbleProp, layoutWrapper, showInSubWindow);
     InitProps(bubbleProp, showInSubWindow, layoutWrapper);
     auto bubbleNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(bubbleNode);
@@ -772,6 +778,8 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         childOffset_.GetY() - BUBBLE_ARROW_HEIGHT.ConvertToPx());
     childWrapper->GetGeometryNode()->SetMarginFrameOffset(childShowOffset);
     childWrapper->Layout();
+    dumpInfo_.needAvoidWindowButtonHeight = std::max(0.0f,
+        dumpInfo_.needAvoidWindowButtonHeight - childShowOffset.GetY());
     auto childLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(childLayoutWrapper);
     const auto& columnChild = childLayoutWrapper->GetAllChildrenWithBuild();
