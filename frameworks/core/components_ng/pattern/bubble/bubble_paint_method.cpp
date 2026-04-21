@@ -16,7 +16,9 @@
 
 #include "base/geometry/ng/rect_t.h"
 #include "base/utils/utils.h"
+#include "core/components/common/properties/shadow_config.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
+#include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {

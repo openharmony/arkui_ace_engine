@@ -38,6 +38,7 @@
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 
