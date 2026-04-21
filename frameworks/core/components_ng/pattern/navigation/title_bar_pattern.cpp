@@ -123,6 +123,7 @@ void SetBackButtonImgAboveVersionTen(const RefPtr<FrameNode>& backButtonNode,
         return;
     }
 
+    CHECK_NULL_VOID(titleBarLayoutProperty->HasImageSource());
     ImageSourceInfo imageSourceInfo = titleBarLayoutProperty->GetImageSourceValue();
     SetImageSourceInfoFillColor(imageSourceInfo);
     backButtonImageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
@@ -137,6 +138,7 @@ void SetBackButtonImgBelowVersionTen(const RefPtr<FrameNode>& backButtonNode,
     if (!backButtonNode || !titleBarLayoutProperty || !backButtonImageLayoutProperty) {
         return;
     }
+    CHECK_NULL_VOID(titleBarLayoutProperty->HasImageSource());
     ImageSourceInfo imageSourceInfo = titleBarLayoutProperty->GetImageSourceValue();
     SetImageSourceInfoFillColor(imageSourceInfo);
     backButtonImageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
@@ -307,6 +309,7 @@ void UpdateImageBackButton(const RefPtr<FrameNode>& backButtonNode, const RefPtr
         auto backButtonImageNode = FrameNode::CreateFrameNode(V2::BACK_BUTTON_IMAGE_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
         CHECK_NULL_VOID(backButtonImageNode);
+        CHECK_NULL_VOID(titleBarLayoutProperty->HasImageSource());
         ImageSourceInfo imageSourceInfo = titleBarLayoutProperty->GetImageSourceValue();
         auto backButtonImageLayoutProperty = backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(backButtonImageLayoutProperty);
