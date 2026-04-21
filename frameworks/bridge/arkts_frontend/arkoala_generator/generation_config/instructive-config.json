@@ -6,14 +6,10 @@
         "ignore": [
             "CommonMethodModifier.ets",
             "ImageModifier.ets",
-            "MarqueeModifier.ets",
             "SwiperModifier.ets",
             "SymbolGlyphModifier.ets",
             "WebModifier.ets",
-            "TextAreaModifier.ets",
-            "TextInputModifier.ets",
             "RichEditorModifier.ets",
-            "SearchModifier.ets",
             "FormLinkModifier.ets"
         ]
     },
