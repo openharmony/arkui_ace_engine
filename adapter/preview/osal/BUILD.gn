@@ -107,6 +107,7 @@ ohos_source_set("preview_osal_source") {
       "thread_priority.cpp",
       "time_event_proxy_preview.cpp",
       "trace_id_impl.cpp",
+      "utils.cpp",
       "view_data_wrap_impl.cpp",
       "want_wrap_preview.cpp",
       "websocket_manager.cpp",
