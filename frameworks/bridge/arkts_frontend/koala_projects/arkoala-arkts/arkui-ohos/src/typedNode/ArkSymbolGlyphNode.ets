@@ -20,6 +20,7 @@ import { ArkBaseNode } from "./ArkBaseNode";
 import { SymbolGlyphAttribute, ResourceColor, FontWeight, SymbolEffect, SymbolEffectStrategy, SymbolRenderingStrategy } from "../framework";
 import { ArkSymbolGlyphPeer } from "../framework";
 import { Resource } from "global.resource";
+import { ColorMetrics } from "#generated"
 
 export class ArkSymbolGlyphNode extends ArkBaseNode implements SymbolGlyphAttribute {
     constructParam(...param: Object[]): this {
@@ -53,6 +54,11 @@ export class ArkSymbolGlyphNode extends ArkBaseNode implements SymbolGlyphAttrib
     fontColor(value: Array<ResourceColor> | undefined): this {
         const value_casted = value as (Array<ResourceColor> | undefined)
         this.getPeer()?.setFontColorAttribute(value_casted)
+        this.markDirty();
+        return this;
+    }
+    symbolColor(value: Array<ResourceColor> | Array<ColorMetrics> | Array<ResourceColor | ColorMetrics> | undefined): this {
+        this.getPeer()?.setSymbolColorAttribute(value)
         this.markDirty();
         return this;
     }
