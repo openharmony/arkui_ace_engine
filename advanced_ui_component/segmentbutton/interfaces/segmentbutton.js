@@ -3056,18 +3056,19 @@ export class SegmentButton extends ViewPU {
           this.isPanGestureMoved = true;
         }
         if (this.isBackgroundSystemMaterialEnabled()) {
-          let nowX =
-            fingerInfo.globalX -
-            this.panGestureStartPoint.x +
-            this.buttonItemsPosition[this.selectedIndexes[0]].start?.value;
-          nowX = Math.max(this.buttonItemsPosition[0].start?.value, nowX);
+          const startX = this.buttonItemsPosition[0].start?.value;
           let buttonLength = Math.min(this.options.buttons.length, this.buttonItemsSize.length);
-          nowX = Math.min(this.buttonItemsPosition[buttonLength - 1].start?.value, nowX);
+          const endX = this.buttonItemsPosition[buttonLength - 1].start?.value;
+          const offset = this.isShouldMirror() ? this.panGestureStartPoint.x - fingerInfo.globalX :
+              fingerInfo.globalX - this.panGestureStartPoint.x;
+          let nowX = offset + this.buttonItemsPosition[this.selectedIndexes[0]].start?.value;
+          nowX = Math.max(startX, nowX);
+          nowX = Math.min(endX, nowX);
           this.selectedItemPosition = {
-            start: LengthMetrics.vp(nowX),
-            end: this.selectedItemPosition.end,
-            top: this.selectedItemPosition.top,
-            bottom: this.selectedItemPosition.bottom,
+              start: LengthMetrics.vp(nowX),
+              end: this.selectedItemPosition.end,
+              top: this.selectedItemPosition.top,
+              bottom: this.selectedItemPosition.bottom
           };
         } else {
           let buttonLength = Math.min(this.options.buttons.length, this.buttonItemsSize.length);
@@ -3294,7 +3295,6 @@ export class SegmentButton extends ViewPU {
             Stack.size(ObservedObject.GetRawObject(this.componentSize));
             globalThis.Context.animation(null);
             Stack.borderRadius(getBackgroundBorderRadius(this.options, this.componentSize.height / 2));
-            Stack.clip(true);
           }, Stack);
           this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
@@ -3448,7 +3448,7 @@ export class SegmentButton extends ViewPU {
           curve: curves.interpolatingSpring(0, 1, 195, 14),
         },
         () => {
-          this.selectedItemScale = { x: 1.23, y: 1.18 };
+          this.selectedItemScale = { x: 1.05, y: 1.18 };
           this.openSelectedItemSystemMaterial = true;
         }
       );
@@ -3457,7 +3457,7 @@ export class SegmentButton extends ViewPU {
   finishSelectMaterialAnimation() {
     if (this.openSelectedItemSystemMaterial) {
       this.getUIContext().animateTo({ curve: curves.interpolatingSpring(0, 1, 195, 14) }, () => {
-        this.selectedItemScale = { x: 1.23, y: 1.18 };
+        this.selectedItemScale = { x: 1.05, y: 1.18 };
       });
       this.getUIContext().animateTo(
         {

@@ -566,6 +566,10 @@ struct SimpleSegmentButtonV2 {
             TapGesture().onAction(() => {
               const index: int = repeatItem.index;
               this.onItemClicked?.(index);
+              this.backplatePosition = {
+                x: this.selectedItemRect?.position.x,
+                y: this.selectedItemRect?.position.y
+              }
               this.updateSelectedIndex(index);
             })
           )
@@ -705,9 +709,15 @@ struct SimpleSegmentButtonV2 {
             return;
           }
           if (this.isBackgroundSystemMaterialEnabled()) {
-            let nowX: double = finger.globalX - this.panStartGlobalX + this.selectedItemRect!.position.x as double
-            nowX = Math.max(this.itemRects.get(0)!.position.x as double, nowX);
-            nowX = Math.min(this.itemRects.get(this.items.length - 1)!.position.x as double, nowX);
+            let nowX = finger.globalX - this.panStartGlobalX + this.selectedItemRect!.position.x as number;
+            let startX = this.itemRects.get(0)!.position.x as number;
+            let endX = this.itemRects.get(this.items.length - 1)!.position.x as number;
+            if (this.isRTL()) {
+              startX = this.itemRects.get(this.items.length - 1)!.position.x as number;
+              endX = this.itemRects.get(0)!.position.x as number
+            }
+            nowX = Math.max(startX, nowX);
+            nowX = Math.min(endX, nowX);
 
             this.backplatePosition = {
               x: nowX,
@@ -820,7 +830,7 @@ struct SimpleSegmentButtonV2 {
       this.getUIContext().animateTo({
         curve: curves.interpolatingSpring(0, 1, 195, 14),
       }, () => {
-        this.selectedItemScale = { x: 1.23, y: 1.18 }
+        this.selectedItemScale = { x: 1.05, y: 1.18 }
         this.openSelectedItemSystemMaterial = true;
       })
     }
@@ -830,7 +840,7 @@ struct SimpleSegmentButtonV2 {
     if (this.openSelectedItemSystemMaterial) {
       this.tempDisableAnimation = true;
       this.getUIContext().animateTo({ curve: curves.interpolatingSpring(0, 1, 195, 14) }, () => {
-        this.selectedItemScale = { x: 1.23, y: 1.18 }
+        this.selectedItemScale = { x: 1.05, y: 1.18 }
       })
       this.getUIContext()
         .animateTo({
@@ -1016,7 +1026,7 @@ struct SimpleSegmentButtonV2 {
   }
 
   private isRTL(): boolean {
-    if (this.languageDirection || this.languageDirection === Direction.Auto) {
+    if (!this.languageDirection || this.languageDirection === Direction.Auto) {
       return i18n.isRTL(i18n.System.getSystemLanguage());
     }
     return this.languageDirection === Direction.Rtl;

@@ -1441,11 +1441,17 @@ class SimpleSegmentButtonV2 extends ViewV2 {
           }
           if (this.isBackgroundSystemMaterialEnabled()) {
             let nowX = finger.globalX - this.panStartGlobalX + this.selectedItemRect.position.x;
-            nowX = Math.max(this.itemRects[0].position.x, nowX);
-            nowX = Math.min(this.itemRects[this.items.length - 1].position.x, nowX);
+            let startX = this.itemRects[0].position.x;
+            let endX = this.itemRects[this.items.length - 1].position.x;
+            if (this.isRTL()) {
+                startX = this.itemRects[this.items.length - 1].position.x;
+                endX = this.itemRects[0].position.x;
+            }
+            nowX = Math.max(startX, nowX);
+            nowX = Math.min(endX, nowX);
             this.backplatePosition = {
-              x: nowX,
-              y: this.backplatePosition.y,
+                x: nowX,
+                y: this.backplatePosition.y
             };
           } else {
             const index = this.getIndexByPosition(finger.globalX, finger.globalY);
@@ -1592,6 +1598,10 @@ class SimpleSegmentButtonV2 extends ViewV2 {
               TapGesture.create();
               TapGesture.onAction(() => {
                 this.onItemClicked?.(repeatItem.index);
+                this.backplatePosition = {
+                  x: this.selectedItemRect?.position.x,
+                  y: this.selectedItemRect?.position.y
+                };
                 this.updateSelectedIndex(repeatItem.index);
               });
               TapGesture.pop();
@@ -2007,7 +2017,7 @@ class SimpleSegmentButtonV2 extends ViewV2 {
           curve: curves.interpolatingSpring(0, 1, 195, 14),
         },
         () => {
-          this.selectedItemScale = { x: 1.23, y: 1.18 };
+          this.selectedItemScale = { x: 1.05, y: 1.18 };
           this.openSelectedItemSystemMaterial = true;
         }
       );
@@ -2017,7 +2027,7 @@ class SimpleSegmentButtonV2 extends ViewV2 {
     if (this.openSelectedItemSystemMaterial) {
       this.tempDisableAnimation = true;
       this.getUIContext().animateTo({ curve: curves.interpolatingSpring(0, 1, 195, 14) }, () => {
-        this.selectedItemScale = { x: 1.23, y: 1.18 };
+        this.selectedItemScale = { x: 1.05, y: 1.18 };
       });
       this.getUIContext().animateTo(
         {
@@ -2159,7 +2169,7 @@ class SimpleSegmentButtonV2 extends ViewV2 {
     });
   }
   isRTL() {
-    if (this.languageDirection || this.languageDirection === Direction.Auto) {
+    if (!this.languageDirection || this.languageDirection === Direction.Auto) {
       return i18n.isRTL(i18n.System.getSystemLanguage());
     }
     return this.languageDirection === Direction.Rtl;
