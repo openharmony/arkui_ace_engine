@@ -43,7 +43,6 @@
 #include "base/utils/noncopyable.h"
 #include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/color.h"
-#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/progress_mask_property.h"

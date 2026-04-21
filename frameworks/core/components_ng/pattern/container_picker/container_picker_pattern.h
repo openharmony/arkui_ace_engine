@@ -20,7 +20,6 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/common/resource/resource_object.h"
-#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/pan_event.h"
 #include "core/components_ng/pattern/container_picker/container_picker_accessibility_property.h"
 #include "core/components_ng/pattern/container_picker/container_picker_event_hub.h"

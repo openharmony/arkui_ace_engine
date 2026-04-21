@@ -18,7 +18,6 @@
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/inspector_filter.h"
-#include "core/components_ng/event/event_hub.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"

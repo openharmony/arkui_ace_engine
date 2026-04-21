@@ -34,7 +34,6 @@
 #include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/focus_box.h"
 #include "core/components_ng/event/focus_event_handler.h"
 #include "core/components_ng/event/gesture_event_hub.h"
