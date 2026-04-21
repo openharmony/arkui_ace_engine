@@ -243,7 +243,7 @@ class ObserveV2 {
 
   // Queue pre-render component creation of global reuse as an idle task
   public queuePreRenderCreation(parent: PUV2ViewBase, componentClass: new (...args: unknown[]) => PUV2ViewBase,
-      componentParams: Object, elmtId: number, pool: __ReusePool, reuseId: string,
+      componentParams: Object, elmtId: number, pool: __ReusePool_Internal__, reuseId: string,
       extraInfo: ExtraInfo = undefined): void {
     const createPreRenderTask = (): void => {
       const instance = new componentClass(parent, componentParams, undefined, elmtId, () => {}, extraInfo);

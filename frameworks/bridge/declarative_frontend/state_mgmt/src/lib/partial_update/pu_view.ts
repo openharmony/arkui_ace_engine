@@ -72,7 +72,7 @@ abstract class ViewPU extends PUV2ViewBase
   private watchedProps: Map<string, (propName: string) => void> = new Map<string, (propName: string) => void>();
 
   private recycleManager_: RecycleManager = undefined;
-  private myReusePool__ : __ReusePool  | undefined;
+  private myReusePool__ : __ReusePool_Internal__  | undefined;
 
   public hasBeenRecycled_: boolean = false;
 
@@ -1181,17 +1181,17 @@ abstract class ViewPU extends PUV2ViewBase
       recycleUpdateFunc(element, isFirstRender, undefined, false);
     };
 
-    const newElmtId: number = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
     const globalPool = this.__isGlobalPoolActive ? this.getReusePoolInternal(componentClass) : undefined;
     // In aliasing cases, matching reuseId strings alone can cause duplicates,
     // so we use the constructor reference to uniquely store/retrieve pool keys.
     if (globalPool && componentClass && (!name || name === componentClass.name)) {
-      __ReusePool.registerCtorName(componentClass, name);
+      __ReusePool_Internal__.registerCtorName(componentClass, name);
     }
 
     // PRE-RENDER mode: queue for later creation
     const preRenderPool = ViewPU.getCurrentPreRenderPool();
     if (preRenderPool) {
+      const newElmtId: number = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
       stateMgmtConsole.debug(`${this.debugInfo__()} [PreRender] Active..Creating pre-render instance for ${componentClass.name}`);
       ObserveV2.getObserve().queuePreRenderCreation(this, componentClass, {}, newElmtId, preRenderPool, name);
       return;
@@ -1221,7 +1221,7 @@ abstract class ViewPU extends PUV2ViewBase
       this.observeComponentCreation(compilerAssignedUpdateFunc);
       return;
     }
-
+    const newElmtId: number = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
     const oldElmtId: number = node.id__();
     let recycleElmtId: number;
 
