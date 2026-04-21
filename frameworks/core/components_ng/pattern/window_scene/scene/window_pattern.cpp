@@ -22,6 +22,7 @@
 #include "session_manager/include/scene_session_manager.h"
 #include "start_window_option.h"
 #include "ui/rs_surface_node.h"
+#include "window_pattern.h"
 
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -31,6 +32,7 @@
 #include "core/components_ng/pattern/window_scene/scene/window_event_process.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/pattern/window_scene/helper/starting_window_layout_helper.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -186,6 +188,15 @@ public:
 private:
     WeakPtr<WindowPattern> windowPattern_;
 };
+
+WindowPattern::WindowPattern()
+{
+    startingWindowLayoutHelper_ = AceType::MakeRefPtr<StartingWindowLayoutHelper>();
+}
+WindowPattern::~WindowPattern()
+{
+    startingWindowLayoutHelper_.Reset();
+}
 
 void WindowPattern::CheckAndMeasureStartingWindow(const SizeF& currentParentSize)
 {

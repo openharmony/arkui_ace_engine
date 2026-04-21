@@ -18,34 +18,34 @@
 
 #include <atomic>
 #include "common/rs_vector4.h"
+#include "foundation/window/window_manager/interfaces/innerkits/wm/wm_common.h"
 #include "key_event.h"
 #include "pointer_event.h"
+#include "refbase.h"
+#include "session/host/include/ws_snapshot_helper.h"
 
 #include "base/geometry/ng/size_t.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/image/image_source_info.h"
 
-#include "core/components_ng/pattern/window_scene/helper/starting_window_layout_helper.h"
 #include "core/components_ng/pattern/window_scene/scene/window_layout_algorithm.h"
 
 namespace OHOS::Rosen {
     class Session;
+    class RSSurfaceNode;
+    class ILifecycleListener;
+    struct SessionInfo;
 }
 
 namespace OHOS::Ace::NG {
+    class StartingWindowLayoutHelper;
 class WindowPattern : public StackPattern {
     DECLARE_ACE_TYPE(WindowPattern, StackPattern);
 
 public:
-    WindowPattern()
-    {
-        startingWindowLayoutHelper_ = AceType::MakeRefPtr<StartingWindowLayoutHelper>();
-    }
-    ~WindowPattern()
-    {
-        startingWindowLayoutHelper_.Reset();
-    }
+    WindowPattern();
+    ~WindowPattern();
 
     bool BorderUnoccupied() const override;
     std::vector<Rosen::Rect> GetHotAreas();
