@@ -1,0 +1,11 @@
+#!/bin/bash
+
+HVIGOR_APP_HOME="`pwd -P`"
+HVIGOR_WRAPPER_SCRIPT=${HVIGOR_APP_HOME}/hvigor/hvigor-wrapper.js
+
+if [ ! -f "$HVIGOR_WRAPPER_SCRIPT" ];then
+    echo "ERROR: hvigor-wrapper.js not found"
+    exit 1
+fi
+
+exec node "$HVIGOR_WRAPPER_SCRIPT" "$@"
