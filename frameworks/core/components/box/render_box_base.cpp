@@ -440,7 +440,7 @@ void RenderBoxBase::CalculateSelfLayoutParam()
     selfMin = layoutSetByParent.Constrain(constrainMin);
     auto context = context_.Upgrade();
     // allow overflow parent when set height or width, except when set flexgrow or flexshrink
-    if (context->GetIsDeclarative()) {
+    if (context && context->GetIsDeclarative()) {
         if (selfDefineWidth_ && layoutSetByParent.GetMinSize().Width() != layoutSetByParent.GetMaxSize().Width()) {
             selfMax.SetWidth(constrainMax.Width());
         }

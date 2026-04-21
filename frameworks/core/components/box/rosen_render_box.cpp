@@ -331,7 +331,7 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
             return;
         }
         auto context = context_.Upgrade();
-        if (context->GetIsDeclarative()) {
+        if (context && context->GetIsDeclarative()) {
             RosenDecorationPainter::PaintGrayScale(outerRRect, canvas, backDecoration_->GetGrayScale(), bgColor);
             RosenDecorationPainter::PaintBrightness(outerRRect, canvas, backDecoration_->GetBrightness(), bgColor);
             RosenDecorationPainter::PaintContrast(outerRRect, canvas, backDecoration_->GetContrast(), bgColor);
@@ -371,7 +371,7 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
             return;
         }
         auto context = context_.Upgrade();
-        if (context->GetIsDeclarative()) {
+        if (context && context->GetIsDeclarative()) {
             RosenDecorationPainter::PaintGrayScale(outerRRect, canvas, frontDecoration_->GetGrayScale(), bgColor);
             RosenDecorationPainter::PaintBrightness(outerRRect, canvas, frontDecoration_->GetBrightness(), bgColor);
             RosenDecorationPainter::PaintContrast(outerRRect, canvas, frontDecoration_->GetContrast(), bgColor);
