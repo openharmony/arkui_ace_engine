@@ -7209,7 +7209,7 @@ enum class ArkUIWidthType : uint32_t {
     MAX_SIDEBAR_WIDTH,
 };
 
-enum class ArkUISideBarContainerType { EMBED, OVERLAY, AUTO };
+enum class ArkUISideBarContainerType { EMBED, OVERLAY, AUTO, DISPLACE };
 
 struct ArkUISideBarContainerModifier {
     void (*setSideBarWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* sideBarWidthPtr);

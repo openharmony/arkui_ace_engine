@@ -47,8 +47,10 @@
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/progress_mask_property.h"
+#include "core/components_ng/property/sidebar_content_mask_property.h"
 #include "core/components_ng/render/adapter/focus_animation_modifier.h"
 #include "core/components_ng/render/adapter/graphic_modifier.h"
+#include "core/components_ng/render/adapter/sidebar_content_mask_modifier.h"
 #include "core/components_ng/render/adapter/moon_progress_modifier.h"
 #include "core/components_ng/render/adapter/rosen_transition_effect.h"
 #include "core/components_ng/render/render_context.h"
@@ -586,6 +588,8 @@ public:
     void SetMaterialWithQualityLevel(
         const std::shared_ptr<Rosen::RSNGFilterBase>& materialFilter, UiMaterialFilterQuality quality) override;
 
+    void OnSidebarContentMaskUpdate(const RefPtr<SidebarContentMaskProperty>& maskProperty) override;
+
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
     void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) override;
@@ -713,6 +717,7 @@ protected:
     void PaintClipMask(const std::unique_ptr<ClipProperty>& clip, const SizeF& frameSize);
     void PaintClip(const SizeF& frameSize);
     void PaintProgressMask();
+    void PaintSideBarContentMask(const Color& maskColor);
     void PaintGradient(const SizeF& frameSize);
     void PaintGraphics();
     void PaintOverlayText();
@@ -875,6 +880,7 @@ protected:
     std::shared_ptr<BorderImageModifier> borderImageModifier_;
     std::shared_ptr<MouseSelectModifier> mouseSelectModifier_;
     RefPtr<MoonProgressModifier> moonProgressModifier_;
+    RefPtr<SidebarContentMaskModifier> sidebarContentMaskModifier_;
     RefPtr<FocusAnimationModifier> focusAnimationModifier_;
 
     std::shared_ptr<FocusStateModifier> focusStateModifier_;

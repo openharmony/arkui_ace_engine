@@ -773,11 +773,20 @@ void SideBarContainerLayoutAlgorithm::LayoutSideBarContent(
     float contentOffsetX = padding.left.value_or(0);
     float contentOffsetY = padding.top.value_or(0);
 
-    if (type_ == SideBarContainerType::EMBED && sideBarPosition == SideBarPosition::START) {
+    if ((type_ == SideBarContainerType::EMBED || type_ == SideBarContainerType::DISPLACE) &&
+        sideBarPosition == SideBarPosition::START) {
         if (sideBarStatus_ == SideBarStatus::SHOW) {
             contentOffsetX = realSideBarWidth_ + realDividerWidth_ + padding.left.value_or(0);
         } else if (sideBarStatus_ == SideBarStatus::CHANGING) {
             contentOffsetX = realSideBarWidth_ + realDividerWidth_ + currentOffset_ + padding.left.value_or(0);
+        }
+    }
+
+    if (type_ == SideBarContainerType::DISPLACE && sideBarPosition == SideBarPosition::END) {
+        if (sideBarStatus_ == SideBarStatus::SHOW) {
+            contentOffsetX = -(realSideBarWidth_ + realDividerWidth_) + padding.left.value_or(0);
+        } else if (sideBarStatus_ == SideBarStatus::CHANGING) {
+            contentOffsetX = currentOffset_ - realDividerWidth_ + padding.left.value_or(0);
         }
     }
 

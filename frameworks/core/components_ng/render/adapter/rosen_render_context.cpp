@@ -5861,6 +5861,21 @@ void RosenRenderContext::PaintProgressMask()
     moonProgressModifier_->SetEnableBreathe(progress->GetEnableBreathe());
 }
 
+void RosenRenderContext::PaintSideBarContentMask(const Color& maskColor)
+{
+    CHECK_NULL_VOID(rsNode_);
+    if (!sidebarContentMaskModifier_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        sidebarContentMaskModifier_ = AceType::MakeRefPtr<SidebarContentMaskModifier>(host);
+        auto modifierAdapter =
+            std::static_pointer_cast<OverlayModifierAdapter>(ConvertOverlayModifier(sidebarContentMaskModifier_));
+        rsNode_->AddModifier(modifierAdapter);
+        modifierAdapter->AttachProperties();
+    }
+    sidebarContentMaskModifier_->SetMaskColor(maskColor);
+}
+
 void RosenRenderContext::SetClipBoundsWithCommands(const std::string& commands)
 {
     FREE_RS_CONTEXT_CHECK(SetClipBoundsWithCommands, commands);
@@ -6064,6 +6079,26 @@ void RosenRenderContext::OnProgressMaskUpdate(const RefPtr<ProgressMaskProperty>
             std::static_pointer_cast<OverlayModifierAdapter>(ConvertOverlayModifier(moonProgressModifier_));
         rsNode_->RemoveModifier(modifierAdapter);
         moonProgressModifier_ = nullptr;
+    }
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnSidebarContentMaskUpdate(const RefPtr<SidebarContentMaskProperty>& maskProperty)
+{
+    CHECK_NULL_VOID(maskProperty);
+    FREE_RS_CONTEXT_CHECK(OnSidebarContentMaskUpdate, maskProperty);
+    CHECK_NULL_VOID(rsNode_);
+    if (maskProperty->GetIsShowMask()) {
+        if (!RectIsNull()) {
+            const Color maskColor = maskProperty->GetMaskColor();
+            PaintSideBarContentMask(maskColor);
+        }
+        rsNode_->SetClipToBounds(true);
+    } else if (sidebarContentMaskModifier_) {
+        auto modifierAdapter =
+            std::static_pointer_cast<OverlayModifierAdapter>(ConvertOverlayModifier(sidebarContentMaskModifier_));
+        rsNode_->RemoveModifier(modifierAdapter);
+        sidebarContentMaskModifier_ = nullptr;
     }
     RequestNextFrame();
 }

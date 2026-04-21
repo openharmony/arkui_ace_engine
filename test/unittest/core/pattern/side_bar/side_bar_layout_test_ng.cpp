@@ -38,6 +38,7 @@
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/property/sidebar_content_mask_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "frameworks/base/geometry/ng/size_t.h"
 #include "frameworks/core/components_ng/property/property.h"
@@ -65,6 +66,8 @@ constexpr float FULL_SCREEN_WIDTH = 720.0f;
 constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
 const SizeF CONTAINER_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 constexpr Dimension DEFAULT_CONTROL_BUTTON_LEFT = 16.0_vp;
+constexpr uint32_t DEFAULT_MASK_COLOR = 0xff000000;
+constexpr uint32_t DEFAULT_MASK_COLOR_2 = 0xff111111;
 } // namespace
 
 class SideBarLayoutTestNg : public testing::Test {
@@ -1268,5 +1271,53 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg029, TestSize.Level1)
     sideBarLayoutProperty->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
     layoutAlgorithm->AdjustMinAndMaxSideBarWidth(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->minSideBarWidth_, layoutAlgorithm->maxSideBarWidth_);
+}
+
+/**
+ * @tc.name: SideBarLayoutTestNg030
+ * @tc.desc: Test SideBar MeasureSideBarContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg030, TestSize.Level1)
+{
+    SideBarContainerModelNG SideBarContainerModelInstance;
+    auto sideBarFrameNode =
+        FrameNode::CreateFrameNode(V2::SIDE_BAR_ETS_TAG, 0, AceType::MakeRefPtr<SideBarContainerPattern>());
+    EXPECT_FALSE(sideBarFrameNode == nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    RefPtr<LayoutWrapperNode> sideBarLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(sideBarFrameNode, geometryNode, sideBarFrameNode->GetLayoutProperty());
+    EXPECT_FALSE(sideBarLayoutWrapper == nullptr);
+    auto sideBarPattern = sideBarFrameNode->GetPattern<SideBarContainerPattern>();
+    EXPECT_FALSE(sideBarPattern == nullptr);
+    auto layoutAlgorithm = AceType::MakeRefPtr<SideBarContainerLayoutAlgorithm>();
+    EXPECT_FALSE(layoutAlgorithm == nullptr);
+    sideBarPattern->sideBarStatus_ = SideBarStatus::SHOW;
+    SideBarContainerModelInstance.SetSideBarContainerType(SideBarContainerType::DISPLACE);
+    layoutAlgorithm->type_ = SideBarContainerType::DISPLACE;
+    layoutAlgorithm->LayoutSideBarContent(AccessibilityManager::RawPtr(sideBarLayoutWrapper), sideBarLayoutWrapper);
+    EXPECT_EQ(layoutAlgorithm->sideBarOffset_.GetX(), 0);
+}
+
+/**
+ * @tc.name: SideBarLayoutTestNg031
+ * @tc.desc: Test sidebar content mask property
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg031, TestSize.Level0)
+{
+    SidebarContentMaskProperty maskProperty(true, Color(DEFAULT_MASK_COLOR));
+    auto currentShowMask = maskProperty.GetIsShowMask();
+    auto currentMaskColor = maskProperty.GetMaskColor();
+    EXPECT_EQ(currentShowMask, true);
+    EXPECT_EQ(currentMaskColor, Color(DEFAULT_MASK_COLOR));
+
+    maskProperty.SetIsShowMask(false);
+    maskProperty.SetMaskColor(Color(DEFAULT_MASK_COLOR_2));
+    currentShowMask = maskProperty.GetIsShowMask();
+    currentMaskColor = maskProperty.GetMaskColor();
+    EXPECT_EQ(currentShowMask, false);
+    EXPECT_EQ(currentMaskColor, Color(DEFAULT_MASK_COLOR_2));
 }
 } // namespace OHOS::Ace::NG
