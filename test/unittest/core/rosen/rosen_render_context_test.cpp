@@ -136,15 +136,15 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest003, TestSize.Level1)
     auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
     auto rosenRenderContext = InitRosenRenderContext(frameNode);
     std::optional<OffsetF> parentPosition = std::make_optional(OffsetF(100.0, 100.0));
-    rosenRenderContext->SetSandBox(parentPosition, false);
-    EXPECT_EQ(rosenRenderContext->sandBoxCount_, 1);
-    rosenRenderContext->SetSandBox(parentPosition, true);
-    EXPECT_EQ(rosenRenderContext->sandBoxCount_, 1);
-    rosenRenderContext->SetSandBox(std::nullopt, true);
-    EXPECT_EQ(rosenRenderContext->sandBoxCount_, 0);
-    rosenRenderContext->sandBoxCount_ = 2;
-    rosenRenderContext->SetSandBox(std::nullopt, true);
-    EXPECT_EQ(rosenRenderContext->sandBoxCount_, 0);
+    rosenRenderContext->SetSandBox(parentPosition, false, false);
+    EXPECT_EQ(rosenRenderContext->animatingGeometryTransitionCount_, 1);
+    rosenRenderContext->SetSandBox(parentPosition, false, true);
+    EXPECT_EQ(rosenRenderContext->animatingGeometryTransitionCount_, 1);
+    rosenRenderContext->SetSandBox(std::nullopt, false, true);
+    EXPECT_EQ(rosenRenderContext->animatingGeometryTransitionCount_, 0);
+    rosenRenderContext->animatingGeometryTransitionCount_ = 2;
+    rosenRenderContext->SetSandBox(std::nullopt, false, true);
+    EXPECT_EQ(rosenRenderContext->animatingGeometryTransitionCount_, 0);
 }
 
 /**

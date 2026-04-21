@@ -707,7 +707,7 @@ std::shared_ptr<Rosen::RSNode> RosenRenderContext::CreateHardwareTexture(
 }
 #endif
 
-void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition, bool force)
+void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition, bool onlyCountMode, bool force)
 {
     FREE_RS_CONTEXT_CHECK(SetSandBox, parentPosition, force);
     CHECK_NULL_VOID(rsNode_);
@@ -715,22 +715,28 @@ void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition
     CHECK_NULL_VOID(host);
     if (parentPosition.has_value()) {
         if (!force) {
-            sandBoxCount_++;
+            animatingGeometryTransitionCount_++;
+        }
+        if (onlyCountMode) {
+            return;
         }
         Rosen::Vector2f value = { parentPosition.value().GetX(), parentPosition.value().GetY() };
-        TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "node[%{public}s] Set SandBox",
-            std::to_string(rsNode_->GetId()).c_str());
+        TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "node[%{public}s] Set SandBox [%f, %f]",
+            std::to_string(rsNode_->GetId()).c_str(), value.GetData().x_, , value.GetData().y_);
         rsNode_->SetSandBox(value);
     } else {
         if (!force) {
-            sandBoxCount_--;
-            if (sandBoxCount_ > 0) {
+            animatingGeometryTransitionCount_--;
+            if (animatingGeometryTransitionCount_ > 0) {
                 return;
             }
         }
+        if (onlyCountMode) {
+            return;
+        }
         TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "node[%{public}s] Remove SandBox",
             std::to_string(rsNode_->GetId()).c_str());
-        sandBoxCount_ = 0;
+        animatingGeometryTransitionCount_ = 0;
         rsNode_->SetSandBox(std::nullopt);
     }
 }
