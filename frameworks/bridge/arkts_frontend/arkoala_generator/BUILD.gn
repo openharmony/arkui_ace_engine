@@ -72,7 +72,7 @@ action("patch_sdk") {
   args = [
     "apply",
     "--input",
-    rebase_path("${ohos_ets_api_path}/.."),
+    rebase_path("${ohos_ets_api_path}"),
     "--output",
     rebase_path(patched_sdk_path),
     "--patch",
