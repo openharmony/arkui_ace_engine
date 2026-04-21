@@ -48,6 +48,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/bubble/bubble_view.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
@@ -63,6 +64,7 @@
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 #include "core/components_ng/render/ui_material_filter_creator.h"
 #include "core/components_ng/property/union_effect_container_options.h"
+#include "core/components_ng/property/smart_gesture_property.h"
 #include "core/interfaces/native/node/menu_modifier.h"
 #include "core/interfaces/native/node/menu_item_modifier.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -81,6 +83,18 @@ constexpr double HEIGHT_ASPECTRATIO_THRESHOLD1 = 0.8; // window height/width = 0
 constexpr double HEIGHT_ASPECTRATIO_THRESHOLD2 = 1.2;
 constexpr double FULL_DIMENSION = 100.0;
 constexpr int32_t DEFAULT_AREA_CHANGE_INTERVAL = 1000;
+
+void SyncSmartGesturePrimaryActionRegistry(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto eventManager = context->GetEventManager();
+    CHECK_NULL_VOID(eventManager);
+    auto manager = eventManager->GetOrCreateSmartGestureManager();
+    CHECK_NULL_VOID(manager);
+    manager->SyncPrimaryActionNode(AceType::Claim(frameNode));
+}
 
 std::string PropertyVectorToString(const std::vector<AnimationPropertyType>& vec)
 {
@@ -8683,6 +8697,33 @@ void ViewAbstract::SetEnabled(FrameNode* frameNode, bool enabled)
     if (focusHub) {
         focusHub->SetEnabled(enabled);
     }
+}
+
+void ViewAbstract::SetSmartGestureShortcut(int32_t action, bool enabled, bool selectable)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    if (action != static_cast<int32_t>(SmartGestureShortcutAction::PRIMARY)) {
+        return;
+    }
+    auto smartGestureProperty = frameNode->GetOrCreateSmartGestureProperty();
+    CHECK_NULL_VOID(smartGestureProperty);
+    SmartGestureShortcutConfig config;
+    config.action = SmartGestureShortcutAction::PRIMARY;
+    config.enabled = enabled;
+    config.selectable = selectable;
+    smartGestureProperty->SetSmartGestureShortcut(config);
+    SyncSmartGesturePrimaryActionRegistry(frameNode);
+}
+
+void ViewAbstract::ResetSmartGestureShortcut()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto smartGestureProperty = frameNode->GetSmartGestureProperty();
+    CHECK_NULL_VOID(smartGestureProperty);
+    smartGestureProperty->ResetSmartGestureShortcut();
+    SyncSmartGesturePrimaryActionRegistry(frameNode);
 }
 
 void ViewAbstract::SetUseShadowBatching(FrameNode* frameNode, bool useShadowBatching)

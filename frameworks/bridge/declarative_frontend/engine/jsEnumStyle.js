@@ -5358,3 +5358,9 @@ let LazyForEachCustomComponentFreezeMode ;
   LazyForEachCustomComponentFreezeMode.DISABLED = 1;
   LazyForEachCustomComponentFreezeMode.ENABLED = 2;
 })(LazyForEachCustomComponentFreezeMode  || (LazyForEachCustomComponentFreezeMode  = {}));
+
+let GestureShortcut;
+(function (GestureShortcut) {
+  GestureShortcut[GestureShortcut.PRIMARY = 0] = 'PRIMARY';
+})(GestureShortcut || (GestureShortcut = {}));
+globalThis.GestureShortcut = GestureShortcut;

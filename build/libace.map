@@ -3549,6 +3549,11 @@
       OHOS::Ace::NG::ServiceCollaborationAceCallback::*;
       OHOS::Ace::NG::ServiceCollaborationMenuAceHelper::*;
       OHOS::Ace::NG::SetRegisterBeforeCreateLayoutBuilder*;
+      OHOS::Ace::NG::SmartGestureManager::ClearSelected*;
+      OHOS::Ace::NG::SmartGestureManager::SetMonitor*;
+      OHOS::Ace::NG::SmartGestureManager::RequestSelected*;
+      OHOS::Ace::NG::SmartGestureManager::SetSmartTapAndSlideGesturesEnabled*;
+      OHOS::Ace::EventManager::GetOrCreateSmartGestureManager*;
       OHOS::Ace::NG::StageManager::*;
       OHOS::Ace::NG::SwiperPattern::IsAtEnd*;
       OHOS::Ace::NG::SwiperPattern::IsAtStart*;

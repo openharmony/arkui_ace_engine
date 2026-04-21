@@ -218,6 +218,11 @@ bool IsFocusCanBeActive()
     return system::GetParameter("persist.gesture.smart_gesture_enable", "1") != "0";
 }
 
+bool IsSmartGestureEnabled()
+{
+    return system::GetBoolParameter("persist.ace.gesture.smart_gesture_enabled", true);
+}
+
 bool IsCacheNavigationNodeEnable()
 {
     return system::GetParameter("persist.ace.navigation.groupnode.cached", "true") == "true";
@@ -782,6 +787,7 @@ float SystemProperties::pageCount_ = GetPageCountProp();
 bool SystemProperties::sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
 std::atomic<bool> SystemProperties::acePerformanceMonitorEnable_(IsAcePerformanceMonitorEnabled());
 std::atomic<bool> SystemProperties::focusCanBeActive_(IsFocusCanBeActive());
+bool SystemProperties::smartGestureEnabled_ = IsSmartGestureEnabled();
 bool SystemProperties::aceCommercialLogEnable_ = IsAceCommercialLogEnable();
 bool SystemProperties::faultInjectEnabled_  = IsFaultInjectEnabled();
 bool SystemProperties::opincEnabled_ = IsOpIncEnabled();

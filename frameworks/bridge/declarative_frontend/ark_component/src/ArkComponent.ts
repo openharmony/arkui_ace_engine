@@ -4104,6 +4104,20 @@ class AccessibilityActionOptionsModifier extends ModifierWithKey<object> {
     }
   }
 }
+
+class SmartGestureShortcutModifier extends ModifierWithKey<object> {
+  constructor(value: object) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('smartGestureShortcut');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetSmartGestureShortcut(node);
+    } else {
+      getUINativeModule().common.setSmartGestureShortcut(node, this.value);
+    }
+  }
+}
 class FreezeModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -6025,6 +6039,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   accessibilityActionOptions(value: object): this {
     modifierWithKey(this._modifiersWithKeys, AccessibilityActionOptionsModifier.identity, AccessibilityActionOptionsModifier, value);
+    return this;
+  }
+
+  smartGestureShortcut(value: object): this {
+    modifierWithKey(this._modifiersWithKeys, SmartGestureShortcutModifier.identity, SmartGestureShortcutModifier, value);
     return this;
   }
 

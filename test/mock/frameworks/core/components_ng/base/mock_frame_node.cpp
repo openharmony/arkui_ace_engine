@@ -29,7 +29,7 @@
 #include "core/common/recorder/exposure_processor.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
-
+#include "core/components_ng/property/smart_gesture_property.h"
 
 
 namespace OHOS::Ace::NG {
@@ -795,6 +795,16 @@ void FrameNode::SetOverlayNodeIsFree(bool isFree)
 
 void FrameNode::TriggerVisibleAreaChangeCallback(uint64_t timestamp, bool forceDisappear, int32_t isVisibleChangeMinDepth)
 {
+}
+
+RefPtr<SmartGestureProperty> FrameNode::GetOrCreateSmartGestureProperty()
+{
+    return nullptr;
+}
+
+RefPtr<SmartGestureProperty> FrameNode::GetSmartGestureProperty() const
+{
+    return nullptr;
 }
 #pragma clang diagnostic pop
 } // namespace OHOS::Ace::NG

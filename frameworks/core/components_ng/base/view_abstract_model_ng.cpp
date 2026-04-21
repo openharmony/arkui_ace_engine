@@ -43,7 +43,8 @@
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/interfaces/native/node/menu_modifier.h"
 #include "frameworks/core/components_ng/event/event_constants.h"
-
+#include "frameworks/core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
+#include "frameworks/core/components_ng/property/smart_gesture_property.h"
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t LONG_PRESS_DURATION = 800;
@@ -134,6 +135,18 @@ void ViewAbstractModelNG::BindMenuGesture(
     auto gestureHub = targetNode->GetOrCreateGestureEventHub();
     gestureHub->BindMenu(std::move(showMenu));
     BindMenuTouch(targetNode, gestureHub);
+}
+
+void SyncSmartGesturePrimaryActionRegistry(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto eventManager = context->GetEventManager();
+    CHECK_NULL_VOID(eventManager);
+    auto manager = eventManager->GetOrCreateSmartGestureManager();
+    CHECK_NULL_VOID(manager);
+    manager->SyncPrimaryActionNode(AceType::Claim(frameNode));
 }
 
 void ViewAbstractModelNG::BindMenuTouch(FrameNode* targetNode, const RefPtr<GestureEventHub>& gestrueHub)
@@ -1772,6 +1785,24 @@ void ViewAbstractModelNG::ResetAccessibilityActionOptions(FrameNode* frameNode)
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->ResetAccessibilityActionOptions();
+}
+
+void ViewAbstractModelNG::SetSmartGestureShortcut(FrameNode* frameNode, SmartGestureShortcutConfig config)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto smartGestureProperty = frameNode->GetOrCreateSmartGestureProperty();
+    CHECK_NULL_VOID(smartGestureProperty);
+    smartGestureProperty->SetSmartGestureShortcut(config);
+    SyncSmartGesturePrimaryActionRegistry(frameNode);
+}
+
+void ViewAbstractModelNG::ResetSmartGestureShortcut(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto smartGestureProperty = frameNode->GetOrCreateSmartGestureProperty();
+    CHECK_NULL_VOID(smartGestureProperty);
+    smartGestureProperty->ResetSmartGestureShortcut();
+    SyncSmartGesturePrimaryActionRegistry(frameNode);
 }
 
 void ViewAbstractModelNG::SetAccessibilityActionOptions(AccessibilityActionOptions actionOptions)
