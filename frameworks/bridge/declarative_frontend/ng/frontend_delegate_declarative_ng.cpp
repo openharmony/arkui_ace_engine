@@ -1493,26 +1493,6 @@ void FrontendDelegateDeclarativeNG::AddFrameNodeWithOrder(
     overlayManager->AddFrameNodeWithOrder(node, levelOrder);
 }
 
-void FrontendDelegateDeclarativeNG::OpenOrderOverlay(const RefPtr<NG::FrameNode>& node,
-    const NG::OrderOverlayOptions& options, std::function<void(int32_t)>&& callback)
-{
-    CHECK_NULL_VOID(node);
-    auto task = [weakNode = AceType::WeakClaim(AceType::RawPtr(node)),
-        options, callback](const RefPtr<NG::OverlayManager>& overlayManager) mutable {
-        CHECK_NULL_VOID(overlayManager);
-        auto node = weakNode.Upgrade();
-        CHECK_NULL_VOID(node);
-        TAG_LOGD(AceLogTag::ACE_OVERLAY, "OpenOrderOverlay calling OpenOrderOverlay.");
-        overlayManager->OpenOrderOverlay(node, options, std::move(callback));
-    };
-
-    if (options.levelMode == LevelMode::EMBEDDED) {
-        NG::DialogManager::ShowInEmbeddedOverlay(std::move(task), "ArkUIOverlayShowOrder", options.levelUniqueId);
-    } else {
-        MainWindowOverlay(std::move(task), "ArkUIOverlayShowOrder", nullptr);
-    }
-}
-
 void FrontendDelegateDeclarativeNG::RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
 {
     auto task = [node, containerId = Container::CurrentId()](const RefPtr<NG::OverlayManager>& overlayManager) {
