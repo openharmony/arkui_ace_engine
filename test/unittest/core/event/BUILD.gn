@@ -259,6 +259,12 @@ ace_unittest("focus_event_handler_test_ng") {
   sources = [ "focus_event_handler_test_ng.cpp" ]
 }
 
+ace_unittest("key_event_test_ng") {
+  module_name = "KeyEvent-UnitTest"
+  type = "new"
+  sources = [ "key_event_test_ng.cpp" ]
+}
+
 group("core_event_unittest") {
   testonly = true
   deps = [
@@ -276,6 +282,7 @@ group("core_event_unittest") {
     ":input_event_hub_test_ng",
     ":input_event_monitor_manager_test_ng",
     ":input_event_test_ng",
+    ":key_event_test_ng",
     ":long_press_event_test_ng",
     ":mouse_style_manager_test_ng",
     ":pan_event_test_ng",
