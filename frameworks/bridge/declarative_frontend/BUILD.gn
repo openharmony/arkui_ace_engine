@@ -251,7 +251,6 @@ template("declarative_js_engine") {
       ":gen_obj_src_ark_common",
       ":gen_obj_src_ark_dynamiccomponent",
       ":gen_obj_src_ark_component",
-      ":ark_theme",
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
       ":gen_obj_src_js_proxyclass_ark_breakpoint",
@@ -262,6 +261,7 @@ template("declarative_js_engine") {
       ":statemanagement",
       ":windowsizelayoutbreakpoint",
       "ark_node:x_node",
+      "ark_theme/theme_manager:ark_theme",
       "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform",
       "ark_component/components:module_group",
     ]
@@ -774,7 +774,6 @@ template("declarative_js_engine_ng") {
       ":gen_obj_src_ark_common",
       ":gen_obj_src_ark_dynamiccomponent",
       ":gen_obj_src_ark_component",
-      ":ark_theme",
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
       ":gen_obj_src_js_proxyclass_ark_breakpoint",
@@ -785,6 +784,7 @@ template("declarative_js_engine_ng") {
       ":statemanagement",
       ":windowsizelayoutbreakpoint",
       "ark_node:x_node",
+      "ark_theme/theme_manager:ark_theme",
       "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform",
       "ark_component/components:module_group",
     ]
@@ -1281,15 +1281,6 @@ ohos_abc("ark_theme_control") {
 ohos_abc("shape") {
   sources = [ "engine/jsShape.js" ]
   output_name = "shape"
-  install_images = [ "system" ]
-  module_install_dir = "etc/abc/arkui"
-  subsystem_name = ace_engine_subsystem
-  part_name = ace_engine_part
-}
-
-ohos_abc("ark_theme") {
-  sources = [ "engine/arkTheme.js" ]
-  output_name = "arktheme"
   install_images = [ "system" ]
   module_install_dir = "etc/abc/arkui"
   subsystem_name = ace_engine_subsystem

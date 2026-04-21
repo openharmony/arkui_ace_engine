@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+/// <reference path='../../types/theme.d.ts' />
+
 class ArkThemeScopeItem {
     elmtId: number;
     ownerId: number;
@@ -69,7 +71,7 @@ class ArkThemeScope {
     /**
      * elmtIds of the components that are in this theme scope
      */
-    private components: ArkThemeScopeArray;
+    private components: Map<number, ArkThemeScopeItem>;
 
     /**
      * Theme instance associated with this Theme Scope
@@ -122,9 +124,9 @@ class ArkThemeScope {
             return;
         }
         if (!this.components) {
-            this.components = new ArkThemeScopeArray();
+            this.components = new Map();
         }
-        this.components.push({ elmtId: elmtId, ownerId: owner.id__(), owner: owner, name: componentName });
+        this.components.set(elmtId, { elmtId: elmtId, ownerId: owner.id__(), owner: owner, name: componentName });
     }
 
     /**
@@ -133,18 +135,12 @@ class ArkThemeScope {
      * @param listener the Custom component
      */
     addCustomListenerInScope(listener: ViewPuInternal) {
-        const len = this.components ? this.components.length : -1;
+        const len = this.components ? this.components.size : -1;
         if (len <= 0) {
             return;
         }
         const listenerId = listener.id__();
-        // the last ThemeScopeItem probably corresponds to Custom component
-        let themeScopeItem = this.components[len - 1];
-        if (themeScopeItem.elmtId === listenerId) {
-            themeScopeItem.listener = listener;
-            return;
-        }
-        themeScopeItem = this.components.find((item) => item.elmtId === listenerId);
+        let themeScopeItem = this.components.get(listenerId);
         if (themeScopeItem) {
             themeScopeItem.listener = listener;
         }
@@ -157,10 +153,7 @@ class ArkThemeScope {
      */
     removeComponentFromScope(elmtId: number) {
         if (this.components) {
-            const index = this.components.binarySearch(elmtId);
-            if (index > -1) {
-                this.components.splice(index, 1);
-            }
+            this.components.delete(elmtId);
         }
     }
 
@@ -171,7 +164,7 @@ class ArkThemeScope {
      * @returns true if theme scope contains component, otherwise false
      */
     isComponentInScope(elmtId: number): boolean {
-        return this.components && (this.components.binarySearch(elmtId) > -1);
+        return this.components && (this.components.has(elmtId));
     }
 
     /**
@@ -179,7 +172,7 @@ class ArkThemeScope {
      *
      * @returns array of elmIds as numbers
      */
-    componentsInScope(): Array<ArkThemeScopeItem> {
+    componentsInScope(): Map<number, ArkThemeScopeItem> {
         return this.components;
     }
 
