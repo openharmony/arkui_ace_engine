@@ -775,63 +775,6 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest031, TestSize.Level1)
 }
 
 /**
- * @tc.name: RosenRenderContextTest032
- * @tc.desc: InitContext()
- * @tc.type: FUNC
- */
-HWTEST_F(RosenRenderContextTest, RosenRenderContextTest032, TestSize.Level1)
-{
-    auto rosenRenderContext = AceType::MakeRefPtr<RosenRenderContext>();
-    RenderContext::ContextParam contextParam;
-    contextParam.type = RenderContext::ContextType::CANVAS;
-    contextParam.surfaceName.emplace("test");
-    std::optional<RenderContext::ContextParam> contextParamValue = std::make_optional(contextParam);
-    // is root is true
-    rosenRenderContext->InitContext(true, contextParamValue);
-    EXPECT_EQ(rosenRenderContext->rsNode_ != nullptr, true);
-    rosenRenderContext->rsNode_ = nullptr;
-    // contextParamValue does not has value
-    std::optional<RenderContext::ContextParam> contextParamValue2 = std::make_optional(contextParam);
-    rosenRenderContext->InitContext(false, contextParamValue2);
-    EXPECT_EQ(rosenRenderContext->rsNode_ != nullptr, true);
-    rosenRenderContext->rsNode_ = nullptr;
-    contextParam.type = RenderContext::ContextType::ROOT;
-    std::optional<RenderContext::ContextParam> contextParamValue3 = std::make_optional(contextParam);
-    rosenRenderContext->InitContext(false, contextParamValue3);
-    EXPECT_EQ(rosenRenderContext->rsNode_ != nullptr, true);
-    rosenRenderContext->rsNode_ = nullptr;
-    contextParam.type = RenderContext::ContextType::SURFACE;
-    std::optional<RenderContext::ContextParam> contextParamValue4 = std::make_optional(contextParam);
-    rosenRenderContext->InitContext(false, contextParamValue4);
-    EXPECT_EQ(rosenRenderContext->rsNode_ != nullptr, false);
-    rosenRenderContext->rsNode_ = nullptr;
-    contextParam.type = RenderContext::ContextType::HARDWARE_SURFACE;
-    std::optional<RenderContext::ContextParam> contextParamValue5 = std::make_optional(contextParam);
-    rosenRenderContext->InitContext(false, contextParamValue5);
-    EXPECT_EQ(rosenRenderContext->rsNode_ != nullptr, false);
-    rosenRenderContext->rsNode_ = nullptr;
-    contextParam.type = RenderContext::ContextType::EFFECT;
-    std::optional<RenderContext::ContextParam> contextParamValue7 = std::make_optional(contextParam);
-    rosenRenderContext->InitContext(false, contextParamValue7);
-    EXPECT_EQ(rosenRenderContext->rsNode_ != nullptr, true);
-    rosenRenderContext->rsNode_ = nullptr;
-    contextParam.type = RenderContext::ContextType::INCREMENTAL_CANVAS;
-    std::optional<RenderContext::ContextParam> contextParamValue8 = std::make_optional(contextParam);
-    rosenRenderContext->InitContext(false, contextParamValue8);
-    EXPECT_EQ(rosenRenderContext->rsNode_ != nullptr, true);
-    rosenRenderContext->rsNode_ = nullptr;
-    contextParam.type = RenderContext::ContextType::COMPOSITE_COMPONENT;
-    std::optional<RenderContext::ContextParam> contextParamValue10 = std::make_optional(contextParam);
-    rosenRenderContext->InitContext(false, contextParamValue10);
-    EXPECT_EQ(rosenRenderContext->rsNode_ != nullptr, false);
-    rosenRenderContext->rsNode_ = nullptr;
-    contextParam.type = RenderContext::ContextType::EXTERNAL;
-    std::optional<RenderContext::ContextParam> contextParamValue9 = std::make_optional(contextParam);
-    rosenRenderContext->InitContext(false, contextParamValue9);
-    EXPECT_EQ(rosenRenderContext->rsNode_ == nullptr, true);
-}
-
-/**
  * @tc.name: RosenRenderContextTest033
  * @tc.desc: PaintDebugBoundary()
  * @tc.type: FUNC

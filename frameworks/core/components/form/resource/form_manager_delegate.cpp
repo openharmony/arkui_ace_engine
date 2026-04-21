@@ -131,11 +131,11 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
 
     SetParamForWant(info, formInfo);
     OHOS::AppExecFwk::FormJsInfo formJsInfo;
-    if (rsUIContext_) {
+    if (rsUIContext_ && rsUIContext_->GetConnectToRender()) {
         auto connectToRender = rsUIContext_->GetConnectToRender();
         wantCache_.SetParam(CONNECT_TO_RENDER, connectToRender);
     } else {
-        TAG_LOGE(AceLogTag::ACE_FORM, "rsUIContext_ is null");
+        TAG_LOGE(AceLogTag::ACE_FORM, "rsUIContext_ or connectToRender is null");
     }
     auto clientInstance = OHOS::AppExecFwk::FormHostClient::GetInstance();
     TAG_LOGI(AceLogTag::ACE_FORM, "Before FormMgr adding form, info.id: %{public}" PRId64, info.id);
@@ -1004,6 +1004,12 @@ void FormManagerDelegate::ReAddForm()
     }
     auto clientInstance = OHOS::AppExecFwk::FormHostClient::GetInstance();
     wantCache_.SetParam(FORM_RENDERER_PROCESS_ON_ADD_SURFACE, renderDelegate_->AsObject());
+    if (rsUIContext_ && rsUIContext_->GetConnectToRender()) {
+        auto connectToRender = rsUIContext_->GetConnectToRender();
+        wantCache_.SetParam(CONNECT_TO_RENDER, connectToRender);
+    } else {
+        TAG_LOGE(AceLogTag::ACE_FORM, "rsUIContext_ or connectToRender is null");
+    }
     auto ret =
         OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(formJsInfo_.formId, wantCache_, clientInstance, formJsInfo_);
     if (ret != 0) {

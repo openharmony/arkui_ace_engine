@@ -27,8 +27,8 @@
 #include "interfaces/inner_api/form_render/include/form_renderer_delegate_impl.h"
 #include "interfaces/inner_api/form_render/include/form_renderer_group.h"
 #include "interfaces/inner_api/ace/serialized_gesture.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #undef private
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "./mock/mock_i_remote_object_form.h"
 
 using namespace testing;
