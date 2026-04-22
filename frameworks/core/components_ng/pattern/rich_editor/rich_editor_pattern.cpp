@@ -10719,6 +10719,19 @@ bool RichEditorPattern::OnScrollCallback(float offset, int32_t source)
     return true;
 }
 
+void RichEditorPattern::SetHorizontalScrolling(bool isHorizontalScrolling)
+{
+    CHECK_NULL_VOID(isHorizontalScrolling_ != isHorizontalScrolling);
+    isHorizontalScrolling_ = isHorizontalScrolling;
+    // Reset scroll bar when horizontal scrolling is disabled
+    needResetScrollBar_ = !isHorizontalScrolling;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    paragraphCache_.Clear();
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetHorizontalScrolling: [%{public}d]", isHorizontalScrolling_);
+}
+
 float RichEditorPattern::GetCrossOverHeight() const
 {
     if (!keyboardAvoidance_ || !contentChange_ || AceApplicationInfo::GetInstance().

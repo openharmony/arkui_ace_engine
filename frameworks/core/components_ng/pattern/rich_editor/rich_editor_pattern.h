@@ -877,6 +877,11 @@ public:
 
     std::optional<float> GetLastCaretPos() const;
     void SetLastCaretPos(float lastCaretPos);
+    void SetHorizontalScrolling(bool isHorizontalScrolling);
+    bool GetHorizontalScrolling() const
+    {
+        return isHorizontalScrolling_;
+    }
     bool IsShortCutBlocked() override;
     void UpdateScrollBarColor(std::optional<Color> color, bool isUpdateProperty = false);
     Color GetScrollBarColor() const;
@@ -1421,6 +1426,8 @@ private:
     // record caret bottom position relative to window when keyboard avoid
     std::optional<float> lastCaretPos_ = std::nullopt;
     std::unordered_set<int32_t> touchedFingers_;
+    bool isHorizontalScrolling_ = false;
+    bool needResetScrollBar_ = false;
     bool isSingleLineMode_ = false;
 
 #if defined(CROSS_PLATFORM)

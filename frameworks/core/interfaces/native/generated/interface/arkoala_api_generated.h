@@ -26119,6 +26119,8 @@ typedef struct GENERATED_ArkUIRichEditorModifier {
                                         const Opt_SelectedDragPreviewStyle* value);
     void (*setOrphanCharOptimization)(Ark_NativePointer node,
                                       const Opt_Boolean* value);
+    void (*setHorizontalScrolling)(Ark_NativePointer node,
+                                 const Opt_Boolean* value);
     void (*setBindSelectionMenu)(Ark_NativePointer node,
                                  const Opt_RichEditorSpanType* spanType,
                                  const Opt_CustomNodeBuilder* content,

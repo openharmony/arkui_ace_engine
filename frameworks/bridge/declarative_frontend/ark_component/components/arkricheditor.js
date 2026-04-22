@@ -216,6 +216,10 @@ class ArkRichEditorComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, RichEditorOrphanCharOptimizationModifier.identity, RichEditorOrphanCharOptimizationModifier, enable);
     return this;
   }
+  horizontalScrolling(enabled) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorHorizontalScrollingModifier.identity, RichEditorHorizontalScrollingModifier, enabled);
+    return this;
+  }
 }
 
 class RichEditorEnableDataDetectorModifier extends ModifierWithKey {
@@ -872,6 +876,20 @@ class RichEditorOrphanCharOptimizationModifier extends ModifierWithKey {
 }
 RichEditorOrphanCharOptimizationModifier.identity = Symbol('richEditorOrphanCharOptimization');
 
+class RichEditorHorizontalScrollingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetHorizontalScrolling(node);
+    } else {
+      getUINativeModule().richEditor.setHorizontalScrolling(node, this.value);
+    }
+  }
+}
+RichEditorHorizontalScrollingModifier.identity = Symbol('richEditorHorizontalScrolling');
+
 class JSRichEditor extends JSViewAbstract {
     static create(params) {
         getUINativeModule().richEditor.create(params);
@@ -1022,6 +1040,9 @@ class JSRichEditor extends JSViewAbstract {
     }
     static orphanCharOptimization(enable) {
         getUINativeModule().richEditor.setOrphanCharOptimization(true, enable);
+    }
+    static horizontalScrolling(enabled) {
+      getUINativeModule().richEditor.setHorizontalScrolling(true, enabled);
     }
     static clip(callback) {
       if (callback === undefined) {

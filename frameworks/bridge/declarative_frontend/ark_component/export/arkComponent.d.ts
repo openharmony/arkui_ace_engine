@@ -473,6 +473,7 @@ declare class ArkRichEditorComponent extends ArkComponent implements CommonMetho
     fallbackLineSpacing(enable: Optional<boolean>): RichEditorAttribute;
     singleLine(enable: boolean): RichEditorAttribute;
     orphanCharOptimization(enable: Optional<boolean>): RichEditorAttribute;
+    horizontalScrolling(enabled: Optional<boolean>): RichEditorAttribute;
 }
 declare class ArkRowComponent extends ArkComponent implements RowAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);

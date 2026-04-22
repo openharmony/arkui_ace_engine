@@ -1230,6 +1230,44 @@ bool RichEditorModelNG::GetSingleLine(FrameNode* frameNode)
     return value;
 }
 
+void RichEditorModelNG::SetHorizontalScrolling(bool isEnable)
+{
+    auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetHorizontalScrolling(isEnable);
+}
+ 
+void RichEditorModelNG::ResetHorizontalScrolling()
+{
+    auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetHorizontalScrolling(false);
+}
+ 
+void RichEditorModelNG::SetHorizontalScrolling(FrameNode* frameNode, bool isEnable)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetHorizontalScrolling(isEnable);
+}
+ 
+void RichEditorModelNG::ResetHorizontalScrolling(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetHorizontalScrolling(false);
+}
+ 
+bool RichEditorModelNG::GetHorizontalScrolling(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(richEditorPattern, false);
+    return richEditorPattern->GetHorizontalScrolling();
+}
+
 Color RichEditorModelNG::GetScrollBarColor(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, Color());

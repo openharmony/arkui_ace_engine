@@ -991,6 +991,18 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._RichEditorAttribute_setOrphanCharOptimization(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setHorizontalScrollingAttribute(value: boolean | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_setHorizontalScrolling(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export enum RichEditorDeleteDirection {
     BACKWARD = 0,
@@ -1354,6 +1366,9 @@ export interface RichEditorAttribute extends CommonMethod {
     orphanCharOptimization(value: boolean | undefined): this {
         throw new Error('Unimplemented method orphanCharOptimization')
     }
+    horizontalScrolling(value: boolean | undefined): this {
+        throw new Error('Unimplemented method horizontalScrolling')
+    }
     attributeModifier(value: AttributeModifier<RichEditorAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error('Unimplemented method attributeModifier')
     }
@@ -1600,6 +1615,11 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
     public orphanCharOptimization(value: boolean | undefined): this {
         const value_casted = value as (boolean | undefined)
         this.getPeer()?.setOrphanCharOptimizationAttribute(value_casted)
+        return this
+    }
+    public horizontalScrolling(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined)
+        this.getPeer()?.setHorizontalScrollingAttribute(value_casted)
         return this
     }
     public attributeModifier(value: AttributeModifier<RichEditorAttribute> | AttributeModifier<CommonMethod> | undefined): this {

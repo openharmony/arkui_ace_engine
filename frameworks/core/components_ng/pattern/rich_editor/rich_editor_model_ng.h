@@ -78,6 +78,8 @@ public:
     void ResetSelectedDragPreviewStyle() override;
     void SetSingleLine(bool enabled) override;
     void ResetSingleLine() override;
+    void SetHorizontalScrolling(bool enabled) override;
+    void ResetHorizontalScrolling() override;
 
     static void SetCaretOffset(FrameNode* frameNode, int32_t caretPosition);
     static int32_t GetCaretOffset(FrameNode* frameNode);
@@ -195,6 +197,9 @@ public:
     static void SetSingleLine(FrameNode* frameNode, bool enabled);
     static void ResetSingleLine(FrameNode* frameNode);
     static bool GetSingleLine(FrameNode* frameNode);
+    static void SetHorizontalScrolling(FrameNode* frameNode, bool enabled);
+    static void ResetHorizontalScrolling(FrameNode* frameNode);
+    static bool GetHorizontalScrolling(FrameNode* frameNode);
     static Color GetScrollBarColor(FrameNode* frameNode);
     static void BindSelectionMenu(FrameNode* frameNode, TextSpanType& spanType,
         TextResponseType& responseType, std::function<void()>& buildFunc, const SelectMenuParam& menuParam);

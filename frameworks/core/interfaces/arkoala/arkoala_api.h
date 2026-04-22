@@ -8392,6 +8392,9 @@ struct ArkUIRichEditorModifier {
     void (*setRichEditorOrphanCharOptimization)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetRichEditorOrphanCharOptimization)(ArkUINodeHandle node);
     ArkUI_Bool (*getRichEditorOrphanCharOptimization)(ArkUINodeHandle node);
+    void (*setRichEditorHorizontalScrolling)(ArkUINodeHandle node, ArkUI_Bool singleLine);
+    void (*resetRichEditorHorizontalScrolling)(ArkUINodeHandle node);
+    ArkUI_Bool (*getRichEditorHorizontalScrolling)(ArkUINodeHandle node);
 };
 
 struct ArkUIRichEditorControllerModifier {
