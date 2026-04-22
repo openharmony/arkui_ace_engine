@@ -1241,6 +1241,29 @@ void SetBackgroundColorWithColorSpace(
     }
 }
 
+void SetBackgroundColorForHDR(
+    ArkUINodeHandle node, ArkUI_Int32 colorSpace, const ArkUI_Float32* hdrValues, void* bgColorRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(hdrValues);
+    Color backgroundColor = Color::FromFloat(hdrValues[0], hdrValues[1], hdrValues[2], hdrValues[3], hdrValues[4]);
+    if (ColorSpace::DISPLAY_P3 == colorSpace) {
+        backgroundColor.SetColorSpace(ColorSpace::DISPLAY_P3);
+    } else if (ColorSpace::BT2020 == colorSpace) {
+        backgroundColor.SetColorSpace(ColorSpace::BT2020);
+    } else {
+        backgroundColor.SetColorSpace(ColorSpace::SRGB);
+    }
+    if (!SystemProperties::ConfigChangePerform() || !bgColorRawPtr) {
+        ViewAbstract::SetBackgroundColor(frameNode, backgroundColor);
+    } else {
+        auto* bgColor = reinterpret_cast<ResourceObject*>(bgColorRawPtr);
+        auto backgroundColorResObj = AceType::Claim(bgColor);
+        ViewAbstract::SetBackgroundColor(frameNode, backgroundColor, backgroundColorResObj);
+    }
+}
+
 void ResetBackgroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -11269,6 +11292,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetBackground = ResetBackground,
         .setBackgroundColor = SetBackgroundColor,
         .setBackgroundColorWithColorSpace = SetBackgroundColorWithColorSpace,
+        .setBackgroundColorForHDR = SetBackgroundColorForHDR,
         .resetBackgroundColor = ResetBackgroundColor,
         .setWidth = SetWidth,
         .resetWidth = ResetWidth,
@@ -11830,6 +11854,7 @@ const CJUICommonModifier* GetCJUICommonModifier()
     static const CJUICommonModifier modifier = {
         .setBackgroundColor = SetBackgroundColor,
         .setBackgroundColorWithColorSpace = SetBackgroundColorWithColorSpace,
+        .setBackgroundColorForHDR = SetBackgroundColorForHDR,
         .resetBackgroundColor = ResetBackgroundColor,
         .setWidth = SetWidth,
         .resetWidth = ResetWidth,

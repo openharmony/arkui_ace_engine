@@ -3044,6 +3044,8 @@ struct ArkUICommonModifier {
     void (*setBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* bgColorRawPtr);
     void (*setBackgroundColorWithColorSpace)(
         ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace, void* bgColorRawPtr);
+    void (*setBackgroundColorForHDR)(
+        ArkUINodeHandle node, ArkUI_Int32 colorSpace, const ArkUI_Float32* hdrValues, void* bgColorRawPtr);
     void (*resetBackgroundColor)(ArkUINodeHandle node);
     void (*setWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue,
         void* widthResPtr);
