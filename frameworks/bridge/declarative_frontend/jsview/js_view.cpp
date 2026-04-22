@@ -1553,9 +1553,8 @@ void JSViewPartialUpdate::RegisterOnInstanceIdUpdateCallback(const JSRef<JSFunc>
         if (!customNodeBase->NeedRebuild()) {
             return;
         }
-        auto jsFunc = JSRef<JSFunc>::Cast(func);
         if (!self->jsViewObject_.IsEmpty() && !self->jsViewObject_->IsUndefined()) {
-            jsFunc->Call(self->jsViewObject_);
+            func->Call(self->jsViewObject_);
         } else {
             TAG_LOGW(AceLogTag::ACE_STATE_MGMT,
                 "JSView %{public}s jsViewObject_ is empty, cannot invoke updateJSInstanceCallback_",
