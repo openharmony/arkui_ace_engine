@@ -1525,9 +1525,6 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage042
     DragSummaryInfo dragSummaryInfo;
     int32_t dataSize = 1;
 
-    RefPtr<MockInteractionInterface> mockInteractionInterface = AceType::MakeRefPtr<MockInteractionInterface>();
-    ASSERT_NE(mockInteractionInterface, nullptr);
-    EXPECT_CALL(*mockInteractionInterface, GetAppDragSwitchState(_)).WillRepeatedly(testing::Return(1));
     RefPtr<MockUnifiedData> unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
     ASSERT_NE(unifiedData, nullptr);
     dragAction->unifiedData = unifiedData;

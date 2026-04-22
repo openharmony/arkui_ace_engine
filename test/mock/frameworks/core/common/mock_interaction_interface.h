@@ -74,12 +74,6 @@ public:
 
     MOCK_METHOD(int32_t, UnRegisterCoordinationListener, (), (override));
 
-    MOCK_METHOD(int32_t, SetDraggableState, (bool state), (override));
-
-    MOCK_METHOD(int32_t, GetAppDragSwitchState, (bool& state), (override));
-
-    MOCK_METHOD(void, SetDraggableStateAsync, (bool state, int64_t downTime), (override));
-
     MOCK_METHOD(int32_t, GetDragBundleInfo, (DragBundleInfo& dragBundleInfo), (override));
 
     MOCK_METHOD(int32_t, EnableInternalDropAnimation, (const std::string& animationInfo), (override));

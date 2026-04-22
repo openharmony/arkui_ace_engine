@@ -310,25 +310,6 @@ void DragDropGlobalController::ResetPrePendingStatus()
     disableDropAnimation_ = false;
 }
 
-void DragDropGlobalController::SetIsAppGlobalDragEnabled(bool isAppGlobalDragEnabled)
-{
-    std::unique_lock<std::shared_mutex> lock(mutex_);
-    isAppGlobalDragEnabled_ = isAppGlobalDragEnabled;
-    isAlreadyGetAppGlobalDrag_ = true;
-}
-
-bool DragDropGlobalController::IsAppGlobalDragEnabled() const
-{
-    std::shared_lock<std::shared_mutex> lock(mutex_);
-    return isAppGlobalDragEnabled_;
-}
-
-bool DragDropGlobalController::IsAlreadyGetAppGlobalDrag() const
-{
-    std::shared_lock<std::shared_mutex> lock(mutex_);
-    return isAlreadyGetAppGlobalDrag_;
-}
-
 bool DragDropGlobalController::IsCurrentDrag(int32_t requestId) const
 {
     return requestId_ == requestId;

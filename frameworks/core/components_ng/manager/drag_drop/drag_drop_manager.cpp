@@ -107,19 +107,7 @@ RefPtr<FrameNode> GetMenuWrapperNodeFromDrag()
     return dragDropManager->GetMenuWrapperNode();
 }
 
-DragDropManager::DragDropManager()
-{
-    if (DragDropGlobalController::GetInstance().IsAlreadyGetAppGlobalDrag()) {
-        return;
-    }
-    bool state = false;
-    auto result = InteractionInterface::GetInstance()->GetAppDragSwitchState(state);
-    if (result != 0) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "get app drag switch state failed!");
-        return;
-    }
-    DragDropGlobalController::GetInstance().SetIsAppGlobalDragEnabled(state);
-}
+DragDropManager::DragDropManager() {}
 
 DragDropManager::~DragDropManager()
 {
