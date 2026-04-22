@@ -14,6 +14,7 @@
  */
 
 #include "dynamic_component_renderer_impl.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "accessibility_element_info.h"
 

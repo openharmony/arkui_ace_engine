@@ -14,6 +14,7 @@
  */
 
 #include "core/components/web/render_web.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include <iomanip>
 #include <sstream>

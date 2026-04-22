@@ -99,6 +99,7 @@ class WebAccessibilityChildTreeCallback;
 class ViewDataCommon;
 class TransitionalNodeInfo;
 class WebDomDocument;
+enum class AccessibilityHoverEventType;
 
 namespace {
 

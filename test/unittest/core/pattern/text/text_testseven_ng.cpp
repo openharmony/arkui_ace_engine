@@ -21,6 +21,7 @@
 #include "test/unittest/core/common/clipboard/mock_clip_board.h"
 #include "text_base.h"
 
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"

@@ -2524,7 +2524,10 @@
       "OHOS::Ace::RenderNode::RotationTest(OHOS::Ace::RotationEvent const&)";
       "OHOS::Ace::RenderNode::RotationTestForward(OHOS::Ace::RotationEvent const&)";
       "OHOS::Ace::RenderNode::ScrollPageByChild(OHOS::Ace::Offset&, int)";
+      "OHOS::Ace::RenderNode::GetAccessibilityNodeId() const";
+      "OHOS::Ace::RenderNode::ClearAccessibilityRect()";
       "OHOS::Ace::RenderNode::SendAccessibilityEvent(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::Ace::RenderNode::SetAccessibilityVisible(bool)";
       "OHOS::Ace::RenderNode::SetAccessibilityRect(OHOS::Ace::Rect const&)";
       "OHOS::Ace::RenderNode::SetLayoutSize(OHOS::Ace::Size const&)";
       "OHOS::Ace::RenderNode::SetPaintRect(OHOS::Ace::Rect const&)";

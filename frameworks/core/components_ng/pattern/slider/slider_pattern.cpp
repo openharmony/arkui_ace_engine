@@ -26,6 +26,7 @@
 #include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/slider/slider_theme.h"
 #include "core/components/theme/app_theme.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"

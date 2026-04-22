@@ -20,6 +20,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/tab_bar/tab_theme.h"
 #include "core/components_ng/base/frame_node.h"

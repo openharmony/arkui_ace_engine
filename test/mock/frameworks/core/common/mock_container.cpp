@@ -20,6 +20,7 @@
 
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
+#include "core/common/container_handler.h"
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
 
 namespace OHOS::Ace {
@@ -39,6 +40,16 @@ void Container::SetAppBar(const RefPtr<NG::AppBarView>& appBar)
 RefPtr<NG::AppBarView> Container::GetAppBar() const
 {
     return appBar_;
+}
+
+void Container::RegisterContainerHandler(const RefPtr<ContainerHandler>& containerHandler)
+{
+    containerHandler_ = containerHandler;
+}
+
+RefPtr<ContainerHandler> Container::GetContainerHandler()
+{
+    return containerHandler_;
 }
 
 RefPtr<MockContainer> MockContainer::container_;

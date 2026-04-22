@@ -14,6 +14,7 @@
  */
 
 #include "compatible/components/list_v2/render_list.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/memory/ace_type.h"
 #include "base/utils/string_utils.h"

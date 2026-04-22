@@ -15,6 +15,8 @@
 
 #include "core/components/dialog_tween/render_dialog_tween.h"
 
+#include "core/accessibility/accessibility_manager.h"
+
 #include "base/log/event_report.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/stack/stack_element.h"

@@ -14,6 +14,7 @@
  */
 
 #include "test/mock/frameworks/core/common/mock_font_manager.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/components_ng/pattern/mock_nestable_scroll_container.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"

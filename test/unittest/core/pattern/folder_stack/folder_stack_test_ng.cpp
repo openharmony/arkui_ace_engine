@@ -15,6 +15,7 @@
 
 #include "gtest/gtest.h"
 
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/blank/blank_model_ng.h"

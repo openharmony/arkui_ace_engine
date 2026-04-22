@@ -16,6 +16,7 @@
 #include "test/unittest/core/pattern/test_ng.h"
 
 #include "base/utils/utils.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/memory/ref_counter.h"

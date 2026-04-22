@@ -14,6 +14,7 @@
  */
 
 #include "core/common/container.h"
+#include "core/common/container_handler.h"
 
 #include <dirent.h>
 #include "iremote_object.h"
@@ -43,6 +44,16 @@ void Container::SetAppBar(const RefPtr<NG::AppBarView>& appBar)
 RefPtr<NG::AppBarView> Container::GetAppBar() const
 {
     return appBar_;
+}
+
+void Container::RegisterContainerHandler(const RefPtr<ContainerHandler>& containerHandler)
+{
+    containerHandler_ = containerHandler;
+}
+
+RefPtr<ContainerHandler> Container::GetContainerHandler()
+{
+    return containerHandler_;
 }
 
 int32_t Container::CurrentId()

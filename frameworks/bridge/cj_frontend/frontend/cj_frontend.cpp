@@ -14,6 +14,7 @@
  */
 
 #include "bridge/cj_frontend/frontend/cj_frontend.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "bridge/cj_frontend/frontend/cj_page_router.h"
 

@@ -14,6 +14,7 @@
  */
 
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "test/mock/frameworks/core/rosen/mock_canvas.h"

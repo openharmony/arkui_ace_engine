@@ -19,6 +19,7 @@
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/frameworks/core/rosen/mock_canvas.h"
 
+#include "core/accessibility/accessibility_manager.h"
 #include "core/common/multi_thread_build_manager.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"

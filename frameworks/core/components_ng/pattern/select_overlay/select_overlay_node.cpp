@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include <cstdint>
 #include <functional>

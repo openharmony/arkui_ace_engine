@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include <sstream>
 

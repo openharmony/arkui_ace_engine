@@ -14,6 +14,7 @@
  */
 
 #include "compatible/components/refresh/render_refresh.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/i18n/localization.h"
 #include "base/utils/system_properties.h"

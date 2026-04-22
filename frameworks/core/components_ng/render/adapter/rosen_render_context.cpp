@@ -51,6 +51,7 @@
 #include "core/common/layout_inspector.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/common/visual_effect/transparency_utils.h"
+#include "core/accessibility/accessibility_manager.h"
 #ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
 #include "core/components_ng/manager/gesture_debug/gesture_debug_boundary_manager.h"
 #endif

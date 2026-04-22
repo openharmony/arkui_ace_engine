@@ -14,6 +14,7 @@
  */
 
 #include "core/components/select_popup/select_popup_element.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "core/components/select_popup/render_select_popup.h"
 

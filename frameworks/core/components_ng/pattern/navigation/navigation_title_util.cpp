@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/i18n/localization.h"
 #include "base/subwindow/subwindow_manager.h"

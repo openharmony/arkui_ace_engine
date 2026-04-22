@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/ui_extension/platform_container_handler.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "base/log/dump_log.h"

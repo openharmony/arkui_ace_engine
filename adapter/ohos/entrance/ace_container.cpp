@@ -14,6 +14,9 @@
  */
 
 #include "adapter/ohos/entrance/ace_container.h"
+#include "core/accessibility/accessibility_manager.h"
+#include "core/accessibility/accessibility_manager_ng.h"
+#include "core/common/container_handler.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include <chrono>

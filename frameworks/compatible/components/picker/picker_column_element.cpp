@@ -14,6 +14,7 @@
  */
 
 #include "compatible/components/picker/picker_column_element.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "compatible/components/picker/render_picker_column.h"
 

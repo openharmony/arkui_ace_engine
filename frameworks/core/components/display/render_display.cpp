@@ -15,6 +15,8 @@
 
 #include "core/components/display/render_display.h"
 
+#include "core/accessibility/accessibility_manager.h"
+
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 

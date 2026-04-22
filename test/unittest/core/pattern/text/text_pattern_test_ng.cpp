@@ -15,6 +15,7 @@
 #include "text_base.h"
 
 #include "base/memory/ace_type.h"
+#include "core/accessibility/accessibility_manager_ng.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/text/span_node.h"

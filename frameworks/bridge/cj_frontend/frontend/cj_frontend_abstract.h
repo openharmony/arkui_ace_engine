@@ -26,6 +26,7 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_common_ffi.h"
 #include "bridge/common/manifest/manifest_parser.h"
 #include "bridge/common/utils/pipeline_context_holder.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/common/frontend.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 

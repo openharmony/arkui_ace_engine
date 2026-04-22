@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/xcomponent/xcomponent_accessibility_child_tree_callback.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"

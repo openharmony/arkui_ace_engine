@@ -18,6 +18,7 @@
 #include "text_base.h"
 #include "ui/base/geometry/dimension.h"
 
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"

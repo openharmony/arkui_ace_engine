@@ -33,6 +33,7 @@
 #include "test/unittest/core/pattern/web/mock_web_delegate.h"
 
 #include "arkweb_utils.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components/text_overlay/text_overlay_theme.h"

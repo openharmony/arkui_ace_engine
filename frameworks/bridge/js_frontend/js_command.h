@@ -21,7 +21,6 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
-#include "core/accessibility/accessibility_manager.h"
 #include "core/components_ng/pattern/image/image_properties.h"
 #include "core/pipeline/pipeline_context.h"
 #include "compatible/components/chart/dom_chart.h"
@@ -32,8 +31,11 @@
 #include "frameworks/bridge/common/dom/dom_proxy.h"
 #include "frameworks/compatible/components/stepper/dom_stepper.h"
 #include "frameworks/compatible/components/stepper/dom_stepper_item.h"
-#include "frameworks/bridge/common/dom/dom_xcomponent.h"
 #include "frameworks/compatible/components/canvas/custom_paint_component.h"
+
+namespace OHOS::Ace {
+class XComponentTaskPool;
+}
 
 namespace OHOS::Ace::Framework {
 

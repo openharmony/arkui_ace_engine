@@ -14,6 +14,7 @@
  */
 
 #include "core/components/transform/render_transform.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "core/components/box/render_box_base.h"
 #include "core/components/transform/transform_component.h"

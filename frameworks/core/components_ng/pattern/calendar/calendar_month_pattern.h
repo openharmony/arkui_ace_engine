@@ -31,6 +31,10 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/render/paint_property.h"
 
+namespace OHOS::Ace {
+class AccessibilitySAObserverCallback;
+}
+
 namespace OHOS::Ace::NG {
 class ClickEvent;
 

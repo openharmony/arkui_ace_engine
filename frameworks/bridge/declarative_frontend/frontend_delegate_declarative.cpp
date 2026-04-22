@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/frontend_delegate_declarative.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/log/event_report.h"
 #include "base/resource/ace_res_config.h"

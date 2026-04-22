@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include <cmath>
 #include <cstdlib>

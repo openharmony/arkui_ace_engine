@@ -28,7 +28,6 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/font_collection.h"
-#include "core/components_v2/inspector/utils.h"
 
 #ifndef USE_ROSEN_DRAWING
 class SkCanvas;
@@ -222,38 +221,7 @@ struct ParagraphStyle {
         return !(*this == others);
     }
 
-    std::string ToString() const
-    {
-        std::string result = "TextAlign: ";
-        result += V2::ConvertWrapTextAlignToString(align);
-        result += ", TextVerticalAlign: ";
-        result += V2::ConvertWrapTextVerticalAlignToString(verticalAlign);
-        result += ", maxLines: ";
-        result += std::to_string(maxLines);
-        result += ", wordBreak: ";
-        result += V2::ConvertWrapWordBreakToString(wordBreak);
-        result += ", textOverflow: ";
-        result += V2::ConvertWrapTextOverflowToString(textOverflow);
-        result += ", leadingMargin: ";
-        result += leadingMargin.has_value() ? leadingMargin.value().ToString().c_str() : "nullptr";
-        result += ", fontSize: ";
-        result += std::to_string(fontSize);
-        result += ", indent: ";
-        result += ", paragraphSpacing: ";
-        result += paragraphSpacing.ToString();
-        result += indent.ToString();
-        result += ", enableAutoSpacing: ";
-        result += enableAutoSpacing;
-        result += ", orphanCharOptimization: ";
-        result += orphanCharOptimization;
-        result += ", compressLeadingPunctuation: ";
-        result += compressLeadingPunctuation;
-        result += ", includeFontPadding: ";
-        result += includeFontPadding;
-        result += ", fallbackLineSpacing: ";
-        result += fallbackLineSpacing;
-        return result;
-    }
+    std::string ToString() const;
 };
 
 struct CaretMetricsF {

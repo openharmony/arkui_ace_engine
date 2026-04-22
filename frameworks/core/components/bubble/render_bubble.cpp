@@ -15,6 +15,8 @@
 
 #include "core/components/bubble/render_bubble.h"
 
+#include "core/accessibility/accessibility_manager.h"
+
 #include "base/log/event_report.h"
 #include "core/components/stack/stack_element.h"
 #include "core/event/ace_event_helper.h"

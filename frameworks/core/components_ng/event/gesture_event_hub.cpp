@@ -15,6 +15,7 @@
 
 #include "core/components_ng/event/gesture_event_hub.h"
 
+#include "core/accessibility/accessibility_utils.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/time_util.h"
 #include "base/geometry/calc_dimension_rect.h"

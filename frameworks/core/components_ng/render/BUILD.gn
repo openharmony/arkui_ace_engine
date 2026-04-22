@@ -47,6 +47,7 @@ build_component_ng("render_ng") {
     "line_painter.cpp",
     "media_player_creator.cpp",
     "paint_property.cpp",
+    "paragraph.cpp",
     "paint_wrapper.cpp",
     "polygon_painter.cpp",
     "rect_painter.cpp",

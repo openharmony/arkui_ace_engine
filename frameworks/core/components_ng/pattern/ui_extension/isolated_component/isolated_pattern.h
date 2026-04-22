@@ -22,6 +22,10 @@
 #include "core/components_ng/pattern/ui_extension/platform_container_handler.h"
 #include "core/components_ng/pattern/ui_extension/platform_pattern.h"
 
+namespace OHOS::Ace {
+class AccessibilityChildTreeCallback;
+}
+
 namespace OHOS::Ace::NG {
 
 struct IsolatedDumpInfo {
