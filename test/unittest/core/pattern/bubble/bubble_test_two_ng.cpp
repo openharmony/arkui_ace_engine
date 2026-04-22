@@ -355,13 +355,13 @@ HWTEST_F(BubbleTestTwoNg, UpdateBubbleMaxSize001, TestSize.Level0)
     ASSERT_NE(layoutWrapper, nullptr);
     bool showInSubwindow = false;
     layoutAlgorithm->useCustom_ = false;
-    layoutAlgorithm->UpdateBubbleMaxSize(AceType::RawPtr(layoutWrapper), showInSubwindow);
+    layoutAlgorithm->UpdateBubbleMaxSize(bubbleLayoutProperty, AceType::RawPtr(layoutWrapper), showInSubwindow);
     layoutAlgorithm->useCustom_ = true;
-    layoutAlgorithm->UpdateBubbleMaxSize(AceType::RawPtr(layoutWrapper), showInSubwindow);
+    layoutAlgorithm->UpdateBubbleMaxSize(bubbleLayoutProperty, AceType::RawPtr(layoutWrapper), showInSubwindow);
     showInSubwindow = true;
-    layoutAlgorithm->UpdateBubbleMaxSize(AceType::RawPtr(layoutWrapper), showInSubwindow);
+    layoutAlgorithm->UpdateBubbleMaxSize(bubbleLayoutProperty, AceType::RawPtr(layoutWrapper), showInSubwindow);
     layoutAlgorithm->isTips_ = true;
-    layoutAlgorithm->UpdateBubbleMaxSize(AceType::RawPtr(layoutWrapper), showInSubwindow);
+    layoutAlgorithm->UpdateBubbleMaxSize(bubbleLayoutProperty, AceType::RawPtr(layoutWrapper), showInSubwindow);
     auto childProp = childNode->GetLayoutProperty();
     ASSERT_NE(childProp, nullptr);
     auto layoutConstraint = childProp->GetLayoutConstraint();
