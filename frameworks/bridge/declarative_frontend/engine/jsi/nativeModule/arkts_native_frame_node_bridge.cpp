@@ -160,6 +160,14 @@ ArkUI_Int32 GetExpandMode(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Int32 ind
     CHECK_NULL_RETURN(!expandModeArg.IsNull(), 1);
     return expandModeArg->IsNumber() || expandModeArg->IsBoolean() ? expandModeArg->ToNumber(vm)->Value() : 1;
 }
+ArkUI_Int32 GetChildrenCountMode(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Int32 index)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> childrenCountModeArg = runtimeCallInfo->GetCallArgRef(index);
+    CHECK_NULL_RETURN(!childrenCountModeArg.IsNull(), 0);
+    return childrenCountModeArg->IsNumber() || childrenCountModeArg->IsBoolean()
+               ? childrenCountModeArg->ToNumber(vm)->Value() : 0;
+}
 ArkUI_Bool GetIsExcludeInner(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Int32 index)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -935,8 +943,8 @@ ArkUINativeModuleValue FrameNodeBridge::GetChildrenCount(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     CHECK_NULL_RETURN(!firstArg.IsNull(), panda::NumberRef::New(vm, 0));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    int isExpanded = GetIsExpanded(runtimeCallInfo, 1);
-    auto number = GetArkUINodeModifiers()->getFrameNodeModifier()->getChildrenCount(nativeNode, isExpanded);
+    int childrenCountMode = GetChildrenCountMode(runtimeCallInfo, 1);
+    auto number = GetArkUINodeModifiers()->getFrameNodeModifier()->getChildrenCount(nativeNode, childrenCountMode);
     return panda::NumberRef::New(vm, number);
 }
 

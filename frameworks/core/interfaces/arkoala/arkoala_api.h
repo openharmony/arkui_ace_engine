@@ -8711,7 +8711,7 @@ struct ArkUIFrameNodeModifier {
     void (*clearChildren)(ArkUINodeHandle node);
     ArkUI_Bool (*convertPoint)(ArkUINodeHandle node, ArkUI_Float32 (*position)[2], ArkUINodeHandle targetnode,
         ArkUI_Float32 (*targetNodePositionOffset)[2]);
-    ArkUI_Uint32 (*getChildrenCount)(ArkUINodeHandle node, ArkUI_Bool isExpanded);
+    ArkUI_Uint32 (*getChildrenCount)(ArkUINodeHandle node, ArkUI_Uint32 childrenCountMode);
     ArkUINodeHandle (*getChild)(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Uint32 expandMode);
     ArkUI_Int32 (*getFirstChildIndexWithoutExpand)(ArkUINodeHandle node, ArkUI_Uint32* index);
     ArkUI_Int32 (*getLastChildIndexWithoutExpand)(ArkUINodeHandle node, ArkUI_Uint32* index);

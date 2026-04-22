@@ -44,6 +44,12 @@ enum class ExpandMode : uint32_t {
     NOT_EXPAND = 0,
     EXPAND,
     LAZY_EXPAND,
+    LAZY_NOT_EXPAND,
+};
+enum class ChildrenCountMode : uint32_t {
+    ALL_EXPAND = 0,
+    ONLY_EXPANDED,
+    ALL_NOT_EXPAND,
 };
 // same as inner defines in property.h
 typedef enum {
@@ -304,6 +310,13 @@ FrameNode* GetChildNode(RefPtr<FrameNode> nodeRef, int32_t index, int32_t expand
     }
     if (expandModeResult == ExpandMode::EXPAND || expandModeResult == ExpandMode::NOT_EXPAND) {
         return nodeRef->GetFrameNodeChildByIndex(index, false, expandModeResult == ExpandMode::EXPAND);
+    } else if (expandModeResult == ExpandMode::LAZY_NOT_EXPAND) {
+        auto child = nodeRef->GetFrameNodeChildByIndex(index, false, true);
+        if (child == nullptr) {
+            return GetChildNode(nodeRef, index, 1);
+        } else {
+            return child;
+        }
     } else {
         auto child = nodeRef->GetFrameNodeChildByIndexWithoutBuild(index);
         if (child == nullptr) {
@@ -398,13 +411,23 @@ Ark_NativePointer GetParentImpl(Ark_FrameNode peer)
     CHECK_NULL_RETURN(parent, nullptr);
     return FrameNodePeer::Create(parent);
 }
-Ark_Int32 GetChildrenCountImpl(Ark_FrameNode peer)
+Ark_Int32 GetChildrenCountImpl(Ark_FrameNode peer,
+                               const Ark_Number* childrenCountMode)
 {
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_RETURN(peerNode, 0);
 
     // Thread validation for multithread support
     CHECK_NODE_ON_VALID_THREAD_RETURN(AceType::RawPtr(peerNode), 0);
+    auto childrenCountModeInt = Converter::Convert<int32_t>(*childrenCountMode);
+    auto childrenCountModeResult = static_cast<ChildrenCountMode>(childrenCountModeInt);
+    if (childrenCountModeResult == ChildrenCountMode::ALL_EXPAND) {
+        return peerNode->GetAllChildrenWithBuild(false).size();
+    } else if (childrenCountModeResult == ChildrenCountMode::ONLY_EXPANDED) {
+        return peerNode->GetTotalChildCountWithoutExpanded();
+    } else if (childrenCountModeResult == ChildrenCountMode::ALL_NOT_EXPAND) {
+        return peerNode->GetTotalChildCount();
+    }
     return peerNode->GetAllChildrenWithBuild(false).size();
 }
 void DisposeImpl(Ark_FrameNode peer)

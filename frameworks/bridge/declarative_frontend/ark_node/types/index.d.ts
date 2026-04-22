@@ -307,7 +307,7 @@ declare interface FrameNodeNativeModule {
   clearChildren(nodePtr: NodePtr): void;
   getFirstChildIndexWithoutExpand(nodePtr: NodePtr): number;
   getLastChildIndexWithoutExpand(nodePtr: NodePtr): number;
-  getChildrenCount(nodePtr: NodePtr, isExpanded: boolean): number;
+  getChildrenCount(nodePtr: NodePtr, childrenCountMode: ChildrenCountMode | boolean): number;
   getPositionToParent(nodePtr: NodePtr): Position;
   getPositionToScreen(nodePtr: NodePtr): Position;
   getPositionToWindow(nodePtr: NodePtr): Position;
