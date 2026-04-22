@@ -347,6 +347,8 @@ export class CounterComponent extends ViewPU {
     this.controller2 = new TextInputController();
     this.controller3 = new TextInputController();
     this.initFlag = true;
+    this.yearTextWidth = 0;
+    this.monthDayTextWidth = 0;
     this.setInitiallyProvidedValue(params);
     this.declareWatch('options', this.onOptionsChange);
     this.finalizeConstruction();
@@ -531,6 +533,12 @@ export class CounterComponent extends ViewPU {
     }
     if (params.initFlag !== undefined) {
       this.initFlag = params.initFlag;
+    }
+    if (params.yearTextWidth !== undefined) {
+      this.yearTextWidth = params.yearTextWidth;
+    }
+    if (params.monthDayTextWidth !== undefined) {
+      this.monthDayTextWidth = params.monthDayTextWidth;
     }
   }
   updateStateVars(params) {
@@ -857,8 +865,7 @@ export class CounterComponent extends ViewPU {
       return fontSize + 'vp';
     }
   }
-  getMeasuredTextWidth() {
-    let text = this.getValue();
+  getMeasuredTextWidth(text) {
     let measureUtils = this.getUIContext().getMeasureUtils();
     let widthPx = measureUtils.measureText({
       textContent: text,
@@ -1181,6 +1188,12 @@ export class CounterComponent extends ViewPU {
         this.dateStyleOptions = options;
       }
       this.updateDateStyleOptions();
+      if (this.yearTextWidth <= 0) {
+        this.yearTextWidth = this.getMeasuredTextWidth('0000');
+      }
+      if (this.monthDayTextWidth <= 0) {
+        this.monthDayTextWidth = this.getMeasuredTextWidth('00');
+      }
     }
     else {
     }
@@ -2706,7 +2719,7 @@ export class CounterComponent extends ViewPU {
                   });
                   TextInput.accessibilityDescription({ 'id': -1, 'type': 10003, params: ['sys.string.input_counter_double_click_description'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                   TextInput.direction(this.counterDirection);
-                  TextInput.width(this.getMeasuredTextWidth());
+                  TextInput.width(this.getMeasuredTextWidth(this.getValue()));
                   TextInput.height('20vp');
                   TextInput.padding(0);
                   TextInput.borderRadius(0);
@@ -3067,7 +3080,7 @@ export class CounterComponent extends ViewPU {
             TextInput.maxLength(5);
             TextInput.padding(0);
             TextInput.backgroundColor(this.hasFocusText1 ? CounterResource.BUTTON_BORDER_FOCUSED_COLOR : Color.Transparent);
-            TextInput.width('38vp');
+            TextInput.width(this.yearTextWidth);
             TextInput.height('20vp');
             TextInput.borderRadius(0);
             TextInput.borderWidth(0);
@@ -3201,7 +3214,7 @@ export class CounterComponent extends ViewPU {
             TextInput.maxLength(3);
             TextInput.padding(0);
             TextInput.backgroundColor(this.hasFocusText2 ? CounterResource.BUTTON_BORDER_FOCUSED_COLOR : Color.Transparent);
-            TextInput.width('19vp');
+            TextInput.width(this.monthDayTextWidth);
             TextInput.height('20vp');
             TextInput.borderRadius(0);
             TextInput.key('DateTextInput2' + this.timeStamp.toString());
@@ -3346,7 +3359,7 @@ export class CounterComponent extends ViewPU {
             TextInput.maxLength(3);
             TextInput.padding(0);
             TextInput.backgroundColor(this.hasFocusText3 ? CounterResource.BUTTON_BORDER_FOCUSED_COLOR : Color.Transparent);
-            TextInput.width('19vp');
+            TextInput.width(this.monthDayTextWidth);
             TextInput.height('20vp');
             TextInput.borderRadius(0);
             TextInput.key('DateTextInput3' + this.timeStamp.toString());
