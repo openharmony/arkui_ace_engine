@@ -14,13 +14,12 @@
  */
 const fs = require("fs");
 
-function AddExportToDistFile(fileName, exportContent) {
+function addOtherContentToDistFile(fileName, otherContent) {
     let content = fs.readFileSync(fileName);
-    if (content.includes('export default {')) {
-        console.log(`[INFO] Export statement already exists in ${fileName}, skipping.`);
+    if (content.includes('globalThis.__getArkUINode__')) {
         return;
     }
-    fs.writeFileSync(fileName, content + exportContent);
+    fs.writeFileSync(fileName, content + otherContent);
 }
 
 
@@ -31,16 +30,8 @@ function main() {
     }
 
     let distFileName = process.argv[2];
-    const exportContent = `
-export default {
-    NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, FrameNodeUtils,
-    NodeRenderType, XComponentNode, LengthMetrics, ColorMetrics, LengthUnit, LengthMetricsUnit, ShapeMask, ShapeClip,
-    getNodePtrValue, nodeDeref, edgeColors, edgeWidths, borderStyles, borderRadiuses, Content, ComponentContent, NodeContent,
-    typeNode, NodeAdapter, ExpandMode, UIState, getFrameNodeRawPtr, ReactiveBuilderNode, ReactiveComponentContent, CompetitionStrategy,
-    createComponentContentByTrans, createReactiveComponentContentByTrans
-};
-`;
-    AddExportToDistFile(distFileName, exportContent);
+    const otherContent = fs.readFileSync('./src/arkComponent.js');
+    addOtherContentToDistFile(distFileName, otherContent);
     console.log(`Updated export file: ${distFileName}`);
 }
 

@@ -114,11 +114,11 @@ es2abc_gen_abc("gen_arkComponent_abc") {
     "//out/arkui-x/gen/build/ohos/sdk:arkui_x_linux",
     "//out/arkui-x/gen/build/ohos/sdk:arkui_x_darwin"
   ]
-  src_js = rebase_path(
-          "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/arkComponent.js")
+  extra_dependencies = [ "../../ark_component:npm_build_ark_component" ]
+  basepath = get_label_info("../../ark_component:npm_build_ark_component", "target_gen_dir")
+  src_js = rebase_path("$basepath/arkComponent.js")
   dst_file = rebase_path(base_output_path + "/arkComponent.abc")
-
-  in_puts = [ "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/arkComponent.js" ]
+  in_puts = [ "$basepath/arkComponent.js" ]
   out_puts = [ base_output_path + "/arkComponent.abc" ]
 }
 

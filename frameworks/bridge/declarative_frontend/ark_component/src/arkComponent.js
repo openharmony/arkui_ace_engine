@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,30 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/// <reference path='./import.ts' />
-let LogTag;
-(function (LogTag) {
-  LogTag[LogTag['STATE_MGMT'] = 0] = 'STATE_MGMT';
-  LogTag[LogTag['ARK_COMPONENT'] = 1] = 'ARK_COMPONENT';
-})(LogTag || (LogTag = {}));
-class ArkLogConsole {
-  static log(...args) {
-      aceConsole.log(LogTag.ARK_COMPONENT, ...args);
-  }
-  static debug(...args) {
-      aceConsole.debug(LogTag.ARK_COMPONENT, ...args);
-  }
-  static info(...args) {
-      aceConsole.info(LogTag.ARK_COMPONENT, ...args);
-  }
-  static warn(...args) {
-      aceConsole.warn(LogTag.ARK_COMPONENT, ...args);
-  }
-  static error(...args) {
-      aceConsole.error(LogTag.ARK_COMPONENT, ...args);
-  }
-}
 let ModifierType;
 (function (ModifierType) {
     ModifierType[ModifierType['ORIGIN'] = 0] = 'ORIGIN';
