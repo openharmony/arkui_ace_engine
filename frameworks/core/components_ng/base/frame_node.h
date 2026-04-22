@@ -1907,7 +1907,7 @@ class ToggleButtonAccessibilityProperty;
 class VideoAccessibilityProperty;
 class WaterFlowAccessibilityProperty;
 class WebAccessibilityProperty;
-// TODO: Remove this template method later and return the base class directly.
+// Remove this template method later and return the base class directly.
 // Expand the DynamicCast call at each call site.
 extern template RefPtr<AccessibilityProperty> FrameNode::GetAccessibilityProperty<AccessibilityProperty>() const;
 extern template RefPtr<BadgeAccessibilityProperty>

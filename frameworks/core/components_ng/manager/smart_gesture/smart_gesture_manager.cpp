@@ -32,6 +32,7 @@
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/gestures/recognizers/recognizer_group.h"
 #include "core/components_ng/manager/smart_gesture/smart_gesture_decider.h"
