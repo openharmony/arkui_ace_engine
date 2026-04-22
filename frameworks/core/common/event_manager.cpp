@@ -1124,6 +1124,32 @@ void EventManager::AddDumpTouchInfo(const TouchEvent& event)
             CheckTouchInfoDump();
         }
     }
+    if (touchTimingCallback_ && !event.isFalsified && event.sourceTool == SourceTool::FINGER) {
+        auto callback = touchTimingCallback_;
+        auto time = std::chrono::high_resolution_clock::now();
+        TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW,
+            "touchTimingCallback:%{public}d/%{public}d sensorTime:%{public}s receiveTime:%{public}s "
+            "dispatchTime:%{public}s", static_cast<int32_t>(event.type), static_cast<int32_t>(event.history.size()),
+            std::to_string(event.sensorTime.time_since_epoch().count()).c_str(),
+            std::to_string(event.processTime.time_since_epoch().count()).c_str(),
+            std::to_string(time.time_since_epoch().count()).c_str()
+        );
+        if (!event.history.empty()) {
+            for (const auto& point : event.history) {
+                callback(static_cast<uint64_t>(point.sensorTime.time_since_epoch().count()),
+                    static_cast<uint64_t>(point.processTime.time_since_epoch().count()),
+                    static_cast<uint64_t>(time.time_since_epoch().count()),
+                    static_cast<int32_t>(point.type)
+                );
+            }
+            return;
+        }
+        callback(static_cast<uint64_t>(event.sensorTime.time_since_epoch().count()),
+            static_cast<uint64_t>(event.processTime.time_since_epoch().count()),
+            static_cast<uint64_t>(time.time_since_epoch().count()),
+            static_cast<int32_t>(event.type)
+        );
+    }
 }
 
 bool EventManager::DispatchTouchEvent(const TouchEvent& event, bool sendOnTouch)

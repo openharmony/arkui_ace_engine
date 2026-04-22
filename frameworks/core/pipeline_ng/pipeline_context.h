@@ -1338,6 +1338,11 @@ public:
         xComponentDisplayConstraintEnabled_ = isEnable;
     }
 
+    void RegisterTouchTimingCallback(
+        const std::function<void(uint64_t sensorTime, uint64_t receiveTime, uint64_t dispatchTime,
+            int32_t eventType)>&& callback);
+    void UnregisterTouchTimingCallback();
+
     bool GetXComponentDisplayConstraintEnabled() override
     {
         return xComponentDisplayConstraintEnabled_;
