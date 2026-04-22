@@ -5364,9 +5364,10 @@ void RosenRenderContext::OnBackShadowUpdate(const Shadow& shadow)
         rsNode_->SetShadowElevation(shadow.IsValid() ? shadow.GetElevation() : 0.0);
     } else {
         auto radius = shadow.GetBlurRadius();
-        rsNode_->SetShadowRadius(
-            (!shadow.IsValid() || (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)
-            && NearZero(radius))) ? -1.0 : DrawingDecorationPainter::ConvertRadiusToSigma(radius));
+        auto isNeedNotConvert = !shadow.IsValid() ||
+            (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX) && NearZero(radius));
+        rsNode_->SetShadowRadius(isNeedNotConvert ?
+            -1.0 : DrawingDecorationPainter::ConvertRadiusToSigma(radius));
     }
     RequestNextFrame();
 }
@@ -7560,7 +7561,7 @@ void RosenRenderContext::SetShadowRadius(float radius)
     FREE_RS_CONTEXT_CHECK(SetShadowRadius, radius);
     CHECK_NULL_VOID(rsNode_);
     if (LessOrEqual(radius, 0.0f) &&
-        Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        !Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         rsNode_->SetShadowRadius(-1.0f);
         return;
     }

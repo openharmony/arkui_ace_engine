@@ -2536,7 +2536,7 @@ double ArkTSUtils::parseShadowRadiusWithResObj(const EcmaVM* vm, const Local<JSV
     double radius = -1.0;
     ArkTSUtils::ParseJsDouble(vm, jsValue, radius, resObj);
     if (LessNotEqual(radius, 0.0) &&
-        Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        !Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         radius = 0.0;
     }
     return radius;

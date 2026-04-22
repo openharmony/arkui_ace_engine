@@ -1150,7 +1150,7 @@ void FfiOHOSAceFrameworkViewAbstractSetShadow(double radius, uint32_t color, dou
     Dimension dOffsetY(offsetY, DimensionUnit::VP);
     double radiusVal = radius;
     if (LessOrEqual(radius, 0.0) &&
-        Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_TWO)) {
+        !Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_TWO)) {
         LOGE("Shadow Parse radius failed, radius = %{public}lf", radius);
         return;
     }
