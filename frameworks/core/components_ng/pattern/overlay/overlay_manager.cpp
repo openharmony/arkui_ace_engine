@@ -87,6 +87,7 @@
 #include "core/components_ng/pattern/web/web_pattern.h"
 #endif
 #include "core/interfaces/native/node/menu_modifier.h"
+#include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {

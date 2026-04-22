@@ -64,6 +64,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/inner_api/ui_session/param_config.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "core/components/common/properties/placement.h"
 
 namespace OHOS::Ace::NG {
 namespace {

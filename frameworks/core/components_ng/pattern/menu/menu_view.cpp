@@ -48,6 +48,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components/button/button_theme.h"
 #include "frameworks/base/utils/measure_util.h"
+#include "core/components/common/properties/placement.h"
 
 namespace OHOS::Ace::NG {
 /**

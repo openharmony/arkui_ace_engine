@@ -101,6 +101,8 @@
 #include "core/components_ng/syntax/static/detached_free_root_proxy_frame_node.h"
 #include "core/common/event_manager.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
+#include "core/components/common/properties/placement.h"
+#include "core/components_ng/animation/geometry_transition.h"
 
 using namespace OHOS::Ace::NG::Converter;
 

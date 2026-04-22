@@ -42,6 +42,7 @@
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components/common/properties/placement.h"
 
 namespace OHOS::Ace::NG {
 namespace {

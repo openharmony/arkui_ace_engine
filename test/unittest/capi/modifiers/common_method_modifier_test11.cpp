@@ -27,6 +27,7 @@
 #include "core/components/popup/popup_theme.h"
 #include "core/components/theme/theme_attributes.h"
 #include "base/geometry/ng/offset_t.h"
+#include "core/components/common/properties/placement.h"
 
 using namespace testing;
 using namespace testing::ext;

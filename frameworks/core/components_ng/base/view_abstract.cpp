@@ -69,6 +69,7 @@
 #include "core/interfaces/native/node/menu_item_modifier.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
+#include "core/components_ng/animation/geometry_transition.h"
 
 namespace OHOS::Ace::NG {
 

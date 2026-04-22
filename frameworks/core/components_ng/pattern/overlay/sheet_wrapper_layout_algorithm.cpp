@@ -25,6 +25,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
+#include "core/components/common/properties/placement.h"
 
 namespace OHOS::Ace::NG {
 namespace {

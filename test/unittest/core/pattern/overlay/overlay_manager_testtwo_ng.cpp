@@ -50,6 +50,8 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 #include "core/components/theme/icon_theme.h"
+#include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
+#include "core/components_ng/pattern/toast/toast_layout_property.h"
 
 using namespace testing;
 using namespace testing::ext;

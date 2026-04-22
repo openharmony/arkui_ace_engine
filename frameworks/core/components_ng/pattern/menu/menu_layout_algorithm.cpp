@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/menu/menu_tag_constants.h"
 #if defined(ENABLE_ROSEN_BACKEND)
 #include "render_service_client/core/ui_effect/property/include/rs_ui_shape_base.h"
+#include "core/components/common/properties/placement.h"
 #endif
 
 namespace OHOS::Ace::NG {

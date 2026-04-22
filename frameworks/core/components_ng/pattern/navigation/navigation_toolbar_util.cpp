@@ -43,6 +43,7 @@
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/interfaces/native/node/menu_modifier.h"
+#include "core/components/common/properties/placement.h"
 
 namespace OHOS::Ace::NG {
 

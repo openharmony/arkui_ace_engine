@@ -54,6 +54,7 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 #include "core/common/ace_engine.h"
+#include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;

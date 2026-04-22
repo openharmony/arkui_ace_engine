@@ -52,6 +52,7 @@
 #include "transaction/rs_transaction_proxy.h"
 #endif
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "core/components/common/properties/placement.h"
 
 namespace OHOS::Ace::NG {
 namespace {

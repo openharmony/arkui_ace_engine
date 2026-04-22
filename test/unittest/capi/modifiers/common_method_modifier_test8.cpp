@@ -24,6 +24,7 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 
 
 using namespace testing;

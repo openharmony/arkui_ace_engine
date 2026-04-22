@@ -26,6 +26,7 @@
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/position_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/animation/geometry_transition.h"
 
 namespace OHOS::Ace::NG {
 namespace {

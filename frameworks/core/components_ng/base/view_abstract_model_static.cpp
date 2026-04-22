@@ -39,6 +39,8 @@
 #include "core/components_ng/syntax/static/detached_free_root_proxy_node.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
+#include "core/components/common/properties/placement.h"
+#include "core/components_ng/animation/geometry_transition.h"
 #endif
 
 namespace OHOS::Ace::NG {
