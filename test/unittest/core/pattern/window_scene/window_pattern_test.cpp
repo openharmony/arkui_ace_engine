@@ -437,7 +437,7 @@ HWTEST_F(WindowPatternTest, CreateStartingWindow_WithValidPreloadSvgBuffer, Test
     ASSERT_NE(windowScene_, nullptr);
     ASSERT_NE(windowScene_->GetHost(), nullptr);
     sceneSession_->ResetPreloadStartingWindow();
-    std::shared_ptr<Media::PixelMap> pixelMap; 
+    std::shared_ptr<Media::PixelMap> pixelMap;
     std::pair<std::shared_ptr<uint8_t[]>, size_t> bufferInfo;
     pixelMap = nullptr;
     bufferInfo = {nullptr, 0};
