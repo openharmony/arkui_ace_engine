@@ -657,6 +657,11 @@ public:
         return focusCanBeActive_.load();
     }
 
+    static bool GetSmartGestureEnabled()
+    {
+        return smartGestureEnabled_;
+    }
+
     static bool GetAceCommercialLogEnabled()
     {
         return aceCommercialLogEnable_;
@@ -781,6 +786,8 @@ public:
     static UiMaterialLevel GetUiMaterialLevel();
 
     static void ReadSystemParametersCallOnce();
+	
+    static int32_t GetFormTaskPriority();
 
 private:
     static bool opincEnabled_;
@@ -864,6 +871,7 @@ private:
     static std::atomic<bool> acePerformanceMonitorEnable_;
     // static std::atomic<bool> asyncInitializeEnabled_;
     static std::atomic<bool> focusCanBeActive_;
+    static bool smartGestureEnabled_;
     static bool aceCommercialLogEnable_;
     static bool faultInjectEnabled_;
     static bool imageFrameworkEnable_;

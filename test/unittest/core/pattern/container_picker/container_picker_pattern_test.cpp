@@ -22,11 +22,12 @@
 #define protected public
 #define private public
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
-#include "test/mock/core/common/mock_container.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components_ng/pattern/container_picker/container_picker_layout_property.h"
 #include "core/components_ng/pattern/container_picker/container_picker_model.h"
 #include "core/components_ng/pattern/container_picker/container_picker_paint_method.h"
@@ -35,6 +36,7 @@
 #include "core/components_ng/pattern/container_picker/container_picker_utils.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1700,14 +1702,15 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_OnColorConfigura
  */
 HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_OnThemeScopeUpdate001, TestSize.Level1)
 {
-    auto frameNode = CreateContainerPickerNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
-    ASSERT_NE(pattern, nullptr);
     auto container = MockContainer::Current();
     ASSERT_NE(container, nullptr);
     int32_t backupApiVersion = container->GetApiTargetVersion();
     container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+
+    auto frameNode = CreateContainerPickerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
 
     auto layoutProperty = frameNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
@@ -1728,14 +1731,15 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_OnThemeScopeUpda
  */
 HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_OnThemeScopeUpdate002, TestSize.Level1)
 {
-    auto frameNode = CreateContainerPickerNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
-    ASSERT_NE(pattern, nullptr);
     auto container = MockContainer::Current();
     ASSERT_NE(container, nullptr);
     int32_t backupApiVersion = container->GetApiTargetVersion();
     container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
+
+    auto frameNode = CreateContainerPickerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
 
     auto layoutProperty = frameNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
@@ -1756,14 +1760,15 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_OnThemeScopeUpda
  */
 HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_OnThemeScopeUpdate003, TestSize.Level1)
 {
-    auto frameNode = CreateContainerPickerNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
-    ASSERT_NE(pattern, nullptr);
     auto container = MockContainer::Current();
     ASSERT_NE(container, nullptr);
     int32_t backupApiVersion = container->GetApiTargetVersion();
     container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+
+    auto frameNode = CreateContainerPickerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
 
     auto layoutProperty = frameNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
@@ -1780,6 +1785,200 @@ HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_OnThemeScopeUpda
     EXPECT_FALSE(frameNode->needCallChildrenUpdate_);
 
     container->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_SyncSelectionIndicatorWithTheme_Divider001
+ * @tc.desc: DIVIDER indicator with isDefaultDividerColor syncs layout divider color from host ContainerPickerTheme.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_SyncSelectionIndicatorWithTheme_Divider001,
+    TestSize.Level1)
+{
+    auto frameNode = CreateContainerPickerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    auto theme = frameNode->GetTheme<ContainerPickerTheme>(true);
+    ASSERT_NE(theme, nullptr);
+    const Color expectedDivider = theme->GetIndicatorDividerColor();
+
+    layoutProperty->UpdateIndicatorType(static_cast<int32_t>(PickerIndicatorType::DIVIDER));
+    layoutProperty->UpdateIndicatorDividerColor(Color::RED);
+    PickerIndicatorStyle style = pattern->GetIndicatorStyleVal();
+    style.isDefaultDividerColor = true;
+    pattern->SetIndicatorStyleVal(style);
+
+    pattern->SyncSelectionIndicatorWithTheme();
+
+    ASSERT_TRUE(layoutProperty->GetIndicatorDividerColor().has_value());
+    EXPECT_EQ(layoutProperty->GetIndicatorDividerColor().value(), expectedDivider);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_SyncSelectionIndicatorWithTheme_Background001
+ * @tc.desc: BACKGROUND indicator with isDefaultBackgroundColor syncs layout background from host ContainerPickerTheme.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_SyncSelectionIndicatorWithTheme_Background001,
+    TestSize.Level1)
+{
+    auto frameNode = CreateContainerPickerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    auto theme = frameNode->GetTheme<ContainerPickerTheme>(true);
+    ASSERT_NE(theme, nullptr);
+    const Color expectedBg = theme->GetIndicatorBackgroundColor();
+
+    layoutProperty->UpdateIndicatorType(static_cast<int32_t>(PickerIndicatorType::BACKGROUND));
+    layoutProperty->UpdateIndicatorBackgroundColor(Color::RED);
+    PickerIndicatorStyle style = pattern->GetIndicatorStyleVal();
+    style.isDefaultBackgroundColor = true;
+    pattern->SetIndicatorStyleVal(style);
+
+    pattern->SyncSelectionIndicatorWithTheme();
+
+    ASSERT_TRUE(layoutProperty->GetIndicatorBackgroundColor().has_value());
+    EXPECT_EQ(layoutProperty->GetIndicatorBackgroundColor().value(), expectedBg);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_SyncIndicator_DividerUserColorKeep_001
+ * @tc.desc: DIVIDER indicator with isDefaultDividerColor false does not overwrite user divider color.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_SyncIndicator_DividerUserColorKeep_001,
+    TestSize.Level1)
+{
+    auto frameNode = CreateContainerPickerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<ContainerPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    const Color userDivider = Color::RED;
+    layoutProperty->UpdateIndicatorType(static_cast<int32_t>(PickerIndicatorType::DIVIDER));
+    layoutProperty->UpdateIndicatorDividerColor(userDivider);
+    PickerIndicatorStyle style = pattern->GetIndicatorStyleVal();
+    style.isDefaultDividerColor = false;
+    pattern->SetIndicatorStyleVal(style);
+
+    pattern->SyncSelectionIndicatorWithTheme();
+
+    ASSERT_TRUE(layoutProperty->GetIndicatorDividerColor().has_value());
+    EXPECT_EQ(layoutProperty->GetIndicatorDividerColor().value(), userDivider);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_SetDefaultTextStyle_ApiBelowTwentySix_KeepsUserColor001
+ * @tc.desc: When child text color differs from theme default and isUseDefaultFontColor_ is true, API below 26 does not
+ *            reset text color (node-scoped GreatOrEqualAPITargetVersion).
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_SetDefaultTextStyle_ApiBelowTwentySix_KeepsUserColor001,
+    TestSize.Level1)
+{
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    const int32_t backupContainerApi = container->GetApiTargetVersion();
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    const int32_t backupPipelineApi = pipeline->GetApiTargetVersion();
+
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_FIVE));
+    pipeline->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_FIVE));
+
+    auto frameNode = CreateContainerPickerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto textPattern = AceType::MakeRefPtr<TextPattern>();
+    auto textNode = CreateChildNode(V2::TEXT_ETS_TAG, textPattern);
+    ASSERT_NE(textNode, nullptr);
+    textNode->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_FIVE);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    frameNode->AddChild(textNode);
+
+    auto theme = frameNode->GetTheme<ContainerPickerTheme>(true);
+    ASSERT_NE(theme, nullptr);
+    const Color themeDefaultFontColor = theme->GetFontColor();
+    const Color userChosenColor = Color::RED;
+    ASSERT_NE(userChosenColor, themeDefaultFontColor);
+
+    textLayoutProperty->UpdateFontSize(Dimension(20.0, DimensionUnit::FP));
+    textLayoutProperty->UpdateTextColor(userChosenColor);
+    ASSERT_TRUE(textLayoutProperty->GetTextColor().has_value());
+    EXPECT_EQ(textLayoutProperty->GetTextColor().value(), userChosenColor);
+
+    pattern->isUseDefaultFontColor_ = true;
+    pattern->isModified_ = false;
+    pattern->SetDefaultTextStyle(textNode, themeDefaultFontColor);
+    ASSERT_TRUE(textLayoutProperty->GetTextColor().has_value());
+    EXPECT_EQ(textLayoutProperty->GetTextColor().value(), userChosenColor);
+
+    container->SetApiTargetVersion(backupContainerApi);
+    pipeline->SetApiTargetVersion(backupPipelineApi);
+}
+
+/**
+ * @tc.name: ContainerPickerPatternTest_SetDefaultTextStyle_ApiTwentySix_ResetToThemeColor001
+ * @tc.desc: When child text color differs from theme default and isUseDefaultFontColor_ is true, API 26+ resets text
+ *            color to the passed default.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerPatternTest, ContainerPickerPatternTest_SetDefaultTextStyle_ApiTwentySix_ResetToThemeColor001,
+    TestSize.Level1)
+{
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    const int32_t backupContainerApi = container->GetApiTargetVersion();
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    const int32_t backupPipelineApi = pipeline->GetApiTargetVersion();
+
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    pipeline->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+
+    auto frameNode = CreateContainerPickerNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ContainerPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto textPattern = AceType::MakeRefPtr<TextPattern>();
+    auto textNode = CreateChildNode(V2::TEXT_ETS_TAG, textPattern);
+    ASSERT_NE(textNode, nullptr);
+    textNode->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    frameNode->AddChild(textNode);
+
+    auto theme = frameNode->GetTheme<ContainerPickerTheme>(true);
+    ASSERT_NE(theme, nullptr);
+    const Color themeDefaultFontColor = theme->GetFontColor();
+    const Color userChosenColor = Color::RED;
+    ASSERT_NE(userChosenColor, themeDefaultFontColor);
+
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateFontSize(Dimension(20.0, DimensionUnit::FP));
+    textLayoutProperty->UpdateTextColor(userChosenColor);
+
+    pattern->isUseDefaultFontColor_ = true;
+    pattern->isModified_ = false;
+    pattern->SetDefaultTextStyle(textNode, themeDefaultFontColor);
+
+    EXPECT_EQ(textLayoutProperty->GetTextColor().value_or(Color::TRANSPARENT), themeDefaultFontColor);
+
+    container->SetApiTargetVersion(backupContainerApi);
+    pipeline->SetApiTargetVersion(backupPipelineApi);
 }
 
 /**

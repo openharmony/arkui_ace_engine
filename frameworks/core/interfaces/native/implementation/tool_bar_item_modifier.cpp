@@ -41,11 +41,24 @@ void SetToolBarItemOptionsImpl(Ark_NativePointer node, const Opt_ToolBarItemOpti
     ToolBarItemModelStatic::SetPlacement(frameNode, static_cast<int32_t>(placement));
 }
 } // namespace ToolBarItemInterfaceModifier
+namespace ToolBarItemAttributeModifier {
+void SetDebugLineImpl(Ark_NativePointer node,
+                      const Ark_String* sourceLine,
+                      const Opt_String* moduleName)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(sourceLine);
+    //auto convValue = Converter::OptConvert<type>(sourceLine); // for enums
+    // ToolBarItemModelNG::SetSetDebugLine(frameNode, convValue);
+}
+} // ToolBarItemAttributeModifier
 const GENERATED_ArkUIToolBarItemModifier* GetToolBarItemModifier()
 {
     static const GENERATED_ArkUIToolBarItemModifier ArkUIToolBarItemModifierImpl {
         ToolBarItemModifier::ConstructImpl,
         ToolBarItemInterfaceModifier::SetToolBarItemOptionsImpl,
+        ToolBarItemAttributeModifier::SetDebugLineImpl,
     };
     return &ArkUIToolBarItemModifierImpl;
 }

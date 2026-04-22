@@ -243,6 +243,7 @@ public:
     void SetUpdateInstanceIdCallback(std::function<void(int32_t)>&& callback) override;
     void SetOverlayScrollbarEnabled(bool isEnabled) override;
     void SetKeyboardAvoidMode(const WebKeyboardAvoidMode& mode) override;
+    void SetKeyboardAppearanceMode(const WebKeyboardAppearanceMode& mode) override;
     void SetEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick,
         const NG::OnPrepareMenuCallback&& onPrepareMenuCallback = nullptr) override;
@@ -291,6 +292,7 @@ public:
     static void SetMultiWindowAccessEnabled(FrameNode* frameNode, bool isMultiWindowAccessEnable);
     static void SetAllowWindowOpenMethod(FrameNode* frameNode, bool isAllowWindowOpenMethod);
     static void SetKeyboardAvoidMode(FrameNode* frameNode, const WebKeyboardAvoidMode& mode);
+    static void SetKeyboardAppearanceMode(FrameNode* frameNode, const WebKeyboardAppearanceMode& mode);
     static void SetOnControllerAttached(FrameNode* frameNode, std::function<void()>&& callback);
     static void SetVerticalScrollBarAccessEnabled(FrameNode* frameNode, bool isVerticalScrollBarAccessEnabled);
     static void SetHorizontalScrollBarAccessEnabled(FrameNode* frameNode, bool isHorizontalScrollBarAccessEnabled);

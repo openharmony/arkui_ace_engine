@@ -52,12 +52,32 @@ void JSUnionEffectContainer::Create(const JSCallbackInfo& info)
     UnionEffectContainerModel::GetInstance()->Create(options);
 }
 
+void JSUnionEffectContainer::JsUnionMode(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    JSRef<JSVal> argUnionMode = info[0];
+    NG::UnionMode unionMode = NG::UnionMode::SMOOTH_UNION;
+    if (argUnionMode->IsNumber()) {
+        int32_t value = argUnionMode->ToNumber<int32_t>();
+        if (value >= static_cast<int32_t>(NG::UnionMode::SMOOTH_UNION) &&
+            value <= static_cast<int32_t>(NG::UnionMode::GRAVITY_UNION)) {
+            unionMode = static_cast<NG::UnionMode>(value);
+        }
+    } else {
+        unionMode = NG::UnionMode::SMOOTH_UNION;
+    }
+    UnionEffectContainerModel::GetInstance()->SetUnionMode(unionMode);
+}
+
 void JSUnionEffectContainer::JSBind(BindingTarget globalObj)
 {
     JSClass<JSUnionEffectContainer>::Declare("UnionEffectContainer");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSUnionEffectContainer>::StaticMethod("create", &JSUnionEffectContainer::Create, opt);
     JSClass<JSUnionEffectContainer>::StaticMethod("pointLight", &JSViewAbstract::JsPointLight, opt);
+    JSClass<JSUnionEffectContainer>::StaticMethod("unionMode", &JSUnionEffectContainer::JsUnionMode, opt);
 
     JSClass<JSUnionEffectContainer>::InheritAndBind<JSContainerBase>(globalObj);
 }

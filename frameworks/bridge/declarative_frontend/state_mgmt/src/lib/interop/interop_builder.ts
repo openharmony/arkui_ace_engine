@@ -14,7 +14,7 @@
  */
 
 
-function __makeBuilderParameterStaticProxy_Interop_Internal(name: string, value: Object, sourceGetter: Object) : Object {
+function __makeBuilderParameterStaticProxy_Interop_Internal(name: string, value: Object, sourceGetter: Object): Object {
   if (InteropExtractorModule.makeBuilderParameterStaticProxy === undefined) {
       // only happened in toolchain error, internal error
       throw new BusinessError(NOT_IMPLEMENT, 'makeBuilderParameterStaticProxy error!');
@@ -50,9 +50,7 @@ function createDynamicBuilder(
           ViewStackProcessor.pop();
         } else {
           args.forEach((arg) => {
-            if (arg && typeof arg === 'object' && 'value' in arg) {
-              arg.value;
-            }
+            __Interop_visitBuilderArg_Internal(arg);
           });
           if (result[1]) {
             result[1]();
@@ -62,6 +60,28 @@ function createDynamicBuilder(
       }, {});
   };
   return func;
+}
+
+function __Interop_visitBuilderArg_Internal(arg: Object): void {
+  if (!arg || typeof arg !== 'object' || !('value' in arg)) {
+    return;
+  }
+  const value = arg.value;
+  if (!value || typeof value !== 'object') {
+    return;
+  }
+  if (Array.isArray(value)) {
+    value.forEach(() => {});
+    return;
+  }
+  if (value instanceof Map) {
+    value.entries();
+    return;
+  }
+  if (value instanceof Set) {
+    value.entries();
+    return;
+  }
 }
 
 /**

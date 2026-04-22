@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PLUGIN_PLUGIN_PATTERN_H
 
 #include "core/components/plugin/resource/plugin_request_data.h"
-#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/plugin/plugin_event_hub.h"
 #include "core/components_ng/pattern/plugin/plugin_layout_property.h"

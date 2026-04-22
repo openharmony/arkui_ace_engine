@@ -33,6 +33,7 @@
 #include "core/common/statistic_event_reporter.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/animation_option.h"
+#include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/shadow.h"
@@ -63,6 +64,7 @@
 #include "core/interfaces/native/node/node_common_modifier_multi_thread.h"
 #include "core/interfaces/native/node/view_model.h"
 #include "securec.h"
+#include "core/components_ng/animation/geometry_transition.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1949,11 +1951,8 @@ void CheckBackShadowResObj(const std::vector<RefPtr<ResourceObject>> objs, Shado
     RefPtr<ResourceObject> colorResObj = objs[NUM_3];
     if (radiusResObj) {
         auto&& updateFunc = [](const RefPtr<ResourceObject>& radiusResObj, Shadow& shadow) {
-            double radius = 0.0;
+            double radius = -1.0;
             ResourceParseUtils::ParseResDouble(radiusResObj, radius);
-            if (LessNotEqual(radius, 0.0)) {
-                radius = 0.0;
-            }
             shadow.SetBlurRadius(radius);
         };
         shadow.AddResource("shadow.radius", radiusResObj, std::move(updateFunc));
@@ -6147,7 +6146,7 @@ void ResetPointLightBloom(ArkUINodeHandle node)
     ViewAbstractModelNG::RemoveResObj(frameNode, "shadow");
     ViewAbstract::SetBloom(frameNode, 0.0f);
     Shadow shadow;
-    shadow.SetBlurRadius(0);
+    shadow.SetBlurRadius(-1);
     ViewAbstract::SetBackShadow(frameNode, shadow);
 #endif
 }

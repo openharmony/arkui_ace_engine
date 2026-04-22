@@ -50,7 +50,15 @@ struct WaterFlowMainPage {
     new TextList(16, 'WaterFlowInfiniteScrollingEarly', 'pages/waterflow/CAPI/WaterFlowInfiniteScrollingEarly'),
     new TextList(17, 'BindControllerDeclare', 'pages/waterflow/bindController/WaterFlowDeclare'),
     new TextList(18, 'BindControllerCommand', 'pages/waterflow/bindController/WaterFlowCommand'),
-    new TextList(19, 'BindControllerDestroy', 'pages/waterflow/bindController/WaterFlowDestroyDeclare')
+    new TextList(19, 'BindControllerDestroy', 'pages/waterflow/bindController/WaterFlowDestroyDeclare'),
+    new TextList(20, 'WaterflowEventReport', 'pages/waterflow/WaterflowEventReport'),
+    new TextList(21, 'WaterflowEventReportNestedScroll', 'pages/waterflow/WaterflowEventReportNestedScroll'),
+    new TextList(22, 'WaterFlowEmptyBranch1', 'pages/waterflow/WaterFlowEmptyBranch1'),
+    new TextList(23, 'WaterFlowEmptyBranch2', 'pages/waterflow/WaterFlowEmptyBranch2'),
+    new TextList(24, 'WaterFlowEmptyBranch4', 'pages/waterflow/WaterFlowEmptyBranch4'),
+    new TextList(25, 'WaterFlowEmptyBranch6', 'pages/waterflow/WaterFlowEmptyBranch6'),
+    new TextList(26, 'WaterFlowEmptyBranchModifier', 'pages/waterflow/WaterFlowEmptyBranchModifier'),
+    new TextList(27, 'WaterFlowEmptyBranchSessionEmpty', 'pages/waterflow/WaterFlowEmptyBranchSessionEmpty'),
   ]
   @State fontSize: Resource | undefined = undefined
   build() {

@@ -17,6 +17,7 @@
 
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/pattern/radio/radio_modifier.h"
+#include "core/components_ng/pattern/radio/radio_paint_property.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline_ng/pipeline_context.h"
 

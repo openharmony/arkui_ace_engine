@@ -93,6 +93,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     hoverModeArea_ = dialogProp->GetHoverModeArea().value_or(HoverModeAreaType::BOTTOM_SCREEN);
     needAdaptForceSplitMode_ = pipeline->IsDisplayInForceSplitMode() && !IsEmbeddedDialog(hostNode) &&
                                 (forceSplitMgr->GetDialogSupportSplit());
+    forceSplitRatio_ = forceSplitMgr->GetSplitRatio();
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     auto keyboardInsert = safeAreaManager->GetKeyboardInset();
     isKeyBoardShow_ = keyboardInsert.IsValid();
@@ -120,8 +121,8 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     ResizeDialogSubwindow(dialogPattern->IsShowInFreeMultiWindow(), isShowInSubWindow_, isShowInFloatingWindow_);
     auto layoutConstraint = dialogProp->GetLayoutConstraint();
     if (needAdaptForceSplitMode_) {
-        layoutConstraint->percentReference.SetWidth(layoutConstraint->percentReference.Width() / HALF);
-        layoutConstraint->maxSize.SetWidth(layoutConstraint->maxSize.Width() / HALF);
+        layoutConstraint->percentReference.SetWidth(layoutConstraint->percentReference.Width() * forceSplitRatio_);
+        layoutConstraint->maxSize.SetWidth(layoutConstraint->maxSize.Width() * forceSplitRatio_);
     }
     const auto& parentIdealSize = layoutConstraint->parentIdealSize;
     OptionalSizeF realSize;
@@ -149,8 +150,9 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // update child layout constraint
     auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     if (needAdaptForceSplitMode_) {
-        childLayoutConstraint.percentReference.SetWidth(childLayoutConstraint.percentReference.Width() / HALF);
-        childLayoutConstraint.maxSize.SetWidth(childLayoutConstraint.maxSize.Width() / HALF);
+        childLayoutConstraint.percentReference.SetWidth(
+            childLayoutConstraint.percentReference.Width() * forceSplitRatio_);
+        childLayoutConstraint.maxSize.SetWidth(childLayoutConstraint.maxSize.Width() * forceSplitRatio_);
         childLayoutConstraint.minSize.SetWidth(ONE_PX);
         childLayoutConstraint.minSize.SetHeight(ONE_PX);
     }
@@ -179,7 +181,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     if (isSuitableForElderly_ && SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
         float widthRatio = needAdaptForceSplitMode_ ?
-            (LANDSCAPE_DIALOG_WIDTH_RATIO * pipeline->GetRootWidth() / HALF) :
+            (LANDSCAPE_DIALOG_WIDTH_RATIO * pipeline->GetRootWidth() * forceSplitRatio_) :
             (LANDSCAPE_DIALOG_WIDTH_RATIO * pipeline->GetRootWidth());
         childLayoutConstraint.maxSize.SetWidth(widthRatio);
         if (needAdaptForceSplitMode_) {
@@ -381,7 +383,9 @@ void DialogLayoutAlgorithm::AnalysisLayoutOfContent(LayoutWrapper* layoutWrapper
     CHECK_NULL_VOID(text);
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(text->GetLayoutProperty());
     CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateWordBreak(dialogPattern->GetDialogProperties().wordBreak);
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        textLayoutProperty->UpdateWordBreak(dialogPattern->GetDialogProperties().wordBreak);
+    }
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(text->GetLayoutAlgorithm());
     CHECK_NULL_VOID(layoutAlgorithmWrapper);
     auto textLayoutAlgorithm = DynamicCast<TextLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
@@ -949,8 +953,8 @@ OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
     auto layoutConstraint = prop->GetLayoutConstraint();
     if (needAdaptForceSplitMode_) {
-        layoutConstraint->percentReference.SetWidth(layoutConstraint->percentReference.Width() / HALF);
-        layoutConstraint->maxSize.SetWidth(layoutConstraint->maxSize.Width() / HALF);
+        layoutConstraint->percentReference.SetWidth(layoutConstraint->percentReference.Width() * forceSplitRatio_);
+        layoutConstraint->maxSize.SetWidth(layoutConstraint->maxSize.Width() * forceSplitRatio_);
     }
     CHECK_NULL_RETURN(dialogTheme_, OffsetF());
     auto dialogOffsetX =
@@ -974,7 +978,7 @@ OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
         needAvoidKeyboard = false;
     }
     if (needAdaptForceSplitMode_) {
-        topLeftPoint.SetX(topLeftPoint.GetX() + pipelineContext->GetRootWidth() / HALF);
+        topLeftPoint.SetX(topLeftPoint.GetX() + pipelineContext->GetRootWidth() * (1 - forceSplitRatio_));
     }
     auto childOffset = AdjustChildPosition(topLeftPoint, dialogOffset, childSize, needAvoidKeyboard);
     AvoidScreen(childOffset, prop, dialogChildSize_);

@@ -22,12 +22,18 @@
 #include "core/components_ng/pattern/calendar/calendar_event_hub.h"
 #include "core/components_ng/pattern/calendar/calendar_model_ng.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_pattern.h"
-#include "core/components_ng/pattern/calendar_picker/calendar_type_define.h"
+
+namespace OHOS::Ace {
+class PickerDate;
+class PipelineBase;
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
+using ::OHOS::Ace::PickerDate;
 class ButtonLayoutProperty;
 class TextLayoutProperty;
 class PipelineContext;
+struct CalendarSettingData;
 
 class ACE_EXPORT CalendarDialogView {
 public:
@@ -46,6 +52,8 @@ public:
     }
 
     static bool CheckOrientationChange();
+
+    static bool SkipCalendarPickerDayGridAgingAdapt(PipelineBase* pipeline);
 
     static DeviceOrientation GetPreviousOrientation()
     {
@@ -129,7 +137,7 @@ private:
         const std::string& eventName, const std::string& eventData);
     static constexpr double deviceHeightLimit = 640.0;
     static void UpdateTextLayoutProperty(const RefPtr<TextLayoutProperty>& textLayoutProperty,
-        RefPtr<CalendarTheme>& theme);
+        RefPtr<CalendarTheme>& theme, const RefPtr<FrameNode>& titleNode);
     static DeviceOrientation previousOrientation_;
 };
 } // namespace OHOS::Ace::NG

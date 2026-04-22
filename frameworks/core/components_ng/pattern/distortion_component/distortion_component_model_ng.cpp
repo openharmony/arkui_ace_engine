@@ -16,23 +16,25 @@
 #include "core/components_ng/pattern/distortion_component/distortion_component_model_ng.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/distortion_component/distortion_component_node.h"
 
 namespace OHOS::Ace::NG {
-void DistortionComponentModelNG::Create(const RefPtr<FrameNode>& builderNode)
+void DistortionComponentModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::DISTORTION_COMPONENT_ETS_TAG, nodeId);
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::DISTORTION_COMPONENT_ETS_TAG, nodeId, []() {
-        return AceType::MakeRefPtr<DistortionComponentPattern>();
-    });
+    auto frameNode = DistortionComponentNode::GetOrCreateDistortionComponentNode(
+        V2::DISTORTION_COMPONENT_ETS_TAG, nodeId, []() {
+            return AceType::MakeRefPtr<DistortionComponentPattern>();
+        });
     stack->Push(frameNode);
 
     // Create content node immediately after parent node is created
     // This ensures content node exists before any children are mounted
     auto pattern = frameNode->GetPattern<DistortionComponentPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->CreateContentNode(builderNode);
+    pattern->CreateContentNode();
 }
 
 void DistortionComponentModelNG::SetDistortion(const DistortionParam& distortion)

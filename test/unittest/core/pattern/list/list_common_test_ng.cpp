@@ -224,7 +224,9 @@ ListItemGroupModelNG ListCommonTestNg::CreateListItemGroupWithHeaderAndFooter(in
     auto header = GetHeaderOrFooterButtonBuilder(count, "header", index);
     auto footer = GetHeaderOrFooterButtonBuilder(count, "footer", index);
     ListItemGroupModelNG groupModel;
-    groupModel.Create(V2::ListItemGroupStyle::NONE);
+    V2::ListItemGroupOptions groupOptions;
+    groupOptions.style = V2::ListItemGroupStyle::NONE;
+    groupModel.Create(groupOptions);
     groupModel.SetHeader(std::move(header));
     groupModel.SetFooter(std::move(footer));
     auto listItemGroup = ViewStackProcessor::GetInstance()->GetMainElementNode();
@@ -1780,7 +1782,9 @@ HWTEST_F(ListCommonTestNg, ListSelectForCardModeTest001, TestSize.Level1)
     ListModelNG model = CreateList();
     model.SetMultiSelectable(true);
     ListItemGroupModelNG groupModel;
-    groupModel.Create(V2::ListItemGroupStyle::CARD);
+    V2::ListItemGroupOptions groupOptions;
+    groupOptions.style = V2::ListItemGroupStyle::CARD;
+    groupModel.Create(groupOptions);
     CreateListItems(GROUP_ITEM_NUMBER, V2::ListItemStyle::CARD);
     ViewStackProcessor::GetInstance()->Pop();
     CreateDone();
@@ -1827,7 +1831,9 @@ HWTEST_F(ListCommonTestNg, ListSelectForCardModeTest002, TestSize.Level1)
     ListModelNG model = CreateList();
     model.SetMultiSelectable(true);
     ListItemGroupModelNG groupModel;
-    groupModel.Create(V2::ListItemGroupStyle::CARD);
+    V2::ListItemGroupOptions groupOptions;
+    groupOptions.style = V2::ListItemGroupStyle::CARD;
+    groupModel.Create(groupOptions);
     CreateListItems(GROUP_ITEM_NUMBER, V2::ListItemStyle::CARD);
     ViewStackProcessor::GetInstance()->Pop();
     CreateDone();
@@ -1879,7 +1885,9 @@ HWTEST_F(ListCommonTestNg, ListSelectForCardModeTest003, TestSize.Level1)
     ListModelNG model = CreateList();
     model.SetMultiSelectable(true);
     ListItemGroupModelNG groupModel;
-    groupModel.Create(V2::ListItemGroupStyle::CARD);
+    V2::ListItemGroupOptions groupOptions;
+    groupOptions.style = V2::ListItemGroupStyle::CARD;
+    groupModel.Create(groupOptions);
     CreateListItems(5, V2::ListItemStyle::CARD);
     ViewStackProcessor::GetInstance()->Pop();
     CreateDone();

@@ -14,6 +14,7 @@
  */
 
 #include "gtest/gtest.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #define private public
 #include "base/memory/ace_type.h"
@@ -343,6 +344,32 @@ HWTEST_F(WebModelStaticTest, SetMultiWindowAccessEnabled001, TestSize.Level1)
 
     WebModelStatic::SetMultiWindowAccessEnabled(AccessibilityManager::RawPtr(frameNode), true);
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckMultiWindowAccessEnabled(true), true);
+#endif
+}
+
+/**
+ * @tc.name: SetKeyboardAppearance01
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetKeyboardAppearance01, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
+    ASSERT_NE(webPatternStatic, nullptr);
+
+    std::optional<WebKeyboardAppearanceMode> mode;
+    WebModelStatic::SetKeyboardAppearance(AccessibilityManager::RawPtr(frameNode), mode);
+
+    mode = WebKeyboardAppearanceMode::LIGHT_IMMERSIVE;
+    WebModelStatic::SetKeyboardAppearance(AccessibilityManager::RawPtr(frameNode), mode);
+    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->GetKeyboardAppearanceMode(),
+            WebKeyboardAppearanceMode::LIGHT_IMMERSIVE);
 #endif
 }
 

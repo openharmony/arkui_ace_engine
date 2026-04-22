@@ -15,11 +15,14 @@
 
 #include "core/components_ng/pattern/menu/menu_view.h"
 
+#include "base/subwindow/subwindow_manager.h"
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
@@ -46,6 +49,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components/button/button_theme.h"
 #include "frameworks/base/utils/measure_util.h"
+#include "core/components/common/properties/placement.h"
 
 namespace OHOS::Ace::NG {
 /**
@@ -101,6 +105,12 @@ void MountTextNode(const RefPtr<FrameNode>& wrapperNode, const RefPtr<UINode>& p
     auto textNode = FrameNode::GetOrCreateFrameNode(TEXT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
     CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateEnableSmallLanguageTruncation(true);
+    if (textNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        textLayoutProperty->UpdateOrphanCharOptimization(true);
+    }
     textNode->MountToParent(wrapperNode);
     textNode->MarkModifyDone();
 }
@@ -213,6 +223,7 @@ void CreateTitleNode(const std::string& title, RefPtr<FrameNode>& column)
     CHECK_NULL_VOID(textNode);
     auto textProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textProperty);
+    textProperty->UpdateEnableSmallLanguageTruncation(true);
     if (textNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         textNode->SetThemeScopeId(column->GetThemeScopeId());
     }
@@ -1129,7 +1140,7 @@ void MenuView::SetMenuSystemMaterial(const RefPtr<FrameNode>& menuNode, const Me
 {
     CHECK_NULL_VOID(menuNode);
     bool isSetMenuSystemMaterial = false;
-    if (menuParam.systemMaterial && MaterialUtils::CheckMaterialValid(menuParam.systemMaterial->GetType())) {
+    if (MaterialUtils::IsEnableMaterialParam(menuParam.systemMaterial)) {
         auto renderContext = menuNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateBackBlurStyle(std::nullopt);
@@ -1419,8 +1430,7 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_RETURN(menuWrapperPattern, nullptr);
     menuWrapperPattern->SetHoverMode(menuParam.enableHoverMode);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
-        (menuParam.systemMaterial || !menuParam.enableArrow.value_or(false))) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && !menuParam.enableArrow.value_or(false)) {
         UpdateMenuBorderEffect(menuNode, wrapperNode, menuParam);
     }
     menuWrapperPattern->SetMenuParam(menuParam);
@@ -1610,6 +1620,10 @@ void MenuView::ReloadMenuParam(const RefPtr<FrameNode>& menuNode, const MenuPara
         menuParamValue.isDarkMode = !menuParamValue.isDarkMode;
         ResourceParseUtils::SetNeedReload(isReloading);
     }
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)
+        && MaterialUtils::IsMaterialEnabled() && !menuParamValue.systemMaterial) {
+        menuParamValue.systemMaterial = MaterialUtils::GetInitMaterial(UiMaterialStyle::THICK);
+    }
 }
 
 void MenuView::UpdateMenuParam(
@@ -1676,8 +1690,7 @@ void MenuView::UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const 
 {
     CHECK_NULL_VOID(menuNode);
     CHECK_NULL_VOID(wrapperNode);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
-        (menuParam.systemMaterial || !menuParam.enableArrow.value_or(false))) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && !menuParam.enableArrow.value_or(false)) {
         UpdateMenuBorderEffect(menuNode, wrapperNode, menuParam);
     } else {
         UpdateMenuOutlineWithArrow(menuNode, wrapperNode, menuParam);
@@ -1851,20 +1864,18 @@ void MenuView::UpdateMenuBorderEffect(
     }
 }
 
-void MenuView::UpdateStyleOptionColorMode(
-    const PipelineContext* pipeLineContext, BlurStyleOption& styleOption, bool isColorModeFollowTarget)
+void MenuView::UpdateStyleOptionColorMode(const OHOS::Ace::ColorMode colorMode, BlurStyleOption& styleOption,
+    bool isColorModeFollowTarget)
 {
-    CHECK_NULL_VOID(pipeLineContext);
-    if (pipeLineContext->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+    if (!isColorModeFollowTarget) {
         return;
     }
-    if (isColorModeFollowTarget) {
-        if (pipeLineContext->GetLocalColorMode() == OHOS::Ace::ColorMode::LIGHT) {
-            styleOption.colorMode = OHOS::Ace::ThemeColorMode::LIGHT;
-        }
-        if (pipeLineContext->GetLocalColorMode() == OHOS::Ace::ColorMode::DARK) {
-            styleOption.colorMode = OHOS::Ace::ThemeColorMode::DARK;
-        }
+    if (colorMode == OHOS::Ace::ColorMode::LIGHT) {
+        styleOption.colorMode = OHOS::Ace::ThemeColorMode::LIGHT;
+    } else if (colorMode == OHOS::Ace::ColorMode::DARK) {
+        styleOption.colorMode = OHOS::Ace::ThemeColorMode::DARK;
+    } else {
+        styleOption.colorMode = OHOS::Ace::ThemeColorMode::SYSTEM;
     }
 }
 
@@ -1921,7 +1932,9 @@ void MenuView::UpdateMenuBackgroundStyle(const RefPtr<FrameNode>& menuNode, cons
         if (menuParam.blurStyleOption.has_value() && menuNodeRenderContext->GetBackgroundEffect().has_value()) {
             menuNodeRenderContext->UpdateBackgroundEffect(std::nullopt);
         }
-        UpdateStyleOptionColorMode(pipeLineContext, styleOption, menuParam.isColorModeFollowTarget);
+        if (menuNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            UpdateStyleOptionColorMode(menuNode->GetLocalColorMode(), styleOption, true);
+        }
         menuNodeRenderContext->UpdateBackBlurStyle(styleOption);
         menuNodeRenderContext->UpdateBackgroundColor(color);
         UpdateMenuEffectOption(menuNode, menuParam);
@@ -2233,6 +2246,21 @@ RefPtr<FrameNode> MenuView::CreateSymbol(const std::function<void(WeakPtr<NG::Fr
     return iconNode;
 }
 
+void MenuView::SetTextTruncationAndWrap(const RefPtr<TextLayoutProperty>& textProperty, bool autoWrapFlag)
+{
+    textProperty->UpdateEnableSmallLanguageTruncation(true);
+    if (!autoWrapFlag) {
+        textProperty->UpdateMaxLines(1);
+        textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    } else {
+        textProperty->UpdateMaxLines(std::numeric_limits<int32_t>::max());
+        auto host = textProperty->GetHost();
+        if (host && host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            textProperty->UpdateOrphanCharOptimization(true);
+        }
+    }
+}
+
 RefPtr<FrameNode> MenuView::CreateText(const std::string& value, const RefPtr<FrameNode>& parent,
                                        bool autoWrapFlag, bool isAIMenuOption)
 {
@@ -2243,6 +2271,7 @@ RefPtr<FrameNode> MenuView::CreateText(const std::string& value, const RefPtr<Fr
 
     auto textProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textProperty, nullptr);
+    SetTextTruncationAndWrap(textProperty, autoWrapFlag);
 
     CHECK_NULL_RETURN(parent, nullptr);
     auto pipeline = parent->GetContext();
@@ -2250,12 +2279,6 @@ RefPtr<FrameNode> MenuView::CreateText(const std::string& value, const RefPtr<Fr
     auto theme = parent->GetTheme<SelectTheme>(true);
     CHECK_NULL_RETURN(theme, nullptr);
     TAG_LOGI(AceLogTag::ACE_MENU, "MenuView::CreateText autoWrapFlag: %{public}d", autoWrapFlag);
-    if (!autoWrapFlag) {
-        textProperty->UpdateMaxLines(1);
-        textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    } else {
-        textProperty->UpdateMaxLines(std::numeric_limits<int32_t>::max());
-    }
     textProperty->UpdateFontSize(theme->GetMenuFontSize());
     textProperty->UpdateFontWeight(theme->GetMenuFontWeight());
     textProperty->UpdateTextColor(theme->GetMenuFontColor());

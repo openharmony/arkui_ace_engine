@@ -693,6 +693,7 @@ bool WebDelegate::GetForceDarkMode()
 void WebDelegate::UpdateDarkMode(const WebDarkMode& mode) {}
 void WebDelegate::UpdateDarkModeAuto(RefPtr<WebDelegate> delegate, std::shared_ptr<OHOS::NWeb::NWebPreference> setting)
 {}
+void WebDelegate::UpdateKeyboardAppearanceMode(const WebKeyboardAppearanceMode& mode) {}
 void WebDelegate::UpdateForceDarkAccess(const bool& access) {}
 void WebDelegate::UpdateAudioResumeInterval(const int32_t& resumeInterval) {}
 void WebDelegate::UpdateAudioSessionType(const WebAudioSessionType& audioSessionType) {}
@@ -1399,6 +1400,10 @@ void SetReturnNode(std::shared_ptr<NWeb::NWebAccessibilityNodeInfo> node)
 void SetComponentType(const std::string& type)
 {
     g_setComponentType = type;
+}
+int WebDelegate::SendCommandActionToNWeb(const std::shared_ptr<OHOS::NWeb::NWebCommandAction>& simulatedAction)
+{
+    return -1;
 }
 void WebDelegate::UpdateLayoutMode(OHOS::Ace::WebLayoutMode mode) {}
 void WebDelegate::SetTransformHint(uint32_t rotation) {}

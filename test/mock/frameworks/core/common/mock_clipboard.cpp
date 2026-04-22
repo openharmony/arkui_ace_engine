@@ -17,6 +17,7 @@
 
 #include "adapter/ohos/capability/clipboard/clipboard_impl.h"
 #include "core/common/clipboard/clipboard_proxy.h"
+#include "ui/base/utils/utils.h"
 
 namespace OHOS::Ace {
 namespace {

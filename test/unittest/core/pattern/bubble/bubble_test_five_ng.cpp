@@ -1863,4 +1863,302 @@ HWTEST_F(BubbleFiveTestNg, GetWindowButtonRect003, TestSize.Level1)
     SubwindowManager::GetInstance()->subwindowMap_.clear();
     SubwindowManager::GetInstance()->instanceSubwindowMap_.clear();
 }
+
+/**
+ * @tc.name: UpdateWindowBoundsRect001
+ * @tc.desc: Test UpdateWindowBoundsRect when followCursor_ is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, UpdateWindowBoundsRect001, TestSize.Level0)
+{
+    BubbleLayoutAlgorithm algorithm;
+    algorithm.followCursor_ = true;
+    algorithm.isTips_ = true;
+    algorithm.wrapperSize_ = SizeF(SIZE_FIVE_HUNDRED, SIZE_FIVE_HUNDRED);
+    algorithm.UpdateWindowBoundsRect(true);
+    EXPECT_FALSE(algorithm.windowBoundsRect_.IsValid());
+}
+
+/**
+ * @tc.name: UpdateWindowBoundsRect002
+ * @tc.desc: Test UpdateWindowBoundsRect when not tips and not showInSubWindow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, UpdateWindowBoundsRect002, TestSize.Level0)
+{
+    BubbleLayoutAlgorithm algorithm;
+    algorithm.followCursor_ = false;
+    algorithm.isTips_ = false;
+    algorithm.wrapperSize_ = SizeF(SIZE_FIVE_HUNDRED, SIZE_FIVE_HUNDRED);
+    algorithm.UpdateWindowBoundsRect(false);
+    EXPECT_FALSE(algorithm.windowBoundsRect_.IsValid());
+}
+
+/**
+ * @tc.name: UpdateWindowBoundsRect003
+ * @tc.desc: Test UpdateWindowBoundsRect when tips and showInSubWindow, no subwindow found.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, UpdateWindowBoundsRect003, TestSize.Level0)
+{
+    BubbleLayoutAlgorithm algorithm;
+    algorithm.followCursor_ = false;
+    algorithm.isTips_ = true;
+    algorithm.wrapperSize_ = SizeF(SIZE_FIVE_HUNDRED, SIZE_FIVE_HUNDRED);
+    algorithm.UpdateWindowBoundsRect(true);
+    EXPECT_FALSE(algorithm.windowBoundsRect_.IsValid());
+}
+
+/**
+ * @tc.name: UpdateWindowBoundsRect004
+ * @tc.desc: Test UpdateWindowBoundsRect when tips and not showInSubWindow, falls to display rect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, UpdateWindowBoundsRect004, TestSize.Level0)
+{
+    BubbleLayoutAlgorithm algorithm;
+    algorithm.followCursor_ = false;
+    algorithm.isTips_ = true;
+    algorithm.wrapperSize_ = SizeF(SIZE_FIVE_HUNDRED, SIZE_FIVE_HUNDRED);
+    algorithm.UpdateWindowBoundsRect(false);
+    EXPECT_FALSE(algorithm.windowBoundsRect_.IsValid());
+}
+
+/**
+ * @tc.name: CheckPositionBottomInBounds001
+ * @tc.desc: Test CheckPositionBottom when position is inside window bounds.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, CheckPositionBottomInBounds001, TestSize.Level0)
+{
+    BubbleLayoutAlgorithm algorithm;
+    InitCheckPositionSetting(algorithm);
+    algorithm.placement_ = Placement::BOTTOM;
+    algorithm.windowBoundsRect_ = Rect(0, 0, SIZE_FIVE_HUNDRED, 400.0f);
+    OffsetF position(OFFSET_TWO_HUNDRED, 300.0f);
+    SizeF childSize(SIZE_THIRTY, SIZE_THIRTY);
+    size_t step = 1;
+    size_t i = 0;
+    OffsetF arrowPosition(0.0f, 0.0f);
+
+    EXPECT_TRUE(algorithm.CheckPositionBottom(position, childSize, step, i, arrowPosition));
+    EXPECT_TRUE(algorithm.bVertical_);
+}
+
+/**
+ * @tc.name: CheckPositionBottomOutBounds002
+ * @tc.desc: Test CheckPositionBottom when position is outside window bounds.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, CheckPositionBottomOutBounds002, TestSize.Level0)
+{
+    BubbleLayoutAlgorithm algorithm;
+    InitCheckPositionSetting(algorithm);
+    algorithm.placement_ = Placement::BOTTOM;
+    algorithm.windowBoundsRect_ = Rect(0, 0, SIZE_FIVE_HUNDRED, 400.0f);
+    OffsetF position(OFFSET_TWO_HUNDRED, 450.0f);
+    SizeF childSize(SIZE_THIRTY, SIZE_THIRTY);
+    size_t step = 1;
+    size_t i = 0;
+    OffsetF arrowPosition(0.0f, 0.0f);
+
+    EXPECT_FALSE(algorithm.CheckPositionBottom(position, childSize, step, i, arrowPosition));
+    EXPECT_EQ(i, step);
+}
+
+/**
+ * @tc.name: CheckPositionTopInBounds001
+ * @tc.desc: Test CheckPositionTop when position is inside window bounds.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, CheckPositionTopInBounds001, TestSize.Level0)
+{
+    BubbleLayoutAlgorithm algorithm;
+    InitCheckPositionSetting(algorithm);
+    algorithm.placement_ = Placement::TOP;
+    algorithm.windowBoundsRect_ = Rect(0, 0, SIZE_FIVE_HUNDRED, SIZE_FIVE_HUNDRED);
+    OffsetF position(OFFSET_TWO_HUNDRED, POSITION_FIFTY);
+    SizeF childSize(SIZE_THIRTY, SIZE_THIRTY);
+    size_t step = 1;
+    size_t i = 0;
+    OffsetF arrowPosition(0.0f, 0.0f);
+
+    EXPECT_TRUE(algorithm.CheckPositionTop(position, childSize, step, i, arrowPosition));
+    EXPECT_TRUE(algorithm.bVertical_);
+}
+
+/**
+ * @tc.name: CheckPositionTopOutBounds002
+ * @tc.desc: Test CheckPositionTop when position is outside window bounds.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, CheckPositionTopOutBounds002, TestSize.Level0)
+{
+    BubbleLayoutAlgorithm algorithm;
+    InitCheckPositionSetting(algorithm);
+    algorithm.placement_ = Placement::TOP;
+    algorithm.windowBoundsRect_ = Rect(0, 100.0f, SIZE_FIVE_HUNDRED, SIZE_FIVE_HUNDRED);
+    OffsetF position(OFFSET_TWO_HUNDRED, POSITION_FIFTY);
+    SizeF childSize(SIZE_THIRTY, SIZE_THIRTY);
+    size_t step = 1;
+    size_t i = 0;
+    OffsetF arrowPosition(0.0f, 0.0f);
+
+    EXPECT_FALSE(algorithm.CheckPositionTop(position, childSize, step, i, arrowPosition));
+    EXPECT_EQ(i, step);
+}
+
+/**
+ * @tc.name: CheckPositionRightInBounds001
+ * @tc.desc: Test CheckPositionRight when position is inside window bounds.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, CheckPositionRightInBounds001, TestSize.Level0)
+{
+    BubbleLayoutAlgorithm algorithm;
+    InitCheckPositionSetting(algorithm);
+    algorithm.placement_ = Placement::RIGHT;
+    algorithm.windowBoundsRect_ = Rect(0, 0, SIZE_FIVE_HUNDRED, SIZE_FIVE_HUNDRED);
+    OffsetF position(350.0f, OFFSET_TWO_HUNDRED);
+    SizeF childSize(SIZE_THIRTY, SIZE_THIRTY);
+    size_t step = 1;
+    size_t i = 0;
+    OffsetF arrowPosition(0.0f, 0.0f);
+
+    EXPECT_TRUE(algorithm.CheckPositionRight(position, childSize, step, i, arrowPosition));
+    EXPECT_TRUE(algorithm.bHorizontal_);
+}
+
+/**
+ * @tc.name: CheckPositionRightOutBounds002
+ * @tc.desc: Test CheckPositionRight when position is outside window bounds.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, CheckPositionRightOutBounds002, TestSize.Level0)
+{
+    BubbleLayoutAlgorithm algorithm;
+    InitCheckPositionSetting(algorithm);
+    algorithm.placement_ = Placement::RIGHT;
+    algorithm.windowBoundsRect_ = Rect(0, 0, 300.0f, SIZE_FIVE_HUNDRED);
+    OffsetF position(350.0f, OFFSET_TWO_HUNDRED);
+    SizeF childSize(SIZE_THIRTY, SIZE_THIRTY);
+    size_t step = 1;
+    size_t i = 0;
+    OffsetF arrowPosition(0.0f, 0.0f);
+
+    EXPECT_FALSE(algorithm.CheckPositionRight(position, childSize, step, i, arrowPosition));
+    EXPECT_EQ(i, step);
+}
+
+/**
+ * @tc.name: CheckPositionLeftInBounds001
+ * @tc.desc: Test CheckPositionLeft when position is inside window bounds.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, CheckPositionLeftInBounds001, TestSize.Level0)
+{
+    BubbleLayoutAlgorithm algorithm;
+    InitCheckPositionSetting(algorithm);
+    algorithm.placement_ = Placement::LEFT;
+    algorithm.windowBoundsRect_ = Rect(0, 0, SIZE_FIVE_HUNDRED, SIZE_FIVE_HUNDRED);
+    OffsetF position(POSITION_FIFTY, OFFSET_TWO_HUNDRED);
+    SizeF childSize(SIZE_THIRTY, SIZE_THIRTY);
+    size_t step = 1;
+    size_t i = 0;
+    OffsetF arrowPosition(0.0f, 0.0f);
+
+    EXPECT_TRUE(algorithm.CheckPositionLeft(position, childSize, step, i, arrowPosition));
+    EXPECT_TRUE(algorithm.bHorizontal_);
+}
+
+/**
+ * @tc.name: CheckPositionLeftOutBounds002
+ * @tc.desc: Test CheckPositionLeft when position is outside window bounds.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, CheckPositionLeftOutBounds002, TestSize.Level0)
+{
+    BubbleLayoutAlgorithm algorithm;
+    InitCheckPositionSetting(algorithm);
+    algorithm.placement_ = Placement::LEFT;
+    algorithm.windowBoundsRect_ = Rect(100.0f, 0, SIZE_FIVE_HUNDRED, SIZE_FIVE_HUNDRED);
+    OffsetF position(POSITION_FIFTY, OFFSET_TWO_HUNDRED);
+    SizeF childSize(SIZE_THIRTY, SIZE_THIRTY);
+    size_t step = 1;
+    size_t i = 0;
+    OffsetF arrowPosition(0.0f, 0.0f);
+
+    EXPECT_FALSE(algorithm.CheckPositionLeft(position, childSize, step, i, arrowPosition));
+    EXPECT_EQ(i, step);
+}
+
+/**
+ * @tc.name: CheckPositionWithEmptyBounds001
+ * @tc.desc: Test CheckPosition with empty windowBoundsRect_, should not block position.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, CheckPositionWithEmptyBounds001, TestSize.Level0)
+{
+    BubbleLayoutAlgorithm algorithm;
+    InitCheckPositionSetting(algorithm);
+    algorithm.placement_ = Placement::BOTTOM;
+    algorithm.windowBoundsRect_ = Rect(0, 0, 0, 0);
+    OffsetF position(OFFSET_TWO_HUNDRED, 300.0f);
+    SizeF childSize(SIZE_THIRTY, SIZE_THIRTY);
+    size_t step = 1;
+    size_t i = 0;
+    OffsetF arrowPosition(0.0f, 0.0f);
+
+    EXPECT_TRUE(algorithm.CheckPositionBottom(position, childSize, step, i, arrowPosition));
+    EXPECT_TRUE(algorithm.bVertical_);
+}
+
+/**
+ * @tc.name: CheckPositionBottomVariants001
+ * @tc.desc: Test CheckPositionBottom with BOTTOM_LEFT and BOTTOM_RIGHT placements.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, CheckPositionBottomVariants001, TestSize.Level0)
+{
+    BubbleLayoutAlgorithm algorithm;
+    InitCheckPositionSetting(algorithm);
+    algorithm.windowBoundsRect_ = Rect(0, 0, SIZE_FIVE_HUNDRED, 400.0f);
+    OffsetF position(OFFSET_TWO_HUNDRED, 300.0f);
+    SizeF childSize(SIZE_THIRTY, SIZE_THIRTY);
+    size_t step = 1;
+    size_t i = 0;
+    OffsetF arrowPosition(0.0f, 0.0f);
+
+    algorithm.placement_ = Placement::BOTTOM_LEFT;
+    EXPECT_TRUE(algorithm.CheckPositionBottom(position, childSize, step, i, arrowPosition));
+
+    algorithm.placement_ = Placement::BOTTOM_RIGHT;
+    algorithm.bVertical_ = false;
+    i = 0;
+    EXPECT_TRUE(algorithm.CheckPositionBottom(position, childSize, step, i, arrowPosition));
+}
+
+/**
+ * @tc.name: BubblePatternPopOnAreaChange001
+ * @tc.desc: Test OnAttachToFrameNode with isTips_ = false, area change callback is registered.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleFiveTestNg, BubblePatternPopOnAreaChange001, TestSize.Level0)
+{
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    bubblePattern->isTips_ = false;
+
+    bubblePattern->OnAttachToFrameNode();
+    auto eventHub = targetNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    EXPECT_FALSE(eventHub->onAreaChangedInnerCallbacks_.empty());
+}
 } // namespace OHOS::Ace::NG

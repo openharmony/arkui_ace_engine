@@ -128,6 +128,12 @@ public:
     void OnDetachFromMainTree(bool recursive, PipelineContext* context) override;
     bool IsChildEmpty() const;
 
+    void UpdateJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+
+    void SetTitleJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+
+    void SetMenuJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+
 private:
     RefPtr<UINode> backButton_;
     RefPtr<UINode> customBackButton_;

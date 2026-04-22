@@ -263,33 +263,54 @@ void DisposeNode(ArkUI_NodeHandle nativePtr)
 
 int32_t AddChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode)
 {
-    CHECK_NULL_RETURN(parentNode, ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
+    if (parentNode == nullptr) {
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Parent node is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (childNode == nullptr) {
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Child node is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (!CheckIsCNodeOrAllowCrossLanguageTreeOperating(parentNode) ||
         !CheckIsCNodeOrAllowCrossLanguageTreeOperating(childNode)) {
+        SET_ERROR_MESSAGE(ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR, __FUNCTION__, "Node is not a C node");
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     // already check in entry point.
     if (parentNode->type == -1 && !CheckIsAllowCrossLanguageTreeOperating(parentNode)) {
+        SET_ERROR_MESSAGE(ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR, __FUNCTION__, "Builder node is not supported");
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     const auto* impl = GetFullImpl();
     // already check in entry point.
-    int result = impl->getBasicAPI()->addChild(parentNode->uiNodeHandle, childNode->uiNodeHandle);
+    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo { ERROR_CODE_NO_ERROR, __FUNCTION__, "" });
+    int result = impl->getBasicAPI()->addChild(parentNode->uiNodeHandle, childNode->uiNodeHandle,
+        reinterpret_cast<void*>(&errorInfoPtr));
+    if (result != ERROR_CODE_NO_ERROR) {
+        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+    }
     impl->getBasicAPI()->markDirty(parentNode->uiNodeHandle, ARKUI_DIRTY_FLAG_MEASURE_BY_CHILD_REQUEST);
     return result;
 }
 
 int32_t RemoveChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode)
 {
-    CHECK_NULL_RETURN(parentNode, ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
+    if (parentNode == nullptr) {
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Parent node is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (childNode == nullptr) {
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Child node is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (!CheckIsCNodeOrAllowCrossLanguageTreeOperating(parentNode) ||
         !CheckIsCNodeOrAllowCrossLanguageTreeOperating(childNode)) {
+        SET_ERROR_MESSAGE(ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR, __FUNCTION__, "Node is not a C node");
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     // already check in entry point.
     if (parentNode->type == -1 && !CheckIsAllowCrossLanguageTreeOperating(parentNode)) {
+        SET_ERROR_MESSAGE(ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR, __FUNCTION__, "Builder node is not supported");
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     const auto* impl = GetFullImpl();
@@ -300,56 +321,93 @@ int32_t RemoveChild(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode)
 
 int32_t InsertChildAfter(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode, ArkUI_NodeHandle siblingNode)
 {
-    CHECK_NULL_RETURN(parentNode, ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
+    if (parentNode == nullptr) {
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Parent node is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (childNode == nullptr) {
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Child node is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (!CheckIsCNodeOrAllowCrossLanguageTreeOperating(parentNode) ||
         !CheckIsCNodeOrAllowCrossLanguageTreeOperating(childNode)) {
+        SET_ERROR_MESSAGE(ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR, __FUNCTION__, "Node is not a C node");
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     // already check in entry point.
     if (parentNode->type == -1 && !CheckIsAllowCrossLanguageTreeOperating(parentNode)) {
+        SET_ERROR_MESSAGE(ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR, __FUNCTION__, "Builder node is not supported");
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     const auto* impl = GetFullImpl();
-    int result = impl->getBasicAPI()->insertChildAfter(
-        parentNode->uiNodeHandle, childNode->uiNodeHandle, siblingNode ? siblingNode->uiNodeHandle : nullptr);
+    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo { ERROR_CODE_NO_ERROR, __FUNCTION__, "" });
+    int result = impl->getBasicAPI()->insertChildAfter(parentNode->uiNodeHandle, childNode->uiNodeHandle,
+        siblingNode ? siblingNode->uiNodeHandle : nullptr, reinterpret_cast<void*>(&errorInfoPtr));
+    if (result != ERROR_CODE_NO_ERROR) {
+        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+    }
     impl->getBasicAPI()->markDirty(parentNode->uiNodeHandle, ARKUI_DIRTY_FLAG_MEASURE_BY_CHILD_REQUEST);
     return result;
 }
 
 int32_t InsertChildBefore(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode, ArkUI_NodeHandle siblingNode)
 {
-    CHECK_NULL_RETURN(parentNode, ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
+    if (parentNode == nullptr) {
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Parent node is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (childNode == nullptr) {
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Child node is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (!CheckIsCNodeOrAllowCrossLanguageTreeOperating(parentNode) ||
         !CheckIsCNodeOrAllowCrossLanguageTreeOperating(childNode)) {
+        SET_ERROR_MESSAGE(ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR, __FUNCTION__, "Node is not a C node");
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     // already check in entry point.
     if (parentNode->type == -1 && !CheckIsAllowCrossLanguageTreeOperating(parentNode)) {
+        SET_ERROR_MESSAGE(ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR, __FUNCTION__, "Builder node is not supported");
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     const auto* impl = GetFullImpl();
-    int result = impl->getBasicAPI()->insertChildBefore(
-        parentNode->uiNodeHandle, childNode->uiNodeHandle, siblingNode ? siblingNode->uiNodeHandle : nullptr);
+    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo { ERROR_CODE_NO_ERROR, __FUNCTION__, "" });
+    int result = impl->getBasicAPI()->insertChildBefore(parentNode->uiNodeHandle, childNode->uiNodeHandle,
+        siblingNode ? siblingNode->uiNodeHandle : nullptr, reinterpret_cast<void*>(&errorInfoPtr));
+    if (result != ERROR_CODE_NO_ERROR) {
+        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+    }
     impl->getBasicAPI()->markDirty(parentNode->uiNodeHandle, ARKUI_DIRTY_FLAG_MEASURE_BY_CHILD_REQUEST);
     return result;
 }
 
 int32_t InsertChildAt(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode, int32_t position)
 {
-    CHECK_NULL_RETURN(parentNode, ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(childNode, ERROR_CODE_PARAM_INVALID);
+    if (parentNode == nullptr) {
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Parent node is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (childNode == nullptr) {
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Child node is null");
+        return ERROR_CODE_PARAM_INVALID;
+    }
     if (!CheckIsCNodeOrAllowCrossLanguageTreeOperating(parentNode) ||
         !CheckIsCNodeOrAllowCrossLanguageTreeOperating(childNode)) {
+        SET_ERROR_MESSAGE(ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR, __FUNCTION__, "Node is not a C node");
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     // already check in entry point.
     if (parentNode->type == -1 && !CheckIsAllowCrossLanguageTreeOperating(parentNode)) {
+        SET_ERROR_MESSAGE(ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR, __FUNCTION__, "Builder node is not supported");
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     const auto* impl = GetFullImpl();
-    int result = impl->getBasicAPI()->insertChildAt(parentNode->uiNodeHandle, childNode->uiNodeHandle, position);
+    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo { ERROR_CODE_NO_ERROR, __FUNCTION__, "" });
+    int result = impl->getBasicAPI()->insertChildAt(parentNode->uiNodeHandle, childNode->uiNodeHandle, position,
+        reinterpret_cast<void*>(&errorInfoPtr));
+    if (result != ERROR_CODE_NO_ERROR) {
+        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+    }
     impl->getBasicAPI()->markDirty(parentNode->uiNodeHandle, ARKUI_DIRTY_FLAG_MEASURE_BY_CHILD_REQUEST);
     return result;
 }
@@ -380,23 +438,39 @@ bool IsSupportAttributeTypeWithBindNative(ArkUI_NodeHandle node, ArkUI_NodeAttri
 int32_t SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, const ArkUI_AttributeItem* value)
 {
     if (node == nullptr) {
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
         return ERROR_CODE_PARAM_INVALID;
     }
     if (node->type == -1 && attribute != NODE_LAYOUT_RECT && !IsSupportAttributeTypeWithBindNative(node, attribute)) {
+        SET_ERROR_MESSAGE(
+            ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR, __FUNCTION__, "Builder node attribute is not supported");
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
-    return SetNodeAttribute(node, attribute, value);
+    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo { ERROR_CODE_NO_ERROR, __FUNCTION__, "" });
+    auto result = SetNodeAttribute(node, attribute, value, reinterpret_cast<void*>(&errorInfoPtr));
+    if (result != ERROR_CODE_NO_ERROR) {
+        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+    }
+    return result;
 }
 
 int32_t ResetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute)
 {
     if (node == nullptr) {
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
         return ERROR_CODE_PARAM_INVALID;
     }
     if (node->type == -1 && attribute != NODE_LAYOUT_RECT) {
+        SET_ERROR_MESSAGE(
+            ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR, __FUNCTION__, "Builder node attribute is not supported");
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
-    return ResetNodeAttribute(node, attribute);
+    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo { ERROR_CODE_NO_ERROR, __FUNCTION__, "" });
+    auto result = ResetNodeAttribute(node, attribute, reinterpret_cast<void*>(&errorInfoPtr));
+    if (result != ERROR_CODE_NO_ERROR) {
+        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+    }
+    return result;
 }
 
 const ArkUI_AttributeItem* GetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute)
@@ -889,9 +963,11 @@ int32_t CheckEvent(ArkUI_NodeEvent* event)
 int32_t SetUserData(ArkUI_NodeHandle node, void* userData)
 {
     if (!node || !CheckIsCNode(node)) {
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node is invalid");
         return ERROR_CODE_PARAM_INVALID;
     }
     if (!userData) {
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "User data is null");
         return ERROR_CODE_PARAM_INVALID;
     }
     node->userData = userData;
@@ -906,10 +982,12 @@ void* GetUserData(ArkUI_NodeHandle node)
 int32_t SetLengthMetricUnit(ArkUI_NodeHandle nodePtr, ArkUI_LengthMetricUnit unit)
 {
     if (!nodePtr || !CheckIsCNode(nodePtr)) {
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node is invalid");
         return ERROR_CODE_PARAM_INVALID;
     }
     if (!InRegion(static_cast<int32_t>(ARKUI_LENGTH_METRIC_UNIT_DEFAULT),
         static_cast<int32_t>(ARKUI_LENGTH_METRIC_UNIT_FP), static_cast<int32_t>(unit))) {
+        SET_ERROR_MESSAGE(ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Length metric unit is invalid");
         return ERROR_CODE_PARAM_INVALID;
     }
     nodePtr->lengthMetricUnit = unit;

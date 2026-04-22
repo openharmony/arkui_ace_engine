@@ -38,6 +38,8 @@
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components/common/properties/placement.h"
+#include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 
 #undef private
 using namespace testing;

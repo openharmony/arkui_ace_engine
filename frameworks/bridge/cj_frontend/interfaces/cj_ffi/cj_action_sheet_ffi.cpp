@@ -302,9 +302,6 @@ void FfiOHOSAceFrameworkActionSheetShowWithShadowOptions(
 
     // Parse shadow
     Shadow shadow;
-    if (LessNotEqual(shadowOptions.radius, 0.0)) {
-        shadowOptions.radius = 0.0;
-    }
     shadow.SetBlurRadius(shadowOptions.radius);
     Color shadowColor = Color(ColorAlphaAdapt(shadowOptions.color));
     shadow.SetColor(shadowColor);

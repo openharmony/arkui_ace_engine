@@ -18,11 +18,11 @@
 #include "base/i18n/localization.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
@@ -44,6 +44,7 @@
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/interfaces/native/node/menu_modifier.h"
+#include "core/components/common/properties/placement.h"
 
 namespace OHOS::Ace::NG {
 
@@ -347,6 +348,7 @@ RefPtr<FrameNode> CreateToolbarItemInContainer(
     auto renderContext = toolBarItemNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    toolBarItemLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     MarginProperty margin;
     AddSafeIntervalBetweenToolbarItem(margin, count, toolbarItemSize, param.needMoreButton);
     toolBarItemLayoutProperty->UpdateMargin(margin);
@@ -419,6 +421,7 @@ RefPtr<FrameNode> CreateToolbarMoreMenuNode(const RefPtr<BarItemNode>& barItemNo
     auto renderContext = toolBarItemNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    menuItemLayoutProperty->UpdateBackgroundColorFlagByUser(true);
 
     MarginProperty menuButtonMargin;
     menuButtonMargin.left = CalcLength(theme->GetToolbarItemMargin());

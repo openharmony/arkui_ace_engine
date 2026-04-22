@@ -49,7 +49,9 @@ constexpr char PROPERTY_DEVICE_TYPE_WEARABLE[] = "wearable";
 constexpr char PROPERTY_FOLD_TYPE[] = "const.window.foldscreen.type";
 constexpr char ENABLE_DEBUG_AUTOUI_KEY[] = "persist.ace.debug.autoui.enabled";
 constexpr char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
 constexpr char ENABLE_GESTURE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.gesture.boundary.enabled";
+#endif
 constexpr char ENABLE_DOWNLOAD_BY_NETSTACK_KEY[] = "persist.ace.download.netstack.enabled";
 constexpr char ENABLE_RECYCLE_IMAGE_KEY[] = "persist.ace.recycle.image.enabled";
 constexpr char ENABLE_IMAGE_RELEASE_MANAGE_OBJECT_KEY[] = "persist.ace.image.releasemanageobject.enabled";
@@ -84,6 +86,7 @@ constexpr int32_t FOLD_TYPE_TWO = 2;
 constexpr int32_t FOLD_TYPE_FOUR = 4;
 constexpr int32_t FOLD_TYPE_SEVEN = 7;
 constexpr float DEFAULT_SCROLL_COEFFICEIENT = 2.0f;
+constexpr int32_t DEFAULT_FORM_TASK_PRIORITY = 2;
 
 bool IsOpIncEnabled()
 {
@@ -114,7 +117,11 @@ bool IsDebugBoundaryEnabled()
 
 bool IsGestureDebugBoundaryEnabled()
 {
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
     return system::GetParameter(ENABLE_GESTURE_DEBUG_BOUNDARY_KEY, "false") == "true";
+#else
+    return false;
+#endif
 }
 
 bool IsDownloadByNetworkDisabled()
@@ -215,6 +222,11 @@ bool IsWindowRectResizeEnabled()
 bool IsFocusCanBeActive()
 {
     return system::GetParameter("persist.gesture.smart_gesture_enable", "1") != "0";
+}
+
+bool IsSmartGestureEnabled()
+{
+    return system::GetBoolParameter("persist.ace.gesture.smart_gesture_enabled", true);
 }
 
 bool IsCacheNavigationNodeEnable()
@@ -781,6 +793,7 @@ float SystemProperties::pageCount_ = GetPageCountProp();
 bool SystemProperties::sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
 std::atomic<bool> SystemProperties::acePerformanceMonitorEnable_(IsAcePerformanceMonitorEnabled());
 std::atomic<bool> SystemProperties::focusCanBeActive_(IsFocusCanBeActive());
+bool SystemProperties::smartGestureEnabled_ = IsSmartGestureEnabled();
 bool SystemProperties::aceCommercialLogEnable_ = IsAceCommercialLogEnable();
 bool SystemProperties::faultInjectEnabled_  = IsFaultInjectEnabled();
 bool SystemProperties::opincEnabled_ = IsOpIncEnabled();
@@ -1587,5 +1600,12 @@ UiMaterialLevel SystemProperties::GetUiMaterialLevel()
 {
     static auto uiMaterialLevel = ReadUiMaterialLevel();
     return uiMaterialLevel;
+}
+
+int32_t SystemProperties::GetFormTaskPriority()
+{
+    static auto formTaskPriority = system::GetIntParameter<int32_t>("const.form.task_priority",
+	                                                                DEFAULT_FORM_TASK_PRIORITY);
+    return formTaskPriority;
 }
 } // namespace OHOS::Ace

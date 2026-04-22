@@ -20,23 +20,18 @@
 
 #include "ui/properties/dirty_flag.h"
 
-#include "base/geometry/ng/rect_t.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
-#include "base/utils/utils.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/container_consts.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/resource/pattern_resource_manager.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
-#include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/manager/smart_gesture/smart_gesture_types.h"
 #include "core/components_ng/layout/vertical_overflow_handler.h"
+#include "core/components_ng/property/accessibility_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/node_paint_method.h"
-#include "core/components_ng/render/paint_property.h"
 #include "core/event/pointer_event.h"
 
 struct _ArkUINodeAdapter;
@@ -214,6 +209,22 @@ public:
     virtual RefPtr<NodePaintMethod> CreateDefaultNodePaintMethod()
     {
         return MakeRefPtr<NodePaintMethod>();
+    }
+
+    virtual bool IsScrollAble(SmartGestureDirection direction = SmartGestureDirection::FORWARD) const
+    {
+        return false;
+    }
+
+    virtual std::optional<ScrollingConfig> GetDefaultScrollingConfig(
+        SmartGestureDirection direction = SmartGestureDirection::FORWARD) const
+    {
+        return std::nullopt;
+    }
+
+    virtual void PerformScroll(const ScrollingConfig& /* config */)
+    {
+        return;
     }
 
     virtual std::optional<RectF> GetOverridePaintRect() const
@@ -815,7 +826,7 @@ public:
     {
         return false;
     }
-    virtual void PostponedTaskForIgnore() {}
+    virtual void PostponedTaskForIgnore(LayoutSafeAreaBundleType type) {}
     virtual bool NeedCustomizeSafeAreaPadding()
     {
         return false;

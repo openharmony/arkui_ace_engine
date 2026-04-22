@@ -25,7 +25,8 @@
         "SectionOptions",
         "LengthMetrics",
         "ColorMetrics",
-        "CustomSpan"
+        "CustomSpan",
+        "TouchEvent"
     ],
     "ignoreGenerics": [
         "arkui.component.common.AttributeModifier",
@@ -54,8 +55,16 @@
             "to": "arkui.component.idlize.ColorMetricsExt"
         },
         {
+            "from": "ohos.base.RecordData",
+            "to": "(Object or undefined)"
+        },
+        {
             "from": "arkui.component.styledString.CustomSpan",
             "to": "arkui.component.idlize.CustomSpanWrapper"
+        },
+        {
+            "from": "arkui.component.styledString.CustomSpanMeasureInfo",
+            "to": "arkui.component.idlize.CustomSpanMeasureInfoProxy"
         },
         {
             "from": "arkui.component.common.TouchEvent",
@@ -691,7 +700,8 @@
             "WithTheme",
             "SaveButton",
             "PasteButton",
-            "CustomSpan"
+            "CustomSpan",
+            "TouchEvent"
         ],
         "ignoreEntry": [
             "Optional",

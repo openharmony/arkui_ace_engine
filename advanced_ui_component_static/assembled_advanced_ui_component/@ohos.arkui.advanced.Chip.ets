@@ -65,7 +65,11 @@ import { ColorMetrics, LengthMetrics, LengthUnit } from '@ohos.arkui.node';
 import { KeyCode } from '@ohos.multimodalInput.keyCode';
 import hilog from '@ohos.hilog';
 import resourceManager from '@ohos.resourceManager';
-
+import common from '@ohos.app.ability.common';
+import { EnvironmentCallback } from '@kit.AbilityKit';
+import deviceInfo from '@ohos.deviceInfo';
+import { Configuration } from '@ohos.app.ability.Configuration';
+import AbilityConstant from '@ohos.app.ability.AbilityConstant';
 
 export enum ChipSize {
   NORMAL = 'NORMAL',
@@ -172,6 +176,7 @@ export interface LabelTheme {
   localizedSmallMargin: LocalizedMargin;
   defaultFontSize: Dimension;
   fontWeight: Resource;
+  adaptiveItemFontSize: Dimension;
 }
 
 export interface ChipNodeOpacity {
@@ -338,6 +343,20 @@ export function Chip(options: ChipOptions) {
   })
 }
 
+export class EnvironmentCallbackEntry implements EnvironmentCallback { 
+  private chipComponent: ChipComponent; 
+  
+  constructor(chipComponent: ChipComponent) { 
+    this.chipComponent = chipComponent; 
+  }
+
+  onConfigurationUpdated(config: Configuration) { 
+    this.chipComponent.updateLanguageLineHeight(); 
+  }
+
+  onMemoryLevel(level: AbilityConstant.MemoryLevel) {} 
+}
+
 @Component
 export struct ChipComponent {
   private theme: ChipTheme = {
@@ -358,6 +377,7 @@ export struct ChipComponent {
     label: {
       normalFontSize: $r('sys.float.chip_normal_font_size'),
       smallFontSize: $r('sys.float.chip_small_font_size'),
+      adaptiveItemFontSize: $r('sys.float.Caption_M'),
       focusFontColor: $r('sys.color.chip_focus_text'),
       focusActiveFontColor: $r('sys.color.chip_activated_focus_font_color'),
       fontColor: $r('sys.color.chip_font_color'),
@@ -489,6 +509,7 @@ export struct ChipComponent {
   @State suffixSymbolWidth: number = 0;
   @State breakPoint: BreakPointsType = BreakPointsType.SM;
   @State fontSizeScale: number = 1;
+  @State useAdaptiveLineHeight: boolean = false;
   private isSuffixIconFocusStyleCustomized: boolean =
     this.resourceToNumber(this.theme.suffixIcon.isShowMargin, 0) !== 0;
   private isSuffixIconFocusable: boolean = this.resourceToNumber(this.theme.suffixIcon.isShowMargin, 0) !== 0;
@@ -496,6 +517,41 @@ export struct ChipComponent {
   public onClicked?: VoidCallback;
   @State chipNodeInFocus: boolean = false;
   private symbolEffect: SymbolEffect = new SymbolEffect();
+  private environmentCallbackID?: int;
+  private environmentCallback: EnvironmentCallbackEntry = new EnvironmentCallbackEntry(this);
+
+  updateLanguageLineHeight(): void {
+    const resourceManager = this.getUIContext().getHostContext()?.resourceManager;
+    if (!resourceManager) {
+      console.error(`[Chip] failed to get resourceManager`);
+      return;
+    }
+    try {
+      this.useAdaptiveLineHeight = resourceManager!.getStringByNameSync('text_fallback_line_spacing') === 'true';
+    } catch (e) {
+      console.error(`[Chip] failed to get text_fallback_line_spacing resource`);
+    }
+  }
+
+  aboutToAppear(): void {
+    if (deviceInfo.sdkApiVersion >= 26) {
+      this.updateLanguageLineHeight();
+      let abilityContext = this.getUIContext().getHostContext();
+      if (abilityContext) {
+        this.environmentCallbackID = abilityContext.getApplicationContext().onEnvironment(this.environmentCallback);
+      }
+    }
+  }
+
+  aboutToDisappear(): void {
+    if (deviceInfo.sdkApiVersion >= 26 && this.environmentCallbackID !== undefined) {
+      let abilityContext = this.getUIContext().getHostContext();
+      if (abilityContext) {
+        abilityContext.getApplicationContext().offEnvironment(this.environmentCallbackID as int);
+      }
+      this.environmentCallbackID = undefined;
+    }
+  }
 
   private isSetActiveChipBgColor(): boolean {
     if (this.chipNodeActivatedBackgroundColor) {
@@ -588,6 +644,8 @@ export struct ChipComponent {
           .maxFontScale(this.maxFontScale)
           .minFontScale(this.minFontScale)
           .margin(this.getLabelMargin())
+          .includeFontPadding(this.useAdaptiveLineHeight)
+ 	        .fallbackLineSpacing(this.useAdaptiveLineHeight)
 
         if (this.hasSuffixSymbol()) {
           Button({ type: ButtonType.Normal } as ButtonOptions) {
@@ -1090,9 +1148,9 @@ export struct ChipComponent {
       return this.chipFontSize!;
     }
     if (this.isSmallChipSize()) {
-      return this.theme.label.smallFontSize;
+      return this.useAdaptiveLineHeight ? this.theme.label.adaptiveItemFontSize : this.theme.label.smallFontSize;
     }
-    return this.theme.label.normalFontSize;
+    return this.useAdaptiveLineHeight ? this.theme.label.adaptiveItemFontSize : this.theme.label.normalFontSize;
   }
 
   private getChipText(): ResourceStr {

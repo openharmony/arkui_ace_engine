@@ -15,8 +15,10 @@
 
 #include "core/components_ng/pattern/select/select_layout_algorithm.h"
 
+#include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/select/select_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_item_inner_modifier.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"

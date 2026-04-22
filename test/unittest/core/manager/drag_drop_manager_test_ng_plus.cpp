@@ -14,6 +14,7 @@
  */
 
 #include "test/unittest/core/manager/drag_drop_manager_test_ng.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/common/event_manager.h"
 
 #include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"

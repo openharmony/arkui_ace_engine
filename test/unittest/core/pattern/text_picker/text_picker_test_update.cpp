@@ -27,6 +27,7 @@
 #include "test/mock/frameworks/core/common/mock_container.h"
 
 #include "core/components_ng/pattern/picker/picker_theme.h"
+#include "core/components/button/button_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
@@ -35,6 +36,7 @@
 #include "core/components_ng/pattern/text_picker/textpicker_dialog_view.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
 #include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #undef private
 #undef protected
 

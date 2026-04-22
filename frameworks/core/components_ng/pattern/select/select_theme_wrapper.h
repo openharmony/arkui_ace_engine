@@ -54,6 +54,11 @@ public:
             SetButtonBackgroundColor(colors->CompBackgroundTertiary());
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
                 SetMenuFontColor(colors->FontPrimary());
+                SetMenuIconColor(colors->IconPrimary());
+                SetSecondaryFontColor(colors->FontSecondary());
+                SetClickedColor(colors->InteractiveClick());
+                SetHoverColor(colors->InteractiveHover());
+                SetLineColor(colors->CompDivider());
             }
         }
     }

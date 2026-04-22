@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PICKER_UTILS_TOSS_ANIMATION_CONTROLLER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PICKER_UTILS_TOSS_ANIMATION_CONTROLLER_H
 
-#include "compatible/components/picker/picker_animation.h"
+#include "core/animation/curve.h"
 #include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/memory/ace_type.h"

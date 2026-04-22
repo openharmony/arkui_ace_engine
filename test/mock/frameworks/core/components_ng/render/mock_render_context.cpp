@@ -125,6 +125,82 @@ void RenderContext::SetTransparencyCallbackId(const std::optional<int32_t>& id)
     uiMaterial_->transparencyCallbackId = id;
 }
 
+RenderContext::RenderContext() = default;
+RenderContext::~RenderContext() = default;
+
+const std::unique_ptr<BorderImageProperty>& RenderContext::GetOrCreateBdImage()
+{
+    if (!propBdImage_) {
+        propBdImage_ = std::make_unique<BorderImageProperty>();
+    }
+    return propBdImage_;
+}
+
+const std::unique_ptr<BorderImageProperty>& RenderContext::GetBdImage() const
+{
+    return propBdImage_;
+}
+
+std::unique_ptr<BorderImageProperty> RenderContext::CloneBdImage() const
+{
+    if (propBdImage_) {
+        return std::make_unique<BorderImageProperty>(*propBdImage_);
+    }
+    return nullptr;
+}
+
+void RenderContext::ResetBdImage()
+{
+    propBdImage_.reset();
+}
+
+std::optional<RefPtr<BorderImage>> RenderContext::GetBorderImage() const
+{
+    auto& groupProperty = GetBdImage();
+    if (groupProperty) {
+        return groupProperty->GetBorderImage();
+    }
+    return std::nullopt;
+}
+
+bool RenderContext::HasBorderImage() const
+{
+    auto& groupProperty = GetBdImage();
+    if (groupProperty) {
+        return groupProperty->HasBorderImage();
+    }
+    return false;
+}
+
+RefPtr<BorderImage> RenderContext::GetBorderImageValue(const RefPtr<BorderImage>& defaultValue) const
+{
+    auto& groupProperty = GetBdImage();
+    if (groupProperty) {
+        if (groupProperty->HasBorderImage()) {
+            return groupProperty->GetBorderImageValue();
+        }
+    }
+    return defaultValue;
+}
+
+void RenderContext::UpdateBorderImage(const RefPtr<BorderImage>& value)
+{
+    auto& groupProperty = GetOrCreateBdImage();
+    if (groupProperty->CheckBorderImage(value)) {
+        return;
+    }
+    groupProperty->UpdateBorderImage(value);
+    OnBorderImageUpdate(value);
+}
+
+void RenderContext::ResetBorderImage()
+{
+    auto& groupProperty = GetBdImage();
+    if (groupProperty) {
+        groupProperty->ResetBorderImage();
+    }
+}
+
 #ifdef ENHANCED_ANIMATION
 namespace {
 void InitProp(const RefPtr<PropertyBase>& propBase)

@@ -39,7 +39,7 @@ import { MenuItemModifier } from './../MenuItemModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 export class ArkMenuItemPeer extends ArkCommonMethodPeer {
-    attributeSet?: MenuItemModifier;
+    menuItemAttributeSet?: MenuItemModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

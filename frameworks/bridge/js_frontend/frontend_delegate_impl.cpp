@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/bridge/js_frontend/frontend_delegate_impl.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/log/event_report.h"
 #include "base/resource/ace_res_config.h"

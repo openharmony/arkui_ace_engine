@@ -17,14 +17,26 @@ ace_unittest("smart_layout_test_ng") {
   type = "new"
   module_name = "Layout-SmartLayout"
   sources = [
-    "smart_layout_node_test.cpp",
+    # Smart layout engine
+    "$ace_root/frameworks/core/components_ng/pattern/smart_layout/engine/localsmt/localsmt.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/smart_layout/engine/localsmt/matrix.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/smart_layout/engine/localsmt/nia_build_instance.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/smart_layout/engine/localsmt/nia_initialize.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/smart_layout/engine/localsmt/nia_ls.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/smart_layout/engine/smart_layout_constraints.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/smart_layout/engine/smart_layout_node.cpp",
     "smart_layout_constraints_test.cpp",
+    "smart_layout_node_test.cpp",
     "smart_layout_test_core.cpp",
     "smart_layout_types_test.cpp",
+    "smart_layout_engine_loader_test.cpp",
+    "smart_layout_smt_file_test.cpp", 
+    "smart_layout_local_smt_test.cpp",
+    "smart_layout_algorithm_test.cpp",
   ]
 
   external_deps = [
+    "bounds_checking_function:libsec_static",
     "hilog:libhilog",
-    "bounds_checking_function:libsec_static"
   ]
 }

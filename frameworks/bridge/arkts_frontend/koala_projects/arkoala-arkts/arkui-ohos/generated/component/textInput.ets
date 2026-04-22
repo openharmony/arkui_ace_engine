@@ -53,14 +53,25 @@ export class SubmitEventInternal implements MaterializedBase,SubmitEvent {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    public text: string
+    // instructive change begin
+    get text(): string {
+        return this.getText()
+    }
+    set text(text: string) {
+        this.setText(text)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, SubmitEventInternal.getFinalizer())
-        this.text = this.getText()
+        // instructive change begin
+        // this.text = this.getText()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, SubmitEventInternal.construct())
-        this.text = this.getText()
+        // instructive change begin
+        // this.text = this.getText()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._SubmitEvent_construct()
@@ -99,7 +110,7 @@ export class SubmitEventInternal implements MaterializedBase,SubmitEvent {
     }
 }
 export class ArkTextInputPeer extends ArkCommonMethodPeer {
-    attributeSet?: TextInputModifier;
+    textInputAttributeSet?: TextInputModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

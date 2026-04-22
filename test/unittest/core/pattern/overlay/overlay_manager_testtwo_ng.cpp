@@ -32,6 +32,7 @@
 #include "core/components/drag_bar/drag_bar_theme.h"
 #include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components/select/select_theme.h"
+#include "core/components/toast/toast_theme.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -48,6 +49,9 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
+#include "core/components/theme/icon_theme.h"
+#include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
+#include "core/components_ng/pattern/toast/toast_layout_property.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -60,6 +64,29 @@ const OffsetF MENU_OFFSET(10.0, 10.0);
 const std::string MESSAGE = "hello world";
 const std::string BOTTOMSTRING = "test";
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
+
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == DragBarTheme::TypeId()) {
+        return AceType::MakeRefPtr<DragBarTheme>();
+    } else if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == DialogTheme::TypeId()) {
+        return AceType::MakeRefPtr<DialogTheme>();
+    } else if (type == PickerTheme::TypeId()) {
+        return AceType::MakeRefPtr<PickerTheme>();
+    } else if (type == SelectTheme::TypeId()) {
+        return AceType::MakeRefPtr<SelectTheme>();
+    } else if (type == MenuTheme::TypeId()) {
+        return AceType::MakeRefPtr<MenuTheme>();
+    } else if (type == ToastTheme::TypeId()) {
+        return AceType::MakeRefPtr<ToastTheme>();
+    } else if (type == SheetTheme::TypeId()) {
+        return AceType::MakeRefPtr<SheetTheme>();
+    } else {
+        return nullptr;
+    }
+}
 } // namespace
 
 class OverlayManagerTwoTestNg : public TestNG {
@@ -128,26 +155,10 @@ void OverlayManagerTwoTestNg::SetUpTestSuite()
         return CreateTheme(type);
     });
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-        if (type == DragBarTheme::TypeId()) {
-            return AceType::MakeRefPtr<DragBarTheme>();
-        } else if (type == IconTheme::TypeId()) {
-            return AceType::MakeRefPtr<IconTheme>();
-        } else if (type == DialogTheme::TypeId()) {
-            return AceType::MakeRefPtr<DialogTheme>();
-        } else if (type == PickerTheme::TypeId()) {
-            return AceType::MakeRefPtr<PickerTheme>();
-        } else if (type == SelectTheme::TypeId()) {
-            return AceType::MakeRefPtr<SelectTheme>();
-        } else if (type == MenuTheme::TypeId()) {
-            return AceType::MakeRefPtr<MenuTheme>();
-        } else if (type == ToastTheme::TypeId()) {
-            return AceType::MakeRefPtr<ToastTheme>();
-        } else if (type == SheetTheme::TypeId()) {
-            return AceType::MakeRefPtr<SheetTheme>();
-        } else {
-            return nullptr;
-        }
+        return GetTheme(type);
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 void OverlayManagerTwoTestNg::TearDownTestSuite()

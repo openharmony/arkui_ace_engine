@@ -483,7 +483,7 @@ ArkUINativeModuleValue RenderNodeBridge::SetShadowRadius(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> radius = runtimeCallInfo->GetCallArgRef(1);
-    float radiusValue = 0;
+    float radiusValue = Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX) ? 0 : -1;
     if (radius->IsNumber()) {
         radiusValue = radius->ToNumber(vm)->Value();
     }

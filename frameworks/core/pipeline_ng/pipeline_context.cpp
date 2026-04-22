@@ -13,7 +13,10 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/accessibility/accessibility_manager.h"
+#include "core/accessibility/accessibility_manager_ng.h"
 
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/event_manager.h"
@@ -53,6 +56,7 @@
 #include "core/common/back_press_handler_manager.h"
 #include "core/common/font_change_observer.h"
 #include "core/common/font_manager.h"
+#include "core/image/image_cache.h"
 #include "core/common/ime/input_method_manager.h"
 #include "core/common/layout_inspector.h"
 #include "core/common/resource/resource_configuration.h"
@@ -69,6 +73,7 @@
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
+#include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
 #include "core/components_ng/pattern/app_bar/atomic_service_pattern.h"
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view_factory.h"
@@ -79,7 +84,11 @@
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/recycle_view/recycle_manager.h"
+#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 #include "core/components_ng/base/inspector.h"
+#ifdef RELAXED_INTERACTION_SUPPORT
+#include "core/components_ng/relaxed_interaction/utils/workflow_dumper.h"
+#endif
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/components_ng/pattern/window_scene/scene/window_scene_layout_manager.h"
@@ -219,6 +228,7 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     recycleManager_ = std::make_unique<RecycleManager>();
     clickOptimizer_->Init();
     contentChangeMgr_ = MakeRefPtr<ContentChangeManager>(taskExecutor_);
+    dynamicComponentSafeManager_ = AceType::MakeRefPtr<DynamicComponentSafeManager>();
 }
 
 PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
@@ -250,6 +260,7 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     recycleManager_ = std::make_unique<RecycleManager>();
     clickOptimizer_->Init();
     contentChangeMgr_ = MakeRefPtr<ContentChangeManager>(taskExecutor_);
+    dynamicComponentSafeManager_ = AceType::MakeRefPtr<DynamicComponentSafeManager>();
 }
 
 PipelineContext::PipelineContext()
@@ -276,6 +287,7 @@ PipelineContext::PipelineContext()
     recycleManager_ = std::make_unique<RecycleManager>();
     clickOptimizer_->Init();
     contentChangeMgr_ = MakeRefPtr<ContentChangeManager>(taskExecutor_);
+    dynamicComponentSafeManager_ = AceType::MakeRefPtr<DynamicComponentSafeManager>();
 }
 
 std::string PipelineContext::GetCurrentPageNameCallback()
@@ -923,6 +935,9 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
     FlushAnimation(nanoTimestamp);
     FlushFrameCallback(nanoTimestamp, frameCount);
     auto hasRunningAnimation = FlushModifierAnimation(nanoTimestamp);
+#ifdef RELAXED_INTERACTION_SUPPORT
+    FlushRelaxedInteraction();
+#endif
     FrameMetrics frameMetrics;
     frameMetrics.vsyncTimestamp = nanoTimestamp;
     int64_t startTimestamp = GetSysTimestamp();
@@ -2019,6 +2034,8 @@ bool PipelineContext::FlushSafeArea(
             safeAreaUpdated |= safeAreaManager_->UpdateSystemSafeArea(avoidArea.second);
         } else if (avoidArea.first == NG::SafeAreaAvoidType::TYPE_NAVIGATION_INDICATOR) {
             safeAreaUpdated |= safeAreaManager_->UpdateNavSafeArea(avoidArea.second);
+        } else if (avoidArea.first == NG::SafeAreaAvoidType::TYPE_FLOAT_NAVIGATION) {
+            safeAreaUpdated |= safeAreaManager_->UpdateFloatNavSafeArea(avoidArea.second);
         } else if (avoidArea.first == NG::SafeAreaAvoidType::TYPE_CUTOUT) {
             safeAreaUpdated |=
                 safeAreaManager_->UpdateCutoutSafeArea(avoidArea.second, NG::OptionalSize<uint32_t>(width, height));
@@ -2568,6 +2585,14 @@ void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea, bool 
     }
 }
 
+void PipelineContext::UpdateFloatNavSafeArea(const SafeAreaInsets& floatNavSafeArea)
+{
+    CHECK_NULL_VOID(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
+    if (safeAreaManager_->UpdateFloatNavSafeArea(floatNavSafeArea)) {
+        AnimateOnSafeAreaUpdate();
+    }
+}
+
 void PipelineContext::UpdateSystemSafeAreaWithoutAnimation(
     const SafeAreaInsets& systemSafeArea, bool checkSceneBoardWindow)
 {
@@ -2607,6 +2632,14 @@ void PipelineContext::UpdateNavSafeAreaWithoutAnimation(const SafeAreaInsets& na
     }
     CHECK_NULL_VOID(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
     if (safeAreaManager_->UpdateNavSafeArea(navSafeArea)) {
+        SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_AVOID_AREA);
+    }
+}
+
+void PipelineContext::UpdateFloatNavSafeAreaWithoutAnimation(const SafeAreaInsets& floatNavSafeArea)
+{
+    CHECK_NULL_VOID(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
+    if (safeAreaManager_->UpdateFloatNavSafeArea(floatNavSafeArea)) {
         SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_AVOID_AREA);
     }
 }
@@ -2835,7 +2868,7 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
         if (scrollResult) {
             FlushUITasks();
         }
-        MarkDirtyOverlay();
+        OnKeyboardAvoidOverlay();
         SubwindowManager::GetInstance()->FlushSubWindowUITasks(Container::CurrentId());
 
         TAG_LOGI(AceLogTag::ACE_KEYBOARD,
@@ -2894,7 +2927,7 @@ void PipelineContext::OriginalAvoidanceLogic(
         if (scrollResult) {
             FlushUITasks();
         }
-        MarkDirtyOverlay();
+        OnKeyboardAvoidOverlay();
         SubwindowManager::GetInstance()->FlushSubWindowUITasks(Container::CurrentId());
     };
     FlushUITasks();
@@ -3037,7 +3070,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         if (scrollResult) {
             context->FlushUITasks();
         }
-        context->MarkDirtyOverlay();
+        context->OnKeyboardAvoidOverlay();
         SubwindowManager::GetInstance()->FlushSubWindowUITasks(Container::CurrentId());
     };
     FlushUITasks();
@@ -3052,28 +3085,10 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
 #endif
 }
 
-void NotifyDirtyChildren(const RefPtr<UINode>& node)
+void PipelineContext::OnKeyboardAvoidOverlay()
 {
-    CHECK_NULL_VOID(node);
-    auto menuChildrens = node->GetChildren();
-    for (auto child : menuChildrens) {
-        if (child) {
-            child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        }
-    }
-}
-
-void PipelineContext::MarkDirtyOverlay()
-{
-    CHECK_NULL_VOID(rootNode_);
-    auto childNodes = rootNode_->GetChildren();
-    for (auto child : childNodes) {
-        if (child && child->GetTag() == V2::POPUP_ETS_TAG) {
-            child->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-        } else if (child && child->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
-            NotifyDirtyChildren(child);
-        }
-    }
+    CHECK_NULL_VOID(overlayManager_);
+    overlayManager_->OnKeyboardAvoid();
 }
 
 void PipelineContext::FlushDirtyPropertyNodesWhenExist()
@@ -3116,7 +3131,7 @@ void PipelineContext::OnCaretPositionChangeOrKeyboardHeightChange(float keyboard
         auto context = weak.Upgrade();
         CHECK_NULL_VOID(context);
         context->DoKeyboardAvoidFunc(keyboardHeight, positionY, height, keyboardHeightChanged);
-        context->MarkDirtyOverlay();
+        context->OnKeyboardAvoidOverlay();
         SubwindowManager::GetInstance()->FlushSubWindowUITasks(Container::CurrentId());
     };
     FlushUITasks();
@@ -3562,6 +3577,9 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         }
         // Set focus state inactive while touch down event received
         SetIsFocusActive(false, FocusActiveReason::POINTER_EVENT);
+        if (eventManager_) {
+            eventManager_->ClearSmartGestureSelected();
+        }
         TouchRestrict touchRestrict { TouchRestrict::NONE };
         touchRestrict.sourceType = point.sourceType;
         touchRestrict.touchEvent = point;
@@ -4272,6 +4290,10 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         std::string info = contentChangeMgr_ ? contentChangeMgr_->DumpInfo() : "No available ContentChangeManager";
         DumpLog::GetInstance().Print(info);
 #endif
+#ifdef RELAXED_INTERACTION_SUPPORT
+    } else if (params[0] == "-relaxedinteractionlog") {
+        DumpLog::GetInstance().Print(1, WorkflowDumper::GetInstance().Dump());
+#endif
     }
     return true;
 }
@@ -4727,6 +4749,9 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
         // Mouse right button press event set focus inactive here.
         // Mouse left button press event will set focus inactive in touch process.
         SetIsFocusActive(false, FocusActiveReason::POINTER_EVENT);
+        if (eventManager_) {
+            eventManager_->ClearSmartGestureSelected();
+        }
     }
 
     if (event.action == MouseAction::RELEASE || event.action == MouseAction::CANCEL ||
@@ -5617,6 +5642,9 @@ void PipelineContext::Destroy()
     buildFinishCallbacks_.clear();
     onWindowStateChangedCallbacks_.clear();
     onWindowFocusChangedCallbacks_.clear();
+    if (eventManager_) {
+        eventManager_->ResetSmartGestureManager();
+    }
     nodesToNotifyMemoryLevel_.clear();
     dirtyFocusNode_.Reset();
     dirtyFocusScope_.Reset();
@@ -6389,11 +6417,11 @@ void PipelineContext::SetCursor(std::variant<int32_t, CustomCursorInfo> cursorVa
 {
     auto mouseStyleManager = eventManager_->GetMouseStyleManager();
     CHECK_NULL_VOID(mouseStyleManager);
-    mouseStyleManager->SetUserSetCursor(true);
     const auto windowId = GetFocusWindowId();
     if (std::holds_alternative<int32_t>(cursorValue)) {
         int32_t cursorInt = std::get<int32_t>(cursorValue);
         if (cursorInt >= 0 && cursorInt <= static_cast<int32_t>(MouseFormat::LASER_CURSOR_DOT_RED)) {
+            mouseStyleManager->SetUserSetCursor(true);
             ChangeMouseStyle(
                 -1, static_cast<MouseFormat>(cursorInt), windowId, false, MouseStyleChangeReason::USER_SET_MOUSESTYLE);
         }
@@ -6402,6 +6430,7 @@ void PipelineContext::SetCursor(std::variant<int32_t, CustomCursorInfo> cursorVa
         if (!customCursorInfo.pixelMap) {
             return;
         }
+        mouseStyleManager->SetUserSetCursor(true);
         ChangeMouseStyle(-1, customCursorInfo, windowId, false, MouseStyleChangeReason::USER_SET_MOUSESTYLE);
     }
 }
@@ -7931,4 +7960,31 @@ const std::unique_ptr<RecycleManager>& PipelineContext::GetRecycleManager() cons
     return recycleManager_;
 }
 
+void PipelineContext::ProcessCommand(const std::string& command)
+{
+#ifdef RELAXED_INTERACTION_SUPPORT
+    CHECK_NULL_VOID(eventManager_);
+    eventManager_->ProcessCommand(command, [this]() { RequestFrame(); });
+#endif
+}
+
+void PipelineContext::FlushRelaxedInteraction()
+{
+#ifdef RELAXED_INTERACTION_SUPPORT
+    CHECK_NULL_VOID(eventManager_);
+    eventManager_->FlushRelaxedInteraction([this]() { RequestFrame(); });
+#endif
+}
+void PipelineContext::SetDynamicComponentSafeManager(const RefPtr<DynamicComponentSafeManager>& manager)
+{
+    dynamicComponentSafeManager_ = manager;
+}
+
+RefPtr<DynamicComponentSafeManager> PipelineContext::GetDynamicComponentSafeManager()
+{
+    if (!dynamicComponentSafeManager_) {
+        dynamicComponentSafeManager_ = AceType::MakeRefPtr<DynamicComponentSafeManager>();
+    }
+    return dynamicComponentSafeManager_;
+}
 } // namespace OHOS::Ace::NG

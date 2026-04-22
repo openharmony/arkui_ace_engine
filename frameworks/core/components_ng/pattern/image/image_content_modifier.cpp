@@ -24,6 +24,9 @@
 
 #include "core/common/ace_application_info.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#ifndef ACE_UNITTEST
+#include "core/components_ng/render/adapter/rosen_render_context.h"
+#endif
 #include "core/components_ng/render/adapter/svg_canvas_image.h"
 #include "core/components_ng/render/image_painter.h"
 
@@ -61,12 +64,33 @@ void ImageContentModifier::onDraw(DrawingContext& drawingContext)
     }
 }
 
+void ImageContentModifier::UpdateSvgHDRHeadroom(const std::optional<Color>& svgFillColor)
+{
+#ifndef ACE_UNITTEST
+    constexpr float DEFAULT_SVG_HDR_HEADROOM = 1.0f;
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderCtx = host->GetRenderContext();
+    auto rosenRenderCtx = AceType::DynamicCast<RosenRenderContext>(renderCtx);
+    CHECK_NULL_VOID(rosenRenderCtx);
+    if (svgFillColor.has_value() && svgFillColor->GetHeadRoomColor().has_value()) {
+        rosenRenderCtx->SetHDRColorHeadRoom(svgFillColor->GetHeadRoomColor().value().headRoom);
+    } else {
+        rosenRenderCtx->SetHDRColorHeadRoom(DEFAULT_SVG_HDR_HEADROOM);
+    }
+#endif
+}
+
 void ImageContentModifier::UpdateSvgColorFilter(const RefPtr<CanvasImage>& canvasImage)
 {
     auto&& paintConfig = canvasImage->GetPaintConfig();
     auto svgCanvas = AceType::DynamicCast<SvgCanvasImage>(canvasImage);
     if (svgCanvas) {
         svgCanvas->SetFillColor(paintConfig.svgFillColor_);
+        // Dynamically sync HDR headroom to RSNode when fillColor changes
+        UpdateSvgHDRHeadroom(paintConfig.svgFillColor_);
         svgCanvas->SetSmoothEdge(paintConfig.smoothEdge_);
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             std::optional<ImageColorFilter> imageColorFilter = std::nullopt;
@@ -84,4 +108,23 @@ ContentTransitionType ImageContentModifier::GetContentTransitionParam()
     CHECK_NULL_RETURN(pattern, ContentTransitionType::IDENTITY);
     return pattern->GetContentTransitionParam();
 }
+
+void ImageContentModifier::SetSensitive(bool sensitive)
+{
+    CHECK_NULL_VOID(sensitive_);
+    sensitive_->Set(sensitive);
+}
+
+void ImageContentModifier::SetSize(const SizeF& size)
+{
+    CHECK_NULL_VOID(size_);
+    size_->Set(size);
+}
+
+void ImageContentModifier::SetCanvasImageWrapper(const CanvasImageModifierWrapper& wrapper)
+{
+    CHECK_NULL_VOID(canvasImageWrapper_);
+    canvasImageWrapper_->Set(wrapper);
+}
+
 } // namespace OHOS::Ace::NG

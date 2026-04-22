@@ -101,6 +101,7 @@ const GENERATED_ArkUICustomBuilderRootModifier* GetCustomBuilderRootModifier();
 const GENERATED_ArkUICustomLayoutRootModifier* GetCustomLayoutRootModifier();
 const GENERATED_ArkUIDataPanelModifier* GetDataPanelModifier();
 const GENERATED_ArkUIDatePickerModifier* GetDatePickerModifier();
+const GENERATED_ArkUIDepthComponentModifier* GetDepthComponentModifier();
 const GENERATED_ArkUIDividerModifier* GetDividerModifier();
 const GENERATED_ArkUIEffectComponentModifier* GetEffectComponentModifier();
 const GENERATED_ArkUIEllipseModifier* GetEllipseModifier();
@@ -297,6 +298,7 @@ const GENERATED_ArkUILevelOrderExtenderAccessor* GetLevelOrderExtenderAccessor()
 const GENERATED_ArkUILinearGradientAccessor* GetLinearGradientAccessor();
 const GENERATED_ArkUILinearGradientStyleAccessor* GetLinearGradientStyleAccessor();
 const GENERATED_ArkUILineHeightStyleAccessor* GetLineHeightStyleAccessor();
+const GENERATED_ArkUILineSpacingStyleAccessor* GetLineSpacingStyleAccessor();
 const GENERATED_ArkUIListItemSwipeActionManagerAccessor* GetListItemSwipeActionManagerAccessor();
 const GENERATED_ArkUIListScrollerAccessor* GetListScrollerAccessor();
 const GENERATED_ArkUILongPressGestureEventAccessor* GetLongPressGestureEventAccessor();
@@ -442,6 +444,7 @@ const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
         GetCustomLayoutRootModifier,
         GetDataPanelModifier,
         GetDatePickerModifier,
+        GetDepthComponentModifier,
         GetDividerModifier,
         GetEffectComponentModifier,
         GetEllipseModifier,
@@ -644,6 +647,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetLinearGradientAccessor,
         GetLinearGradientStyleAccessor,
         GetLineHeightStyleAccessor,
+        GetLineSpacingStyleAccessor,
         GetListItemSwipeActionManagerAccessor,
         GetListScrollerAccessor,
         GetLongPressGestureEventAccessor,

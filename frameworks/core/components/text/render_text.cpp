@@ -14,6 +14,7 @@
  */
 
 #include "core/components/text/render_text.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/log/dump_log.h"
 #include "core/common/ace_engine_ext.h"

@@ -33,6 +33,7 @@
 #include "bridge/common/utils/utils.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "interfaces/native/error_message_macros.h"
 
 namespace OHOS::Ace::NodeModel {
 namespace {
@@ -14532,14 +14533,13 @@ void ProcessFontWeightConfigs(ArkUI_NodeHandle node, OH_ArkUI_FontWeightConfigs*
             node->uiNodeHandle, configs->enableVariableFontWeight, nullptr);
         modifier->setSpanVariableFontWeight(node->uiNodeHandle, fontWeight, nullptr);
     } else {
-        modifier->resetSpanEnableVariableFontWeight(node->uiNodeHandle);
-        modifier->resetSpanVariableFontWeight(node->uiNodeHandle);
+        modifier->setSpanEnableVariableFontWeight(node->uiNodeHandle, false, nullptr);
     }
     if (configs->isEnableDeviceFontWeightCategorySet) {
         modifier->setSpanEnableDeviceFontWeightCategory(
             node->uiNodeHandle, configs->enableDeviceFontWeightCategory, nullptr);
     } else {
-        modifier->resetSpanEnableDeviceFontWeightCategory(node->uiNodeHandle);
+        modifier->setSpanEnableDeviceFontWeightCategory(node->uiNodeHandle, true, nullptr);
     }
 }
 
@@ -14573,8 +14573,8 @@ void FillSpanFontWeightConfigs(ArkUI_NodeHandle node)
         modifier->getSpanEnableVariableFontWeight(node->uiNodeHandle);
     g_spanFontWeightConfigs.enableDeviceFontWeightCategory =
         modifier->getSpanEnableDeviceFontWeightCategory(node->uiNodeHandle);
-    g_spanFontWeightConfigs.isEnableVariableFontWeightSet = true;
-    g_spanFontWeightConfigs.isEnableDeviceFontWeightCategorySet = true;
+    g_spanFontWeightConfigs.isEnableVariableFontWeightSet = false;
+    g_spanFontWeightConfigs.isEnableDeviceFontWeightCategorySet = false;
 }
 
 int32_t SetSpanFontWeight(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -14650,6 +14650,11 @@ int32_t SetSpanFont(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         if (fontConfigs->fontWeightConfigs) {
             ProcessFontWeightConfigs(node, fontConfigs->fontWeightConfigs,
                 fontWeightValue);
+        } else {
+            auto* modifier = fullImpl->getNodeModifiers()->getSpanModifier();
+            modifier->resetSpanVariableFontWeight(node->uiNodeHandle);
+            modifier->resetSpanEnableVariableFontWeight(node->uiNodeHandle);
+            modifier->resetSpanEnableDeviceFontWeightCategory(node->uiNodeHandle);
         }
     }
     return ERROR_CODE_NO_ERROR;
@@ -22112,7 +22117,8 @@ void ResetCheckboxGroupAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
     return resetters[subTypeId](node);
 }
 
-int32_t SetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, const ArkUI_AttributeItem* item)
+int32_t SetNodeAttribute(
+    ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, const ArkUI_AttributeItem* item, void* errorInfoPtr)
 {
     using AttributeSetterClass = int32_t(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item);
     static AttributeSetterClass* setterClasses[] = { SetCommonAttribute, SetTextAttribute, SetSpanAttribute,
@@ -22131,14 +22137,19 @@ int32_t SetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, co
         subTypeClass < MAX_NODE_SCOPE_NUM ? subTypeClass : (subTypeClass - MAX_NODE_SCOPE_NUM + BASIC_COMPONENT_NUM);
     if ((static_cast<uint32_t>(nodeSubTypeClass) >= sizeof(setterClasses) / sizeof(AttributeSetterClass*)) ||
         !CheckIfAttributeLegal(node, type) || !CheckIsCNodeOrCrossLanguage(node)) {
+        SetErrorInfoFromErrorInfoPtr(
+            ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED, errorInfoPtr, "Node attribute is not supported");
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
     }
     if (!setterClasses[nodeSubTypeClass]) {
+        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Node attribute setter is invalid");
         return ERROR_CODE_PARAM_INVALID;
     }
     auto result = setterClasses[nodeSubTypeClass](node, subTypeId, item);
     if (result == ERROR_CODE_NO_ERROR) {
         GetFullImpl()->getBasicAPI()->markDirty(node->uiNodeHandle, ARKUI_DIRTY_FLAG_ATTRIBUTE_DIFF);
+    } else {
+        SetErrorInfoFromErrorInfoPtr(result, errorInfoPtr, "Failed to set node attribute");
     }
     return result;
 }
@@ -22171,7 +22182,7 @@ const ArkUI_AttributeItem* GetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAtt
     return getterClasses[nodeSubTypeClass](node, subTypeId);
 }
 
-int32_t ResetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type)
+int32_t ResetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, void* errorInfoPtr)
 {
     using AttributeResetterClass = void(ArkUI_NodeHandle node, int32_t subTypeId);
     static AttributeResetterClass* resetterClasses[] = { ResetCommonAttribute, ResetTextAttribute, ResetSpanAttribute,
@@ -22191,9 +22202,12 @@ int32_t ResetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type)
     if ((static_cast<uint32_t>(nodeSubTypeClass) >= sizeof(resetterClasses) / sizeof(AttributeResetterClass*)) ||
         !CheckIfAttributeLegal(node, type) || !CheckIsCNodeOrCrossLanguage(node)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "node attribute: %{public}d NOT IMPLEMENT", type);
+        SetErrorInfoFromErrorInfoPtr(
+            ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED, errorInfoPtr, "Node attribute is not supported");
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
     }
     if (!resetterClasses[nodeSubTypeClass]) {
+        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Node attribute resetter is invalid");
         return ERROR_CODE_PARAM_INVALID;
     }
     resetterClasses[nodeSubTypeClass](node, subTypeId);

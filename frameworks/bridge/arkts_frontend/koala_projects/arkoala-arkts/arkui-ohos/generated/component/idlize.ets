@@ -22,14 +22,14 @@ import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
 import { ArkUIGeneratedNativeModule } from '#components'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { AlertDialogParamWithConfirm_serializer, AlertDialogParamWithButtons_serializer, AlertDialogParamWithOptions_serializer, AlertDialogParamWithConfirm, AlertDialogParamWithButtons, AlertDialogParamWithOptions, DialogAlignment } from './alertDialog'
-import { AnimateParam_serializer, TranslateOptions_serializer, KeyframeAnimateParam_serializer, KeyframeState_serializer, AnimateParam, TranslateOptions, KeyframeAnimateParam, KeyframeState, Bindable_I32_serializer, Bindable, BlurStyle, OnWillScrollCallback, OnScrollCallback, MouseEvent_serializer, AxisEvent_serializer, TouchEvent, TouchEventInternal, MouseEvent, MouseEventInternal, AxisEvent, AxisEventInternal, ClickEvent, ClickEventInternal, ItemDragEventHandler_serializer, OnMoveHandler, ItemDragEventHandler, UICommonEvent, UICommonEventInternal, SourceTool, SheetOptions_serializer, InputEventMonitor_serializer, KeyEvent, KeyEventInternal, SheetOptions, InputEventListener, RawInputEventWrapper, RawInputEventWrapperInternal, InputEventMonitor, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, ThemeColorMode, HistoricalPoint_serializer, HistoricalPoint, UIScrollableCommonEvent, UIScrollableCommonEventInternal, GeometryInfo, Measurable, Layoutable, ICurve, Rectangle, ShadowOptions, ShadowStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode as arkui_component_common_KeyboardAvoidMode, HoverModeAreaType, SystemUiMaterial, EventTarget, SourceType, ModifierKeyStateGetter, TouchObject, SizeResult, CommonMethod, Rectangle_serializer, ShadowOptions_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer, EventTarget_serializer, TouchObject_serializer, TouchEventHandwritten } from './common'
+import { AnimateParam_serializer, TranslateOptions_serializer, KeyframeAnimateParam_serializer, KeyframeState_serializer, AnimateParam, TranslateOptions, KeyframeAnimateParam, KeyframeState, Bindable_I32_serializer, Bindable, BlurStyle, OnWillScrollCallback, OnScrollCallback, MouseEvent_serializer, AxisEvent_serializer, TouchEvent, MouseEvent, MouseEventInternal, AxisEvent, AxisEventInternal, ClickEvent, ClickEventInternal, ItemDragEventHandler_serializer, OnMoveHandler, ItemDragEventHandler, UICommonEvent, UICommonEventInternal, SourceTool, SheetOptions_serializer, InputEventMonitor_serializer, KeyEvent, KeyEventInternal, SheetOptions, InputEventListener, RawInputEventWrapper, RawInputEventWrapperInternal, InputEventMonitor, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, ThemeColorMode, HistoricalPoint_serializer, HistoricalPoint, UIScrollableCommonEvent, UIScrollableCommonEventInternal, GeometryInfo, Measurable, Layoutable, ICurve, Rectangle, ShadowOptions, ShadowStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode as arkui_component_common_KeyboardAvoidMode, HoverModeAreaType, SystemUiMaterial, EventTarget, SourceType, ModifierKeyStateGetter, TouchObject, SizeResult, CommonMethod, Rectangle_serializer, ShadowOptions_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer, EventTarget_serializer, TouchObject_serializer, TouchEventHandwritten } from './common'
 import { extractors, ContentModifier, CustomDialogController, initializers, hookRootAttributeModifier, AttributeModifier, AttributeUpdater, hookComponentRootAttributeModifier, hookCustomBuilderRootAttributeModifier, hookCustomLayoutRootAttributeModifier } from '#handwritten'
 import { arkui_component_units_Font_serializer, Font as arkui_component_units_Font, VoidCallback, SizeOptions_serializer, Length, Resource as arkui_component_units_Resource, SizeOptions, Position_serializer, Position, ResourceColor, ConstraintSizeOptions, Offset, Dimension, BorderRadiuses, EdgeWidths, EdgeColors, EdgeStyles, Offset_serializer, BorderRadiuses_serializer, EdgeWidths_serializer, EdgeColors_serializer, EdgeStyles_serializer } from './units'
 import { arkui_Graphics_LengthMetrics_serializer, Vector2_serializer, Size_serializer, Vector3_serializer, Circle_serializer, RoundRect_serializer, CommandPath_serializer, Frame_serializer, arkui_Graphics_DrawContext_serializer } from './../framework/Graphics'
 import { ColorMetrics as arkui_Graphics_ColorMetrics, LengthMetrics as arkui_Graphics_LengthMetrics, Vector2, Size, NodePosition, Vector3, Matrix4, Rect, Circle, RoundRect, CommandPath, Frame, DrawContext as arkui_Graphics_DrawContext } from 'arkui.Graphics'
 import { ArkListOptions_serializer } from './../framework/ohos.arkui.ArcList'
 import { ArkListOptions, ArcScrollIndexHandler } from '@ohos.arkui.ArcList'
-import { CrownSensitivity, BarState, ScrollSource, EdgeEffect, Color as arkui_component_enums_Color, AnimationPropertyType, EventQueryType, RawInputEventType, Curve, BorderStyle, TouchType, ColorSpace } from './enums'
+import { CrownSensitivity, BarState, ScrollSource, EdgeEffect, CompetitionStrategy, Color as arkui_component_enums_Color, AnimationPropertyType, EventQueryType, RawInputEventType, Curve, BorderStyle, TouchType, ColorSpace } from './enums'
 import { ScrollState, UIListEvent, UIListEventInternal } from './list'
 import { SwipeActionOptions_serializer, SwipeActionOptions } from './listItem'
 import { ArcScrollBarOptions_serializer } from './../framework/ohos.arkui.ArcScrollBar'
@@ -75,6 +75,7 @@ import { default as text } from '@ohos.graphics.text'
 import { TabsController, TabsControllerInternal } from './tabs'
 import { Scroller, ScrollerInternal, UIScrollEvent, UIScrollEventInternal } from './scroll'
 import { CustomKeyboardContinueFeature, TargetInfo, GestureListenerType, GestureActionPhase } from '@ohos.arkui.UIContext'
+import { LazyForEachOptions_serializer, LazyForEachOptions } from './lazyForEach'
 import { NavigationOptions_serializer, NavPathStack, NavPathStackInternal, NavPathInfo, NavPathInfoInternal, NavigationOptions } from './navigation'
 import { TargetInfo_serializer } from './../framework/ohos.arkui.UIContext'
 import { common2D_Rect_serializer } from './../framework/ohos.graphics.common2D'
@@ -94,7 +95,7 @@ import { default as curves } from '@ohos.curves'
 import { default as uiMaterial } from '@ohos.arkui.uiMaterial'
 import { ParticleUpdater, ParticleColorOptions, VelocityOptions, EmitterParticleOptions, ParticleEmitterShape, DistributionType, DisturbanceFieldShape, ParticleColorOptions_serializer, EmitterParticleOptions_serializer, VelocityOptions_serializer } from './particle'
 import { default as router } from '@ohos.router'
-import { CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, CustomSpanMeasureInfo_serializer, CustomSpanDrawInfo_serializer } from './styledString'
+import { CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, CustomSpanDrawInfo_serializer } from './styledString'
 import { RootModifier } from './../RootModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
@@ -990,23 +991,49 @@ export class ArcSwiperContentTransitionProxyInnerInternal implements Materialize
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    public selectedIndex: int32
-    public index: int32
-    public position: double
-    public mainAxisLength: double
+    // instructive change begin
+    get selectedIndex(): int32 {
+        return this.getSelectedIndex()
+    }
+    set selectedIndex(selectedIndex: int32) {
+        this.setSelectedIndex(selectedIndex)
+    }
+    get index(): int32 {
+        return this.getIndex()
+    }
+    set index(index: int32) {
+        this.setIndex(index)
+    }
+    get position(): double {
+        return this.getPosition()
+    }
+    set position(position: double) {
+        this.setPosition(position)
+    }
+    get mainAxisLength(): double {
+        return this.getMainAxisLength()
+    }
+    set mainAxisLength(mainAxisLength: double) {
+        this.setMainAxisLength(mainAxisLength)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, ArcSwiperContentTransitionProxyInnerInternal.getFinalizer())
-        this.selectedIndex = this.getSelectedIndex()
-        this.index = this.getIndex()
-        this.position = this.getPosition()
-        this.mainAxisLength = this.getMainAxisLength()
+        // instructive change begin
+        // this.selectedIndex = this.getSelectedIndex()
+        // this.index = this.getIndex()
+        // this.position = this.getPosition()
+        // this.mainAxisLength = this.getMainAxisLength()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, ArcSwiperContentTransitionProxyInnerInternal.construct())
-        this.selectedIndex = this.getSelectedIndex()
-        this.index = this.getIndex()
-        this.position = this.getPosition()
-        this.mainAxisLength = this.getMainAxisLength()
+        // instructive change begin
+        // this.selectedIndex = this.getSelectedIndex()
+        // this.index = this.getIndex()
+        // this.position = this.getPosition()
+        // this.mainAxisLength = this.getMainAxisLength()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._ArcSwiperContentTransitionProxyInner_construct()
@@ -1549,6 +1576,11 @@ export class BuilderNodeOps implements MaterializedBase {
         const event_casted = event as (InputEventType | undefined)
         return this.postInputEvent_serialize(event_casted)
     }
+    public postInputEventWithStrategy(event?: InputEventType, competitionStrategy?: CompetitionStrategy): boolean {
+        const event_casted = event as (InputEventType | undefined)
+        const competitionStrategy_casted = competitionStrategy as (CompetitionStrategy | undefined)
+        return this.postInputEventWithStrategy_serialize(event_casted, competitionStrategy_casted)
+    }
     public setRootFrameNodeInBuilderNode(node: KPointer): KPointer {
         const node_casted = node as (KPointer)
         return this.setRootFrameNodeInBuilderNode_serialize(node_casted)
@@ -1605,6 +1637,39 @@ export class BuilderNodeOps implements MaterializedBase {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const retval = ArkUIGeneratedNativeModule._BuilderNodeOps_postInputEvent(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    private postInputEventWithStrategy_serialize(event?: InputEventType, competitionStrategy?: CompetitionStrategy): boolean {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (event !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const eventTmpValue = event!
+            if (eventTmpValue instanceof TouchEvent) {
+                thisSerializer.writeInt8((0).toByte())
+                const eventTmpValueForIdx0 = eventTmpValue as TouchEvent
+                const eventTmpValueForIdx0Transformed: TouchEventProxy = extractors.transform_Ark_TouchEvent_to_Ark_TouchEventProxy(eventTmpValueForIdx0)
+                TouchEventProxy_serializer.write(thisSerializer, eventTmpValueForIdx0Transformed)
+            } else if (eventTmpValue instanceof MouseEvent) {
+                thisSerializer.writeInt8((1).toByte())
+                const eventTmpValueForIdx1 = eventTmpValue as MouseEvent
+                MouseEvent_serializer.write(thisSerializer, eventTmpValueForIdx1)
+            } else if (eventTmpValue instanceof AxisEvent) {
+                thisSerializer.writeInt8((2).toByte())
+                const eventTmpValueForIdx2 = eventTmpValue as AxisEvent
+                AxisEvent_serializer.write(thisSerializer, eventTmpValueForIdx2)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (competitionStrategy !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const competitionStrategyTmpValue = (competitionStrategy as CompetitionStrategy)
+            thisSerializer.writeInt32(competitionStrategyTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval = ArkUIGeneratedNativeModule._BuilderNodeOps_postInputEventWithStrategy(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
@@ -2426,14 +2491,23 @@ export class FrameNodeExtender {
         FrameNodeExtender.removeSupportedUIStates_serialize(peer_casted, uiStates_casted)
         return
     }
-    public static setCrossLanguageOptions(peer: FrameNode, options: boolean): boolean {
+    public static setCrossLanguageOptions(peer: FrameNode, options: boolean, treeOperating: boolean | undefined): boolean {
         const peer_casted = peer as (FrameNode)
         const options_casted = options as (boolean)
-        return FrameNodeExtender.setCrossLanguageOptions_serialize(peer_casted, options_casted)
+        const treeOperating_casted = treeOperating as (boolean | undefined)
+        return FrameNodeExtender.setCrossLanguageOptions_serialize(peer_casted, options_casted, treeOperating_casted)
     }
     public static getCrossLanguageOptions(peer: FrameNode): boolean {
         const peer_casted = peer as (FrameNode)
         return FrameNodeExtender.getCrossLanguageOptions_serialize(peer_casted)
+    }
+    public static getCrossLanguageTreeOperating(peer: FrameNode): boolean {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getCrossLanguageTreeOperating_serialize(peer_casted)
+    }
+    public static checkIfCanCrossLanguageTreeOperating(peer: FrameNode): boolean {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.checkIfCanCrossLanguageTreeOperating_serialize(peer_casted)
     }
     public static setMeasuredSize(peer: FrameNode, size: Size): void {
         const peer_casted = peer as (FrameNode)
@@ -2793,12 +2867,29 @@ export class FrameNodeExtender {
     private static removeSupportedUIStates_serialize(peer: FrameNode, uiStates: int32): void {
         ArkUIGeneratedNativeModule._FrameNodeExtender_removeSupportedUIStates(extractors.toFrameNodePtr(peer), uiStates)
     }
-    private static setCrossLanguageOptions_serialize(peer: FrameNode, options: boolean): boolean {
-        const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_setCrossLanguageOptions(extractors.toFrameNodePtr(peer), options ? true : false)
+    private static setCrossLanguageOptions_serialize(peer: FrameNode, options: boolean, treeOperating: boolean | undefined): boolean {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (treeOperating !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const treeOperatingTmpValue = treeOperating!
+            thisSerializer.writeBoolean(treeOperatingTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_setCrossLanguageOptions(extractors.toFrameNodePtr(peer), options ? true : false, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
         return retval
     }
     private static getCrossLanguageOptions_serialize(peer: FrameNode): boolean {
         const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_getCrossLanguageOptions(extractors.toFrameNodePtr(peer))
+        return retval
+    }
+    private static getCrossLanguageTreeOperating_serialize(peer: FrameNode): boolean {
+        const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_getCrossLanguageTreeOperating(extractors.toFrameNodePtr(peer))
+        return retval
+    }
+    private static checkIfCanCrossLanguageTreeOperating_serialize(peer: FrameNode): boolean {
+        const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_checkIfCanCrossLanguageTreeOperating(extractors.toFrameNodePtr(peer))
         return retval
     }
     private static setMeasuredSize_serialize(peer: FrameNode, size: Size): void {
@@ -2916,11 +3007,11 @@ export class FrameNodeExtender {
         return retval
     }
     private static getFrameNodeById_serialize(id: number): KPointer {
-        const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_getFrameNodeById(id)
+        const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_getFrameNodeById0(id)
         return retval
     }
     private static getFrameNodeByUniqueId_serialize(id: int32): KPointer {
-        const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_getFrameNodeByUniqueId(id)
+        const retval = ArkUIGeneratedNativeModule._FrameNodeExtender_getFrameNodeByUniqueId0(id)
         return retval
     }
     private static reuse_serialize(peer: FrameNode): void {
@@ -3086,7 +3177,7 @@ export class FrameNodeExtender {
             const ptrsTmpElement : KPointer = ptrs[ptrsCounterI]
             thisSerializer.writePointer(ptrsTmpElement)
         }
-        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getRenderNodesByFrameNodes(thisSerializer.asBuffer(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getRenderNodeByFrameNodes(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength : int32 = retvalDeserializer.readInt32()
@@ -3105,7 +3196,7 @@ export class FrameNodeExtender {
             const ptrsTmpElement : KPointer = ptrs[ptrsCounterI]
             thisSerializer.writePointer(ptrsTmpElement)
         }
-        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getIdsByFrameNodes(thisSerializer.asBuffer(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getIdByFrameNodes(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength : int32 = retvalDeserializer.readInt32()
@@ -3901,6 +3992,12 @@ export class LazyForEachOps {
         LazyForEachOps.SyncOnMoveOps_serialize(node_casted, onMoveFromToOps_casted, onMoveOps_casted, onMoveDragEventOps_casted)
         return
     }
+    public static SetOptions(node: KPointer, options: LazyForEachOptions): void {
+        const node_casted = node as (KPointer)
+        const options_casted = options as (LazyForEachOptions)
+        LazyForEachOps.SetOptions_serialize(node_casted, options_casted)
+        return
+    }
     private static NotifyChange_serialize(node: KPointer, startIndex: int32, endIndex: int32, count: int32): void {
         ArkUIGeneratedNativeModule._LazyForEachOps_NotifyChange(node, startIndex, endIndex, count)
     }
@@ -3929,6 +4026,12 @@ export class LazyForEachOps {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._LazyForEachOps_SyncOnMoveOps(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private static SetOptions_serialize(node: KPointer, options: LazyForEachOptions): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        LazyForEachOptions_serializer.write(thisSerializer, options)
+        ArkUIGeneratedNativeModule._LazyForEachOps_SetOptions(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -6360,7 +6463,6 @@ export class TouchEventExtender {
         ArkUIGeneratedNativeModule._TouchEventExtender_preventDefault(ptr)
     }
 }
-
 export class UIContextAtomicServiceBar {
     public static getBarRect(): Frame {
         return UIContextAtomicServiceBar.getBarRect_serialize()
@@ -6583,7 +6685,7 @@ export class XComponentControllerExtender {
     }
 }
 export class ArkRootPeer extends PeerNode {
-    attributeSet?: RootModifier;
+    rootAttributeSet?: RootModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -6596,7 +6698,7 @@ export class ArkRootPeer extends PeerNode {
     }
 }
 export class ArkComponentRootPeer extends PeerNode {
-    attributeSet?: ComponentRootModifier;
+    componentRootAttributeSet?: ComponentRootModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -6609,7 +6711,7 @@ export class ArkComponentRootPeer extends PeerNode {
     }
 }
 export class ArkCustomBuilderRootPeer extends PeerNode {
-    attributeSet?: CustomBuilderRootModifier;
+    customBuilderRootAttributeSet?: CustomBuilderRootModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -6622,7 +6724,7 @@ export class ArkCustomBuilderRootPeer extends PeerNode {
     }
 }
 export class ArkCustomLayoutRootPeer extends PeerNode {
-    attributeSet?: CustomLayoutRootModifier;
+    customLayoutRootAttributeSet?: CustomLayoutRootModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -7163,6 +7265,11 @@ export interface CustomSpanWrapper {
     onMeasure_callback: ((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics);
     onDraw_callback: ((context: arkui_Graphics_DrawContext,drawInfo: CustomSpanDrawInfo) => void);
 }
+export interface CustomSpanMeasureInfoProxy {
+    fontSize: double;
+    maxWidth?: double | undefined;
+    layoutPolicyPtr?: KPointer | undefined;
+}
 export interface TransformationMatrix {
     matrix4x4: Array<number>;
 }
@@ -7702,6 +7809,47 @@ export class CustomDialogControllerExternalOptionsExtender_serializer {
         return value
     }
 }
+export class CustomSpanMeasureInfoProxy_serializer {
+    public static write(buffer: SerializerBase, value: CustomSpanMeasureInfoProxy): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForFontSize = value.fontSize
+        valueSerializer.writeFloat64(valueHolderForFontSize)
+        const valueHolderForMaxWidth = value.maxWidth
+        if (valueHolderForMaxWidth !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMaxWidthTmpValue = valueHolderForMaxWidth!
+            valueSerializer.writeFloat64(valueHolderForMaxWidthTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForLayoutPolicyPtr = value.layoutPolicyPtr
+        if (valueHolderForLayoutPolicyPtr !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForLayoutPolicyPtrTmpValue = valueHolderForLayoutPolicyPtr!
+            valueSerializer.writePointer(valueHolderForLayoutPolicyPtrTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): CustomSpanMeasureInfoProxy {
+        let valueDeserializer: DeserializerBase = buffer
+        const fontSizeTmpResult: double = valueDeserializer.readFloat64()
+        const maxWidthTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let maxWidthTmpBuf: double | undefined = undefined
+        if ((maxWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            maxWidthTmpBuf = valueDeserializer.readFloat64()
+        }
+        const maxWidthTmpResult: double | undefined = maxWidthTmpBuf
+        const layoutPolicyPtrTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let layoutPolicyPtrTmpBuf: KPointer | undefined = undefined
+        if ((layoutPolicyPtrTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            layoutPolicyPtrTmpBuf = valueDeserializer.readPointer()
+        }
+        const layoutPolicyPtrTmpResult: KPointer | undefined = layoutPolicyPtrTmpBuf
+        let value: CustomSpanMeasureInfoProxy = ({fontSize: fontSizeTmpResult, maxWidth: maxWidthTmpResult, layoutPolicyPtr: layoutPolicyPtrTmpResult} as CustomSpanMeasureInfoProxy)
+        return value
+    }
+}
 export class CustomSpanWrapper_serializer {
     public static write(buffer: SerializerBase, value: CustomSpanWrapper): void {
         let valueSerializer: SerializerBase = buffer
@@ -7726,7 +7874,8 @@ export class CustomSpanWrapper_serializer {
             onMeasure_callbackTmpBufBufArgsSerializer.writeInt32(onMeasure_callbackTmpBufBufResource.resourceId);
             onMeasure_callbackTmpBufBufArgsSerializer.writePointer(onMeasure_callbackTmpBufBufCall);
             onMeasure_callbackTmpBufBufArgsSerializer.writePointer(onMeasure_callbackTmpBufBufCallSync);
-            CustomSpanMeasureInfo_serializer.write(onMeasure_callbackTmpBufBufArgsSerializer, measureInfo);
+            const measureInfoTransformed: CustomSpanMeasureInfoProxy = extractors.transform_Ark_CustomSpanMeasureInfo_to_Ark_CustomSpanMeasureInfoProxy(measureInfo);
+            CustomSpanMeasureInfoProxy_serializer.write(onMeasure_callbackTmpBufBufArgsSerializer, measureInfoTransformed);
             let onMeasure_callbackTmpBufBufContinuationValue: CustomSpanMetrics | undefined;
             const onMeasure_callbackTmpBufBufContinuationCallback: ((value: CustomSpanMetrics) => void) = (value: CustomSpanMetrics):void => {
             onMeasure_callbackTmpBufBufContinuationValue = value;
@@ -10506,7 +10655,6 @@ export class TouchEventProxy_serializer {
         const sourceToolTmpResult: SourceTool = SourceTool.fromValue(valueDeserializer.readInt32())
         const getModifierKeyStateTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let getModifierKeyStateTmpBuf: ModifierKeyStateGetter | undefined = undefined
-        
         if ((getModifierKeyStateTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const getModifierKeyStateTmpBufOptBufResource: CallbackResource = valueDeserializer.readCallbackResource()
             const getModifierKeyStateTmpBufOptBufCall: KPointer = valueDeserializer.readPointer()

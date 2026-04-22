@@ -41,6 +41,7 @@
 #include "adapter/ohos/capability/html/span_to_html.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/rect.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/image/file_uri_helper.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
@@ -52,9 +53,11 @@
 #include "base/utils/utils.h"
 #include "arkweb_utils.h"
 #include "bridge/common/utils/engine_helper.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/common/ace_engine_ext.h"
 #include "core/common/ai/image_analyzer_manager.h"
 #include "core/common/container.h"
+#include "core/components/common/properties/placement.h"
 #include "core/common/ime/input_method_manager.h"
 #include "core/common/recorder/event_definition.h"
 #include "core/common/recorder/event_recorder.h"
@@ -88,6 +91,7 @@
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/web/web_agent_utils.h"
 #include "core/components_ng/pattern/web/web_accessibility_child_tree_callback.h"
+#include "core/components_ng/pattern/web/web_command_wrapper.h"
 #include "core/components_ng/pattern/web/web_dom_document.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
 #include "core/components_ng/pattern/web/view_data_common.h"
@@ -107,6 +111,8 @@
 #include "web_statusbar_click.h"
 #include "web_pattern.h"
 #include "nweb_handler.h"
+#include "web_util.h"
+#include "nweb_hisysevent.h"
 #include "core/interfaces/native/node/menu_item_modifier.h"
 
 namespace OHOS::Ace::NG {
@@ -116,6 +122,7 @@ const std::string IMAGE_POINTER_ALIAS_PATH = "etc/webview/ohos_nweb/alias.svg";
 const std::string AUTO_FILL_VIEW_DATA_PAGE_URL = "autofill_viewdata_origin_pageurl";
 const std::string AUTO_FILL_VIEW_DATA_OTHER_ACCOUNT = "autofill_viewdata_other_account";
 const std::string AUTO_FILL_START_POPUP_WINDOW = "persist.sys.abilityms.autofill.is_passwd_popup_window";
+const std::string COMMAND_ACTION_JSON = "persist.sys.abilityms.command.action.book.info";
 const std::string WEB_INFO_PC = "8";
 const std::string WEB_INFO_TABLET = "4";
 const std::string WEB_INFO_PHONE = "2";
@@ -123,6 +130,10 @@ const std::string WEB_INFO_DEFAULT = "1";
 const std::string WEB_SNAPSHOT_PATH_PREFIX = "/data/storage/el2/base/cache/web/snapshot/web_frame_";
 const std::string WEB_SNAPSHOT_PATH_PNG_SUFFIX = ".png";
 const std::string WEB_SNAPSHOT_PATH_HEIC_SUFFIX = ".heic";
+const char INJECTION_SEND_COMMAND_ERROR[] = "INJECTION_SEND_COMMAND_ERROR";
+const char INJECTION_TYPE_JSON_INVALID[] = "INJECTION_EVENT_JSON_INVALID";
+const char INJECTION_TYPE_TARGET_NODE_NOT_FOUND[] = "INJECTION_EVENT_TARGET_NODE_NOT_FOUND";
+const char INJECTION_TYPE_SEND_COMMAND_ERROR[] = "INJECTION_EVENT_SEND_COMMAND_ERROR";
 const std::string ACC_PAGE_MODE_FULL = "FULL_SILENT";
 const std::string ACC_PAGE_MODE_SEMI = "SEMI_SILENT";
 const Matrix4 WEB_SNAPSHOT_IMAGE_SCALE_MATRIX = Matrix4::CreateScale(2.0, 2.0, 1.0); // scale width and height
@@ -572,6 +583,7 @@ constexpr Dimension TOOLTIP_FONT_SIZE = 14.0_vp;
 constexpr Dimension TOOLTIP_PADDING = 8.0_vp;
 constexpr Dimension TOOLTIP_MOUSE_HEIGHT = 24.0_vp;
 constexpr Dimension TOOLTIP_MARGIN = 8.0_vp;
+constexpr Dimension TOOLTIP_MOUSE_WIDTH = 16.0_vp;
 constexpr float TOOLTIP_MAX_PORTION = 0.35f;
 constexpr float TOOLTIP_DELAY_MS = 700;
 constexpr uint32_t ADJUST_WEB_DRAW_LENGTH = 3000;
@@ -4109,6 +4121,12 @@ void WebPattern::OnInitialScaleUpdate(float value)
 
 void WebPattern::OnMultiWindowAccessEnabledUpdate(bool value)
 {
+    TAG_LOGD(AceLogTag::ACE_WEB, "Get json config ");
+    std::string json = OHOS::system::GetParameter(COMMAND_ACTION_JSON, "");
+    if (json != "") {
+        TAG_LOGI(AceLogTag::ACE_WEB, "Get json config success. Content: %{public}s", json.c_str());
+        OnInjectionEvent(json);
+    }
     if (delegate_) {
         delegate_->UpdateMultiWindowAccess(value);
     }
@@ -4264,6 +4282,16 @@ void WebPattern::OnTextAutosizingUpdate(bool isTextAutosizing)
 void WebPattern::OnKeyboardAvoidModeUpdate(const WebKeyboardAvoidMode& mode)
 {
     keyBoardAvoidMode_ = mode;
+}
+
+void WebPattern::OnKeyboardAppearanceModeUpdate(const WebKeyboardAppearanceMode& mode)
+{
+    if (!delegate_) {
+        return;
+    }
+
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnKeyboardAppearanceModeUpdate mode:%{public}d", mode);
+    delegate_->UpdateKeyboardAppearanceMode(mode);
 }
 
 void WebPattern::OnEnabledHapticFeedbackUpdate(bool enable)
@@ -4651,6 +4679,8 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateOptimizeParserBudgetEnabled(GetOptimizeParserBudgetEnabledValue(false));
         delegate_->UpdateWebMediaAVSessionEnabled(GetWebMediaAVSessionEnabledValue(true));
         delegate_->UpdateGestureFocusMode(GetGestureFocusModeValue(GestureFocusMode::DEFAULT));
+        delegate_->UpdateKeyboardAppearanceMode(GetKeyboardAppearanceModeValue(WebKeyboardAppearanceMode::NONE_IMMERSIVE));
+
         if (GetMetaViewport()) {
             delegate_->UpdateMetaViewport(GetMetaViewport().value());
         }
@@ -6835,6 +6865,122 @@ void WebPattern::ShowTooltip(const std::string& tooltip, int64_t tooltipTimestam
     taskExecutor->PostDelayedTask(tooltipTask, TaskExecutor::TaskType::UI, TOOLTIP_DELAY_MS, "ArkUIWebShowTooltip");
 }
 
+WebPattern::TooltipPosition WebPattern::GetPositionForPlacement(
+    Placement placement,
+    float mouseX, float mouseY,
+    float tooltipWidth, float tooltipHeight)
+{
+    float margin = TOOLTIP_MARGIN.ConvertToPx();
+    float mouseHeight = TOOLTIP_MOUSE_HEIGHT.ConvertToPx();
+
+    switch (placement) {
+        case Placement::BOTTOM:
+            return { mouseX, mouseY + mouseHeight + margin };
+        case Placement::RIGHT:
+            return { mouseX, mouseY - tooltipHeight / 2.0f };
+        case Placement::RIGHT_TOP:
+            return { mouseX, mouseY - tooltipHeight - margin };
+        case Placement::RIGHT_BOTTOM:
+            return { mouseX, mouseY + mouseHeight + margin };
+        case Placement::LEFT:
+            return { mouseX - tooltipWidth, mouseY - tooltipHeight / 2.0f };
+        case Placement::TOP_LEFT:
+            return { mouseX - tooltipWidth, mouseY - tooltipHeight - margin };
+        case Placement::BOTTOM_LEFT:
+            return { mouseX - tooltipWidth, mouseY + mouseHeight + margin };
+        case Placement::LEFT_TOP:
+            return { mouseX - tooltipWidth, mouseY - tooltipHeight - margin };
+        case Placement::LEFT_BOTTOM:
+            return { mouseX - tooltipWidth, mouseY + mouseHeight + margin };
+        case Placement::TOP:
+            return { mouseX - tooltipWidth / 2.0f, mouseY - tooltipHeight - margin };
+        case Placement::TOP_RIGHT:
+            return { mouseX, mouseY - tooltipHeight - margin };
+        default:
+            return { mouseX, mouseY + mouseHeight + margin };
+    }
+}
+
+bool WebPattern::CheckPlacementAvailable(
+    const TooltipPosition& pos,
+    const TooltipCalculationContext& context)
+{
+    bool outOfBounds = pos.x < 0.0f || pos.y < 0.0f ||
+                       pos.x + context.tooltipWidth > context.webWidth ||
+                       pos.y + context.tooltipHeight > context.webHeight;
+
+    if (outOfBounds) {
+        return false;
+    }
+
+    float mouseWidth = TOOLTIP_MOUSE_WIDTH.ConvertToPx();
+    float mouseHeight = TOOLTIP_MOUSE_HEIGHT.ConvertToPx();
+
+    bool overlapX = !(pos.x + context.tooltipWidth < context.mouseX || pos.x > context.mouseX + mouseWidth);
+    bool overlapY = !(pos.y + context.tooltipHeight < context.mouseY || pos.y > context.mouseY + mouseHeight);
+
+    if (overlapX && overlapY) {
+        return false;
+    }
+
+    return true;
+}
+
+OffsetF WebPattern::CalculateTooltipOffsetWithPlacement(const TooltipCalculationContext& context)
+{
+    static const std::vector<Placement> placementOrder = {
+        Placement::RIGHT_BOTTOM, Placement::LEFT_BOTTOM, Placement::RIGHT_TOP,
+        Placement::RIGHT, Placement::LEFT, Placement::TOP, Placement::BOTTOM,
+        Placement::BOTTOM_LEFT, Placement::TOP_LEFT, Placement::NONE
+    };
+
+    if (context.tooltipWidth <= 0.0f || context.tooltipHeight <= 0.0f ||
+        context.webWidth <= 0.0f || context.webHeight <= 0.0f ||
+        context.mouseX < 0.0f || context.mouseY < 0.0f) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "Invalid tooltip context params");
+        return OffsetF(0.0f, 0.0f);
+    }
+
+    int placementCount = 0;
+    for (const Placement& placement : placementOrder) {
+        if (placement == Placement::NONE) { break; }
+        placementCount++;
+        TooltipPosition pos = GetPositionForPlacement(
+            placement, context.mouseX, context.mouseY, context.tooltipWidth, context.tooltipHeight);
+        if (CheckPlacementAvailable(pos, context)) {
+            return OffsetF(pos.x, pos.y);
+        }
+    }
+
+    TAG_LOGI(AceLogTag::ACE_WEB,
+            "GetPositionForPlacement: All %{public}d placements unavailable, using fallback strategy", placementCount);
+    float margin = TOOLTIP_MARGIN.ConvertToPx();
+    float spaceTop = context.mouseY;
+    float spaceBottom = context.webHeight - context.mouseY;
+    float spaceLeft = context.mouseX;
+    float spaceRight = context.webWidth - context.mouseX;
+    float maxSpace = std::max({spaceTop, spaceBottom, spaceLeft, spaceRight});
+    float finalX = 0.0f, finalY = 0.0f;
+
+    if (maxSpace == spaceRight) {
+        finalX = std::min(context.mouseX + margin, context.webWidth - context.tooltipWidth);
+        finalY = std::max(0.0f, std::min(context.mouseY - context.tooltipHeight / 2.0f,
+                                          context.webHeight - context.tooltipHeight));
+    } else if (maxSpace == spaceLeft) {
+        finalX = std::max(0.0f, context.mouseX - context.tooltipWidth - margin);
+        finalY = std::max(0.0f, std::min(context.mouseY - context.tooltipHeight / 2.0f,
+                                          context.webHeight - context.tooltipHeight));
+    } else if (maxSpace == spaceBottom) {
+        finalX = std::max(0.0f, std::min(context.mouseX, context.webWidth - context.tooltipWidth));
+        finalY = std::min(context.mouseY + margin, context.webHeight - context.tooltipHeight);
+    } else {
+        finalX = std::max(0.0f, std::min(context.mouseX, context.webWidth - context.tooltipWidth));
+        finalY = std::max(0.0f, context.mouseY - context.tooltipHeight - margin);
+    }
+
+    return OffsetF(finalX, finalY);
+}
+
 void WebPattern::CalculateTooltipOffset(RefPtr<FrameNode>& tooltipNode, OffsetF& tooltipOffset)
 {
     auto textLayoutWrapper = tooltipNode->CreateLayoutWrapper(true);
@@ -6854,24 +7000,19 @@ void WebPattern::CalculateTooltipOffset(RefPtr<FrameNode>& tooltipNode, OffsetF&
     CHECK_NULL_VOID(rootNode);
     auto root = rootNode->GetTransformRectRelativeToWindow();
 
-    auto offsetX = offset.GetX() - root.GetX() + mouseHoveredX_;
-    auto offsetY = offset.GetY() - root.GetY() + mouseHoveredY_ + TOOLTIP_MARGIN.ConvertToPx() +
-                   TOOLTIP_MOUSE_HEIGHT.ConvertToPx();
+    float mouseX = offset.GetX() - root.GetX() + mouseHoveredX_;
+    float mouseY = offset.GetY() - root.GetY() + mouseHoveredY_;
 
-    ScopedLayout scope(Referenced::RawPtr(pipeline));
-    if (GreatNotEqual(offsetX + textWidth, root.Width())) {
-        offsetX = root.Width() - textWidth;
-    }
-    if (GreatNotEqual(offsetY + textHeight, root.Height())) {
-        offsetX = offsetX + TOOLTIP_MARGIN.ConvertToPx();
-        offsetY = root.Height() - textHeight;
-    }
-    tooltipOffset.SetX(offsetX);
-    tooltipOffset.SetY(offsetY);
+    TooltipCalculationContext context = {mouseX, mouseY, textWidth, textHeight, root.Width(), root.Height()};
+    OffsetF result = CalculateTooltipOffsetWithPlacement(context);
+
+    tooltipOffset.SetX(result.GetX());
+    tooltipOffset.SetY(result.GetY());
     TAG_LOGI(AceLogTag::ACE_WEB,
         "CalculateTooltipOffset [Tooltip] width: %{public}f height: %{public}f offset:(%{public}f, %{public}f)"
-        " [Web] width: %{public}f height: %{public}f offset:(%{public}f, %{public}f)",
-        textWidth, textHeight, offsetX, offsetY, drawSize_.Width(), drawSize_.Height(), offset.GetX(), offset.GetY());
+        " [Web] width: %{public}f height: %{public}f mouse:(%{public}f, %{public}f)",
+        textWidth, textHeight, result.GetX(), result.GetY(),
+        drawSize_.Width(), drawSize_.Height(), mouseX, mouseY);
 }
 
 void WebPattern::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
@@ -9461,7 +9602,7 @@ bool WebPattern::OnAccessibilityChildTreeDeregister()
     CHECK_NULL_RETURN(accessibilityManager, false);
     if (treeId_ == 0) {
         TAG_LOGD(AceLogTag::ACE_WEB, "OnAccessibilityChildTreeDeregister: treeId is 0.");
-        return false;
+        return true;
     }
     return accessibilityManager->DeregisterWebInteractionOperationAsChildTree(treeId_, WeakClaim(this));
 }
@@ -9573,6 +9714,78 @@ RefPtr<AccessibilitySessionAdapter> WebPattern::GetAccessibilitySessionAdapter()
     return accessibilitySessionAdapter_;
 }
 
+int32_t WebPattern::OnInjectionEvent(const std::string &command)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnInjectionEvent");
+    auto json = JsonUtil::ParseJsonString(command);
+    if (!json || !json->IsValid()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "The command json is invalid");
+        NWeb::EventReport::ReportMSDPError(INJECTION_SEND_COMMAND_ERROR,
+            INJECTION_TYPE_JSON_INVALID,
+            std::to_string(static_cast<int32_t>(WebCommandResult::JSON_IS_INVALID)));
+        return static_cast<int>(WebCommandResult::JSON_IS_INVALID);
+    }
+    if (json->IsObject()) {
+        int result = SendCommandToNWeb(std::move(json));
+        TAG_LOGI(AceLogTag::ACE_WEB, "Web exe the command result is : %{public}d" , result);
+        if (result >= static_cast<int>(WebCommandResult::JSON_IS_INVALID) &&
+            result <= static_cast<int>(WebCommandResult::JSON_INVALID_OFFSET)) {
+            NWeb::EventReport::ReportMSDPError(
+                INJECTION_SEND_COMMAND_ERROR, INJECTION_TYPE_JSON_INVALID, std::to_string(result));
+        }
+        return result;
+    } else if (json->IsArray()) {
+        auto length = json->GetArraySize();
+        for (int32_t index = 0; index < length; ++index) {
+            auto item = json->GetArrayItem(index);
+            if (!item || !item->IsValid() || !item->IsObject()) {
+                TAG_LOGI(AceLogTag::ACE_WEB, "The command json in array acton is InValid");
+                return static_cast<int>(WebCommandResult::FAILED);
+            }
+            int32_t result = SendCommandToNWeb(std::move(item));
+            if (result > static_cast<int>(WebCommandResult::SUCCESS)) {
+                return static_cast<int>(WebCommandResult::FAILED);
+            }
+            TAG_LOGI(AceLogTag::ACE_WEB, "The command json in array acton is success");
+        }
+    }
+    return static_cast<int>(WebCommandResult::FAILED);
+}
+
+int WebPattern::SendCommandToNWeb(std::unique_ptr<JsonValue> comJson)
+{
+    if (WebUtil::HasJSONDuplicateKeys(comJson->ToString())) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "The command json is invalid.");
+        return static_cast<int>(WebCommandResult::JSON_IS_INVALID);
+    }
+
+    // Use WebCommandWrapper to build the command action from JSON
+    std::shared_ptr<NWebCommandActionImpl> commandAction;
+    int buildResult = WebCommandWrapper::BuildCommandFromJson(comJson, commandAction);
+    if (buildResult != WEB_COMMAND_BUILD_SUCCESS) {
+        return buildResult;
+    }
+
+    // Execute the command via delegate
+    if (delegate_) {
+        int result = delegate_->SendCommandActionToNWeb(std::move(commandAction));
+        if (result == static_cast<int>(WebCommandResult::ELEMENT_NOT_FOUND)) {
+            auto xpathValue = comJson->GetValue("XPath");
+            std::string xpathStr = xpathValue ? xpathValue->GetString() : "";
+            NWeb::EventReport::ReportMSDPError(INJECTION_SEND_COMMAND_ERROR, INJECTION_TYPE_TARGET_NODE_NOT_FOUND,
+                std::to_string(static_cast<int32_t>(WebCommandResult::ELEMENT_NOT_FOUND)), xpathStr.c_str());
+        } else if (result > RET_SUCCESS) {
+            NWeb::EventReport::ReportMSDPError(
+                INJECTION_SEND_COMMAND_ERROR, INJECTION_TYPE_SEND_COMMAND_ERROR, std::to_string(result));
+        }
+        return result;
+    }
+
+    TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: delegate_ is nullptr");
+    NWeb::EventReport::ReportMSDPError(INJECTION_SEND_COMMAND_ERROR, INJECTION_TYPE_SEND_COMMAND_ERROR,
+        std::to_string(static_cast<int32_t>(WebCommandResult::DELEGATE_NULL)));
+    return static_cast<int>(WebCommandResult::DELEGATE_NULL);
+}
 void WebPattern::OnOptimizeParserBudgetEnabledUpdate(bool value)
 {
     if (delegate_) {

@@ -94,8 +94,24 @@ public:
         return std::make_shared<TestingShaderEffect>();
     }
 
+    static std::shared_ptr<TestingShaderEffect> CreateSweepGradient(const TestingPoint& /* centerPt */,
+        const std::vector<TestingUIColor>& /* colors */, std::shared_ptr<TestingColorSpace> /* colorSpace */,
+        const std::vector<float>& /* pos */, TileMode /* mode */, float /* startAngle */, float /* endAngle */,
+        const TestingMatrix* /* matrix */)
+    {
+        return std::make_shared<TestingShaderEffect>();
+    }
+
     static std::shared_ptr<TestingShaderEffect> CreateLinearGradient(const TestingPoint& /* startPt */,
         const TestingPoint& /* endPt */, const std::vector<TestingColor4f>& /* colors */,
+        std::shared_ptr<TestingColorSpace> /* colorSpace */, const std::vector<float>& /* pos */, TileMode /* mode */,
+        const TestingMatrix* matrix = nullptr)
+    {
+        return std::make_shared<TestingShaderEffect>();
+    }
+
+    static std::shared_ptr<TestingShaderEffect> CreateLinearGradient(const TestingPoint& /* startPt */,
+        const TestingPoint& /* endPt */, const std::vector<TestingUIColor>& /* colors */,
         std::shared_ptr<TestingColorSpace> /* colorSpace */, const std::vector<float>& /* pos */, TileMode /* mode */,
         const TestingMatrix* matrix = nullptr)
     {
@@ -109,8 +125,23 @@ public:
         return std::make_shared<TestingShaderEffect>();
     }
 
+    static std::shared_ptr<TestingShaderEffect> CreateRadialGradient(const TestingPoint& centerPt, scalar radius,
+        const std::vector<TestingUIColor>& /* colors */, std::shared_ptr<TestingColorSpace> /* colorSpace */,
+        const std::vector<scalar>& pos, TileMode mode, const TestingMatrix* matrix = nullptr)
+    {
+        return std::make_shared<TestingShaderEffect>();
+    }
+
     static std::shared_ptr<TestingShaderEffect> CreateTwoPointConical(const TestingPoint& startPt, scalar startRadius,
         const TestingPoint& endPt, scalar endRadius, const std::vector<TestingColor4f>& /* colors */,
+        std::shared_ptr<TestingColorSpace> /* colorSpace */, const std::vector<scalar>& pos, TileMode mode,
+        const TestingMatrix* matrix)
+    {
+        return std::make_shared<TestingShaderEffect>();
+    }
+
+    static std::shared_ptr<TestingShaderEffect> CreateTwoPointConical(const TestingPoint& startPt, scalar startRadius,
+        const TestingPoint& endPt, scalar endRadius, const std::vector<TestingUIColor>& /* colors */,
         std::shared_ptr<TestingColorSpace> /* colorSpace */, const std::vector<scalar>& pos, TileMode mode,
         const TestingMatrix* matrix)
     {

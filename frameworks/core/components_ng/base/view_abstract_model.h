@@ -29,11 +29,11 @@
 #include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/blend_mode.h"
+#include "core/components/common/properties/depth_option.h"
 #include "core/components/common/properties/popup_param.h"
 #include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/focus_box.h"
 #include "core/components_ng/event/focus_event_handler.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -333,6 +333,7 @@ public:
     virtual void SetUseShadowBatching(bool useShadowBatching) = 0;
     virtual void SetFreeze(bool freeze) = 0;
     virtual void SetUseUnion(bool useUnion) {}
+    virtual void SetCenterGravityOptions(const NG::CenterGravityOptions& centerGravityOptions) {}
 
     // event
     virtual void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc,
@@ -427,6 +428,8 @@ public:
             responseRegionMap) = 0;
     virtual void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) = 0;
     virtual void SetMouseResponseRegion(const std::vector<DimensionRect>& responseRegion) {}
+    virtual void SetSmartGestureShortcut(int32_t action, bool enabled, bool selectable) {}
+    virtual void ResetSmartGestureShortcut() {}
     virtual void SetEnabled(bool enabled) = 0;
     virtual void SetTouchable(bool touchable) = 0;
     virtual void SetFocusable(bool focusable) = 0;
@@ -581,6 +584,11 @@ public:
     virtual void CreateWithResourceObj(const RefPtr<NG::FrameNode>& frameNode,
         const RefPtr<ResourceObject>& resourceObj, const PopupOptionsType& type) = 0;
     virtual void AllowForceDark(bool forceDarkAllowed) {};
+
+    // depth space
+    virtual void SetSpatialEffect(const std::optional<SpatialEffectParams>& params) {};
+    // edgelight
+    virtual void SetEdgeLightParam(const std::optional<NG::EdgeLightParam>& param) {};
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_ABSTRACT_MODEL_H

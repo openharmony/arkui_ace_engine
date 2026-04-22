@@ -14,10 +14,14 @@
  */
 #include "core/components_ng/pattern/toast/toast_view.h"
 
+#include "core/components/common/properties/ui_material.h"
 #include "core/components/theme/shadow_theme.h"
+#include "core/components/toast/toast_theme.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/pattern/toast/toast_layout_property.h"
 
 namespace OHOS::Ace::NG {
 constexpr float MAX_TOAST_SCALE = 2.0f;
@@ -90,6 +94,10 @@ void ToastView::UpdateTextLayoutProperty(
     auto padding = toastTheme->GetPadding();
     auto fontWeight = toastTheme->GetTextStyle().GetFontWeight();
     auto defaultColor = toastTheme->GetTextStyle().GetTextColor();
+    textLayoutProperty->UpdateEnableSmallLanguageTruncation(true);
+    if (textNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        textLayoutProperty->UpdateOrphanCharOptimization(true);
+    }
     textLayoutProperty->UpdateMaxFontScale(std::min(MAX_TOAST_SCALE, context->GetMaxAppFontScale()));
     PaddingProperty paddings;
     paddings.top = NG::CalcLength(padding.Top());
@@ -110,6 +118,40 @@ void ToastView::UpdateTextLayoutProperty(
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
         textLayoutProperty->UpdateEllipsisMode(EllipsisMode::TAIL);
+    }
+}
+
+void ToastView::SetToastSystemMaterial(const RefPtr<FrameNode>& toastNode, const ToastInfo& toastInfo)
+{
+    if (SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::SMOOTH ||
+        MaterialUtils::IsMaterialDisabled()) {
+        return;
+    }
+    if (toastInfo.systemMaterial && !MaterialUtils::IsEnableMaterialParam(toastInfo.systemMaterial)) {
+        return;
+    }
+    CHECK_NULL_VOID(toastNode);
+    auto renderContext = toastNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    // Check if user has explicitly set systemMaterial
+    if (toastInfo.systemMaterial) {
+        renderContext->UpdateBackBlurStyle(std::nullopt);
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(toastNode), AceType::RawPtr(toastInfo.systemMaterial));
+        return;
+    }
+
+    // Apply default MATERIAL_TYPE_THICK when user hasn't set backgroundColor,
+    // backgroundBlurStyle, shadow, and systemMaterial (API 26+)
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        bool hasCustomStyle = toastInfo.backgroundColor.has_value() ||
+                              toastInfo.backgroundBlurStyle.has_value() ||
+                              toastInfo.shadow.has_value();
+        if (!hasCustomStyle) {
+            auto defaultMaterial = MaterialUtils::GetInitMaterial(UiMaterialStyle::THICK);
+            renderContext->UpdateBackBlurStyle(std::nullopt);
+            ViewAbstract::SetSystemMaterial(AceType::RawPtr(toastNode), AceType::RawPtr(defaultMaterial));
+        }
     }
 }
 
@@ -164,8 +206,19 @@ void ToastView::UpdateToastNodeStyle(const RefPtr<FrameNode>& toastNode)
     auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
     CHECK_NULL_VOID(toastTheme);
     auto toastInfo = pattern->GetToastInfo();
-    auto shadowStyle = toastTheme->GetToastShadowStyle();
-    auto shadow = toastInfo.shadow.value_or(Shadow::CreateShadow(shadowStyle));
+
+    // Get shadow from theme if user hasn't set it
+    Shadow shadow;
+    if (toastInfo.shadow.has_value()) {
+        shadow = toastInfo.shadow.value();
+    } else {
+        auto shadowStyle = toastTheme->GetToastShadowStyle();
+        auto colorMode = pipelineContext->GetColorMode();
+        auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+        if (shadowTheme) {
+            shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
+        }
+    }
 
     if (toastInfo.isTypeStyleShadow) {
         auto colorMode = pipelineContext->GetColorMode();
@@ -190,5 +243,6 @@ void ToastView::UpdateToastNodeStyle(const RefPtr<FrameNode>& toastNode)
         auto toastBackgroundColor = toastTheme->GetBackgroundColor();
         toastContext->UpdateBackgroundColor(toastBackgroundColor);
     }
+    SetToastSystemMaterial(toastNode, toastInfo);
 }
 } // namespace OHOS::Ace::NG

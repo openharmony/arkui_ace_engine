@@ -36,6 +36,7 @@
 #include "frameworks/base/error/error_code.h"
 #include "frameworks/base/subwindow/subwindow.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 
 namespace OHOS::Ace::NG {
 using DragAction = OHOS::Ace::Ani::DragAction;
@@ -609,7 +610,7 @@ bool StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
     DragDropFuncWrapper::SetExtraInfo(asyncCtx->instanceId, asyncCtx->extraParams);
     LogDragInfoInner(asyncCtx, dragData.value());
     auto result = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(
-        dragData.value(), std::make_shared<OHOS::Ace::StartDragListenerImpl>(callback));
+        dragData.value(), std::make_shared<OHOS::Ace::StartDragListenerImpl>(callback, asyncCtx->instanceId));
     if (result != 0) {
         return false;
     }
@@ -815,7 +816,7 @@ bool TryToStartDrag(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
         asyncCtx->dragPointerEvent.pointerId, asyncCtx->instanceId);
     LogDragInfoInner(asyncCtx, dragData);
     auto result = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(
-        dragData, std::make_shared<OHOS::Ace::StartDragListenerImpl>(callback));
+        dragData, std::make_shared<OHOS::Ace::StartDragListenerImpl>(callback, asyncCtx->instanceId));
     if (result != 0) {
         return false;
     }

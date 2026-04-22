@@ -344,7 +344,7 @@ function __Text__secondaryTitleStyles(r141) {
     Text.align(r141?.alignment);
     Text.fallbackLineSpacing(true);
     Text.wordBreak(WordBreak.HYPHENATION);
-    Text.optimizeTrailingSpace(true);
+    Text.orphanCharOptimization(true);
 }
 
 function __Text__primaryTitleStyles(q141) {
@@ -362,7 +362,7 @@ function __Text__primaryTitleStyles(q141) {
     Text.align(q141?.alignment);
     Text.fallbackLineSpacing(true);
     Text.wordBreak(WordBreak.HYPHENATION);
-    Text.optimizeTrailingSpace(true);
+    Text.orphanCharOptimization(true);
 }
 
 class SubHeaderModifier {

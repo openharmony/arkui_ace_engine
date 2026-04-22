@@ -28,6 +28,7 @@
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "arkweb_net_error_list.h"
+#include "base/utils/feature_param.h"
 #include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
@@ -36,6 +37,7 @@
 #include "base/utils/utils.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "core/accessibility/accessibility_manager.h"
+#include "core/accessibility/accessibility_manager_ng.h"
 #include "core/components_ng/pattern/web/web_agent_event_reporter.h"
 #include "core/components_ng/render/detached_rs_node_manager.h"
 #include "core/components/container_modal/container_modal_constants.h"
@@ -2575,6 +2577,7 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineBase>& context)
 #endif
         }
     }
+    FetchCloudControlWebAutoLayoutConfig();
 }
 void WebDelegate::RegisterOHOSWebEventAndMethord()
 {
@@ -4929,6 +4932,48 @@ void WebDelegate::LoadUrl()
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebLoadSrcUrl");
+}
+
+int WebDelegate::SendCommandActionToNWeb(const std::shared_ptr<OHOS::NWeb::NWebCommandAction>& commandAction)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "SendCommandActionToNWeb Context upgrade failed");
+        return static_cast<int>(WebCommandResult::CONTEXT_NULL);
+    }
+    auto taskExecutor = context->GetTaskExecutor();
+    if (!taskExecutor) {
+        return static_cast<int>(WebCommandResult::TASK_EXECUTOR_NULL);
+    }
+    if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::PLATFORM)) {
+        if (!nweb_) {
+            return static_cast<int>(WebCommandResult::WEB_NWEB_NULL);
+        }
+        return nweb_->SendCommandAction(commandAction);
+    }
+
+    auto promise = std::make_shared<std::promise<int>>();
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), commandAction, promise]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                promise->set_value(static_cast<int>(WebCommandResult::DELEGATE_NULL));
+                return;
+            }
+            if (!delegate->nweb_) {
+                promise->set_value(static_cast<int>(WebCommandResult::WEB_NWEB_NULL));
+                return;
+            }
+            promise->set_value(delegate->nweb_->SendCommandAction(commandAction));
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebSendCommandAction");
+
+    auto future = promise->get_future();
+    if (future.wait_for(std::chrono::milliseconds(1000)) == std::future_status::ready) {
+        return future.get();
+    }
+
+    return static_cast<int>(WebCommandResult::WEB_EXECUTE_TIMEOUT);
 }
 
 void WebDelegate::OnInactive()
@@ -10258,4 +10303,40 @@ void WebDelegate::RequestWebDomJsonString(const std::function<void(const std::st
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebRequestWebDomJsonString");
 }
+
+void WebDelegate::UpdateKeyboardAppearanceMode(const WebKeyboardAppearanceMode& mode)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), mode]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                delegate->nweb_->SetKeyboardImmersiveMode(static_cast<int32_t>(mode));
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebKeyboardAppearnaceMode");
+}
+
+void WebDelegate::FetchCloudControlWebAutoLayoutConfig()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                delegate->nweb_->SetWebAutoLayoutConfig(FeatureParam::GetArkWebAutoLayoutConfig());
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebFetchCloudControlWebAutoLayoutConfig");
+}
+
 } // namespace OHOS::Ace

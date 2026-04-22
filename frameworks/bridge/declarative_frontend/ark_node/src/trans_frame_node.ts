@@ -25,39 +25,39 @@ class TransFrameNode extends FrameNode {
         return true;
     }
     public getRenderNode(): RenderNode | null {
-        throw new BusinessError(100031, 'frameNode created by transferDynamic not support getRenderNode');
+        throw new BusinessError(100031, 'FrameNode created by transferDynamic not support getRenderNode');
     }
     public getCustomProperty(name: string): Object | undefined {
-        throw new BusinessError(100031, 'frameNode created by transferDynamic not support getCustomProperty');
+        throw new BusinessError(100031, 'FrameNode created by transferDynamic not support getCustomProperty');
     }
     get commonAttribute(): ArkComponent {
-        throw new BusinessError(100031, 'frameNode created by transferDynamic not support commonAttribute');
+        throw new BusinessError(100031, 'FrameNode created by transferDynamic not support commonAttribute');
     }
     get commonEvent(): UICommonEvent {
-        throw new BusinessError(100031, 'frameNode created by transferDynamic not support commonEvent');
+        throw new BusinessError(100031, 'FrameNode created by transferDynamic not support commonEvent');
     }
     get gestureEvent(): UIGestureEvent {
-        throw new BusinessError(100031, 'frameNode created by transferDynamic not support gestureEvent');
+        throw new BusinessError(100031, 'FrameNode created by transferDynamic not support gestureEvent');
     }
     public setMeasuredSize(size: Size): void {
-        throw new BusinessError(100031, 'frameNode created by transferDynamic not support setMeasuredSize');
+        throw new BusinessError(100031, 'FrameNode created by transferDynamic not support setMeasuredSize');
     }
     public setLayoutPosition(position: Position): void {
-        throw new BusinessError(100031, 'frameNode created by transferDynamic not support setLayoutPosition');
+        throw new BusinessError(100031, 'FrameNode created by transferDynamic not support setLayoutPosition');
     }
     public measure(constraint: LayoutConstraint): void {
-        throw new BusinessError(100031, 'frameNode created by transferDynamic not support measure');
+        throw new BusinessError(100031, 'FrameNode created by transferDynamic not support measure');
     }
     public layout(position: Position): void {
-        throw new BusinessError(100031, 'frameNode created by transferDynamic not support layout');
+        throw new BusinessError(100031, 'FrameNode created by transferDynamic not support layout');
     }
     public setNeedsLayout(): void {
-        throw new BusinessError(100031, 'frameNode created by transferDynamic not support setNeedsLayout');
+        throw new BusinessError(100031, 'FrameNode created by transferDynamic not support setNeedsLayout');
     }
     public invalidate(): void {
-        throw new BusinessError(100031, 'frameNode created by transferDynamic not support invalidate');
+        throw new BusinessError(100031, 'FrameNode created by transferDynamic not support invalidate');
     }
     public addComponentContent(content: ComponentContent): void {
-        throw new BusinessError(100031, 'frameNode created by transferDynamic not support addComponentContent');
+        throw new BusinessError(100031, 'FrameNode created by transferDynamic not support addComponentContent');
     }
 }

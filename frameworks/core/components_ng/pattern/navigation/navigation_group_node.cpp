@@ -48,6 +48,30 @@ constexpr int32_t SOFT_ANIMATION_OPACITY_DELAY = 50;
 const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
 const RefPtr<InterpolatingSpring> springCurve = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 342.0f, 37.0f);
 const RefPtr<CubicCurve> replaceCurve = AceType::MakeRefPtr<CubicCurve>(0.33, 0.0, 0.67, 1.0);
+const RefPtr<InterpolatingSpring> SPLIT_POP_CURVE = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 342.0f, 37.0f);
+const RefPtr<InterpolatingSpring> SPLIT_PUSH_CURVE =
+    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 328.0f, 36.0f);
+
+void UpdateDividerOpacityForForceSplitAnimation(const RefPtr<NavigationGroupNode>& navigation, bool isVisible)
+{
+    CHECK_NULL_VOID(navigation);
+    auto dividerNode = AceType::DynamicCast<FrameNode>(navigation->GetDividerNode());
+    CHECK_NULL_VOID(dividerNode);
+    auto dividerRenderContext = dividerNode->GetRenderContext();
+    CHECK_NULL_VOID(dividerRenderContext);
+    dividerRenderContext->UpdateOpacity(isVisible ? 1.0f : 0.0f);
+    dividerNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void UpdateContainerClipToBoundsForForceSplitAnimation(const RefPtr<UINode>& node, bool enableClip)
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetClipToBounds(enableClip);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
 
 void UpdateTransitionAnimationId(const RefPtr<FrameNode>& node, int32_t id)
 {
@@ -376,6 +400,7 @@ void NavigationGroupNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const In
         std::string subtitle = NavigationTitleUtil::GetSubtitleString(titleBarNode);
         json->PutExtAttr("title", title.c_str(), filter);
         json->PutExtAttr("subtitle", subtitle.c_str(), filter);
+        titleBarNode->UpdateJsonValue(json, filter);
     }
     auto navBarPattern = navBarOrHomeDestNode->GetPattern<NavDestinationPatternBase>();
     if (navBarPattern) {
@@ -1034,6 +1059,309 @@ RefPtr<FrameNode> NavigationGroupNode::TransitionAnimationIsValid(
         return nullptr;
     }
     return node;
+}
+
+void NavigationGroupNode::StartSplitPushAnimation(
+    const RefPtr<FrameNode>& pushExitNode, const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode)
+{
+    CHECK_NULL_VOID(pushExitNode);
+    CHECK_NULL_VOID(preNode);
+    CHECK_NULL_VOID(curNode);
+
+    // Create animation callback
+    CleanSplitPushAnimations();
+    auto pushAnimationId = MakeUniqueAnimationId();
+    UpdateTransitionAnimationId(pushExitNode, pushAnimationId);
+    UpdateTransitionAnimationId(preNode, pushAnimationId);
+    UpdateTransitionAnimationId(curNode, pushAnimationId);
+    std::function<void()> onFinish = [weakPushExitNode = WeakPtr<FrameNode>(pushExitNode),
+        weakPreNode = WeakPtr<FrameNode>(preNode), weakCurNode = WeakPtr<FrameNode>(curNode),
+        weakNavigation = WeakClaim(this), pushAnimationId] {
+            ACE_SCOPED_TRACE_COMMERCIAL("Navigation split push page transition end");
+            PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
+            auto navigation = weakNavigation.Upgrade();
+            CHECK_NULL_VOID(navigation);
+            auto pattern = navigation->GetPattern<NavigationPattern>();
+            CHECK_NULL_VOID(pattern);
+            navigation->UpdateForceSplitTransitionAuxiliaryState(false);
+            auto pushExitNode = AceType::DynamicCast<NavDestinationNodeBase>(weakPushExitNode.Upgrade());
+            auto preNode = AceType::DynamicCast<NavDestinationNodeBase>(weakPreNode.Upgrade());
+            auto curNode = AceType::DynamicCast<NavDestinationNodeBase>(weakCurNode.Upgrade());
+            if (pushExitNode) {
+                pushExitNode->SplitTransitionPushFinish(pushAnimationId);
+            }
+            if (preNode) {
+                preNode->SplitTransitionPushFinish(pushAnimationId);
+            }
+            if (curNode) {
+                curNode->SplitTransitionPushFinish(pushAnimationId);
+            }
+            navigation->ContentChangeReport(curNode);
+            navigation->RemoveDialogDestination();
+            auto id = navigation->GetTopDestination() ? navigation->GetTopDestination()->GetAccessibilityId() : -1;
+            navigation->OnAccessibilityEvent(
+                AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
+            UiSessionManager::GetInstance()->OnRouterChange(navigation->GetNavigationPathInfo(), "onPageChange");
+            navigation->isOnAnimation_ = false;
+            navigation->CleanSplitPushAnimations();
+            pattern->CheckContentNeedMeasure(navigation);
+            if (pushExitNode) {
+                pushExitNode->SetNodeFreeze(false);
+            }
+        };
+
+    AnimationFinishCallback callback = [onFinishCb = std::move(onFinish), weakNavigation = WeakClaim(this)]() {
+        auto navigation = weakNavigation.Upgrade();
+        if (onFinishCb) {
+            onFinishCb();
+        }
+        CHECK_NULL_VOID(navigation);
+        auto pattern = navigation->GetPattern<NavigationPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnFinishOneTransitionAnimation();
+    };
+    TransitionUnitInfo pushExitInfo(pushExitNode, false, pushAnimationId);
+    TransitionUnitInfo preInfo(preNode, false, pushAnimationId);
+    TransitionUnitInfo curInfo(curNode, false, pushAnimationId);
+    UpdateForceSplitTransitionAuxiliaryState(true);
+    if (!CreateSplitPushAnimation(pushExitInfo, preInfo, curInfo, callback)) {
+        UpdateForceSplitTransitionAuxiliaryState(false);
+        return;
+    }
+
+    isOnAnimation_ = true;
+    auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
+    CHECK_NULL_VOID(curNavDestination);
+#if !defined(ACE_UNITTEST)
+    TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(curNode,
+        curNavDestination->GetNavDestinationPathInfo(), true);
+#endif
+}
+
+void NavigationGroupNode::StartSplitPopAnimation(
+    const RefPtr<FrameNode>& popEnterNode, const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode)
+{
+    CHECK_NULL_VOID(popEnterNode);
+    CHECK_NULL_VOID(preNode);
+    CHECK_NULL_VOID(curNode);
+
+    // Create animation callback
+    CleanSplitPopAnimations();
+    auto popAnimationId = MakeUniqueAnimationId();
+    UpdateTransitionAnimationId(popEnterNode, popAnimationId);
+    UpdateTransitionAnimationId(preNode, popAnimationId);
+    UpdateTransitionAnimationId(curNode, popAnimationId);
+    std::function<void()> onFinish = [weakPopEnterNode = WeakPtr<FrameNode>(popEnterNode),
+        weakPreNode = WeakPtr<FrameNode>(preNode), weakCurNode = WeakPtr<FrameNode>(curNode),
+        weakNavigation = WeakClaim(this), popAnimationId] {
+            ACE_SCOPED_TRACE_COMMERCIAL("Navigation split pop page transition end");
+            PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
+            auto navigation = weakNavigation.Upgrade();
+            CHECK_NULL_VOID(navigation);
+            auto pattern = navigation->GetPattern<NavigationPattern>();
+            CHECK_NULL_VOID(pattern);
+            navigation->UpdateForceSplitTransitionAuxiliaryState(false);
+            auto popEnterNode = AceType::DynamicCast<NavDestinationNodeBase>(weakPopEnterNode.Upgrade());
+            auto preNode = AceType::DynamicCast<NavDestinationNodeBase>(weakPreNode.Upgrade());
+            auto curNode = AceType::DynamicCast<NavDestinationNodeBase>(weakCurNode.Upgrade());
+            if (popEnterNode) {
+                popEnterNode->SplitTransitionPopFinish(popAnimationId);
+            }
+            if (preNode) {
+                preNode->SplitTransitionPopFinish(popAnimationId);
+            }
+            if (curNode) {
+                curNode->SplitTransitionPopFinish(popAnimationId);
+            }
+            navigation->ContentChangeReport(curNode);
+            navigation->RemoveDialogDestination();
+            auto id = navigation->GetTopDestination() ? navigation->GetTopDestination()->GetAccessibilityId() : -1;
+            navigation->OnAccessibilityEvent(
+                AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
+            UiSessionManager::GetInstance()->OnRouterChange(navigation->GetNavigationPathInfo(), "onPageChange");
+            navigation->isOnAnimation_ = false;
+            navigation->CleanSplitPopAnimations();
+            pattern->CheckContentNeedMeasure(navigation);
+        };
+
+    AnimationFinishCallback callback = [onFinishCb = std::move(onFinish), weakNavigation = WeakClaim(this)]() {
+        auto navigation = weakNavigation.Upgrade();
+        if (onFinishCb) {
+            onFinishCb();
+        }
+        CHECK_NULL_VOID(navigation);
+        auto pattern = navigation->GetPattern<NavigationPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnFinishOneTransitionAnimation();
+    };
+    TransitionUnitInfo popEnterInfo(popEnterNode, false, popAnimationId);
+    TransitionUnitInfo preInfo(preNode, false, popAnimationId);
+    TransitionUnitInfo curInfo(curNode, false, popAnimationId);
+    UpdateForceSplitTransitionAuxiliaryState(true);
+    if (!CreateSplitPopAnimation(popEnterInfo, preInfo, curInfo, callback)) {
+        UpdateForceSplitTransitionAuxiliaryState(false);
+        return;
+    }
+    isOnAnimation_ = true;
+    auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
+    CHECK_NULL_VOID(curNavDestination);
+#if !defined(ACE_UNITTEST)
+    TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(curNode,
+        curNavDestination->GetNavDestinationPathInfo(), true);
+#endif
+}
+
+bool NavigationGroupNode::CreateSplitPushAnimation(
+    const TransitionUnitInfo& pushExitInfo, const TransitionUnitInfo& preInfo,
+    const TransitionUnitInfo& curInfo, const AnimationFinishCallback finishCallback)
+{
+    auto pattern = GetPattern<NavigationPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    auto pushExitNode = AceType::DynamicCast<NavDestinationNodeBase>(pushExitInfo.transitionNode);
+    auto preNode = AceType::DynamicCast<NavDestinationNodeBase>(preInfo.transitionNode);
+    auto curNode = AceType::DynamicCast<NavDestinationNodeBase>(curInfo.transitionNode);
+    if (pushExitNode) {
+        pushExitNode->SplitTransitionPushStart(ForceSplitTransitionType::TRANSITION_OUT);
+    }
+    if (preNode) {
+        preNode->SplitTransitionPushStart(ForceSplitTransitionType::TRANSITION_MOVE);
+        preNode->SetAdjustConstraintType(ForceSplitAdjustConstraintType::NONE);
+    }
+    if (curNode) {
+        curNode->SplitTransitionPushStart(ForceSplitTransitionType::TRANSITION_IN);
+    }
+    // start transition animation
+    AnimationOption option = CreateAnimationOption(SPLIT_PUSH_CURVE, FillMode::FORWARDS, 0, finishCallback);
+    pattern->OnStartOneTransitionAnimation();
+    auto newSplitPushAnimation = AnimationUtils::StartAnimation(option, [
+        pushExitNode, preNode, curNode, weakNavigation = WeakClaim(this)]() {
+            ACE_SCOPED_TRACE_COMMERCIAL("Navigation page split push transition start");
+            PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
+            auto navNode = weakNavigation.Upgrade();
+            CHECK_NULL_VOID(navNode);
+            auto context = navNode->GetContext();
+            CHECK_NULL_VOID(context);
+            if (preNode) {
+                preNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            }
+            context->FlushUITasks();
+            if (pushExitNode) {
+                pushExitNode->SplitTransitionPushEnd(ForceSplitTransitionType::TRANSITION_OUT);
+            }
+            if (preNode) {
+                preNode->SplitTransitionPushEnd(ForceSplitTransitionType::TRANSITION_MOVE);
+            }
+            if (curNode) {
+                curNode->SplitTransitionPushEnd(ForceSplitTransitionType::TRANSITION_IN);
+            }
+    }, option.GetOnFinishEvent(), nullptr /* repeatCallback */, GetContextRefPtr());
+    if (newSplitPushAnimation) {
+        splitPushAnimations_.emplace_back(newSplitPushAnimation);
+        if (pushExitNode) {
+            pushExitNode->SetNodeFreeze(true);
+        }
+        return true;
+    }
+    return false;
+}
+
+void NavigationGroupNode::UpdateForceSplitTransitionAuxiliaryState(bool hasRunningAnimation)
+{
+    // Divider visibility and content clip are shared by split push/pop.
+    // Treat them as one reference-counted auxiliary state instead of pairing them with one specific animation.
+    if (hasRunningAnimation) {
+        forceSplitRunningAnimationCount_++;
+        if (forceSplitRunningAnimationCount_ > 1) {
+            return;
+        }
+        UpdateDividerOpacityForForceSplitAnimation(Claim(this), false);
+        UpdateContentClipForForceSplitAnimation(false);
+        return;
+    }
+    if (forceSplitRunningAnimationCount_ <= 0) {
+        forceSplitRunningAnimationCount_ = 0;
+        return;
+    }
+    forceSplitRunningAnimationCount_--;
+    if (forceSplitRunningAnimationCount_ > 0) {
+        return;
+    }
+    UpdateDividerOpacityForForceSplitAnimation(Claim(this), true);
+    UpdateContentClipForForceSplitAnimation(true);
+}
+
+void NavigationGroupNode::UpdateContentClipForForceSplitAnimation(bool enableClip)
+{
+    UpdateContainerClipToBoundsForForceSplitAnimation(GetPrimaryContentNode(), enableClip);
+    UpdateContainerClipToBoundsForForceSplitAnimation(GetContentNode(), enableClip);
+}
+
+bool NavigationGroupNode::CreateSplitPopAnimation(
+    const TransitionUnitInfo& popEnterInfo, const TransitionUnitInfo& preInfo,
+    const TransitionUnitInfo& curInfo, const AnimationFinishCallback finishCallback)
+{
+    auto pattern = GetPattern<NavigationPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    auto popEnterNode = AceType::DynamicCast<NavDestinationNodeBase>(popEnterInfo.transitionNode);
+    auto preNode = AceType::DynamicCast<NavDestinationNodeBase>(preInfo.transitionNode);
+    auto curNode = AceType::DynamicCast<NavDestinationNodeBase>(curInfo.transitionNode);
+    if (popEnterNode) {
+        popEnterNode->SplitTransitionPopStart(ForceSplitTransitionType::TRANSITION_IN);
+    }
+    if (preNode) {
+        preNode->SplitTransitionPopStart(ForceSplitTransitionType::TRANSITION_OUT);
+    }
+    if (curNode) {
+        curNode->SplitTransitionPopStart(ForceSplitTransitionType::TRANSITION_MOVE);
+        curNode->SetAdjustConstraintType(ForceSplitAdjustConstraintType::NONE);
+    }
+    // start transition animation
+    AnimationOption option = CreateAnimationOption(SPLIT_POP_CURVE, FillMode::FORWARDS, 0, finishCallback);
+    pattern->OnStartOneTransitionAnimation();
+    auto newSplitPopAnimation = AnimationUtils::StartAnimation(option, [
+        popEnterNode, preNode, curNode, weakNavigation = WeakClaim(this)]() {
+            ACE_SCOPED_TRACE_COMMERCIAL("Navigation page split pop transition start");
+            PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
+            auto navNode = weakNavigation.Upgrade();
+            CHECK_NULL_VOID(navNode);
+            auto context = navNode->GetContext();
+            CHECK_NULL_VOID(context);
+            if (curNode) {
+                curNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            }
+            context->FlushUITasks();
+            if (popEnterNode) {
+                popEnterNode->SplitTransitionPopEnd(ForceSplitTransitionType::TRANSITION_IN);
+            }
+            if (preNode) {
+                preNode->SplitTransitionPopEnd(ForceSplitTransitionType::TRANSITION_OUT);
+            }
+            if (curNode) {
+                curNode->SplitTransitionPopEnd(ForceSplitTransitionType::TRANSITION_MOVE);
+            }
+    }, option.GetOnFinishEvent(), nullptr /* repeatCallback */, GetContextRefPtr());
+    if (newSplitPopAnimation) {
+        splitPopAnimations_.emplace_back(newSplitPopAnimation);
+        return true;
+    }
+    return false;
+}
+
+void NavigationGroupNode::StopForceSplitAnimations()
+{
+    // Even if the animation is stopped here, it will still trigger its finish callback
+    auto splitPushAnimations = std::move(splitPushAnimations_);
+    auto splitPopAnimations = std::move(splitPopAnimations_);
+    for (const auto& animation : splitPushAnimations) {
+        if (animation) {
+            AnimationUtils::StopAnimation(animation);
+        }
+    }
+    for (const auto& animation : splitPopAnimations) {
+        if (animation) {
+            AnimationUtils::StopAnimation(animation);
+        }
+    }
 }
 
 void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
@@ -2666,7 +2994,7 @@ bool NavigationGroupNode::IsHomeNodeAndShouldShow(const RefPtr<NavDestinationGro
         !navigationPattern->IsTopFullScreenPage();
 }
 
-void NavigationGroupNode::ContentChangeReport(RefPtr<FrameNode>& keyNode)
+void NavigationGroupNode::ContentChangeReport(const RefPtr<FrameNode>& keyNode)
 {
     auto context = GetContextWithCheck();
     CHECK_NULL_VOID(context);

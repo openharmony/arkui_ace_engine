@@ -16,6 +16,7 @@
 #define NAPI_VERSION 8
 
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include <algorithm>
@@ -37,6 +38,7 @@
 #include "core/components_ng/pattern/select/select_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
+#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
@@ -83,7 +85,6 @@
 #endif
 #endif
 #include "core/common/udmf/udmf_client.h"
-
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #endif
@@ -1961,14 +1962,14 @@ void TextFieldPattern::SetNeedToRequestKeyboardInner(bool needToRequestKeyboardI
     needToRequestKeyboardInner_ = needToRequestKeyboardInner;
 }
 
-bool TextFieldPattern::IsCloseKeyboard(RefPtr<TextFieldManagerNG> textFieldManager)
+bool TextFieldPattern::IsCloseKeyboard(const RefPtr<TextFieldManagerNG>& textFieldManager)
 {
     bool continueFeature = textFieldManager && textFieldManager->GetCustomKeyboardContinueFeature();
-    bool isNoContinueFeatureClose =
-        !continueFeature && (customKeyboard_ || customKeyboardBuilder_) && isCustomKeyboardAttached_;
-    bool isCloseCustomKeyboard = continueFeature && blurReason_ == BlurReason::WINDOW_BLUR &&
-                                 ((customKeyboard_ || customKeyboardBuilder_) && isCustomKeyboardAttached_);
-    return isCloseCustomKeyboard || isNoContinueFeatureClose;
+    if (!continueFeature) {
+        return (customKeyboard_ || customKeyboardBuilder_) && isCustomKeyboardAttached_;
+    }
+    return (blurReason_ == BlurReason::WINDOW_BLUR || blurReason_ == BlurReason::VIEW_SWITCH ) &&
+           ((customKeyboard_ || customKeyboardBuilder_) && isCustomKeyboardAttached_);
 }
 
 bool TextFieldPattern::QuerySmartEdgeState()
@@ -2032,6 +2033,7 @@ void TextFieldPattern::HandleBlurEvent()
     ScheduleDisappearDelayTask();
     requestFocusReason_ = RequestFocusReason::UNKNOWN;
     ClearFocusStyle();
+    CloseVoiceKeyboardOpenedByButton();
     SetVoiceKBShown(false);
 }
 
@@ -2616,6 +2618,9 @@ void TextFieldPattern::SetVoiceKBShown(bool voiceKbShown)
     CHECK_NULL_VOID(host);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "%{public}d Set VoiceKB to %{public}d", host->GetId(), voiceKbShown);
     voiceKbShown_ = voiceKbShown;
+    if (!voiceKbShown) {
+        voiceKbOpenedByButton_ = false;
+    }
     if (!IsShowVoiceButtonMode()) {
         return;
     }
@@ -2631,6 +2636,8 @@ void TextFieldPattern::HandleOnVoiceInput()
 {
     TextFieldRequestFocus(RequestFocusReason::VOICE_NODE);
     if (!voiceKbShown_) {
+        voiceKbOpenedByButton_ = true;
+        voiceButtonKeyboardOpened_ = true;
         HandleOnTextMethodInput(TEXT_INPUT_VOICE_INPUT, "HandleOnVoiceInput", nullptr);
     } else {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Close VoiceKB");
@@ -3518,6 +3525,7 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
             StopTwinkling();
             return;
         }
+        UnFocusOnHandleClick_ = true;
     }
     firstGetFocus = firstGetFocus || firstClickAfterLosingFocus_;
     firstClickAfterLosingFocus_ = false;
@@ -3542,6 +3550,7 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     isFocusedBeforeClick_ = false;
+    UnFocusOnHandleClick_ = false;
 }
 
 bool TextFieldPattern::CheckMousePressedOverScrollBar(GestureEvent& info)
@@ -3567,11 +3576,29 @@ bool TextFieldPattern::HandleBetweenSelectedPosition(const GestureEvent& info)
 {
     if (!IsUsingMouse() && SelectOverlayIsOn() && BetweenSelectedPosition(info.GetGlobalLocation())) {
         CHECK_NULL_RETURN(selectOverlay_, false);
+        if (UnFocusOnHandleClick_ && QuerySmartEdgeState()) {
+            return true;
+        }
         // click selected area to switch show/hide state
         selectOverlay_->ToggleMenu();
         return true;
     }
     return false;
+}
+
+void TextFieldPattern::CloseVoiceKeyboardOpenedByButton()
+{
+#if defined(ENABLE_STANDARD_INPUT)
+    if (!voiceKbShown_ || !voiceKbOpenedByButton_ || !IsShowVoiceButtonMode()) {
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Close VoiceKB opened by voice button");
+    auto inputMethod = MiscServices::InputMethodController::GetInstance();
+    if (inputMethod) {
+        inputMethod->Close();
+    }
+    SetVoiceKBShown(false);
+#endif
 }
 
 void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info, bool firstGetFocus)
@@ -3585,6 +3612,7 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info, bool firstGetF
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    CloseVoiceKeyboardOpenedByButton();
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     auto lastCaretIndex = selectController_->GetCaretIndex();
     auto clickLocalOffset = GetCaretClickLocalOffset(info.GetLocalLocation());
@@ -5808,7 +5836,7 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     }
     ACE_LAYOUT_SCOPED_TRACE("RequestKeyboard[id:%d][WId:%u]", tmpHost->GetId(), textConfig.windowId);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "node:%{public}d, RequestKeyboard set calling window id:%{public}u"
-        " inputType:%{public}d, enterKeyType:%{public}d, customSettings size: %{public}u, needKeyboard:%{public}d"
+        " inputType:%{public}d, enterKeyType:%{public}d, customSettings size: %{public}zu, needKeyboard:%{public}d"
         " sourceType:%{public}u, placeholderLength:%{public}zu",
         tmpHost->GetId(), textConfig.windowId, textConfig.inputAttribute.inputPattern,
         textConfig.inputAttribute.enterKeyType, textConfig.inputAttribute.extraConfig.customSettings.size(),
@@ -5921,11 +5949,19 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
     auto theme = GetTheme();
     CHECK_NULL_RETURN(theme, {});
     auto windowRect = pipeline->GetCurrentWindowRect();
-    double positionY = (tmpHost->GetPaintRectOffsetNG(false, true) - pipeline->GetRootRect().GetOffset()).GetY() + windowRect.Top();
+    auto currentContainer = Container::Current();
+    float dcTop = 0.0f;
+    if (currentContainer && currentContainer->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT
+        && pipeline->GetDynamicComponentSafeManager()) {
+        dcTop = pipeline->GetDynamicComponentSafeManager()->viewportConfig_.Top();
+    }
+    double positionY = (tmpHost->GetPaintRectOffsetNG(false, true) - pipeline->GetRootRect().GetOffset()).GetY() +
+        windowRect.Top() + dcTop;
     auto offset = AVOID_OFFSET.ConvertToPx();
     auto textPaintOffset = GetPaintRectGlobalOffset();
     auto caretRectWithScale = GetCaretRect(false);
-    double height = caretRectWithScale.Bottom() + windowRect.Top() + textPaintOffset.GetY() + offset - positionY;
+    double height = caretRectWithScale.Bottom() + windowRect.Top() + textPaintOffset.GetY() +
+        offset - positionY + dcTop;
     std::u16string placeholder = TruncateText(GetPlaceHolder(), MAX_PLACEHOLDER_SIZE);
     std::u16string abilityName = TruncateText(UtfUtils::Str8ToStr16(AceApplicationInfo::GetInstance()
         .GetAbilityName()), MAX_ABILITY_NAME_SIZE);
@@ -8255,7 +8291,8 @@ bool TextFieldPattern::OnBackPressed()
         }
     }
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-    if (!(imeShown_ || voiceKbShown_) && !isCustomKeyboardAttached_) {
+    if (!(imeShown_ || voiceKbShown_ || (IsShowVoiceButtonMode() && voiceButtonKeyboardOpened_)) &&
+        !isCustomKeyboardAttached_) {
         return false;
     }
 #else
@@ -9999,6 +10036,11 @@ void TextFieldPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(context);
     auto colorMode = context->GetColorMode();
     SetOriginCursorColor(colorMode == ColorMode::DARK ? Color(0x4DFFFFFF) : Color(0x4D000000));
+    auto textFieldTheme = host->GetTheme<TextFieldTheme>(true);
+    CHECK_NULL_VOID(textFieldTheme);
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        OnThemeScopeUpdateColor(layoutProperty, paintProperty, textFieldTheme);
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -13364,6 +13406,10 @@ void TextFieldPattern::UpdatePropertyImpl(const std::string& key, RefPtr<Propert
                     }
                     auto frameNode = wp.Upgrade();
                     CHECK_NULL_VOID(frameNode);
+                    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+                        ACE_UPDATE_NODE_PAINT_PROPERTY(
+                            TextFieldPaintProperty, SelectedBackgroundColorFlagByUser, true, frameNode);
+                    }
                     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, SelectedBackgroundColor, *realValue, frameNode);
                 }
             }

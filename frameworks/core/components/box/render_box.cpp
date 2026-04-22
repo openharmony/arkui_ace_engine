@@ -15,6 +15,8 @@
 
 #include "core/components/box/render_box.h"
 
+#include "core/accessibility/accessibility_manager.h"
+
 #include "base/log/event_report.h"
 #include "core/components/box/box_component_helper.h"
 #include "core/components/container_modal/container_modal_constants.h"

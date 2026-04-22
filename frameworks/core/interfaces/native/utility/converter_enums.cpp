@@ -1092,6 +1092,21 @@ void AssignCast(std::optional<V2::ListItemGroupStyle>& dst, const Ark_ListItemGr
 }
 
 template<>
+void AssignCast(std::optional<V2::ListItemGroupHeaderFooterStyle>& dst, const Ark_ListItemGroupHeaderFooterStyle& src)
+{
+    switch (src) {
+        case ARK_LIST_ITEM_GROUP_HEADER_FOOTER_STYLE_NONE:
+            dst = V2::ListItemGroupHeaderFooterStyle::NONE;
+            break;
+        case ARK_LIST_ITEM_GROUP_HEADER_FOOTER_STYLE_FLOATING:
+            dst = V2::ListItemGroupHeaderFooterStyle::FLOATING;
+            break;
+        default:
+            LOGE("Unexpected enum value in Ark_ListItemGroupHeaderFooterStyle: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<ListItemSwipeActionDirection>& dst, const Ark_ListItemSwipeActionDirection& src)
 {
     switch (src) {
@@ -1407,6 +1422,18 @@ void AssignCast(std::optional<WebKeyboardAvoidMode>& dst, const Ark_WebKeyboardA
         case ARK_WEB_KEYBOARD_AVOID_MODE_OVERLAYS_CONTENT: dst = WebKeyboardAvoidMode::OVERLAYS_CONTENT; break;
         case ARK_WEB_KEYBOARD_AVOID_MODE_RETURN_TO_UICONTEXT: dst = WebKeyboardAvoidMode::RETURN_TO_UICONTEXT; break;
         default: LOGE("Unexpected enum value in Ark_WebKeyboardAvoidMode: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<WebKeyboardAppearanceMode>& dst, const Ark_WebKeyboardAppearanceMode& src)
+{
+    switch (src) {
+        case ARK_WEB_KEYBOARD_APPEARANCE_MODE_NONE_IMMERSIVE: dst = WebKeyboardAppearanceMode::NONE_IMMERSIVE; break;
+        case ARK_WEB_KEYBOARD_APPEARANCE_MODE_IMMERSIVE: dst = WebKeyboardAppearanceMode::IMMERSIVE; break;
+        case ARK_WEB_KEYBOARD_APPEARANCE_MODE_LIGHT_IMMERSIVE: dst = WebKeyboardAppearanceMode::LIGHT_IMMERSIVE; break;
+        case ARK_WEB_KEYBOARD_APPEARANCE_MODE_DARK_IMMERSIVE: dst = WebKeyboardAppearanceMode::DARK_IMMERSIVE; break;
+        default: LOGE("Unexpected enum value in Ark_WebKeyboardAppearanceMode: %{public}d", src);
     }
 }
 

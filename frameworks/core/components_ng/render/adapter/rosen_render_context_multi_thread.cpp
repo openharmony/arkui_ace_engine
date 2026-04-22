@@ -17,6 +17,7 @@
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/drawing_decoration_painter.h"
 #include "core/components/theme/blur_style_theme.h"
+#include "core/components_ng/animation/geometry_transition.h"
 namespace OHOS::Ace::NG {
 
 namespace ROSEN_RENDER_MULTI_THREAD {

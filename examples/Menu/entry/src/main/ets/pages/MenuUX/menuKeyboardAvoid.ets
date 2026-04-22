@@ -12,18 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-class PageClass {
-  title: string
-  url: string
-  key: string
-
-  constructor(title: string, url: string, key: string) {
-    this.title = title;
-    this.url = url;
-    this.key = key;
-  }
-}
+import { PageClass } from '../../common/PageClass'
 
 const testList1: PageClass[] = [
   new PageClass('菜单基础场景', 'pages/MenuUX/MenuKeyboardAvoid/baseMenu', 'bindMenu'),

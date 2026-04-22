@@ -21,7 +21,6 @@
 #include <optional>
 #include <string>
 
-#include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
 #include "core/common/ime/text_input_action.h"
 #include "core/components/common/layout/constants.h"

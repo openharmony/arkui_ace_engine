@@ -15,6 +15,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_MOCK_BASE_MOCK_SYSTEM_PROPERTIES_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_MOCK_BASE_MOCK_SYSTEM_PROPERTIES_H
 #include "core/common/ace_application_info.h"
+#include "ui/properties/ui_material_enums.h"
 namespace OHOS::Ace {
 namespace MockSystemProperties {
 extern bool g_isSuperFoldDisplayDevice;
@@ -27,6 +28,7 @@ extern bool g_isNeedSymbol;
 extern bool g_isResourceDecoupling;
 extern bool g_isConfigChangePerform;
 extern bool g_isMultiInstanceEnabled;
+extern UiMaterialLevel g_uiMaterialLevel;
 
 class APIVersionGuard final {
 public:

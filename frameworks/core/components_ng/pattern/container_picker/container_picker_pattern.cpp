@@ -20,7 +20,6 @@
 #include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
 #include "base/log/dump_log.h"
 #include "core/animation/spring_curve.h"
-#include "core/common/container.h"
 #include "core/common/resource/resource_object.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/container_picker/container_picker_paint_method.h"
@@ -461,7 +460,7 @@ void ContainerPickerPattern::SetDefaultTextStyle(RefPtr<FrameNode> node, Color d
             isModified_ = true;
             isUseDefaultFontColor_ = true;
         } else if (textLayoutProperty->GetTextColor().value() != defaultColor && isUseDefaultFontColor_) {
-            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            if (node->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
                 textLayoutProperty->UpdateTextColor(defaultColor);
                 isModified_ = true;
             }
@@ -1456,7 +1455,7 @@ void ContainerPickerPattern::OnColorConfigurationUpdate()
     }
 }
 
-void ContainerPickerPattern::SyncSelectionIndicatorWithTheme(int32_t themeScopeId)
+void ContainerPickerPattern::SyncSelectionIndicatorWithTheme()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1485,7 +1484,7 @@ bool ContainerPickerPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     host->SetNeedCallChildrenUpdate(false);
-    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         return false;
     }
     bool result = false;
@@ -1510,7 +1509,7 @@ bool ContainerPickerPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     }
 
     if (needThemeResync) {
-        SyncSelectionIndicatorWithTheme(themeScopeId);
+        SyncSelectionIndicatorWithTheme();
         result = true;
         host->SetNeedCallChildrenUpdate(true);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);

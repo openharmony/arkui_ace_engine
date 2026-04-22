@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/svg/svg_fit_convertor.h"
+#include "core/components_ng/render/drawing.h"
 #include "core/common/ace_application_info.h"
 
 namespace OHOS::Ace::NG {

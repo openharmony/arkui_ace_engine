@@ -56,4 +56,6 @@ ace_unittest("gestures_test_ng") {
       "gestures_test_core.cpp",
     ]
   }
+
+  defines = [ "GESTURE_DEBUG_BOUNDARY_SUPPORTED" ]
 }

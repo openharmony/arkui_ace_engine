@@ -2865,6 +2865,12 @@ struct ArkUILetterSpacingStyle {
 
 struct ArkUILineHeightStyle {
     float lineHeight;
+    std::optional<double> lineHeightMultiple;
+};
+
+struct ArkUILineSpacingStyle {
+    float lineSpacing = 0.0f;
+    bool onlyBetweenLines = false;
 };
 
 struct ArkUIBackgroundColorStyle {
@@ -2929,6 +2935,7 @@ struct ArkUISpanStyle {
     ArkUIBaselineOffsetStyle baselineOffsetStyle;
     ArkUILetterSpacingStyle letterSpacingStyle;
     ArkUILineHeightStyle lineHeightStyle;
+    ArkUILineSpacingStyle lineSpacingStyle;
     ArkUIUrlStyle urlStyle;
     ArkUIBackgroundColorStyle backgroundColorStyle;
     ArkUIUserDataSpan userDataSpan;
@@ -4474,6 +4481,10 @@ struct ArkUIListItemGroupModifier {
     void (*resetListItemGroupSpace)(ArkUINodeHandle node);
     void (*setListItemGroupStyle)(ArkUINodeHandle node, ArkUI_Uint32 style);
     void (*resetListItemGroupStyle)(ArkUINodeHandle node);
+    void (*setListItemGroupHeaderStyle)(ArkUINodeHandle node, ArkUI_Uint32 style);
+    void (*resetListItemGroupHeaderStyle)(ArkUINodeHandle node);
+    void (*setListItemGroupFooterStyle)(ArkUINodeHandle node, ArkUI_Uint32 style);
+    void (*resetListItemGroupFooterStyle)(ArkUINodeHandle node);
     ArkUI_Int32 (*setListItemGroupNodeAdapter)(ArkUINodeHandle node, ArkUINodeAdapterHandle handle);
     void (*resetListItemGroupNodeAdapter)(ArkUINodeHandle node);
     ArkUINodeAdapterHandle (*getListItemGroupNodeAdapter)(ArkUINodeHandle node);
@@ -4649,6 +4660,9 @@ struct ArkUIStackModifier {
     void (*setAlignContent)(ArkUINodeHandle node, ArkUI_Int32 alignment);
     void (*resetAlignContent)(ArkUINodeHandle node);
     ArkUI_Int32 (*getAlignContent)(ArkUINodeHandle node);
+    void (*setSyncLoad)(ArkUINodeHandle node, ArkUI_Bool enabled);
+    void (*resetSyncLoad)(ArkUINodeHandle node);
+    ArkUI_Bool (*getSyncLoad)(ArkUINodeHandle node);
 };
 
 struct ArkUIFolderStackModifier {
@@ -6450,6 +6464,8 @@ struct ArkUIWebModifier {
     void (*resetScrollbarLayoutPolicy)(ArkUINodeHandle node);
     void (*setOnInputMethodAttached)(ArkUINodeHandle node, void* callback);
     void (*resetOnInputMethodAttached)(ArkUINodeHandle node);
+    void (*setKeyboardAppearance)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetKeyboardAppearance)(ArkUINodeHandle node);
 };
 
 struct ArkUIBlankModifier {
@@ -7193,7 +7209,7 @@ enum class ArkUIWidthType : uint32_t {
     MAX_SIDEBAR_WIDTH,
 };
 
-enum class ArkUISideBarContainerType { EMBED, OVERLAY, AUTO };
+enum class ArkUISideBarContainerType { EMBED, OVERLAY, AUTO, DISPLACE };
 
 struct ArkUISideBarContainerModifier {
     void (*setSideBarWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* sideBarWidthPtr);
@@ -7976,7 +7992,7 @@ struct ArkUISelectModifier {
     void (*setSelectValue)(ArkUINodeHandle node, ArkUI_CharPtr* values, ArkUI_CharPtr* icons, ArkUI_Uint32 length);
     void (*resetSelectValue)(ArkUINodeHandle node);
     void (*setMenuBgColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
-    void (*resetMenuBgColor)(ArkUINodeHandle node);
+    void (*resetMenuBgColor)(ArkUINodeHandle node, ArkUI_Bool isJsView);
     void (*setMenuBgBlurStyle)(ArkUINodeHandle node, ArkUI_Int32 style);
     void (*resetMenuBgBlurStyle)(ArkUINodeHandle node);
     void (*setSelectDivider)(ArkUINodeHandle node, const ArkUISelectDividerArgs* dividerArgs);
@@ -9260,11 +9276,14 @@ struct ArkUIBasicAPI {
     ArkUI_CharPtr (*getName)(ArkUINodeHandle node);
     void (*dump)(ArkUINodeHandle node);
 
-    ArkUI_Int32 (*addChild)(ArkUINodeHandle parent, ArkUINodeHandle child);
+    ArkUI_Int32 (*addChild)(ArkUINodeHandle parent, ArkUINodeHandle child, void* errorInfoPtr);
     void (*removeChild)(ArkUINodeHandle parent, ArkUINodeHandle child);
-    ArkUI_Int32 (*insertChildAfter)(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling);
-    ArkUI_Int32 (*insertChildBefore)(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling);
-    ArkUI_Int32 (*insertChildAt)(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUI_Int32 position);
+    ArkUI_Int32 (*insertChildAfter)(
+        ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling, void* errorInfoPtr);
+    ArkUI_Int32 (*insertChildBefore)(
+        ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling, void* errorInfoPtr);
+    ArkUI_Int32 (*insertChildAt)(
+        ArkUINodeHandle parent, ArkUINodeHandle child, ArkUI_Int32 position, void* errorInfoPtr);
 
     // Returned pointer is valid only till node is alive.
     ArkUI_CharPtr (*getAttribute)(ArkUINodeHandle node, ArkUI_CharPtr attribute);

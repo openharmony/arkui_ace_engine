@@ -871,6 +871,7 @@ bool NavigationModelStatic::UpdateBackButtonProperty(const RefPtr<FrameNode>& ba
     backButtonLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(backButtonWidth), CalcLength(backButtonHeight)));
     backButtonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(backButtonRadiusSize));
+    backButtonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     renderContext->UpdateBackgroundColor(backButtonColor);
     PaddingProperty padding;
     padding.SetEdges(CalcLength(backButtonPadding));

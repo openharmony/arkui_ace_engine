@@ -170,7 +170,7 @@ function __Text__secondaryTitleStyles(l11) {
     Text.align(l11?.alignment);
     Text.fallbackLineSpacing(true);
     Text.wordBreak(WordBreak.HYPHENATION);
-    Text.optimizeTrailingSpace(true);
+    Text.orphanCharOptimization(true);
 }
 
 function __Text__primaryTitleStyles(k11) {
@@ -188,7 +188,7 @@ function __Text__primaryTitleStyles(k11) {
     Text.align(k11?.alignment);
     Text.fallbackLineSpacing(true);
     Text.wordBreak(WordBreak.HYPHENATION);
-    Text.optimizeTrailingSpace(true);
+    Text.orphanCharOptimization(true);
 }
 
 class SubHeaderModifier {

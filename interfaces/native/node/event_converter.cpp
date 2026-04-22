@@ -15,6 +15,7 @@
 #include "node/event_converter.h"
 
 #include "interfaces/native/drag_and_drop.h"
+#include "interfaces/native/error_message_macros.h"
 #include "interfaces/native/native_key_event.h"
 #include "node/gesture_impl.h"
 #include "node/node_model.h"
@@ -1495,17 +1496,21 @@ ArkUI_DragEvent* OH_ArkUI_NodeEvent_GetDragEvent(ArkUI_NodeEvent* nodeEvent)
 ArkUI_TouchTestInfo* OH_ArkUI_NodeEvent_GetTouchTestInfo(ArkUI_NodeEvent* nodeEvent)
 {
     if (!nodeEvent) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "nodeEvent is null");
         return nullptr;
     }
     if (nodeEvent->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_INPUT_EVENT)) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "nodeEvent category is invalid");
         return nullptr;
     }
     auto* originNodeEvent = reinterpret_cast<ArkUINodeEvent*>(nodeEvent->origin);
     if (!originNodeEvent) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "originNodeEvent is null");
         return nullptr;
     }
     auto* touchTestInfo = reinterpret_cast<ArkUI_TouchTestInfo*>(&originNodeEvent->touchTestInfo);
     if (!touchTestInfo) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "touchTestInfo is null");
         return nullptr;
     }
     return touchTestInfo;

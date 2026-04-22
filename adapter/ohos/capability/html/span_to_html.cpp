@@ -47,6 +47,15 @@ std::string SpanToHtml::FontSizeToHtml(const std::optional<Dimension>& value)
     return ToHtmlStyleFormat("font-size", DimensionToString(value.value_or(TEXT_DEFAULT_FONT_SIZE)));
 }
 
+std::string SpanToHtml::ActualFontSizeToHtml(const NG::FontStyle& fontStyle)
+{
+    auto fontSize = fontStyle.GetFontSize().value_or(TEXT_DEFAULT_FONT_SIZE);
+    if (fontStyle.GetFontSizeScale().has_value()) {
+        fontSize = fontSize * fontStyle.GetFontSizeScale().value();
+    }
+    return FontSizeToHtml(fontSize);
+}
+
 std::string SpanToHtml::FontWeightToHtml(const std::optional<FontWeight>& value)
 {
     static const LinearEnumMapNode<FontWeight, std::string> table[] = {
@@ -486,7 +495,7 @@ std::string SpanToHtml::ImageToHtml(RefPtr<NG::SpanItem> item)
 std::string SpanToHtml::NormalStyleToHtml(
     const NG::FontStyle& fontStyle, const OHOS::Ace::NG::TextLineStyle& textLineStyle)
 {
-    std::string style = FontSizeToHtml(fontStyle.GetFontSize());
+    std::string style = ActualFontSizeToHtml(fontStyle);
     style += FontStyleToHtml(fontStyle.GetItalicFontStyle());
     style += FontWeightToHtml(fontStyle.GetFontWeight());
     style += ColorToHtml(fontStyle.GetTextColor());
@@ -514,7 +523,7 @@ std::string SpanToHtml::NormalStyleToHtml(const RefPtr<NG::SpanItem>& item)
     const auto& fontStyle = *item->fontStyle;
     const auto& textLineStyle = *item->textLineStyle;
 
-    std::string style = FontSizeToHtml(fontStyle.GetFontSize());
+    std::string style = ActualFontSizeToHtml(fontStyle);
     style += FontStyleToHtml(fontStyle.GetItalicFontStyle());
     style += FontWeightToHtml(fontStyle.GetFontWeight());
     style += ColorToHtml(fontStyle.GetTextColor());

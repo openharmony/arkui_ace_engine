@@ -192,3 +192,17 @@ std::function<void(int32_t)> GetToastPromise(std::shared_ptr<PromptActionAsyncCo
     };
     return callback;
 }
+
+bool GetShowToastOptionsInternal(ani_env* env, ani_object object, OHOS::Ace::NG::ToastInfo& result)
+{
+    if (IsUndefinedObject(env, object)) {
+        return false;
+    }
+
+    if (!IsClassObject(env, object, "@ohos.promptAction.promptAction.ShowToastOptionsInternal")) {
+        return false;
+    }
+
+    GetSystemMaterial(env, object, result.systemMaterial);
+    return true;
+}

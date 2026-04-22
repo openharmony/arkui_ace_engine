@@ -21,6 +21,7 @@
 #include "test/mock/frameworks/core/components_ng/render/mock_canvas_image.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;

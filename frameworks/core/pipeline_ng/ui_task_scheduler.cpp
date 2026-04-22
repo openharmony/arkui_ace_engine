@@ -23,6 +23,7 @@
 #endif
 #include "base/perfmonitor/perf_monitor.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/animation/geometry_transition.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -220,7 +221,7 @@ void UITaskScheduler::FlushPostponedLayoutTask(bool forceUseMainThread)
         if (!container || container->IsInDestroying()) {
             continue;
         }
-        if (!container->PostponedTaskForIgnore()) {
+        if (!container->PostponedTaskForIgnore(bundle->type)) {
             container->CreateLayoutTask(forceUseMainThread, LayoutType::LAYOUT_FOR_IGNORE);
         }
     }

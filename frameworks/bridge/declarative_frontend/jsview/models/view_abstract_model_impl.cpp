@@ -27,6 +27,7 @@
 #include "core/components_v2/inspector/inspector_composed_component.h"
 #include "core/components_ng/pattern/grid_container/grid_container_model.h"
 #include "core/gestures/long_press_gesture.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 
 // avoid windows build error about macro defined in winuser.h
 #ifdef GetMessage

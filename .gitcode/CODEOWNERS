@@ -558,9 +558,13 @@ frameworks/bridge/common/utils/ @arkui_framework_xnode
 frameworks/bridge/common/utils/module_buffer_reader.h @arkui_framework_resource
 frameworks/bridge/common/utils/module_buffer_reader.cpp @arkui_framework_resource
 frameworks/bridge/declarative_frontend/ark_breakpoint/ @arkui_framework_xnode
+frameworks/bridge/declarative_frontend/ark_component/components/arkhyperlink.js @huawei_g_five
+frameworks/bridge/declarative_frontend/ark_component/components/arkmarquee.js @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_component/components/arkmenu.js @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/components/arkmenuitem.js @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/components/arkmenuitemgroup.js @arkuipopupwindow_all
+frameworks/bridge/declarative_frontend/ark_component/components/arksearch.js @huawei_g_five
+frameworks/bridge/declarative_frontend/ark_component/components/arksymbolglyph.js @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_component/src_dir/ @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/types/ @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/.gitignore @arkuieco3
@@ -568,6 +572,7 @@ frameworks/bridge/declarative_frontend/ark_component/package-lock.json @arkuieco
 frameworks/bridge/declarative_frontend/ark_component/package.json @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/components/arkflowitem.js @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/components/arkfolderstack.js @arkuilayout1
+frameworks/bridge/declarative_frontend/ark_component/components/arklazywaterflow.js @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/components/arkwaterflow.js @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/tsconfig.release.json @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/components/arkdynamiclayout.js @arkuilayout1
@@ -623,6 +628,7 @@ frameworks/bridge/declarative_frontend/ark_component/src/ArkImageAnimator.ts @ar
 frameworks/bridge/declarative_frontend/ark_component/src/ArkImageSpan.ts @arkui001
 frameworks/bridge/declarative_frontend/ark_component/src/ArkImage.ts @arkui001
 frameworks/bridge/declarative_frontend/ark_component/src/ArkLazyGridLayout.ts @arkuiscroll
+frameworks/bridge/declarative_frontend/ark_component/src/ArkLazyWaterFlowLayout.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/src/ArkLine.ts @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_component/src/ArkLinearIndicator.ts @arkui_navigation
 frameworks/bridge/declarative_frontend/ark_component/src/ArkListItemGroup.ts @arkuiscroll
@@ -716,6 +722,7 @@ frameworks/bridge/declarative_frontend/ark_modifier/src/image_modifier.ts @arkui
 frameworks/bridge/declarative_frontend/ark_modifier/src/image_span_modifier.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_modifier/src/import.ts @arkuieco3
 frameworks/bridge/declarative_frontend/ark_modifier/src/lazy_grid_layout_modifier.ts @arkuiscroll
+frameworks/bridge/declarative_frontend/ark_modifier/src/lazy_water_flow_layout_modifier.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_modifier/src/line_modifier.ts @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_modifier/src/linear_indicator_modifier.ts @arkui_navigation
 frameworks/bridge/declarative_frontend/ark_modifier/src/list_item_group_modifier.ts @arkuiscroll
@@ -725,7 +732,7 @@ frameworks/bridge/declarative_frontend/ark_modifier/src/loading_progress_modifie
 frameworks/bridge/declarative_frontend/ark_modifier/src/marquee_modifier.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_modifier/src/menu_item_modifier.ts @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_modifier/src/menu_modifier.ts @arkuipopupwindow_all
-frameworks/bridge/declarative_frontend/ark_modifier/src/modifier_utilities.ts @arkui_framework_xnode
+frameworks/bridge/declarative_frontend/ark_modifier/src/modifier_utilities.ts @arkuieco3
 frameworks/bridge/declarative_frontend/ark_modifier/src/nav_destination_modifier.ts @arkui_navigation
 frameworks/bridge/declarative_frontend/ark_modifier/src/navigation_modifier.ts @arkui_navigation
 frameworks/bridge/declarative_frontend/ark_modifier/src/navigator_modifier.ts @arkui_navigation
@@ -950,6 +957,8 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_imag
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_span_bridge.h @huawei_g_five
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_lazy_grid_layout_bridge.cpp @arkuiscroll
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_lazy_grid_layout_bridge.h @arkuiscroll
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_lazy_water_flow_layout_bridge.cpp @arkuiscroll
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_lazy_water_flow_layout_bridge.h @arkuiscroll
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_line_bridge.cpp @arkuilayout1
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_line_bridge.h @arkuilayout1
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_linear_indicator.cpp @arkui_navigation
@@ -2452,6 +2461,7 @@ frameworks/core/components_ng/manager/select_overlay/ @huawei_g_five
 frameworks/core/components_ng/manager/select_overlay/service_collaboration_menu_ace_helper.h @arkui_rich_editor
 frameworks/core/components_ng/manager/select_overlay/service_collaboration_menu_ace_helper.cpp @arkui_rich_editor
 frameworks/core/components_ng/manager/shared_overlay/ @arkui_framework_xnode
+frameworks/core/components_ng/manager/smart_gesture/ @ArkUI_Event
 frameworks/core/components_ng/manager/toolbar/ @ArkUI_Event
 frameworks/core/components_ng/pattern/ability_component/ @arkuieco3
 frameworks/core/components_ng/pattern/action_sheet/ @arkuipopupwindow_all
@@ -2495,6 +2505,7 @@ frameworks/core/components_ng/pattern/image_animator/ @arkui001
 frameworks/core/components_ng/pattern/image/ @arkui001
 frameworks/core/components_ng/pattern/indexer/ @arkui_navigation
 frameworks/core/components_ng/pattern/lazy_layout/ @arkuiscroll
+frameworks/core/components_ng/pattern/lazy_waterflow/ @arkuiscroll
 frameworks/core/components_ng/pattern/linear_indicator/ @arkui_navigation
 frameworks/core/components_ng/pattern/linear_layout/ @arkuilayout1
 frameworks/core/components_ng/pattern/linear_split/ @arkuilayout1
@@ -2876,6 +2887,8 @@ frameworks/core/interfaces/native/node/image_animator_modifier.cpp @arkui001
 frameworks/core/interfaces/native/node/image_animator_modifier.h @arkui001
 frameworks/core/interfaces/native/node/lazy_grid_layout_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/node/lazy_grid_layout_modifier.h @arkuiscroll
+frameworks/core/interfaces/native/node/lazy_water_flow_layout_modifier.cpp @arkuiscroll
+frameworks/core/interfaces/native/node/lazy_water_flow_layout_modifier.h @arkuiscroll
 frameworks/core/interfaces/native/node/line_modifier.cpp @arkuilayout1
 frameworks/core/interfaces/native/node/line_modifier.h @arkuilayout1
 frameworks/core/interfaces/native/node/linear_indicator_modifier.cpp @arkui_navigation
@@ -3375,7 +3388,9 @@ frameworks/core/interfaces/native/implementation/gesture_style_peer.h @huawei_g_
 frameworks/core/interfaces/native/implementation/decoration_style_accessor.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/decoration_style_peer.h @huawei_g_five
 frameworks/core/interfaces/native/implementation/line_height_style_accessor.cpp @huawei_g_five
+frameworks/core/interfaces/native/implementation/line_spacing_style_accessor.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/line_height_style_peer.h @huawei_g_five
+frameworks/core/interfaces/native/implementation/line_spacing_style_peer.h @huawei_g_five
 frameworks/core/interfaces/native/implementation/text_shadow_style_accessor.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/text_shadow_style_peer.h @huawei_g_five
 frameworks/core/interfaces/native/implementation/text_field_modifier.cpp @huawei_g_five

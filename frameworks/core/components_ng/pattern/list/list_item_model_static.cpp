@@ -19,7 +19,6 @@
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_item.h"
 #include "core/components_ng/pattern/scrollable/scrollable_item_pool.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/pattern/arc_list/arc_list_item_pattern.h"
 
 namespace OHOS::Ace::NG {

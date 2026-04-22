@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 
+#include "base/subwindow/subwindow_manager.h"
 #include "base/geometry/dimension.h"
 #include "base/log/dump_log.h"
 #include "core/components/common/layout/grid_system_manager.h"
@@ -46,6 +47,7 @@
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/common/properties/placement.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -2495,8 +2497,10 @@ void MenuPattern::OnColorConfigurationUpdate()
             child->MarkModifyDone();
             child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
+        host->SetNeedCallChildrenUpdate(false);
+    } else {
+        host->SetNeedCallChildrenUpdate(SystemProperties::ConfigChangePerform());
     }
-    host->SetNeedCallChildrenUpdate(false);
 
     auto menuLayoutProperty = GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(menuLayoutProperty);
@@ -2508,7 +2512,7 @@ void MenuPattern::OnColorConfigurationUpdate()
     }
 }
 
-bool MenuPattern::UpdateMenuBackBlurStyle()
+bool MenuPattern::UpdateMenuBackBlurStyle(bool userSetBgColor)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -2521,15 +2525,10 @@ bool MenuPattern::UpdateMenuBackBlurStyle()
     auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_RETURN(wrapperPattern, false);
     auto menuParams = wrapperPattern->GetMenuParam();
-    if (renderContext->IsUniRenderEnabled()) {
+ 
+    if (renderContext->IsUniRenderEnabled() && (!renderContext->HasBackgroundColor() || !userSetBgColor)) {
         BlurStyleOption styleOption;
-        if (isColorModeFollowTarget_) {
-            if (host->GetLocalColorMode() == OHOS::Ace::ColorMode::LIGHT) {
-                styleOption.colorMode = OHOS::Ace::ThemeColorMode::LIGHT;
-            } else if (host->GetLocalColorMode() == OHOS::Ace::ColorMode::DARK) {
-                styleOption.colorMode = OHOS::Ace::ThemeColorMode::DARK;
-            }
-        }
+        MenuView::UpdateStyleOptionColorMode(host->GetLocalColorMode(), styleOption, isColorModeFollowTarget_);
         if (menuTheme->GetMenuBlendBgColor()) {
             styleOption.blurStyle = static_cast<BlurStyle>(menuTheme->GetMenuNormalBackgroundBlurStyle());
             renderContext->UpdateBackgroundColor(menuParams.backgroundColor.value_or(menuTheme->GetBackgroundColor()));
@@ -2572,8 +2571,8 @@ bool MenuPattern::OnThemeScopeUpdate(int32_t themeScopeId)
         menuLayoutProperty->UpdateFontColor(themeFontColor);
         menuLayoutProperty->UpdateFontColorSetByUser(false);
     }
-    auto ret = UpdateMenuBackBlurStyle();
-    host->MarkModifyDone();
+    auto userSetBgColor = menuLayoutProperty->GetIsUserSetBackgroundColor();
+    auto ret = UpdateMenuBackBlurStyle(userSetBgColor);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     return ret;
 }

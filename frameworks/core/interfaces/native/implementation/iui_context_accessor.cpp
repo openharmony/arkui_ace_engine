@@ -108,6 +108,7 @@ TouchEventInfo CreateMonitorTouchEventInfo(const TouchEvent& event)
     changedInfo.SetScreenLocation(Offset(event.screenX, event.screenY));
     changedInfo.SetGlobalDisplayLocation(Offset(event.globalDisplayX, event.globalDisplayY));
     changedInfo.SetTouchType(event.type);
+    changedInfo.SetSourceDevice(event.sourceType);
     changedInfo.SetForce(event.force);
     changedInfo.SetPressedTime(event.pressedTime);
     changedInfo.SetWidth(event.width);
@@ -195,6 +196,7 @@ Ark_RawInputEventWrapper CreateArkRawInputEventWrapper(const RawInputEventWrappe
                 .target = Converter::ArkValue<Ark_EventTarget>(touchInfo.GetTarget()),
                 .timeStamp = Converter::ArkValue<Ark_Int64>(
                     static_cast<int64_t>(touchInfo.GetTimeStamp().time_since_epoch().count())),
+                .source = Converter::ArkValue<Ark_SourceType>(touchInfo.GetSourceDevice()),
                 .pressure = Converter::ArkValue<Ark_Float64>(touchInfo.GetForce()),
                 .tiltX = Converter::ArkValue<Ark_Float64>(static_cast<double>(touchInfo.GetTiltX().value_or(0))),
                 .tiltY = Converter::ArkValue<Ark_Float64>(static_cast<double>(touchInfo.GetTiltY().value_or(0))),
@@ -812,10 +814,10 @@ const GENERATED_ArkUIIUIContextAccessor* GetIUIContextAccessor()
         IUIContextAccessor::BindTabsToNestedScrollableImpl,
         IUIContextAccessor::UnbindTabsFromNestedScrollableImpl,
         IUIContextAccessor::SetCustomKeyboardContinueFeatureImpl,
+        IUIContextAccessor::SetCustomCursorImpl,
+        IUIContextAccessor::EnableEventPassthroughImpl,
         IUIContextAccessor::AddLocalInputEventMonitorImpl,
         IUIContextAccessor::RemoveLocalInputEventMonitorImpl,
-        IUIContextAccessor::EnableEventPassthroughImpl,
-        IUIContextAccessor::SetCustomCursorImpl,
     };
     return &IUIContextAccessorImpl;
 }

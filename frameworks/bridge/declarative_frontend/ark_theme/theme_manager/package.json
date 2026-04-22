@@ -1,6 +1,15 @@
 {
+  "name": "ark_theme",
+  "version": "0.0.1",
+  "description": "ArkUI imperative interface",
+  "main": "./dist/arkTheme.js",
   "devDependencies": {
     "@types/node": "^15.0.1",
     "typescript": "^4.2.4"
-  }
+  },
+  "scripts": {
+    "build": "rm -rf ./dist && tsc --build tsconfig.json && node export.js ./dist/arkTheme.js"
+  },
+  "author": "ArkUI",
+  "license": "Apache-2.0"
 }

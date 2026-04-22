@@ -119,16 +119,9 @@ bool ParallelStagePattern::CalculateMode()
         auto container = Container::GetContainer(pipelineContext->GetInstanceId());
         CHECK_NULL_RETURN(container, false);
         bool isMainWindow = container->IsMainWindow();
-        auto windowManager = pipelineContext->GetWindowManager();
-        CHECK_NULL_RETURN(windowManager, false);
-        auto windowMode = windowManager->GetWindowMode();
-        bool isInSplitScreenMode =
-            windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-            windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
-        splitMode = (isMainWindow && !isInSplitScreenMode) ? PageMode::SPLIT : PageMode::STACK;
-        TAG_LOGI(AceLogTag::ACE_ROUTER,
-            "calc splitMode, isMainWindow: %{public}d, windowMode: %{public}d, isInSplitScreenMode: %{public}d, "
-            "resultMode: %{public}d", isMainWindow, windowMode, isInSplitScreenMode, static_cast<int32_t>(splitMode));
+        splitMode = isMainWindow ? PageMode::SPLIT : PageMode::STACK;
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "calc splitMode, isMainWindow: %{public}d, resultMode: %{public}d",
+            isMainWindow, static_cast<int32_t>(splitMode));
     }
     if (mode_ == splitMode) {
         return false;
@@ -291,7 +284,7 @@ void ParallelStagePattern::UpdateDividerNodeInVirtualStackBasedSplit(const RefPt
     CreateDividerNodeIfNeeded();
     if (dividerNode_) {
         auto renderContext = dividerNode_->GetRenderContext();
-        CHECK_NULL_RETURN(renderContext, false);
+        CHECK_NULL_VOID(renderContext);
         renderContext->UpdateBackgroundColor(GetDividerNodeColor(hostNode));
     }
     TAG_LOGD(AceLogTag::ACE_ROUTER, "add dividerNode for split mode");
@@ -316,7 +309,7 @@ void ParallelStagePattern::UpdateDividerNode(
             CreateDividerNodeIfNeeded();
             if (dividerNode_) {
                 auto renderContext = dividerNode_->GetRenderContext();
-                CHECK_NULL_RETURN(renderContext, false);
+                CHECK_NULL_VOID(renderContext);
                 renderContext->UpdateBackgroundColor(GetDividerNodeColor(hostNode));
             }
             TAG_LOGD(AceLogTag::ACE_ROUTER, "add dividerNode for split display");

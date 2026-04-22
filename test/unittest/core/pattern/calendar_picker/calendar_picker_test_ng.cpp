@@ -14,6 +14,7 @@
  */
 
 #include <cstddef>
+#include "core/accessibility/accessibility_manager.h"
 #include <optional>
 #include <string>
 #include <utility>
@@ -69,6 +70,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+#include "core/components/button/button_theme.h"
 
 #undef private
 #undef protected

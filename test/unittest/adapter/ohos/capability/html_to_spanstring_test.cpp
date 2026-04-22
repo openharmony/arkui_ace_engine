@@ -2411,6 +2411,21 @@ HWTEST_F(HtmlConvertTestNg, HtmlHeadingFontWeightOverrideTest, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HtmlHeadingAddsBlockLineBreaksTest
+ * @tc.desc: Verify h1 behaves like a block element and keeps line breaks before and after adjacent text.
+ * @tc.level: 1
+ */
+HWTEST_F(HtmlConvertTestNg, HtmlHeadingAddsBlockLineBreaksTest, TestSize.Level1)
+{
+    const std::string html = "<html><body>prefix<h1>Heading</h1>suffix</body></html>";
+    HtmlToSpan toSpan;
+    auto dstSpan = toSpan.ToSpanString(html);
+    ASSERT_NE(dstSpan, nullptr);
+
+    EXPECT_EQ(dstSpan->GetString(), "prefix\nHeading\nsuffix");
+}
+
+/**
  * @tc.name: HtmlConvertSmallTagSingle
  * @tc.desc: Verify single <small> tag sets fontSizeScale = 0.8
  * @tc.level: 1
@@ -2494,6 +2509,36 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvertSmallTagWithBold, TestSize.Level1)
     }
     EXPECT_TRUE(hasBold);
     EXPECT_TRUE(hasScale);
+}
+
+/**
+ * @tc.name: HtmlConvertSmallTagRoundTripFontSize
+ * @tc.desc: Verify <small> round-trip conversion outputs the scaled font-size in HTML.
+ * @tc.level: 1
+ */
+HWTEST_F(HtmlConvertTestNg, HtmlConvertSmallTagRoundTripFontSize, TestSize.Level1)
+{
+    const std::string html = "<html><body><small>small text</small></body></html>";
+    auto spanString = HtmlToSpan().ToSpanString(html);
+    ASSERT_NE(spanString, nullptr);
+
+    auto out = SpanToHtml().ToHtml(*spanString);
+    EXPECT_NE(out.find("font-size: 12.80px;"), std::string::npos);
+}
+
+/**
+ * @tc.name: HtmlConvertSmallTagWithInlineFontSizeRoundTrip
+ * @tc.desc: Verify <small> with explicit font-size outputs the scaled actual font-size in HTML.
+ * @tc.level: 1
+ */
+HWTEST_F(HtmlConvertTestNg, HtmlConvertSmallTagWithInlineFontSizeRoundTrip, TestSize.Level1)
+{
+    const std::string html = "<html><body><small style=\"font-size: 25px;\">scaled text</small></body></html>";
+    auto spanString = HtmlToSpan().ToSpanString(html);
+    ASSERT_NE(spanString, nullptr);
+
+    auto out = SpanToHtml().ToHtml(*spanString);
+    EXPECT_NE(out.find("font-size: 20.00px;"), std::string::npos);
 }
 
 } // namespace OHOS::Ace::NG

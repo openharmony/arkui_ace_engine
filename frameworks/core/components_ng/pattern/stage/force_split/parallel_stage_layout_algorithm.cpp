@@ -16,11 +16,13 @@
 #include "core/components_ng/pattern/stage/force_split/parallel_stage_layout_algorithm.h"
 
 #include <algorithm>
+#include <cmath>
 
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/manager/force_split/force_split_manager.h"
 #include "core/components_ng/pattern/stage/force_split/parallel_stage_manager.h"
+#include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/stage/force_split/parallel_stage_pattern.h"
 
@@ -439,9 +441,12 @@ void ParallelStageLayoutAlgorithm::SizeCalculationForForceSplit(const RefPtr<Fra
     auto forceSplitMgr = pipeline->GetForceSplitManager();
     CHECK_NULL_VOID(forceSplitMgr);
     auto detailPageRatio = forceSplitMgr->GetSplitRatio();
-    auto dividerWidth = DIVIDER_WIDTH.ConvertToPx();
+    float dividerWidth = static_cast<float>(DIVIDER_WIDTH.ConvertToPx());
+    dividerWidth = std::ceil(dividerWidth);
     auto secondaryWidth = (size.Width() - dividerWidth) * detailPageRatio;
+    secondaryWidth = std::max(std::floor(secondaryWidth), 0.0f);
     auto primaryWidth = size.Width() - secondaryWidth - dividerWidth;
+    primaryWidth = std::max(std::floor(primaryWidth), 0.0f);
     dividerSize_ = SizeF(dividerWidth, size.Height());
     primarySize_ = SizeF(primaryWidth, size.Height());
     secondarySize_ = SizeF(secondaryWidth, size.Height());

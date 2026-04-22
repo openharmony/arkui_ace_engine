@@ -36,7 +36,7 @@ import { LoadingProgressModifier } from './../LoadingProgressModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 export class ArkLoadingProgressPeer extends ArkCommonMethodPeer {
-    attributeSet?: LoadingProgressModifier;
+    loadingProgressAttributeSet?: LoadingProgressModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

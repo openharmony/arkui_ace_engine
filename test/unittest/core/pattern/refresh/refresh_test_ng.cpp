@@ -38,7 +38,11 @@ void RefreshTestNg::SetUpTestSuite()
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto themeConstants = CreateThemeConstants(THEME_PATTERN_REFRESH);
     auto refreshTheme = RefreshThemeNG::Builder().Build(themeConstants);
+    // Catch-all expectations must be FIRST (GMock checks in REVERSE order)
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(refreshTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(refreshTheme));
+    // Specific expectations take precedence over catch-alls when defined AFTER them
+    EXPECT_CALL(*themeManager, GetTheme(RefreshThemeNG::TypeId(), _)).WillRepeatedly(Return(refreshTheme));
     auto scrollableThemeConstants = CreateThemeConstants(THEME_PATTERN_SCROLLABLE);
     auto scrollableTheme = ScrollableTheme::Builder().Build(scrollableThemeConstants);
     EXPECT_CALL(*themeManager, GetTheme(ScrollableTheme::TypeId())).WillRepeatedly(Return(scrollableTheme));
@@ -96,4 +100,5 @@ RefPtr<FrameNode> RefreshTestNg::CreateCustomNode()
     layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(CUSTOM_NODE_WIDTH), CalcLength(CUSTOM_NODE_HEIGHT)));
     return frameNode;
 }
+
 } // namespace OHOS::Ace::NG

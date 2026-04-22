@@ -17,10 +17,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RADIO_RADIO_MODEL_STATIC_H
 
 #include "core/components_ng/base/common_configuration.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/radio/radio_model.h"
 
 namespace OHOS::Ace::NG {
+class FrameNode;
 class ACE_EXPORT RadioModelStatic {
 public:
     static void SetChecked(FrameNode* frameNode, const std::optional<bool> isChecked);

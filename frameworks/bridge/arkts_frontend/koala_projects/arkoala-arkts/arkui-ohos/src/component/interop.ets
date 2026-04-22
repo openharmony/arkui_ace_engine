@@ -322,8 +322,8 @@ export function registerCreateWatchFuncCallback(): void {
 }
 
 export function registerCreateStaticObservedCallback(): void {
-    const makeObservedcallback = (value: Object): Object => {
-        return uiUtils.makeV1Observed(value) as Object;
+    const makeObservedcallback = (value: Any): Any => {
+        return uiUtils.makeV1Observed(value);
     }
     const global = ESValue.getGlobal();
     const registerCallback = global.getProperty('registerCallbackForMakeObserved');
@@ -554,9 +554,6 @@ export function transferCompatibleUpdatableBuilder<T extends Object>(
                 if (handler instanceof InteropBuilderLiteralProxyHandler) {
                     state = handler!.state;
                 }
-            } else if (args instanceof InteropTransferMutableBinding || args instanceof InteropTransferBinding) {
-                state = GlobalStateManager.instance.mutableState<int32>(0, true);
-                args.interopAddState(state);
             }
         }
         const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
@@ -1035,7 +1032,7 @@ export function registerCreateCompatibleStaticState(): void {
     registerCallback.invoke(createCompatibleStaticState<undefined>);
 }
 
-function createCompatibleStaticState<T>(dynamicValue: Object): IDecoratedV1Variable<T> {
+function createCompatibleStaticState<T>(dynamicValue: Any): IDecoratedV1Variable<T> {
     const value = ESValue.wrap(dynamicValue);
     const getProxy = value.invokeMethod('getProxy').unwrap();
     if (getProxy === undefined) {
@@ -1150,7 +1147,7 @@ export function staticStateBindObservedObject<T>(
         ESValue.wrap(value),
         ESValue.wrap(onPropertyChange),
         ESValue.wrap(onTrackPropertyRead),
-        ESValue.wrap(onTrackPropertyChange)) as Object as T;
+        ESValue.wrap(onTrackPropertyChange)) as T;
 }
 
 function registerLocalStorageSetProxy(): void {
@@ -1159,7 +1156,7 @@ function registerLocalStorageSetProxy(): void {
     registerCallback.invoke(localStorageSetProxy);
 }
 
-function localStorageSetProxy(storage: LocalStorage, proxy: Object): void {
+function localStorageSetProxy(storage: LocalStorage, proxy: Any): void {
     storage.setProxy(ESValue.wrap(proxy));
 }
 

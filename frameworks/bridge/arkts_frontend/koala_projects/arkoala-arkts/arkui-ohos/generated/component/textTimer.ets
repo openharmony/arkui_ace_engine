@@ -81,7 +81,7 @@ export class TextTimerController implements MaterializedBase {
     }
 }
 export class ArkTextTimerPeer extends ArkCommonMethodPeer {
-    attributeSet?: TextTimerModifier;
+    textTimerAttributeSet?: TextTimerModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

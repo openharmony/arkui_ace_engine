@@ -19,6 +19,7 @@
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #include "test/unittest/core/rosen/rosen_render_context_test.h"
 #include "test/unittest/core/rosen/mock_animated_image.h"
+#include "core/components/common/properties/border_image.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "core/components_ng/render/drawing.h"
 

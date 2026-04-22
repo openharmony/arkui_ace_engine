@@ -37,6 +37,7 @@
 #include "core/components_ng/property/position_property.h"
 #include "core/components_ng/base/inspector.h"
 #include "base/json/json_util.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 using namespace testing;
 using namespace testing::ext;

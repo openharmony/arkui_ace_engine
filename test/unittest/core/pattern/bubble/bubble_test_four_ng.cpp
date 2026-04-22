@@ -32,6 +32,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components/button/button_theme.h"
+#include "core/components/common/properties/shadow_config.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components/popup/popup_theme.h"
@@ -48,6 +49,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 using namespace testing;
 using namespace testing::ext;

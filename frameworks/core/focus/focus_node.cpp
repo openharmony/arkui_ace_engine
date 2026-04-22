@@ -14,6 +14,7 @@
  */
 
 #include "core/focus/focus_node.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/log/dump_log.h"
 #include "core/components/flex/flex_element.h"

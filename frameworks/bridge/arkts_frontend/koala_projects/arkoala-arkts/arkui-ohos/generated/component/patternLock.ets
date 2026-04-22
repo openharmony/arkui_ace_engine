@@ -77,7 +77,7 @@ export class PatternLockController implements MaterializedBase {
     }
 }
 export class ArkPatternLockPeer extends ArkCommonMethodPeer {
-    attributeSet?: PatternLockModifier;
+    patternLockAttributeSet?: PatternLockModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

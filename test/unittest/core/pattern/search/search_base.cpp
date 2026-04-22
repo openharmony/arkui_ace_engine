@@ -14,6 +14,8 @@
  */
 
 #include "search_base.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components/theme/icon_theme.h"
 
 namespace OHOS::Ace::NG {
 void SearchBases::SetUpTestSuite()

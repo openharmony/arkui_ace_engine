@@ -25,6 +25,7 @@
 #include "adapter/ohos/entrance/ace_container.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "base/log/event_report.h"
+#include "core/accessibility/accessibility_manager_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/components_ng/pattern/web/web_accessibility_child_tree_callback.h"

@@ -35,7 +35,7 @@ import { RichTextModifier } from './../RichTextModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 export class ArkRichTextPeer extends ArkCommonMethodPeer {
-    attributeSet?: RichTextModifier;
+    richTextAttributeSet?: RichTextModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

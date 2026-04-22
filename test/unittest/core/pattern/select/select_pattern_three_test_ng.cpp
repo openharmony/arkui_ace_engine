@@ -842,6 +842,12 @@ HWTEST_F(SelectPatternTheTestNg, OnThemeScopeUpdate, TestSize.Level1)
     int32_t themeScopeId = 0;
     bool res = selectPattern->OnThemeScopeUpdate(themeScopeId);
     ASSERT_NE(res, false);
+    int32_t originApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    int32_t errApiVersion = 99;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(errApiVersion);
+    res = selectPattern->OnThemeScopeUpdate(themeScopeId);
+    ASSERT_NE(res, false);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(originApiVersion);
 }
 
 /**

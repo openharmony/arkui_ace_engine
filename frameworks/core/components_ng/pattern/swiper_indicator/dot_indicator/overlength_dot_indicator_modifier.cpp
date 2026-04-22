@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/overlength_dot_indicator_modifier.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.h"
+#include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -110,6 +111,7 @@ void OverlengthDotIndicatorModifier::PaintBackground(
     auto radius = axis_ == Axis::HORIZONTAL ? rectHeight : rectWidth;
     backgroundStart_ = axis_ == Axis::HORIZONTAL ? rectLeft : rectTop;
     backgroundEnd_ = axis_ == Axis::HORIZONTAL ? rectRight : rectBottom;
+    isDrawbackground_ = true;
     canvas.DrawRoundRect({ { rectLeft, rectTop, rectRight, rectBottom }, radius, radius });
     canvas.DetachBrush();
 }
@@ -187,7 +189,7 @@ void OverlengthDotIndicatorModifier::PaintBlackPoint(DrawingContext& context, Co
             // new point color
             paintColor = paintColor.BlendOpacity(contentProperty.newPointOpacity / FULL_ALPHA);
         }
-        if (isDrawbackground_ || (center.GetX() - width * HALF_FLOAT > backgroundStart_ &&
+        if (!isDrawbackground_ || (center.GetX() - width * HALF_FLOAT > backgroundStart_ &&
                                      center.GetX() + width * HALF_FLOAT < backgroundEnd_)) {
             PaintUnselectedIndicator(canvas, center, width, height, LinearColor(paintColor));
         }

@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/search/search_pattern.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include <cstdint>
 #include "base/geometry/dimension.h"
@@ -1890,6 +1891,7 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
         textFieldLayoutProperty->GetIncludeFontPadding().value_or(false)).c_str(), filter);
     json->PutExtAttr("fallbackLineSpacing", std::to_string(
         textFieldLayoutProperty->GetFallbackLineSpacing().value_or(false)).c_str(), filter);
+    json->PutExtAttr("enableKeyboardOnFocus", NeedToRequestKeyboardOnFocus() ? "true" : "false", filter);
     json->PutExtAttr("enterKeyType", searchTextFieldPattern->TextInputActionToString().c_str(), filter);
     json->PutExtAttr("selectionMenuHidden",
         textFieldLayoutProperty->GetSelectionMenuHidden().value_or(false) ? "true" : "false", filter);
@@ -2199,6 +2201,9 @@ void SearchPattern::OnSearchColorConfigrationUpdate(const RefPtr<FrameNode>& fra
     auto layoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (frameNode->GetTag() == SYMBOL_ETS_TAG) {
+        if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            GetSearchNode()->SetSearchSymbolIconColor(Color(color));
+        }
         auto symbolLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(symbolLayoutProperty);
         CHECK_NULL_VOID(!symbolLayoutProperty->GetTextColorFlagByUserValue(false));
@@ -2233,6 +2238,9 @@ void SearchPattern::OnCancelColorConfigrationUpdate(const RefPtr<FrameNode>& fra
     auto layoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (frameNode->GetTag() == SYMBOL_ETS_TAG) {
+        if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            GetSearchNode()->SetCancelSymbolIconColor(Color(color));
+        }
         auto symbolLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(symbolLayoutProperty);
         CHECK_NULL_VOID(!symbolLayoutProperty->GetTextColorFlagByUserValue(false));
@@ -2919,19 +2927,8 @@ void SearchPattern::UpdateSymbolIconProperties(RefPtr<FrameNode>& iconFrameNode,
                                       : GetSearchNode()->GetCancelSymbolIconColor() });
     auto parentInspector = GetSearchNode()->GetInspectorIdValue("");
     iconFrameNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[index] + parentInspector);
-    if (index == SEARCH_IMAGE_INDEX) {
-        auto iconSymbol = layoutProperty->GetSearchIconSymbol();
-        if (iconSymbol != nullptr) {
-            iconSymbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconFrameNode)));
-            symbolLayoutProperty->OnPropertyChangeMeasure();
-        }
-    } else {
-        auto iconSymbol = layoutProperty->GetCancelIconSymbol();
-        if (iconSymbol != nullptr) {
-            iconSymbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconFrameNode)));
-            symbolLayoutProperty->OnPropertyChangeMeasure();
-        }
-    }
+
+    UpdateSymbolLayoutProperty(iconFrameNode, index, layoutProperty, symbolLayoutProperty);
     // reset symbol effect
     auto symbolEffectOptions = symbolLayoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
     symbolEffectOptions.SetIsTxtActive(false);
@@ -2940,6 +2937,37 @@ void SearchPattern::UpdateSymbolIconProperties(RefPtr<FrameNode>& iconFrameNode,
     if (GreatOrEqualCustomPrecision(fontSize.ConvertToPxDistribute(GetMinFontScale(), GetMaxFontScale()),
         ICON_MAX_SIZE.ConvertToPx())) {
         symbolLayoutProperty->UpdateFontSize(ICON_MAX_SIZE);
+    }
+}
+
+void SearchPattern::UpdateSymbolLayoutProperty(RefPtr<FrameNode>& iconFrameNode, int32_t index,
+    RefPtr<SearchLayoutProperty> layoutProperty, RefPtr<TextLayoutProperty> symbolLayoutProperty)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(layoutProperty);
+    if (index == SEARCH_IMAGE_INDEX) {
+        auto iconSymbol = layoutProperty->GetSearchIconSymbol();
+        if (iconSymbol != nullptr) {
+            iconSymbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconFrameNode)));
+            CHECK_NULL_VOID(symbolLayoutProperty);
+            if (!symbolLayoutProperty->GetTextColorFlagByUserValue(false) &&
+                host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+                symbolLayoutProperty->UpdateSymbolColorList({ GetSearchNode()->GetSearchSymbolIconColor() });
+            }
+            symbolLayoutProperty->OnPropertyChangeMeasure();
+        }
+    } else {
+        auto iconSymbol = layoutProperty->GetCancelIconSymbol();
+        if (iconSymbol != nullptr) {
+            iconSymbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconFrameNode)));
+            CHECK_NULL_VOID(symbolLayoutProperty);
+            if (!symbolLayoutProperty->GetTextColorFlagByUserValue(false) &&
+                host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+                symbolLayoutProperty->UpdateSymbolColorList({ GetSearchNode()->GetCancelSymbolIconColor() });
+            }
+            symbolLayoutProperty->OnPropertyChangeMeasure();
+        }
     }
 }
 

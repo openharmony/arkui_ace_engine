@@ -14,6 +14,7 @@
  */
 
 #include <optional>
+#include "core/accessibility/accessibility_manager.h"
 #include <vector>
 
 #include "gtest/gtest.h"

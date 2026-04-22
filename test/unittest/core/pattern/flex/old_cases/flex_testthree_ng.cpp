@@ -17,6 +17,7 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #define private public
 #define protectd public

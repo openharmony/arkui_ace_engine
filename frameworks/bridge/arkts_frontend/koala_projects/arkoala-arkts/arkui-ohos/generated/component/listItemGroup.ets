@@ -36,7 +36,7 @@ import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 import { ComponentContentBase_serializer } from './../framework/ComponentContent'
 export class ArkListItemGroupPeer extends ArkCommonMethodPeer {
-    attributeSet?: ListItemGroupModifier;
+    listItemGroupAttributeSet?: ListItemGroupModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -77,6 +77,10 @@ export enum ListItemGroupStyle {
     NONE = 0,
     CARD = 1
 }
+export enum ListItemGroupHeaderFooterStyle {
+    NONE = 0,
+    FLOATING = 1
+}
 export interface ListItemGroupOptions {
     header?: CustomBuilder;
     headerComponent?: ComponentContentBase;
@@ -84,6 +88,8 @@ export interface ListItemGroupOptions {
     footerComponent?: ComponentContentBase;
     space?: double | string;
     style?: ListItemGroupStyle;
+    headerStyle?: ListItemGroupHeaderFooterStyle;
+    footerStyle?: ListItemGroupHeaderFooterStyle;
 }
 export interface ListItemGroupAttribute extends CommonMethod {
     setListItemGroupOptions(options?: ListItemGroupOptions): this {
@@ -207,6 +213,22 @@ export class ListItemGroupOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForHeaderStyle = value.headerStyle
+        if (valueHolderForHeaderStyle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForHeaderStyleTmpValue = (valueHolderForHeaderStyle as ListItemGroupHeaderFooterStyle)
+            valueSerializer.writeInt32(valueHolderForHeaderStyleTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForFooterStyle = value.footerStyle
+        if (valueHolderForFooterStyle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFooterStyleTmpValue = (valueHolderForFooterStyle as ListItemGroupHeaderFooterStyle)
+            valueSerializer.writeInt32(valueHolderForFooterStyleTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): ListItemGroupOptions {
         let valueDeserializer: DeserializerBase = buffer
@@ -281,7 +303,23 @@ export class ListItemGroupOptions_serializer {
             styleTmpBuf = ListItemGroupStyle.fromValue(valueDeserializer.readInt32())
         }
         const styleTmpResult: ListItemGroupStyle | undefined = styleTmpBuf
-        let value: ListItemGroupOptions = ({header: headerTmpResult, headerComponent: headerComponentTmpResult, footer: footerTmpResult, footerComponent: footerComponentTmpResult, space: spaceTmpResult, style: styleTmpResult} as ListItemGroupOptions)
+        const headerStyleTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let headerStyleTmpBuf: ListItemGroupHeaderFooterStyle | undefined = undefined
+        if ((headerStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            headerStyleTmpBuf = ListItemGroupHeaderFooterStyle.fromValue(valueDeserializer.readInt32())
+        }
+        const headerStyleTmpResult: ListItemGroupHeaderFooterStyle | undefined = headerStyleTmpBuf
+        const footerStyleTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let footerStyleTmpBuf: ListItemGroupHeaderFooterStyle | undefined = undefined
+        if ((footerStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            footerStyleTmpBuf = ListItemGroupHeaderFooterStyle.fromValue(valueDeserializer.readInt32())
+        }
+        const footerStyleTmpResult: ListItemGroupHeaderFooterStyle | undefined = footerStyleTmpBuf
+        let value: ListItemGroupOptions = ({header: headerTmpResult, headerComponent: headerComponentTmpResult,
+                                            footer: footerTmpResult, footerComponent: footerComponentTmpResult,
+                                            space: spaceTmpResult, style: styleTmpResult,
+                                            headerStyle: headerStyleTmpResult, footerStyle: footerStyleTmpResult}
+                                            as ListItemGroupOptions)
         return value
     }
 }

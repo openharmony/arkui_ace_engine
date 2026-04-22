@@ -15,6 +15,7 @@
  */
 
 #include "gtest/gtest.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #define private public
 #include "base/memory/ace_type.h"
@@ -2028,6 +2029,29 @@ HWTEST_F(WebModelTestNg, SetOverlayScrollbarEnabled010, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetKeyboardAppearanceMode01
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetKeyboardAppearanceMode01, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetKeyboardAppearanceMode(WebKeyboardAppearanceMode::LIGHT_IMMERSIVE);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->GetKeyboardAppearanceMode(),
+        WebKeyboardAppearanceMode::LIGHT_IMMERSIVE);
+#endif
+}
+
+/**
  * @tc.name: SetKeyboardAvoidMode011
  * @tc.desc: Test web_model_ng.cpp
  * @tc.type: FUNC
@@ -2643,6 +2667,30 @@ HWTEST_F(WebModelTestNg, SetNativeEmbedObjectParamChangeId001, TestSize.Level1)
     AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
         ->propOnNativeEmbedObjectParamChangeEvent_(nullptr);
     EXPECT_NE(callCount, 0);
+#endif
+}
+
+/**
+ * @tc.name: SetKeyboardAppearanceMode02
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetKeyboardAppearanceMode02, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetKeyboardAppearanceMode(
+        AccessibilityManager::RawPtr(frameNode), WebKeyboardAppearanceMode::LIGHT_IMMERSIVE);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->GetKeyboardAppearanceMode(),
+        WebKeyboardAppearanceMode::LIGHT_IMMERSIVE);
 #endif
 }
 

@@ -70,7 +70,9 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
     public _syncLoad_0_0value?: boolean | undefined
     public _colorFilter_0_0value?: ColorFilter | DrawingColorFilter | undefined
     public _copyOption_0_0value?: CopyOptions | undefined
-    public _draggable_0_0value?: boolean | undefined
+    // instructive change start
+    public _draggable_0_0value?: boolean | undefined = undefined
+    // instructive change end
     public _pointLight_0_0value?: PointLightStyle | undefined
     public _edgeAntialiasing_0_0value?: double | undefined
     public _onComplete_0_0value?: ImageOnCompleteCallback | undefined

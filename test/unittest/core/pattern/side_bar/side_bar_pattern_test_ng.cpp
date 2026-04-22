@@ -20,6 +20,7 @@
 #include "base/memory/referenced.h"
 #include "core/animation/animator.h"
 #include "core/animation/curve_animation.h"
+#include "core/components/common/properties/border_image.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"

@@ -162,6 +162,15 @@ void JSStack::SetSize(const JSCallbackInfo& info)
     SetHeight(sizeObj->GetProperty("height"));
 }
 
+void JSStack::SetSyncLoad(const JSCallbackInfo& info)
+{
+    bool enabled = true;
+    if (info[0]->IsBoolean()) {
+        enabled = info[0]->ToBoolean();
+    }
+    StackModel::GetInstance()->SetSyncLoad(enabled);
+}
+
 void JSStack::Create(const JSCallbackInfo& info)
 {
     Alignment alignment = Alignment::CENTER;
@@ -213,6 +222,7 @@ void JSStack::JSBind(BindingTarget globalObj)
     JSClass<JSStack>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSStack>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSStack>::StaticMethod("pointLight", &JSViewAbstract::JsPointLight, opt);
+    JSClass<JSStack>::StaticMethod("syncLoad", &JSStack::SetSyncLoad);
     JSClass<JSStack>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

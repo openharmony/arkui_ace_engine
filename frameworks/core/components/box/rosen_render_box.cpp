@@ -24,6 +24,7 @@
 #include "core/components/box/rosen_mask_painter.h"
 #include "core/components/common/painter/debug_boundary_painter.h"
 #include "core/components/common/painter/rosen_decoration_painter.h"
+#include "core/components/common/properties/border_image.h"
 #include "core/components/flex/render_flex.h"
 #include "core/components/image/image_component.h"
 #include "core/components_ng/render/animation_utils.h"

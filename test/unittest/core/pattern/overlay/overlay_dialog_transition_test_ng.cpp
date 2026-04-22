@@ -48,7 +48,9 @@
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_event_hub.h"
+#include "core/components_ng/pattern/dialog/dialog_layout_algorithm.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
@@ -75,6 +77,7 @@
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/theme/icon_theme.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -95,6 +98,31 @@ const std::string SUB_TITLE = "subtitle";
 const std::string CHECKBOX_CONTENT = "checkboxContent";
 constexpr int32_t FONT_SIZE_10 = 10;
 constexpr int32_t FONT_SIZE_15 = 15;
+
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == DragBarTheme::TypeId()) {
+        return AceType::MakeRefPtr<DragBarTheme>();
+    } else if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == DialogTheme::TypeId()) {
+        return AceType::MakeRefPtr<DialogTheme>();
+    } else if (type == PickerTheme::TypeId()) {
+        return AceType::MakeRefPtr<PickerTheme>();
+    } else if (type == SelectTheme::TypeId()) {
+        return AceType::MakeRefPtr<SelectTheme>();
+    } else if (type == MenuTheme::TypeId()) {
+        return AceType::MakeRefPtr<MenuTheme>();
+    } else if (type == ToastTheme::TypeId()) {
+        return AceType::MakeRefPtr<ToastTheme>();
+    } else if (type == SheetTheme::TypeId()) {
+        return AceType::MakeRefPtr<SheetTheme>();
+    } else if (type == TextTheme::TypeId()) {
+        return AceType::MakeRefPtr<TextTheme>();
+    } else {
+        return nullptr;
+    }
+}
 } // namespace
 class OverlayDialogTransitionTestNg : public testing::Test {
 public:
@@ -123,28 +151,10 @@ void OverlayDialogTransitionTestNg::SetUpTestCase()
     MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
     MockPipelineContext::GetCurrentContext()->SetMinPlatformVersion((int32_t)PlatformVersion::VERSION_ELEVEN);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-        if (type == DragBarTheme::TypeId()) {
-            return AceType::MakeRefPtr<DragBarTheme>();
-        } else if (type == IconTheme::TypeId()) {
-            return AceType::MakeRefPtr<IconTheme>();
-        } else if (type == DialogTheme::TypeId()) {
-            return AceType::MakeRefPtr<DialogTheme>();
-        } else if (type == PickerTheme::TypeId()) {
-            return AceType::MakeRefPtr<PickerTheme>();
-        } else if (type == SelectTheme::TypeId()) {
-            return AceType::MakeRefPtr<SelectTheme>();
-        } else if (type == MenuTheme::TypeId()) {
-            return AceType::MakeRefPtr<MenuTheme>();
-        } else if (type == ToastTheme::TypeId()) {
-            return AceType::MakeRefPtr<ToastTheme>();
-        } else if (type == SheetTheme::TypeId()) {
-            return AceType::MakeRefPtr<SheetTheme>();
-        } else if (type == TextTheme::TypeId()) {
-            return AceType::MakeRefPtr<TextTheme>();
-        } else {
-            return nullptr;
-        }
+        return GetTheme(type);
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 void OverlayDialogTransitionTestNg::TearDownTestCase()
@@ -1014,4 +1024,115 @@ HWTEST_F(OverlayDialogTransitionTestNg, DialogTransitionTest014, TestSize.Level1
     dialogNode->eventHub_ = eventHub;
     EXPECT_TRUE(overlayManager->DialogInMapHoldingFocus());
 }
+/**
+ * @tc.name: DialogAnalysisLayoutOfContent001
+ * @tc.desc: Test DialogLayoutAlgorithm::AnalysisLayoutOfContent when API version < VERSION_TWENTY_SIX,
+ *           wordBreak should be updated from dialog properties.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayDialogTransitionTestNg, DialogAnalysisLayoutOfContent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set API target version < VERSION_TWENTY_SIX.
+     */
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto oldVersion = container->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+
+    /**
+     * @tc.steps: step2. Create dialog node with DialogPattern.
+     */
+    auto dialogNode = FrameNode::CreateFrameNode(
+        V2::DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr));
+    ASSERT_NE(dialogNode, nullptr);
+
+    /**
+     * @tc.steps: step3. Create scroll node and text node with proper hierarchy.
+     */
+    auto scrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 3, AceType::MakeRefPtr<TextPattern>());
+    scrollNode->AddChild(textNode);
+
+    /**
+     * @tc.steps: step4. Create layout wrappers and build wrapper tree.
+     */
+    auto dialogWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        dialogNode, dialogNode->GetGeometryNode(), dialogNode->GetLayoutProperty());
+    auto scrollWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        scrollNode, scrollNode->GetGeometryNode(), scrollNode->GetLayoutProperty());
+    auto textWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        textNode, textNode->GetGeometryNode(), textNode->GetLayoutProperty());
+    scrollWrapper->AppendChild(textWrapper);
+
+    /**
+     * @tc.steps: step5. Call AnalysisLayoutOfContent and verify wordBreak is updated.
+     * @tc.expected: When API version < VERSION_TWENTY_SIX, wordBreak should be set to BREAK_ALL.
+     */
+    DialogLayoutAlgorithm dialogLayoutAlgorithm;
+    dialogLayoutAlgorithm.AnalysisLayoutOfContent(dialogWrapper.rawPtr_, scrollWrapper);
+
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(textNode->GetLayoutProperty());
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_TRUE(textLayoutProperty->GetWordBreak().has_value());
+    EXPECT_EQ(textLayoutProperty->GetWordBreak().value(), WordBreak::BREAK_ALL);
+
+    container->SetApiTargetVersion(oldVersion);
+}
+
+/**
+ * @tc.name: DialogAnalysisLayoutOfContent002
+ * @tc.desc: Test DialogLayoutAlgorithm::AnalysisLayoutOfContent when API version >= VERSION_TWENTY_SIX,
+ *           wordBreak should NOT be updated.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayDialogTransitionTestNg, DialogAnalysisLayoutOfContent002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set API target version >= VERSION_TWENTY_SIX.
+     */
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto oldVersion = container->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+
+    /**
+     * @tc.steps: step2. Create dialog node with DialogPattern.
+     */
+    auto dialogNode = FrameNode::CreateFrameNode(
+        V2::DIALOG_ETS_TAG, 4, AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr));
+    ASSERT_NE(dialogNode, nullptr);
+
+    /**
+     * @tc.steps: step3. Create scroll node and text node with proper hierarchy.
+     */
+    auto scrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 5, AceType::MakeRefPtr<Pattern>());
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 6, AceType::MakeRefPtr<TextPattern>());
+    scrollNode->AddChild(textNode);
+
+    /**
+     * @tc.steps: step4. Create layout wrappers and build wrapper tree.
+     */
+    auto dialogWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        dialogNode, dialogNode->GetGeometryNode(), dialogNode->GetLayoutProperty());
+    auto scrollWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        scrollNode, scrollNode->GetGeometryNode(), scrollNode->GetLayoutProperty());
+    auto textWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        textNode, textNode->GetGeometryNode(), textNode->GetLayoutProperty());
+    scrollWrapper->AppendChild(textWrapper);
+
+    /**
+     * @tc.steps: step5. Call AnalysisLayoutOfContent and verify wordBreak is NOT updated.
+     * @tc.expected: When API version >= VERSION_TWENTY_SIX, wordBreak should NOT be set.
+     */
+    DialogLayoutAlgorithm dialogLayoutAlgorithm;
+    dialogLayoutAlgorithm.AnalysisLayoutOfContent(dialogWrapper.rawPtr_, scrollWrapper);
+
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(textNode->GetLayoutProperty());
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_FALSE(textLayoutProperty->GetWordBreak().has_value());
+
+    container->SetApiTargetVersion(oldVersion);
+}
+
 } // namespace OHOS::Ace::NG

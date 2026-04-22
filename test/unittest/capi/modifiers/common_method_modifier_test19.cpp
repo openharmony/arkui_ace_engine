@@ -14,6 +14,7 @@
 */
 
 #include "common_method_modifier_test.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"

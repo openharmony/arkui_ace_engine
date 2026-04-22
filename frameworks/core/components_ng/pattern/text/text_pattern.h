@@ -162,6 +162,8 @@ public:
 
     void OnWindowShow() override;
 
+    void OnLanguageConfigurationUpdate() override;
+
     bool CheckMeasureFlag();
 
     void PreCreateLayoutWrapper();
@@ -1022,7 +1024,7 @@ public:
     ACE_FORCE_EXPORT int32_t OnInjectionEvent(const std::string& command) override;
 
     bool GetFallbackLineSpacingStyleOptimizeFlag();
-    void SetFallbackLineSpacingAndIncludeFontPadding(bool flag);
+    bool SetFallbackLineSpacingAndIncludeFontPadding(bool flag);
 
 protected:
     virtual RefPtr<TextSelectOverlay> GetSelectOverlay();

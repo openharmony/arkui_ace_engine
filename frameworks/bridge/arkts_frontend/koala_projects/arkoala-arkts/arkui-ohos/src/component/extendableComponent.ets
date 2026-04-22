@@ -122,7 +122,6 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
     }
 
     __clearStateVariables__Internal(): void {
-        this.delegate_ = undefined;
         if (!this.ownedStateVariables_?.length) {
             return;
         }

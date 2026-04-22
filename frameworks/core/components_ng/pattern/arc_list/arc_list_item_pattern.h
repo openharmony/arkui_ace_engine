@@ -38,10 +38,11 @@ public:
 
     FocusPattern GetFocusPattern() const override;
 
-    void SetListItemDefaultAttributes(const RefPtr<FrameNode>& listItemNode) override;
+    void ApplyListItemDefaultAttributes(const RefPtr<FrameNode>& listItemNode) override;
 
     void HandleHoverEvent(bool isHover, const RefPtr<NG::FrameNode>& itemNode) override;
     void HandlePressEvent(bool isPressed, const RefPtr<NG::FrameNode>& itemNode) override;
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
     bool IsEnableChildrenMatchParent() override
     {
         return true;

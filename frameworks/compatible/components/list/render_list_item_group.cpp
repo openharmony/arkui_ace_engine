@@ -14,6 +14,7 @@
  */
 
 #include "compatible/components/list/render_list_item_group.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "core/components/flex/render_flex.h"
 #include "compatible/components/list/list_item_group_component.h"

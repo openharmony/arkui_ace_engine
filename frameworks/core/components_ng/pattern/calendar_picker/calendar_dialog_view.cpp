@@ -30,12 +30,14 @@
 #include "core/components_ng/pattern/calendar/calendar_pattern.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_event_hub.h"
 #include "core/common/container.h"
+#include "core/common/font_manager.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "core/common/resource/resource_parse_utils.h"
@@ -54,13 +56,14 @@ constexpr size_t CANCEL_BUTTON_FONT_COLOR_INDEX = 0;
 constexpr size_t CANCEL_BUTTON_BACKGROUND_COLOR_INDEX = 1;
 constexpr size_t ACCEPT_BUTTON_FONT_COLOR_INDEX = 2;
 constexpr size_t ACCEPT_BUTTON_BACKGROUND_COLOR_INDEX = 3;
+constexpr float CALENDAR_PICKER_TEXT_MAX_SCALE = 1.45f;
 
 void ApplyBlurStyleColorModeForApi26(const RefPtr<FrameNode>& dialogNode, BlurStyleOption& styleOption)
 {
     CHECK_NULL_VOID(dialogNode);
     // Target API 26+: blur style follows the dialog node's local color mode (WithTheme / explicit scope).
     // Below target API 26: keep colorMode from blurStyleOption default or dialogProperties.
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+    if (dialogNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         if (dialogNode->GetLocalColorMode() == ColorMode::DARK) {
             styleOption.colorMode = ThemeColorMode::DARK;
         } else if (dialogNode->GetLocalColorMode() == ColorMode::LIGHT) {
@@ -79,6 +82,14 @@ bool CalendarDialogView::CheckOrientationChange()
     return (!(SystemProperties::GetDeviceOrientation() == previousOrientation_)
                 ? Dimension(pipeline->GetRootWidth()).ConvertToVp() < deviceHeightLimit
                 : Dimension(pipeline->GetRootHeight()).ConvertToVp() < deviceHeightLimit);
+}
+
+bool CalendarDialogView::SkipCalendarPickerDayGridAgingAdapt(PipelineBase* pipeline)
+{
+    CHECK_NULL_RETURN(pipeline, false);
+    auto fontManager = pipeline->GetFontManager();
+    CHECK_NULL_RETURN(fontManager, false);
+    return fontManager->GetFallbackLineSpacingStyleOptimizeFlag();
 }
 
 DeviceOrientation CalendarDialogView::previousOrientation_ { DeviceOrientation::PORTRAIT };
@@ -258,6 +269,11 @@ void CalendarDialogView::SetTitleIdealSize(
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto fontSizeScale = pipeline->GetFontScale();
+    const bool skipDialogDayGridAging = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
+        SkipCalendarPickerDayGridAgingAdapt(pipeline.GetRawPtr());
+    if (skipDialogDayGridAging) {
+        fontSizeScale = fontSizeScale > CALENDAR_PICKER_TEXT_MAX_SCALE ? CALENDAR_PICKER_TEXT_MAX_SCALE : fontSizeScale;
+    }
     if (fontSizeScale < theme->GetCalendarPickerLargeScale() || CheckOrientationChange()) {
         layoutProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(theme->GetCalendarTitleRowHeight())));
     } else if (fontSizeScale >= theme->GetCalendarPickerLargerScale()) {
@@ -327,7 +343,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateTitleNode(const RefPtr<FrameNode>& c
     CHECK_NULL_RETURN(textTitleNode, nullptr);
     auto textLayoutProperty = textTitleNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-    UpdateTextLayoutProperty(textLayoutProperty, theme);
+    UpdateTextLayoutProperty(textLayoutProperty, theme, textTitleNode);
     textTitleNode->MarkModifyDone();
     textTitleNode->MountToParent(titleRow);
 
@@ -428,7 +444,10 @@ void CalendarDialogView::SetCalendarIdealSize(const RefPtr<CalendarTheme>& theme
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto fontSizeScale = pipeline->GetFontScale();
-    if (fontSizeScale < theme->GetCalendarPickerLargeScale() || CheckOrientationChange()) {
+    const bool skipDialogDayGridAging = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
+        SkipCalendarPickerDayGridAgingAdapt(pipeline.GetRawPtr());
+    if (skipDialogDayGridAging ||
+        fontSizeScale < theme->GetCalendarPickerLargeScale() || CheckOrientationChange()) {
         calendarLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt,
             CalcLength(theme->GetCalendarContainerHeight() + CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT - weekHeight)));
     } else if (fontSizeScale >= theme->GetCalendarPickerLargerScale()) {
@@ -517,6 +536,7 @@ bool CalendarDialogView::MountCalendarMonthFramesToSwiper(int32_t calendarNodeId
 
 void CalendarDialogView::InitCalendarProperty(const RefPtr<FrameNode>& calendarNode)
 {
+    CHECK_NULL_VOID(calendarNode);
     auto calendarLayoutProperty = calendarNode->GetLayoutProperty();
     CHECK_NULL_VOID(calendarLayoutProperty);
     RefPtr<CalendarTheme> theme = calendarNode->GetTheme<CalendarTheme>(true);
@@ -674,9 +694,12 @@ RefPtr<FrameNode> CalendarDialogView::CreateButtonNode(bool isConfirm, const std
     if (fontSizeScale < calendarTheme->GetCalendarPickerLargeScale() || CheckOrientationChange()) {
         textLayoutProperty->UpdateFontSize(fontSize);
     } else {
-        fontSizeScale = fontSizeScale > calendarTheme->GetCalendarPickerLargeScale()
-                            ? calendarTheme->GetCalendarPickerLargeScale()
-                            : fontSizeScale;
+        const bool skipDialogDayGridAging =
+            buttonNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
+            SkipCalendarPickerDayGridAgingAdapt(pipeline.GetRawPtr());
+        auto maxTextScale = skipDialogDayGridAging ?
+            CALENDAR_PICKER_TEXT_MAX_SCALE : calendarTheme->GetCalendarPickerLargeScale();
+        fontSizeScale = fontSizeScale > maxTextScale ? maxTextScale : fontSizeScale;
         textLayoutProperty->UpdateFontSize(fontSize * fontSizeScale);
     }
 
@@ -695,6 +718,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateButtonNode(bool isConfirm, const std
     buttonRenderContext->UpdateBackgroundColor(defaultBGColor);
     auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(buttonLayoutProperty, nullptr);
+    buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     auto index = isConfirm ? ACCEPT_BUTTON_INDEX : CANCEL_BUTTON_INDEX;
     UpdateButtonStyles(buttonInfos, index, buttonLayoutProperty, buttonRenderContext);
     UpdateButtonDefaultFocus(buttonInfos, buttonNode, isConfirm);
@@ -735,10 +759,32 @@ void CalendarDialogView::UpdateButtonLayoutProperty(const RefPtr<FrameNode>& but
     }
 
     auto fontSizeScale = pipeline->GetFontScale();
-    if (fontSizeScale >= calendarTheme->GetCalendarPickerLargerScale() &&
+    auto heightScale = fontSizeScale;
+    const bool skipDialogButtonAging = buttonNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
+        SkipCalendarPickerDayGridAgingAdapt(pipeline.GetRawPtr());
+    if (skipDialogButtonAging) {
+        auto rawFontSizeScale = fontSizeScale;
+        auto baseFontSize = pickerTheme->GetOptionStyle(false, false).GetFontSize();
+        auto maxTextScale = CALENDAR_PICKER_TEXT_MAX_SCALE;
+        if (fontSizeScale < calendarTheme->GetCalendarPickerLargeScale() || CheckOrientationChange()) {
+            buttonLayoutProperty->UpdateFontSize(baseFontSize);
+        } else {
+            fontSizeScale = fontSizeScale > maxTextScale ? maxTextScale : fontSizeScale;
+            // Button label text will still be scaled by framework fontScale once.
+            // Use compensated font size here so final rendered size is capped by maxTextScale.
+            auto compensatedScale = GreatNotEqual(rawFontSizeScale, 0.0f) ? (fontSizeScale / rawFontSizeScale) : 1.0f;
+            buttonLayoutProperty->UpdateFontSize(baseFontSize * compensatedScale);
+        }
+        heightScale = rawFontSizeScale > maxTextScale ? maxTextScale : rawFontSizeScale;
+    }
+    const bool useLargeButtonHeight = heightScale >= calendarTheme->GetCalendarPickerLargerScale() &&
         (!(GetPreviousOrientation() == SystemProperties::GetDeviceOrientation())
                 ? Dimension(pipeline->GetRootWidth()).ConvertToVp() >= deviceHeightLimit
-                : Dimension(pipeline->GetRootHeight()).ConvertToVp() >= deviceHeightLimit)) {
+                : Dimension(pipeline->GetRootHeight()).ConvertToVp() >= deviceHeightLimit);
+    if (skipDialogButtonAging) {
+        buttonLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(width, std::nullopt));
+    } else if (useLargeButtonHeight) {
         buttonLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(width, CalcLength(calendarTheme->GetCalendarActionLargeRowHeight())));
     } else {
@@ -961,7 +1007,15 @@ void CalendarDialogView::UpdateOptionLayoutProps(
     margin.right = CalcLength(theme->GetCalendarActionRowBottomLeftRightPadding());
     margin.bottom = CalcLength(theme->GetCalendarTitleRowTopPadding() + CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT);
     layoutProps->UpdateMargin(margin);
-    layoutProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(theme->GetCalendarActionRowHeight())));
+    if (contentRow->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
+        SkipCalendarPickerDayGridAgingAdapt(pipelineContext.GetRawPtr()) &&
+        pipelineContext->GetFontScale() >= theme->GetCalendarPickerLargerScale() && !CheckOrientationChange()) {
+        layoutProps->UpdateUserDefinedIdealSize(
+            CalcSize(std::nullopt, CalcLength(theme->GetCalendarActionLargeRowHeight())));
+    } else {
+        layoutProps->UpdateUserDefinedIdealSize(
+            CalcSize(std::nullopt, CalcLength(theme->GetCalendarActionRowHeight())));
+    }
 }
 
 void CalendarDialogView::SetCalendarPaintProperties(
@@ -975,7 +1029,10 @@ void CalendarDialogView::SetCalendarPaintProperties(
     auto fontSizeScale = pipelineContext->GetFontScale();
     Dimension defaultDayRadius;
     auto fontSize = theme->GetCalendarDayFontSize();
-    if (fontSizeScale < theme->GetCalendarPickerLargeScale() || CheckOrientationChange()) {
+    const bool skipDialogDayGridAging = themeNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
+        SkipCalendarPickerDayGridAgingAdapt(pipelineContext.GetRawPtr());
+    if (skipDialogDayGridAging ||
+        fontSizeScale < theme->GetCalendarPickerLargeScale() || CheckOrientationChange()) {
         ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, DayHeight, theme->GetCalendarPickerDayWidthOrHeight());
         ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, DayWidth, theme->GetCalendarPickerDayWidthOrHeight());
         ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, DayFontSize, fontSize);
@@ -1090,9 +1147,9 @@ void CalendarDialogView::UpdateBackgroundStyle(const RefPtr<RenderContext>& rend
         dialogProperties.backgroundBlurStyle.value_or(calendarTheme->GetCalendarPickerDialogBlurStyle()));
     if (dialogProperties.blurStyleOption.has_value() && contentRenderContext->GetBackgroundEffect().has_value()) {
         contentRenderContext->UpdateBackgroundEffect(std::nullopt);
+    } else {
+        ApplyBlurStyleColorModeForApi26(dialogNode, styleOption);
     }
-
-    ApplyBlurStyleColorModeForApi26(dialogNode, styleOption);
 
     renderContext->UpdateBackBlurStyle(styleOption);
     if (dialogProperties.effectOption.has_value()) {
@@ -1201,7 +1258,11 @@ void CalendarDialogView::UpdatePaintProperties(
     auto fontSizeScale = pipelineContext->GetFontScale();
     Dimension defaultDayRadius;
     auto fontSize = theme->GetCalendarDayFontSize();
-    if (fontSizeScale < theme->GetCalendarPickerLargeScale() || CheckOrientationChange()) {
+    const bool skipDialogDayGridAging =
+        monthFrameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
+        SkipCalendarPickerDayGridAgingAdapt(pipelineContext);
+    if (skipDialogDayGridAging ||
+        fontSizeScale < theme->GetCalendarPickerLargeScale() || CheckOrientationChange()) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(
             CalendarPaintProperty, DayHeight, theme->GetCalendarPickerDayWidthOrHeight(), monthFrameNode);
         ACE_UPDATE_NODE_PAINT_PROPERTY(
@@ -1260,9 +1321,12 @@ void CalendarDialogView::UpdateButtons(
     if (fontSizeScale < calendarTheme->GetCalendarPickerLargeScale() || CheckOrientationChange()) {
         textLayoutProperty->UpdateFontSize(fontSize);
     } else {
-        fontSizeScale = fontSizeScale > calendarTheme->GetCalendarPickerLargeScale()
-                            ? calendarTheme->GetCalendarPickerLargeScale()
-                            : fontSizeScale;
+        const bool skipDialogDayGridAging =
+            buttonNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
+            SkipCalendarPickerDayGridAgingAdapt(pipelineContext.GetRawPtr());
+        auto maxTextScale = skipDialogDayGridAging ?
+            CALENDAR_PICKER_TEXT_MAX_SCALE : calendarTheme->GetCalendarPickerLargeScale();
+        fontSizeScale = fontSizeScale > maxTextScale ? maxTextScale : fontSizeScale;
         textLayoutProperty->UpdateFontSize(fontSize * fontSizeScale);
     }
 
@@ -1346,14 +1410,29 @@ bool CalendarDialogView::ReportChangeEvent(int32_t nodeId, const std::string& co
 }
 
 void CalendarDialogView::UpdateTextLayoutProperty(const RefPtr<TextLayoutProperty>& textLayoutProperty,
-    RefPtr<CalendarTheme>& theme)
+    RefPtr<CalendarTheme>& theme, const RefPtr<FrameNode>& titleNode)
 {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_VOID(titleNode);
     textLayoutProperty->UpdateContent(u"");
     MarginProperty textMargin;
     textMargin.left = CalcLength(theme->GetCalendarTitleTextPadding());
     textMargin.right = CalcLength(theme->GetCalendarTitleTextPadding());
     textLayoutProperty->UpdateMargin(textMargin);
-    textLayoutProperty->UpdateFontSize(theme->GetCalendarTitleFontSize());
+    auto fontSizeScale = pipeline->GetFontScale();
+    auto fontSize = theme->GetCalendarTitleFontSize();
+    if (fontSizeScale < theme->GetCalendarPickerLargeScale() || CheckOrientationChange()) {
+        textLayoutProperty->UpdateFontSize(fontSize);
+    } else {
+        const bool skipDialogDayGridAging =
+            titleNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
+            SkipCalendarPickerDayGridAgingAdapt(pipeline.GetRawPtr());
+        auto maxTextScale = skipDialogDayGridAging ?
+            CALENDAR_PICKER_TEXT_MAX_SCALE : theme->GetCalendarPickerLargeScale();
+        fontSizeScale = fontSizeScale > maxTextScale ? maxTextScale : fontSizeScale;
+        textLayoutProperty->UpdateFontSize(fontSize * fontSizeScale);
+    }
     textLayoutProperty->UpdateTextColor(theme->GetCalendarTitleFontColor());
     textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
     textLayoutProperty->UpdateMaxLines(1);

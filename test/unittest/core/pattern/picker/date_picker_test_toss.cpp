@@ -16,6 +16,7 @@
 #include "gtest/gtest.h"
 #define private public
 #define protected public
+#include "core/components/button/button_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/picker/datepicker_column_pattern.h"
 #include "core/components_ng/pattern/picker_utils/toss_animation_controller.h"

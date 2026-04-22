@@ -23,8 +23,6 @@
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/event/event_hub.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_accessibility_property.h"
@@ -32,10 +30,17 @@
 #include "core/components_ng/pattern/picker/datepicker_event_hub.h"
 #include "core/components_ng/pattern/picker/datepicker_layout_property.h"
 #include "core/components_ng/pattern/picker/datepicker_row_layout_property.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
+#include "core/components_ng/pattern/picker/datepicker_pattern_fwd.h"
+
+namespace OHOS::Ace {
+class PickerTheme;
+class DialogTheme;
+}
 
 namespace OHOS::Ace::NG {
+using OHOS::Ace::PickerTheme;
+using OHOS::Ace::DialogTheme;
+
 class InspectorFilter;
 namespace {
 const Dimension FOCUS_PAINT_WIDTH = 2.0_vp;
@@ -67,10 +72,7 @@ public:
         return true;
     }
 
-    RefPtr<EventHub> CreateEventHub() override
-    {
-        return MakeRefPtr<DatePickerEventHub>();
-    }
+    RefPtr<EventHub> CreateEventHub() override;
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {

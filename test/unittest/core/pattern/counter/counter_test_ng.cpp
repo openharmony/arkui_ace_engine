@@ -26,6 +26,7 @@
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
+#include "core/accessibility/accessibility_manager.h"
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -36,6 +37,7 @@
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "frameworks/core/components_ng/pattern/text/text_pattern.h"
 #include "frameworks/core/interfaces/arkoala/arkoala_api.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 using namespace testing;
 using namespace testing::ext;

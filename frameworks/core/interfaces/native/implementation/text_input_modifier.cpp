@@ -1336,10 +1336,10 @@ const GENERATED_ArkUITextInputModifier* GetTextInputModifier()
         TextInputAttributeModifier::SetSelectedDragPreviewStyleImpl,
         TextInputAttributeModifier::SetTextDirectionImpl,
         TextInputAttributeModifier::SetVoiceButtonImpl,
+        TextInputAttributeModifier::SetOrphanCharOptimizationImpl,
         TextInputAttributeModifier::SetInputFilterImpl,
         TextInputAttributeModifier::SetCustomKeyboardImpl,
         TextInputAttributeModifier::SetShowCounterImpl,
-        TextInputAttributeModifier::SetOrphanCharOptimizationImpl,
     };
     return &ArkUITextInputModifierImpl;
 }

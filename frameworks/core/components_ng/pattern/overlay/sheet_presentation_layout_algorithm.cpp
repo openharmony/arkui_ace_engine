@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
+#include "core/components/common/properties/placement.h"
 
 namespace OHOS::Ace::NG {
 namespace {

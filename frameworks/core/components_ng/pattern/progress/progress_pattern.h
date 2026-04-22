@@ -25,6 +25,7 @@
 #include "core/components/common/properties/shadow.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
+#include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/progress/progress_accessibility_property.h"
 #include "core/components_ng/pattern/progress/progress_layout_algorithm.h"

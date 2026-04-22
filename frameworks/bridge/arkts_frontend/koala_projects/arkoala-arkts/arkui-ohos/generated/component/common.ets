@@ -16,10 +16,10 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-// instuctive change begin
+// instructive change begin
 // no need import the CustomSpan
 import { hookBaseEventGetModifierKeyState, hookTouchEventGetModifierKeyState, hookDragEventGetSummary, hookDragEventStartDataLoading, hookDragEventSetDataLoadParams, hookEnableInternalDropAnimation, hookDragEventGetModifierKeyState, extractors, hookKeyEventGetModifierKeyState, DrawModifier, GestureModifier, GestureType, WrappedBuilder, GestureControl, hookId, hookStateStyleImpl, hookGesture, hookPriorityGesture, hookParallelGesture, hookGestureModifier, hookCustomPropertyImpl, hookDrawModifier, hookAllowDrop, hookDragPreviewOptions, CustomStyles, initializers, ContentModifier, hookCommonMethodAttributeModifier, AttributeModifier, AttributeUpdater, hookCommonShapeMethodAttributeModifier, hookScrollableCommonMethodAttributeModifier } from '#handwritten'
-// instuctive change end
+// instructive change end
 import { SerializerBase, DeserializerBase, Finalizable, RuntimeType, toPeerPtr, KPointer, MaterializedBase, MaterializedBaseTag, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, resourceFinalizerRegister } from '@koalaui/interop'
 import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
 import { ArkUIGeneratedNativeModule } from '#components'
@@ -115,53 +115,129 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    public target: EventTarget
-    public timestamp: int64
-    public source: SourceType
-    public axisHorizontal?: double | undefined
-    public axisVertical?: double | undefined
-    public pressure: double
-    public tiltX: double
-    public tiltY: double
-    public rollAngle?: double | undefined
-    public sourceTool: SourceTool
-    public getModifierKeyState?: ModifierKeyStateGetter | undefined
-    public deviceId?: int32 | undefined
-    public targetDisplayId?: int32 | undefined
-    public axisPinch?: double | undefined
+    // instructive change begin
+    get target(): EventTarget {
+        return this.getTarget()
+    }
+    set target(target: EventTarget) {
+        this.setTarget(target)
+    }
+    get timestamp(): int64 {
+        return this.getTimestamp()
+    }
+    set timestamp(timestamp: int64) {
+        this.setTimestamp(timestamp)
+    }
+    get source(): SourceType {
+        return this.getSource()
+    }
+    set source(source: SourceType) {
+        this.setSource(source)
+    }
+    get axisHorizontal(): double | undefined {
+        return this.getAxisHorizontal()
+    }
+    set axisHorizontal(axisHorizontal: double | undefined) {
+        this.setAxisHorizontal(axisHorizontal)
+    }
+    get axisVertical(): double | undefined {
+        return this.getAxisVertical()
+    }
+    set axisVertical(axisVertical: double | undefined) {
+        this.setAxisVertical(axisVertical)
+    }
+    get pressure(): double {
+        return this.getPressure()
+    }
+    set pressure(pressure: double) {
+        this.setPressure(pressure)
+    }
+    get tiltX(): double {
+        return this.getTiltX()
+    }
+    set tiltX(tiltX: double) {
+        this.setTiltX(tiltX)
+    }
+    get tiltY(): double {
+        return this.getTiltY()
+    }
+    set tiltY(tiltY: double) {
+        this.setTiltY(tiltY)
+    }
+    get rollAngle(): double | undefined {
+        return this.getRollAngle()
+    }
+    set rollAngle(rollAngle: double | undefined) {
+        this.setRollAngle(rollAngle)
+    }
+    get sourceTool(): SourceTool {
+        return this.getSourceTool()
+    }
+    set sourceTool(sourceTool: SourceTool) {
+        this.setSourceTool(sourceTool)
+    }
+    get getModifierKeyState(): ModifierKeyStateGetter | undefined {
+        return this.getGetModifierKeyState()
+    }
+    set getModifierKeyState(getModifierKeyState: ModifierKeyStateGetter | undefined) {
+        this.setGetModifierKeyState(getModifierKeyState)
+    }
+    get deviceId(): int32 | undefined {
+        return this.getDeviceId()
+    }
+    set deviceId(deviceId: int32 | undefined) {
+        this.setDeviceId(deviceId)
+    }
+    get targetDisplayId(): int32 | undefined {
+        return this.getTargetDisplayId()
+    }
+    set targetDisplayId(targetDisplayId: int32 | undefined) {
+        this.setTargetDisplayId(targetDisplayId)
+    }
+    get axisPinch(): double | undefined {
+        return this.getAxisPinch()
+    }
+    set axisPinch(axisPinch: double | undefined) {
+        this.setAxisPinch(axisPinch)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, BaseEventInternal.getFinalizer())
-        this.target = this.getTarget()
-        this.timestamp = this.getTimestamp()
-        this.source = this.getSource()
-        this.axisHorizontal = this.getAxisHorizontal()
-        this.axisVertical = this.getAxisVertical()
-        this.pressure = this.getPressure()
-        this.tiltX = this.getTiltX()
-        this.tiltY = this.getTiltY()
-        this.rollAngle = this.getRollAngle()
-        this.sourceTool = this.getSourceTool()
-        this.getModifierKeyState = this.getGetModifierKeyState()
-        this.deviceId = this.getDeviceId()
-        this.targetDisplayId = this.getTargetDisplayId()
-        this.axisPinch = this.getAxisPinch()
+        // instructive change begin
+        // this.target = this.getTarget()
+        // this.timestamp = this.getTimestamp()
+        // this.source = this.getSource()
+        // this.axisHorizontal = this.getAxisHorizontal()
+        // this.axisVertical = this.getAxisVertical()
+        // this.pressure = this.getPressure()
+        // this.tiltX = this.getTiltX()
+        // this.tiltY = this.getTiltY()
+        // this.rollAngle = this.getRollAngle()
+        // this.sourceTool = this.getSourceTool()
+        // this.getModifierKeyState = this.getGetModifierKeyState()
+        // this.deviceId = this.getDeviceId()
+        // this.targetDisplayId = this.getTargetDisplayId()
+        // this.axisPinch = this.getAxisPinch()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, BaseEventInternal.construct())
-        this.target = this.getTarget()
-        this.timestamp = this.getTimestamp()
-        this.source = this.getSource()
-        this.axisHorizontal = this.getAxisHorizontal()
-        this.axisVertical = this.getAxisVertical()
-        this.pressure = this.getPressure()
-        this.tiltX = this.getTiltX()
-        this.tiltY = this.getTiltY()
-        this.rollAngle = this.getRollAngle()
-        this.sourceTool = this.getSourceTool()
-        this.getModifierKeyState = this.getGetModifierKeyState()
-        this.deviceId = this.getDeviceId()
-        this.targetDisplayId = this.getTargetDisplayId()
-        this.axisPinch = this.getAxisPinch()
+        // instructive change begin
+        // this.target = this.getTarget()
+        // this.timestamp = this.getTimestamp()
+        // this.source = this.getSource()
+        // this.axisHorizontal = this.getAxisHorizontal()
+        // this.axisVertical = this.getAxisVertical()
+        // this.pressure = this.getPressure()
+        // this.tiltX = this.getTiltX()
+        // this.tiltY = this.getTiltY()
+        // this.rollAngle = this.getRollAngle()
+        // this.sourceTool = this.getSourceTool()
+        // this.getModifierKeyState = this.getGetModifierKeyState()
+        // this.deviceId = this.getDeviceId()
+        // this.targetDisplayId = this.getTargetDisplayId()
+        // this.axisPinch = this.getAxisPinch()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._BaseEvent_construct()
@@ -552,14 +628,25 @@ export class DismissContentCoverActionInternal implements MaterializedBase,Dismi
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    public reason: DismissReason
+    // instructive change begin
+    get reason(): DismissReason {
+        return this.getReason()
+    }
+    set reason(reason: DismissReason) {
+        this.setReason(reason)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, DismissContentCoverActionInternal.getFinalizer())
-        this.reason = this.getReason()
+        // instructive change begin
+        // this.reason = this.getReason()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, DismissContentCoverActionInternal.construct())
-        this.reason = this.getReason()
+        // instructive change begin
+        // this.reason = this.getReason()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._DismissContentCoverAction_construct()
@@ -603,14 +690,25 @@ export class DismissPopupActionInternal implements MaterializedBase,DismissPopup
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    public reason: DismissReason
+    // instructive change begin
+    get reason(): DismissReason {
+        return this.getReason()
+    }
+    set reason(reason: DismissReason) {
+        this.setReason(reason)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, DismissPopupActionInternal.getFinalizer())
-        this.reason = this.getReason()
+        // instructive change begin
+        // this.reason = this.getReason()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, DismissPopupActionInternal.construct())
-        this.reason = this.getReason()
+        // instructive change begin
+        // this.reason = this.getReason()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._DismissPopupAction_construct()
@@ -654,14 +752,25 @@ export class DismissSheetActionInternal implements MaterializedBase,DismissSheet
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    public reason: DismissReason
+    // instructive change begin
+    get reason(): DismissReason {
+        return this.getReason()
+    }
+    set reason(reason: DismissReason) {
+        this.setReason(reason)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, DismissSheetActionInternal.getFinalizer())
-        this.reason = this.getReason()
+        // instructive change begin
+        // this.reason = this.getReason()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, DismissSheetActionInternal.construct())
-        this.reason = this.getReason()
+        // instructive change begin
+        // this.reason = this.getReason()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._DismissSheetAction_construct()
@@ -729,22 +838,48 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    public dragBehavior: DragBehavior
-    public useCustomDropAnimation: boolean
-    public autoHideComponentUniqueIds?: int32 | Array<int32> | undefined
-    public getModifierKeyState?: ModifierKeyStateGetter | undefined
+    // instructive change begin
+    get dragBehavior(): DragBehavior {
+        return this.getDragBehavior()
+    }
+    set dragBehavior(dragBehavior: DragBehavior) {
+        this.setDragBehavior(dragBehavior)
+    }
+    get useCustomDropAnimation(): boolean {
+        return this.getUseCustomDropAnimation()
+    }
+    set useCustomDropAnimation(useCustomDropAnimation: boolean) {
+        this.setUseCustomDropAnimation(useCustomDropAnimation)
+    }
+    get autoHideComponentUniqueIds(): int32 | Array<int32> | undefined {
+        return this.getAutoHideComponentUniqueIds()
+    }
+    set autoHideComponentUniqueIds(autoHideComponentUniqueIds: int32 | Array<int32> | undefined) {
+        this.setAutoHideComponentUniqueIds(autoHideComponentUniqueIds)
+    }
+    get getModifierKeyState(): ModifierKeyStateGetter | undefined {
+        return this.getGetModifierKeyState()
+    }
+    set getModifierKeyState(getModifierKeyState: ModifierKeyStateGetter | undefined) {
+        this.setGetModifierKeyState(getModifierKeyState)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, DragEventInternal.getFinalizer())
-        this.dragBehavior = this.getDragBehavior()
-        this.useCustomDropAnimation = this.getUseCustomDropAnimation()
-        this.autoHideComponentUniqueIds = this.getAutoHideComponentUniqueIds()
-        this.getModifierKeyState = this.getGetModifierKeyState()
+        // instructive change begin
+        // this.dragBehavior = this.getDragBehavior()
+        // this.useCustomDropAnimation = this.getUseCustomDropAnimation()
+        // this.autoHideComponentUniqueIds = this.getAutoHideComponentUniqueIds()
+        // this.getModifierKeyState = this.getGetModifierKeyState()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, DragEventInternal.construct())
-        this.dragBehavior = this.getDragBehavior()
-        this.useCustomDropAnimation = this.getUseCustomDropAnimation()
-        this.getModifierKeyState = this.getGetModifierKeyState()
+        // instructive change begin
+        // this.dragBehavior = this.getDragBehavior()
+        // this.useCustomDropAnimation = this.getUseCustomDropAnimation()
+        // this.getModifierKeyState = this.getGetModifierKeyState()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._DragEvent_construct()
@@ -1051,50 +1186,121 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    public type: KeyType
-    public keyCode: int32
-    public keyText: string
-    public keySource: KeySource
-    public deviceId: int32
-    public metaKey: int32
-    public timestamp: int64
-    public intentionCode: IntentionCode
-    public getModifierKeyState?: ModifierKeyStateGetter | undefined
-    public unicode?: int64 | undefined
-    public isNumLockOn?: boolean | undefined
-    public isCapsLockOn?: boolean | undefined
-    public isScrollLockOn?: boolean | undefined
+    // instructive change begin
+    get type(): KeyType {
+        return this.getType()
+    }
+    set type(type: KeyType) {
+        this.setType(type)
+    }
+    get keyCode(): int32 {
+        return this.getKeyCode()
+    }
+    set keyCode(keyCode: int32) {
+        this.setKeyCode(keyCode)
+    }
+    get keyText(): string {
+        return this.getKeyText()
+    }
+    set keyText(keyText: string) {
+        this.setKeyText(keyText)
+    }
+    get keySource(): KeySource {
+        return this.getKeySource()
+    }
+    set keySource(keySource: KeySource) {
+        this.setKeySource(keySource)
+    }
+    get deviceId(): int32 {
+        return this.getDeviceId()
+    }
+    set deviceId(deviceId: int32) {
+        this.setDeviceId(deviceId)
+    }
+    get metaKey(): int32 {
+        return this.getMetaKey()
+    }
+    set metaKey(metaKey: int32) {
+        this.setMetaKey(metaKey)
+    }
+    get timestamp(): int64 {
+        return this.getTimestamp()
+    }
+    set timestamp(timestamp: int64) {
+        this.setTimestamp(timestamp)
+    }
+    get intentionCode(): IntentionCode {
+        return this.getIntentionCode()
+    }
+    set intentionCode(intentionCode: IntentionCode) {
+        this.setIntentionCode(intentionCode)
+    }
+    get getModifierKeyState(): ModifierKeyStateGetter | undefined {
+        return this.getGetModifierKeyState()
+    }
+    set getModifierKeyState(getModifierKeyState: ModifierKeyStateGetter | undefined) {
+        this.setGetModifierKeyState(getModifierKeyState)
+    }
+    get unicode(): int64 | undefined {
+        return this.getUnicode()
+    }
+    set unicode(unicode: int64 | undefined) {
+        this.setUnicode(unicode)
+    }
+    get isNumLockOn(): boolean | undefined {
+        return this.getIsNumLockOn()
+    }
+    set isNumLockOn(isNumLockOn: boolean | undefined) {
+        this.setIsNumLockOn(isNumLockOn)
+    }
+    get isCapsLockOn(): boolean | undefined {
+        return this.getIsCapsLockOn()
+    }
+    set isCapsLockOn(isCapsLockOn: boolean | undefined) {
+        this.setIsCapsLockOn(isCapsLockOn)
+    }
+    get isScrollLockOn(): boolean | undefined {
+        return this.getIsScrollLockOn()
+    }
+    set isScrollLockOn(isScrollLockOn: boolean | undefined) {
+        this.setIsScrollLockOn(isScrollLockOn)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, KeyEventInternal.getFinalizer())
-        this.type = this.getType()
-        this.keyCode = this.getKeyCode()
-        this.keyText = this.getKeyText()
-        this.keySource = this.getKeySource()
-        this.deviceId = this.getDeviceId()
-        this.metaKey = this.getMetaKey()
-        this.timestamp = this.getTimestamp()
-        this.intentionCode = this.getIntentionCode()
-        this.getModifierKeyState = this.getGetModifierKeyState()
-        this.unicode = this.getUnicode()
-        this.isNumLockOn = this.getIsNumLockOn()
-        this.isCapsLockOn = this.getIsCapsLockOn()
-        this.isScrollLockOn = this.getIsScrollLockOn()
+        // instructive change begin
+        // this.type = this.getType()
+        // this.keyCode = this.getKeyCode()
+        // this.keyText = this.getKeyText()
+        // this.keySource = this.getKeySource()
+        // this.deviceId = this.getDeviceId()
+        // this.metaKey = this.getMetaKey()
+        // this.timestamp = this.getTimestamp()
+        // this.intentionCode = this.getIntentionCode()
+        // this.getModifierKeyState = this.getGetModifierKeyState()
+        // this.unicode = this.getUnicode()
+        // this.isNumLockOn = this.getIsNumLockOn()
+        // this.isCapsLockOn = this.getIsCapsLockOn()
+        // this.isScrollLockOn = this.getIsScrollLockOn()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, KeyEventInternal.construct())
-        this.type = this.getType()
-        this.keyCode = this.getKeyCode()
-        this.keyText = this.getKeyText()
-        this.keySource = this.getKeySource()
-        this.deviceId = this.getDeviceId()
-        this.metaKey = this.getMetaKey()
-        this.timestamp = this.getTimestamp()
-        this.intentionCode = this.getIntentionCode()
-        this.getModifierKeyState = this.getGetModifierKeyState()
-        this.unicode = this.getUnicode()
-        this.isNumLockOn = this.getIsNumLockOn()
-        this.isCapsLockOn = this.getIsCapsLockOn()
-        this.isScrollLockOn = this.getIsScrollLockOn()
+        // instructive change begin
+        // this.type = this.getType()
+        // this.keyCode = this.getKeyCode()
+        // this.keyText = this.getKeyText()
+        // this.keySource = this.getKeySource()
+        // this.deviceId = this.getDeviceId()
+        // this.metaKey = this.getMetaKey()
+        // this.timestamp = this.getTimestamp()
+        // this.intentionCode = this.getIntentionCode()
+        // this.getModifierKeyState = this.getGetModifierKeyState()
+        // this.unicode = this.getUnicode()
+        // this.isNumLockOn = this.getIsNumLockOn()
+        // this.isCapsLockOn = this.getIsCapsLockOn()
+        // this.isScrollLockOn = this.getIsScrollLockOn()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._KeyEvent_construct()
@@ -1398,17 +1604,33 @@ export class LayoutableInternal implements MaterializedBase,Layoutable {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    public measureResult: MeasureResult
-    public uniqueId?: int32 | undefined
+    // instructive change begin
+    get measureResult(): MeasureResult {
+        return this.getMeasureResult()
+    }
+    set measureResult(measureResult: MeasureResult) {
+        this.setMeasureResult(measureResult)
+    }
+    get uniqueId(): int32 | undefined {
+        return this.getUniqueId()
+    }
+    set uniqueId(uniqueId: int32 | undefined) {
+        this.setUniqueId(uniqueId)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, LayoutableInternal.getFinalizer())
-        this.measureResult = this.getMeasureResult()
-        this.uniqueId = this.getUniqueId()
+        // instructive change begin
+        // this.measureResult = this.getMeasureResult()
+        // this.uniqueId = this.getUniqueId()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, LayoutableInternal.construct())
-        this.measureResult = this.getMeasureResult()
-        this.uniqueId = this.getUniqueId()
+        // instructive change begin
+        // this.measureResult = this.getMeasureResult()
+        // this.uniqueId = this.getUniqueId()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._Layoutable_construct()
@@ -1599,14 +1821,25 @@ export class MeasurableInternal implements MaterializedBase,Measurable {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    public uniqueId?: int32 | undefined
+    // instructive change begin
+    get uniqueId(): int32 | undefined {
+        return this.getUniqueId()
+    }
+    set uniqueId(uniqueId: int32 | undefined) {
+        this.setUniqueId(uniqueId)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, MeasurableInternal.getFinalizer())
-        this.uniqueId = this.getUniqueId()
+        // instructive change begin
+        // this.uniqueId = this.getUniqueId()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, MeasurableInternal.construct())
-        this.uniqueId = this.getUniqueId()
+        // instructive change begin
+        // this.uniqueId = this.getUniqueId()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._Measurable_construct()
@@ -2677,7 +2910,7 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
     }
 }
 export class ArkCommonMethodPeer extends PeerNode {
-    attributeSet?: CommonMethodModifier;
+    commonMethodAttributeSet?: CommonMethodModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -4757,6 +4990,18 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setLightUpEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setSpatialEffectAttribute(value: SpatialEffectParams | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            SpatialEffectParams_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setSpatialEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setPixelStretchEffectAttribute(value: PixelStretchEffectOptions | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -5619,6 +5864,19 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setBackdropBlur(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOnAreaChange1Attribute(event: AreaChangeCallback, options?: AreaChangeOptions): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(event)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue = options!
+            AreaChangeOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setOnAreaChange1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setSharedTransitionAttribute(id: string | undefined, options?: sharedTransitionOptions): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (id !== undefined) {
@@ -6291,22 +6549,9 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setDebugLine(this.peer.ptr, sourceLine, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnAreaChange1Attribute(event: AreaChangeCallback, options?: AreaChangeOptions): void {
-        const thisSerializer: SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(event)
-        if (options !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const optionsTmpValue = options!
-            AreaChangeOptions_serializer.write(thisSerializer, optionsTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_setOnAreaChange1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
 }
 export class ArkCommonShapeMethodPeer extends ArkCommonMethodPeer {
-    attributeSet?: CommonShapeMethodModifier;
+    commonShapeMethodAttributeSet?: CommonShapeMethodModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -6554,7 +6799,7 @@ export class ArkCommonShapeMethodPeer extends ArkCommonMethodPeer {
     }
 }
 export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
-    attributeSet?: ScrollableCommonMethodModifier;
+    scrollableCommonMethodAttributeSet?: ScrollableCommonMethodModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -7749,6 +7994,7 @@ export interface TipsOptions {
     arrowWidth?: Dimension;
     arrowHeight?: Dimension;
     showAtAnchor?: TipsAnchorType;
+    systemMaterial?: SystemUiMaterial;
 }
 export interface PopupButton {
     value: string;
@@ -7915,6 +8161,21 @@ export class TouchTestInfo {
 export class TouchResult {
     strategy: TouchTestStrategy = initializers.arkui.component.common.TouchResultNS.strategy;
     id?: string | undefined;
+}
+export interface DepthVector3 {
+    x: double;
+    y: double;
+    z: double;
+}
+export interface SpatialPosition {
+    leftTop: DepthVector3;
+    rightTop: DepthVector3;
+    leftBottom: DepthVector3;
+    rightBottom: DepthVector3;
+}
+export interface SpatialEffectParams {
+    position: SpatialPosition;
+    occlusionWeight?: double;
 }
 export interface PixelStretchEffectOptions {
     top?: Length;
@@ -9632,6 +9893,18 @@ export interface CommonMethod {
         }
         throw new Error('Unimplemented method lightUpEffect')
     }
+    spatialEffect(params: SpatialEffectParams | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.spatialEffect(params));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'spatialEffect' can only be set when creating a custom component.")
+            }
+        }
+        throw new Error('Unimplemented method spatialEffect')
+    }
     pixelStretchEffect(value: PixelStretchEffectOptions | undefined): this {
         const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
         if (commonStyle) {
@@ -10304,6 +10577,18 @@ export interface CommonMethod {
         }
         throw new Error('Unimplemented method backdropBlur')
     }
+    onAreaChange(event: AreaChangeCallback, options?: AreaChangeOptions): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onAreaChange(event, options));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'onAreaChange' can only be set when creating a custom component.")
+            }
+        }
+        throw new Error('Unimplemented method onAreaChange')
+    }
     sharedTransition(id: string | undefined, options?: sharedTransitionOptions): this {
         const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
         if (commonStyle) {
@@ -10616,18 +10901,6 @@ export interface CommonMethod {
         }
         throw new Error('Unimplemented method onGestureRecognizerJudgeBegin')
     }
-    onAreaChange(event: AreaChangeCallback, options?: AreaChangeOptions): this {
-        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
-        if (commonStyle) {
-            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.onAreaChange(event, options));
-            return this;
-        } else {
-            if (this.__is_CustomComponent__Internal()) {
-                throw new Error("Common method 'onAreaChange' can only be set when creating a custom component.")
-            }
-        }
-        throw new Error('Unimplemented method onAreaChange')
-    }
     applyAttributesFinish(): void {
     }
 }
@@ -10730,6 +11003,10 @@ export interface RectResult {
     width: double;
     height: double;
 }
+export interface AreaChangeOptions {
+    expectedUpdateInterval?: int32;
+}
+export type AreaChangeCallback = (oldValue: Area, newValue: Area) => void;
 export interface CaretOffset {
     index: int32;
     x: int32;
@@ -10928,10 +11205,6 @@ export interface InputEventInterceptResult {
 export interface InputEventMonitor {
 }
 export type InputEventListener = (event: RawInputEventWrapper) => InputEventInterceptResult;
-export interface AreaChangeOptions {
-    expectedUpdateInterval?: int32;
-}
-export type AreaChangeCallback = (oldValue: Area, newValue: Area) => void;
 export class ArkCommonMethodComponent extends ComponentBase implements CommonMethod {
     getPeer(): ArkCommonMethodPeer {
         return (this.peer as ArkCommonMethodPeer)
@@ -11628,6 +11901,11 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         this.getPeer()?.setLightUpEffectAttribute(value_casted)
         return this
     }
+    public spatialEffect(params: SpatialEffectParams | undefined): this {
+        const params_casted = params as (SpatialEffectParams | undefined)
+        this.getPeer()?.setSpatialEffectAttribute(params_casted)
+        return this
+    }
     public pixelStretchEffect(value: PixelStretchEffectOptions | undefined): this {
         const value_casted = value as (PixelStretchEffectOptions | undefined)
         this.getPeer()?.setPixelStretchEffectAttribute(value_casted)
@@ -11925,6 +12203,12 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         this.getPeer()?.setBackdropBlurAttribute(radius_casted, options_casted, sysOptions_casted)
         return this
     }
+    public onAreaChange(event: AreaChangeCallback, options?: AreaChangeOptions): this {
+        const event_casted = event as (AreaChangeCallback)
+        const options_casted = options as (AreaChangeOptions | undefined)
+        this.getPeer()?.setOnAreaChange1Attribute(event_casted, options_casted)
+        return this
+    }
     public sharedTransition(id: string | undefined, options?: sharedTransitionOptions): this {
         const id_casted = id as (string | undefined)
         const options_casted = options as (sharedTransitionOptions | undefined)
@@ -12087,12 +12371,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
             this.getPeer()?.setDebugLineAttribute(sourceLine_casted, moduleName_casted)
             return this
         }
-        return this
-    }
-    public onAreaChange(event: AreaChangeCallback, options?: AreaChangeOptions): this {
-        const event_casted = event as (AreaChangeCallback)
-        const options_casted = options as (AreaChangeOptions | undefined)
-        this.getPeer()?.setOnAreaChange1Attribute(event_casted, options_casted)
         return this
     }
     public attributeModifier(value: AttributeModifier<CommonMethod> | undefined): this {
@@ -12336,9 +12614,6 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
     public applyOptionsFinish(traceName: string): void {
         super.applyOptionsFinish(traceName)
     }
-}
-export function postCardAction(component: Object, action: Object): void {
-    GlobalScope.postCardAction(component, action)
 }
 export function $r(value: string, params: Array<RecordData>): global_resource_Resource {
     return GlobalScope.$r(value, params)
@@ -18224,6 +18499,71 @@ export class DividerStyle_serializer {
         return value
     }
 }
+export class DepthVector3_serializer {
+    public static write(buffer: SerializerBase, value: DepthVector3): void {
+        let valueSerializer: SerializerBase = buffer
+        valueSerializer.writeFloat64(value.x)
+        valueSerializer.writeFloat64(value.y)
+        valueSerializer.writeFloat64(value.z)
+    }
+    public static read(buffer: DeserializerBase): DepthVector3 {
+        let valueDeserializer: DeserializerBase = buffer
+        const xTmpResult: double = valueDeserializer.readFloat64()
+        const yTmpResult: double = valueDeserializer.readFloat64()
+        const zTmpResult: double = valueDeserializer.readFloat64()
+        let value: DepthVector3 = ({x: xTmpResult, y: yTmpResult, z: zTmpResult} as DepthVector3)
+        return value
+    }
+}
+export class SpatialPosition_serializer {
+    public static write(buffer: SerializerBase, value: SpatialPosition): void {
+        let valueSerializer: SerializerBase = buffer
+        DepthVector3_serializer.write(valueSerializer, value.leftTop)
+        DepthVector3_serializer.write(valueSerializer, value.rightTop)
+        DepthVector3_serializer.write(valueSerializer, value.leftBottom)
+        DepthVector3_serializer.write(valueSerializer, value.rightBottom)
+    }
+    public static read(buffer: DeserializerBase): SpatialPosition {
+        let valueDeserializer: DeserializerBase = buffer
+        const leftTopTmpResult: DepthVector3 = DepthVector3_serializer.read(valueDeserializer)
+        const rightTopTmpResult: DepthVector3 = DepthVector3_serializer.read(valueDeserializer)
+        const leftBottomTmpResult: DepthVector3 = DepthVector3_serializer.read(valueDeserializer)
+        const rightBottomTmpResult: DepthVector3 = DepthVector3_serializer.read(valueDeserializer)
+        let value: SpatialPosition = ({leftTop: leftTopTmpResult, rightTop: rightTopTmpResult, leftBottom: leftBottomTmpResult, rightBottom: rightBottomTmpResult} as SpatialPosition)
+        return value
+    }
+}
+export class SpatialEffectParams_serializer {
+    public static write(buffer: SerializerBase, value: SpatialEffectParams): void {
+        let valueSerializer: SerializerBase = buffer
+        valueSerializer.writeInt8(RuntimeType.OBJECT)
+        SpatialPosition_serializer.write(valueSerializer, value.position)
+        const valueHolderForOcclusionWeight = value.occlusionWeight
+        if (valueHolderForOcclusionWeight !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOcclusionWeightTmpValue = valueHolderForOcclusionWeight!
+            valueSerializer.writeFloat64(valueHolderForOcclusionWeightTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): SpatialEffectParams {
+        let valueDeserializer: DeserializerBase = buffer
+        const positionTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let positionTmpResult: SpatialPosition = { leftTop: { x: 0.0, y: 0.0, z: 0.0 }, rightTop: { x: 0.0, y: 0.0, z: 0.0 }, leftBottom: { x: 0.0, y: 0.0, z: 0.0 }, rightBottom: { x: 0.0, y: 0.0, z: 0.0 } }
+        if ((positionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            positionTmpResult = SpatialPosition_serializer.read(valueDeserializer)
+        }
+        const occlusionWeightTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let occlusionWeightTmpBuf: double | undefined = undefined
+        if ((occlusionWeightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            occlusionWeightTmpBuf = valueDeserializer.readFloat64()
+        }
+        const occlusionWeightTmpResult: double | undefined = occlusionWeightTmpBuf
+        let value: SpatialEffectParams = ({position: positionTmpResult, occlusionWeight: occlusionWeightTmpResult} as SpatialEffectParams)
+        return value
+    }
+}
 export class PixelStretchEffectOptions_serializer {
     public static write(buffer: SerializerBase, value: PixelStretchEffectOptions): void {
         let valueSerializer: SerializerBase = buffer
@@ -19085,6 +19425,14 @@ export class TipsOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForSystemMaterial = value.systemMaterial
+        if (valueHolderForSystemMaterial !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSystemMaterialTmpValue = valueHolderForSystemMaterial!
+            uiMaterial_Material_serializer.write(valueSerializer, valueHolderForSystemMaterialTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): TipsOptions {
         let valueDeserializer: DeserializerBase = buffer
@@ -19164,7 +19512,13 @@ export class TipsOptions_serializer {
             showAtAnchorTmpBuf = TipsAnchorType.fromValue(valueDeserializer.readInt32())
         }
         const showAtAnchorTmpResult: TipsAnchorType | undefined = showAtAnchorTmpBuf
-        let value: TipsOptions = ({appearingTime: appearingTimeTmpResult, disappearingTime: disappearingTimeTmpResult, appearingTimeWithContinuousOperation: appearingTimeWithContinuousOperationTmpResult, disappearingTimeWithContinuousOperation: disappearingTimeWithContinuousOperationTmpResult, enableArrow: enableArrowTmpResult, arrowPointPosition: arrowPointPositionTmpResult, arrowWidth: arrowWidthTmpResult, arrowHeight: arrowHeightTmpResult, showAtAnchor: showAtAnchorTmpResult} as TipsOptions)
+        const systemMaterialTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let systemMaterialTmpBuf: SystemUiMaterial | undefined = undefined
+        if ((systemMaterialTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            systemMaterialTmpBuf = (uiMaterial_Material_serializer.read(valueDeserializer) as uiMaterial.Material)
+        }
+        const systemMaterialTmpResult: SystemUiMaterial | undefined = systemMaterialTmpBuf
+        let value: TipsOptions = ({appearingTime: appearingTimeTmpResult, disappearingTime: disappearingTimeTmpResult, appearingTimeWithContinuousOperation: appearingTimeWithContinuousOperationTmpResult, disappearingTimeWithContinuousOperation: disappearingTimeWithContinuousOperationTmpResult, enableArrow: enableArrowTmpResult, arrowPointPosition: arrowPointPositionTmpResult, arrowWidth: arrowWidthTmpResult, arrowHeight: arrowHeightTmpResult, showAtAnchor: showAtAnchorTmpResult, systemMaterial: systemMaterialTmpResult} as TipsOptions)
         return value
     }
 }
@@ -25760,38 +26114,89 @@ export interface AccessibilityHoverEvent extends BaseEvent {
     globalDisplayY?: double | undefined
 }
 export class AccessibilityHoverEventInternal extends BaseEventInternal implements MaterializedBase,AccessibilityHoverEvent {
-    public type: AccessibilityHoverType
-    public x: double
-    public y: double
-    public displayX: double
-    public displayY: double
-    public windowX: double
-    public windowY: double
-    public globalDisplayX?: double | undefined
-    public globalDisplayY?: double | undefined
+    // instructive change begin
+    get type(): AccessibilityHoverType {
+        return this.getType()
+    }
+    set type(type: AccessibilityHoverType) {
+        this.setType(type)
+    }
+    get x(): double {
+        return this.getX()
+    }
+    set x(x: double) {
+        this.setX(x)
+    }
+    get y(): double {
+        return this.getY()
+    }
+    set y(y: double) {
+        this.setY(y)
+    }
+    get displayX(): double {
+        return this.getDisplayX()
+    }
+    set displayX(displayX: double) {
+        this.setDisplayX(displayX)
+    }
+    get displayY(): double {
+        return this.getDisplayY()
+    }
+    set displayY(displayY: double) {
+        this.setDisplayY(displayY)
+    }
+    get windowX(): double {
+        return this.getWindowX()
+    }
+    set windowX(windowX: double) {
+        this.setWindowX(windowX)
+    }
+    get windowY(): double {
+        return this.getWindowY()
+    }
+    set windowY(windowY: double) {
+        this.setWindowY(windowY)
+    }
+    get globalDisplayX(): double | undefined {
+        return this.getGlobalDisplayX()
+    }
+    set globalDisplayX(globalDisplayX: double | undefined) {
+        this.setGlobalDisplayX(globalDisplayX)
+    }
+    get globalDisplayY(): double | undefined {
+        return this.getGlobalDisplayY()
+    }
+    set globalDisplayY(globalDisplayY: double | undefined) {
+        this.setGlobalDisplayY(globalDisplayY)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         super(tag, peerPtr)
-        this.type = this.getType()
-        this.x = this.getX()
-        this.y = this.getY()
-        this.displayX = this.getDisplayX()
-        this.displayY = this.getDisplayY()
-        this.windowX = this.getWindowX()
-        this.windowY = this.getWindowY()
-        this.globalDisplayX = this.getGlobalDisplayX()
-        this.globalDisplayY = this.getGlobalDisplayY()
+        // instructive change begin
+        // this.type = this.getType()
+        // this.x = this.getX()
+        // this.y = this.getY()
+        // this.displayX = this.getDisplayX()
+        // this.displayY = this.getDisplayY()
+        // this.windowX = this.getWindowX()
+        // this.windowY = this.getWindowY()
+        // this.globalDisplayX = this.getGlobalDisplayX()
+        // this.globalDisplayY = this.getGlobalDisplayY()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, AccessibilityHoverEventInternal.construct())
-        this.type = this.getType()
-        this.x = this.getX()
-        this.y = this.getY()
-        this.displayX = this.getDisplayX()
-        this.displayY = this.getDisplayY()
-        this.windowX = this.getWindowX()
-        this.windowY = this.getWindowY()
-        this.globalDisplayX = this.getGlobalDisplayX()
-        this.globalDisplayY = this.getGlobalDisplayY()
+        // instructive change begin
+        // this.type = this.getType()
+        // this.x = this.getX()
+        // this.y = this.getY()
+        // this.displayX = this.getDisplayX()
+        // this.displayY = this.getDisplayY()
+        // this.windowX = this.getWindowX()
+        // this.windowY = this.getWindowY()
+        // this.globalDisplayX = this.getGlobalDisplayX()
+        // this.globalDisplayY = this.getGlobalDisplayY()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._AccessibilityHoverEvent_construct()
@@ -25991,41 +26396,97 @@ export interface AxisEvent extends BaseEvent {
     hasAxis(axisType: AxisType): boolean
 }
 export class AxisEventInternal extends BaseEventInternal implements MaterializedBase,AxisEvent {
-    public action: AxisAction
-    public displayX: double
-    public displayY: double
-    public windowX: double
-    public windowY: double
-    public x: double
-    public y: double
-    public scrollStep?: int32 | undefined
-    public globalDisplayX?: double | undefined
-    public globalDisplayY?: double | undefined
+    // instructive change begin
+    get action(): AxisAction {
+        return this.getAction()
+    }
+    set action(action: AxisAction) {
+        this.setAction(action)
+    }
+    get displayX(): double {
+        return this.getDisplayX()
+    }
+    set displayX(displayX: double) {
+        this.setDisplayX(displayX)
+    }
+    get displayY(): double {
+        return this.getDisplayY()
+    }
+    set displayY(displayY: double) {
+        this.setDisplayY(displayY)
+    }
+    get windowX(): double {
+        return this.getWindowX()
+    }
+    set windowX(windowX: double) {
+        this.setWindowX(windowX)
+    }
+    get windowY(): double {
+        return this.getWindowY()
+    }
+    set windowY(windowY: double) {
+        this.setWindowY(windowY)
+    }
+    get x(): double {
+        return this.getX()
+    }
+    set x(x: double) {
+        this.setX(x)
+    }
+    get y(): double {
+        return this.getY()
+    }
+    set y(y: double) {
+        this.setY(y)
+    }
+    get scrollStep(): int32 | undefined {
+        return this.getScrollStep()
+    }
+    set scrollStep(scrollStep: int32 | undefined) {
+        this.setScrollStep(scrollStep)
+    }
+    get globalDisplayX(): double | undefined {
+        return this.getGlobalDisplayX()
+    }
+    set globalDisplayX(globalDisplayX: double | undefined) {
+        this.setGlobalDisplayX(globalDisplayX)
+    }
+    get globalDisplayY(): double | undefined {
+        return this.getGlobalDisplayY()
+    }
+    set globalDisplayY(globalDisplayY: double | undefined) {
+        this.setGlobalDisplayY(globalDisplayY)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         super(tag, peerPtr)
-        this.action = this.getAction()
-        this.displayX = this.getDisplayX()
-        this.displayY = this.getDisplayY()
-        this.windowX = this.getWindowX()
-        this.windowY = this.getWindowY()
-        this.x = this.getX()
-        this.y = this.getY()
-        this.scrollStep = this.getScrollStep()
-        this.globalDisplayX = this.getGlobalDisplayX()
-        this.globalDisplayY = this.getGlobalDisplayY()
+        // instructive change begin
+        // this.action = this.getAction()
+        // this.displayX = this.getDisplayX()
+        // this.displayY = this.getDisplayY()
+        // this.windowX = this.getWindowX()
+        // this.windowY = this.getWindowY()
+        // this.x = this.getX()
+        // this.y = this.getY()
+        // this.scrollStep = this.getScrollStep()
+        // this.globalDisplayX = this.getGlobalDisplayX()
+        // this.globalDisplayY = this.getGlobalDisplayY()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, AxisEventInternal.construct())
-        this.action = this.getAction()
-        this.displayX = this.getDisplayX()
-        this.displayY = this.getDisplayY()
-        this.windowX = this.getWindowX()
-        this.windowY = this.getWindowY()
-        this.x = this.getX()
-        this.y = this.getY()
-        this.scrollStep = this.getScrollStep()
-        this.globalDisplayX = this.getGlobalDisplayX()
-        this.globalDisplayY = this.getGlobalDisplayY()
+        // instructive change begin
+        // this.action = this.getAction()
+        // this.displayX = this.getDisplayX()
+        // this.displayY = this.getDisplayY()
+        // this.windowX = this.getWindowX()
+        // this.windowY = this.getWindowY()
+        // this.x = this.getX()
+        // this.y = this.getY()
+        // this.scrollStep = this.getScrollStep()
+        // this.globalDisplayX = this.getGlobalDisplayX()
+        // this.globalDisplayY = this.getGlobalDisplayY()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._AxisEvent_construct()
@@ -26288,38 +26749,89 @@ export interface ClickEvent extends BaseEvent {
     preventDefault(): void
 }
 export class ClickEventInternal extends BaseEventInternal implements MaterializedBase,ClickEvent {
-    public displayX: double
-    public displayY: double
-    public windowX: double
-    public windowY: double
-    public x: double
-    public y: double
-    public hand?: InteractionHand | undefined
-    public globalDisplayX?: double | undefined
-    public globalDisplayY?: double | undefined
+    // instructive change begin
+    get displayX(): double {
+        return this.getDisplayX()
+    }
+    set displayX(displayX: double) {
+        this.setDisplayX(displayX)
+    }
+    get displayY(): double {
+        return this.getDisplayY()
+    }
+    set displayY(displayY: double) {
+        this.setDisplayY(displayY)
+    }
+    get windowX(): double {
+        return this.getWindowX()
+    }
+    set windowX(windowX: double) {
+        this.setWindowX(windowX)
+    }
+    get windowY(): double {
+        return this.getWindowY()
+    }
+    set windowY(windowY: double) {
+        this.setWindowY(windowY)
+    }
+    get x(): double {
+        return this.getX()
+    }
+    set x(x: double) {
+        this.setX(x)
+    }
+    get y(): double {
+        return this.getY()
+    }
+    set y(y: double) {
+        this.setY(y)
+    }
+    get hand(): InteractionHand | undefined {
+        return this.getHand()
+    }
+    set hand(hand: InteractionHand | undefined) {
+        this.setHand(hand)
+    }
+    get globalDisplayX(): double | undefined {
+        return this.getGlobalDisplayX()
+    }
+    set globalDisplayX(globalDisplayX: double | undefined) {
+        this.setGlobalDisplayX(globalDisplayX)
+    }
+    get globalDisplayY(): double | undefined {
+        return this.getGlobalDisplayY()
+    }
+    set globalDisplayY(globalDisplayY: double | undefined) {
+        this.setGlobalDisplayY(globalDisplayY)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         super(tag, peerPtr)
-        this.displayX = this.getDisplayX()
-        this.displayY = this.getDisplayY()
-        this.windowX = this.getWindowX()
-        this.windowY = this.getWindowY()
-        this.x = this.getX()
-        this.y = this.getY()
-        this.hand = this.getHand()
-        this.globalDisplayX = this.getGlobalDisplayX()
-        this.globalDisplayY = this.getGlobalDisplayY()
+        // instructive change begin
+        // this.displayX = this.getDisplayX()
+        // this.displayY = this.getDisplayY()
+        // this.windowX = this.getWindowX()
+        // this.windowY = this.getWindowY()
+        // this.x = this.getX()
+        // this.y = this.getY()
+        // this.hand = this.getHand()
+        // this.globalDisplayX = this.getGlobalDisplayX()
+        // this.globalDisplayY = this.getGlobalDisplayY()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, ClickEventInternal.construct())
-        this.displayX = this.getDisplayX()
-        this.displayY = this.getDisplayY()
-        this.windowX = this.getWindowX()
-        this.windowY = this.getWindowY()
-        this.x = this.getX()
-        this.y = this.getY()
-        this.hand = this.getHand()
-        this.globalDisplayX = this.getGlobalDisplayX()
-        this.globalDisplayY = this.getGlobalDisplayY()
+        // instructive change begin
+        // this.displayX = this.getDisplayX()
+        // this.displayY = this.getDisplayY()
+        // this.windowX = this.getWindowX()
+        // this.windowY = this.getWindowY()
+        // this.x = this.getX()
+        // this.y = this.getY()
+        // this.hand = this.getHand()
+        // this.globalDisplayX = this.getGlobalDisplayX()
+        // this.globalDisplayY = this.getGlobalDisplayY()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._ClickEvent_construct()
@@ -26532,14 +27044,25 @@ export interface FocusAxisEvent extends BaseEvent {
     stopPropagation(): void
 }
 export class FocusAxisEventInternal extends BaseEventInternal implements MaterializedBase,FocusAxisEvent {
-    public axisMap: Map<AxisModel, double>
+    // instructive change begin
+    get axisMap(): Map<AxisModel, double> {
+        return this.getAxisMap()
+    }
+    set axisMap(axisMap: Map<AxisModel, double>) {
+        this.setAxisMap(axisMap)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         super(tag, peerPtr)
-        this.axisMap = this.getAxisMap()
+        // instructive change begin
+        // this.axisMap = this.getAxisMap()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, FocusAxisEventInternal.construct())
-        this.axisMap = this.getAxisMap()
+        // instructive change begin
+        // this.axisMap = this.getAxisMap()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._FocusAxisEvent_construct()
@@ -26606,35 +27129,81 @@ export interface HoverEvent extends BaseEvent {
     stopPropagation(): void
 }
 export class HoverEventInternal extends BaseEventInternal implements MaterializedBase,HoverEvent {
-    public x?: double | undefined
-    public y?: double | undefined
-    public windowX?: double | undefined
-    public windowY?: double | undefined
-    public displayX?: double | undefined
-    public displayY?: double | undefined
-    public globalDisplayX?: double | undefined
-    public globalDisplayY?: double | undefined
+    // instructive change begin
+    get x(): double | undefined {
+        return this.getX()
+    }
+    set x(x: double | undefined) {
+        this.setX(x)
+    }
+    get y(): double | undefined {
+        return this.getY()
+    }
+    set y(y: double | undefined) {
+        this.setY(y)
+    }
+    get windowX(): double | undefined {
+        return this.getWindowX()
+    }
+    set windowX(windowX: double | undefined) {
+        this.setWindowX(windowX)
+    }
+    get windowY(): double | undefined {
+        return this.getWindowY()
+    }
+    set windowY(windowY: double | undefined) {
+        this.setWindowY(windowY)
+    }
+    get displayX(): double | undefined {
+        return this.getDisplayX()
+    }
+    set displayX(displayX: double | undefined) {
+        this.setDisplayX(displayX)
+    }
+    get displayY(): double | undefined {
+        return this.getDisplayY()
+    }
+    set displayY(displayY: double | undefined) {
+        this.setDisplayY(displayY)
+    }
+    get globalDisplayX(): double | undefined {
+        return this.getGlobalDisplayX()
+    }
+    set globalDisplayX(globalDisplayX: double | undefined) {
+        this.setGlobalDisplayX(globalDisplayX)
+    }
+    get globalDisplayY(): double | undefined {
+        return this.getGlobalDisplayY()
+    }
+    set globalDisplayY(globalDisplayY: double | undefined) {
+        this.setGlobalDisplayY(globalDisplayY)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         super(tag, peerPtr)
-        this.x = this.getX()
-        this.y = this.getY()
-        this.windowX = this.getWindowX()
-        this.windowY = this.getWindowY()
-        this.displayX = this.getDisplayX()
-        this.displayY = this.getDisplayY()
-        this.globalDisplayX = this.getGlobalDisplayX()
-        this.globalDisplayY = this.getGlobalDisplayY()
+        // instructive change begin
+        // this.x = this.getX()
+        // this.y = this.getY()
+        // this.windowX = this.getWindowX()
+        // this.windowY = this.getWindowY()
+        // this.displayX = this.getDisplayX()
+        // this.displayY = this.getDisplayY()
+        // this.globalDisplayX = this.getGlobalDisplayX()
+        // this.globalDisplayY = this.getGlobalDisplayY()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, HoverEventInternal.construct())
-        this.x = this.getX()
-        this.y = this.getY()
-        this.windowX = this.getWindowX()
-        this.windowY = this.getWindowY()
-        this.displayX = this.getDisplayX()
-        this.displayY = this.getDisplayY()
-        this.globalDisplayX = this.getGlobalDisplayX()
-        this.globalDisplayY = this.getGlobalDisplayY()
+        // instructive change begin
+        // this.x = this.getX()
+        // this.y = this.getY()
+        // this.windowX = this.getWindowX()
+        // this.windowY = this.getWindowY()
+        // this.displayX = this.getDisplayX()
+        // this.displayY = this.getDisplayY()
+        // this.globalDisplayX = this.getGlobalDisplayX()
+        // this.globalDisplayY = this.getGlobalDisplayY()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._HoverEvent_construct()
@@ -26928,50 +27497,121 @@ export interface MouseEvent extends BaseEvent {
     getHistoricalPoints(): Array<MouseHistoricalPoint> | undefined
 }
 export class MouseEventInternal extends BaseEventInternal implements MaterializedBase,MouseEvent {
-    public button: MouseButton
-    public action: MouseAction
-    public displayX: double
-    public displayY: double
-    public windowX: double
-    public windowY: double
-    public x: double
-    public y: double
-    public rawDeltaX?: double | undefined
-    public rawDeltaY?: double | undefined
-    public pressedButtons?: Array<MouseButton> | undefined
-    public globalDisplayX?: double | undefined
-    public globalDisplayY?: double | undefined
+    // instructive change begin
+    get button(): MouseButton {
+        return this.getButton()
+    }
+    set button(button: MouseButton) {
+        this.setButton(button)
+    }
+    get action(): MouseAction {
+        return this.getAction()
+    }
+    set action(action: MouseAction) {
+        this.setAction(action)
+    }
+    get displayX(): double {
+        return this.getDisplayX()
+    }
+    set displayX(displayX: double) {
+        this.setDisplayX(displayX)
+    }
+    get displayY(): double {
+        return this.getDisplayY()
+    }
+    set displayY(displayY: double) {
+        this.setDisplayY(displayY)
+    }
+    get windowX(): double {
+        return this.getWindowX()
+    }
+    set windowX(windowX: double) {
+        this.setWindowX(windowX)
+    }
+    get windowY(): double {
+        return this.getWindowY()
+    }
+    set windowY(windowY: double) {
+        this.setWindowY(windowY)
+    }
+    get x(): double {
+        return this.getX()
+    }
+    set x(x: double) {
+        this.setX(x)
+    }
+    get y(): double {
+        return this.getY()
+    }
+    set y(y: double) {
+        this.setY(y)
+    }
+    get rawDeltaX(): double | undefined {
+        return this.getRawDeltaX()
+    }
+    set rawDeltaX(rawDeltaX: double | undefined) {
+        this.setRawDeltaX(rawDeltaX)
+    }
+    get rawDeltaY(): double | undefined {
+        return this.getRawDeltaY()
+    }
+    set rawDeltaY(rawDeltaY: double | undefined) {
+        this.setRawDeltaY(rawDeltaY)
+    }
+    get pressedButtons(): Array<MouseButton> | undefined {
+        return this.getPressedButtons()
+    }
+    set pressedButtons(pressedButtons: Array<MouseButton> | undefined) {
+        this.setPressedButtons(pressedButtons)
+    }
+    get globalDisplayX(): double | undefined {
+        return this.getGlobalDisplayX()
+    }
+    set globalDisplayX(globalDisplayX: double | undefined) {
+        this.setGlobalDisplayX(globalDisplayX)
+    }
+    get globalDisplayY(): double | undefined {
+        return this.getGlobalDisplayY()
+    }
+    set globalDisplayY(globalDisplayY: double | undefined) {
+        this.setGlobalDisplayY(globalDisplayY)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         super(tag, peerPtr)
-        this.button = this.getButton()
-        this.action = this.getAction()
-        this.displayX = this.getDisplayX()
-        this.displayY = this.getDisplayY()
-        this.windowX = this.getWindowX()
-        this.windowY = this.getWindowY()
-        this.x = this.getX()
-        this.y = this.getY()
-        this.rawDeltaX = this.getRawDeltaX()
-        this.rawDeltaY = this.getRawDeltaY()
-        this.pressedButtons = this.getPressedButtons()
-        this.globalDisplayX = this.getGlobalDisplayX()
-        this.globalDisplayY = this.getGlobalDisplayY()
+        // instructive change begin
+        // this.button = this.getButton()
+        // this.action = this.getAction()
+        // this.displayX = this.getDisplayX()
+        // this.displayY = this.getDisplayY()
+        // this.windowX = this.getWindowX()
+        // this.windowY = this.getWindowY()
+        // this.x = this.getX()
+        // this.y = this.getY()
+        // this.rawDeltaX = this.getRawDeltaX()
+        // this.rawDeltaY = this.getRawDeltaY()
+        // this.pressedButtons = this.getPressedButtons()
+        // this.globalDisplayX = this.getGlobalDisplayX()
+        // this.globalDisplayY = this.getGlobalDisplayY()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, MouseEventInternal.construct())
-        this.button = this.getButton()
-        this.action = this.getAction()
-        this.displayX = this.getDisplayX()
-        this.displayY = this.getDisplayY()
-        this.windowX = this.getWindowX()
-        this.windowY = this.getWindowY()
-        this.x = this.getX()
-        this.y = this.getY()
-        this.rawDeltaX = this.getRawDeltaX()
-        this.rawDeltaY = this.getRawDeltaY()
-        this.pressedButtons = this.getPressedButtons()
-        this.globalDisplayX = this.getGlobalDisplayX()
-        this.globalDisplayY = this.getGlobalDisplayY()
+        // instructive change begin
+        // this.button = this.getButton()
+        // this.action = this.getAction()
+        // this.displayX = this.getDisplayX()
+        // this.displayY = this.getDisplayY()
+        // this.windowX = this.getWindowX()
+        // this.windowY = this.getWindowY()
+        // this.x = this.getX()
+        // this.y = this.getY()
+        // this.rawDeltaX = this.getRawDeltaX()
+        // this.rawDeltaY = this.getRawDeltaY()
+        // this.pressedButtons = this.getPressedButtons()
+        // this.globalDisplayX = this.getGlobalDisplayX()
+        // this.globalDisplayY = this.getGlobalDisplayY()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._MouseEvent_construct()
@@ -27295,149 +27935,6 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._MouseEvent_setGlobalDisplayY(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-}
-export interface TouchEvent extends BaseEvent {
-    type: TouchType
-    touches: Array<TouchObject>
-    changedTouches: Array<TouchObject>
-    stopPropagation(): void
-    getHistoricalPoints(): Array<HistoricalPoint> | undefined
-    preventDefault(): void
-}
-export class TouchEventInternal extends BaseEventInternal implements MaterializedBase,TouchEvent {
-    public type: TouchType
-    public touches: Array<TouchObject>
-    public changedTouches: Array<TouchObject>
-    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
-        super(tag, peerPtr)
-        this.type = this.getType()
-        this.touches = this.getTouches()
-        this.changedTouches = this.getChangedTouches()
-    }
-    constructor() {
-        this(MaterializedBaseTag.NOP, TouchEventInternal.construct())
-        this.type = this.getType()
-        this.touches = this.getTouches()
-        this.changedTouches = this.getChangedTouches()
-    }
-    static construct(): KPointer {
-        const retval = ArkUIGeneratedNativeModule._TouchEvent_construct()
-        return retval
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._TouchEvent_getFinalizer()
-    }
-    public static fromPtr(ptr: KPointer): TouchEventInternal {
-        return new TouchEventInternal(MaterializedBaseTag.NOP, ptr)
-    }
-    public stopPropagation(): void {
-        this.stopPropagation_serialize()
-        return
-    }
-    public getHistoricalPoints(): Array<HistoricalPoint> | undefined {
-        return this.getHistoricalPoints_serialize()
-    }
-    public preventDefault(): void {
-        // instructive change start
-        ArkUIAniModule._TouchEvent_preventDefault(this!.peer!.ptr);
-        // instructive change end
-        return
-    }
-    private getType(): TouchType {
-        return this.getType_serialize()
-    }
-    private setType(type: TouchType): void {
-        const type_casted = type as (TouchType)
-        this.setType_serialize(type_casted)
-        return
-    }
-    private getTouches(): Array<TouchObject> {
-        return this.getTouches_serialize()
-    }
-    private setTouches(touches: Array<TouchObject>): void {
-        const touches_casted = touches as (Array<TouchObject>)
-        this.setTouches_serialize(touches_casted)
-        return
-    }
-    private getChangedTouches(): Array<TouchObject> {
-        return this.getChangedTouches_serialize()
-    }
-    private setChangedTouches(changedTouches: Array<TouchObject>): void {
-        const changedTouches_casted = changedTouches as (Array<TouchObject>)
-        this.setChangedTouches_serialize(changedTouches_casted)
-        return
-    }
-    private stopPropagation_serialize(): void {
-        ArkUIGeneratedNativeModule._TouchEvent_stopPropagation(this.peer!.ptr)
-    }
-    private getHistoricalPoints_serialize(): Array<HistoricalPoint> | undefined {
-        const retval = ArkUIGeneratedNativeModule._TouchEvent_getHistoricalPoints(this.peer!.ptr)
-        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
-        let buffer: Array<HistoricalPoint> | undefined = undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const bufferOptLength: int32 = retvalDeserializer.readInt32()
-            const bufferOpt: Array<HistoricalPoint> = new Array<HistoricalPoint>(bufferOptLength, (arg0: int32):HistoricalPoint => {
-            return HistoricalPoint_serializer.read(retvalDeserializer);
-        })
-            buffer = bufferOpt
-        }
-        const returnResult: Array<HistoricalPoint> | undefined = buffer
-        retvalDeserializer.dispose()
-        return returnResult
-    }
-    private preventDefault_serialize(): void {
-        ArkUIGeneratedNativeModule._TouchEvent_preventDefault(this.peer!.ptr)
-    }
-    private getType_serialize(): TouchType {
-        const retval = ArkUIGeneratedNativeModule._TouchEvent_getType(this.peer!.ptr)
-        return TouchType.fromValue(retval)
-    }
-    private setType_serialize(type: TouchType): void {
-        ArkUIGeneratedNativeModule._TouchEvent_setType(this.peer!.ptr, type.valueOf())
-    }
-    private getTouches_serialize(): Array<TouchObject> {
-        const retval = ArkUIGeneratedNativeModule._TouchEvent_getTouches(this.peer!.ptr)
-        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
-        const bufferLength: int32 = retvalDeserializer.readInt32()
-        const buffer: Array<TouchObject> = new Array<TouchObject>(bufferLength, (arg0: int32):TouchObject => {
-            return TouchObject_serializer.read(retvalDeserializer);
-        })
-        const returnResult: Array<TouchObject> = buffer
-        retvalDeserializer.dispose()
-        return returnResult
-    }
-    private setTouches_serialize(touches: Array<TouchObject>): void {
-        const thisSerializer: SerializerBase = SerializerBase.hold()
-        thisSerializer.writeInt32((touches.length).toInt())
-        for (let touchesCounterI = 0; touchesCounterI < touches.length; touchesCounterI++) {
-            const touchesTmpElement: TouchObject = touches[touchesCounterI]
-            TouchObject_serializer.write(thisSerializer, touchesTmpElement)
-        }
-        ArkUIGeneratedNativeModule._TouchEvent_setTouches(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    private getChangedTouches_serialize(): Array<TouchObject> {
-        const retval = ArkUIGeneratedNativeModule._TouchEvent_getChangedTouches(this.peer!.ptr)
-        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
-        const bufferLength: int32 = retvalDeserializer.readInt32()
-        const buffer: Array<TouchObject> = new Array<TouchObject>(bufferLength, (arg0: int32):TouchObject => {
-            return TouchObject_serializer.read(retvalDeserializer);
-        })
-        const returnResult: Array<TouchObject> = buffer
-        retvalDeserializer.dispose()
-        return returnResult
-    }
-    private setChangedTouches_serialize(changedTouches: Array<TouchObject>): void {
-        const thisSerializer: SerializerBase = SerializerBase.hold()
-        thisSerializer.writeInt32((changedTouches.length).toInt())
-        for (let changedTouchesCounterI = 0; changedTouchesCounterI < changedTouches.length; changedTouchesCounterI++) {
-            const changedTouchesTmpElement: TouchObject = changedTouches[changedTouchesCounterI]
-            TouchObject_serializer.write(thisSerializer, changedTouchesTmpElement)
-        }
-        ArkUIGeneratedNativeModule._TouchEvent_setChangedTouches(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }

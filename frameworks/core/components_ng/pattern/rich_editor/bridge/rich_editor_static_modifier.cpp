@@ -1001,10 +1001,10 @@ const GENERATED_ArkUIRichEditorModifier* GetRichEditorStaticModifier()
         RichEditorAttributeModifier::SetSingleLineImpl,
         RichEditorAttributeModifier::SetCompressLeadingPunctuationImpl,
         RichEditorAttributeModifier::SetSelectedDragPreviewStyleImpl,
+        RichEditorAttributeModifier::SetOrphanCharOptimizationImpl,
         RichEditorAttributeModifier::SetBindSelectionMenuImpl,
         RichEditorAttributeModifier::SetCustomKeyboardImpl,
         RichEditorAttributeModifier::SetPlaceholderImpl,
-        RichEditorAttributeModifier::SetOrphanCharOptimizationImpl,
     };
     return &ArkUIRichEditorModifierImpl;
 }

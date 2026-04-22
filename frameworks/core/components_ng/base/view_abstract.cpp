@@ -48,6 +48,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/bubble/bubble_view.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
@@ -62,9 +63,14 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 #include "core/components_ng/render/ui_material_filter_creator.h"
+#include "core/components_ng/property/union_effect_container_options.h"
+#include "core/components_ng/property/smart_gesture_property.h"
+#include "core/components_ng/property/edgelight_property.h"
 #include "core/interfaces/native/node/menu_modifier.h"
 #include "core/interfaces/native/node/menu_item_modifier.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
+#include "core/components_ng/animation/geometry_transition.h"
 
 namespace OHOS::Ace::NG {
 
@@ -79,6 +85,18 @@ constexpr double HEIGHT_ASPECTRATIO_THRESHOLD1 = 0.8; // window height/width = 0
 constexpr double HEIGHT_ASPECTRATIO_THRESHOLD2 = 1.2;
 constexpr double FULL_DIMENSION = 100.0;
 constexpr int32_t DEFAULT_AREA_CHANGE_INTERVAL = 1000;
+
+void SyncSmartGesturePrimaryActionRegistry(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto eventManager = context->GetEventManager();
+    CHECK_NULL_VOID(eventManager);
+    auto manager = eventManager->GetOrCreateSmartGestureManager();
+    CHECK_NULL_VOID(manager);
+    manager->SyncPrimaryActionNode(AceType::Claim(frameNode));
+}
 
 std::string PropertyVectorToString(const std::vector<AnimationPropertyType>& vec)
 {
@@ -1072,6 +1090,19 @@ void ViewAbstract::SetPixelStretchEffect(PixStretchEffectOption& option)
         pattern->AddResObj("pixelStretchEffect", resObj, std::move(updateFunc));
     }
     ACE_UPDATE_RENDER_CONTEXT(PixelStretchEffect, option);
+}
+
+void ViewAbstract::SetSpatialEffect(const std::optional<SpatialEffectParams>& params)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+
+    if (params.has_value()) {
+        ACE_UPDATE_RENDER_CONTEXT(SpatialEffect, params.value());
+        return;
+    }
+    ACE_RESET_RENDER_CONTEXT(RenderContext, SpatialEffect);
 }
 
 void ViewAbstract::SetLightUpEffect(double radio)
@@ -5822,13 +5853,17 @@ void ViewAbstract::SetSystemMaterial(const UiMaterial* material)
 
 void ViewAbstract::SetSystemMaterial(FrameNode* frameNode, const UiMaterial* material)
 {
+    if (MaterialUtils::IsMaterialDisabled()) {
+        return;
+    }
     CHECK_NULL_VOID(frameNode);
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    if (!MaterialUtils::CallSetMaterial(frameNode, material)) {
-        ViewAbstract::SetSystemMaterialImmediate(frameNode, material);
+    auto nativeMaterial = MaterialUtils::PreProcessMaterial(material);
+    if (!MaterialUtils::CallSetMaterial(frameNode, nativeMaterial)) {
+        ViewAbstract::SetSystemMaterialImmediate(frameNode, nativeMaterial);
     }
-    renderContext->SetSystemMaterial(material ? material->Copy() : nullptr);
+    renderContext->SetSystemMaterial(nativeMaterial ? nativeMaterial->Copy() : nullptr);
 }
 
 void ViewAbstract::ResetSystemMaterialEffect(FrameNode* frameNode)
@@ -6301,6 +6336,14 @@ void ViewAbstract::SetUseUnion(bool useUnion)
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     SetUseUnion(frameNode, useUnion);
+}
+
+void ViewAbstract::SetCenterGravityOptions(const CenterGravityOptions& centerGravityOptions)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(CenterGravityOptions, centerGravityOptions);
 }
 
 void ViewAbstract::SetFreeze(bool freeze)
@@ -7383,6 +7426,16 @@ void ViewAbstract::SetPixelStretchEffect(FrameNode* frameNode, PixStretchEffectO
     ACE_UPDATE_NODE_RENDER_CONTEXT(PixelStretchEffect, option, frameNode);
 }
 
+void ViewAbstract::SetSpatialEffect(FrameNode* frameNode, const std::optional<SpatialEffectParams>& params)
+{
+    if (params.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(SpatialEffect, params.value(), frameNode);
+        return;
+    }
+    auto target = frameNode->GetRenderContext();
+    ACE_RESET_NODE_RENDER_CONTEXT(target, SpatialEffect, frameNode);
+}
+ 
 void ViewAbstract::SetLightUpEffect(FrameNode* frameNode, double radio)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(LightUpEffect, radio, frameNode);
@@ -8646,6 +8699,33 @@ void ViewAbstract::SetEnabled(FrameNode* frameNode, bool enabled)
     if (focusHub) {
         focusHub->SetEnabled(enabled);
     }
+}
+
+void ViewAbstract::SetSmartGestureShortcut(int32_t action, bool enabled, bool selectable)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    if (action != static_cast<int32_t>(SmartGestureShortcutAction::PRIMARY)) {
+        return;
+    }
+    auto smartGestureProperty = frameNode->GetOrCreateSmartGestureProperty();
+    CHECK_NULL_VOID(smartGestureProperty);
+    SmartGestureShortcutConfig config;
+    config.action = SmartGestureShortcutAction::PRIMARY;
+    config.enabled = enabled;
+    config.selectable = selectable;
+    smartGestureProperty->SetSmartGestureShortcut(config);
+    SyncSmartGesturePrimaryActionRegistry(frameNode);
+}
+
+void ViewAbstract::ResetSmartGestureShortcut()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto smartGestureProperty = frameNode->GetSmartGestureProperty();
+    CHECK_NULL_VOID(smartGestureProperty);
+    smartGestureProperty->ResetSmartGestureShortcut();
+    SyncSmartGesturePrimaryActionRegistry(frameNode);
 }
 
 void ViewAbstract::SetUseShadowBatching(FrameNode* frameNode, bool useShadowBatching)
@@ -11088,5 +11168,21 @@ void ViewAbstract::ResetOnNeedSoftkeyboard(FrameNode* frameNode)
     auto pattern = frameNode->GetPattern<Pattern>();
     CHECK_NULL_VOID(pattern);
     pattern->ResetOnNeedSoftKeyboard();
+}
+
+void ViewAbstract::SetEdgeLightParam(const std::optional<EdgeLightParam>& param)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    if (param.has_value()) {
+        renderContext->UpdateEdgeLightParam(param.value());
+    } else {
+        renderContext->ResetEdgeLightParam();
+        renderContext->ResetEdgeLightFilter();
+    }  
 }
 } // namespace OHOS::Ace::NG

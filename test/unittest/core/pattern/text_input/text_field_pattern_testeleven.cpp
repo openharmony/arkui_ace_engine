@@ -1040,6 +1040,32 @@ HWTEST_F(TextFieldPatternTesteleven, OnBackPressed001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnBackPressed002
+ * @tc.desc: Test OnBackPressed with voice button keyboard fallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTesteleven, OnBackPressed002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXTINPUT_ETS_TAG, 0, AceType::MakeRefPtr<TextFieldPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateIsShowVoiceButton(true);
+    layoutProperty->UpdateTextInputType(TextInputType::TEXT);
+
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+    textFieldPattern->voiceButtonKeyboardOpened_ = true;
+    auto result = textFieldPattern->OnBackPressed();
+    EXPECT_TRUE(result);
+#else
+    auto result = textFieldPattern->OnBackPressed();
+    EXPECT_FALSE(result);
+#endif
+}
+
+/**
  * @tc.name: IsStopBackPress001
  * @tc.desc: Test IsStopBackPress
  * @tc.type: FUNC

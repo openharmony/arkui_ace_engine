@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 
 #include "base/log/jank_frame_report.h"
+#include "core/animation/scroll_motion.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
@@ -23,6 +24,7 @@
 #include "core/common/layout_inspector.h"
 #include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
 #include "core/components_ng/pattern/scrollable/scrollable_theme.h"
+#include "core/components_ng/render/animation_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "base/log/event_report.h"
 #include "core/pipeline/base/constants.h"

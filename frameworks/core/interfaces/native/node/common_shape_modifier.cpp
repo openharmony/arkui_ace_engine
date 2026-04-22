@@ -28,6 +28,24 @@ constexpr int DEFAULT_STROKE_DASH_OFFSET = 0;
 constexpr int DEFAULT_STROKE_LINE_CAPS = 0;
 constexpr int DEFAULT_STROKE_LINE_JOIN = 0;
 
+using NodeModifier::ShapeColorModifierPayload;
+
+RefPtr<ShapeColorModifierPayload> GetShapeColorPayload(uint32_t colorValue, void* payloadPtr)
+{
+    if (!payloadPtr) {
+        return nullptr;
+    }
+    auto payload = AceType::DynamicCast<ShapeColorModifierPayload>(
+        AceType::Claim(reinterpret_cast<AceType*>(payloadPtr)));
+    if (!payload) {
+        return nullptr;
+    }
+    if (!payload->GetColor().GetHeadRoomColor().has_value() && payload->GetColor().GetValue() != colorValue) {
+        return nullptr;
+    }
+    return payload;
+}
+
 void SetStrokeMiterLimit(ArkUINodeHandle node, ArkUI_Float32 miterLimit, void* resObjPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -161,14 +179,19 @@ void SetStroke(ArkUINodeHandle node, uint32_t stroke, void* resObjPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto strokeColor = Color(stroke);
+    auto payload = GetShapeColorPayload(stroke, resObjPtr);
+    auto strokeColor = payload ? payload->GetColor() : Color(stroke);
     ShapeModelNG::SetStroke(frameNode, strokeColor);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     pattern->IsEnableChildrenMatchParent() ? pattern->UnRegisterResource("ShapeStroke")
                                            : pattern->UnRegisterResource("ShapeAbstractStroke");
-    if (SystemProperties::ConfigChangePerform() && resObjPtr) {
-        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resObjPtr));
+    if (SystemProperties::ConfigChangePerform()) {
+        auto resObj = payload ?
+            payload->GetResourceObject() : AceType::Claim(reinterpret_cast<ResourceObject*>(resObjPtr));
+        if (!resObj) {
+            return;
+        }
         pattern->IsEnableChildrenMatchParent() ? ShapeModelNG::SetStroke(frameNode, resObj)
                                                : ShapeAbstractModelNG::SetStroke(frameNode, resObj);
     }

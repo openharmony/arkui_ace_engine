@@ -109,6 +109,41 @@ struct Index {
             router.pushUrl({ url: 'pages/example/ImageExample017' })
           })
 
+          Button('router ImageSyncLoadExample').onClick(() => {
+            console.log('router ImageSyncLoadExample');
+            router.pushUrl({ url: 'pages/example/ImageSyncLoadExample' })
+          })
+
+          Button('router ImageComprehensiveExample').onClick(() => {
+            console.log('router ImageComprehensiveExample');
+            router.pushUrl({ url: 'pages/example/ImageComprehensiveExample' })
+          })
+
+          Button('router ImageAdvancedFeaturesExample').onClick(() => {
+            console.log('router ImageAdvancedFeaturesExample');
+            router.pushUrl({ url: 'pages/example/ImageAdvancedFeaturesExample' })
+          })
+
+          Button('router ImageCompleteDemo').onClick(() => {
+            console.log('router ImageCompleteDemo');
+            router.pushUrl({ url: 'pages/example/ImageCompleteDemo' })
+          })
+
+          Button('router ImagePerformanceExample').onClick(() => {
+            console.log('router ImagePerformanceExample');
+            router.pushUrl({ url: 'pages/example/ImagePerformanceExample' })
+          })
+
+          Button('router ImageTextCompositeExample').onClick(() => {
+            console.log('router ImageTextCompositeExample');
+            routerser.pushUrl({ url: 'pages/example/ImageTextCompositeExample' })
+          })
+
+          Button('router ImageRealWorldExample').onClick(() => {
+            console.log('router ImageRealWorldExample');
+            router.pushUrl({ url: 'pages/example/ImageRealWorldExample' })
+          })
+
           Button('router ImageModifier001').onClick(() => {
             console.log('router ImageModifierTestCase001');
             router.pushUrl({ url: 'pages/testcase/ImageModifierTestCase001' })

@@ -54,9 +54,11 @@ public:
     void SetPageType(RouterPageType type)
     {
         type_ = type;
+#if defined(ENABLE_SPLIT_MODE)
         if (type == RouterPageType::PLACEHOLDER_PAGE) {
             needFireObserver_ = false;
         }
+#endif
     }
 
     RouterPageType GetPageType() const

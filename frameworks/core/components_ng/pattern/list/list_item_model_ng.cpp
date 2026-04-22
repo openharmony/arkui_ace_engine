@@ -22,7 +22,6 @@
 #include "core/components_ng/pattern/scrollable/scrollable_item.h"
 #include "core/components_ng/pattern/scrollable/scrollable_item_pool.h"
 #include "core/components_ng/syntax/shallow_builder.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -31,6 +30,7 @@ void ListItemModelNG::Create(
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    RefPtr<FrameNode> frameNode = nullptr;
     if (deepRenderFunc) {
         auto deepRender = [nodeId, deepRenderFunc = std::move(deepRenderFunc)]() -> RefPtr<UINode> {
             CHECK_NULL_RETURN(deepRenderFunc, nullptr);
@@ -40,7 +40,6 @@ void ListItemModelNG::Create(
         };
         const char* tag = isCreateArc ? V2::ARC_LIST_ITEM_ETS_TAG : V2::LIST_ITEM_ETS_TAG;
         ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", tag, nodeId);
-        RefPtr<FrameNode> frameNode = nullptr;
         if (!isCreateArc) {
             frameNode = ScrollableItemPool::GetInstance().Allocate(tag, nodeId,
                 [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender)), style = listItemStyle]() {
@@ -55,9 +54,18 @@ void ListItemModelNG::Create(
         stack->Push(frameNode);
     } else {
         ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::LIST_ITEM_ETS_TAG, nodeId);
-        auto frameNode = FrameNode::GetOrCreateFrameNode(V2::LIST_ITEM_ETS_TAG, nodeId,
+        frameNode = FrameNode::GetOrCreateFrameNode(V2::LIST_ITEM_ETS_TAG, nodeId,
             [listItemStyle]() { return AceType::MakeRefPtr<ListItemPattern>(nullptr, listItemStyle); });
         stack->Push(frameNode);
+    }
+    if (listItemStyle == V2::ListItemStyle::CARD && frameNode) {
+        RefPtr<ListItemPattern> pattern = frameNode->GetPattern<ListItemPattern>();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->GetIsCardStyleInitialized()) {
+            return;
+        }
+        pattern->ApplyListItemDefaultAttributes(frameNode);
+        pattern->SetIsCardStyleInitialized(true);
     }
 }
 

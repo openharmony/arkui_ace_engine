@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
 #include "core/components_ng/pattern/text_clock/text_clock_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;
@@ -2361,6 +2362,29 @@ HWTEST_F(TextClockPatternTestNG, UpdateTextLayoutPropertyTest001, TestSize.Level
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     EXPECT_EQ(textLayoutProperty->GetFontSize(), FONT_SIZE_VALUE);
+}
+
+HWTEST_F(TextClockPatternTestNG, UpdateTextLayoutPropertyTest003, TestSize.Level1)
+{
+    auto mockContainer = MockContainer::Current();
+    ASSERT_NE(mockContainer, nullptr);
+    auto lastPlatformVersion = mockContainer->GetApiTargetVersion();
+    mockContainer->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textNode = pattern->GetTextNode();
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    pattern->UpdateTextLayoutProperty(layoutProperty, textLayoutProperty);
+    EXPECT_TRUE(textLayoutProperty->GetEnableSmallLanguageTruncationValue(false));
+    mockContainer->SetApiTargetVersion(lastPlatformVersion);
 }
 
 /**

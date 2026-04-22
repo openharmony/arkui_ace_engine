@@ -19,6 +19,7 @@
 #include "base/geometry/axis.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
+#include "core/accessibility/accessibility_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"

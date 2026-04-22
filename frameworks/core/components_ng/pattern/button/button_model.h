@@ -48,6 +48,7 @@ public:
     virtual void SetFontStyle(const Ace::FontStyle& fontStyle) = 0;
     virtual void SetFontFamily(const std::vector<std::string>& fontFamily) = 0;
     virtual void SetFontColor(const Color& textColor) = 0;
+    virtual void SetFontColorDefault(const Color& textColor) {}
     virtual void SetType(const int value) = 0;
     virtual void SetStateEffect(const bool stateEffect) = 0;
     virtual void SetLabelStyle(ButtonParameters& buttonParameters) {}
@@ -58,6 +59,7 @@ public:
     virtual void OnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc,
         double distanceThreshold) = 0;
     virtual void BackgroundColor(const Color& color, const bool& colorFlag) = 0;
+    virtual void BackgroundColorDefault(const Color& color) {}
     virtual void SetWidth(const Dimension& width) {}
     virtual void SetHeight(const Dimension& height) {}
     virtual void SetAspectRatio(const double& ratio) {}

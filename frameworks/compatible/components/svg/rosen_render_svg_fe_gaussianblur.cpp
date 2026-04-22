@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/compatible/components/svg/rosen_render_svg_fe_gaussianblur.h"
+#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace {
 

@@ -19,6 +19,7 @@
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/frameworks/core/rosen/mock_canvas.h"
 
+#include "core/accessibility/accessibility_manager.h"
 #include "core/common/multi_thread_build_manager.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
@@ -1573,7 +1574,9 @@ HWTEST_F(ListLayoutTestNg, ListItemGroupCreateForCardModeTest001, TestSize.Level
      * @tc.expected: step2. create a card style ListItemGroup success.
      */
     ListItemGroupModelNG groupModel;
-    groupModel.Create(V2::ListItemGroupStyle::CARD);
+    V2::ListItemGroupOptions groupOptions;
+    groupOptions.style = V2::ListItemGroupStyle::CARD;
+    groupModel.Create(groupOptions);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();

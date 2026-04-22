@@ -39,7 +39,7 @@ import { ModifierStateManager } from './../CommonModifier'
 import { global_resource_Resource_serializer } from './../framework/resource'
 import { intl_DateTimeOptions_serializer } from './../framework/ohos.intl'
 export class ArkDatePickerPeer extends ArkCommonMethodPeer {
-    attributeSet?: DatePickerModifier;
+    datePickerAttributeSet?: DatePickerModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

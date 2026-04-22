@@ -2243,6 +2243,8 @@ struct CJUIWebModifier {
     void (*resetScrollbarLayoutPolicy)(ArkUINodeHandle node);
     void (*setOnInputMethodAttached)(ArkUINodeHandle node, void* callback);
     void (*resetOnInputMethodAttached)(ArkUINodeHandle node);
+    void (*setKeyboardAppearance)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetKeyboardAppearance)(ArkUINodeHandle node);
 };
 
 struct CJUIBlankModifier {
@@ -2309,7 +2311,6 @@ struct CJUICheckboxModifier {
     ArkUI_Int32 (*getCheckboxShape)(ArkUINodeHandle node);
     void (*setCheckboxName)(ArkUINodeHandle node, ArkUI_CharPtr nameValue);
     void (*setCheckboxGroup)(ArkUINodeHandle node, ArkUI_CharPtr groupValue);
-    
     ArkUI_CharPtr (*getCheckboxName)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getCheckboxGroup)(ArkUINodeHandle node);
 };
@@ -3912,11 +3913,14 @@ struct CJUIBasicAPI {
     ArkUI_CharPtr (*getName)(ArkUINodeHandle node);
     void (*dump)(ArkUINodeHandle node);
 
-    ArkUI_Int32 (*addChild)(ArkUINodeHandle parent, ArkUINodeHandle child);
+    ArkUI_Int32 (*addChild)(ArkUINodeHandle parent, ArkUINodeHandle child, void* errorInfoPtr);
     void (*removeChild)(ArkUINodeHandle parent, ArkUINodeHandle child);
-    ArkUI_Int32 (*insertChildAfter)(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling);
-    ArkUI_Int32 (*insertChildBefore)(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling);
-    ArkUI_Int32 (*insertChildAt)(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUI_Int32 position);
+    ArkUI_Int32 (*insertChildAfter)(
+        ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling, void* errorInfoPtr);
+    ArkUI_Int32 (*insertChildBefore)(
+        ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling, void* errorInfoPtr);
+    ArkUI_Int32 (*insertChildAt)(
+        ArkUINodeHandle parent, ArkUINodeHandle child, ArkUI_Int32 position, void* errorInfoPtr);
 
     // Returned pointer is valid only till node is alive.
     ArkUI_CharPtr (*getAttribute)(ArkUINodeHandle node, ArkUI_CharPtr attribute);

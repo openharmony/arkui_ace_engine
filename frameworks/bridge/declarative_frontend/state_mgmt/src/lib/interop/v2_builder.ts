@@ -52,10 +52,44 @@ function createCompatibleNodeWithFuncVoid(fn: (() => void) | Object, elmtId: num
     return builderViewV2;
 }
 
+class __Interop_BindingProxyHandler_Internal {
+    get(target: any, key: string | symbol, receiver: any): any {
+        if (typeof key === 'symbol') {
+            if (key === ObserveV2.SYMBOL_PROXY_GET_TARGET) {
+                return target;
+            }
+            return target[key];
+        }
+        const ret = target[key];
+        if (key === 'value') {
+            ObserveV2.getObserve().addRef(RefInfo.get(target), 'value');
+            return ret;
+        }
+        return typeof ret === 'function' ? ret.bind(receiver) : ret;
+    }
+    set(target: any, key: string | symbol, value: any): boolean {
+        if (typeof key === 'symbol') {
+            target[key] = value;
+            return true;
+        }
+        target[key] = value;
+        if (key === 'value') {
+            ObserveV2.getObserve().fireChange(RefInfo.get(target), 'value');
+        }
+        return true;
+    }
+}
+
+function __Interop_MakeObservedInteropBinding_Internal(binding: Object): Object {
+    return new Proxy(binding, new __Interop_BindingProxyHandler_Internal());
+}
+
 function createCompatibleNodeWithFuncHelper(fn: (() => void) | Object, elmtId: number, args: any[]) {
     let builderViewV2 = new BuilderViewV2(undefined, undefined, elmtId);
     for (let i = 0; i < args.length; i++) {
         if (args[i] instanceof MutableBinding || args[i] instanceof Binding) {
+            builderViewV2['arg' + (i+1)] = __Interop_MakeObservedInteropBinding_Internal(args[i]);
+        } else if (args.length === 1 && args[i] && typeof args[i] === 'object') {
             builderViewV2['arg' + (i+1)] = UIUtilsImpl.instance().makeObserved(args[i]);
         } else {
             builderViewV2['arg' + (i+1)] = args[i];

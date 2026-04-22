@@ -39,7 +39,7 @@ import { ShapeModifier } from './../ShapeModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 export class ArkShapePeer extends ArkCommonMethodPeer {
-    attributeSet?: ShapeModifier;
+    shapeAttributeSet?: ShapeModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

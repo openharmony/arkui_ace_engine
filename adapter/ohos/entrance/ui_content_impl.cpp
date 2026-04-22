@@ -14,6 +14,7 @@
  */
 
 #include "adapter/ohos/entrance/ui_content_impl.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include <atomic>
@@ -43,6 +44,7 @@
 #include "ui_extension_context.h"
 #include "wm_common.h"
 #include "form_ashmem.h"
+#include "pointer_event.h"
 
 #include "base/log/event_report.h"
 #include "base/log/log_wrapper.h"
@@ -62,6 +64,7 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_resolution_config.h"
 #include "core/components_ng/render/animation_utils.h"
+#include "core/components_ng/syntax/lazy_for_each_utils.h"
 #include "core/pipeline/container_window_manager.h"
 
 #if !defined(ACE_UNITTEST)
@@ -90,6 +93,7 @@
 #include "adapter/ohos/entrance/capability_registry.h"
 #include "adapter/ohos/entrance/cj_utils/cj_utils.h"
 #include "adapter/ohos/entrance/dialog_container.h"
+#include "adapter/ohos/entrance/dynamic_component/dynamic_component_renderer_impl.h"
 #include "adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.h"
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "adapter/ohos/entrance/form_utils_impl.h"
@@ -136,6 +140,8 @@
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 #include "core/components_ng/pattern/select_overlay/expanded_menu_plugin_loader.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
+#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_container_handler.h"
@@ -516,6 +522,8 @@ bool ParseAvoidAreasUpdate(const RefPtr<NG::PipelineContext>& context,
             safeAreaUpdated |= safeAreaManager->UpdateSystemSafeArea(ConvertAvoidArea(avoidArea.second));
         } else if (avoidArea.first == OHOS::Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
             safeAreaUpdated |= safeAreaManager->UpdateNavSafeArea(ConvertAvoidArea(avoidArea.second));
+        } else if (avoidArea.first == OHOS::Rosen::AvoidAreaType::TYPE_FLOAT_NAVIGATION) {
+            safeAreaUpdated |= safeAreaManager->UpdateFloatNavSafeArea(ConvertAvoidArea(avoidArea.second));
         } else if (avoidArea.first == OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT) {
             safeAreaUpdated |= safeAreaManager->UpdateCutoutSafeArea(ConvertAvoidArea(avoidArea.second),
                 NG::OptionalSize<uint32_t>(config.Width(), config.Height()));
@@ -537,6 +545,8 @@ std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets> ParseAvoidAreasToMap(
             safeAvoidAreas[NG::SafeAreaAvoidType::TYPE_SYSTEM] = ConvertAvoidArea(avoidArea.second);
         } else if (avoidArea.first == OHOS::Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
             safeAvoidAreas[NG::SafeAreaAvoidType::TYPE_NAVIGATION_INDICATOR] = ConvertAvoidArea(avoidArea.second);
+        } else if (avoidArea.first == OHOS::Rosen::AvoidAreaType::TYPE_FLOAT_NAVIGATION) {
+            safeAvoidAreas[NG::SafeAreaAvoidType::TYPE_FLOAT_NAVIGATION] = ConvertAvoidArea(avoidArea.second);
         } else if (avoidArea.first == OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT) {
             safeAvoidAreas[NG::SafeAreaAvoidType::TYPE_CUTOUT] = ConvertAvoidArea(avoidArea.second);
         }
@@ -555,6 +565,26 @@ void AvoidAreasUpdateOnUIExtension(const RefPtr<NG::PipelineContext>& context,
     for (auto& avoidArea : avoidAreas) {
         context->UpdateOriginAvoidArea(avoidArea.second, static_cast<uint32_t>(avoidArea.first));
     }
+}
+
+void AvoidAreasUpdateOnDynamicComponent(const RefPtr<NG::PipelineContext>& context,
+    RefPtr<Platform::AceContainer> container,
+    const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
+    const std::shared_ptr<OHOS::Rosen::RSTransaction>& transaction,
+    const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas,
+    const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info)
+{
+    CHECK_NULL_VOID(container);
+    CHECK_NULL_VOID(context);
+    auto dynamicComponentManager = context->GetDynamicComponentSafeManager();
+    dynamicComponentManager->viewportConfig_ = config;
+    dynamicComponentManager->reason_ = static_cast<OHOS::Ace::WindowSizeChangeReason>(reason);
+    dynamicComponentManager->rsTransaction_ = transaction;
+    dynamicComponentManager->SetOccupiedAreaChangeInfo(info);
+    if (container->IsSceneBoardWindow()) {
+        return;
+    }
+    dynamicComponentManager->SetAvoidArea(avoidAreas);
 }
 
 std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets> UpdateSafeArea(const RefPtr<PipelineBase>& pipelineContext,
@@ -620,6 +650,11 @@ public:
         CHECK_NULL_VOID(pipeline);
         auto taskExecutor = container->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
+        auto context = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+        if (context) {
+            auto dynamicComponentManager = context->GetDynamicComponentSafeManager();
+            dynamicComponentManager->UpdateAllDCAvoidArea(instanceId_, avoidArea, type);
+        }
         if (type == Rosen::AvoidAreaType::TYPE_SYSTEM) {
             systemSafeArea_ = ConvertAvoidArea(avoidArea);
         } else if (type == Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
@@ -2154,6 +2189,11 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         EventReport::ReportReusedNodeSkipMeasureApp();
     }
     AceApplicationInfo::GetInstance().SetReusedNodeSkipMeasure(reusedNodeSkipMeasure);
+    // Read the enableCustomComponentFreeze configuration from metadata and set it in LazyForEachUtils.
+    bool enableCustomComponentFreeze = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
+        return metaDataItem.name == "enableCustomComponentFreeze" && metaDataItem.value == "true";
+    });
+    NG::LazyForEachUtils::SetEnableCustomComponentFreeze(enableCustomComponentFreeze);
     auto useNewPipe = AceNewPipeJudgement::QueryAceNewPipeEnabledStage(
         bundleName_, apiCompatibleVersion, apiTargetVersion, apiReleaseType, closeArkTSPartialUpdate);
     AceApplicationInfo::GetInstance().SetIsUseNewPipeline(useNewPipe);
@@ -2163,6 +2203,16 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             return metaDataItem.name == "enableCustomComponentCrossAbility" && metaDataItem.value == "true";
         });
     AceApplicationInfo::GetInstance().SetEnableCustomComponentCrossAbility(enableCustomComponentCrossAbility);
+    // Read UIMaterial metadata from entry module only
+    if (hapModuleInfo && hapModuleInfo->moduleType == OHOS::AppExecFwk::ModuleType::ENTRY) {
+        for (const auto& metaDataItem : metaData) {
+            if (metaDataItem.name == "ohos.arkui.UIMaterial.state") {
+                AceApplicationInfo::GetInstance().SetUIMaterialState(metaDataItem.value);
+            } else if (metaDataItem.name == "ohos.arkui.UIMaterial.type") {
+                AceApplicationInfo::GetInstance().SetUIMaterialType(metaDataItem.value);
+            }
+        }
+    }
     LOGI("[%{public}s][%{public}s][%{public}d]: UIContent: apiCompatibleVersion: %{public}d, apiTargetVersion: "
          "%{public}d, and apiReleaseType: %{public}s, "
          "useNewPipe: %{public}d, enableCustomComponentCrossAbility: %{public}d",
@@ -2757,12 +2807,16 @@ void UIContentImpl::InitializeSafeArea(const RefPtr<Platform::AceContainer>& con
             auto systemInsets = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM);
             auto cutoutInsets = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT);
             auto navInsets = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
+            auto floatNavInsets = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_FLOAT_NAVIGATION);
             pipeline->UpdateSystemSafeAreaWithoutAnimation(systemInsets);
             pipeline->UpdateCutoutSafeAreaWithoutAnimation(cutoutInsets);
             pipeline->UpdateNavSafeAreaWithoutAnimation(navInsets);
+            pipeline->UpdateFloatNavSafeAreaWithoutAnimation(floatNavInsets);
             TAG_LOGI(ACE_SAFE_AREA,
-                "InitializeSafeArea systemInsets:%{public}s, cutoutInsets:%{public}s, navInsets:%{public}s",
-                systemInsets.ToString().c_str(), cutoutInsets.ToString().c_str(), navInsets.ToString().c_str());
+                "InitializeSafeArea systemInsets:%{public}s, cutoutInsets:%{public}s, navInsets:%{public}s, "
+                "floatNavInsets:%{public}s",
+                systemInsets.ToString().c_str(), cutoutInsets.ToString().c_str(), navInsets.ToString().c_str(),
+                floatNavInsets.ToString().c_str());
         }
     }
     InitWindowMode(container);
@@ -3668,6 +3722,21 @@ bool UIExtensionKeyboardAvoid(const RefPtr<PipelineBase>& pipelineContext,
     return false;
 }
 
+bool DynamicKeyboardAvoid(OHOS::Rosen::WindowSizeChangeReason reason,
+    int32_t instanceId,
+    const RefPtr<PipelineBase>& pipelineContext,
+    const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info,
+    const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
+    const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
+{
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    CHECK_NULL_RETURN(pipeline, false);
+    ContainerScope scope(instanceId);
+    auto dynamicComponentSafeManager = pipeline->GetDynamicComponentSafeManager();
+    return dynamicComponentSafeManager->UpdateDynamicKeyBoardAvoid(pipelineContext,
+        reason, info, rsTransaction, avoidAreas);
+}
+
 bool UIContentImpl::LaterAvoid(const Rect& keyboardRect, double positionY, double height)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -3729,12 +3798,17 @@ void SetKeyboardInfo(const RefPtr<PipelineBase>& pipelineContext, float height)
 
 void KeyboardAvoid(OHOS::Rosen::WindowSizeChangeReason reason, int32_t instanceId,
     const RefPtr<PipelineBase>& pipelineContext, const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info,
-    const RefPtr<Platform::AceContainer>& container)
+    const RefPtr<Platform::AceContainer>& container, const ViewportConfig& config,
+    const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
+    const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
 {
     CHECK_NULL_VOID(info);
     auto rect = info->rect_;
     Rect keyboardRect = Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
     SetKeyboardInfo(pipelineContext, keyboardRect.Height());
+    if (DynamicKeyboardAvoid(reason, instanceId, pipelineContext, info, rsTransaction, avoidAreas)) {
+        return;
+    }
     if (UIExtensionKeyboardAvoid(pipelineContext, instanceId, keyboardRect, info)) {
         return;
     }
@@ -3751,7 +3825,7 @@ void KeyboardAvoid(OHOS::Rosen::WindowSizeChangeReason reason, int32_t instanceI
     pipelineContext->OnVirtualKeyboardAreaChange(keyboardRect, textFieldPositionY, textFieldHeight);
 }
 
-void UIContentImpl::ProcessWindowSizeLayoutBreakPointChange()
+void UIContentImpl::ProcessWindowSizeLayoutBreakPointChange(double density)
 {
     auto container = Platform::AceContainer::GetContainer(GetInstanceId());
     CHECK_NULL_VOID(container);
@@ -3760,7 +3834,7 @@ void UIContentImpl::ProcessWindowSizeLayoutBreakPointChange()
 
     auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
 
-    auto task = [instanceId = GetInstanceId()]() {
+    auto task = [instanceId = GetInstanceId(), density]() {
         auto container = Platform::AceContainer::GetContainer(instanceId);
         CHECK_NULL_VOID(container);
 
@@ -3770,6 +3844,7 @@ void UIContentImpl::ProcessWindowSizeLayoutBreakPointChange()
         CHECK_NULL_VOID(pipelineContext);
         auto window = pipelineContext->GetWindow();
         CHECK_NULL_VOID(window);
+        window->SetDensity(density);
 
         window->NotifyBreakpointChangeIfNeeded(instanceId, layoutWidthBreakpoints, layoutHeightBreakpoints);
     };
@@ -3787,7 +3862,7 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas,
     const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info)
 {
-    ProcessWindowSizeLayoutBreakPointChange();
+    ProcessWindowSizeLayoutBreakPointChange(config.Density());
     if (KeyFrameActionPolicy(config, reason, rsTransaction, avoidAreas)) {
         return;
     }
@@ -3985,13 +4060,14 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     if (viewportConfigMgr_->IsConfigsEqual(config) && (rsTransaction == nullptr) && reasonDragFlag) {
         TAG_LOGD(ACE_LAYOUT, "UpdateViewportConfig return in advance");
         taskExecutor->PostTask([context, config, avoidAreas, reason, instanceId = instanceId_,
-            pipelineContext, info, container] {
+            pipelineContext, info, container, rsTransaction] {
                 if (ParseAvoidAreasUpdate(context, avoidAreas, config)) {
                     context->AnimateOnSafeAreaUpdate();
                 }
                 AvoidAreasUpdateOnUIExtension(context, avoidAreas);
                 if (pipelineContext && reason == OHOS::Rosen::WindowSizeChangeReason::OCCUPIED_AREA_CHANGE) {
-                    KeyboardAvoid(reason, instanceId, pipelineContext, info, container);
+                    KeyboardAvoid(reason, instanceId, pipelineContext, info, container, config,
+                        rsTransaction, avoidAreas);
                 }
             }, TaskExecutor::TaskType::UI, "ArkUIUpdateOriginAvoidAreaAndExecuteKeyboardAvoid");
         return;
@@ -4000,7 +4076,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     auto taskId = viewportConfigMgr_->MakeTaskId();
     auto task = [config = modifyConfig, container, reason, rsTransaction, rsWindow = window_,
                     instanceId = instanceId_, info, isDynamicRender = isDynamicRender_, animationOpt, avoidAreas,
-                    taskId, weak = WeakPtr(viewportConfigMgr_)]() {
+                    taskId, weak = WeakPtr(viewportConfigMgr_), beforeConfig = config]() {
         container->SetWindowPos(config.Left(), config.Top());
         auto pipelineContext = container->GetPipelineContext();
         auto avoidAreaMap = UpdateSafeArea(pipelineContext, avoidAreas);
@@ -4025,8 +4101,11 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
             if (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION ||
                 reason == OHOS::Rosen::WindowSizeChangeReason::SCENE_WITH_ANIMATION) {
                 pipelineContext->FlushBuild();
+                LOGI("StartWindowAnimation with reason: %{public}d", reason);
                 pipelineContext->StartWindowAnimation();
-                if (container->GetUIContentType() != UIContentType::DYNAMIC_COMPONENT) {
+                // SCENE_WITH_ANIMATION does not require refreshing all nodes
+                if (container->GetUIContentType() != UIContentType::DYNAMIC_COMPONENT &&
+                    reason != OHOS::Rosen::WindowSizeChangeReason::SCENE_WITH_ANIMATION) {
                     container->NotifyDirectionUpdate();
                 }
             }
@@ -4067,7 +4146,8 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         }
         if (pipelineContext && reason == OHOS::Rosen::WindowSizeChangeReason::OCCUPIED_AREA_CHANGE) {
             TAG_LOGD(ACE_KEYBOARD, "KeyboardAvoid in the UpdateViewportConfig task");
-            KeyboardAvoid(reason, instanceId, pipelineContext, info, container);
+            KeyboardAvoid(reason, instanceId, pipelineContext, info, container,
+                beforeConfig, rsTransaction, avoidAreas);
         }
     };
     auto changeBrightnessTask = [container]() {
@@ -4105,6 +4185,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     viewportConfigMgr_->StoreConfig(aceViewportConfig);
     viewportConfigMgr_->StoreInfo(info);
     UIExtensionUpdateViewportConfig(config);
+    AvoidAreasUpdateOnDynamicComponent(context, container, config, reason, rsTransaction, avoidAreas, info);
 }
 
 void UIContentImpl::UIExtensionUpdateViewportConfig(const ViewportConfig& config)
@@ -4361,6 +4442,8 @@ void UIContentImpl::UpdateTitleInTargetPos(bool isShow, int32_t height)
 
 void UIContentImpl::NotifyRotationAnimationEnd()
 {
+    LOGI("[%{public}s][%{public}s][%{public}d]: NotifyRotationAnimationEnd", bundleName_.c_str(), moduleName_.c_str(),
+        instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId_);
@@ -4370,6 +4453,7 @@ void UIContentImpl::NotifyRotationAnimationEnd()
         [container]() {
             auto pipelineContext = container->GetPipelineContext();
             if (pipelineContext) {
+                LOGI("StopWindowAnimation: %{public}d", pipelineContext->GetInstanceId());
                 pipelineContext->StopWindowAnimation();
             }
         },
@@ -4448,14 +4532,34 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "initialize subWindow display invalid. window name is %{public}s",
             window->GetWindowName().c_str());
     }
-    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
-    if (defaultDisplay) {
-        auto displayInfo = defaultDisplay->GetDisplayInfo();
-        if (displayInfo) {
-            density = displayInfo->GetDensityInCurResolution();
+    auto needAdaptForceSplitMode = false;
+    auto aceContainer = Platform::AceContainer::GetContainer(instanceId_);
+    if (aceContainer) {
+        auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+        if (pipelineContext) {
+            needAdaptForceSplitMode = pipelineContext->IsDisplayInForceSplitMode();
         }
-        deviceWidth = defaultDisplay->GetWidth();
-        deviceHeight = defaultDisplay->GetHeight();
+    }
+    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
+    if (needAdaptForceSplitMode) {
+        defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId, true);
+    }
+    if (defaultDisplay) {
+        if (needAdaptForceSplitMode) {
+            auto displayInfoWithCache = defaultDisplay->GetDisplayInfoWithCache();
+            if (displayInfoWithCache) {
+                density = displayInfoWithCache->GetDensityInCurResolution();
+                deviceWidth = displayInfoWithCache->GetWidth();
+                deviceHeight = displayInfoWithCache->GetHeight();
+            }
+        } else {
+            auto displayInfo = defaultDisplay->GetDisplayInfo();
+            if (displayInfo) {
+                density = displayInfo->GetDensityInCurResolution();
+            }
+            deviceWidth = defaultDisplay->GetWidth();
+            deviceHeight = defaultDisplay->GetHeight();
+        }
     }
     SystemProperties::ReadSystemParametersCallOnce();
     SystemProperties::InitDeviceInfo(deviceWidth, deviceHeight, deviceHeight >= deviceWidth ? 0 : 1, density, false);
@@ -5974,6 +6078,28 @@ void sendCommandCallbackInner(const WeakPtr<TaskExecutor>& taskExecutor)
     UiSessionManager::GetInstance()->SaveSendCommandFunction(sendCommandCallback);
 }
 
+void UIContentImpl::RelaxedCommandCallbackInner(const WeakPtr<TaskExecutor>& taskExecutor)
+{
+#ifdef RELAXED_INTERACTION_SUPPORT
+    auto relaxedCommandCallback = [weakTaskExecutor = taskExecutor](const std::string& command) {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [command]() {
+                auto pipelineContext = NG::PipelineContext::GetCurrentContextSafely();
+                if (pipelineContext == nullptr) {
+                    TAG_LOGE(
+                        AceLogTag::ACE_UIEVENT, "Failed to process relaxed command because pipelineContext is nullptr");
+                    return;
+                }
+                pipelineContext->ProcessCommand(command);
+            },
+            TaskExecutor::TaskType::UI, "UiSessionRelaxedSendCommand");
+    };
+    UiSessionManager::GetInstance()->SaveRelaxedCommandFunction(relaxedCommandCallback);
+#endif
+}
+
 void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& taskExecutor)
 {
     const int32_t GET_INSPECTOR_TREE_TIMEOUT_TIME = 1500;
@@ -6012,6 +6138,7 @@ void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& t
     RegisterGetCurrentPageName(taskExecutor);
     InitSendCommandFunctionsCallbacks(taskExecutor);
     sendCommandCallbackInner(taskExecutor);
+    RelaxedCommandCallbackInner(taskExecutor);
     SaveGetCurrentInstanceId();
     RegisterExeAppAIFunction(taskExecutor);
     SaveGetHitTestInfoCallback(taskExecutor);
@@ -6532,6 +6659,11 @@ int32_t UIContentImpl::GetUIContentWindowID(int32_t instanceId)
     LOGI(
         "GetUIContentWindowID entry success instanceId:[%{public}d],windowId:[%{public}d]", instanceId, windowId);
     return static_cast<int32_t>(windowId);
+}
+
+OHOS::Rosen::Window* UIContentImpl::GetUIContentWindow()
+{
+    return window_;
 }
 
 void UIContentImpl::SetContentChangeDetectCallback(const WeakPtr<TaskExecutor>& taskExecutor)

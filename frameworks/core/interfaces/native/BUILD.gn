@@ -229,6 +229,7 @@ template("ace_core_interfaces_native_node") {
     deps = [
       "$ace_root/frameworks/core/components/theme:build_theme_code",
       "$ace_root/frameworks/core/interfaces/native/common:ace_core_interfaces_native_$platform",
+      "$ace_root/frameworks/bridge/arkts_frontend/arkoala_generator:idlize_gen",
     ]
     if (defined(config.web_components_support) &&
         config.web_components_support) {

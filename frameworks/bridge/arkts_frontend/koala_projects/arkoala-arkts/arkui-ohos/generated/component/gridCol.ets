@@ -33,7 +33,7 @@ import { GridColModifier } from './../GridColModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 export class ArkGridColPeer extends ArkCommonMethodPeer {
-    attributeSet?: GridColModifier;
+    gridColAttributeSet?: GridColModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

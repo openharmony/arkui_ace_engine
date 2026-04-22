@@ -26,6 +26,7 @@
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 
@@ -79,6 +80,7 @@ namespace OHOS::Ace::NG {
 namespace {
 const InspectorFilter filter;
 constexpr Dimension TEST_SETTING_RADIUS = Dimension(10.0, DimensionUnit::VP);
+constexpr int32_t TEST_NON_DEFAULT_THEME_SCOPE_ID = 9;
 } // namespace
 class CalendarDialogPatternTestNg : public testing::Test {
 public:
@@ -1917,5 +1919,91 @@ HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogViewTest0050, TestSize.Level
     calendarDialogView.OperationsToPattern(contentColumn, settingData, properties, buttonInfos);
     auto pattern = contentColumn->GetPattern<CalendarDialogPattern>();
     ASSERT_NE(pattern->entryNode_.Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: CalendarDialogPattern_OnColorConfig_ThemedScopeApi26_001
+ * @tc.desc: API 26+ with non-zero title theme scope skips title color refresh on configuration update.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogPattern_OnColorConfig_ThemedScopeApi26_001,
+    TestSize.Level1)
+{
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    const int32_t backupContainerApi = container->GetApiTargetVersion();
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    const int32_t backupPipelineApi = pipeline->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    pipeline->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+
+    auto calendarDialogNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<CalendarDialogPattern>());
+    ASSERT_NE(calendarDialogNode, nullptr);
+    auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+    auto textTitle = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textTitle, nullptr);
+    dialogPattern->SetTitleNode(textTitle);
+    textTitle->SetThemeScopeId(TEST_NON_DEFAULT_THEME_SCOPE_ID);
+
+    auto textLayoutProperty = textTitle->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    const Color lockedTitleColor = Color::FromRGB(0x2A, 0x3B, 0x4C);
+    textLayoutProperty->UpdateTextColor(lockedTitleColor);
+
+    g_isConfigChangePerform = false;
+    dialogPattern->OnColorConfigurationUpdate();
+
+    EXPECT_EQ(textLayoutProperty->GetTextColor().value_or(Color::TRANSPARENT), lockedTitleColor);
+
+    container->SetApiTargetVersion(backupContainerApi);
+    pipeline->SetApiTargetVersion(backupPipelineApi);
+}
+
+/**
+ * @tc.name: CalendarDialogPattern_OnColorConfig_DefaultScopeApi26_001
+ * @tc.desc: API 26+ with default title theme scope still applies calendar title font color on configuration update.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarDialogPatternTestNg, CalendarDialogPattern_OnColorConfig_DefaultScopeApi26_001,
+    TestSize.Level1)
+{
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    const int32_t backupContainerApi = container->GetApiTargetVersion();
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    const int32_t backupPipelineApi = pipeline->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    pipeline->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+
+    auto calendarDialogNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<CalendarDialogPattern>());
+    ASSERT_NE(calendarDialogNode, nullptr);
+    auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+    auto textTitle = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textTitle, nullptr);
+    dialogPattern->SetTitleNode(textTitle);
+    textTitle->SetThemeScopeId(0);
+
+    auto textLayoutProperty = textTitle->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto calTheme = textTitle->GetTheme<CalendarTheme>(true);
+    ASSERT_NE(calTheme, nullptr);
+    const Color expectedTitleColor = calTheme->GetCalendarTitleFontColor();
+    textLayoutProperty->UpdateTextColor(Color::FromRGB(0x5D, 0x6E, 0x7F));
+
+    g_isConfigChangePerform = false;
+    dialogPattern->OnColorConfigurationUpdate();
+
+    EXPECT_EQ(textLayoutProperty->GetTextColor().value_or(Color::TRANSPARENT), expectedTitleColor);
+
+    container->SetApiTargetVersion(backupContainerApi);
+    pipeline->SetApiTargetVersion(backupPipelineApi);
 }
 } // namespace OHOS::Ace::NG

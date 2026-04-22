@@ -30,6 +30,7 @@
 #include "core/image/image_object.h"
 #include "core/image/image_source_info.h"
 #endif
+#include "core/image/image_cache.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {

@@ -120,8 +120,13 @@ public:
         auto maxSideBarWidth = propMaxSideBarWidth_.value_or(DEFAULT_MAX_SIDE_BAR_WIDTH);
         auto sideBarPosition = propSideBarPosition_.value_or(SideBarPosition::START);
         auto minContentWidth = propMinContentWidth_.value_or(DEFAULT_MIN_CONTENT_WIDTH);
-        json->PutExtAttr("type", type == SideBarContainerType::EMBED ?
-            "SideBarContainerType.Embed" : "SideBarContainerType.OVERLAY", filter);
+        if (type == SideBarContainerType::EMBED) {
+            json->PutExtAttr("type", "SideBarContainerType.Embed", filter);
+        } else if (type == SideBarContainerType::DISPLACE) {
+            json->PutExtAttr("type", "SideBarContainerType.DISPLACE", filter);
+        } else {
+            json->PutExtAttr("type", "SideBarContainerType.OVERLAY", filter);
+        }
         json->PutExtAttr("showSideBar", propShowSideBar_.value_or(true) ? "true" : "false", filter);
         json->PutExtAttr("showControlButton", propShowControlButton_.value_or(true) ? "true" : "false", filter);
         json->PutExtAttr("sideBarWidth", std::to_string(sideBarWidth.Value()).c_str(), filter);

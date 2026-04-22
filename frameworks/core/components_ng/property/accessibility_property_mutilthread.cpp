@@ -16,6 +16,7 @@
 #include "core/components_ng/property/accessibility_property.h"
 
 #include "core/accessibility/accessibility_constants.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 

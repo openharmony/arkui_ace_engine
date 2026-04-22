@@ -42,8 +42,8 @@ enum class ForceSplitTransitionType {
 };
 
 enum class ForceSplitBehaviorMode {
-    NAVIGATION,
     DISPLACE,
+    NAVIGATION,
 };
 
 } // namespace OHOS::Ace::NG

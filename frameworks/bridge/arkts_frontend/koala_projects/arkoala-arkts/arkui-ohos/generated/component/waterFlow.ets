@@ -44,7 +44,7 @@ import { ModifierStateManager } from './../CommonModifier'
 import { ComponentContentBase_serializer } from './../framework/ComponentContent'
 import { WaterFlowSectionsInterface, WaterFlowSectionsInterface_serializer } from './idlize'
 export class ArkWaterFlowPeer extends ArkScrollableCommonMethodPeer {
-    attributeSet?: WaterFlowModifier;
+    waterFlowAttributeSet?: WaterFlowModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

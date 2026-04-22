@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/picker/datepicker_column_layout_algorithm.h"
 #include <cstdint>
 
+#include "core/components/button/button_theme.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_utils.h"
 #include "core/components_ng/pattern/picker/datepicker_layout_property.h"

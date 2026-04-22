@@ -14,6 +14,7 @@
  */
 
 #include "core/components/panel/render_sliding_panel.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"

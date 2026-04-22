@@ -21,7 +21,6 @@
 #include "core/components/swiper/swiper_indicator_theme.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/render/animation_utils.h"
-#include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_modifier.h"
 #include "core/components_ng/pattern/swiper/swiper_constants.h"
 

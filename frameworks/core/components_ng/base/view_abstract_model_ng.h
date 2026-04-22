@@ -28,7 +28,6 @@
 #include "base/utils/utils.h"
 #include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/alignment.h"
-#include "core/components/common/properties/border_image.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model.h"
@@ -47,6 +46,7 @@
 namespace OHOS::Ace {
 class SpanString;
 class CalcDimensionRect;
+class BorderImage;
 }
 namespace OHOS::Ace::NG {
 constexpr int32_t MAT4_ZERO = 0;
@@ -65,6 +65,7 @@ constexpr int32_t MAT4_TWELVE = 12;
 constexpr int32_t MAT4_THIRTEEN = 13;
 constexpr int32_t MAT4_FOURTEEN = 14;
 constexpr int32_t MAT4_FIFTEEN = 15;
+struct SmartGestureShortcutConfig;
 
 class ACE_FORCE_EXPORT ViewAbstractModelNG : public ViewAbstractModel {
 public:
@@ -282,6 +283,10 @@ public:
     void SetPixelStretchEffect(PixStretchEffectOption& option) override
     {
         ViewAbstract::SetPixelStretchEffect(option);
+    }
+    void SetSpatialEffect(const std::optional<SpatialEffectParams>& params) override
+    {
+        ViewAbstract::SetSpatialEffect(params);
     }
     void SetLightUpEffect(double radio) override
     {
@@ -669,27 +674,7 @@ public:
         ViewAbstract::SetOuterBorderStyle(borderStyles);
     }
 
-    void SetBorderImage(const RefPtr<BorderImage>& borderImage, uint8_t bitset) override
-    {
-        CHECK_NULL_VOID(borderImage);
-        if (bitset & BorderImage::SOURCE_BIT) {
-            ViewAbstract::SetBorderImageSource(
-                borderImage->GetSrc(), borderImage->GetBundleName(), borderImage->GetModuleName());
-        }
-        if (bitset & BorderImage::OUTSET_BIT) {
-            ViewAbstract::SetHasBorderImageOutset(true);
-        }
-        if (bitset & BorderImage::SLICE_BIT) {
-            ViewAbstract::SetHasBorderImageSlice(true);
-        }
-        if (bitset & BorderImage::REPEAT_BIT) {
-            ViewAbstract::SetHasBorderImageRepeat(true);
-        }
-        if (bitset & BorderImage::WIDTH_BIT) {
-            ViewAbstract::SetHasBorderImageWidth(true);
-        }
-        ViewAbstract::SetBorderImage(borderImage);
-    }
+    void SetBorderImage(const RefPtr<BorderImage>& borderImage, uint8_t bitset) override;
 
     void SetBorderImageGradient(const NG::Gradient& gradient) override
     {
@@ -1155,6 +1140,16 @@ public:
         ViewAbstract::SetUseUnion(useUnion);
     }
 
+    void SetCenterGravityOptions(const CenterGravityOptions& centerGravityOptions) override
+    {
+        ViewAbstract::SetCenterGravityOptions(centerGravityOptions);
+    }
+
+    void SetEdgeLightParam(const std::optional<EdgeLightParam>& param) override
+    {
+        ViewAbstract::SetEdgeLightParam(param);
+    }
+
     void SetUseShadowBatching(bool useShadowBatching) override
     {
         ViewAbstract::SetUseShadowBatching(useShadowBatching);
@@ -1482,6 +1477,16 @@ public:
     void SetMouseResponseRegion(const std::vector<DimensionRect>& responseRegion) override
     {
         ViewAbstract::SetMouseResponseRegion(responseRegion);
+    }
+
+    void SetSmartGestureShortcut(int32_t action, bool enabled, bool selectable) override
+    {
+        ViewAbstract::SetSmartGestureShortcut(action, enabled, selectable);
+    }
+
+    void ResetSmartGestureShortcut() override
+    {
+        ViewAbstract::ResetSmartGestureShortcut();
     }
 
     void SetEnabled(bool enabled) override
@@ -2008,6 +2013,8 @@ public:
     static void SetAccessibilityGroupOptions(FrameNode* frameNode, AccessibilityGroupOptions groupOptions);
     static void SetAccessibilityActionOptions(FrameNode* frameNode, AccessibilityActionOptions actionOptions);
     static void ResetAccessibilityActionOptions(FrameNode* frameNode);
+    static void SetSmartGestureShortcut(FrameNode* frameNode, SmartGestureShortcutConfig config);
+    static void ResetSmartGestureShortcut(FrameNode* frameNode);
     static void SetAccessibilityRole(FrameNode* frameNode, const std::string& role, bool resetValue);
     static void SetOnAccessibilityFocus(
         FrameNode* frameNode, NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl);

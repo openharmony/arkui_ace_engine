@@ -25,12 +25,36 @@
 #include <array>
 #include <optional>
 
+#include "ani_utils.h"
 #include "core/common/container.h"
 #include "core/common/resource/resource_wrapper.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/theme/shadow_theme.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/common/resource/resource_manager.h"
 #include "frameworks/base/log/log_wrapper.h"
+
+using OHOS::Ace::AniUtils::CreateANIIntObject;
+using OHOS::Ace::AniUtils::CreateANILongObject;
+using OHOS::Ace::AniUtils::CreateANIDoubleObject;
+using OHOS::Ace::AniUtils::IsUndefinedObject;
+using OHOS::Ace::AniUtils::IsClassObject;
+using OHOS::Ace::AniUtils::IsArrayObject;
+using OHOS::Ace::AniUtils::IsEnum;
+using OHOS::Ace::AniUtils::GetBoolParam;
+using OHOS::Ace::AniUtils::GetInt32Param;
+using OHOS::Ace::AniUtils::GetInt64Param;
+using OHOS::Ace::AniUtils::GetDoubleParam;
+using OHOS::Ace::AniUtils::GetDoubleParamOpt;
+using OHOS::Ace::AniUtils::ANIStringToStdString;
+using OHOS::Ace::AniUtils::GetStringParam;
+using OHOS::Ace::AniUtils::GetStringParamOpt;
+using OHOS::Ace::AniUtils::GetStringArrayParam;
+using OHOS::Ace::AniUtils::GetEnumInt;
+using OHOS::Ace::AniUtils::GetEnumIntOpt;
+using OHOS::Ace::AniUtils::GetEnumString;
+using OHOS::Ace::AniUtils::GetEnumStringOpt;
+using OHOS::Ace::AniUtils::GetFunctionParam;
 
 struct PromptActionAsyncContext {
     ani_vm* vm = nullptr;
@@ -104,41 +128,6 @@ constexpr int32_t PLURAL_HOLDER_INDEX = 2;
 constexpr int32_t DOLLAR_TOKENS_SIZE = 3;
 constexpr int32_t MAYBE_MODULE_NAME_SIZE = 3;
 
-// Get ANI base params
-ani_object CreateANIIntObject(ani_env *env, int32_t intValue);
-ani_object CreateANILongObject(ani_env *env, int64_t longValue);
-ani_object CreateANIDoubleObject(ani_env *env, double doubleValue);
-bool IsUndefinedObject(ani_env *env, ani_ref objectRef);
-bool IsClassObject(ani_env *env, ani_object object, const char *class_descriptor);
-bool IsArrayObject(ani_env *env, ani_object object);
-bool IsArrayObject(ani_env *env, ani_ref ref);
-bool IsEnum(ani_env *env, ani_object object, const char *enum_descriptor);
-bool GetBoolParam(ani_env* env, ani_ref ref, bool& result);
-bool GetBoolParam(ani_env* env, ani_object object, const char *name, bool& result);
-bool GetInt32Param(ani_env* env, ani_ref ref, int32_t& result);
-bool GetInt32Param(ani_env* env, ani_object object, const char *name, int32_t& result);
-bool GetInt64Param(ani_env* env, ani_ref ref, int64_t& result);
-bool GetInt64Param(ani_env* env, ani_object object, const char *name, int64_t& result);
-bool GetDoubleParam(ani_env* env, ani_ref ref, double& result);
-bool GetDoubleParam(ani_env* env, ani_object object, const char *name, double& result);
-bool GetDoubleParamOpt(ani_env *env, ani_object object, const char *name, std::optional<double>& result);
-std::string ANIStringToStdString(ani_env *env, ani_string ani_str);
-bool GetStringParam(ani_env *env, ani_ref ref, std::string& result);
-bool GetStringParam(ani_env *env, ani_object object, const char *name, std::string& result);
-bool GetStringParamOpt(ani_env *env, ani_object object, const char *name, std::optional<std::string>& result);
-bool GetStringArrayParam(ani_env *env, ani_object object, const char *name, std::vector<std::string>& result);
-bool GetEnumInt(ani_env* env, ani_object resultObj, const char *enum_descriptor, int32_t& result);
-bool GetEnumInt(ani_env* env, ani_object object, const char *name, const char *enum_descriptor, int32_t& result);
-bool GetEnumIntOpt(ani_env* env, ani_object object, const char *name, const char *enum_descriptor,
-    std::optional<int32_t>& result);
-bool GetEnumString(ani_env* env, ani_object resultObj, const char *enum_descriptor, std::string& result);
-bool GetEnumString(ani_env* env, ani_object object, const char *name, const char *enum_descriptor,
-    std::string& result);
-bool GetEnumStringOpt(ani_env* env, ani_object object, const char *name, const char *enum_descriptor,
-    std::optional<std::string>& result);
-bool GetFunctionParam(ani_env *env, ani_ref ref, std::function<void()>& result);
-bool GetFunctionParam(ani_env *env, ani_object object, const char *name, std::function<void()>& result);
-
 // Get promptAction params
 void PrefixEmptyBundleName(ani_env *env, ani_object object);
 ResourceStruct CheckResourceStruct(ani_env *env, ani_object object);
@@ -190,5 +179,8 @@ bool GetHoverModeAreaParam(ani_env* env, ani_object object, OHOS::Ace::HoverMode
 bool GetHoverModeAreaParamOpt(ani_env* env, ani_object object, std::optional<OHOS::Ace::HoverModeAreaType>& result);
 bool GetOffsetParam(ani_env *env, ani_object object, OHOS::Ace::DimensionOffset& result);
 bool GetOffsetParamOpt(ani_env *env, ani_object object, std::optional<OHOS::Ace::DimensionOffset>& result);
+
+// Common material parameter parsing
+bool GetSystemMaterial(ani_env* env, ani_object object, OHOS::Ace::RefPtr<OHOS::Ace::UiMaterial>& result);
 
 #endif // INTERFACES_ETS_ANI_PROMPTACTION_SRC_PROMPT_ACTION_PARAMS_H

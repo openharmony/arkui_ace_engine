@@ -17,7 +17,6 @@
 #include "interfaces/native/node/list_option.h"
 #include "interfaces/native/node/node_model.h"
 
-#include "bridge/common/utils/utils.h"
 #include "core/components/list/list_theme.h"
 #include "core/components_ng/pattern/list/list_children_main_size.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
@@ -25,7 +24,6 @@
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/interfaces/native/node/node_adapter_impl.h"
-#include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {

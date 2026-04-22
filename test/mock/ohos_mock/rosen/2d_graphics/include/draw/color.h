@@ -57,6 +57,23 @@ struct Color4f {
     scalar alphaF_ = 1;
 };
 
+struct UIColor {
+    scalar r_ = 0;
+    scalar g_ = 0;
+    scalar b_ = 0;
+    scalar a_ = 1;
+    scalar headRoom_ = 1;
+    UIColor() = default;
+    UIColor(scalar r, scalar g, scalar b, scalar a) : r_(r), g_(g), b_(b), a_(a) {}
+    UIColor(scalar r, scalar g, scalar b, scalar a, scalar headRoom)
+        : r_(r), g_(g), b_(b), a_(a), headRoom_(headRoom) {}
+    scalar red() const { return r_; }
+    scalar green() const { return g_; }
+    scalar blue() const { return b_; }
+    scalar alpha() const { return a_; }
+    scalar headRoom() const { return headRoom_; }
+};
+
 typedef uint32_t ColorQuad;
 
 class Color {

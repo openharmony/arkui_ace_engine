@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,9 +21,9 @@
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/scrollable/selectable_container_pattern.h"
 
 namespace OHOS::Ace::NG {
-// implement interfaces with mock
 class PartiallyMockedScrollable : public ScrollablePattern {
     DECLARE_ACE_TYPE(PartiallyMockedScrollable, ScrollablePattern);
 
@@ -40,6 +40,41 @@ private:
 
 class FullyMockedScrollable : public PartiallyMockedScrollable {
     DECLARE_ACE_TYPE(FullyMockedScrollable, PartiallyMockedScrollable);
+
+public:
+    RefPtr<EventHub> CreateEventHub() override
+    {
+        return MakeRefPtr<ScrollableEventHub>();
+    }
+
+private:
+    MOCK_METHOD(bool, HandleScrollVelocity, (float, const RefPtr<NestableScrollContainer>&), (override));
+    MOCK_METHOD(void, OnScrollEndCallback, (), (override));
+    MOCK_METHOD(bool, OutBoundaryCallback, (bool useCurrentDelta), (override));
+};
+
+class PartiallyMockedSelectableContainer : public SelectableContainerPattern {
+    DECLARE_ACE_TYPE(PartiallyMockedSelectableContainer, SelectableContainerPattern);
+
+public:
+    std::vector<RefPtr<FrameNode>> GetVisibleSelectedItems() override
+    {
+        return {};
+    }
+
+private:
+    MOCK_METHOD(bool, UpdateCurrentOffset, (float delta, int32_t source), (override));
+    MOCK_METHOD(bool, IsAtTop, (), (const, override));
+    MOCK_METHOD(bool, IsAtBottom, (bool considerRepeat), (const, override));
+    MOCK_METHOD(void, UpdateScrollBarOffset, (), (override));
+    MOCK_METHOD(bool, IsScrollable, (), (const, override));
+    MOCK_METHOD(OverScrollOffset, GetOverScrollOffset, (double delta), (const, override));
+    MOCK_METHOD(float, GetMainContentSize, (), (const, override));
+    MOCK_METHOD(bool, IsOutOfBoundary, (bool useCurrentDelta), (override));
+};
+
+class FullyMockedSelectableContainer : public PartiallyMockedSelectableContainer {
+    DECLARE_ACE_TYPE(FullyMockedSelectableContainer, PartiallyMockedSelectableContainer);
 
 public:
     RefPtr<EventHub> CreateEventHub() override

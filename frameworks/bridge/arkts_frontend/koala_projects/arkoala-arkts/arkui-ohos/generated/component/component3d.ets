@@ -38,7 +38,7 @@ import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 import { Scene_serializer } from './../framework/Scene'
 export class ArkComponent3DPeer extends ArkCommonMethodPeer {
-    attributeSet?: Component3DModifier;
+    component3DAttributeSet?: Component3DModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

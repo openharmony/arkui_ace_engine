@@ -14,6 +14,7 @@
  */
 
 #include "patternlock_test_ng.h"
+#include "core/components/common/properties/border_image.h"
 #include "core/components_ng/pattern/patternlock/patternlock_theme_wrapper.h"
 
 namespace OHOS::Ace::NG {

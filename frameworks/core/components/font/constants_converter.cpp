@@ -288,18 +288,6 @@ RSColor ConvertToRSColor(Color color)
     return color.GetValue();
 }
 
-bool ShouldUseUIColorForSymbolColor(const Color& color)
-{
-    return color.GetHeadRoomColor().has_value() || color.GetColorSpace() != ColorSpace::SRGB;
-}
-
-bool HasUIColorSymbolColors(const std::vector<Color>& colors)
-{
-    return std::any_of(colors.begin(), colors.end(), [](const auto& color) {
-        return ShouldUseUIColorForSymbolColor(color);
-    });
-}
-
 Rosen::Drawing::UIColor ConvertToRSUIColor(const Color& color)
 {
     if (auto headRoomColor = color.GetHeadRoomColor(); headRoomColor.has_value()) {
@@ -597,15 +585,24 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     auto fontWeightValue = (static_cast<int32_t>(
             ConvertTxtFontWeight(textStyle.GetFontWeight())) + 1) * DEFAULT_MULTIPLE;
     auto pipelineContext = context.Upgrade();
-    if (pipelineContext) {
-        if (textStyle.GetEnableDeviceFontWeightCategory()) {
-            fontWeightValue = fontWeightValue * pipelineContext->GetFontWeightScale();
-        }
-    }
     if (textStyle.GetEnableVariableFontWeight()) {
         fontWeightValue = textStyle.GetVariableFontWeight();
         if (LessNotEqual(fontWeightValue, MIN_FONT_WEIGHT) || GreatNotEqual(fontWeightValue, MAX_FONT_WEIGHT)) {
             fontWeightValue = DEFAULT_FONT_WEIGHT;
+        }
+    }
+    if (pipelineContext) {
+        auto enableDeviceFontWeightCategory = textStyle.GetEnableDeviceFontWeightCategory();
+        if (enableDeviceFontWeightCategory.has_value()) {
+            // Span/styledString组件: 显式设置时根据设置值决定是否缩放
+            if (enableDeviceFontWeightCategory.value()) {
+                fontWeightValue = fontWeightValue * pipelineContext->GetFontWeightScale();
+            }
+        } else {
+            // Text组件: enableDeviceFontWeightCategory未设置，默认行为是缩放
+            if (!textStyle.GetEnableVariableFontWeight()) {
+                fontWeightValue = fontWeightValue * pipelineContext->GetFontWeightScale();
+            }
         }
     }
     txtStyle.fontVariations.SetAxisValue(FONTWEIGHT, fontWeightValue);
@@ -803,9 +800,10 @@ Rosen::SymbolColor ConvertToNativeSymbolColor(const std::vector<SymbolGradient>&
     return symbolColor;
 }
 
-void SetSymbolRenderColor(const std::vector<Color>& symbolColor, Rosen::TextStyle& txtStyle)
+void SetSymbolRenderColor(const TextStyle& textStyle, Rosen::TextStyle& txtStyle)
 {
-    if (HasUIColorSymbolColors(symbolColor)) {
+    const auto& symbolColor = textStyle.GetSymbolColorList();
+    if (textStyle.GetAndUpdateSymbolColorInfo().shouldUseUIColor) {
         std::vector<Rosen::Drawing::UIColor> uiColors;
         std::vector<Rosen::SymbolColorSpace> colorSpaces;
         uiColors.reserve(symbolColor.size());
@@ -833,8 +831,7 @@ void ConvertSymbolTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyl
 
     txtStyle.isSymbolGlyph = true;
     txtStyle.symbol.SetRenderMode(textStyle.GetRenderStrategy());
-    const std::vector<Color>& symbolColor = textStyle.GetSymbolColorList();
-    SetSymbolRenderColor(symbolColor, txtStyle);
+    SetSymbolRenderColor(textStyle, txtStyle);
 
     if (auto intermediateStyle = textStyle.GetShaderStyle(); !intermediateStyle.empty()) {
         txtStyle.symbol.SetSymbolColor(ConvertToNativeSymbolColor(intermediateStyle));

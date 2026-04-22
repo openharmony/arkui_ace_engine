@@ -113,6 +113,12 @@ void AnimationUtils::SetNavGroupNodeTransAnimationCallback()
     navigationManger->SetNodeAddAnimation(true);
 }
 
+void AnimationUtils::OpenImplicitAnimation(
+    const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback)
+{
+    OpenImplicitAnimation(option, curve, finishCallback, nullptr);
+}
+
 void AnimationUtils::OpenImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
     const std::function<void()>& finishCallback, const RefPtr<PipelineBase>& context)
 {
@@ -121,6 +127,11 @@ void AnimationUtils::OpenImplicitAnimation(const AnimationOption& option, const 
     auto rsUIContext = GetRSUIContext(context);
     Rosen::RSNode::OpenImplicitAnimation(rsUIContext, timingProtocol,
         NativeCurveHelper::ToNativeCurve(curve), wrappedOnFinish);
+}
+
+bool AnimationUtils::CloseImplicitAnimation()
+{
+    return CloseImplicitAnimation(nullptr);
 }
 
 bool AnimationUtils::CloseImplicitAnimation(const RefPtr<PipelineBase>& context)
@@ -135,10 +146,20 @@ bool AnimationUtils::CloseImplicitAnimation(const RefPtr<PipelineBase>& context)
     return !animations.empty();
 }
 
+bool AnimationUtils::CloseImplicitCancelAnimation()
+{
+    return CloseImplicitCancelAnimation(nullptr);
+}
+
 bool AnimationUtils::CloseImplicitCancelAnimation(const RefPtr<PipelineBase>& context)
 {
     auto rsUIContext = GetRSUIContext(context);
     return Rosen::RSNode::CloseImplicitCancelAnimation(rsUIContext);
+}
+
+CancelAnimationStatus AnimationUtils::CloseImplicitCancelAnimationReturnStatus()
+{
+    return CloseImplicitCancelAnimationReturnStatus(nullptr);
 }
 
 CancelAnimationStatus AnimationUtils::CloseImplicitCancelAnimationReturnStatus(const RefPtr<PipelineBase>& context)
@@ -148,10 +169,21 @@ CancelAnimationStatus AnimationUtils::CloseImplicitCancelAnimationReturnStatus(c
     return static_cast<CancelAnimationStatus>(status);
 }
 
+bool AnimationUtils::IsImplicitAnimationOpen()
+{
+    return IsImplicitAnimationOpen(nullptr);
+}
+
 bool AnimationUtils::IsImplicitAnimationOpen(const RefPtr<PipelineBase>& context)
 {
     auto rsUIContext = GetRSUIContext(context);
     return Rosen::RSNode::IsImplicitAnimationOpen(rsUIContext);
+}
+
+void AnimationUtils::Animate(const AnimationOption& option, const PropertyCallback& callback,
+    const FinishCallback& finishCallback, const RepeatCallback& repeatCallback)
+{
+    Animate(option, callback, finishCallback, repeatCallback, nullptr);
 }
 
 void AnimationUtils::Animate(const AnimationOption& option, const PropertyCallback& callback,
@@ -170,12 +202,22 @@ void AnimationUtils::Animate(const AnimationOption& option, const PropertyCallba
     }
 }
 
+void AnimationUtils::AnimateWithCurrentOptions(const PropertyCallback& callback, const FinishCallback& finishCallback)
+{
+    AnimateWithCurrentOptions(callback, finishCallback, true, nullptr);
+}
+
 void AnimationUtils::AnimateWithCurrentOptions(const PropertyCallback& callback, const FinishCallback& finishCallback,
     bool timingSensitive, const RefPtr<PipelineBase>& context)
 {
     auto wrappedOnFinish = GetWrappedCallback(finishCallback, true, context);
     auto rsUIContext = GetRSUIContext(context);
     Rosen::RSNode::AnimateWithCurrentOptions(rsUIContext, callback, wrappedOnFinish, timingSensitive);
+}
+
+void AnimationUtils::AnimateWithCurrentCallback(const AnimationOption& option, const PropertyCallback& callback)
+{
+    AnimateWithCurrentCallback(option, callback, nullptr);
 }
 
 void AnimationUtils::AnimateWithCurrentCallback(const AnimationOption& option, const PropertyCallback& callback,
@@ -187,11 +229,21 @@ void AnimationUtils::AnimateWithCurrentCallback(const AnimationOption& option, c
         timingProtocol, NativeCurveHelper::ToNativeCurve(option.GetCurve()), callback);
 }
 
+void AnimationUtils::AddKeyFrame(float fraction, const RefPtr<Curve>& curve, const PropertyCallback& callback)
+{
+    AddKeyFrame(fraction, curve, callback, nullptr);
+}
+
 void AnimationUtils::AddKeyFrame(float fraction, const RefPtr<Curve>& curve, const PropertyCallback& callback,
     const RefPtr<PipelineBase>& context)
 {
     auto rsUIContext = GetRSUIContext(context);
     Rosen::RSNode::AddKeyFrame(rsUIContext, fraction, NativeCurveHelper::ToNativeCurve(curve), callback);
+}
+
+void AnimationUtils::AddKeyFrame(float fraction, const PropertyCallback& callback)
+{
+    AddKeyFrame(fraction, callback, nullptr);
 }
 
 void AnimationUtils::AddKeyFrame(float fraction, const PropertyCallback& callback,
@@ -201,11 +253,23 @@ void AnimationUtils::AddKeyFrame(float fraction, const PropertyCallback& callbac
     Rosen::RSNode::AddKeyFrame(rsUIContext, fraction, callback);
 }
 
+void AnimationUtils::AddDurationKeyFrame(int duration, const RefPtr<Curve>& curve, const PropertyCallback& callback)
+{
+    AddDurationKeyFrame(duration, curve, callback, nullptr);
+}
+
 void AnimationUtils::AddDurationKeyFrame(int duration, const RefPtr<Curve>& curve, const PropertyCallback& callback,
     const RefPtr<PipelineBase>& context)
 {
     auto rsUIContext = GetRSUIContext(context);
     Rosen::RSNode::AddDurationKeyFrame(rsUIContext, duration, NativeCurveHelper::ToNativeCurve(curve), callback);
+}
+
+std::shared_ptr<AnimationUtils::Animation> AnimationUtils::StartAnimation(const AnimationOption& option,
+    const PropertyCallback& callback, const FinishCallback& finishCallback,
+    const RepeatCallback& repeatCallback)
+{
+    return StartAnimation(option, callback, finishCallback, repeatCallback, nullptr);
 }
 
 std::shared_ptr<AnimationUtils::Animation> AnimationUtils::StartAnimation(
@@ -290,6 +354,11 @@ void AnimationUtils::ReverseAnimation(const std::shared_ptr<AnimationUtils::Anim
     for (auto& ani : animation->animations_) {
         ani->Reverse();
     }
+}
+
+void AnimationUtils::ExecuteWithoutAnimation(const PropertyCallback& callback)
+{
+    ExecuteWithoutAnimation(callback, nullptr);
 }
 
 void AnimationUtils::ExecuteWithoutAnimation(const PropertyCallback& callback,

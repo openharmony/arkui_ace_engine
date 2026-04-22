@@ -1156,6 +1156,38 @@ HWTEST_F(FrameNodeTestNg, FrameNodeSetOnAreaChangeCallbackWithInterval02, TestSi
 }
 
 /**
+ * @tc.name: FrameNodeSetOnAreaChangeCallbackWithInterval03
+ * @tc.desc: Test the function SetOnAreaChangeCallbackWithInterval keeps valid boundary interval values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeSetOnAreaChangeCallbackWithInterval03, TestSize.Level1)
+{
+    constexpr uint32_t MAX_INTERVAL = std::numeric_limits<int32_t>::max();
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+
+    frameNode->SetOnAreaChangeCallbackWithInterval(
+        [](const RectF&, const OffsetF&, const RectF&, const OffsetF&) {}, 3000);
+    frameNode->lastAreaChangeTriggerTime_ = 789;
+    frameNode->throttledAreaChangeCallbackOnTheWay_ = true;
+
+    frameNode->SetOnAreaChangeCallbackWithInterval(
+        [](const RectF&, const OffsetF&, const RectF&, const OffsetF&) {}, 0);
+    EXPECT_EQ(frameNode->onAreaChangeMinInterval_, 0);
+    EXPECT_EQ(frameNode->lastAreaChangeTriggerTime_, 0);
+    EXPECT_FALSE(frameNode->throttledAreaChangeCallbackOnTheWay_);
+
+    frameNode->lastAreaChangeTriggerTime_ = 321;
+    frameNode->throttledAreaChangeCallbackOnTheWay_ = true;
+    frameNode->SetOnAreaChangeCallbackWithInterval(
+        [](const RectF&, const OffsetF&, const RectF&, const OffsetF&) {}, MAX_INTERVAL);
+    EXPECT_EQ(frameNode->onAreaChangeMinInterval_, MAX_INTERVAL);
+    EXPECT_EQ(frameNode->lastAreaChangeTriggerTime_, 0);
+    EXPECT_FALSE(frameNode->throttledAreaChangeCallbackOnTheWay_);
+    EXPECT_TRUE(frameNode->eventHub_->HasOnAreaChanged());
+}
+
+/**
  * @tc.name: FrameNodeProcessThrottledAreaChangeCallback01
  * @tc.desc: Test the function ProcessThrottledAreaChangeCallback posts delayed task when interval is not reached.
  * @tc.type: FUNC

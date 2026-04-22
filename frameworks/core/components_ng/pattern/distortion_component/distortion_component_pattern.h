@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DISTORTION_COMPONENT_DISTORTION_COMPONENT_PATTERN_H
 
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/distortion_component/distortion_component_layout_algorithm.h"
 #include "core/components_ng/pattern/distortion_component/distortion_component_options.h"
 
 namespace OHOS::Ace::NG {
@@ -43,7 +44,7 @@ public:
      * Create the content node for mounting developer content.
      * The content node is created immediately after parent node creation.
      */
-    void CreateContentNode(const RefPtr<FrameNode>& builderNode);
+    void CreateContentNode();
     
     /**
      * Get the content node.
@@ -52,9 +53,14 @@ public:
      */
     RefPtr<FrameNode> GetContentNode() const { return contentNode_; }
 
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
+    {
+        return AceType::MakeRefPtr<DistortionComponentLayoutAlgorithm>();
+    }
+
     bool IsAtomicNode() const override
     {
-        return true;
+        return false;
     }
 
     bool IsSupportDrawModifier() const override

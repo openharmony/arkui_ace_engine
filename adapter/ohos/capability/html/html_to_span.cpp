@@ -47,6 +47,11 @@ bool IsHeadingTag(const std::string& element)
     return HEADING_STYLES.find(element) != HEADING_STYLES.end();
 }
 
+bool EndsWithLineBreak(const std::string& content)
+{
+    return !content.empty() && content.back() == '\n';
+}
+
 void ToLowerCase(std::string& str)
 {
     for (auto& c : str) {
@@ -1026,9 +1031,6 @@ void HtmlToSpan::ToTextSpan(
     info.type = HtmlType::TEXT;
     info.start = pos;
     info.end = pos + len;
-    if (IsHeadingTag(element)) {
-        AddHeadingStyleSpan(element, info);
-    }
     xmlAttrPtr curNode = node->properties;
     for (; curNode; curNode = curNode->next) {
         auto styles = ToTextSpanStyle(curNode);
@@ -1036,11 +1038,29 @@ void HtmlToSpan::ToTextSpan(
             info.values.emplace_back(value);
         }
     }
-    if (!element.empty() && !IsHeadingTag(element)) {
+    if (!element.empty()) {
         AddStyleSpan(element, info);
     }
     if (info.values.empty()) {
         return;
+    }
+    spanInfos.emplace_back(std::move(info));
+}
+
+void HtmlToSpan::ToHeadingSpan(
+    const std::string& element, xmlNodePtr node, size_t len, size_t& pos, std::vector<SpanInfo>& spanInfos)
+{
+    SpanInfo info;
+    info.type = HtmlType::TEXT;
+    info.start = pos;
+    info.end = pos + len;
+    AddHeadingStyleSpan(element, info);
+    xmlAttrPtr curNode = node->properties;
+    for (; curNode; curNode = curNode->next) {
+        auto styles = ToTextSpanStyle(curNode);
+        for (auto [key, value] : styles) {
+            info.values.emplace_back(value);
+        }
     }
     spanInfos.emplace_back(std::move(info));
 }
@@ -1110,6 +1130,13 @@ void HtmlToSpan::ToSpan(
     xmlNodePtr curNode, size_t& pos, std::string& allContent, std::vector<SpanInfo>& spanInfos,
     bool isNeedLoadPixelMap)
 {
+    std::string htmlTag = reinterpret_cast<const char*>(curNode->name);
+    bool isHeading = (curNode->type == XML_ELEMENT_NODE && IsHeadingTag(htmlTag));
+    if (isHeading && !allContent.empty() && !EndsWithLineBreak(allContent)) {
+        allContent += "\n";
+        pos++;
+    }
+
     size_t curNodeLen = 0;
     if (curNode->content) {
         std::string curNodeContent = reinterpret_cast<const char*>(curNode->content);
@@ -1117,7 +1144,6 @@ void HtmlToSpan::ToSpan(
         curNodeLen = StringUtils::ToWstring(curNodeContent).length();
     }
 
-    std::string htmlTag = reinterpret_cast<const char*>(curNode->name);
     size_t childPos = pos + curNodeLen;
     bool isSmall = (curNode->type == XML_ELEMENT_NODE && htmlTag == "small");
     if (isSmall) {
@@ -1141,6 +1167,12 @@ void HtmlToSpan::ToSpan(
         } else if (htmlTag == "br") {
             allContent += "\n";
             childPos++;
+        } else if (isHeading) {
+            ToHeadingSpan(htmlTag, curNode, childPos - pos, pos, spanInfos);
+            if (!EndsWithLineBreak(allContent)) {
+                allContent += "\n";
+                childPos++;
+            }
         } else {
             ToTextSpan(htmlTag, curNode, childPos - pos, pos, spanInfos);
         }

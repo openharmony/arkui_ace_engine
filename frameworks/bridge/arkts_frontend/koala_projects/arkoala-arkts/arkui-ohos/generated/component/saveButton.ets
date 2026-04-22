@@ -40,7 +40,7 @@ import { SaveButtonModifier } from './../SaveButtonModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 export class ArkSaveButtonPeer extends ArkSecurityComponentMethodPeer {
-    attributeSet?: SaveButtonModifier;
+    saveButtonAttributeSet?: SaveButtonModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

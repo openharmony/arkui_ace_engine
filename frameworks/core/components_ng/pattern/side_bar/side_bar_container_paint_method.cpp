@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/side_bar/side_bar_container_paint_method.h"
 
+#include "core/components_ng/render/drawing.h"
+
 namespace OHOS::Ace::NG {
 CanvasDrawFunction SideBarContainerPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
 {

@@ -1210,4 +1210,13 @@ RSImage SkiaDecorationPainter::CreateBorderImageGradient(const NG::Gradient& gra
     return RSImage(&skImage);
 }
 
+float SkiaDecorationPainter::ConvertRadiusToSigma(float radius)
+{
+    constexpr float BlurSigmaScale = 0.57735f;
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return radius > 0.0f ? BlurSigmaScale * radius + SK_ScalarHalf : 0.0f;
+    }
+    return radius >= 0.0f ?
+        (NearZero(radius) ? 0.0f : BlurSigmaScale * radius + SK_ScalarHalf) : -1.0f;
+}
 } // namespace OHOS::Ace::NG

@@ -15,6 +15,8 @@
 
 #include "core/components/button/render_button.h"
 
+#include "core/accessibility/accessibility_manager.h"
+
 #include "base/log/event_report.h"
 #include "core/event/ace_event_helper.h"
 

@@ -68,26 +68,57 @@ export class NavigationTransitionProxyInternal implements MaterializedBase,Navig
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    public from: NavContentInfo
-    public to: NavContentInfo
-    public isInteractive?: boolean | undefined
-    public cancelTransition?: VoidCallback | undefined
-    public updateTransition?: UpdateTransitionCallback | undefined
+    // instructive change begin
+    get from(): NavContentInfo {
+        return this.getFrom()
+    }
+    set from(from: NavContentInfo) {
+        this.setFrom(from)
+    }
+    get to(): NavContentInfo {
+        return this.getTo()
+    }
+    set to(to: NavContentInfo) {
+        this.setTo(to)
+    }
+    get isInteractive(): boolean | undefined {
+        return this.getIsInteractive()
+    }
+    set isInteractive(isInteractive: boolean | undefined) {
+        this.setIsInteractive(isInteractive)
+    }
+    get cancelTransition(): VoidCallback | undefined {
+        return this.getCancelTransition()
+    }
+    set cancelTransition(cancelTransition: VoidCallback | undefined) {
+        this.setCancelTransition(cancelTransition)
+    }
+    get updateTransition(): UpdateTransitionCallback | undefined {
+        return this.getUpdateTransition()
+    }
+    set updateTransition(updateTransition: UpdateTransitionCallback | undefined) {
+        this.setUpdateTransition(updateTransition)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, NavigationTransitionProxyInternal.getFinalizer())
-        this.from = this.getFrom()
-        this.to = this.getTo()
-        this.isInteractive = this.getIsInteractive()
-        this.cancelTransition = this.getCancelTransition()
-        this.updateTransition = this.getUpdateTransition()
+        // instructive change begin
+        // this.from = this.getFrom()
+        // this.to = this.getTo()
+        // this.isInteractive = this.getIsInteractive()
+        // this.cancelTransition = this.getCancelTransition()
+        // this.updateTransition = this.getUpdateTransition()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, NavigationTransitionProxyInternal.construct())
-        this.from = this.getFrom()
-        this.to = this.getTo()
-        this.isInteractive = this.getIsInteractive()
-        this.cancelTransition = this.getCancelTransition()
-        this.updateTransition = this.getUpdateTransition()
+        // instructive change begin
+        // this.from = this.getFrom()
+        // this.to = this.getTo()
+        // this.isInteractive = this.getIsInteractive()
+        // this.cancelTransition = this.getCancelTransition()
+        // this.updateTransition = this.getUpdateTransition()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._NavigationTransitionProxy_construct()
@@ -1128,7 +1159,7 @@ export class NavPathStack implements MaterializedBase {
     }
 }
 export class ArkNavigationPeer extends ArkCommonMethodPeer {
-    attributeSet?: NavigationModifier;
+    navigationAttributeSet?: NavigationModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

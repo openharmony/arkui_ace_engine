@@ -1047,8 +1047,15 @@ void SetTextInputCancelButton(ArkUINodeHandle node, ArkUI_Int32 style, const str
         } else {
             pattern->UnRegisterResource("cancelButtonIconSize");
         }
+        RefPtr<ResourceObject> colorResObj;
         if (imageIconRes && imageIconRes->colorObj) {
-            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(imageIconRes->colorObj));
+            colorResObj = AceType::Claim(reinterpret_cast<ResourceObject*>(imageIconRes->colorObj));
+        } else {
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                colorResObj, iconColor, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
+        }
+        if (colorResObj) {
+            auto resObj = colorResObj;
             pattern->RegisterResource<Color>("cancelButtonIconColor", resObj, iconColor);
         } else {
             pattern->UnRegisterResource("cancelButtonIconColor");

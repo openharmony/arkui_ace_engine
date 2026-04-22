@@ -29,6 +29,7 @@
 #include "include/utils/SkShadowUtils.h"
 #endif
 
+#include "core/common/container.h"
 #include "core/components/common/painter/border_image_painter.h"
 #include "core/pipeline/base/rosen_render_context.h"
 #include "core/pipeline/base/constants.h"
@@ -2903,7 +2904,7 @@ void RosenDecorationPainter::PaintBoxShadows(const std::vector<Shadow>& shadows,
 #endif
         }
     } else {
-        rsNode->SetShadowRadius(0.f);
+        rsNode->SetShadowRadius(-1.f);
     }
 }
 

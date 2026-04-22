@@ -1542,4 +1542,32 @@ HWTEST_F(LazyForEachSyntaxTestNg, ReorganizeOffscreenNode001, TestSize.Level1)
     EXPECT_EQ(count2 - count1, 1);
 }
 
+/**
+ * @tc.name: RemovingExpiringItemEmptyTest
+ * @tc.desc: Test RemovingExpiringItem with empty removingNodeList_
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, RemovingExpiringItemEmptyTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyForEachBuilder
+     */
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+    
+    /**
+     * @tc.steps: step2. Ensure removingNodeList_ is empty
+     * @tc.expected: removingNodeList_ is empty
+     */
+    EXPECT_TRUE(lazyForEachBuilder->removingNodeList_.empty());
+    
+    /**
+     * @tc.steps: step3. Call RemovingExpiringItem with far deadline
+     * @tc.expected: No crash, method returns immediately
+     */
+    int64_t deadline = GetSysTimestamp() + 10000;  // 很远的时间
+    lazyForEachBuilder->RemovingExpiringItem(deadline);
+    EXPECT_TRUE(lazyForEachBuilder->removingNodeList_.empty());
+}
+
 } // namespace OHOS::Ace::NG

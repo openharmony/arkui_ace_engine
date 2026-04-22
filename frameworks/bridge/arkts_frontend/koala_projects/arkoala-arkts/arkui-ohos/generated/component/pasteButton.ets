@@ -35,7 +35,7 @@ import { PasteButtonModifier } from './../PasteButtonModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 export class ArkPasteButtonPeer extends ArkSecurityComponentMethodPeer {
-    attributeSet?: PasteButtonModifier;
+    pasteButtonAttributeSet?: PasteButtonModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

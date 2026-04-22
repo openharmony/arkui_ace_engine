@@ -154,6 +154,34 @@ void ResetListItemGroupStyle(ArkUINodeHandle node)
     ListItemGroupModelNG::SetStyle(frameNode, V2::ListItemGroupStyle::NONE);
 }
 
+void SetListItemGroupHeaderStyle(ArkUINodeHandle node, ArkUI_Uint32 style)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListItemGroupModelNG::SetHeaderStyle(frameNode, static_cast<V2::ListItemGroupHeaderFooterStyle>(style));
+}
+
+void ResetListItemGroupHeaderStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListItemGroupModelNG::SetHeaderStyle(frameNode, V2::ListItemGroupHeaderFooterStyle::NONE);
+}
+
+void SetListItemGroupFooterStyle(ArkUINodeHandle node, ArkUI_Uint32 style)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListItemGroupModelNG::SetFooterStyle(frameNode, static_cast<V2::ListItemGroupHeaderFooterStyle>(style));
+}
+
+void ResetListItemGroupFooterStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListItemGroupModelNG::SetFooterStyle(frameNode, V2::ListItemGroupHeaderFooterStyle::NONE);
+}
+
 ArkUI_Int32 SetListItemGroupNodeAdapter(ArkUINodeHandle node, ArkUINodeAdapterHandle handle)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -232,6 +260,10 @@ const ArkUIListItemGroupModifier* GetListItemGroupModifier()
         .resetListItemGroupSpace = ResetListItemGroupSpace,
         .setListItemGroupStyle = SetListItemGroupStyle,
         .resetListItemGroupStyle = ResetListItemGroupStyle,
+        .setListItemGroupHeaderStyle = SetListItemGroupHeaderStyle,
+        .resetListItemGroupHeaderStyle = ResetListItemGroupHeaderStyle,
+        .setListItemGroupFooterStyle = SetListItemGroupFooterStyle,
+        .resetListItemGroupFooterStyle = ResetListItemGroupFooterStyle,
         .setListItemGroupNodeAdapter = SetListItemGroupNodeAdapter,
         .resetListItemGroupNodeAdapter = ResetListItemGroupNodeAdapter,
         .getListItemGroupNodeAdapter = GetListItemGroupNodeAdapter,

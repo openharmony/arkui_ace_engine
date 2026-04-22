@@ -247,6 +247,19 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
     }
   }
 
+  /**
+   * Resets this property's local value from its source binding.
+   * Called during reuse to resync one-way storage
+   * bindings when the component is reparented to a new owner.
+  */
+  public resetSource(): void {
+    if (this.source_ !== undefined && this.source_ !== null) {
+      if (this.resetLocalValue(this.source_.getUnmonitored(), true)) {
+          this.notifyPropertyHasChangedPU();
+      }
+    }
+  }
+
   private createSourceDependency(sourceObject: C): void {
     if (ObservedObject.IsObservedObject(sourceObject)) {
       stateMgmtConsole.debug(`${this.debugInfo()} createSourceDependency: create dependency on source ObservedObject ...`);
@@ -310,6 +323,9 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
       } else if (ObservedObject.IsObservedObject(this.localCopyObservedObject_)) {
         // case: new ObservedObject
         ObservedObject.addOwningProperty(this.localCopyObservedObject_, this);
+        this.shouldInstallTrackedObjectReadCb = TrackedObject.needsPropertyReadCb(this.localCopyObservedObject_);
+      } else if (InteropConfigureStateMgmt.needsInterop() && isStaticProxy(this.localCopyObservedObject_)) {
+        this.localCopyObservedObject_ = InteropExtractorModule.getInteropObservedObject(this.localCopyObservedObject_, this);
         this.shouldInstallTrackedObjectReadCb = TrackedObject.needsPropertyReadCb(this.localCopyObservedObject_);
       } else {
         // wrap newObservedObjectValue raw object as ObservedObject and subscribe to it
@@ -412,7 +428,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
     return getDeepCopyOfObjectRecursive(obj);
 
     function getDeepCopyOfObjectRecursive(obj: any): any {
-      if (!obj || typeof obj !== 'object') {
+      if (!obj || typeof obj !== 'object' || Reflect.get(obj, '__MATERIAL_REFERENCE__')) {
         return obj;
       }
 

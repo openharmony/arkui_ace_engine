@@ -21,6 +21,7 @@
 #include "base/ressched/ressched_report.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/common/event_manager.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/common/thread_checker.h"

@@ -246,8 +246,8 @@ HWTEST_F(ListPatternTestNg, ProcessAreaVertical001, TestSize.Level1)
 {
     RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> groupItemPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> groupItemPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     groupItemPattern->itemTotalCount_ = 2;
     auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, groupItemPattern);
     ASSERT_NE(frameNode, nullptr);
@@ -273,8 +273,8 @@ HWTEST_F(ListPatternTestNg, ProcessAreaVertical002, TestSize.Level1)
 {
     RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> groupItemPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> groupItemPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     groupItemPattern->itemTotalCount_ = 2;
     auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, groupItemPattern);
     ASSERT_NE(frameNode, nullptr);
@@ -301,8 +301,8 @@ HWTEST_F(ListPatternTestNg, ProcessAreaVertical003, TestSize.Level1)
 {
     RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> groupItemPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> groupItemPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     groupItemPattern->itemTotalCount_ = 0;
     groupItemPattern->headerMainSize_ = 4.0f;
     groupItemPattern->footerMainSize_ = 8.0f;
@@ -335,8 +335,8 @@ HWTEST_F(ListPatternTestNg, ProcessAreaVertical004, TestSize.Level1)
 {
     RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> groupItemPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> groupItemPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     groupItemPattern->itemTotalCount_ = 0;
     groupItemPattern->headerMainSize_ = 4.0f;
     groupItemPattern->footerMainSize_ = 8.0f;
@@ -369,8 +369,8 @@ HWTEST_F(ListPatternTestNg, ProcessAreaVertical005, TestSize.Level1)
 {
     RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> groupItemPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> groupItemPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     groupItemPattern->itemTotalCount_ = 0;
     groupItemPattern->headerMainSize_ = 1.0f;
     groupItemPattern->footerMainSize_ = 8.0f;
@@ -403,8 +403,8 @@ HWTEST_F(ListPatternTestNg, ProcessAreaVertical006, TestSize.Level1)
 {
     RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> groupItemPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> groupItemPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     groupItemPattern->itemTotalCount_ = 0;
     groupItemPattern->headerMainSize_ = 1.0f;
     groupItemPattern->footerMainSize_ = 2.0f;
@@ -437,8 +437,8 @@ HWTEST_F(ListPatternTestNg, ProcessAreaVertical007, TestSize.Level1)
 {
     RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> groupItemPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> groupItemPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     groupItemPattern->itemTotalCount_ = 0;
     groupItemPattern->headerMainSize_ = 1.0f;
     groupItemPattern->footerMainSize_ = 8.0f;
@@ -471,8 +471,8 @@ HWTEST_F(ListPatternTestNg, ProcessAreaVertical008, TestSize.Level1)
 {
     RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> groupItemPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> groupItemPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     groupItemPattern->itemTotalCount_ = 0;
     groupItemPattern->headerMainSize_ = 1.0f;
     groupItemPattern->footerMainSize_ = 8.0f;
@@ -505,8 +505,8 @@ HWTEST_F(ListPatternTestNg, ProcessAreaVertical009, TestSize.Level1)
 {
     RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> groupItemPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> groupItemPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     groupItemPattern->itemTotalCount_ = 0;
     groupItemPattern->headerMainSize_ = 1.0f;
     groupItemPattern->footerMainSize_ = 8.0f;
@@ -539,8 +539,8 @@ HWTEST_F(ListPatternTestNg, ProcessAreaVertical010, TestSize.Level1)
 {
     RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> groupItemPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> groupItemPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     groupItemPattern->itemTotalCount_ = 2;
     auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, groupItemPattern);
     ASSERT_NE(frameNode, nullptr);
@@ -567,8 +567,8 @@ HWTEST_F(ListPatternTestNg, ProcessAreaVertical011, TestSize.Level1)
 {
     RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> groupItemPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> groupItemPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     groupItemPattern->itemTotalCount_ = 2;
     auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, groupItemPattern);
     ASSERT_NE(frameNode, nullptr);
@@ -595,8 +595,8 @@ HWTEST_F(ListPatternTestNg, ProcessAreaVertical012, TestSize.Level1)
 {
     RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> groupItemPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> groupItemPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     groupItemPattern->itemTotalCount_ = 2;
     auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, groupItemPattern);
     ASSERT_NE(frameNode, nullptr);
@@ -623,8 +623,8 @@ HWTEST_F(ListPatternTestNg, ProcessAreaVertical013, TestSize.Level1)
 {
     RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> groupItemPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> groupItemPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     groupItemPattern->itemTotalCount_ = 2;
     auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, groupItemPattern);
     ASSERT_NE(frameNode, nullptr);
@@ -651,8 +651,8 @@ HWTEST_F(ListPatternTestNg, ProcessAreaVertical014, TestSize.Level1)
 {
     RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> groupItemPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> groupItemPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     groupItemPattern->itemTotalCount_ = 2;
     auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, groupItemPattern);
     ASSERT_NE(frameNode, nullptr);
@@ -679,8 +679,8 @@ HWTEST_F(ListPatternTestNg, ProcessAreaVertical015, TestSize.Level1)
 {
     RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> groupItemPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> groupItemPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     groupItemPattern->itemTotalCount_ = 2;
     auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, groupItemPattern);
     ASSERT_NE(frameNode, nullptr);
@@ -707,8 +707,8 @@ HWTEST_F(ListPatternTestNg, ProcessAreaHorizontal001, TestSize.Level1)
 {
     RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> groupItemPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> groupItemPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     groupItemPattern->itemTotalCount_ = 2;
     auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, groupItemPattern);
     ASSERT_NE(frameNode, nullptr);
@@ -734,8 +734,8 @@ HWTEST_F(ListPatternTestNg, ProcessAreaHorizontal002, TestSize.Level1)
 {
     RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> groupItemPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> groupItemPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     groupItemPattern->itemTotalCount_ = 2;
     auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, groupItemPattern);
     ASSERT_NE(frameNode, nullptr);
@@ -762,8 +762,8 @@ HWTEST_F(ListPatternTestNg, ProcessAreaHorizontal003, TestSize.Level1)
 {
     RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> groupItemPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> groupItemPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     groupItemPattern->itemTotalCount_ = 0;
     groupItemPattern->headerMainSize_ = 4.0f;
     groupItemPattern->footerMainSize_ = 8.0f;
@@ -796,8 +796,8 @@ HWTEST_F(ListPatternTestNg, ProcessAreaHorizontal004, TestSize.Level1)
 {
     RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> groupItemPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> groupItemPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     groupItemPattern->itemTotalCount_ = 0;
     groupItemPattern->headerMainSize_ = 4.0f;
     groupItemPattern->footerMainSize_ = 8.0f;
@@ -830,8 +830,8 @@ HWTEST_F(ListPatternTestNg, ProcessAreaHorizontal005, TestSize.Level1)
 {
     RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> groupItemPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> groupItemPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     groupItemPattern->itemTotalCount_ = 0;
     groupItemPattern->headerMainSize_ = 1.0f;
     groupItemPattern->footerMainSize_ = 8.0f;
@@ -864,8 +864,8 @@ HWTEST_F(ListPatternTestNg, ProcessAreaHorizontal006, TestSize.Level1)
 {
     RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> groupItemPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> groupItemPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     groupItemPattern->itemTotalCount_ = 0;
     groupItemPattern->headerMainSize_ = 1.0f;
     groupItemPattern->footerMainSize_ = 2.0f;
@@ -898,8 +898,8 @@ HWTEST_F(ListPatternTestNg, ProcessAreaHorizontal007, TestSize.Level1)
 {
     RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> groupItemPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> groupItemPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     groupItemPattern->itemTotalCount_ = 0;
     groupItemPattern->headerMainSize_ = 1.0f;
     groupItemPattern->footerMainSize_ = 8.0f;
@@ -932,8 +932,8 @@ HWTEST_F(ListPatternTestNg, ProcessAreaHorizontal008, TestSize.Level1)
 {
     RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> groupItemPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> groupItemPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     groupItemPattern->itemTotalCount_ = 0;
     groupItemPattern->headerMainSize_ = 1.0f;
     groupItemPattern->footerMainSize_ = 8.0f;
@@ -966,8 +966,8 @@ HWTEST_F(ListPatternTestNg, ProcessAreaHorizontal009, TestSize.Level1)
 {
     RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> groupItemPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> groupItemPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     groupItemPattern->itemTotalCount_ = 0;
     groupItemPattern->headerMainSize_ = 1.0f;
     groupItemPattern->footerMainSize_ = 8.0f;
@@ -1000,8 +1000,8 @@ HWTEST_F(ListPatternTestNg, ProcessAreaHorizontal010, TestSize.Level1)
 {
     RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> groupItemPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> groupItemPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     groupItemPattern->itemTotalCount_ = 2;
     auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, groupItemPattern);
     ASSERT_NE(frameNode, nullptr);
@@ -1028,8 +1028,8 @@ HWTEST_F(ListPatternTestNg, ProcessAreaHorizontal011, TestSize.Level1)
 {
     RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> groupItemPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> groupItemPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     groupItemPattern->itemTotalCount_ = 2;
     auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, groupItemPattern);
     ASSERT_NE(frameNode, nullptr);
@@ -1056,8 +1056,8 @@ HWTEST_F(ListPatternTestNg, ProcessAreaHorizontal012, TestSize.Level1)
 {
     RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> groupItemPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> groupItemPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     groupItemPattern->itemTotalCount_ = 2;
     auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, groupItemPattern);
     ASSERT_NE(frameNode, nullptr);
@@ -1084,8 +1084,8 @@ HWTEST_F(ListPatternTestNg, ProcessAreaHorizontal013, TestSize.Level1)
 {
     RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> groupItemPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> groupItemPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     groupItemPattern->itemTotalCount_ = 2;
     auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, groupItemPattern);
     ASSERT_NE(frameNode, nullptr);
@@ -1112,8 +1112,8 @@ HWTEST_F(ListPatternTestNg, ProcessAreaHorizontal014, TestSize.Level1)
 {
     RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> groupItemPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> groupItemPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     groupItemPattern->itemTotalCount_ = 2;
     auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, groupItemPattern);
     ASSERT_NE(frameNode, nullptr);
@@ -1140,8 +1140,8 @@ HWTEST_F(ListPatternTestNg, ProcessAreaHorizontal015, TestSize.Level1)
 {
     RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> groupItemPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> groupItemPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     groupItemPattern->itemTotalCount_ = 2;
     auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, groupItemPattern);
     ASSERT_NE(frameNode, nullptr);

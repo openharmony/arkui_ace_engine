@@ -158,11 +158,13 @@ void ProgressPattern::RegisterVisibleAreaChange()
     CHECK_NULL_VOID(host);
     auto paintProperty = host->GetPaintProperty<ProgressPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    bool isScan = paintProperty->GetEnableScanEffect().value_or(false)
-        || paintProperty->GetEnableRingScanEffect().value_or(false)
-        || paintProperty->GetEnableLinearScanEffect().value_or(false);
     ProgressStatus progressStatus = paintProperty->GetProgressStatusValue(ProgressStatus::PROGRESSING);
-    CHECK_NULL_VOID(isScan || progressStatus == ProgressStatus::LOADING);
+    bool hasAnimation = paintProperty->GetEnableSmoothEffectValue(true)
+        || paintProperty->GetEnableScanEffect().value_or(false)
+        || paintProperty->GetEnableRingScanEffect().value_or(false)
+        || paintProperty->GetEnableLinearScanEffect().value_or(false)
+        || progressStatus == ProgressStatus::LOADING;
+    CHECK_NULL_VOID(hasAnimation);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
@@ -317,7 +319,7 @@ void ProgressPattern::ClearFocusStyle()
 
     if (isFocusShadowSet_) {
         renderContext->ResetBackShadow();
-        renderContext->SetShadowRadius(0.0f);
+        renderContext->SetShadowRadius(-1.0f);
         renderContext->ResetBorderRadius();
         isFocusShadowSet_ = false;
     }

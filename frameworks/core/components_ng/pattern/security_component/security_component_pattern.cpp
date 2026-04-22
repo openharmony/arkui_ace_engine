@@ -797,6 +797,7 @@ void SecurityComponentPattern::UpdateButtonProperty(RefPtr<FrameNode>& scNode, R
     } else {
         buttonRender->UpdateBackgroundColor(theme->GetBackgroundColor());
     }
+    buttonLayoutProp->UpdateBackgroundColorFlagByUser(true);
     if (scPaintProp->GetBackgroundBorderColor().has_value()) {
         BorderColorProperty borderColor;
         borderColor.SetColor(scPaintProp->GetBackgroundBorderColor().value());

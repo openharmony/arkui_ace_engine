@@ -107,6 +107,7 @@ bool ConvertSliderGradientColor(const EcmaVM* vm, const Local<JSValueRef>& value
     if (colorLength == 0) {
         return false;
     }
+
     for (size_t colorIndex = 0; colorIndex < colorLength; ++colorIndex) {
         OHOS::Ace::NG::GradientColor gradientColor;
         gradientColor.SetLinearColor(LinearColor(jsLinearGradient->GetGradient().at(colorIndex).first));
@@ -135,9 +136,11 @@ bool ConvertSliderMetricsGradientColor(
 
     if (isJsView && colorLength == 1) {
         OHOS::Ace::NG::GradientColor gradientColor;
-        gradientColor.SetLinearColor(
-            LinearColor(jsColorMetricsLinearGradient->GetColorMetricsGradient().front().color));
-        gradientColor.SetDimension(jsColorMetricsLinearGradient->GetColorMetricsGradient().front().offset);
+        const auto& stop = jsColorMetricsLinearGradient->GetColorMetricsGradient().front();
+        auto color = stop.color;
+        gradientColor.SetColor(color);
+        gradientColor.SetLinearColor(LinearColor(color));
+        gradientColor.SetDimension(stop.offset);
         gradient.AddColor(gradientColor);
         gradient.AddColor(gradientColor);
         return true;
@@ -145,9 +148,11 @@ bool ConvertSliderMetricsGradientColor(
 
     for (size_t colorIndex = 0; colorIndex < colorLength; ++colorIndex) {
         OHOS::Ace::NG::GradientColor gradientColor;
-        gradientColor.SetLinearColor(
-            LinearColor(jsColorMetricsLinearGradient->GetColorMetricsGradient().at(colorIndex).color));
-        gradientColor.SetDimension(jsColorMetricsLinearGradient->GetColorMetricsGradient().at(colorIndex).offset);
+        const auto& stop = jsColorMetricsLinearGradient->GetColorMetricsGradient().at(colorIndex);
+        auto color = stop.color;
+        gradientColor.SetColor(color);
+        gradientColor.SetLinearColor(LinearColor(color));
+        gradientColor.SetDimension(stop.offset);
         gradient.AddColor(gradientColor);
     }
     return true;
@@ -843,32 +848,15 @@ ArkUINativeModuleValue SliderBridge::SetTrackColorMetrics(ArkUIRuntimeCallInfo* 
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
     Gradient gradient;
-    RefPtr<ResourceObject> colorResObj;
     bool isJsView = IsJsView(firstArg, vm);
-    auto frameNode = isJsView
-                         ? reinterpret_cast<ArkUINodeHandle>(ViewStackProcessor::GetInstance()->GetMainFrameNode())
-                         : nativeNode;
-    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(frameNode);
     if (ConvertSliderMetricsGradientColor(vm, secondArg, gradient, isJsView)) {
-        ArkUIGradientType gradientObj;
         auto colorLength = gradient.GetColors().size();
-        std::vector<uint32_t> colorValues;
-        std::vector<ArkUILengthType> offsetValues;
-        GetArkUINodeModifiers()->getSliderModifier()->resetTrackBackgroundColor(nativeNode);
         if (colorLength <= 0) {
             return panda::JSValueRef::Undefined(vm);
         }
-        for (int32_t i = 0; i < static_cast<int32_t>(colorLength); i++) {
-            colorValues.push_back(gradient.GetColors()[i].GetLinearColor().GetValue());
-            offsetValues.push_back(
-                ArkUILengthType { .number = static_cast<ArkUI_Float32>(gradient.GetColors()[i].GetDimension().Value()),
-                    .unit = static_cast<int8_t>(gradient.GetColors()[i].GetDimension().Unit()) });
-        }
-
-        gradientObj.color = &(*colorValues.begin());
-        gradientObj.offset = &(*offsetValues.begin());
-        GetArkUINodeModifiers()->getSliderModifier()->setLinearTrackBackgroundColor(
-            nativeNode, &gradientObj, colorLength);
+        auto* frameNodePtr = isJsView ?
+            ViewStackProcessor::GetInstance()->GetMainFrameNode() : reinterpret_cast<FrameNode*>(nativeNode);
+        SliderModelNG::SetTrackBackgroundColor(frameNodePtr, gradient, false);
     } else {
         GetArkUINodeModifiers()->getSliderModifier()->resetTrackBackgroundColor(nativeNode);
     }

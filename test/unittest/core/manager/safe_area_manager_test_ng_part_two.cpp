@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "test/unittest/core/manager/safe_area_manager_test_ng.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 
 namespace OHOS::Ace::NG {
 /**
@@ -672,7 +673,6 @@ HWTEST_F(SafeAreaManagerTest, KeyboardHeightConsideringUIExtensionTest, TestSize
      */
     uint32_t initialHeight = safeAreaManager_->GetkeyboardHeightConsideringUIExtension();
     EXPECT_EQ(initialHeight, 0);
-
     uint32_t newHeight = 256;
     safeAreaManager_->SetkeyboardHeightConsideringUIExtension(newHeight);
     EXPECT_EQ(safeAreaManager_->GetkeyboardHeightConsideringUIExtension(), newHeight);
@@ -695,7 +695,6 @@ HWTEST_F(SafeAreaManagerTest, KeyboardChangeCallbackConsideringUIExtTest, TestSi
     int32_t nodeId = 1;
 
     auto callback = [&callbackCount]() { callbackCount++; };
-
     /**
      * @tc.steps: step1 Add callback and set keyboard height to trigger callback.
      */
@@ -729,19 +728,17 @@ HWTEST_F(SafeAreaManagerTest, GetNavSafeAreaTest, TestSize.Level1)
      */
     auto ret = safeAreaManager_->UpdateNavSafeArea(navArea);
     EXPECT_EQ(ret, true);
-
     auto navSafeArea = safeAreaManager_->GetNavSafeArea();
     CommonExpectEQ(
         Rect { navSafeArea.left_.start, navSafeArea.right_.end, navSafeArea.top_.start, navSafeArea.bottom_.end },
         Rect { NAV_LEFT_START, NAV_RIGHT_END, NAV_TOP_START, NAV_BOTTOM_END });
-
     /**
      * @tc.steps: step2 Update same nav area again and verify.
      */
     ret = safeAreaManager_->UpdateNavSafeArea(navArea);
     EXPECT_EQ(ret, false);
-
     navSafeArea = safeAreaManager_->GetNavSafeArea();
+
     CommonExpectEQ(
         Rect { navSafeArea.left_.start, navSafeArea.right_.end, navSafeArea.top_.start, navSafeArea.bottom_.end },
         Rect { NAV_LEFT_START, NAV_RIGHT_END, NAV_TOP_START, NAV_BOTTOM_END });
@@ -788,7 +785,6 @@ HWTEST_F(SafeAreaManagerTest, GetSafeAreaWithoutProcessTest, TestSize.Level1)
     auto safeArea = safeAreaManager_->GetSafeAreaWithoutProcess();
     CommonExpectEQ(Rect { safeArea.left_.start, safeArea.right_.end, safeArea.top_.start, safeArea.bottom_.end },
         Rect { 0.0f, DISPLAY_WIDTH, 0.0f, DISPLAY_HEIGHT });
-
     /**
      * @tc.steps: step2 Set window type to SCB and update SCB areas.
      */
@@ -816,7 +812,6 @@ HWTEST_F(SafeAreaManagerTest, GetKeyboardInsetWithoutProcessTest, TestSize.Level
     auto keyboardInset = safeAreaManager_->GetKeyboardInsetWithoutProcess();
     EXPECT_EQ(keyboardInset.start, DISPLAY_HEIGHT - KEYBOARD_HEIGHT);
     EXPECT_EQ(keyboardInset.end, DISPLAY_HEIGHT);
-
     /**
      * @tc.steps: step2 Set mode to OFFSET and verify inset still returned.
      */
@@ -824,7 +819,6 @@ HWTEST_F(SafeAreaManagerTest, GetKeyboardInsetWithoutProcessTest, TestSize.Level
     keyboardInset = safeAreaManager_->GetKeyboardInsetWithoutProcess();
     EXPECT_EQ(keyboardInset.start, DISPLAY_HEIGHT - KEYBOARD_HEIGHT);
     EXPECT_EQ(keyboardInset.end, DISPLAY_HEIGHT);
-
     /**
      * @tc.steps: step3 Set mode to RESIZE and verify inset still returned.
      */
@@ -847,7 +841,6 @@ HWTEST_F(SafeAreaManagerTest, SafeAreaToPaddingTest8, TestSize.Level1)
     safeAreaManager_->UpdateSystemSafeArea(systemArea);
     safeAreaManager_->UpdateNavSafeArea(navArea);
     safeAreaManager_->UpdateCutoutSafeArea(cutoutArea);
-
     /**
      * @tc.steps: step1 Test with OFFSET_WITH_CARET mode.
      */
@@ -860,10 +853,10 @@ HWTEST_F(SafeAreaManagerTest, SafeAreaToPaddingTest8, TestSize.Level1)
     EXPECT_EQ(paddingProperty.right, std::nullopt);
     EXPECT_EQ(paddingProperty.top, std::nullopt);
     EXPECT_EQ(paddingProperty.bottom, std::nullopt);
-
     offset = -KEYBOARD_HEIGHT / 2.0f;
     safeAreaManager_->UpdateKeyboardOffset(offset);
     paddingProperty = safeAreaManager_->SafeAreaToPadding(true, LAYOUT_SAFE_AREA_TYPE_KEYBOARD);
+
     EXPECT_EQ(paddingProperty.left, std::nullopt);
     EXPECT_EQ(paddingProperty.right, std::nullopt);
     EXPECT_EQ(paddingProperty.top, std::nullopt);
@@ -878,7 +871,6 @@ HWTEST_F(SafeAreaManagerTest, SafeAreaToPaddingTest8, TestSize.Level1)
     EXPECT_EQ(paddingProperty.right, std::nullopt);
     EXPECT_EQ(paddingProperty.top, std::nullopt);
     EXPECT_EQ(paddingProperty.bottom, KEYBOARD_HEIGHT);
-
     paddingProperty = safeAreaManager_->SafeAreaToPadding(true, LAYOUT_SAFE_AREA_TYPE_ALL);
     EXPECT_EQ(paddingProperty.left, NAV_LEFT_END - SYSTEM_LEFT_START);
     EXPECT_EQ(paddingProperty.right, SYSTEM_RIGHT_END - NAV_RIGHT_START);
@@ -895,14 +887,12 @@ HWTEST_F(SafeAreaManagerTest, GetWindowWrapperOffsetTest2, TestSize.Level1)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     auto manager = pipeline->GetSafeAreaManager();
-
     /**
      * @tc.steps: step1 Test with CONTAINER_MODAL and null windowManager (expected to return OffsetF()).
      */
     pipeline->SetWindowModal(WindowModal::CONTAINER_MODAL);
     auto ret = manager->GetWindowWrapperOffset();
     EXPECT_EQ(ret, OffsetF());
-
     /**
      * @tc.steps: step2 Test with FULLSCREEN mode.
      */
@@ -927,13 +917,11 @@ HWTEST_F(SafeAreaManagerTest, GetUseCutoutTest, TestSize.Level1)
      * @tc.steps: step1 Verify initial useCutout value.
      */
     EXPECT_EQ(safeAreaManager_->GetUseCutout(), true); // Set to true in SetUp
-
     /**
      * @tc.steps: step2 Set useCutout to false and verify.
      */
     safeAreaManager_->SetUseCutout(false);
     EXPECT_EQ(safeAreaManager_->GetUseCutout(), false);
-
     /**
      * @tc.steps: step3 Set useCutout back to true and verify.
      */
@@ -956,7 +944,6 @@ HWTEST_F(SafeAreaManagerTest, GetWindowTypeConfigTest, TestSize.Level1)
     EXPECT_EQ(config.isAppWindow, true);
     EXPECT_EQ(config.isSystemWindow, false);
     EXPECT_EQ(config.isSceneBoardWindow, false);
-
     /**
      * @tc.steps: step2 Set different config and verify.
      */

@@ -70,6 +70,7 @@ enum class StatisticEventType {
     CANVAS_GLOBAL_ALPHA_MINUS_ONE = 10226,
     // List events (10500-10599)
     CALL_SET_CACHE_RANGE = 10500,
+    SCROLL_VISIBLE_CONTENT_CHANGE = 10501,
     // AI/Smart menu events (10600-10699)
     CLICK_AI_MENU_PHONE_NUMBER = 10600,
     CLICK_AI_MENU_URL = 10601,
@@ -88,6 +89,8 @@ enum class StatisticEventType {
     VIDEO_EXCEED_PROGRESS_RATE = 10902,
     // Navigation events (11100-11199)
     NAVIGATION_HOME_DESTINATION = 11100,
+    // Sheet events (11300-11399)
+    SHEETPAGE_ATTACH_ERR = 11300,
 };
 
 struct StatisticAppInfo {

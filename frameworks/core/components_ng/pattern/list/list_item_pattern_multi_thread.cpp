@@ -15,34 +15,14 @@
 
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 
-#include "base/log/dump_log.h"
-#include "base/memory/ace_type.h"
-#include "base/utils/multi_thread.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/pattern/list/list_item_group_layout_property.h"
-#include "core/components/common/properties/color.h"
-#include "core/components_ng/base/inspector_filter.h"
-#include "core/components_ng/pattern/list/list_item_layout_algorithm.h"
-#include "core/components_ng/pattern/list/list_item_layout_property.h"
-#include "core/components_ng/pattern/list/list_pattern.h"
-#include "core/components_ng/property/property.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/common/container.h"
-#include "core/components_ng/property/measure_utils.h"
-
 namespace OHOS::Ace::NG {
-
-void ListItemPattern::OnAttachToFrameNodeMultiThread()
-{
-    // do nothing unsafe thread
-}
 
 void ListItemPattern::OnAttachToMainTreeMultiThread()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (listItemStyle_ == V2::ListItemStyle::CARD) {
-        SetListItemDefaultAttributes(host);
+        ApplyListItemDefaultAttributes(host);
     }
 }
 bool ListItemPattern::CloseSwipeActionMultiThread(OnFinishFunc&& onFinishCallback)
@@ -71,7 +51,7 @@ void ListItemPattern::SetListItemStyleMultiThread(V2::ListItemStyle style)
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->listItemStyle_ = style;
-            pattern->SetListItemDefaultAttributes(node);
+            pattern->ApplyListItemDefaultAttributes(node);
             pattern->InitListItemCardStyleForList();
         });
     }

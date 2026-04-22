@@ -43,7 +43,7 @@ struct ForceSplitConfig {
     std::optional<Color> splitDividerColorLight;
     std::optional<Color> splitDividerColorDark;
     ForceSplitBehaviorMode behaviorMode = ForceSplitBehaviorMode::NAVIGATION;
-    // For ForceSplitBehaviorMode::NAVIGAITON, from -> to
+    // For ForceSplitBehaviorMode::NAVIGATION, from -> to
     std::unordered_map<std::string, std::unordered_set<std::string>> pagePairs;
     // For ForceSplitBehaviorMode::DISPLACE
     std::unordered_set<std::string> transPages;

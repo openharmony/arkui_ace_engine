@@ -43,8 +43,8 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T> implem
     public readonly backing_: IBackingValue<T>;
     // @state can init from parent @Component
     // initValue is either value provided by parent or localInit value
-    constructor(owningView: IVariableOwner | undefined, varName: string, initValue: T, watchFunc?: WatchFuncType) {
-        super('@State', owningView, varName, watchFunc);
+    constructor(owningView: IVariableOwner | undefined, varName: string, initValue: T, watchFunc?: WatchFuncType, decoratorName?: string) {
+        super(decoratorName ?? '@State', owningView, varName, watchFunc);
         this.checkValueIsNotFunction(initValue);
         if (isDynamicObject(initValue)) {
             initValue = getObservedObject(initValue);
@@ -70,7 +70,9 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T> implem
         const shouldAddRef = this.shouldAddRef();
         const value = this.backing_.get(shouldAddRef);
         if (shouldAddRef) {
-            ObserveSingleton.instance.setV1RenderId(value as NullableObject);
+            if (value instanceof Object) {
+                ObserveSingleton.instance.setV1RenderId(value as NullableObject);
+            }
             uiUtils.builtinContainersAddRefAnyKey(value);
             this.selfTrack();
             ObservedObjectRegistry.get(StateMgmtDFX.getObservedObjectFromValue(value))?.addV1InnerRef();

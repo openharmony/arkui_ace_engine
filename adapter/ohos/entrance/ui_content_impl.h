@@ -99,6 +99,7 @@ public:
     void SetHostParams(const OHOS::AAFwk::WantParams& params) override;
     void UpdateFontScale(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
     static int32_t GetUIContentWindowID(int32_t instanceId);
+    OHOS::Rosen::Window* GetUIContentWindow() override;
     // UI content event process
     bool ProcessBackPressed() override;
     void UpdateDialogResourceConfiguration(RefPtr<Container>& container,
@@ -426,6 +427,7 @@ public:
     void SetTopWindowBoundaryByID(const std::string& stringId) override;
     void SetupGetPixelMapCallback(const WeakPtr<TaskExecutor>& taskExecutor);
     void SaveGetHitTestInfoCallback(const WeakPtr<TaskExecutor>& taskExecutor);
+    void RelaxedCommandCallbackInner(const WeakPtr<TaskExecutor>& taskExecutor);
     void RegisterGetSpecifiedContentOffsetsCallback(const WeakPtr<TaskExecutor>& taskExecutor);
     void RegisterHighlightSpecifiedContentCallback(const WeakPtr<TaskExecutor>& taskExecutor);
     void RegisterSelectTextCallback(const WeakPtr<TaskExecutor>& taskExecutor);
@@ -607,7 +609,7 @@ protected:
     VMType vmType_ = VMType::NORMAL;
 
 private:
-    void ProcessWindowSizeLayoutBreakPointChange();
+    void ProcessWindowSizeLayoutBreakPointChange(double density);
 };
 
 } // namespace OHOS::Ace

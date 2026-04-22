@@ -61,6 +61,7 @@ public:
             slipPressedBackgroundColor_ = colors->InteractiveClick();
             popupClickedBgAreaColor_ = colors->CompBackgroundTertiary();
             popupTitleBackground_ = colors->CompBackgroundTertiary();
+            popupLowMaterialBgColor_ = colors->CompBackgroundPrimary();
         }
     }
 

@@ -34,6 +34,7 @@
 #include "core/common/platform_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 #include "core/event/crown_event.h"
+#include "core/pipeline/pipeline_base.h"
 
 #include <refbase.h>
 
@@ -43,6 +44,10 @@ namespace OHOS::Rosen {
 
 namespace OHOS::AbilityRuntime {
     class Context;
+}
+
+namespace OHOS::Ace {
+class PipelineContext;
 }
 
 namespace OHOS::Ace::Platform {

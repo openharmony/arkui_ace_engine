@@ -13,9 +13,25 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_shape_bridge.h"
+#include "core/interfaces/native/node/common_shape_modifier.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+RefPtr<NodeModifier::ShapeColorModifierPayload> CreateShapeColorModifierPayload(
+    FrameNode* frameNode, const Color& color, const RefPtr<ResourceObject>& resObj)
+{
+    if (!frameNode || frameNode->GetTag() != V2::CIRCLE_ETS_TAG) {
+        return nullptr;
+    }
+    if (!color.GetHeadRoomColor().has_value()) {
+        return nullptr;
+    }
+    return AceType::MakeRefPtr<NodeModifier::ShapeColorModifierPayload>(color, resObj);
+}
+} // namespace
+
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr double STROKE_MITERLIMIT_DEFAULT = 4.0f;
@@ -90,8 +106,15 @@ ArkUINativeModuleValue CommonShapeBridge::SetStroke(ArkUIRuntimeCallInfo* runtim
     if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resObj, ArkTSUtils::MakeNativeNodeInfo(nativeNode))) {
         GetArkUINodeModifiers()->getCommonShapeModifier()->resetStroke(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getCommonShapeModifier()->setStroke(
-            nativeNode, color.GetValue(), AceType::RawPtr(resObj));
+        auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+        auto payload = CreateShapeColorModifierPayload(frameNode, color, resObj);
+        if (payload) {
+            GetArkUINodeModifiers()->getCommonShapeModifier()->setStroke(
+                nativeNode, color.GetValue(), static_cast<void*>(AceType::RawPtr(payload)));
+        } else {
+            GetArkUINodeModifiers()->getCommonShapeModifier()->setStroke(
+                nativeNode, color.GetValue(), static_cast<void*>(AceType::RawPtr(resObj)));
+        }
     }
     return panda::JSValueRef::Undefined(vm);
 }

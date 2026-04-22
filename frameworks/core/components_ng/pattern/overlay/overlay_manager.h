@@ -27,28 +27,27 @@
 #include "base/utils/noncopyable.h"
 #include "base/want/want_wrap.h"
 #include "base/utils/utils.h"
-#include "core/components/common/properties/placement.h"
 #include "core/components/dialog/dialog_properties.h"
-#include "core/components_ng/pattern/picker/picker_data.h"
-#include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/pattern/calendar_picker/calendar_type_define.h"
 #include "core/components_ng/pattern/overlay/content_cover_param.h"
-#include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
+#include "core/components_ng/pattern/overlay/overlay_options.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/overlay/group_manager.h"
-#include "core/components_ng/pattern/picker/datepicker_event_hub.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
-#include "core/components_ng/pattern/toast/toast_layout_property.h"
 #include "core/components_ng/pattern/toast/toast_view.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
-#include "interfaces/inner_api/ace/modal_ui_extension_config.h"
 
+namespace OHOS::Ace {
+struct ModalUIExtensionCallbacks;
+struct ModalUIExtensionConfig;
+struct ModalUIExtensionAllowedUpdateConfig;
+} // namespace OHOS::Ace
 namespace OHOS::Ace::NG {
+struct CalendarSettingData;
 
 enum class HideMenuType : int32_t {
     NORMAL = 0,
@@ -591,6 +590,7 @@ public:
 
     void MarkDirty(PropertyChangeFlag flag);
     void MarkDirtyOverlay();
+    void OnKeyboardAvoid();
     float GetRootHeight() const;
     float GetRootWidth() const;
 
@@ -657,6 +657,9 @@ public:
     void AddFrameNodeToOverlay(const RefPtr<NG::FrameNode>& node, std::optional<int32_t> index = std::nullopt);
     RefPtr<FrameNode> CreateOverlayNodeWithOrder(std::optional<double> levelOrder);
     void AddFrameNodeWithOrder(const RefPtr<FrameNode>& node, std::optional<double> levelOrder);
+    bool TopNodeIsModelUEC();
+    void OpenOrderOverlay(const RefPtr<FrameNode>& node, const OrderOverlayOptions& options,
+        const std::function<void(int32_t)>&& callback);
     void RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node);
     void RemoveFrameNodeWithOrder(const RefPtr<NG::FrameNode>& node);
     void ShowNodeOnOverlay(const RefPtr<NG::FrameNode>& node);

@@ -61,6 +61,8 @@
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 #include "core/event/touch_event.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components/theme/icon_theme.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -449,7 +451,6 @@ HWTEST_F(MenuPattern2TwoTestNg, ShowStackMainMenuDisappearAnimation001, TestSize
     ASSERT_NE(subMenuNode, nullptr);
     auto mainMenuPattern = mainMenuNode->GetPattern<MenuPattern>();
     ASSERT_NE(mainMenuPattern, nullptr);
-    mainMenuPattern->SetPreviewMode(MenuPreviewMode::IMAGE);
     mainMenuPattern->originMenuYForStack_ = 10.0f;
     mainMenuPattern->originPreviewYForStack_ = 10.0f;
 
@@ -1438,6 +1439,203 @@ HWTEST_F(MenuPattern2TwoTestNg, OnThemeScopeUpdate005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateMenuBackBlurStyle001
+ * @tc.desc: Verify UpdateMenuBackBlurStyle when version is 26.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TwoTestNg, UpdateMenuBackBlurStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init pipeline and create menu.
+     * @tc.expected: step1. All pointers non-null.
+     */
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    ASSERT_NE(wrapperNode, nullptr);
+    auto menuNode = CreateTargetNode();
+    ASSERT_NE(menuNode, nullptr);
+    menuNode->MountToParent(wrapperNode);
+    menuNode->SetThemeScopeId(THEME_SCOPE_ID);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto layout = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(layout, nullptr);
+    auto renderContext = menuNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto pipeline = menuNode->GetContextWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    ASSERT_NE(theme, nullptr);
+ 
+    auto host = menuPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto menuTheme = host->GetTheme<SelectTheme>(true);
+    ASSERT_NE(menuTheme, nullptr);
+    menuTheme->menuBlendBgColor_ = true;
+    theme->menuFontColor_ = Color::RED;
+    theme->menuBlendBgColor_ = true;
+    theme->backgroundColor_ = Color::RED;
+
+    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    auto ret = menuPattern->UpdateMenuBackBlurStyle(false);
+    ASSERT_TRUE(ret);
+
+    ret = menuPattern->UpdateMenuBackBlurStyle(true);
+    ASSERT_TRUE(ret);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: UpdateMenuBackBlurStyle002
+ * @tc.desc: Verify UpdateMenuBackBlurStyle when version is 26.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TwoTestNg, UpdateMenuBackBlurStyle002, TestSize.Level1)
+{
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    ASSERT_NE(wrapperNode, nullptr);
+    auto menuNode = CreateTargetNode();
+    ASSERT_NE(menuNode, nullptr);
+    menuNode->MountToParent(wrapperNode);
+    menuNode->SetThemeScopeId(THEME_SCOPE_ID);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto layout = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(layout, nullptr);
+ 
+    auto host = menuPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto menuTheme = host->GetTheme<SelectTheme>(true);
+    ASSERT_NE(menuTheme, nullptr);
+    menuTheme->menuBlendBgColor_ = true;
+
+    auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->isHasBackgroundColor_ = false;
+    renderContext->isUniRenderEnabled_ = false;
+    menuNode->renderContext_ = renderContext;
+    auto ret = menuPattern->UpdateMenuBackBlurStyle(true);
+    ASSERT_TRUE(ret);
+
+    renderContext->isHasBackgroundColor_ = true;
+    renderContext->isUniRenderEnabled_ = false;
+    ret = menuPattern->UpdateMenuBackBlurStyle(true);
+    ASSERT_TRUE(ret);
+
+    renderContext->isHasBackgroundColor_ = false;
+    renderContext->isUniRenderEnabled_ = true;
+    menuNode->renderContext_ = renderContext;
+    ret = menuPattern->UpdateMenuBackBlurStyle(true);
+    ASSERT_TRUE(ret);
+
+    renderContext->isHasBackgroundColor_ = true;
+    renderContext->isUniRenderEnabled_ = true;
+    ret = menuPattern->UpdateMenuBackBlurStyle(true);
+    ASSERT_TRUE(ret);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: UpdateMenuBackBlurStyle003
+ * @tc.desc: Verify UpdateMenuBackBlurStyle when version is 26.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TwoTestNg, UpdateMenuBackBlurStyle003, TestSize.Level1)
+{
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    ASSERT_NE(wrapperNode, nullptr);
+    auto menuNode = CreateTargetNode();
+    ASSERT_NE(menuNode, nullptr);
+    menuNode->MountToParent(wrapperNode);
+    menuNode->SetThemeScopeId(THEME_SCOPE_ID);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto layout = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(layout, nullptr);
+    auto host = menuPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto menuTheme = host->GetTheme<SelectTheme>(true);
+    ASSERT_NE(menuTheme, nullptr);
+    menuTheme->menuBlendBgColor_ = false;
+    menuTheme->menuFontColor_ = Color::RED;
+    menuTheme->backgroundColor_ = Color::RED;
+
+    auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->isHasBackgroundColor_ = false;
+    renderContext->isUniRenderEnabled_ = true;
+    menuNode->renderContext_ = renderContext;
+    auto ret = menuPattern->UpdateMenuBackBlurStyle(false);
+    ASSERT_TRUE(ret);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: UpdateMenuBackBlurStyle004
+ * @tc.desc: Verify UpdateMenuBackBlurStyle when version is 26.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TwoTestNg, UpdateMenuBackBlurStyle004, TestSize.Level1)
+{
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    ASSERT_NE(wrapperNode, nullptr);
+    auto menuNode = CreateTargetNode();
+    ASSERT_NE(menuNode, nullptr);
+    menuNode->MountToParent(wrapperNode);
+    menuNode->SetThemeScopeId(THEME_SCOPE_ID);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto layout = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(layout, nullptr);
+ 
+    auto host = menuPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto menuTheme = host->GetTheme<SelectTheme>(true);
+    ASSERT_NE(menuTheme, nullptr);
+    menuTheme->menuBlendBgColor_ = true;
+
+    auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->isHasBackgroundColor_ = false;
+    renderContext->isUniRenderEnabled_ = false;
+    menuNode->renderContext_ = renderContext;
+    auto ret = menuPattern->UpdateMenuBackBlurStyle(false);
+    ASSERT_TRUE(ret);
+
+    renderContext->isHasBackgroundColor_ = true;
+    renderContext->isUniRenderEnabled_ = false;
+    ret = menuPattern->UpdateMenuBackBlurStyle(false);
+    ASSERT_TRUE(ret);
+
+    renderContext->isHasBackgroundColor_ = false;
+    renderContext->isUniRenderEnabled_ = true;
+    menuNode->renderContext_ = renderContext;
+    ret = menuPattern->UpdateMenuBackBlurStyle(false);
+    ASSERT_TRUE(ret);
+
+    renderContext->isHasBackgroundColor_ = true;
+    renderContext->isUniRenderEnabled_ = true;
+    ret = menuPattern->UpdateMenuBackBlurStyle(false);
+    ASSERT_TRUE(ret);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
  * @tc.name: MenuItemModelNgCreateTest001
  * @tc.desc: Verify MenuItemModelNG::Create when version is 26.
  * @tc.type: FUNC
@@ -1515,42 +1713,36 @@ HWTEST_F(MenuPattern2TwoTestNg, MenuModelNgCreateTest001, TestSize.Level1)
 
 /**
  * @tc.name: UpdateStyleOptionColorModeTest001
- * @tc.desc: Verify UpdateStyleOptionColorMode when version 26.
+ * @tc.desc: Verify UpdateStyleOptionColorMode.
  * @tc.type: FUNC
  */
 HWTEST_F(MenuPattern2TwoTestNg, UpdateStyleOptionColorModeTest001, TestSize.Level0)
 {
     BlurStyleOption styleOption = {};
-    auto menuNode = CreateTargetNode();
-    ASSERT_NE(menuNode, nullptr);
-    auto pipelineContext = menuNode->GetContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    pipelineContext->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
-    pipelineContext->SetLocalColorMode(OHOS::Ace::ColorMode::LIGHT);
-    MenuView::UpdateStyleOptionColorMode(pipelineContext, styleOption);
-    EXPECT_EQ(styleOption.colorMode, ThemeColorMode::LIGHT);
+    styleOption.colorMode = OHOS::Ace::ThemeColorMode::LIGHT;
+    MenuView::UpdateStyleOptionColorMode(OHOS::Ace::ColorMode::DARK, styleOption);
+    EXPECT_EQ(styleOption.colorMode, OHOS::Ace::ThemeColorMode::DARK);
+ 
+    styleOption.colorMode = OHOS::Ace::ThemeColorMode::DARK;
+    MenuView::UpdateStyleOptionColorMode(OHOS::Ace::ColorMode::LIGHT, styleOption);
+    EXPECT_EQ(styleOption.colorMode, OHOS::Ace::ThemeColorMode::LIGHT);
 
-    pipelineContext->SetLocalColorMode(OHOS::Ace::ColorMode::DARK);
-    MenuView::UpdateStyleOptionColorMode(pipelineContext, styleOption);
-    EXPECT_EQ(styleOption.colorMode, ThemeColorMode::DARK);
+    styleOption.colorMode = OHOS::Ace::ThemeColorMode::DARK;
+    MenuView::UpdateStyleOptionColorMode(OHOS::Ace::ColorMode::COLOR_MODE_UNDEFINED, styleOption);
+    EXPECT_EQ(styleOption.colorMode, OHOS::Ace::ThemeColorMode::SYSTEM);
 }
 
 /**
  * @tc.name: UpdateStyleOptionColorModeTest002
- * @tc.desc: Verify UpdateStyleOptionColorMode when version less 26.
+ * @tc.desc: Verify UpdateStyleOptionColorMode.
  * @tc.type: FUNC
  */
 HWTEST_F(MenuPattern2TwoTestNg, UpdateStyleOptionColorModeTest002, TestSize.Level0)
 {
-    auto menuNode = CreateTargetNode();
-    ASSERT_NE(menuNode, nullptr);
-    auto pipelineContext = menuNode->GetContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    pipelineContext->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY));
     BlurStyleOption styleOption = {};
-    auto colorMode = styleOption.colorMode;
-    MenuView::UpdateStyleOptionColorMode(pipelineContext, styleOption);
-    EXPECT_EQ(styleOption.colorMode, colorMode);
+    styleOption.colorMode = OHOS::Ace::ThemeColorMode::LIGHT;
+    MenuView::UpdateStyleOptionColorMode(OHOS::Ace::ColorMode::DARK, styleOption, false);
+    EXPECT_EQ(styleOption.colorMode, OHOS::Ace::ThemeColorMode::LIGHT);
 }
 
 /**
@@ -1564,6 +1756,22 @@ HWTEST_F(MenuPattern2TwoTestNg, UpdateNodeThemeScopeId001, TestSize.Level0)
     menuNode->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY);
     int32_t result = MenuView::UpdateNodeThemeScopeId(menuNode, 1, "");
     EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: UpdateNodeThemeScopeId002
+ * @tc.desc: verify NodeThemeScopeId when version greater than 26.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TwoTestNg, UpdateNodeThemeScopeId002, TestSize.Level0)
+{
+    int32_t errApiVersion = 99;
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(errApiVersion);
+    auto menuNode = CreateTargetNode();
+    int32_t result = MenuView::UpdateNodeThemeScopeId(menuNode, 1, "");
+    EXPECT_EQ(result, 0);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -1601,6 +1809,29 @@ HWTEST_F(MenuPattern2TwoTestNg, ModifyDivider001, TestSize.Level1)
     groupPattern->ModifyDividerColor(groupNode, Color::FOREGROUND);
     groupPattern->ModifyDividerColor(groupNode, Color::RED);
  
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: CreateMenuOption001
+ * @tc.desc: verify CreateMenuOption when version greater than 26.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TwoTestNg, CreateMenuOption001, TestSize.Level1)
+{
+    std::vector<OptionParam> params;
+    params.emplace_back("MenuItem1", "testIcon", nullptr);
+    int32_t errApiVersion = 99;
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(errApiVersion);
+    auto menuNode = CreateTargetNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuViewOption = MenuView::CreateMenuOption(true, params, 0, 0);
+    ASSERT_NE(menuViewOption, nullptr);
+    MenuParam menuParam;
+    menuParam.type = MenuType::CONTEXT_MENU;
+    menuParam.previewMode = MenuPreviewMode::CUSTOM;
+    MenuView::MountOptionToColumn(params, menuNode, menuParam, menuNode, 0);
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 } // namespace OHOS::Ace::NG

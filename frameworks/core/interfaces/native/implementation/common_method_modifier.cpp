@@ -100,6 +100,9 @@
 #include "core/interfaces/native/implementation/touch_recognizer_peer.h"
 #include "core/components_ng/syntax/static/detached_free_root_proxy_frame_node.h"
 #include "core/common/event_manager.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
+#include "core/components/common/properties/placement.h"
+#include "core/components_ng/animation/geometry_transition.h"
 
 using namespace OHOS::Ace::NG::Converter;
 
@@ -485,6 +488,40 @@ auto g_popupCommonParam = [](const auto& src, RefPtr<PopupParam>& popupParam) {
     if (keyboardAvoidMode.has_value()) {
         popupParam->SetKeyBoardAvoidMode(keyboardAvoidMode.value());
     }
+
+    // Parse lifecycle callbacks
+    auto arkOnWillAppear = GetOpt(src.onWillAppear);
+    if (arkOnWillAppear.has_value()) {
+        auto onWillAppearCallback = [arkCallback = CallbackHelper(*arkOnWillAppear)]() {
+            arkCallback.InvokeSync();
+        };
+        popupParam->SetOnWillAppear(std::move(onWillAppearCallback));
+    }
+
+    auto arkOnDidAppear = GetOpt(src.onDidAppear);
+    if (arkOnDidAppear.has_value()) {
+        auto onDidAppearCallback = [arkCallback = CallbackHelper(*arkOnDidAppear)]() {
+            arkCallback.InvokeSync();
+        };
+        popupParam->SetOnDidAppear(std::move(onDidAppearCallback));
+    }
+
+    auto arkOnWillDisappear = GetOpt(src.onWillDisappear);
+    if (arkOnWillDisappear.has_value()) {
+        auto onWillDisappearCallback = [arkCallback = CallbackHelper(*arkOnWillDisappear)]() {
+            arkCallback.InvokeSync();
+        };
+        popupParam->SetOnWillDisappear(std::move(onWillDisappearCallback));
+    }
+
+    auto arkOnDidDisappear = GetOpt(src.onDidDisappear);
+    if (arkOnDidDisappear.has_value()) {
+        auto onDidDisappearCallback = [arkCallback = CallbackHelper(*arkOnDidDisappear)]() {
+            arkCallback.InvokeSync();
+        };
+        popupParam->SetOnDidDisappear(std::move(onDidDisappearCallback));
+    }
+
     auto material = OptConvert<UiMaterial*>(src.systemMaterial);
     if (material.has_value()) {
         popupParam->SetSystemMaterial(material.value()->Copy());
@@ -2022,6 +2059,10 @@ RefPtr<PopupParam> Convert(const Ark_TipsOptions& src)
     if (showAtAnchorOpt.has_value()) {
         popupParam->SetAnchorType(showAtAnchorOpt.value());
     }
+    auto material = OptConvert<UiMaterial*>(src.systemMaterial);
+    if (material.has_value()) {
+        popupParam->SetSystemMaterial(material.value()->Copy());
+    }
     return popupParam;
 }
 
@@ -2315,6 +2356,7 @@ void SetWidthImpl(Ark_NativePointer node,
         [frameNode](const Ark_Length& src) {
             auto result = Converter::OptConvert<CalcDimension>(src);
             SetWidthInternal(frameNode, result);
+            ViewAbstractModelStatic::ResetLayoutPolicyProperty(frameNode, true);
         },
         [frameNode](const Ark_LayoutPolicy& src) {
             auto result = Converter::OptConvert<LayoutCalPolicy>(src);
@@ -2323,6 +2365,7 @@ void SetWidthImpl(Ark_NativePointer node,
         },
         [frameNode]() {
             SetWidthInternal(frameNode, std::nullopt);
+            ViewAbstractModelStatic::ResetLayoutPolicyProperty(frameNode, true);
         });
 }
 void SetHeightInternal(FrameNode *frameNode, std::optional<CalcDimension> value)
@@ -2372,6 +2415,7 @@ void SetHeightImpl(Ark_NativePointer node,
             auto result = Converter::OptConvert<CalcDimension>(src);
             SetHeightInternal(frameNode, result);
             SetBlankHeight(frameNode, result);
+            ViewAbstractModelStatic::ResetLayoutPolicyProperty(frameNode, false);
         },
         [frameNode](const Ark_LayoutPolicy& src) {
             auto result = Converter::OptConvert<LayoutCalPolicy>(src);
@@ -2380,6 +2424,7 @@ void SetHeightImpl(Ark_NativePointer node,
         },
         [frameNode]() {
             SetHeightInternal(frameNode, std::nullopt);
+            ViewAbstractModelStatic::ResetLayoutPolicyProperty(frameNode, false);
         });
 }
 void SetDrawModifierImpl(Ark_NativePointer node,
@@ -3300,6 +3345,7 @@ void SetOnAccessibilityHoverTransparentImpl(Ark_NativePointer node,
             .target = Converter::ArkValue<Ark_EventTarget>(info.GetTarget()),
             .timeStamp = Converter::ArkValue<Ark_Int64>(
                 static_cast<int64_t>(info.GetTimeStamp().time_since_epoch().count())),
+            .source = Converter::ArkValue<Ark_SourceType>(info.GetSourceDevice()),
             .pressure = Converter::ArkValue<Ark_Float64>(info.GetForce()),
             .tiltX = Converter::ArkValue<Ark_Float64>(static_cast<double>(info.GetTiltX().value_or(0))),
             .tiltY = Converter::ArkValue<Ark_Float64>(static_cast<double>(info.GetTiltY().value_or(0))),
@@ -3363,6 +3409,7 @@ void SetOnTouchImpl(Ark_NativePointer node,
             .target = Converter::ArkValue<Ark_EventTarget>(info.GetTarget()),
             .timeStamp = Converter::ArkValue<Ark_Int64>(
                 static_cast<int64_t>(info.GetTimeStamp().time_since_epoch().count())),
+            .source = Converter::ArkValue<Ark_SourceType>(info.GetSourceDevice()),
             .pressure = Converter::ArkValue<Ark_Float64>(info.GetForce()),
             .tiltX = Converter::ArkValue<Ark_Float64>(static_cast<double>(info.GetTiltX().value_or(0))),
             .tiltY = Converter::ArkValue<Ark_Float64>(static_cast<double>(info.GetTiltY().value_or(0))),
@@ -4924,6 +4971,32 @@ void SetLightUpEffectImpl(Ark_NativePointer node,
     Validator::ValidateByRange(convValue, LIGHTUPEFFECT_MIN, LIGHTUPEFFECT_MAX);
     ViewAbstractModelStatic::SetLightUpEffect(frameNode, convValue);
 }
+void SetSpatialEffectImpl(Ark_NativePointer node,
+                          const Opt_SpatialEffectParams* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    if (value->tag == INTEROP_TAG_UNDEFINED) {
+        ViewAbstractModelStatic::SetSpatialEffect(frameNode, std::nullopt);
+        return;
+    }
+    const auto& src = value->value;
+    auto toVec3 = [](const Ark_DepthVector3& v) -> DepthVector3 {
+        return { static_cast<float>(v.x), static_cast<float>(v.y), static_cast<float>(v.z) };
+    };
+    SpatialEffectParams effectParams;
+    effectParams.position = DepthPosition {
+        .leftTop = toVec3(src.position.leftTop),
+        .rightTop = toVec3(src.position.rightTop),
+        .leftBottom = toVec3(src.position.leftBottom),
+        .rightBottom = toVec3(src.position.rightBottom),
+    };
+    if (src.occlusionWeight.tag != INTEROP_TAG_UNDEFINED) {
+        effectParams.occlusionWeight = static_cast<float>(src.occlusionWeight.value);
+    }
+    ViewAbstractModelStatic::SetSpatialEffect(frameNode, effectParams);
+}
 void SetPixelStretchEffectImpl(Ark_NativePointer node,
                                const Opt_PixelStretchEffectOptions* value)
 {
@@ -5299,6 +5372,7 @@ void SetOnTouchInterceptImpl(Ark_NativePointer node,
             .target = Converter::ArkValue<Ark_EventTarget>(info.GetTarget()),
             .timeStamp = Converter::ArkValue<Ark_Int64>(
                 static_cast<int64_t>(info.GetTimeStamp().time_since_epoch().count())),
+            .source = Converter::ArkValue<Ark_SourceType>(info.GetSourceDevice()),
             .pressure = Converter::ArkValue<Ark_Float64>(info.GetForce()),
             .tiltX = Converter::ArkValue<Ark_Float64>(static_cast<double>(info.GetTiltX().value_or(0))),
             .tiltY = Converter::ArkValue<Ark_Float64>(static_cast<double>(info.GetTiltY().value_or(0))),
@@ -6025,6 +6099,9 @@ void SetAdvancedBlendModeImpl(Ark_NativePointer node,
                 },
                 [frameNode](const Ark_uiEffect_HdrBrightnessBlender& blender) {
                     LOGE("SetAdvancedBlendModeImpl is not implemented for Ark_uiEffect_HdrBrightnessBlender");
+                },
+                [frameNode](const Ark_uiEffect_HdrDarkenBlender& blender) {
+                    LOGE("SetAdvancedBlendModeImpl is not implemented for Ark_uiEffect_HdrDarkenBlender");
                 },
                 [frameNode]() {
                     ViewAbstractModelStatic::SetBlendMode(frameNode, BlendMode::NONE);
@@ -6958,6 +7035,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetRestoreIdImpl,
         CommonMethodModifier::SetSphericalEffectImpl,
         CommonMethodModifier::SetLightUpEffectImpl,
+        CommonMethodModifier::SetSpatialEffectImpl,
         CommonMethodModifier::SetPixelStretchEffectImpl,
         CommonMethodModifier::SetAccessibilityNextFocusIdImpl,
         CommonMethodModifier::SetAccessibilityDefaultFocusImpl,
@@ -7009,6 +7087,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetSystemBarEffectImpl,
         CommonMethodModifier::SetUseEffect1Impl,
         CommonMethodModifier::SetBackdropBlurImpl,
+        CommonMethodModifier::SetOnAreaChange1Impl,
         CommonMethodModifier::SetSharedTransitionImpl,
         CommonMethodModifier::SetChainModeImpl,
         CommonMethodModifier::SetOnDrop1Impl,
@@ -7034,7 +7113,6 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetAccessibilityGroupImpl,
         CommonMethodModifier::SetOnGestureRecognizerJudgeBegin1Impl,
         CommonMethodModifier::SetDebugLineImpl,
-        CommonMethodModifier::SetOnAreaChange1Impl,
     };
     return &ArkUICommonMethodModifierImpl;
 }

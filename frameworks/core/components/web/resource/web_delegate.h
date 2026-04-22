@@ -950,6 +950,72 @@ private:
     std::vector<int32_t> pressedCodes_ {};
 };
 
+enum class WebCommandResult : int32_t {
+    SUCCESS = 10,
+    // environment error
+    FAILED = 11,
+    DELEGATE_NULL = 102,
+    CONTEXT_NULL = 103,
+    TASK_EXECUTOR_NULL = 104,
+    // json error
+    JSON_IS_INVALID = 110,
+    JSON_MISSING_EVENT_TYPE = 111,
+    JSON_INVALID_EVENT_TYPE = 112,
+    JSON_VALUE_ERROR_EVENT_TYPE = 113,
+    JSON_MISSING_XPATH = 114,
+    JSON_INVALID_XPATH = 115,
+    JSON_MISSING_DURATION = 116,
+    JSON_INVALID_DURATION = 117,
+    JSON_MISSING_ALIGN = 118,
+    JSON_INVALID_ALIGN = 119,
+    JSON_VALUE_ERROR_ALIGN = 120,
+    JSON_MISSING_OFFSET = 121,
+    JSON_INVALID_OFFSET = 122,
+    // runtime error
+    WEB_EXECUTE_TIMEOUT = 130,
+    ELEMENT_NOT_FOUND = 131,
+    WEB_NWEB_NULL = 132,
+};
+class NWebCommandActionImpl : public OHOS::NWeb::NWebCommandAction {
+public:
+    NWebCommandActionImpl(
+        const std::string &type, const std::string &path, int32_t dur, const std::string &al, int32_t off)
+        : event_type(type), XPath(path), duration(dur), align(al), offset(off)
+    {}
+
+    std::string GetEventType() override
+    {
+        return event_type;
+    }
+
+    std::string GetXPath() override
+    {
+        return XPath;
+    }
+
+    int32_t GetDuration() override
+    {
+        return duration;
+    }
+
+    std::string GetAlign() override
+    {
+        return align;
+    }
+
+    int32_t GetOffset() override
+    {
+        return offset;
+    }
+
+private:
+    std::string event_type = "";
+    std::string XPath = "";
+    int32_t duration = 0;
+    std::string align = "";
+    int32_t offset = 0;
+};
+
 class WebDelegate : public WebResource {
     DECLARE_ACE_TYPE(WebDelegate, WebResource);
 
@@ -1466,6 +1532,8 @@ public:
 
     void UpdateWebMediaAVSessionEnabled(bool isEnabled);
 
+    void UpdateKeyboardAppearanceMode(const WebKeyboardAppearanceMode& mode);
+
     std::string GetCurrentLanguage();
     void RegisterNativeJavaScriptProxy(const std::string& obj, const std::vector<std::string>& method,
         std::vector<std::function<void(const std::vector<std::string>&)>> callbackImpl,
@@ -1530,6 +1598,7 @@ public:
     void OnPdfLoadEvent(int32_t result, const std::string& url);
     void OnMediaCastEnter();
     void SetImeShow(bool visible);
+    int SendCommandActionToNWeb(const std::shared_ptr<OHOS::NWeb::NWebCommandAction>& simulatedAction);
     void OnRequestAutofill(int32_t menuType);
 
     bool HasOnNativeEmbedGestureEventV2()
@@ -1554,6 +1623,7 @@ public:
     void RequestWebDomJsonString(const std::function<void(const std::string)>&& callback);
     void SetScrollbarLayoutPolicy(ScrollbarLayoutPolicy policy);
     void SetIsSystemRtlEnable(bool enable);
+    void FetchCloudControlWebAutoLayoutConfig();
 private:
     void InitWebEvent();
     void RegisterWebEvent();

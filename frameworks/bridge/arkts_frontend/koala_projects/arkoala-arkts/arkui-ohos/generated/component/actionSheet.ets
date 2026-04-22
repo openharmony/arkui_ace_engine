@@ -42,14 +42,25 @@ export class DismissDialogActionInternal implements MaterializedBase,DismissDial
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    public reason: DismissReason
+    // instructive change begin
+    get reason(): DismissReason {
+        return this.getReason()
+    }
+    set reason(reason: DismissReason) {
+        this.setReason(reason)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, DismissDialogActionInternal.getFinalizer())
-        this.reason = this.getReason()
+        // instructive change begin
+        // this.reason = this.getReason()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, DismissDialogActionInternal.construct())
-        this.reason = this.getReason()
+        // instructive change begin
+        // this.reason = this.getReason()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._DismissDialogAction_construct()

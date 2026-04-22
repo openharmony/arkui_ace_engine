@@ -16,6 +16,7 @@
 #include "core/components/popup/popup_element.h"
 
 #include "base/subwindow/subwindow_manager.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components/bubble/bubble_component.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/popup/popup_theme.h"

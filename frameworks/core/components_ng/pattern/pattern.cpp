@@ -19,6 +19,7 @@
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/corner_mark/corner_mark.h"
 #include "core/components_ng/property/accessibility_property.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 
 namespace OHOS::Ace::NG {
 int32_t Pattern::OnRecvCommand(const std::string& command)

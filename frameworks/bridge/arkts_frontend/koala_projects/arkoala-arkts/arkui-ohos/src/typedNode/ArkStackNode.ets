@@ -46,4 +46,11 @@ export class ArkStackNode extends ArkBaseNode implements StackAttribute {
         this.getPeer()?.setAlignContentAttribute(value_casted);
         return this;
     }
+
+    syncLoad(value: boolean): this {
+        const value_casted = value as (boolean);
+        this.getPeer()?.setSyncLoadAttribute(value_casted);
+        this.markDirty();
+        return this;
+    }
 }

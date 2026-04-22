@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/compatible/components/svg/rosen_render_svg_path.h"
+#include "core/components_ng/render/drawing.h"
 
 #include "frameworks/core/components/common/painter/rosen_svg_painter.h"
 #include "frameworks/core/components/transform/rosen_render_transform.h"

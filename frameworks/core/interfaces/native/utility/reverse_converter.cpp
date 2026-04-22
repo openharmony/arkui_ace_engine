@@ -40,6 +40,7 @@
 #include "core/interfaces/native/implementation/length_metrics_peer.h"
 #include "core/interfaces/native/implementation/letter_spacing_style_peer.h"
 #include "core/interfaces/native/implementation/line_height_style_peer.h"
+#include "core/interfaces/native/implementation/line_spacing_style_peer.h"
 #include "core/interfaces/native/implementation/nav_destination_context_peer.h"
 #include "core/interfaces/native/implementation/nav_path_info_peer_impl.h"
 #include "core/interfaces/native/implementation/nav_path_stack_peer_impl.h"
@@ -664,6 +665,9 @@ void AssignArkValue(Ark_SpanStyle& dst, const RefPtr<OHOS::Ace::SpanBase>& src)
             break;
         case Ace::SpanType::LineHeight:
             CreateStylePeer<LineHeightStylePeer, OHOS::Ace::LineHeightSpan>(dst, src);
+            break;
+        case Ace::SpanType::LineSpacing:
+            CreateStylePeer<LineSpacingStylePeer, OHOS::Ace::LineSpacingSpan>(dst, src);
             break;
         case Ace::SpanType::BackgroundColor:
             CreateStylePeer<BackgroundColorStylePeer, OHOS::Ace::BackgroundColorSpan>(dst, src);

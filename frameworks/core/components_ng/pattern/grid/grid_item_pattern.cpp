@@ -62,9 +62,7 @@ FocusPattern GridItemPattern::GetFocusPattern() const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, FocusPattern());
-    auto pipeline = host->GetContext();
-    CHECK_NULL_RETURN(pipeline, FocusPattern());
-    auto theme = pipeline->GetTheme<GridItemTheme>();
+    auto theme = host->GetTheme<GridItemTheme>(true);
     CHECK_NULL_RETURN(theme, FocusPattern());
     auto focusColor = theme->GetGridItemFocusColor();
     FocusPaintParam focusPaintParam;
@@ -123,6 +121,34 @@ void GridItemPattern::OnModifyDone()
         InitHoverEvent();
         InitPressEvent();
     }
+    if (!isFocusBorderColorInitialized_) {
+        auto gridItemTheme = host->GetTheme<GridItemTheme>(true);
+        CHECK_NULL_VOID(gridItemTheme);
+        std::unique_ptr<FocusPaintParam> paintParams = std::make_unique<FocusPaintParam>();
+        paintParams->SetPaintColor(gridItemTheme->GetGridItemFocusColor());
+        focusHub->SetFocusPaintParamsPtr(paintParams);
+        isFocusBorderColorInitialized_ = true;
+    }
+}
+
+bool GridItemPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return false;
+    }
+    auto gridItemTheme = host->GetTheme<GridItemTheme>(true);
+    CHECK_NULL_RETURN(gridItemTheme, false);
+
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    std::unique_ptr<FocusPaintParam> paintParams = std::make_unique<FocusPaintParam>();
+    paintParams->SetPaintColor(gridItemTheme->GetGridItemFocusColor());
+    focusHub->SetFocusPaintParamsPtr(paintParams);
+
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    return false;
 }
 
 void GridItemPattern::MarkIsSelected(bool isSelected)
@@ -203,9 +229,9 @@ void GridItemPattern::BeforeCreateLayoutWrapper()
 Color GridItemPattern::GetBlendGgColor()
 {
     Color color = Color::TRANSPARENT;
-    auto pipeline = GetContext();
-    CHECK_NULL_RETURN(pipeline, color);
-    auto theme = pipeline->GetTheme<GridItemTheme>();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, color);
+    auto theme = host->GetTheme<GridItemTheme>(true);
     CHECK_NULL_RETURN(theme, color);
     if (isPressed_) {
         color = color.BlendColor(theme->GetGridItemPressColor());

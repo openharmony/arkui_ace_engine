@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include <sstream>
 
@@ -123,6 +124,7 @@ void SetBackButtonImgAboveVersionTen(const RefPtr<FrameNode>& backButtonNode,
         return;
     }
 
+    CHECK_NULL_VOID(titleBarLayoutProperty->HasImageSource());
     ImageSourceInfo imageSourceInfo = titleBarLayoutProperty->GetImageSourceValue();
     SetImageSourceInfoFillColor(imageSourceInfo);
     backButtonImageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
@@ -137,6 +139,7 @@ void SetBackButtonImgBelowVersionTen(const RefPtr<FrameNode>& backButtonNode,
     if (!backButtonNode || !titleBarLayoutProperty || !backButtonImageLayoutProperty) {
         return;
     }
+    CHECK_NULL_VOID(titleBarLayoutProperty->HasImageSource());
     ImageSourceInfo imageSourceInfo = titleBarLayoutProperty->GetImageSourceValue();
     SetImageSourceInfoFillColor(imageSourceInfo);
     backButtonImageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
@@ -307,6 +310,7 @@ void UpdateImageBackButton(const RefPtr<FrameNode>& backButtonNode, const RefPtr
         auto backButtonImageNode = FrameNode::CreateFrameNode(V2::BACK_BUTTON_IMAGE_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
         CHECK_NULL_VOID(backButtonImageNode);
+        CHECK_NULL_VOID(titleBarLayoutProperty->HasImageSource());
         ImageSourceInfo imageSourceInfo = titleBarLayoutProperty->GetImageSourceValue();
         auto backButtonImageLayoutProperty = backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(backButtonImageLayoutProperty);
@@ -1343,6 +1347,9 @@ void TitleBarPattern::OnColorConfigurationUpdate()
         backButtonPattern->SetFocusBorderColor(theme->GetBackgroundFocusOutlineColor());
         backButtonPattern->SetFocusBorderWidth(theme->GetBackgroundFocusOutlineWeight());
         renderContext->UpdateBackgroundColor(backButtonColor);
+        auto backButtonLayoutProperty = backButtonPattern->GetLayoutProperty<ButtonLayoutProperty>();
+        CHECK_NULL_VOID(backButtonLayoutProperty);
+        backButtonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
         backButton->MarkModifyDone();
     }
     auto backButtonImgNode = AceType::DynamicCast<FrameNode>(backButton->GetChildren().front());

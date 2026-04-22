@@ -19,7 +19,6 @@
 #include "ffi_remote_data.h"
 
 #include "base/memory/referenced.h"
-#include "core/components/common/properties/decoration.h"
 #include "bridge/cj_frontend/cppview/matrix2d.h"
 #include "frameworks/core/components/common/properties/paint_state.h"
 

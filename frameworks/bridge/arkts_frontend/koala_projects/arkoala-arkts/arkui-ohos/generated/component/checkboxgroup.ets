@@ -48,23 +48,49 @@ export class CheckBoxGroupConfigurationInternal implements MaterializedBase,Comm
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    public enabled: boolean
-    public contentModifier: ContentModifier<CheckBoxGroupConfiguration>
-    public name: string
-    public status: SelectStatus
+    // instructive change begin
+    get enabled(): boolean {
+        return this.getEnabled()
+    }
+    set enabled(enabled: boolean) {
+        this.setEnabled(enabled)
+    }
+    get contentModifier(): ContentModifier<CheckBoxGroupConfiguration> {
+        return this.getContentModifier()
+    }
+    set contentModifier(contentModifier: ContentModifier<CheckBoxGroupConfiguration>) {
+        this.setContentModifier(contentModifier)
+    }
+    get name(): string {
+        return this.getName()
+    }
+    set name(name: string) {
+        this.setName(name)
+    }
+    get status(): SelectStatus {
+        return this.getStatus()
+    }
+    set status(status: SelectStatus) {
+        this.setStatus(status)
+    }
+    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, CheckBoxGroupConfigurationInternal.getFinalizer())
-        this.enabled = this.getEnabled()
-        this.contentModifier = this.getContentModifier()
-        this.name = this.getName()
-        this.status = this.getStatus()
+        // instructive change begin
+        // this.enabled = this.getEnabled()
+        // this.contentModifier = this.getContentModifier()
+        // this.name = this.getName()
+        // this.status = this.getStatus()
+        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, CheckBoxGroupConfigurationInternal.construct())
-        this.enabled = this.getEnabled()
-        this.contentModifier = this.getContentModifier()
-        this.name = this.getName()
-        this.status = this.getStatus()
+        // instructive change begin
+        // this.enabled = this.getEnabled()
+        // this.contentModifier = this.getContentModifier()
+        // this.name = this.getName()
+        // this.status = this.getStatus()
+        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._CheckBoxGroupConfiguration_construct()
@@ -155,7 +181,7 @@ export class CheckBoxGroupConfigurationInternal implements MaterializedBase,Comm
     }
 }
 export class ArkCheckboxGroupPeer extends ArkCommonMethodPeer {
-    attributeSet?: CheckboxGroupModifier;
+    checkboxGroupAttributeSet?: CheckboxGroupModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

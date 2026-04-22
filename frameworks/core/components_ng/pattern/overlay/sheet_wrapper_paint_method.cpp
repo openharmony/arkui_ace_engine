@@ -25,6 +25,7 @@
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/paint_wrapper.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/common/properties/placement.h"
 
 namespace OHOS::Ace::NG {
 namespace {

@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_TEST_UNITTEST_CORE_PIPELINE_IGNORE_LAYOUT_SAFE_AREA_SCHEDULING_TEST_NG_H
 #define FOUNDATION_ACE_TEST_UNITTEST_CORE_PIPELINE_IGNORE_LAYOUT_SAFE_AREA_SCHEDULING_TEST_NG_H
 
+#include <map>
+
 #include "test/unittest/core/pattern/test_ng.h"
 
 #include "core/components_ng/layout/box_layout_algorithm.h"

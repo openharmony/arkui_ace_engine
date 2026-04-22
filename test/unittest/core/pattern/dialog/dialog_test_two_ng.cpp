@@ -24,6 +24,7 @@
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "core/common/recorder/event_recorder.h"
 
+#include "core/common/ace_engine.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -200,6 +201,7 @@ void DialogPatternTwoTestNg::SetDialogTheme()
 {
     auto themeManager = AceType::DynamicCast<MockThemeManager>(MockPipelineContext::GetCurrent()->GetThemeManager());
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MockDialogTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<MockDialogTheme>()));
 }
 
 void DialogPatternTwoTestNg::UpdateDialogProperties(DialogProperties& props)
@@ -268,6 +270,7 @@ HWTEST_F(DialogPatternTwoTestNg, DialogPatternTest017, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
     /**
      * @tc.steps: step2. create dialog node.
      * @tc.expected: the dialog node created successfully.
@@ -341,6 +344,7 @@ HWTEST_F(DialogPatternTwoTestNg, DialogPatternTest020, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
     auto dialog = DialogView::CreateDialogNode(props, nullptr);
     ASSERT_NE(dialog, nullptr);
     auto dialogPattern = dialog->GetPattern<DialogPattern>();
@@ -403,6 +407,7 @@ HWTEST_F(DialogPatternTwoTestNg, DialogPatternTest021, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
     auto dialog = DialogView::CreateDialogNode(props, nullptr);
     ASSERT_NE(dialog, nullptr);
     auto dialogPattern = dialog->GetPattern<DialogPattern>();
@@ -411,6 +416,7 @@ HWTEST_F(DialogPatternTwoTestNg, DialogPatternTest021, TestSize.Level1)
     
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ButtonTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<ButtonTheme>()));
     dialogPattern->isSuitableForElderly_ = true;
     dialogPattern->AddButtonAndDivider(btnItems, dialogPattern->buttonContainer_, false);
     SystemProperties::orientation_ = DeviceOrientation::PORTRAIT;
@@ -453,6 +459,7 @@ HWTEST_F(DialogPatternTwoTestNg, DialogPatternTest022, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
     float expectedFontScale = 3.0f;
     float actualFontScale = 2.0f;
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -505,6 +512,7 @@ HWTEST_F(DialogPatternTwoTestNg, DialogPatternTest028, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<DialogTheme>()));
     /**
      * @tc.steps: step2. create dialog node.
      * @tc.expected: the dialog node created successfully.
@@ -610,6 +618,16 @@ HWTEST_F(DialogPatternTwoTestNg, DialogPatternTest030, TestSize.Level1)
             return buttonTheme;
         }
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([=](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            if (type == TextTheme::TypeId()) {
+                return textTheme;
+            } else if (type == DialogTheme::TypeId()) {
+                return dialogTheme;
+            } else {
+                return buttonTheme;
+            }
+        });
     /**
      * @tc.steps: step2. create dialog node.
      * @tc.expected: the dialog node created successfully.
@@ -681,6 +699,16 @@ HWTEST_F(DialogPatternTwoTestNg, DialogPatternTest031, TestSize.Level1)
             return buttonTheme;
         }
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([=](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            if (type == TextTheme::TypeId()) {
+                return textTheme;
+            } else if (type == DialogTheme::TypeId()) {
+                return dialogTheme;
+            } else {
+                return buttonTheme;
+            }
+        });
     /**
      * @tc.steps: step2. create dialog node.
      * @tc.expected: the dialog node created successfully.
@@ -781,6 +809,16 @@ HWTEST_F(DialogPatternTwoTestNg, DialogPatternTest032, TestSize.Level1)
             return buttonTheme;
         }
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([=](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            if (type == TextTheme::TypeId()) {
+                return textTheme;
+            } else if (type == DialogTheme::TypeId()) {
+                return dialogTheme;
+            } else {
+                return buttonTheme;
+            }
+        });
     /**
      * @tc.steps: step2. create dialog node.
      * @tc.expected: the dialog node created successfully.
@@ -1002,6 +1040,7 @@ HWTEST_F(DialogPatternTwoTestNg, DialogPatternThemeScopeTest003, TestSize.Level1
 
     auto dialog = DialogView::CreateDialogNode(props, nullptr);
     ASSERT_NE(dialog, nullptr);
+    dialog->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
     auto pattern = dialog->GetPattern<DialogPattern>();
     ASSERT_NE(pattern, nullptr);
 

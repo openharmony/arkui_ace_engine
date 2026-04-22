@@ -19,8 +19,12 @@ if (globalThis.WithTheme !== undefined) {
         deepRenderFunction: (elmtId: number, isInitialRender: boolean) => void
     ): (elmtId: number, isInitialRender: boolean) => void {
         // get actual theme scope
-        const themeScope = ArkThemeScopeManager.getInstance().lastLocalThemeScope();
+        let themeScope = ArkThemeScopeManager.getInstance().lastLocalThemeScope();
         // if ListItem isn`t in theme scope we shouldn`t use any theme scope for deep render
+        if (themeScope === undefined) {
+            const listItemElemtId = ViewStackProcessor.GetElmtIdToAccountFor();
+            themeScope = ArkThemeScopeManager.getInstance().scopeForElmtId(listItemElemtId);
+        }
         if (themeScope === undefined) {
             return deepRenderFunction;
         }

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include <mutex>
+#include "core/accessibility/accessibility_manager.h"
 #include <optional>
 #include <string>
 
@@ -80,6 +81,7 @@
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/theme/icon_theme.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -105,6 +107,32 @@ constexpr float PIXELMAP_WIDTH = 100.0;
 constexpr float PIXELMAP_HEIGHT = 100.0;
 constexpr float BORDER_VALUE = 10.0;
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
+
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == DragBarTheme::TypeId()) {
+        return AceType::MakeRefPtr<DragBarTheme>();
+    } else if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == DialogTheme::TypeId()) {
+        return AceType::MakeRefPtr<DialogTheme>();
+    } else if (type == PickerTheme::TypeId()) {
+        return AceType::MakeRefPtr<PickerTheme>();
+    } else if (type == SelectTheme::TypeId()) {
+        return AceType::MakeRefPtr<SelectTheme>();
+    } else if (type == MenuTheme::TypeId()) {
+        return AceType::MakeRefPtr<MenuTheme>();
+    } else if (type == ToastTheme::TypeId()) {
+        return AceType::MakeRefPtr<ToastTheme>();
+    } else if (type == SheetTheme::TypeId()) {
+        auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+        sheetTheme->closeIconButtonWidth_ = SHEET_CLOSE_ICON_WIDTH;
+        sheetTheme->centerDefaultWidth_ = SHEET_LANDSCAPE_WIDTH;
+        return sheetTheme;
+    } else {
+        return nullptr;
+    }
+}
 } // namespace
 
 class OverlayManagerTestNg : public testing::Test {
@@ -148,29 +176,10 @@ void OverlayManagerTestNg::SetUpTestCase()
     MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
     MockPipelineContext::GetCurrentContext()->SetMinPlatformVersion((int32_t)PlatformVersion::VERSION_ELEVEN);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-        if (type == DragBarTheme::TypeId()) {
-            return AceType::MakeRefPtr<DragBarTheme>();
-        } else if (type == IconTheme::TypeId()) {
-            return AceType::MakeRefPtr<IconTheme>();
-        } else if (type == DialogTheme::TypeId()) {
-            return AceType::MakeRefPtr<DialogTheme>();
-        } else if (type == PickerTheme::TypeId()) {
-            return AceType::MakeRefPtr<PickerTheme>();
-        } else if (type == SelectTheme::TypeId()) {
-            return AceType::MakeRefPtr<SelectTheme>();
-        } else if (type == MenuTheme::TypeId()) {
-            return AceType::MakeRefPtr<MenuTheme>();
-        } else if (type == ToastTheme::TypeId()) {
-            return AceType::MakeRefPtr<ToastTheme>();
-        } else if (type == SheetTheme::TypeId()) {
-            auto  sheetTheme = AceType::MakeRefPtr<SheetTheme>();
-            sheetTheme->closeIconButtonWidth_ = SHEET_CLOSE_ICON_WIDTH;
-            sheetTheme->centerDefaultWidth_ = SHEET_LANDSCAPE_WIDTH;
-            return sheetTheme;
-        } else {
-            return nullptr;
-        }
+        return GetTheme(type);
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 void OverlayManagerTestNg::TearDownTestCase()
@@ -245,7 +254,7 @@ void OverlayManagerTestNg::CreateSheetContentNode()
  * @tc.desc: Test OverlayManager::DeleteModal
  * @tc.type: FUNC
  */
-HWTEST_F(OverlayManagerTestNg, DeleteModal001, TestSize.Level1)
+HWTEST_F(OverlayManagerTestNg, DeleteModal001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create target node and toast node.

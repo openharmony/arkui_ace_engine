@@ -23,6 +23,8 @@ class sptr {
 private:
     std::shared_ptr<T> ptr_;
 public:
+    sptr() = default;
+
     sptr(T* p)
     {
         ptr_ = std::shared_ptr<T>(p);

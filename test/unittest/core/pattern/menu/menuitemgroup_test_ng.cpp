@@ -41,6 +41,7 @@
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view.h"
+#include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view_static.h"
 #include "core/components_ng/pattern/menu/menu_model_ng.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
@@ -973,6 +974,29 @@ HWTEST_F(MenuItemGroupTestNg, AddFooterNormal, TestSize.Level1)
     EXPECT_EQ(menuItemPattern->footerIndex_, START_INDEX);
 }
 
+HWTEST_F(MenuItemGroupTestNg, MenuItemGroupTextProperty001, TestSize.Level1)
+{
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    MenuItemGroupView menuItemGroupView;
+    menuItemGroupView.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto menuItemPattern = frameNode->GetPattern<MenuItemGroupPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    menuItemGroupView.SetHeader(std::string("head"));
+    ASSERT_NE(menuItemPattern->headerContent_, nullptr);
+    auto headerLayoutProps = menuItemPattern->headerContent_->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(headerLayoutProps, nullptr);
+    EXPECT_TRUE(headerLayoutProps->GetEnableSmallLanguageTruncationValue(false));
+    menuItemGroupView.SetFooter(std::string("foot"));
+    ASSERT_NE(menuItemPattern->footerContent_, nullptr);
+    auto footerLayoutProps = menuItemPattern->footerContent_->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(footerLayoutProps, nullptr);
+    EXPECT_TRUE(footerLayoutProps->GetEnableSmallLanguageTruncationValue(false));
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
 /**
  * @tc.name: AddFooterNull
  * @tc.desc: Test MenuItemGroup pattern AddFooter with null ptr.
@@ -1093,6 +1117,78 @@ HWTEST_F(MenuItemGroupTestNg, UpdateMenuBackgroundStyle003, TestSize.Level1)
     EXPECT_EQ(renderContext->GetBackgroundEffect()->saturation, effectOption.saturation);
 
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: UpdateMenuBackgroundStyle004
+ * @tc.desc: MenuView UpdateMenuBackgroundStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemGroupTestNg, UpdateMenuBackgroundStyle004, TestSize.Level1)
+{
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(
+        static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+
+    MenuParam menuParam;
+    BlurStyleOption blurStyleOption;
+    EffectOption effectOption;
+    blurStyleOption.colorMode = ThemeColorMode::LIGHT;
+    effectOption.saturation = 6.0f;
+    menuParam.blurStyleOption = blurStyleOption;
+    menuParam.effectOption = effectOption;
+    
+    auto menuWrapperNode = GetPreviewMenuWrapper();
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+
+    MenuView::UpdateMenuBackgroundStyle(menuNode, menuParam);
+    auto renderContext = menuNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetBackBlurStyle(), std::nullopt);
+    ASSERT_NE(renderContext->GetBackgroundEffect(), std::nullopt);
+    EXPECT_EQ(renderContext->GetBackgroundEffect()->saturation, effectOption.saturation);
+
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: UpdateMenuBackgroundStyle005
+ * @tc.desc: MenuView UpdateMenuBackgroundStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemGroupTestNg, UpdateMenuBackgroundStyle005, TestSize.Level1)
+{
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(setApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+ 
+    MenuParam menuParam;
+    BlurStyleOption blurStyleOption;
+    EffectOption effectOption;
+    blurStyleOption.colorMode = ThemeColorMode::SYSTEM;
+    effectOption.saturation = 6.0f;
+    menuParam.blurStyleOption = blurStyleOption;
+    menuParam.effectOption = effectOption;
+    
+    auto menuWrapperNode = GetPreviewMenuWrapper();
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(mockRenderContext, nullptr);
+    mockRenderContext->isUniRenderEnabled_ = true;
+    menuNode->renderContext_ = mockRenderContext;
+ 
+    MenuView::UpdateMenuBackgroundStyle(menuNode, menuParam);
+    EXPECT_EQ(mockRenderContext->GetBackBlurStyle()->colorMode, ThemeColorMode::SYSTEM);
+ 
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(rollbackApiVersion);
 }
 
 /**

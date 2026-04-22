@@ -50,7 +50,12 @@ struct Parent {
         'pages/v2_get_statemgmt_info_test',
         'pages/v2_change_observation_tests',
         'pages/v2_computed_tests',
-        'pages/v2_decorated_variables_tests'
+        'pages/v2_decorated_variables_tests',
+        'pages/state_mgmt_console_trace_tests',
+        'pages/utils_tests',
+        'pages/weakref_pool_tests',
+        'pages/state_mgmt_configure_tests',
+        'pages/state_mgmt_dfx_tests'
       ])
       PageController.start(this.reportFinal)
     }, 200)

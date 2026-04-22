@@ -233,6 +233,7 @@ public:
     Color operator/(double value) const;
 
     std::string ColorToString() const;
+    std::string ColorWithHdrToString() const;
     std::string ToSvgFillColorKey() const;
 
     static Color ColorFromString(const std::string& str);

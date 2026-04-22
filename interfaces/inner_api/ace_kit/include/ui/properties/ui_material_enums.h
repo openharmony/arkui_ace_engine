@@ -21,7 +21,7 @@ namespace OHOS::Ace {
 enum class MaterialType: int32_t {
     NONE = 0,
     SEMI_TRANSPARENT = 1,
-    IMMERSIVE = 101,
+    IMMERSIVE = 2,
     MAX = IMMERSIVE,
 };
 
@@ -67,6 +67,11 @@ enum class MaterialTransparency: int32_t {
     GENTLE_THICK = 5,
 };
 
+enum class MaterialState {
+    DEFAULT = 0,
+    ENABLE = 1,
+    DISABLE = 2,
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_UI_PROPERTIES_UI_MATERIAL_ENUM_H

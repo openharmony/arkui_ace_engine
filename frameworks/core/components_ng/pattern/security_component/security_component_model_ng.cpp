@@ -259,6 +259,10 @@ void SecurityComponentModelNG::SetDefaultTextStyle(const RefPtr<FrameNode>& text
     textLayoutProperty->UpdateItalicFontStyle(Ace::FontStyle::NORMAL);
     textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
     textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        textLayoutProperty->UpdateOrphanCharOptimization(true);
+        textLayoutProperty->UpdateWordBreak(WordBreak::HYPHENATION);
+    }
 
     if (isButtonVisible) {
         textLayoutProperty->UpdateTextColor(secCompTheme->GetFontColor());
@@ -341,6 +345,7 @@ void SecurityComponentModelNG::SetInvisibleBackgroundButton(const RefPtr<FrameNo
     const auto& renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
 }
 

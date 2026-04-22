@@ -15,8 +15,11 @@
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
 
 #include "base/subwindow/subwindow_manager.h"
+#include "core/common/ace_engine.h"
+#include "core/common/container.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProperties,

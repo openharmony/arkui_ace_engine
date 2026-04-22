@@ -84,7 +84,7 @@ std::vector<std::tuple<std::string, Ark_Int32, std::string>> testFixtureTimerSta
 };
 
 std::vector<std::tuple<std::string, Ark_Int32>> testFixtureTimerInitialValueInvalidValues = {
-    { "-1", Converter::ArkValue<Ark_Int32>(-1.0) },
+    { "-1", Converter::ArkValue<Ark_Int32>(-1) },
 };
 
 std::vector<std::tuple<std::string, Ark_Float64, std::string>> testFixtureShadowRadiusNumberValidValues = {

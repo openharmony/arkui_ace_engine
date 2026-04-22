@@ -154,6 +154,34 @@ void FfiOHOSAceFrameworkTabsPop()
     TabsModel::GetInstance()->Pop();
 }
 
+void FfiOHOSAceFrameworkTabsSetWidth(double width, int32_t unit)
+{
+    FfiOHOSAceFrameworkViewAbstractSetWidth(width, unit);
+
+    Dimension value(width, static_cast<DimensionUnit>(unit));
+    if (value.Unit() == DimensionUnit::AUTO) {
+        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
+        TabsModel::GetInstance()->SetWidthAuto(true);
+        return;
+    }
+
+    TabsModel::GetInstance()->SetWidthAuto(false);
+}
+
+void FfiOHOSAceFrameworkTabsSetHeight(double height, int32_t unit)
+{
+    FfiOHOSAceFrameworkViewAbstractSetHeight(height, unit);
+
+    Dimension value(height, static_cast<DimensionUnit>(unit));
+    if (value.Unit() == DimensionUnit::AUTO) {
+        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
+        TabsModel::GetInstance()->SetHeightAuto(true);
+        return;
+    }
+
+    TabsModel::GetInstance()->SetHeightAuto(false);
+}
+
 void FfiOHOSAceFrameworkTabsSetBarWidth(double width, int32_t unit)
 {
     Dimension value(width, static_cast<DimensionUnit>(unit));
@@ -163,7 +191,12 @@ void FfiOHOSAceFrameworkTabsSetBarWidth(double width, int32_t unit)
 void FfiOHOSAceFrameworkTabsSetBarHeight(double height, int32_t unit)
 {
     Dimension value(height, static_cast<DimensionUnit>(unit));
+    bool adaptiveHeight = false;
+    if (value.Unit() == DimensionUnit::AUTO) {
+        adaptiveHeight = true;
+    }
     TabsModel::GetInstance()->SetTabBarHeight(value);
+    TabsModel::GetInstance()->SetBarAdaptiveHeight(adaptiveHeight);
 }
 
 void FfiOHOSAceFrameworkTabsSetBarMode(int32_t barMode)

@@ -113,6 +113,8 @@ class ObserveV2 {
   // @Monitor id
   private monitorIdsChanged_: Set<number> = new Set();
   private persistenceChanged_: Set<number> = new Set();
+  private anonymousMonitorFuncKeyMap_: WeakMap<MonitorCallback, string> = new WeakMap();
+  private anonymousMonitorFuncKeySeed_: number = 0;
 
   // ViewV2s Grouped by instance id (container id), contains ReactiveBuilderNode.
   private viewV2NeedUpdateMap_: Map<number, Map<ViewBuildNodeBase, Array<number>>> = new Map();
@@ -238,6 +240,45 @@ class ObserveV2 {
       this.idleTasks_[this.idleTasks_.end++] = [this.clearBindingInternal, id];
     } else {
       this.clearBindingInternal(id);
+    }
+  }
+
+  // Queue pre-render component creation of global reuse as an idle task
+  public queuePreRenderCreation(parent: PUV2ViewBase, componentClass: new (...args: unknown[]) => PUV2ViewBase,
+      componentParams: Object, elmtId: number, pool: __ReusePool_Internal__, reuseId: string,
+      extraInfo: ExtraInfo = undefined): void {
+    const createPreRenderTask = (): void => {
+      const instance = new componentClass(parent, componentParams, undefined, elmtId, () => {}, extraInfo);
+      instance.isPreRendered = true;
+
+      // Set context before rendering children
+      PUV2ViewBase.beginPreRender(pool);
+
+      // Build the full component subtree in sandboxed mode
+      // (fake element IDs, no observation bindings)
+      if ('initialRenderForPreRender' in instance && typeof instance.initialRenderForPreRender === 'function') {
+        instance.initialRenderForPreRender();
+      }
+
+      // Push to pool before endPreRender
+      if (pool && typeof pool.push === 'function') {
+          pool.push(reuseId, instance, componentClass);
+      }
+      PUV2ViewBase.endPreRender();
+    };
+    setTimeout(() => createPreRenderTask(), 5);
+  }
+
+  /**
+ * Schedules a task to run during the framework's idle phase.
+ * Falls back to synchronous execution if no idle task queue exists.
+ */
+  public queueIdleTask(task: () => void): void {
+    if (this.idleTasks_) {
+        this.idleTasks_[this.idleTasks_.end++] = [task];
+    } else {
+        // No idle task system, run immediately
+        task();
     }
   }
 
@@ -1172,13 +1213,26 @@ class ObserveV2 {
     this.constructSyncMonitorAndMonitorsWithOptions(owningObject, owningObjectName, true);
   }
 
+  public getAnonymousMonitorFuncDisplay(monitorFunc: MonitorCallback): string {
+    let funcKey = this.anonymousMonitorFuncKeyMap_.get(monitorFunc);
+    if (!funcKey) {
+      funcKey = `__anonymous_monitor_${++this.anonymousMonitorFuncKeySeed_}`;
+      this.anonymousMonitorFuncKeyMap_.set(monitorFunc, funcKey);
+    }
+    return funcKey;
+  }
+
   public AddMonitorPath(target: object, path: string | string[], monitorFunc: MonitorCallback,
     isSync: boolean,
     wildcardEnabled: boolean,
     monitorType: MonitorType = MonitorType.ADD_MONITOR_API,
     owningObjectName: string = ''): void {
 
-    const funcName = monitorFunc.name;
+    let funcName = monitorFunc.name;
+    // if monitorFunc is an anonymous function, assign a unique name for it to store in refs
+    if (funcName === 'anonymousMonitorFunc') {
+      funcName = this.getAnonymousMonitorFuncDisplay(monitorFunc);
+    }
     const pathsUniqueString = Array.isArray(path) ? path.join(' ') : path;
     const paths = Array.isArray(path) ? path : [path];
     const decorator = monitorType === MonitorType.SYNC_MONITOR_DECORATOR || monitorType === MonitorType.MONITOR_WITH_OPTIONS_DECORATOR;
@@ -1241,7 +1295,13 @@ class ObserveV2 {
     const paths = Array.isArray(path) ? path : [path];
 
     if (monitorFunc) {
-      const funcName = monitorFunc.name;
+      let funcName = monitorFunc.name;
+      stateMgmtConsole.debug(`AddMonitorPath anonymous Func name ${funcName} typeof ${typeof funcName}`);
+      // if monitorFunc is an anonymous function, assign a unique name for it to store in refs
+      if (funcName === 'anonymousMonitorFunc') {
+        funcName = this.getAnonymousMonitorFuncDisplay(monitorFunc);
+        stateMgmtConsole.debug(`AddMonitorPath anonymous Func name ${funcName}`);
+      }
       let monitor = refs[funcName];
       if (monitor && monitor instanceof MonitorV2) {
         paths.forEach(item => {
@@ -1251,6 +1311,13 @@ class ObserveV2 {
             );
           }
         });
+        // there is a memory leak when path is empty, need to delete MonitorV2 from target
+        // only deal with monitorFunc is anonymous function, since for normal function may have compatibility issue
+        stateMgmtConsole.debug(`clearMonitorPath anonymous Func name ${funcName} length ${monitor.getValues().size}`);
+        if (monitorFunc.name === 'anonymousMonitorFunc' && monitor.getValues().size === 0) {
+          stateMgmtConsole.debug(`clearMonitorPath anonymous Func name ${funcName} delete ref`);
+          delete refs[funcName];
+        }
       } else {
         const pathsUniqueString = paths.join(' ');
         stateMgmtConsole.applicationError(

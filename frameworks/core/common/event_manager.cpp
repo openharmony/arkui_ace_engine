@@ -21,8 +21,10 @@
 #include "core/common/container.h"
 #include "core/common/reporter/reporter.h"
 #include "core/common/xcollie/xcollieInterface.h"
+#include "core/components/text_overlay/text_overlay_manager.h"
 #include "core/components_ng/event/error_reporter/general_interaction_error_reporter.h"
 #include "core/components_ng/gestures/recognizers/gestures_extra_handler.h"
+#include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
 #include "core/components_ng/manager/gesture_debug/gesture_debug_boundary_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
@@ -30,6 +32,11 @@
 #include "core/event/crown_event.h"
 #include "core/event/coasting_axis_event_generator.h"
 #include "core/pipeline/base/render_node.h"
+#include "core/pipeline_ng/pipeline_context.h"
+#ifdef RELAXED_INTERACTION_SUPPORT
+#include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/relaxed_interaction/relaxed_interaction_manager.h"
+#endif
 
 namespace OHOS::Ace {
 constexpr int32_t DUMP_DOUBLE_NUMBER = 2;
@@ -108,6 +115,14 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
             touchPoint.convertInfo.first == UIInputEventType::NONE && touchPoint.sourceType == SourceType::TOUCH);
     hitTestRecordInfo_ = { isRealTouch, touchPoint.screenX, touchPoint.screenY, touchPoint.id, touchPoint.time,
         touchPoint.type };
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
+    // Reset all gesture debug boundaries when a new gesture round starts.
+    if (SystemProperties::GetGestureDebugBoundaryEnabled() && downFingerIds_.size() == 1) {
+        auto& gestureDebugBoundaryManager = GetGestureDebugBoundaryManager();
+        CHECK_NULL_VOID(gestureDebugBoundaryManager);
+        gestureDebugBoundaryManager->ResetAllGesturesOnNewRound();
+    }
+#endif
     // For root node, the parent local point is the same as global point.
     frameNode->TouchTest(point, point, point, touchRestrict, hitTestResult, touchPoint.id, responseLinkResult);
     NotifyHitTestFrameNodeListener(touchPoint);
@@ -561,7 +576,9 @@ RefPtr<NG::GestureReferee> EventManager::GetCurrentReferee(bool isNewReferee, in
     auto currentReferee = refereeNG_;
     auto key = eventHandleId / EVENT_HANDLE;
     if (isNewReferee) {
-        if (postEventRefereeWithStrategyNG_.find(key) == postEventRefereeWithStrategyNG_.end()) {
+        auto iter = postEventRefereeWithStrategyNG_.find(key);
+        if (iter == postEventRefereeWithStrategyNG_.end() || (iter != postEventRefereeWithStrategyNG_.end() &&
+            !postEventRefereeWithStrategyNG_[key])) {
             auto gestureReferee = AceType::MakeRefPtr<NG::GestureReferee>();
             postEventRefereeWithStrategyNG_[key] = gestureReferee;
         }
@@ -1206,10 +1223,26 @@ void EventManager::UpdateInfoWhenFinishDispatch(const TouchEvent& point, bool se
                     isRefereeEmpty = false;
                 }
             }
-            auto key = point.eventHandleId / EVENT_HANDLE;
-            if (postEventRefereeWithStrategyNG_.find(key) != postEventRefereeWithStrategyNG_.end() && isRefereeEmpty) {
-                postEventRefereeWithStrategyNG_.erase(key);
+            if (isRefereeEmpty) {
+                EraseEventRefereeWithStrategy(point);
             }
+        }
+    }
+}
+
+void EventManager::EraseEventRefereeWithStrategy(const TouchEvent& point)
+{
+    auto key = point.eventHandleId / EVENT_HANDLE;
+    auto iter = postEventRefereeWithStrategyNG_.find(key);
+    if (iter == postEventRefereeWithStrategyNG_.end()) {
+        return;
+    }
+    auto currentReferee = iter->second;
+    for (auto it = postEventRefereeWithStrategyNG_.begin(); it != postEventRefereeWithStrategyNG_.end();) {
+        if (it->second == currentReferee) {
+            it = postEventRefereeWithStrategyNG_.erase(it);
+        } else {
+            ++it;
         }
     }
 }
@@ -2377,6 +2410,36 @@ EventManager::EventManager()
 
 EventManager::~EventManager() = default;
 
+const RefPtr<NG::SmartGestureManager>& EventManager::GetOrCreateSmartGestureManager()
+{
+    if (!smartGestureManager_) {
+        auto container = Container::GetContainer(instanceId_);
+        CHECK_NULL_RETURN(container, smartGestureManager_);
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+        CHECK_NULL_RETURN(pipeline, smartGestureManager_);
+        smartGestureManager_ = AceType::MakeRefPtr<NG::SmartGestureManager>(WeakPtr<NG::PipelineContext>(pipeline));
+    }
+    return smartGestureManager_;
+}
+
+const RefPtr<NG::SmartGestureManager>& EventManager::GetSmartGestureManager() const
+{
+    return smartGestureManager_;
+}
+
+void EventManager::ClearSmartGestureSelected()
+{
+    auto smartGestureManager = GetSmartGestureManager();
+    if (smartGestureManager) {
+        smartGestureManager->ClearSelected();
+    }
+}
+
+void EventManager::ResetSmartGestureManager()
+{
+    smartGestureManager_.Reset();
+}
+
 void EventManager::AddRectCallback(std::function<void(std::vector<Rect>&)>&& getRectCallback,
     std::function<void()>&& touchCallback, std::function<void()>&& mouseCallback)
 {
@@ -2411,9 +2474,11 @@ void EventManager::DumpEvent(NG::EventTreeType type, bool hasJson)
 
 const RefPtr<NG::GestureDebugBoundaryManager>& EventManager::GetGestureDebugBoundaryManager()
 {
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
     if (!gestureDebugBoundaryManager_) {
         gestureDebugBoundaryManager_ = AceType::MakeRefPtr<NG::GestureDebugBoundaryManager>();
     }
+#endif
     return gestureDebugBoundaryManager_;
 }
 
@@ -3320,4 +3385,47 @@ void EventManager::NotifyTouchpadInteraction()
         }
     }
 }
+
+void EventManager::ProcessCommand(const std::string& command, std::function<void()> requestFrameCallback)
+{
+#ifdef RELAXED_INTERACTION_SUPPORT
+    auto relaxedInteractionManager = GetOrCreateRelaxedInteractionManager();
+    if (!relaxedInteractionManager) {
+        TAG_LOGW(AceLogTag::ACE_UIEVENT, "RelaxedInteractionManager is null.");
+        return;
+    }
+    auto result = relaxedInteractionManager->ProcessCommand(command);
+    TAG_LOGD(AceLogTag::ACE_UIEVENT, "ProcessCommand result: %{public}d.", static_cast<int>(result));
+    if (result == NG::ProcessResult::SUCCESS) {
+        requestFrameCallback();
+    }
+#endif
+}
+
+void EventManager::FlushRelaxedInteraction(std::function<void()> requestFrameCallback)
+{
+#ifdef RELAXED_INTERACTION_SUPPORT
+    CHECK_NULL_VOID(relaxedInteractionManager_);
+    auto state = relaxedInteractionManager_->ExecuteNextStep();
+    if (state == NG::ExecutionState::RUNNING) {
+        requestFrameCallback();
+    }
+#endif
+}
+
+#ifdef RELAXED_INTERACTION_SUPPORT
+RefPtr<NG::RelaxedInteractionManager> EventManager::GetOrCreateRelaxedInteractionManager()
+{
+    if (relaxedInteractionManager_) {
+        return relaxedInteractionManager_;
+    }
+
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    relaxedInteractionManager_ = AceType::MakeRefPtr<NG::RelaxedInteractionManager>(pipelineContext);
+    return relaxedInteractionManager_;
+}
+#endif
 } // namespace OHOS::Ace

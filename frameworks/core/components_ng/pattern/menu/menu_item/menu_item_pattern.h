@@ -447,6 +447,9 @@ public:
     void ResetSelectTextProps();
     void ApplyOptionThemeStyles();
     void ApplySelectedThemeStyles();
+    void ApplySelectedThemeStyles(
+        const RefPtr<SelectPaintProperty>& selectPaintProperty, const RefPtr<FrameNode>& menuNode);
+    void ApplyOptionThemeStyles(const RefPtr<SelectPaintProperty>& selectPaintProperty);
     void UpdateCheckMarkColor(const Color& color);
     void SetShowDefaultSelectedIcon(bool show);
     void SetCheckMarkVisibleType(VisibleType type);
@@ -596,6 +599,7 @@ friend class ServiceCollaborationMenuAceHelper;
     void HandleOptionFontColor();
     void UpdateOptionStyle();
     RefPtr<SelectTheme> GetCurrentSelectTheme();
+    void UpdateTextAlignment(RefPtr<TextLayoutProperty>& textProperty, RefPtr<SelectTheme>& theme);
     void OnAttachToMainTree() override;
     void UpdateFontByThemeColor(RefPtr<MenuLayoutProperty>& menuProperty,
         RefPtr<MenuItemLayoutProperty>& itemProperty, RefPtr<SelectTheme> &menuTheme, bool isLabel);

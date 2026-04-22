@@ -21,6 +21,7 @@
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_param.h"
+#include "core/event/key_event.h"
 
 namespace OHOS::Ace::NG {
 struct RendererDumpInfo {

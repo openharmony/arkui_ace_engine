@@ -16,16 +16,19 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CALENDAR_CALENDAR_TYPE_DEFINE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CALENDAR_CALENDAR_TYPE_DEFINE_H
 
-#include <cstdint>
-#include <string>
+#include <optional>
+#include <utility>
+#include <vector>
 
 #include "base/geometry/dimension_offset.h"
-#include "core/components_ng/pattern/picker/picker_data.h"
-#include "core/components_ng/base/frame_node.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
-#include "core/common/resource/resource_object.h"
+#include "ui/base/referenced.h"
 
 namespace OHOS::Ace::NG {
+using ::OHOS::Ace::PickerDate;
+class FrameNode;
+
 namespace CalendarPickerConstants {
 const std::vector<HoverModeAreaType> HOVER_MODE_AREA_TYPE = { HoverModeAreaType::TOP_SCREEN,
     HoverModeAreaType::BOTTOM_SCREEN };

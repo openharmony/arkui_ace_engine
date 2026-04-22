@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include <atomic>
 #include <future>

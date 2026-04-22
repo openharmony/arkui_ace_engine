@@ -26,19 +26,9 @@
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/base/view_abstract.h"
 
 namespace OHOS::Ace::NG {
-
-void ListItemGroupPattern::OnAttachToFrameNode()
-{
-    auto host = GetHost();
-    // call OnAttachToFrameNodeMultiThread by multi thread
-    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
-    CHECK_NULL_VOID(host);
-    if (listItemGroupStyle_ == V2::ListItemGroupStyle::CARD) {
-        SetListItemGroupDefaultAttributes(host);
-    }
-}
 
 void ListItemGroupPattern::OnAttachToMainTree()
 {
@@ -56,24 +46,20 @@ void ListItemGroupPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(itemGroupNode);
     auto renderContext = itemGroupNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto pipeline = itemGroupNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto listItemGroupTheme = pipeline->GetTheme<ListItemTheme>();
+    auto listItemGroupTheme = itemGroupNode->GetTheme<ListItemTheme>(true);
     CHECK_NULL_VOID(listItemGroupTheme);
 
     renderContext->UpdateBackgroundColor(listItemGroupTheme->GetItemGroupDefaultColor());
 }
 
-void ListItemGroupPattern::SetListItemGroupDefaultAttributes(const RefPtr<FrameNode>& itemGroupNode)
+void ListItemGroupPattern::ApplyListItemGroupDefaultAttributes(const RefPtr<FrameNode>& itemGroupNode)
 {
     auto renderContext = itemGroupNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto layoutProperty = itemGroupNode->GetLayoutProperty<ListItemGroupLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
-    auto pipeline = GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto listItemGroupTheme = pipeline->GetTheme<ListItemTheme>();
+    auto listItemGroupTheme = itemGroupNode->GetTheme<ListItemTheme>(true);
     CHECK_NULL_VOID(listItemGroupTheme);
 
     renderContext->UpdateBackgroundColor(listItemGroupTheme->GetItemGroupDefaultColor());
@@ -91,6 +77,29 @@ void ListItemGroupPattern::SetListItemGroupDefaultAttributes(const RefPtr<FrameN
     layoutProperty->UpdatePadding(itemGroupPadding);
 
     renderContext->UpdateBorderRadius(listItemGroupTheme->GetItemGroupDefaultBorderRadius());
+}
+
+bool ListItemGroupPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    if (listItemGroupStyle_ != V2::ListItemGroupStyle::CARD ||
+        host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return false;
+    }
+    auto layoutProperty = host->GetLayoutProperty<ListItemGroupLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto listItemGroupTheme = host->GetTheme<ListItemTheme>(true);
+    CHECK_NULL_RETURN(listItemGroupTheme, false);
+
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    if (!layoutProperty->GetIsUserSetBackgroundColor()) {
+        renderContext->UpdateBackgroundColor(listItemGroupTheme->GetItemGroupDefaultColor());
+    }
+
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    return false;
 }
 
 void ListItemGroupPattern::DumpAdvanceInfo()
@@ -396,6 +405,38 @@ VisibleContentInfo ListItemGroupPattern::GetStartListItemIndex()
     return startInfo;
 }
 
+VisibleContentInfo ListItemGroupPattern::GetStartListItemIndex(float startPosFromMargin)
+{
+    VisibleContentInfo startInfo;
+    if (headerMainSize_ == 0 && footerMainSize_ == 0 && GetTotalItemCount() == 0) {
+        startInfo.area = ListItemGroupArea::NONE_AREA;
+        return startInfo;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, startInfo);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, startInfo);
+    auto offset = geometryNode->GetPaddingOffset() - geometryNode->GetMarginFrameOffset();
+    float startPos = startPosFromMargin - GetMainAxisOffset(offset, axis_);
+    if (footerMainSize_ > 0 && GreatNotEqual(startPos, mainSize_ - footerMainSize_)) {
+        startInfo.area = ListItemGroupArea::IN_FOOTER_AREA;
+        return startInfo;
+    }
+    if (headerMainSize_ > 0 && LessNotEqual(startPos, headerMainSize_)) {
+        startInfo.area = ListItemGroupArea::IN_HEADER_AREA;
+        return startInfo;
+    }
+    startInfo.area = ListItemGroupArea::IN_LIST_ITEM_AREA;
+    startInfo.indexInGroup = itemDisplayStartIndex_;
+    for (auto iter = itemPosition_.find(itemDisplayStartIndex_); iter != itemPosition_.end(); iter++) {
+        if (GreatOrEqual(iter->second.endPos, startPos)) {
+            startInfo.indexInGroup = iter->first;
+            return startInfo;
+        }
+    }
+    return startInfo;
+}
+
 VisibleContentInfo ListItemGroupPattern::GetEndListItemIndex()
 {
     bool isFooter = endFooterPos_ < 0 ? true : false;
@@ -416,6 +457,39 @@ VisibleContentInfo ListItemGroupPattern::GetEndListItemIndex()
         endArea = ListItemGroupArea::NONE_AREA;
     }
     VisibleContentInfo endInfo = { endArea, endItemIndexInGroup };
+    return endInfo;
+}
+
+VisibleContentInfo ListItemGroupPattern::GetEndListItemIndex(float endPosFromMargin)
+{
+    VisibleContentInfo endInfo;
+    if (headerMainSize_ == 0 && footerMainSize_ == 0 && GetTotalItemCount() == 0) {
+        endInfo.area = ListItemGroupArea::NONE_AREA;
+        return endInfo;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, endInfo);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, endInfo);
+    auto offset = geometryNode->GetPaddingOffset() - geometryNode->GetMarginFrameOffset();
+    float endPos = endPosFromMargin - GetMainAxisOffset(offset, axis_);
+    if (headerMainSize_ > 0 && LessNotEqual(endPos, headerMainSize_)) {
+        endInfo.area = ListItemGroupArea::IN_HEADER_AREA;
+        return endInfo;
+    }
+    if (footerMainSize_ > 0 && GreatNotEqual(endPos, mainSize_ - footerMainSize_)) {
+        endInfo.area = ListItemGroupArea::IN_FOOTER_AREA;
+        return endInfo;
+    }
+    endInfo.area = ListItemGroupArea::IN_LIST_ITEM_AREA;
+    endInfo.indexInGroup = itemDisplayEndIndex_;
+    for (auto index = itemDisplayEndIndex_; index >= itemDisplayStartIndex_; index--) {
+        auto iter = itemPosition_.find(index);
+        if (iter != itemPosition_.end() && LessOrEqual(iter->second.startPos, endPos)) {
+            endInfo.indexInGroup = iter->first;
+            return endInfo;
+        }
+    }
     return endInfo;
 }
 
@@ -737,8 +811,63 @@ void ListItemGroupPattern::SetListItemGroupStyle(V2::ListItemGroupStyle style)
     CHECK_NULL_VOID(host);
     if (listItemGroupStyle_ == V2::ListItemGroupStyle::NONE && style == V2::ListItemGroupStyle::CARD) {
         listItemGroupStyle_ = style;
-        SetListItemGroupDefaultAttributes(host);
+        ApplyListItemGroupDefaultAttributes(host);
     }
+}
+
+void ListItemGroupPattern::SetHeaderStyle(V2::ListItemGroupHeaderFooterStyle style)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (headerStyle_ == V2::ListItemGroupHeaderFooterStyle::NONE &&
+        style == V2::ListItemGroupHeaderFooterStyle::FLOATING) {
+        headerStyle_ = style;
+        auto headerNode = GetHeader();
+        if (headerNode) {
+            auto headerFrameNode = AceType::DynamicCast<FrameNode>(headerNode);
+            if (headerFrameNode) {
+                ApplyHeaderFooterStyle(headerFrameNode);
+            }
+        }
+    }
+}
+
+void ListItemGroupPattern::SetFooterStyle(V2::ListItemGroupHeaderFooterStyle style)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (footerStyle_ == V2::ListItemGroupHeaderFooterStyle::NONE &&
+        style == V2::ListItemGroupHeaderFooterStyle::FLOATING) {
+        footerStyle_ = style;
+        auto footerNode = GetFooter();
+        if (footerNode) {
+            auto footerFrameNode = AceType::DynamicCast<FrameNode>(footerNode);
+            if (footerFrameNode) {
+                ApplyHeaderFooterStyle(footerFrameNode);
+            }
+        }
+    }
+}
+
+void ListItemGroupPattern::ApplyHeaderFooterStyle(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    auto renderContext = node->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pipeline = node->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto listItemGroupTheme = pipeline->GetTheme<ListItemTheme>();
+    CHECK_NULL_VOID(listItemGroupTheme);
+    
+    renderContext->UpdateBorderRadius(listItemGroupTheme->GetItemGroupDefaultBorderRadius());
+
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(static_cast<int32_t>(Ace::MaterialType::IMMERSIVE));
+    ImmersiveOptions options {
+        .style = UiMaterialStyle::THICK
+    };
+    material->SetImmersiveOptions(options);
+    ViewAbstract::SetSystemMaterial(AceType::RawPtr(node), AceType::RawPtr(material));
 }
 
 float ListItemGroupPattern::GetListPaddingOffset(const RefPtr<FrameNode>& listNode) const

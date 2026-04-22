@@ -33,8 +33,8 @@ export class StorageProperty<T> extends StateDecoratedVariable<T> implements IDe
         }
     );
 
-    constructor(propName: string, initValue: T) {
-        super(undefined, propName, initValue);
+    constructor(propName: string, initValue: T, decoratorName?: string, owner?: IVariableOwner) {
+        super(owner, propName, initValue, undefined, decoratorName);
     }
 
     public mkRef(propertyNameInAppStorage: string): AbstractProperty<T> {
@@ -116,8 +116,8 @@ export class StorageBase {
         return this.repoAllTypes.size;
     }
 
-    public createAndSet<T>(key: string, value: T): boolean {
-        const sp = new StorageProperty<T>(key, uiUtils.makeV1Observed(value));
+    public createAndSet<T>(key: string, value: T, decoratorName?: string, owner?: IVariableOwner): boolean {
+        const sp = new StorageProperty<T>(key, uiUtils.makeV1Observed(value), decoratorName, owner);
         this.repoAllTypes.set(key, sp);
         return true;
     }
@@ -173,7 +173,7 @@ export class StorageBase {
     ): StorageLinkDecoratedVariable<T> | undefined {
         let sp = this.repoAllTypes.get(key);
         if (sp === undefined) {
-            if (!this.createAndSet<T>(key, defaultValue)) {
+            if (!this.createAndSet<T>(key, defaultValue, decoratorName, owner)) {
                 StateMgmtConsole.log(`makeStorageLink: key '${key}' is new, createAndSet failed`);
                 return undefined;
             }

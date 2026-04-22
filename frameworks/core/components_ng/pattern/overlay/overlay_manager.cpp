@@ -41,6 +41,7 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/common/ime/input_method_manager.h"
 #include "core/common/interaction/interaction_interface.h"
 #include "core/common/modal_ui_extension.h"
@@ -81,11 +82,13 @@
 #include "core/components_ng/pattern/video/video_full_screen_pattern.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
+#include "interfaces/inner_api/ace/modal_ui_extension_config.h"
 
 #ifdef WEB_SUPPORTED
 #include "core/components_ng/pattern/web/web_pattern.h"
 #endif
 #include "core/interfaces/native/node/menu_modifier.h"
+#include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1033,11 +1036,28 @@ void OverlayManager::ShowPopupAnimation(const RefPtr<FrameNode>& popupNode)
     BlurLowerNode(popupNode);
     auto levelOrder = GetLevelOrder(popupNode);
     auto isNeedFocus = IsTopOrder(levelOrder);
+
+    // Fire onWillAppear callback
+    auto popupParam = popupPattern->GetPopupParam();
+    if (popupParam) {
+        popupParam->FireOnWillAppear();
+    }
+
     auto onFinish = [popupNodeWk = WeakPtr<FrameNode>(popupNode), weak = WeakClaim(this), isNeedFocus]() {
         auto overlayManager = weak.Upgrade();
         auto popupNode = popupNodeWk.Upgrade();
         CHECK_NULL_VOID(overlayManager && popupNode);
         ACE_UINODE_TRACE(popupNode);
+
+        // Fire onDidAppear callback
+        auto popupPattern = popupNode->GetPattern<BubblePattern>();
+        if (popupPattern) {
+            auto popupParam = popupPattern->GetPopupParam();
+            if (popupParam) {
+                popupParam->FireOnDidAppear();
+            }
+        }
+
         if (isNeedFocus) {
             overlayManager->FocusOverlayNode(popupNode);
         }
@@ -1053,10 +1073,29 @@ void OverlayManager::ShowPopupAnimationNG(const RefPtr<FrameNode>& popupNode)
 {
     auto popupPattern = popupNode->GetPattern<BubblePattern>();
     CHECK_NULL_VOID(popupPattern);
+
+    // Fire onWillAppear callback
+    auto popupParam = popupPattern->GetPopupParam();
+    if (popupParam) {
+        popupParam->FireOnWillAppear();
+    }
+
+    // Create onFinish callback to fire onDidAppear
+    auto onFinish = [popupNodeWk = WeakPtr<FrameNode>(popupNode)]() {
+        auto popupNode = popupNodeWk.Upgrade();
+        CHECK_NULL_VOID(popupNode);
+        auto popupPattern = popupNode->GetPattern<BubblePattern>();
+        CHECK_NULL_VOID(popupPattern);
+        auto popupParam = popupPattern->GetPopupParam();
+        if (popupParam) {
+            popupParam->FireOnDidAppear();
+        }
+    };
+
     if (popupPattern->GetHasTransition()) {
-        popupPattern->StartEnteringTransitionEffects(popupNode, nullptr);
+        popupPattern->StartEnteringTransitionEffects(popupNode, onFinish);
     } else {
-        popupPattern->StartEnteringAnimation(nullptr);
+        popupPattern->StartEnteringAnimation(onFinish);
     }
 }
 
@@ -1563,6 +1602,13 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo, boo
     CheckReturnFocus(popupNode);
     // detach popupNode after exiting animation
     popupMap_[targetId].isCurrentOnShow = false;
+
+    // Fire onWillDisappear callback
+    auto popupParam = popupPattern->GetPopupParam();
+    if (popupParam) {
+        popupParam->FireOnWillDisappear();
+    }
+
     auto onFinish = [isShowInSubWindow, isTypeWithOption, isUseCustom, focusable,
         targetId, popupNodeWk = WeakPtr<FrameNode>(popupNode),
         rootNodeWk = WeakPtr<UINode>(rootNode), weak = WeakClaim(this)]() {
@@ -1571,6 +1617,16 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo, boo
         auto overlayManager = weak.Upgrade();
         CHECK_NULL_VOID(rootNode && popupNode && overlayManager);
         ACE_UINODE_TRACE(popupNode);
+
+        // Fire onDidDisappear callback
+        auto popupPattern = popupNode->GetPattern<BubblePattern>();
+        if (popupPattern) {
+            auto popupParam = popupPattern->GetPopupParam();
+            if (popupParam) {
+                popupParam->FireOnDidDisappear();
+            }
+        }
+
         auto popupInfoIter = overlayManager->popupMap_.find(targetId);
         auto targetIsInMap = popupInfoIter != overlayManager->popupMap_.end();
         bool popupNodeIsInMap = false;
@@ -1580,7 +1636,6 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo, boo
                 return;
             }
         }
-        auto popupPattern = popupNode->GetPattern<BubblePattern>();
         CHECK_NULL_VOID(popupPattern);
         popupPattern->SetTransitionStatus(TransitionStatus::INVISIABLE);
         auto popupEventHub = popupNode->GetEventHub<BubbleEventHub>();
@@ -1786,6 +1841,7 @@ void OverlayManager::HideAllPopupsWithoutAnimation()
 
 void OverlayManager::HideAllMenusWithoutAnimation(bool showInSubwindow)
 {
+    CHECK_EQUAL_VOID(DynamicModuleHelper::GetInstance().IsDynamicModuleLoaded("Menu"), false);
     if (!CheckMenuManager()) {
         return;
     }
@@ -1928,6 +1984,7 @@ void OverlayManager::HideMenu(
 
 void OverlayManager::HideAllMenus()
 {
+    CHECK_EQUAL_VOID(DynamicModuleHelper::GetInstance().IsDynamicModuleLoaded("Menu"), false);
     if (!CheckMenuManager()) {
         return;
     }
@@ -5041,6 +5098,15 @@ void OverlayManager::OnBindSheetInner(std::function<void(const std::string&)>&& 
     InitSheetWrapperAction(sheetNode, targetNode, sheetStyle);
     auto sheetNodePattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetNodePattern);
+    auto sheetWrapper = sheetNode->GetParent();
+    if (sheetWrapper && !sheetWrapper->IsOnMainTree() &&
+        (sheetNodePattern->GetSheetOnWillAppear() || sheetNodePattern->GetSheetOnAppear())) {
+        auto context = sheetNode->GetContext();
+        CHECK_NULL_VOID(context);
+        auto reporter = context->GetStatisticEventReporter();
+        CHECK_NULL_VOID(reporter);
+        reporter->SendEvent(StatisticEventType::SHEETPAGE_ATTACH_ERR);
+    }
     if (SystemProperties::ConfigChangePerform()) {
         // Register the resource update function as required during sheet node creation.
         sheetNodePattern->UpdateSheetParamResource(sheetNode, sheetStyle);
@@ -6773,6 +6839,38 @@ void OverlayManager::AddFrameNodeWithOrder(const RefPtr<FrameNode>& node, std::o
     }
 }
 
+bool OverlayManager::TopNodeIsModelUEC()
+{
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_RETURN(rootNode, false);
+    auto topNode = rootNode->GetLastChild();
+    CHECK_NULL_RETURN(topNode, false);
+    return topNode->GetTag() == V2::MODAL_PAGE_TAG && !topNode->IsAllowAddChildBelowModalUec();
+}
+
+void OverlayManager::OpenOrderOverlay(const RefPtr<FrameNode>& node, const OrderOverlayOptions& options,
+    const std::function<void(int32_t)>&& callback)
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "OpenOrderOverlay enter");
+    CHECK_NULL_VOID(node);
+    if (TopNodeIsModelUEC()) {
+        if (callback) {
+            callback(ERROR_CODE_OVERLAY_CANNOT_OPEN_DUE_TO_SYSTEM_WINDOW);
+        }
+        return;
+    }
+
+    auto levelOrder = options.levelOrder;
+    if (!levelOrder.has_value()) {
+        levelOrder = std::make_optional(LevelOrder::ORDER_DEFAULT);
+    }
+
+    AddFrameNodeWithOrder(node, levelOrder);
+    if (callback) {
+        callback(ERROR_CODE_NO_ERROR);
+    }
+}
+
 void OverlayManager::RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
 {
     OHOS::Ace::ResSchedReport::GetInstance().ResSchedDataReport("overlay_remove");
@@ -6967,6 +7065,31 @@ void OverlayManager::MarkDirty(PropertyChangeFlag flag)
     for (auto&& child : rootNode->GetChildren()) {
         if (child->GetTag() == V2::TOAST_ETS_TAG && (child != root->GetFirstChild() || pipeline->IsSubPipeline())) {
             child->MarkDirtyNode(flag);
+        }
+    }
+}
+
+void NotifyDirtyChildren(const RefPtr<UINode>& node)
+{
+    CHECK_NULL_VOID(node);
+    auto childNodes = node->GetChildren();
+    for (auto child : childNodes) {
+        if (child) {
+            child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    }
+}
+
+void OverlayManager::OnKeyboardAvoid()
+{
+    auto root = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(root);
+    auto childNodes = root->GetChildren();
+    for (auto child : childNodes) {
+        if (child && child->GetTag() == V2::POPUP_ETS_TAG) {
+            child->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+        } else if (child && child->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+            NotifyDirtyChildren(child);
         }
     }
 }

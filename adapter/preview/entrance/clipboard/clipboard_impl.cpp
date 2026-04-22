@@ -16,6 +16,7 @@
 #include "adapter/preview/entrance/clipboard/clipboard_impl.h"
 
 #include "adapter/preview/entrance/ace_preview_helper.h"
+#include "base/image/pixel_map.h"
 #include "frameworks/base/utils/utils.h"
 
 namespace OHOS::Ace::Platform {

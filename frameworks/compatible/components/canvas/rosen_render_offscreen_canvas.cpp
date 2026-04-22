@@ -323,7 +323,7 @@ void RosenRenderOffscreenCanvas::SetPaintImage()
     filter.SetImageFilter(RSImageFilter::CreateBlurImageFilter(0, 0, RSTileMode::DECAL, nullptr));
     imageBrush_.SetFilter(filter);
 
-    SetDropShadowFilter("0px 0px 0px black");
+    SetDropShadowFilter("0px 0px -1px black");
     std::string filterType, filterParam;
     if (!GetFilterType(filterType, filterParam)) {
         return;

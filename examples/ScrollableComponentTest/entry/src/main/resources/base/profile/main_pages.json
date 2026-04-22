@@ -212,6 +212,22 @@
     "pages/scrollable/ScrollSpeak/Scroll/scrollNo",
     "pages/scrollable/ScrollSpeak/WaterFlow/waterFlowIndex",
     "pages/scrollable/ScrollSpeak/WaterFlow/waterFlowHori",
-    "pages/scrollable/ScrollSpeak/WaterFlow/waterFlowNo"
+    "pages/scrollable/ScrollSpeak/WaterFlow/waterFlowNo",
+    "pages/Scroll/ScrollEventReport",
+    "pages/Scroll/ScrollEventReportNestedScroll",
+    "pages/List/ListEventReport",
+    "pages/List/ListEventReportNestedScroll",
+    "pages/grid/GridEventReport",
+    "pages/grid/GridEventReportNestedScroll",
+    "pages/waterflow/WaterflowEventReport",
+    "pages/waterflow/WaterflowEventReportNestedScroll",
+    "pages/waterflow/WaterFlowEmptyBranch1",
+    "pages/waterflow/WaterFlowEmptyBranch2",
+    "pages/waterflow/WaterFlowEmptyBranch4",
+    "pages/waterflow/WaterFlowEmptyBranch6",
+    "pages/waterflow/WaterFlowEmptyBranchModifier",
+    "pages/waterflow/WaterFlowEmptyBranchSessionEmpty",
+    "pages/grid/GridEmptyBranch",
+    "pages/List/ListEmptyBranch"
   ]
 }

@@ -51,6 +51,7 @@
 #include "core/interfaces/native/node/extension_custom_node.h"
 #include "core/interfaces/native/node/theme_modifier.h"
 #include "core/pipeline/base/element_register.h"
+#include "core/image/image_cache.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "bridge/arkts_frontend/arkts_frontend.h"
 #include "bridge/arkts_frontend/ani_context_module.h"

@@ -111,8 +111,24 @@ public:
         return std::make_shared<ShaderEffect>();
     }
 
+    static std::shared_ptr<ShaderEffect> CreateSweepGradient(const Point& /* centerPt */,
+        const std::vector<UIColor>& /* colors */, std::shared_ptr<ColorSpace> /* colorSpace */,
+        const std::vector<float>& /* pos */, TileMode /* mode */, float /* startAngle */, float /* endAngle */,
+        const Matrix* /* matrix */)
+    {
+        return std::make_shared<ShaderEffect>();
+    }
+
     static std::shared_ptr<ShaderEffect> CreateLinearGradient(const Point& /* startPt */,
         const Point& /* endPt */, const std::vector<Color4f>& /* colors */,
+        std::shared_ptr<ColorSpace> /* colorSpace */, const std::vector<float>& /* pos */, TileMode /* mode */,
+        const Matrix* matrix = nullptr)
+    {
+        return std::make_shared<ShaderEffect>();
+    }
+
+    static std::shared_ptr<ShaderEffect> CreateLinearGradient(const Point& /* startPt */,
+        const Point& /* endPt */, const std::vector<UIColor>& /* colors */,
         std::shared_ptr<ColorSpace> /* colorSpace */, const std::vector<float>& /* pos */, TileMode /* mode */,
         const Matrix* matrix = nullptr)
     {
@@ -126,8 +142,23 @@ public:
         return std::make_shared<ShaderEffect>();
     }
 
+    static std::shared_ptr<ShaderEffect> CreateRadialGradient(const Point& centerPt, scalar radius,
+        const std::vector<UIColor>& /* colors */, std::shared_ptr<ColorSpace> /* colorSpace */,
+        const std::vector<scalar>& pos, TileMode mode, const Matrix* matrix = nullptr)
+    {
+        return std::make_shared<ShaderEffect>();
+    }
+
     static std::shared_ptr<ShaderEffect> CreateTwoPointConical(const Point& startPt, scalar startRadius,
         const Point& endPt, scalar endRadius, const std::vector<Color4f>& /* colors */,
+        std::shared_ptr<ColorSpace> /* colorSpace */, const std::vector<scalar>& pos, TileMode mode,
+        const Matrix* matrix)
+    {
+        return std::make_shared<ShaderEffect>();
+    }
+
+    static std::shared_ptr<ShaderEffect> CreateTwoPointConical(const Point& startPt, scalar startRadius,
+        const Point& endPt, scalar endRadius, const std::vector<UIColor>& /* colors */,
         std::shared_ptr<ColorSpace> /* colorSpace */, const std::vector<scalar>& pos, TileMode mode,
         const Matrix* matrix)
     {

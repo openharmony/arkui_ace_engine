@@ -701,7 +701,7 @@ export class TipsDialog extends ViewPU {
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                         Text.fallbackLineSpacing(true);
                         Text.wordBreak(WordBreak.HYPHENATION);
-                        Text.optimizeTrailingSpace(true);
+                        Text.orphanCharOptimization(true);
                     }, Text);
                     Text.pop();
                 });
@@ -772,7 +772,7 @@ export class TipsDialog extends ViewPU {
                         Text.width('100%');
                         Text.fallbackLineSpacing(true);
                         Text.wordBreak(WordBreak.HYPHENATION);
-                        Text.optimizeTrailingSpace(true);
+                        Text.orphanCharOptimization(true);
                     }, Text);
                     Text.pop();
                     Row.pop();
@@ -809,7 +809,7 @@ export class TipsDialog extends ViewPU {
                         });
                         Text.fallbackLineSpacing(true);
                         Text.wordBreak(WordBreak.HYPHENATION);
-                        Text.optimizeTrailingSpace(true);
+                        Text.orphanCharOptimization(true);
                     }, Text);
                     Text.pop();
                     Row.pop();
@@ -1204,7 +1204,7 @@ export class SelectDialog extends ViewPU {
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                         Text.fallbackLineSpacing(true);
                         Text.wordBreak(WordBreak.HYPHENATION);
-                        Text.optimizeTrailingSpace(true);
+                        Text.orphanCharOptimization(true);
                     }, Text);
                     Text.pop();
                     Row.pop();
@@ -1341,7 +1341,7 @@ export class SelectDialog extends ViewPU {
                             Text.direction(i18n.isRTL(i18n.System.getSystemLanguage()) ? Direction.Rtl : Direction.Ltr);
                             Text.fallbackLineSpacing(true);
                             Text.wordBreak(WordBreak.HYPHENATION);
-                            Text.optimizeTrailingSpace(true);
+                            Text.orphanCharOptimization(true);
                         }, Text);
                         Text.pop();
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1813,7 +1813,7 @@ export class ConfirmDialog extends ViewPU {
             Text.width('100%');
             Text.fallbackLineSpacing(true);
             Text.wordBreak(WordBreak.HYPHENATION);
-            Text.optimizeTrailingSpace(true);
+            Text.orphanCharOptimization(true);
         }, Text);
         Text.pop();
         Column.pop();
@@ -1888,7 +1888,7 @@ export class ConfirmDialog extends ViewPU {
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.fallbackLineSpacing(true);
             Text.wordBreak(WordBreak.HYPHENATION);
-            Text.optimizeTrailingSpace(true);
+            Text.orphanCharOptimization(true);
         }, Text);
         Text.pop();
         Row.pop();
@@ -2267,7 +2267,7 @@ export class AlertDialog extends ViewPU {
             });
             Text.fallbackLineSpacing(true);
             Text.wordBreak(WordBreak.HYPHENATION);
-            Text.optimizeTrailingSpace(true);
+            Text.orphanCharOptimization(true);
         }, Text);
         Text.pop();
         Scroll.pop();
@@ -3282,7 +3282,7 @@ class CustomDialogContentComponent extends ViewPU {
             Text.width('100%');
             Text.fallbackLineSpacing(true);
             Text.wordBreak(WordBreak.HYPHENATION);
-            Text.optimizeTrailingSpace(true);
+            Text.orphanCharOptimization(true);
         }, Text);
         Text.pop();
         Row.pop();
@@ -3325,7 +3325,7 @@ class CustomDialogContentComponent extends ViewPU {
             Text.width('100%');
             Text.fallbackLineSpacing(true);
             Text.wordBreak(WordBreak.HYPHENATION);
-            Text.optimizeTrailingSpace(true);
+            Text.orphanCharOptimization(true);
         }, Text);
         Text.pop();
         Row.pop();
@@ -3879,7 +3879,16 @@ function isDefaultFocus(singleButton, isHasDefaultFocus, isAllFocusFalse) {
 }
 function getNumberByResourceId(resourceId, defaultValue, allowZero) {
     try {
-        let sourceValue = resourceManager.getSystemResourceManager().getNumber(resourceId);
+        let currentDeviceType = 
+            resourceManager.getSysResourceManager()?.getConfigurationSync()?.deviceType;
+        let systemConfiguration =
+            resourceManager.getSystemResourceManager()?.getConfigurationSync();
+        if (currentDeviceType !== undefined && systemConfiguration !== undefined) {
+            systemConfiguration.deviceType = currentDeviceType;
+        }
+        let sourceValue = resourceManager.getSystemResourceManager()
+            ?.getOverrideResourceManager(systemConfiguration)
+            ?.getNumber(resourceId);
         if (sourceValue > 0 || allowZero) {
             return sourceValue;
         } else {
@@ -4153,7 +4162,7 @@ export class LoadingDialog extends ViewPU {
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.fallbackLineSpacing(true);
             Text.wordBreak(WordBreak.HYPHENATION);
-            Text.optimizeTrailingSpace(true);
+            Text.orphanCharOptimization(true);
         }, Text);
         Text.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {

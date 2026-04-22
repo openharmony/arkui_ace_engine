@@ -33,7 +33,9 @@ HWTEST_F(ListItemGroupModelTestNg, SetHeader_TwoParameters, TestSize.Level1)
      * @tc.steps: step1. Construct the objects for test preparation
      */
     ListItemGroupModelNG model;
-    model.Create(V2::ListItemGroupStyle::CARD);
+    model.Create(V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD,
+        V2::ListItemGroupHeaderFooterStyle::NONE,
+        V2::ListItemGroupHeaderFooterStyle::NONE});
     auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(listNode, nullptr);
     auto pattern = listNode->GetPattern<ListItemGroupPattern>();
@@ -63,7 +65,9 @@ HWTEST_F(ListItemGroupModelTestNg, SetFooter_TwoParameters, TestSize.Level1)
      * @tc.steps: step1. Construct the objects for test preparation
      */
     ListItemGroupModelNG model;
-    model.Create(V2::ListItemGroupStyle::CARD);
+    model.Create(V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD,
+        V2::ListItemGroupHeaderFooterStyle::NONE,
+        V2::ListItemGroupHeaderFooterStyle::NONE});
     auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(listNode, nullptr);
     auto pattern = listNode->GetPattern<ListItemGroupPattern>();
@@ -93,7 +97,9 @@ HWTEST_F(ListItemGroupModelTestNg, SetListChildrenMainSize, TestSize.Level1)
      * @tc.steps: step1. Construct the objects for test preparation
      */
     ListItemGroupModelNG model;
-    model.Create(V2::ListItemGroupStyle::CARD);
+    model.Create(V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD,
+        V2::ListItemGroupHeaderFooterStyle::NONE,
+        V2::ListItemGroupHeaderFooterStyle::NONE});
     auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(listNode, nullptr);
     auto pattern = listNode->GetPattern<ListItemGroupPattern>();
@@ -127,7 +133,9 @@ HWTEST_F(ListItemGroupModelTestNg, ResetListChildrenMainSize, TestSize.Level1)
      * @tc.steps: step1. Construct the objects for test preparation
      */
     ListItemGroupModelNG model;
-    model.Create(V2::ListItemGroupStyle::CARD);
+    model.Create(V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD,
+        V2::ListItemGroupHeaderFooterStyle::NONE,
+        V2::ListItemGroupHeaderFooterStyle::NONE});
     auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(listNode, nullptr);
     auto pattern = listNode->GetPattern<ListItemGroupPattern>();
@@ -161,7 +169,9 @@ HWTEST_F(ListItemGroupModelTestNg, GetDivider, TestSize.Level1)
      * @tc.steps: step1. Construct the objects for test preparation
      */
     ListItemGroupModelNG model;
-    model.Create(V2::ListItemGroupStyle::CARD);
+    model.Create(V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD,
+        V2::ListItemGroupHeaderFooterStyle::NONE,
+        V2::ListItemGroupHeaderFooterStyle::NONE});
     auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(listNode, nullptr);
     RefPtr<ListItemGroupLayoutProperty> layoutProperty = AceType::MakeRefPtr<ListItemGroupLayoutProperty>();
@@ -196,7 +206,9 @@ HWTEST_F(ListItemGroupModelTestNg, SetSpace_TwoParameters, TestSize.Level1)
      * @tc.steps: step1. Construct the objects for test preparation
      */
     ListItemGroupModelNG model;
-    model.Create(V2::ListItemGroupStyle::CARD);
+    model.Create(V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD,
+        V2::ListItemGroupHeaderFooterStyle::NONE,
+        V2::ListItemGroupHeaderFooterStyle::NONE});
     auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(listNode, nullptr);
     RefPtr<ListItemGroupLayoutProperty> layoutProperty = AceType::MakeRefPtr<ListItemGroupLayoutProperty>();
@@ -231,7 +243,9 @@ HWTEST_F(ListItemGroupModelTestNg, RemoveHeader_NoParameter, TestSize.Level1)
      * @tc.steps: step1. Construct the objects for test preparation
      */
     ListItemGroupModelNG model;
-    model.Create(V2::ListItemGroupStyle::CARD);
+    model.Create(V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD,
+        V2::ListItemGroupHeaderFooterStyle::NONE,
+        V2::ListItemGroupHeaderFooterStyle::NONE});
     auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(listNode, nullptr);
     auto pattern = listNode->GetPattern<ListItemGroupPattern>();
@@ -268,7 +282,9 @@ HWTEST_F(ListItemGroupModelTestNg, RemoveFooter_NoParameter, TestSize.Level1)
      * @tc.steps: step1. Construct the objects for test preparation
      */
     ListItemGroupModelNG model;
-    model.Create(V2::ListItemGroupStyle::CARD);
+    model.Create(V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD,
+        V2::ListItemGroupHeaderFooterStyle::NONE,
+        V2::ListItemGroupHeaderFooterStyle::NONE});
     auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(listNode, nullptr);
     auto pattern = listNode->GetPattern<ListItemGroupPattern>();
@@ -305,7 +321,9 @@ HWTEST_F(ListItemGroupModelTestNg, HasHeader, TestSize.Level1)
      * @tc.steps: step1. Construct the objects for test preparation
      */
     ListItemGroupModelNG model;
-    model.Create(V2::ListItemGroupStyle::CARD);
+    model.Create(V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD,
+        V2::ListItemGroupHeaderFooterStyle::NONE,
+        V2::ListItemGroupHeaderFooterStyle::NONE});
     auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(listNode, nullptr);
     auto pattern = listNode->GetPattern<ListItemGroupPattern>();
@@ -340,7 +358,9 @@ HWTEST_F(ListItemGroupModelTestNg, HasFooter, TestSize.Level1)
      * @tc.steps: step1. Construct the objects for test preparation
      */
     ListItemGroupModelNG model;
-    model.Create(V2::ListItemGroupStyle::CARD);
+    model.Create(V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD,
+        V2::ListItemGroupHeaderFooterStyle::NONE,
+        V2::ListItemGroupHeaderFooterStyle::NONE});
     auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(listNode, nullptr);
     auto pattern = listNode->GetPattern<ListItemGroupPattern>();
@@ -363,4 +383,132 @@ HWTEST_F(ListItemGroupModelTestNg, HasFooter, TestSize.Level1)
     EXPECT_TRUE(result);
     CreateDone();
 }
+
+/**
+ * @tc.name: SetHeaderStyle
+ * @tc.desc: Test ListItemGroupModelNG SetHeaderStyle with FLOATING
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupModelTestNg, SetHeaderStyle, TestSize.Level1)
+{
+    ListItemGroupModelNG model;
+    V2::ListItemGroupOptions options;
+    options.style = V2::ListItemGroupStyle::NONE;
+    model.Create(options);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListItemGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    EXPECT_EQ(pattern->GetHeaderStyle(), V2::ListItemGroupHeaderFooterStyle::NONE);
+    ListItemGroupModelNG::SetHeaderStyle(listNode, V2::ListItemGroupHeaderFooterStyle::FLOATING);
+    EXPECT_EQ(pattern->GetHeaderStyle(), V2::ListItemGroupHeaderFooterStyle::FLOATING);
+    CreateDone();
+}
+
+/**
+ * @tc.name: SetFooterStyle
+ * @tc.desc: Test ListItemGroupModelNG SetFooterStyle with FLOATING
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupModelTestNg, SetFooterStyle, TestSize.Level1)
+{
+    ListItemGroupModelNG model;
+    V2::ListItemGroupOptions options;
+    options.style = V2::ListItemGroupStyle::NONE;
+    model.Create(options);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListItemGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    EXPECT_EQ(pattern->GetFooterStyle(), V2::ListItemGroupHeaderFooterStyle::NONE);
+    ListItemGroupModelNG::SetFooterStyle(listNode, V2::ListItemGroupHeaderFooterStyle::FLOATING);
+    EXPECT_EQ(pattern->GetFooterStyle(), V2::ListItemGroupHeaderFooterStyle::FLOATING);
+    CreateDone();
+}
+
+/**
+ * @tc.name: SetHeaderStyleNullNode
+ * @tc.desc: Test ListItemGroupModelNG SetHeaderStyle with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupModelTestNg, SetHeaderStyleNullNode, TestSize.Level1)
+{
+    FrameNode* nullNode = nullptr;
+    ListItemGroupModelNG::SetHeaderStyle(nullNode, V2::ListItemGroupHeaderFooterStyle::FLOATING);
+}
+
+/**
+ * @tc.name: SetFooterStyleNullNode
+ * @tc.desc: Test ListItemGroupModelNG SetFooterStyle with null frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupModelTestNg, SetFooterStyleNullNode, TestSize.Level1)
+{
+    FrameNode* nullNode = nullptr;
+    ListItemGroupModelNG::SetFooterStyle(nullNode, V2::ListItemGroupHeaderFooterStyle::FLOATING);
+}
+
+/**
+ * @tc.name: CreateWithOptionsHeaderFooterStyle
+ * @tc.desc: Test ListItemGroupModelNG Create with ListItemGroupOptions including headerStyle/footerStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupModelTestNg, CreateWithOptionsHeaderFooterStyle, TestSize.Level1)
+{
+    ListItemGroupModelNG model;
+    V2::ListItemGroupOptions options;
+    options.style = V2::ListItemGroupStyle::NONE;
+    options.headerStyle = V2::ListItemGroupHeaderFooterStyle::FLOATING;
+    options.footerStyle = V2::ListItemGroupHeaderFooterStyle::FLOATING;
+    model.Create(options);
+
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    CreateDone();
+}
+
+/**
+ * @tc.name: SetHeaderStyleResetToNone
+ * @tc.desc: Test ListItemGroupModelNG SetHeaderStyle reset to NONE
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupModelTestNg, SetHeaderStyleResetToNone, TestSize.Level1)
+{
+    ListItemGroupModelNG model;
+    V2::ListItemGroupOptions options;
+    options.style = V2::ListItemGroupStyle::NONE;
+    model.Create(options);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListItemGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    ListItemGroupModelNG::SetHeaderStyle(listNode, V2::ListItemGroupHeaderFooterStyle::NONE);
+    EXPECT_EQ(pattern->GetHeaderStyle(), V2::ListItemGroupHeaderFooterStyle::NONE);
+    CreateDone();
+}
+
+/**
+ * @tc.name: SetFooterStyleResetToNone
+ * @tc.desc: Test ListItemGroupModelNG SetFooterStyle reset to NONE
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupModelTestNg, SetFooterStyleResetToNone, TestSize.Level1)
+{
+    ListItemGroupModelNG model;
+    V2::ListItemGroupOptions options;
+    options.style = V2::ListItemGroupStyle::NONE;
+    model.Create(options);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListItemGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    ListItemGroupModelNG::SetFooterStyle(listNode, V2::ListItemGroupHeaderFooterStyle::NONE);
+    EXPECT_EQ(pattern->GetFooterStyle(), V2::ListItemGroupHeaderFooterStyle::NONE);
+    CreateDone();
+}
+
 } // namespace OHOS::Ace::NG

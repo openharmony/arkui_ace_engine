@@ -435,13 +435,13 @@ export class InteropStorageBase extends StorageBase {
      * @syscap SystemCapability.ArkUI.ArkUI.Full
      * @since 20
      */
-    public setAndRef<T>(key: string, defaultValue: T): AbstractProperty<T> | undefined {
+    public setAndRef<T>(key: string, defaultValue: T, decoratorName?: string): AbstractProperty<T> | undefined {
         if (!super.has(key)) {
             // search ArkTS1.1 Storage.
             let interopValue = this.interopStorage_.get(key);
             if (interopValue === undefined) {
                 // create new entry, set with defaultValue
-                if (!super.createAndSet<T>(key, defaultValue)) {
+                if (!super.createAndSet<T>(key, defaultValue, decoratorName)) {
                     // creation failed
                     return undefined;
                 }

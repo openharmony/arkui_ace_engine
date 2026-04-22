@@ -17,6 +17,7 @@
 #include "gtest/gtest.h"
 #include "core/components_ng/event/focus_event_handler.h"
 #include "core/event/focus_axis_event.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;

@@ -14,11 +14,13 @@
  */
 
 #include "core/components_ng/base/view_abstract_model_ng.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
 #include "core/common/event_manager.h"
 #include "core/common/vibrator/vibrator_utils.h"
+#include "core/components/common/properties/border_image.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/focus_hub.h"
@@ -42,7 +44,9 @@
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/interfaces/native/node/menu_modifier.h"
 #include "frameworks/core/components_ng/event/event_constants.h"
-
+#include "frameworks/core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
+#include "frameworks/core/components_ng/property/smart_gesture_property.h"
+#include "core/components/common/properties/placement.h"
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t LONG_PRESS_DURATION = 800;
@@ -133,6 +137,18 @@ void ViewAbstractModelNG::BindMenuGesture(
     auto gestureHub = targetNode->GetOrCreateGestureEventHub();
     gestureHub->BindMenu(std::move(showMenu));
     BindMenuTouch(targetNode, gestureHub);
+}
+
+void SyncSmartGesturePrimaryActionRegistry(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto eventManager = context->GetEventManager();
+    CHECK_NULL_VOID(eventManager);
+    auto manager = eventManager->GetOrCreateSmartGestureManager();
+    CHECK_NULL_VOID(manager);
+    manager->SyncPrimaryActionNode(AceType::Claim(frameNode));
 }
 
 void ViewAbstractModelNG::BindMenuTouch(FrameNode* targetNode, const RefPtr<GestureEventHub>& gestrueHub)
@@ -1773,6 +1789,24 @@ void ViewAbstractModelNG::ResetAccessibilityActionOptions(FrameNode* frameNode)
     accessibilityProperty->ResetAccessibilityActionOptions();
 }
 
+void ViewAbstractModelNG::SetSmartGestureShortcut(FrameNode* frameNode, SmartGestureShortcutConfig config)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto smartGestureProperty = frameNode->GetOrCreateSmartGestureProperty();
+    CHECK_NULL_VOID(smartGestureProperty);
+    smartGestureProperty->SetSmartGestureShortcut(config);
+    SyncSmartGesturePrimaryActionRegistry(frameNode);
+}
+
+void ViewAbstractModelNG::ResetSmartGestureShortcut(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto smartGestureProperty = frameNode->GetOrCreateSmartGestureProperty();
+    CHECK_NULL_VOID(smartGestureProperty);
+    smartGestureProperty->ResetSmartGestureShortcut();
+    SyncSmartGesturePrimaryActionRegistry(frameNode);
+}
+
 void ViewAbstractModelNG::SetAccessibilityActionOptions(AccessibilityActionOptions actionOptions)
 {
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1797,6 +1831,28 @@ void ViewAbstractModelNG::ResetKeyboardShortcutAll(FrameNode* frameNode)
     auto eventManager = pipeline->GetEventManager();
     CHECK_NULL_VOID(eventManager);
     eventManager->DelKeyboardShortcutNode(frameNode->GetId());
+}
+
+void ViewAbstractModelNG::SetBorderImage(const RefPtr<BorderImage>& borderImage, uint8_t bitset)
+{
+    CHECK_NULL_VOID(borderImage);
+    if (bitset & BorderImage::SOURCE_BIT) {
+        ViewAbstract::SetBorderImageSource(
+            borderImage->GetSrc(), borderImage->GetBundleName(), borderImage->GetModuleName());
+    }
+    if (bitset & BorderImage::OUTSET_BIT) {
+        ViewAbstract::SetHasBorderImageOutset(true);
+    }
+    if (bitset & BorderImage::SLICE_BIT) {
+        ViewAbstract::SetHasBorderImageSlice(true);
+    }
+    if (bitset & BorderImage::REPEAT_BIT) {
+        ViewAbstract::SetHasBorderImageRepeat(true);
+    }
+    if (bitset & BorderImage::WIDTH_BIT) {
+        ViewAbstract::SetHasBorderImageWidth(true);
+    }
+    ViewAbstract::SetBorderImage(borderImage);
 }
 
 } // namespace OHOS::Ace::NG

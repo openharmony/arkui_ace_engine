@@ -28,7 +28,6 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/offset.h"
 #include "base/geometry/rect.h"
-#include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
 #include "base/resource/asset_manager.h"
 #include "base/resource/data_provider_manager.h"
@@ -44,12 +43,10 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/page/page_component.h"
-#include "core/components/text_overlay/text_overlay_manager.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/event/visible_ratio_callback.h"
 #include "core/event/event_trigger.h"
 #include "core/gestures/gesture_info.h"
-#include "core/image/image_cache.h"
 #include "core/pipeline/base/composed_component.h"
 #include "core/pipeline/base/factories/render_factory.h"
 #include "core/pipeline/pipeline_base.h"
@@ -78,6 +75,8 @@ class StageElement;
 class StackElement;
 class Window;
 class Animator;
+class PixelMap;
+class TextOverlayManager;
 class ManagerInterface;
 class AccessibilityManager;
 class RenderContext;
@@ -744,15 +743,9 @@ public:
 
     void SetShortcutKey(const KeyEvent& event);
 
-    void SetTextOverlayManager(const RefPtr<TextOverlayManager>& textOverlayManager)
-    {
-        textOverlayManager_ = textOverlayManager;
-    }
+    void SetTextOverlayManager(const RefPtr<TextOverlayManager>& textOverlayManager);
 
-    RefPtr<TextOverlayManager> GetTextOverlayManager() const
-    {
-        return textOverlayManager_;
-    }
+    RefPtr<TextOverlayManager> GetTextOverlayManager() const;
 
     void SubscribeCtrlA(SubscribeCtrlACallback callback)
     {

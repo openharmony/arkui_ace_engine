@@ -53,4 +53,6 @@ void OverlayManager::ClearToastInSubwindow() {}
 void OverlayManager::ReloadBuilderNodeConfig() {}
 
 void OverlayManager::ClearUIExtensionNode() {}
+
+void OverlayManager::OnKeyboardAvoid() {}
 } // namespace OHOS::Ace::NG

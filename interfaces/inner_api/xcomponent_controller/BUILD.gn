@@ -50,6 +50,7 @@ ohos_shared_library("ace_xcomponent_controller") {
   deps = [
     "$ace_root/interfaces/inner_api/ace:ace_forward_compatibility",
     "$ace_root/interfaces/inner_api/ace:ace_uicontent",
+    "$ace_root/frameworks/bridge/arkts_frontend/arkoala_generator:idlize_gen",
   ]
 
   external_deps = [

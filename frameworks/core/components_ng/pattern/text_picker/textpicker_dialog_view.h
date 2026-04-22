@@ -147,6 +147,7 @@ private:
     static const Dimension AdjustFontSizeScale(const Dimension& fontSizeValue, double fontScale);
     static void GetUserSettingLimit();
     static bool NeedAdaptForAging();
+    static bool IsEnableFallbackLineSpacingStyleOptimize();
     static void SetTextDisappearProperties(const RefPtr<PickerTheme>& pickerTheme,
         const PickerTextProperties& properties);
     static void SetTextNormalProperties(const RefPtr<PickerTheme>& pickerTheme,

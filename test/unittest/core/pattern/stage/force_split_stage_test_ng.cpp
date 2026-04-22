@@ -14,6 +14,8 @@
  */
 
 #include <optional>
+#include <unordered_map>
+#include <unordered_set>
 
 #include "gtest/gtest.h"
 
@@ -26,8 +28,12 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/system_properties.h"
+#include "core/common/ace_application_info.h"
 #include "core/components/navigation_bar/navigation_bar_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
 #include "core/components_ng/pattern/stage/page_info.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
@@ -43,6 +49,76 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+namespace {
+RefPtr<ForceSplitManager> GetForceSplitManager()
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    return pipeline ? pipeline->GetForceSplitManager() : nullptr;
+}
+
+void ResetForceSplitBehaviorConfig(const RefPtr<ForceSplitManager>& manager)
+{
+    if (!manager) {
+        return;
+    }
+    manager->behaviorMode_ = ForceSplitBehaviorMode::NAVIGATION;
+    manager->pagePairs_.clear();
+    manager->transPages_.clear();
+    manager->fullScreenPages_.clear();
+}
+
+RefPtr<ParallelStageManager> CreateParallelStageManagerForLayout(
+    RefPtr<FrameNode>& stageNode, RefPtr<ParallelStagePattern>& stagePattern)
+{
+    stagePattern = AceType::MakeRefPtr<ParallelStagePattern>();
+    stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), stagePattern);
+    auto stageManager = AceType::MakeRefPtr<ParallelStageManager>(stageNode);
+    auto context = MockPipelineContext::GetCurrent();
+    if (context) {
+        context->stageManager_ = stageManager;
+    }
+    return stageManager;
+}
+
+RefPtr<ParallelStageManager> CreateParallelStageManager(
+    RefPtr<FrameNode>& stageNode, RefPtr<ParallelStagePattern>& stagePattern)
+{
+    return CreateParallelStageManagerForLayout(stageNode, stagePattern);
+}
+
+RefPtr<FrameNode> CreateRouterPage(
+    const std::string& url, RouterPageType pageType = RouterPageType::DETAIL_PAGE,
+    ForceSplitPageColumnType columnType = ForceSplitPageColumnType::NONE)
+{
+    auto pageInfo = AceType::MakeRefPtr<PageInfo>(ElementRegister::GetInstance()->MakeUniqueId(), url, url);
+    auto pagePattern = AceType::MakeRefPtr<ParallelPagePattern>(pageInfo);
+    pagePattern->SetPageType(pageType);
+    pagePattern->SetColumnType(columnType);
+    return FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
+}
+
+RefPtr<ParallelPagePattern> GetRouterPagePattern(const RefPtr<FrameNode>& page)
+{
+    return page ? page->GetPattern<ParallelPagePattern>() : nullptr;
+}
+
+void MountRouterPage(const RefPtr<FrameNode>& stageNode, const RefPtr<FrameNode>& page)
+{
+    ASSERT_NE(stageNode, nullptr);
+    ASSERT_NE(page, nullptr);
+    page->MountToParent(stageNode);
+}
+
+void SetRouterPageFrameSize(const RefPtr<FrameNode>& page, float width)
+{
+    ASSERT_NE(page, nullptr);
+    auto geometryNode = page->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(width, width));
+}
+}
+
 class ParallelStageTestNg : public testing::Test {
 public:
     static void SetUpTestSuite()
@@ -65,11 +141,16 @@ public:
         SystemProperties::orientation_ = DeviceOrientation::LANDSCAPE;
         preDeviceType_ = SystemProperties::deviceType_;
         SystemProperties::deviceType_ = DeviceType::TABLET;
+        if (MockContainer::container_) {
+            ON_CALL(*MockContainer::container_, WindowIsShow()).WillByDefault(Return(true));
+        }
     }
     void TearDown()
     {
         SystemProperties::orientation_ = preOrientation_;
         SystemProperties::deviceType_ = preDeviceType_;
+        auto forceSplitManager = MockPipelineContext::GetCurrent()->GetForceSplitManager();
+        ResetForceSplitBehaviorConfig(forceSplitManager);
         MockPipelineContext::GetCurrent()->stageManager_ = backupStageManager_;
     }
 
@@ -130,8 +211,8 @@ HWTEST_F(ParallelStageTestNg, ParallelStagePatternTest001, TestSize.Level1)
     ASSERT_FALSE(stagePattern->HasDividerNode());
     auto dividerNode = stagePattern->GetDividerNode();
     ASSERT_EQ(dividerNode, nullptr);
-    auto primaryPage = stagePattern->GetPrimaryPage();
-    ASSERT_EQ(primaryPage, nullptr);
+    auto homePage = stagePattern->GetHomePage();
+    ASSERT_EQ(homePage, nullptr);
 
     /**
      * @tc.steps: step2. Create layoutAlgorithm.
@@ -141,43 +222,43 @@ HWTEST_F(ParallelStageTestNg, ParallelStagePatternTest001, TestSize.Level1)
     ASSERT_NE(layoutAlgorithm, nullptr);
 
     /**
-     * @tc.steps: step3. Create PrimaryPage.
+     * @tc.steps: step3. Create home page.
      */
     auto info = AceType::MakeRefPtr<PageInfo>();
     ASSERT_NE(info, nullptr);
     auto pagePattern = AceType::MakeRefPtr<ParallelPagePattern>(info);
     ASSERT_NE(pagePattern, nullptr);
-    pagePattern->SetPageType(RouterPageType::PRIMARY_PAGE);
+    pagePattern->SetPageType(RouterPageType::HOME_PAGE);
     auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, pagePattern);
 
     /**
-     * @tc.steps: step4. Set primary page in stack mode.
-     * @tc.expected: Success to set primary page, divider node will not be created.
+     * @tc.steps: step4. Set home page in stack mode.
+     * @tc.expected: Success to set home page, divider node will not be created.
      */
     stagePattern->mode_ = PageMode::STACK;
-    stagePattern->SetPrimaryPage(pageNode);
-    primaryPage = stagePattern->GetPrimaryPage();
-    ASSERT_EQ(primaryPage, pageNode);
+    stagePattern->SetHomePage(pageNode);
+    homePage = stagePattern->GetHomePage();
+    ASSERT_EQ(homePage, pageNode);
     ASSERT_FALSE(stagePattern->HasDividerNode());
     dividerNode = stagePattern->GetDividerNode();
     ASSERT_EQ(dividerNode, nullptr);
 
     /**
-     * @tc.steps: step5. Reset primary page.
-     * @tc.expected: Success to clear primary page.
+     * @tc.steps: step5. Reset home page.
+     * @tc.expected: Success to clear home page.
      */
-    stagePattern->SetPrimaryPage(nullptr);
-    primaryPage = stagePattern->GetPrimaryPage();
-    ASSERT_EQ(primaryPage, nullptr);
+    stagePattern->SetHomePage(nullptr);
+    homePage = stagePattern->GetHomePage();
+    ASSERT_EQ(homePage, nullptr);
 
     /**
-     * @tc.steps: step6. Set primary page in split mode.
-     * @tc.expected: Success to set primary page, divider node will be created.
+     * @tc.steps: step6. Set home page in split mode.
+     * @tc.expected: Success to set home page, divider node will be created.
      */
     stagePattern->mode_ = PageMode::SPLIT;
-    stagePattern->SetPrimaryPage(pageNode);
-    primaryPage = stagePattern->GetPrimaryPage();
-    ASSERT_EQ(primaryPage, pageNode);
+    stagePattern->SetHomePage(pageNode);
+    homePage = stagePattern->GetHomePage();
+    ASSERT_EQ(homePage, pageNode);
     ASSERT_TRUE(stagePattern->HasDividerNode());
     dividerNode = stagePattern->GetDividerNode();
     ASSERT_NE(dividerNode, nullptr);
@@ -561,5 +642,1364 @@ HWTEST_F(ParallelStageTestNg, UpdateIsTopFullScreenPageTest001, TestSize.Level1)
     stageManager->UpdateIsTopFullScreenPage(false);
     ASSERT_TRUE(stageManager->IsTopFullScreenPageChanged());
     ASSERT_FALSE(stageManager->IsTopFullScreenPage());
+}
+
+/**
+ * @tc.name: RebuildRouterColumnNodesIfNeeded001
+ * @tc.desc: Test RebuildRouterColumnNodesIfNeeded records stack pages as primary nodes before home page detected.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, RebuildRouterColumnNodesIfNeeded001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create stage and manager.
+     */
+    auto stagePattern = AceType::MakeRefPtr<ParallelStagePattern>();
+    ASSERT_NE(stagePattern, nullptr);
+    auto stageNode = FrameNode::CreateFrameNode(V2::STAGE_ETS_TAG, 0, stagePattern);
+    ASSERT_NE(stageNode, nullptr);
+    auto stageManager = AceType::MakeRefPtr<ParallelStageManager>(stageNode);
+    ASSERT_NE(stageManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Mount detail pages without a home page.
+     */
+    RefPtr<FrameNode> firstPage;
+    RefPtr<ParallelPagePattern> firstPattern;
+    CreatePage(firstPage, firstPattern);
+    ASSERT_NE(firstPage, nullptr);
+    ASSERT_NE(firstPattern, nullptr);
+    firstPattern->SetPageType(RouterPageType::DETAIL_PAGE);
+    firstPage->MountToParent(stageNode);
+
+    RefPtr<FrameNode> secondPage;
+    RefPtr<ParallelPagePattern> secondPattern;
+    CreatePage(secondPage, secondPattern);
+    ASSERT_NE(secondPage, nullptr);
+    ASSERT_NE(secondPattern, nullptr);
+    secondPattern->SetPageType(RouterPageType::DETAIL_PAGE);
+    secondPage->MountToParent(stageNode);
+
+    /**
+     * @tc.steps: step3. Rebuild router column cache.
+     * @tc.expected: All stack pages are temporarily recorded as primary nodes, and secondary is empty.
+     */
+    stageManager->routerColumnNodesDirty_ = true;
+    stageManager->RebuildRouterColumnNodesIfNeeded();
+    EXPECT_FALSE(stageManager->routerColumnNodesDirty_);
+    EXPECT_EQ(stageManager->primaryNodes_.size(), 2);
+    EXPECT_TRUE(stageManager->secondaryNodes_.empty());
+    EXPECT_EQ(stageManager->GetTopPrimaryColumnPage(), secondPage);
+    EXPECT_EQ(stageManager->GetTopSecondaryColumnPage(), nullptr);
+}
+
+/**
+ * @tc.name: RebuildRouterColumnNodesIfNeeded002
+ * @tc.desc: Test RebuildRouterColumnNodesIfNeeded splits stack pages by home page and column type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, RebuildRouterColumnNodesIfNeeded002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create stage and manager.
+     */
+    auto stagePattern = AceType::MakeRefPtr<ParallelStagePattern>();
+    ASSERT_NE(stagePattern, nullptr);
+    auto stageNode = FrameNode::CreateFrameNode(V2::STAGE_ETS_TAG, 0, stagePattern);
+    ASSERT_NE(stageNode, nullptr);
+    auto stageManager = AceType::MakeRefPtr<ParallelStageManager>(stageNode);
+    ASSERT_NE(stageManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Mount pages around home, plus placeholder and related pages.
+     */
+    RefPtr<FrameNode> beforeHomePage;
+    RefPtr<ParallelPagePattern> beforeHomePattern;
+    CreatePage(beforeHomePage, beforeHomePattern);
+    ASSERT_NE(beforeHomePage, nullptr);
+    ASSERT_NE(beforeHomePattern, nullptr);
+    beforeHomePattern->SetPageType(RouterPageType::DETAIL_PAGE);
+    beforeHomePage->MountToParent(stageNode);
+
+    RefPtr<FrameNode> homePage;
+    RefPtr<ParallelPagePattern> homePattern;
+    CreatePage(homePage, homePattern);
+    ASSERT_NE(homePage, nullptr);
+    ASSERT_NE(homePattern, nullptr);
+    homePattern->SetPageType(RouterPageType::HOME_PAGE);
+    homePage->MountToParent(stageNode);
+
+    RefPtr<FrameNode> primaryPage;
+    RefPtr<ParallelPagePattern> primaryPattern;
+    CreatePage(primaryPage, primaryPattern);
+    ASSERT_NE(primaryPage, nullptr);
+    ASSERT_NE(primaryPattern, nullptr);
+    primaryPattern->SetPageType(RouterPageType::DETAIL_PAGE);
+    primaryPattern->SetColumnType(ForceSplitPageColumnType::PRIMARY);
+    primaryPage->MountToParent(stageNode);
+
+    RefPtr<FrameNode> secondaryPage;
+    RefPtr<ParallelPagePattern> secondaryPattern;
+    CreatePage(secondaryPage, secondaryPattern);
+    ASSERT_NE(secondaryPage, nullptr);
+    ASSERT_NE(secondaryPattern, nullptr);
+    secondaryPattern->SetPageType(RouterPageType::DETAIL_PAGE);
+    secondaryPattern->SetColumnType(ForceSplitPageColumnType::NONE);
+    secondaryPage->MountToParent(stageNode);
+
+    RefPtr<FrameNode> placeholderPage;
+    RefPtr<ParallelPagePattern> placeholderPattern;
+    CreatePage(placeholderPage, placeholderPattern);
+    ASSERT_NE(placeholderPage, nullptr);
+    ASSERT_NE(placeholderPattern, nullptr);
+    placeholderPattern->SetPageType(RouterPageType::PLACEHOLDER_PAGE);
+    placeholderPage->MountToParent(stageNode);
+
+    RefPtr<FrameNode> relatedPage;
+    RefPtr<ParallelPagePattern> relatedPattern;
+    CreatePage(relatedPage, relatedPattern);
+    ASSERT_NE(relatedPage, nullptr);
+    ASSERT_NE(relatedPattern, nullptr);
+    relatedPattern->SetPageType(RouterPageType::RELATED_PAGE);
+    relatedPage->MountToParent(stageNode);
+
+    /**
+     * @tc.steps: step3. Rebuild router column cache.
+     * @tc.expected: Pages before/at home and primary detail are primary nodes; default detail is secondary.
+     */
+    stageManager->routerColumnNodesDirty_ = true;
+    stageManager->RebuildRouterColumnNodesIfNeeded();
+    EXPECT_FALSE(stageManager->routerColumnNodesDirty_);
+    EXPECT_EQ(stageManager->primaryNodes_.size(), 3);
+    EXPECT_EQ(stageManager->secondaryNodes_.size(), 1);
+    EXPECT_EQ(stageManager->GetTopPrimaryColumnPage(), primaryPage);
+    EXPECT_EQ(stageManager->GetTopSecondaryColumnPage(), secondaryPage);
+}
+
+/**
+ * @tc.name: RebuildRouterColumnNodesIfNeeded003
+ * @tc.desc: Test RebuildRouterColumnNodesIfNeeded keeps existing cache when dirty flag is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, RebuildRouterColumnNodesIfNeeded003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create stage and manager.
+     */
+    auto stagePattern = AceType::MakeRefPtr<ParallelStagePattern>();
+    ASSERT_NE(stagePattern, nullptr);
+    auto stageNode = FrameNode::CreateFrameNode(V2::STAGE_ETS_TAG, 0, stagePattern);
+    ASSERT_NE(stageNode, nullptr);
+    auto stageManager = AceType::MakeRefPtr<ParallelStageManager>(stageNode);
+    ASSERT_NE(stageManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Prepare an existing cache and mount another page.
+     */
+    RefPtr<FrameNode> cachedPage;
+    RefPtr<ParallelPagePattern> cachedPattern;
+    CreatePage(cachedPage, cachedPattern);
+    ASSERT_NE(cachedPage, nullptr);
+    ASSERT_NE(cachedPattern, nullptr);
+    cachedPattern->SetPageType(RouterPageType::DETAIL_PAGE);
+    cachedPage->MountToParent(stageNode);
+
+    RefPtr<FrameNode> newPage;
+    RefPtr<ParallelPagePattern> newPattern;
+    CreatePage(newPage, newPattern);
+    ASSERT_NE(newPage, nullptr);
+    ASSERT_NE(newPattern, nullptr);
+    newPattern->SetPageType(RouterPageType::DETAIL_PAGE);
+    newPage->MountToParent(stageNode);
+
+    stageManager->primaryNodes_.emplace_back(cachedPage);
+    stageManager->routerColumnNodesDirty_ = false;
+
+    /**
+     * @tc.steps: step3. Call rebuild without invalidating the cache.
+     * @tc.expected: Cached primary nodes are not rebuilt.
+     */
+    stageManager->RebuildRouterColumnNodesIfNeeded();
+    EXPECT_FALSE(stageManager->routerColumnNodesDirty_);
+    EXPECT_EQ(stageManager->primaryNodes_.size(), 1);
+    EXPECT_EQ(stageManager->GetTopPrimaryColumnPage(), cachedPage);
+}
+
+/**
+ * @tc.name: RouterPageColumnState001
+ * @tc.desc: Test GetPageColumnType, SetPageColumnType and ClearRouterPageState.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, RouterPageColumnState001, TestSize.Level1)
+{
+    RefPtr<FrameNode> stageNode;
+    RefPtr<ParallelStagePattern> stagePattern;
+    auto stageManager = CreateParallelStageManager(stageNode, stagePattern);
+    ASSERT_NE(stageManager, nullptr);
+
+    auto homePage = CreateRouterPage("home", RouterPageType::HOME_PAGE);
+    auto detailPage = CreateRouterPage("detail");
+    auto placeholderPage = CreateRouterPage("placeholder", RouterPageType::PLACEHOLDER_PAGE);
+    auto detailPattern = GetRouterPagePattern(detailPage);
+    ASSERT_NE(detailPattern, nullptr);
+
+    EXPECT_EQ(stageManager->GetPageColumnType(nullptr), ForceSplitPageColumnType::NONE);
+    EXPECT_EQ(stageManager->GetPageColumnType(homePage), ForceSplitPageColumnType::PRIMARY);
+    EXPECT_EQ(stageManager->GetPageColumnType(detailPage), ForceSplitPageColumnType::SECONDARY);
+    EXPECT_EQ(stageManager->GetPageColumnType(placeholderPage), ForceSplitPageColumnType::NONE);
+
+    stageManager->routerColumnNodesDirty_ = false;
+    stageManager->SetPageColumnType(detailPage, ForceSplitPageColumnType::SECONDARY);
+    EXPECT_EQ(detailPattern->GetColumnType(), ForceSplitPageColumnType::SECONDARY);
+    EXPECT_TRUE(stageManager->routerColumnNodesDirty_);
+
+    stageManager->routerColumnNodesDirty_ = false;
+    stageManager->SetPageColumnType(detailPage, ForceSplitPageColumnType::SECONDARY);
+    EXPECT_FALSE(stageManager->routerColumnNodesDirty_);
+
+    stageManager->SetPageColumnType(detailPage, ForceSplitPageColumnType::PRIMARY);
+    EXPECT_EQ(stageManager->GetPageColumnType(detailPage), ForceSplitPageColumnType::PRIMARY);
+    EXPECT_TRUE(stageManager->routerColumnNodesDirty_);
+
+    stageManager->routerColumnNodesDirty_ = false;
+    stageManager->ClearRouterPageState(detailPage);
+    EXPECT_EQ(detailPattern->GetColumnType(), ForceSplitPageColumnType::NONE);
+    EXPECT_TRUE(stageManager->routerColumnNodesDirty_);
+
+    stageManager->routerColumnNodesDirty_ = false;
+    stageManager->ClearRouterPageState(detailPage);
+    EXPECT_FALSE(stageManager->routerColumnNodesDirty_);
+}
+
+/**
+ * @tc.name: ShouldMovePageToPrimaryForTransition001
+ * @tc.desc: Test ShouldMovePageToPrimaryForTransition with split state, home page and page pair constraints.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, ShouldMovePageToPrimaryForTransition001, TestSize.Level1)
+{
+    auto forceSplitManager = GetForceSplitManager();
+    ASSERT_NE(forceSplitManager, nullptr);
+    ResetForceSplitBehaviorConfig(forceSplitManager);
+    forceSplitManager->SetBehaviorMode(ForceSplitBehaviorMode::NAVIGATION);
+    std::unordered_map<std::string, std::unordered_set<std::string>> pagePairs = {
+        { "list", { "detail" } },
+    };
+    forceSplitManager->SetPagePairs(std::move(pagePairs));
+
+    RefPtr<FrameNode> stageNode;
+    RefPtr<ParallelStagePattern> stagePattern;
+    auto stageManager = CreateParallelStageManager(stageNode, stagePattern);
+    ASSERT_NE(stageManager, nullptr);
+    ASSERT_NE(stagePattern, nullptr);
+
+    auto homePage = CreateRouterPage("home", RouterPageType::HOME_PAGE);
+    ASSERT_NE(homePage, nullptr);
+    auto fromPage = CreateRouterPage("list");
+    ASSERT_NE(fromPage, nullptr);
+    auto toPage = CreateRouterPage("detail");
+    ASSERT_NE(toPage, nullptr);
+    auto otherPage = CreateRouterPage("other");
+    ASSERT_NE(otherPage, nullptr);
+    MountRouterPage(stageNode, homePage);
+    MountRouterPage(stageNode, fromPage);
+    MountRouterPage(stageNode, toPage);
+    MountRouterPage(stageNode, otherPage);
+
+    stagePattern->mode_ = PageMode::STACK;
+    EXPECT_FALSE(stageManager->ShouldMovePageToPrimaryForTransition(fromPage, toPage));
+    EXPECT_TRUE(stageManager->ShouldMovePageToPrimaryForTransition(fromPage, toPage, false));
+
+    stagePattern->mode_ = PageMode::SPLIT;
+    stageManager->needClearSecondaryPage_ = true;
+    EXPECT_FALSE(stageManager->ShouldMovePageToPrimaryForTransition(fromPage, toPage));
+    stageManager->needClearSecondaryPage_ = false;
+    EXPECT_TRUE(stageManager->ShouldMovePageToPrimaryForTransition(fromPage, toPage));
+    EXPECT_FALSE(stageManager->ShouldMovePageToPrimaryForTransition(fromPage, fromPage));
+    EXPECT_FALSE(stageManager->ShouldMovePageToPrimaryForTransition(homePage, toPage));
+    EXPECT_FALSE(stageManager->ShouldMovePageToPrimaryForTransition(fromPage, homePage));
+    EXPECT_FALSE(stageManager->ShouldMovePageToPrimaryForTransition(fromPage, otherPage));
+}
+
+/**
+ * @tc.name: UpdateRouterColumnsOnPush001
+ * @tc.desc: Test UpdateRouterColumnsOnPush updates current and new page column types.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, UpdateRouterColumnsOnPush001, TestSize.Level1)
+{
+    auto forceSplitManager = GetForceSplitManager();
+    ASSERT_NE(forceSplitManager, nullptr);
+    ResetForceSplitBehaviorConfig(forceSplitManager);
+    forceSplitManager->SetBehaviorMode(ForceSplitBehaviorMode::NAVIGATION);
+    std::unordered_map<std::string, std::unordered_set<std::string>> pagePairs = {
+        { "list", { "detail" } },
+    };
+    forceSplitManager->SetPagePairs(std::move(pagePairs));
+
+    RefPtr<FrameNode> stageNode;
+    RefPtr<ParallelStagePattern> stagePattern;
+    auto stageManager = CreateParallelStageManager(stageNode, stagePattern);
+    ASSERT_NE(stageManager, nullptr);
+    ASSERT_NE(stagePattern, nullptr);
+    stagePattern->mode_ = PageMode::SPLIT;
+
+    auto homePage = CreateRouterPage("home", RouterPageType::HOME_PAGE);
+    ASSERT_NE(homePage, nullptr);
+    auto currentPage = CreateRouterPage("list");
+    ASSERT_NE(currentPage, nullptr);
+    auto newPage = CreateRouterPage("detail");
+    ASSERT_NE(newPage, nullptr);
+    MountRouterPage(stageNode, homePage);
+    MountRouterPage(stageNode, currentPage);
+    MountRouterPage(stageNode, newPage);
+
+    stageManager->UpdateRouterColumnsOnPush(currentPage, newPage);
+    auto currentPattern = GetRouterPagePattern(currentPage);
+    ASSERT_NE(currentPattern, nullptr);
+    auto newPattern = GetRouterPagePattern(newPage);
+    ASSERT_NE(newPattern, nullptr);
+    EXPECT_EQ(currentPattern->GetColumnType(), ForceSplitPageColumnType::PRIMARY);
+    EXPECT_EQ(newPattern->GetColumnType(), ForceSplitPageColumnType::SECONDARY);
+
+    forceSplitManager->pagePairs_.clear();
+    auto blockedCurrentPage = CreateRouterPage("blockedCurrent");
+    auto blockedNewPage = CreateRouterPage("blockedNew");
+    MountRouterPage(stageNode, blockedCurrentPage);
+    MountRouterPage(stageNode, blockedNewPage);
+    stageManager->UpdateRouterColumnsOnPush(blockedCurrentPage, blockedNewPage);
+    auto blockedCurrentPattern = GetRouterPagePattern(blockedCurrentPage);
+    ASSERT_NE(blockedCurrentPattern, nullptr);
+    auto blockedNewPattern = GetRouterPagePattern(blockedNewPage);
+    ASSERT_NE(blockedNewPattern, nullptr);
+    EXPECT_EQ(blockedCurrentPattern->GetColumnType(), ForceSplitPageColumnType::NONE);
+    EXPECT_EQ(blockedNewPattern->GetColumnType(), ForceSplitPageColumnType::SECONDARY);
+}
+
+/**
+ * @tc.name: GetRouterVisiblePages001
+ * @tc.desc: Test router visible page calculation for stack tree, split tree and dispatcher.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, GetRouterVisiblePages001, TestSize.Level1)
+{
+    RefPtr<FrameNode> stageNode;
+    RefPtr<ParallelStagePattern> stagePattern;
+    auto stageManager = CreateParallelStageManager(stageNode, stagePattern);
+    ASSERT_NE(stageManager, nullptr);
+    ASSERT_NE(stagePattern, nullptr);
+
+    auto homePage = CreateRouterPage("home", RouterPageType::HOME_PAGE);
+    auto primaryPage = CreateRouterPage("primary", RouterPageType::DETAIL_PAGE, ForceSplitPageColumnType::PRIMARY);
+    auto secondaryPage = CreateRouterPage(
+        "secondary", RouterPageType::DETAIL_PAGE, ForceSplitPageColumnType::SECONDARY);
+    auto placeholderPage = CreateRouterPage("placeholder", RouterPageType::PLACEHOLDER_PAGE);
+    MountRouterPage(stageNode, homePage);
+    MountRouterPage(stageNode, primaryPage);
+    MountRouterPage(stageNode, secondaryPage);
+    MountRouterPage(stageNode, placeholderPage);
+    stagePattern->SetPlaceholderPage(placeholderPage);
+
+    stagePattern->mode_ = PageMode::STACK;
+    auto stackVisible = stageManager->GetRouterVisiblePagesForCurrentStackTree();
+    EXPECT_EQ(stackVisible.primary, nullptr);
+    EXPECT_EQ(stackVisible.detail, secondaryPage);
+    auto dispatcherVisible = stageManager->GetRouterVisiblePages();
+    EXPECT_EQ(dispatcherVisible.primary, nullptr);
+    EXPECT_EQ(dispatcherVisible.detail, secondaryPage);
+
+    stagePattern->mode_ = PageMode::SPLIT;
+    stageManager->InvalidateRouterColumnNodes();
+    auto splitVisible = stageManager->GetRouterVisiblePagesForCurrentSplitTree();
+    EXPECT_EQ(splitVisible.primary, primaryPage);
+    EXPECT_EQ(splitVisible.detail, secondaryPage);
+    dispatcherVisible = stageManager->GetRouterVisiblePages();
+    EXPECT_EQ(dispatcherVisible.primary, primaryPage);
+    EXPECT_EQ(dispatcherVisible.detail, secondaryPage);
+
+    stageNode->RemoveChild(secondaryPage);
+    stageManager->InvalidateRouterColumnNodes();
+    auto fallbackVisible = stageManager->GetRouterVisiblePagesForCurrentSplitTree();
+    EXPECT_EQ(fallbackVisible.primary, primaryPage);
+    EXPECT_EQ(fallbackVisible.detail, placeholderPage);
+}
+
+/**
+ * @tc.name: CheckRouterMoveAllowed001
+ * @tc.desc: Test CheckIfMovePageToPrimaryIsAllowed and CheckIfMovePageToSecondaryIsAllowed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, CheckRouterMoveAllowed001, TestSize.Level1)
+{
+    RefPtr<FrameNode> stageNode;
+    RefPtr<ParallelStagePattern> stagePattern;
+    auto stageManager = CreateParallelStageManager(stageNode, stagePattern);
+    ASSERT_NE(stageManager, nullptr);
+
+    auto pageA = CreateRouterPage("pageA");
+    auto pageB = CreateRouterPage("pageB");
+    auto pageC = CreateRouterPage("pageC");
+
+    ParallelStageManager::RouterVisiblePages prePushVisible;
+    prePushVisible.primary = pageA;
+    prePushVisible.detail = pageB;
+    ParallelStageManager::RouterVisiblePages newPushVisible;
+    newPushVisible.primary = pageB;
+    newPushVisible.detail = pageC;
+    EXPECT_TRUE(stageManager->CheckIfMovePageToPrimaryIsAllowed(prePushVisible, newPushVisible));
+    EXPECT_FALSE(stageManager->CheckIfMovePageToSecondaryIsAllowed(prePushVisible, newPushVisible));
+
+    ParallelStageManager::RouterVisiblePages prePopVisible;
+    prePopVisible.primary = pageB;
+    prePopVisible.detail = pageC;
+    ParallelStageManager::RouterVisiblePages newPopVisible;
+    newPopVisible.primary = pageA;
+    newPopVisible.detail = pageB;
+    EXPECT_FALSE(stageManager->CheckIfMovePageToPrimaryIsAllowed(prePopVisible, newPopVisible));
+    EXPECT_TRUE(stageManager->CheckIfMovePageToSecondaryIsAllowed(prePopVisible, newPopVisible));
+
+    ParallelStageManager::RouterVisiblePages invalidVisible;
+    invalidVisible.primary = pageA;
+    invalidVisible.detail = pageA;
+    EXPECT_FALSE(stageManager->CheckIfMovePageToPrimaryIsAllowed(invalidVisible, newPushVisible));
+    EXPECT_FALSE(stageManager->CheckIfMovePageToSecondaryIsAllowed(prePopVisible, invalidVisible));
+}
+
+/**
+ * @tc.name: RouterPagesSplitPushTransitionStage001
+ * @tc.desc: Test split push start and end dispatch target transition types to each page.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, RouterPagesSplitPushTransitionStage001, TestSize.Level1)
+{
+    constexpr float pageWidth = 120.0f;
+    RefPtr<FrameNode> stageNode;
+    RefPtr<ParallelStagePattern> stagePattern;
+    auto stageManager = CreateParallelStageManager(stageNode, stagePattern);
+    ASSERT_NE(stageManager, nullptr);
+
+    auto exitPage = CreateRouterPage("exit");
+    auto movePage = CreateRouterPage("move");
+    auto enterPage = CreateRouterPage("enter");
+    MountRouterPage(stageNode, exitPage);
+    MountRouterPage(stageNode, movePage);
+    MountRouterPage(stageNode, enterPage);
+    SetRouterPageFrameSize(exitPage, pageWidth);
+    SetRouterPageFrameSize(movePage, pageWidth);
+    SetRouterPageFrameSize(enterPage, pageWidth);
+
+    auto exitPattern = GetRouterPagePattern(exitPage);
+    auto movePattern = GetRouterPagePattern(movePage);
+    auto enterPattern = GetRouterPagePattern(enterPage);
+    ASSERT_NE(exitPattern, nullptr);
+    ASSERT_NE(movePattern, nullptr);
+    ASSERT_NE(enterPattern, nullptr);
+
+    constexpr int32_t animationId1 = 1;
+    exitPattern->PrepareSplitTransition(animationId1, PageTransitionType::EXIT_PUSH);
+    movePattern->PrepareSplitTransition(animationId1, PageTransitionType::MOVE_PUSH);
+    enterPattern->PrepareSplitTransition(animationId1, PageTransitionType::ENTER_PUSH);
+    stageManager->OnRouterPagesSplitPushStart(exitPage, movePage, enterPage);
+    EXPECT_EQ(exitPattern->GetSplitTransitionType(), PageTransitionType::EXIT_PUSH);
+    EXPECT_EQ(movePattern->GetSplitTransitionType(), PageTransitionType::MOVE_PUSH);
+    EXPECT_EQ(enterPattern->GetSplitTransitionType(), PageTransitionType::ENTER_PUSH);
+    EXPECT_EQ(exitPattern->GetSplitTransitionPhase(), SplitTransitionPhase::START);
+    EXPECT_EQ(movePattern->GetSplitTransitionPhase(), SplitTransitionPhase::START);
+    EXPECT_EQ(enterPattern->GetSplitTransitionPhase(), SplitTransitionPhase::START);
+
+    stageManager->OnRouterPagesSplitPushEnd(exitPage, movePage, enterPage);
+    EXPECT_EQ(exitPattern->GetSplitTransitionType(), PageTransitionType::EXIT_PUSH);
+    EXPECT_EQ(movePattern->GetSplitTransitionType(), PageTransitionType::MOVE_PUSH);
+    EXPECT_EQ(enterPattern->GetSplitTransitionType(), PageTransitionType::ENTER_PUSH);
+    EXPECT_EQ(exitPattern->GetSplitTransitionPhase(), SplitTransitionPhase::END);
+    EXPECT_EQ(movePattern->GetSplitTransitionPhase(), SplitTransitionPhase::END);
+    EXPECT_EQ(enterPattern->GetSplitTransitionPhase(), SplitTransitionPhase::END);
+}
+
+/**
+ * @tc.name: RouterPagesSplitPopTransitionStage001
+ * @tc.desc: Test split pop start and end dispatch target transition types to each page.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, RouterPagesSplitPopTransitionStage001, TestSize.Level1)
+{
+    constexpr float pageWidth = 120.0f;
+    RefPtr<FrameNode> stageNode;
+    RefPtr<ParallelStagePattern> stagePattern;
+    auto stageManager = CreateParallelStageManager(stageNode, stagePattern);
+    ASSERT_NE(stageManager, nullptr);
+
+    auto enterPage = CreateRouterPage("enter");
+    auto exitPage = CreateRouterPage("exit");
+    auto movePage = CreateRouterPage("move");
+    MountRouterPage(stageNode, enterPage);
+    MountRouterPage(stageNode, exitPage);
+    MountRouterPage(stageNode, movePage);
+    SetRouterPageFrameSize(enterPage, pageWidth);
+    SetRouterPageFrameSize(exitPage, pageWidth);
+    SetRouterPageFrameSize(movePage, pageWidth);
+
+    auto enterPattern = GetRouterPagePattern(enterPage);
+    auto exitPattern = GetRouterPagePattern(exitPage);
+    auto movePattern = GetRouterPagePattern(movePage);
+    ASSERT_NE(enterPattern, nullptr);
+    ASSERT_NE(exitPattern, nullptr);
+    ASSERT_NE(movePattern, nullptr);
+
+    constexpr int32_t animationId = 1;
+    enterPattern->PrepareSplitTransition(animationId, PageTransitionType::ENTER_POP);
+    movePattern->PrepareSplitTransition(animationId, PageTransitionType::MOVE_POP);
+    exitPattern->PrepareSplitTransition(animationId, PageTransitionType::EXIT_POP);
+    stageManager->OnRouterPagesSplitPopStart(enterPage, exitPage, movePage);
+    EXPECT_EQ(enterPattern->GetSplitTransitionType(), PageTransitionType::ENTER_POP);
+    EXPECT_EQ(movePattern->GetSplitTransitionType(), PageTransitionType::MOVE_POP);
+    EXPECT_EQ(exitPattern->GetSplitTransitionType(), PageTransitionType::EXIT_POP);
+    EXPECT_EQ(enterPattern->GetSplitTransitionPhase(), SplitTransitionPhase::START);
+    EXPECT_EQ(movePattern->GetSplitTransitionPhase(), SplitTransitionPhase::START);
+    EXPECT_EQ(exitPattern->GetSplitTransitionPhase(), SplitTransitionPhase::START);
+
+    stageManager->OnRouterPagesSplitPopEnd(enterPage, exitPage, movePage);
+    EXPECT_EQ(enterPattern->GetSplitTransitionType(), PageTransitionType::ENTER_POP);
+    EXPECT_EQ(movePattern->GetSplitTransitionType(), PageTransitionType::MOVE_POP);
+    EXPECT_EQ(exitPattern->GetSplitTransitionType(), PageTransitionType::EXIT_POP);
+    EXPECT_EQ(enterPattern->GetSplitTransitionPhase(), SplitTransitionPhase::END);
+    EXPECT_EQ(movePattern->GetSplitTransitionPhase(), SplitTransitionPhase::END);
+    EXPECT_EQ(exitPattern->GetSplitTransitionPhase(), SplitTransitionPhase::END);
+}
+
+/**
+ * @tc.name: ParallelPagePatternSplitTransitionColumnType001
+ * @tc.desc: Test split transition phase and type map to expected column types.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, ParallelPagePatternSplitTransitionColumnType001, TestSize.Level1)
+{
+    auto page = CreateRouterPage("detail");
+    auto pattern = GetRouterPagePattern(page);
+    ASSERT_NE(pattern, nullptr);
+
+    EXPECT_EQ(pattern->GetSplitTransitionColumnType(), ForceSplitPageColumnType::NONE);
+    EXPECT_FALSE(pattern->IsInSplitTransitionLayout());
+
+    pattern->SetPageInTransition(true);
+    pattern->UpdateSplitTransitionState(PageTransitionType::EXIT_PUSH, SplitTransitionPhase::START);
+    EXPECT_EQ(pattern->GetSplitTransitionColumnType(), ForceSplitPageColumnType::PRIMARY);
+    EXPECT_TRUE(pattern->IsInSplitTransitionLayout());
+
+    pattern->UpdateSplitTransitionState(PageTransitionType::ENTER_PUSH, SplitTransitionPhase::START);
+    EXPECT_EQ(pattern->GetSplitTransitionColumnType(), ForceSplitPageColumnType::SECONDARY);
+
+    pattern->UpdateSplitTransitionState(PageTransitionType::MOVE_PUSH, SplitTransitionPhase::START);
+    EXPECT_EQ(pattern->GetSplitTransitionColumnType(), ForceSplitPageColumnType::SECONDARY);
+    pattern->UpdateSplitTransitionState(PageTransitionType::MOVE_PUSH, SplitTransitionPhase::END);
+    EXPECT_EQ(pattern->GetSplitTransitionColumnType(), ForceSplitPageColumnType::PRIMARY);
+
+    pattern->UpdateSplitTransitionState(PageTransitionType::ENTER_POP, SplitTransitionPhase::START);
+    EXPECT_EQ(pattern->GetSplitTransitionColumnType(), ForceSplitPageColumnType::PRIMARY);
+
+    pattern->UpdateSplitTransitionState(PageTransitionType::EXIT_POP, SplitTransitionPhase::START);
+    EXPECT_EQ(pattern->GetSplitTransitionColumnType(), ForceSplitPageColumnType::SECONDARY);
+
+    pattern->UpdateSplitTransitionState(PageTransitionType::MOVE_POP, SplitTransitionPhase::START);
+    EXPECT_EQ(pattern->GetSplitTransitionColumnType(), ForceSplitPageColumnType::PRIMARY);
+    pattern->UpdateSplitTransitionState(PageTransitionType::MOVE_POP, SplitTransitionPhase::END);
+    EXPECT_EQ(pattern->GetSplitTransitionColumnType(), ForceSplitPageColumnType::SECONDARY);
+
+    pattern->UpdateSplitTransitionState(PageTransitionType::MOVE_POP, SplitTransitionPhase::NONE);
+    EXPECT_EQ(pattern->GetSplitTransitionColumnType(), ForceSplitPageColumnType::NONE);
+    EXPECT_FALSE(pattern->IsInSplitTransitionLayout());
+}
+
+/**
+ * @tc.name: ParallelPagePatternPrepareAbortSplitTransition001
+ * @tc.desc: Test PrepareSplitTransition records transition state and AbortSplitTransition clears it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, ParallelPagePatternPrepareAbortSplitTransition001, TestSize.Level1)
+{
+    constexpr float pageWidth = 100.0f;
+    constexpr int32_t animationId = 101;
+    auto page = CreateRouterPage("detail");
+    auto pattern = GetRouterPagePattern(page);
+    ASSERT_NE(pattern, nullptr);
+    SetRouterPageFrameSize(page, pageWidth);
+    auto eventHub = page->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    EXPECT_TRUE(eventHub->IsEnabled());
+
+    pattern->PrepareSplitTransition(animationId, PageTransitionType::EXIT_POP);
+    EXPECT_TRUE(pattern->GetPageInTransition());
+    EXPECT_EQ(pattern->GetAnimationId(), animationId);
+    EXPECT_EQ(pattern->GetSplitTransitionType(), PageTransitionType::EXIT_POP);
+    EXPECT_EQ(pattern->GetSplitTransitionPhase(), SplitTransitionPhase::START);
+    EXPECT_TRUE(pattern->hasSplitTransitionVisualOffset_);
+    EXPECT_FALSE(eventHub->IsEnabled());
+
+    pattern->OnSplitTransitionEnd(PageTransitionType::EXIT_POP);
+    EXPECT_TRUE(pattern->hasSplitTransitionVisualOffset_);
+
+    pattern->AbortSplitTransition();
+    EXPECT_FALSE(pattern->GetPageInTransition());
+    EXPECT_EQ(pattern->GetSplitTransitionType(), PageTransitionType::NONE);
+    EXPECT_EQ(pattern->GetSplitTransitionPhase(), SplitTransitionPhase::NONE);
+    EXPECT_FALSE(pattern->hasSplitTransitionVisualOffset_);
+    EXPECT_TRUE(eventHub->IsEnabled());
+}
+
+/**
+ * @tc.name: ParallelPagePatternFinishSplitTransition001
+ * @tc.desc: Test OnSplitTransitionFinish ignores stale animation and clears current transition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, ParallelPagePatternFinishSplitTransition001, TestSize.Level1)
+{
+    constexpr float pageWidth = 100.0f;
+    constexpr int32_t animationId = 201;
+    auto page = CreateRouterPage("detail");
+    auto pattern = GetRouterPagePattern(page);
+    ASSERT_NE(pattern, nullptr);
+    SetRouterPageFrameSize(page, pageWidth);
+
+    pattern->PrepareSplitTransition(animationId, PageTransitionType::ENTER_PUSH);
+    pattern->OnSplitTransitionStart(PageTransitionType::ENTER_PUSH);
+    EXPECT_TRUE(pattern->GetPageInTransition());
+    EXPECT_EQ(pattern->GetSplitTransitionPhase(), SplitTransitionPhase::START);
+
+    EXPECT_FALSE(pattern->OnSplitTransitionFinish(animationId + 1, PageTransitionType::ENTER_PUSH));
+    EXPECT_TRUE(pattern->GetPageInTransition());
+    EXPECT_EQ(pattern->GetSplitTransitionType(), PageTransitionType::ENTER_PUSH);
+    EXPECT_EQ(pattern->GetSplitTransitionPhase(), SplitTransitionPhase::START);
+
+    EXPECT_TRUE(pattern->OnSplitTransitionFinish(animationId, PageTransitionType::ENTER_PUSH));
+    EXPECT_FALSE(pattern->GetPageInTransition());
+    EXPECT_EQ(pattern->GetSplitTransitionType(), PageTransitionType::NONE);
+    EXPECT_EQ(pattern->GetSplitTransitionPhase(), SplitTransitionPhase::NONE);
+    EXPECT_FALSE(pattern->hasSplitTransitionVisualOffset_);
+}
+
+/**
+ * @tc.name: ParallelPagePatternFinishExitTransition001
+ * @tc.desc: Test exit push hides page and exit pop removes page from parent after finish.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, ParallelPagePatternFinishExitTransition001, TestSize.Level1)
+{
+    constexpr int32_t exitPushAnimationId = 301;
+    constexpr int32_t exitPopAnimationId = 302;
+    RefPtr<FrameNode> stageNode;
+    RefPtr<ParallelStagePattern> stagePattern;
+    auto stageManager = CreateParallelStageManager(stageNode, stagePattern);
+    ASSERT_NE(stageManager, nullptr);
+
+    auto exitPushPage = CreateRouterPage("exitPush");
+    auto exitPushPattern = GetRouterPagePattern(exitPushPage);
+    ASSERT_NE(exitPushPattern, nullptr);
+    MountRouterPage(stageNode, exitPushPage);
+    exitPushPattern->PrepareSplitTransition(exitPushAnimationId, PageTransitionType::EXIT_PUSH);
+    EXPECT_TRUE(exitPushPattern->OnSplitTransitionFinish(exitPushAnimationId, PageTransitionType::EXIT_PUSH));
+    EXPECT_EQ(stageNode->GetChildIndex(exitPushPage), 0);
+    EXPECT_EQ(exitPushPage->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::INVISIBLE);
+
+    auto exitPopPage = CreateRouterPage("exitPop");
+    auto exitPopPattern = GetRouterPagePattern(exitPopPage);
+    ASSERT_NE(exitPopPattern, nullptr);
+    MountRouterPage(stageNode, exitPopPage);
+    ASSERT_GE(stageNode->GetChildIndex(exitPopPage), 0);
+    exitPopPattern->PrepareSplitTransition(exitPopAnimationId, PageTransitionType::EXIT_POP);
+    EXPECT_TRUE(exitPopPattern->OnSplitTransitionFinish(exitPopAnimationId, PageTransitionType::EXIT_POP));
+    EXPECT_LT(stageNode->GetChildIndex(exitPopPage), 0);
+}
+
+/**
+ * @tc.name: ParallelPagePatternInitOnTouchEventForVirtualStack001
+ * @tc.desc: Test InitOnTouchEvent records touched primary or secondary page in virtual stack split mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, ParallelPagePatternInitOnTouchEventForVirtualStack001, TestSize.Level1)
+{
+    auto forceSplitManager = GetForceSplitManager();
+    ASSERT_NE(forceSplitManager, nullptr);
+    ResetForceSplitBehaviorConfig(forceSplitManager);
+    std::unordered_map<std::string, std::unordered_set<std::string>> pagePairs = {
+        { "primary", { "secondary" } },
+    };
+    forceSplitManager->SetPagePairs(std::move(pagePairs));
+
+    RefPtr<FrameNode> stageNode;
+    RefPtr<ParallelStagePattern> stagePattern;
+    auto stageManager = CreateParallelStageManager(stageNode, stagePattern);
+    ASSERT_NE(stageManager, nullptr);
+    ASSERT_NE(stagePattern, nullptr);
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+
+    auto homePage = CreateRouterPage("home", RouterPageType::HOME_PAGE);
+    auto primaryPage = CreateRouterPage("primary", RouterPageType::DETAIL_PAGE, ForceSplitPageColumnType::PRIMARY);
+    auto secondaryPage =
+        CreateRouterPage("secondary", RouterPageType::DETAIL_PAGE, ForceSplitPageColumnType::SECONDARY);
+    MountRouterPage(stageNode, homePage);
+    MountRouterPage(stageNode, primaryPage);
+    MountRouterPage(stageNode, secondaryPage);
+    stagePattern->mode_ = PageMode::SPLIT;
+    stageManager->InvalidateRouterColumnNodes();
+
+    auto primaryPattern = GetRouterPagePattern(primaryPage);
+    auto secondaryPattern = GetRouterPagePattern(secondaryPage);
+    ASSERT_NE(primaryPattern, nullptr);
+    ASSERT_NE(secondaryPattern, nullptr);
+
+    auto oldStageManager = context->stageManager_;
+    context->stageManager_ = stageManager;
+    primaryPattern->InitOnTouchEvent();
+    secondaryPattern->InitOnTouchEvent();
+    if (!primaryPattern->touchListener_ || !secondaryPattern->touchListener_) {
+        context->stageManager_ = oldStageManager;
+        ResetForceSplitBehaviorConfig(forceSplitManager);
+        FAIL();
+    }
+    TouchEventInfo touchInfo("touch");
+
+    (*secondaryPattern->touchListener_)(touchInfo);
+    EXPECT_EQ(stageManager->GetTouchedPrimaryColumnPage(), nullptr);
+    EXPECT_EQ(stageManager->TakeTouchedSecondaryColumnPage(), secondaryPage);
+
+    (*primaryPattern->touchListener_)(touchInfo);
+    EXPECT_EQ(stageManager->GetTouchedPrimaryColumnPage(), primaryPage);
+    EXPECT_EQ(stageManager->TakeTouchedSecondaryColumnPage(), nullptr);
+
+    primaryPattern->RemoveOnTouchEvent();
+    secondaryPattern->RemoveOnTouchEvent();
+    EXPECT_EQ(primaryPattern->touchListener_, nullptr);
+    EXPECT_EQ(secondaryPattern->touchListener_, nullptr);
+    context->stageManager_ = oldStageManager;
+    ResetForceSplitBehaviorConfig(forceSplitManager);
+}
+
+/**
+ * @tc.name: ParallelPagePatternRelatedPageLifecycle001
+ * @tc.desc: Test related page attach, detach and NotifyAboutToDisappear lifecycle state.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, ParallelPagePatternRelatedPageLifecycle001, TestSize.Level1)
+{
+    auto relatedPage = CreateRouterPage("related", RouterPageType::RELATED_PAGE);
+    auto relatedPattern = GetRouterPagePattern(relatedPage);
+    ASSERT_NE(relatedPattern, nullptr);
+
+    EXPECT_TRUE(relatedPattern->needNotifyRelatedPageAboutToAppear_);
+    relatedPattern->OnAttachToMainTree();
+    EXPECT_FALSE(relatedPattern->needNotifyRelatedPageAboutToAppear_);
+    EXPECT_EQ(relatedPattern->GetPageInfo()->GetPageIndex(), -1);
+    EXPECT_EQ(relatedPattern->state_, RouterPageState::ABOUT_TO_APPEAR);
+
+    relatedPattern->SetNeedNotifyRelatedPageAboutToDisappear(true);
+    relatedPattern->OnDetachFromMainTree();
+    EXPECT_FALSE(relatedPattern->needNotifyRelatedPageAboutToDisappear_);
+    EXPECT_EQ(relatedPattern->state_, RouterPageState::ABOUT_TO_DISAPPEAR);
+
+    relatedPattern->NotifyAboutToDisappear();
+    EXPECT_TRUE(relatedPattern->needNotifyRelatedPageAboutToAppear_);
+    EXPECT_EQ(relatedPattern->state_, RouterPageState::ABOUT_TO_DISAPPEAR);
+}
+
+/**
+ * @tc.name: ParallelStageLayoutAlgorithmPageColumnType001
+ * @tc.desc: Test GetPageLayoutColumnType with visible pages, invisible pages, placeholder and transition pages.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, ParallelStageLayoutAlgorithmPageColumnType001, TestSize.Level1)
+{
+    ParallelStageLayoutAlgorithm algorithm;
+    algorithm.primaryIndex_ = 1;
+    algorithm.secondaryIndex_ = 2;
+
+    RefPtr<FrameNode> primaryPage;
+    RefPtr<ParallelPagePattern> primaryPattern;
+    CreatePage(primaryPage, primaryPattern);
+    ASSERT_NE(primaryPage, nullptr);
+    ASSERT_NE(primaryPattern, nullptr);
+    primaryPattern->SetPageType(RouterPageType::DETAIL_PAGE);
+    EXPECT_EQ(algorithm.GetPageLayoutColumnType(primaryPage, 1), ForceSplitPageColumnType::PRIMARY);
+
+    RefPtr<FrameNode> secondaryPage;
+    RefPtr<ParallelPagePattern> secondaryPattern;
+    CreatePage(secondaryPage, secondaryPattern);
+    ASSERT_NE(secondaryPage, nullptr);
+    ASSERT_NE(secondaryPattern, nullptr);
+    secondaryPattern->SetPageType(RouterPageType::DETAIL_PAGE);
+    EXPECT_EQ(algorithm.GetPageLayoutColumnType(secondaryPage, 2), ForceSplitPageColumnType::SECONDARY);
+
+    RefPtr<FrameNode> invisiblePage;
+    RefPtr<ParallelPagePattern> invisiblePattern;
+    CreatePage(invisiblePage, invisiblePattern);
+    ASSERT_NE(invisiblePage, nullptr);
+    ASSERT_NE(invisiblePattern, nullptr);
+    invisiblePattern->SetPageType(RouterPageType::DETAIL_PAGE);
+    invisiblePage->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+    EXPECT_EQ(algorithm.GetPageLayoutColumnType(invisiblePage, 1), ForceSplitPageColumnType::NONE);
+
+    RefPtr<FrameNode> transitionPage;
+    RefPtr<ParallelPagePattern> transitionPattern;
+    CreatePage(transitionPage, transitionPattern);
+    ASSERT_NE(transitionPage, nullptr);
+    ASSERT_NE(transitionPattern, nullptr);
+    transitionPattern->SetPageType(RouterPageType::DETAIL_PAGE);
+    transitionPage->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+    transitionPattern->SetPageInTransition(true);
+    transitionPattern->UpdateSplitTransitionState(PageTransitionType::MOVE_PUSH, SplitTransitionPhase::START);
+    EXPECT_EQ(algorithm.GetPageLayoutColumnType(transitionPage, 3), ForceSplitPageColumnType::SECONDARY);
+
+    RefPtr<FrameNode> placeholderPage;
+    RefPtr<ParallelPagePattern> placeholderPattern;
+    CreatePage(placeholderPage, placeholderPattern);
+    ASSERT_NE(placeholderPage, nullptr);
+    ASSERT_NE(placeholderPattern, nullptr);
+    placeholderPattern->SetPageType(RouterPageType::PLACEHOLDER_PAGE);
+    EXPECT_EQ(algorithm.GetPageLayoutColumnType(placeholderPage, 1), ForceSplitPageColumnType::NONE);
+    EXPECT_EQ(algorithm.GetPageLayoutColumnType(placeholderPage, 2), ForceSplitPageColumnType::SECONDARY);
+}
+
+/**
+ * @tc.name: ParallelStageLayoutAlgorithmSlotOffset001
+ * @tc.desc: Test primary, secondary and divider offsets in LTR and RTL directions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, ParallelStageLayoutAlgorithmSlotOffset001, TestSize.Level1)
+{
+    constexpr float primaryWidth = 300.0f;
+    constexpr float secondaryWidth = 419.0f;
+    constexpr float dividerWidth =1.0f;
+    constexpr float stageHeight = 600.0f;
+    constexpr float narrowPrimaryPageWidth = 200.0f;
+    constexpr float widePrimaryPageWidth = 400.0f;
+    constexpr float ltrPrimaryOffsetX = primaryWidth - narrowPrimaryPageWidth;
+    constexpr float ltrSecondaryOffsetX = primaryWidth + dividerWidth;
+    constexpr float rtlPrimaryOffsetX = secondaryWidth + dividerWidth + ltrPrimaryOffsetX;
+    ParallelStageLayoutAlgorithm algorithm;
+    algorithm.primarySize_ = SizeF(primaryWidth, stageHeight);
+    algorithm.secondarySize_ = SizeF(secondaryWidth, stageHeight);
+    algorithm.dividerSize_ = SizeF(dividerWidth, stageHeight);
+
+    auto& applicationInfo = AceApplicationInfo::GetInstance();
+    auto oldRtl = applicationInfo.isRightToLeft_;
+    applicationInfo.isRightToLeft_ = false;
+    EXPECT_FLOAT_EQ(algorithm.GetDividerOffsetX(), primaryWidth);
+    EXPECT_EQ(algorithm.GetPrimarySlotOffset(narrowPrimaryPageWidth), OffsetF(ltrPrimaryOffsetX, 0.0f));
+    EXPECT_EQ(algorithm.GetPrimarySlotOffset(widePrimaryPageWidth), OffsetF(0.0f, 0.0f));
+    EXPECT_EQ(algorithm.GetSecondarySlotOffset(), OffsetF(ltrSecondaryOffsetX, 0.0f));
+
+    applicationInfo.isRightToLeft_ = true;
+    EXPECT_FLOAT_EQ(algorithm.GetDividerOffsetX(), secondaryWidth);
+    EXPECT_EQ(algorithm.GetPrimarySlotOffset(narrowPrimaryPageWidth), OffsetF(rtlPrimaryOffsetX, 0.0f));
+    EXPECT_EQ(algorithm.GetSecondarySlotOffset(), OffsetF(0.0f, 0.0f));
+    applicationInfo.isRightToLeft_ = oldRtl;
+}
+
+/**
+ * @tc.name: ParallelStageManagerConstructor001
+ * @tc.desc: Test ParallelStageManager constructor sets callbacks correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, ParallelStageManagerConstructor001, TestSize.Level1)
+{
+    auto stagePattern = AceType::MakeRefPtr<ParallelStagePattern>();
+    ASSERT_NE(stagePattern, nullptr);
+    auto stageNode = FrameNode::CreateFrameNode(V2::STAGE_ETS_TAG, 0, stagePattern);
+    ASSERT_NE(stageNode, nullptr);
+
+    auto stageManager = AceType::MakeRefPtr<ParallelStageManager>(stageNode);
+    ASSERT_NE(stageManager, nullptr);
+    EXPECT_NE(stagePattern->modeChangeCallback_, nullptr);
+    EXPECT_NE(stagePattern->windowStateChangeCallback_, nullptr);
+}
+
+/**
+ * @tc.name: OnModeChangeToSplit001
+ * @tc.desc: Test OnModeChange transitions from stack to split mode with home page.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, OnModeChangeToSplit001, TestSize.Level1)
+{
+    RefPtr<FrameNode> stageNode;
+    RefPtr<ParallelStagePattern> stagePattern;
+    auto stageManager = CreateParallelStageManager(stageNode, stagePattern);
+    ASSERT_NE(stageManager, nullptr);
+    stagePattern->mode_ = PageMode::STACK;
+
+    auto homePage = CreateRouterPage("home", RouterPageType::HOME_PAGE);
+    auto homePattern = GetRouterPagePattern(homePage);
+    ASSERT_NE(homePattern, nullptr);
+    homePattern->isRenderDone_ = true;
+    homePattern->isOnShow_ = false;
+    MountRouterPage(stageNode, homePage);
+    auto detailPage = CreateRouterPage("detail");
+    MountRouterPage(stageNode, detailPage);
+
+    stagePattern->mode_ = PageMode::SPLIT;
+    stageManager->OnModeChange();
+    EXPECT_TRUE(stagePattern->GetIsSplit());
+    EXPECT_TRUE(homePattern->GetIsShow());
+}
+
+/**
+ * @tc.name: OnModeChangeToStack001
+ * @tc.desc: Test OnModeChange transitions from split to stack mode removes placeholder page.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, OnModeChangeToStack001, TestSize.Level1)
+{
+    auto stagePattern = AceType::MakeRefPtr<ParallelStagePattern>();
+    ASSERT_NE(stagePattern, nullptr);
+    stagePattern->mode_ = PageMode::SPLIT;
+    auto stageNode = FrameNode::CreateFrameNode(V2::STAGE_ETS_TAG, 0, stagePattern);
+    ASSERT_NE(stageNode, nullptr);
+    auto stageManager = AceType::MakeRefPtr<ParallelStageManager>(stageNode);
+    ASSERT_NE(stageManager, nullptr);
+
+    auto homePage = CreateRouterPage("home", RouterPageType::HOME_PAGE);
+    MountRouterPage(stageNode, homePage);
+    auto placeholderPage = CreateRouterPage("placeholder", RouterPageType::PLACEHOLDER_PAGE);
+    MountRouterPage(stageNode, placeholderPage);
+    stagePattern->SetHomePage(homePage);
+
+    stagePattern->mode_ = PageMode::STACK;
+    stageManager->OnModeChange();
+    EXPECT_FALSE(stagePattern->GetIsSplit());
+    EXPECT_LT(stageNode->GetChildIndex(placeholderPage), 0);
+}
+
+/**
+ * @tc.name: GetHomePage001
+ * @tc.desc: Test GetHomePage returns correct home page from stage children.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, GetHomePage001, TestSize.Level1)
+{
+    RefPtr<FrameNode> stageNode;
+    RefPtr<ParallelStagePattern> stagePattern;
+    auto stageManager = CreateParallelStageManager(stageNode, stagePattern);
+    ASSERT_NE(stageManager, nullptr);
+
+    auto detailPage = CreateRouterPage("detail");
+    MountRouterPage(stageNode, detailPage);
+    EXPECT_EQ(stageManager->GetHomePage(), nullptr);
+
+    auto homePage = CreateRouterPage("home", RouterPageType::HOME_PAGE);
+    MountRouterPage(stageNode, homePage);
+    EXPECT_EQ(stageManager->GetHomePage(), homePage);
+}
+
+/**
+ * @tc.name: GetPrevPageWithTransition001
+ * @tc.desc: Test GetPrevPageWithTransition returns source page during transition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, GetPrevPageWithTransition001, TestSize.Level1)
+{
+    RefPtr<FrameNode> stageNode;
+    RefPtr<ParallelStagePattern> stagePattern;
+    auto stageManager = CreateParallelStageManager(stageNode, stagePattern);
+    ASSERT_NE(stageManager, nullptr);
+
+    auto pageA = CreateRouterPage("pageA");
+    auto pageB = CreateRouterPage("pageB");
+    MountRouterPage(stageNode, pageA);
+    MountRouterPage(stageNode, pageB);
+
+    EXPECT_EQ(stageManager->GetPrevPageWithTransition(), pageA);
+
+    stageManager->stageInTrasition_ = true;
+    stageManager->srcPageNode_ = pageA;
+    EXPECT_EQ(stageManager->GetPrevPageWithTransition(), pageA);
+    stageManager->stageInTrasition_ = false;
+}
+
+/**
+ * @tc.name: GetLastPageWithTransition001
+ * @tc.desc: Test GetLastPageWithTransition returns destination page during transition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, GetLastPageWithTransition001, TestSize.Level1)
+{
+    RefPtr<FrameNode> stageNode;
+    RefPtr<ParallelStagePattern> stagePattern;
+    auto stageManager = CreateParallelStageManager(stageNode, stagePattern);
+    ASSERT_NE(stageManager, nullptr);
+
+    auto pageA = CreateRouterPage("pageA");
+    auto pageB = CreateRouterPage("pageB");
+    MountRouterPage(stageNode, pageA);
+    MountRouterPage(stageNode, pageB);
+
+    EXPECT_EQ(stageManager->GetLastPageWithTransition(), pageB);
+
+    stageManager->stageInTrasition_ = true;
+    stageManager->destPageNode_ = pageA;
+    EXPECT_EQ(stageManager->GetLastPageWithTransition(), pageA);
+    stageManager->stageInTrasition_ = false;
+}
+
+/**
+ * @tc.name: ExchangePageFocus001
+ * @tc.desc: Test ExchangePageFocus exchanges focus between primary and last page in split mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, ExchangePageFocus001, TestSize.Level1)
+{
+    RefPtr<FrameNode> stageNode;
+    RefPtr<ParallelStagePattern> stagePattern;
+    auto stageManager = CreateParallelStageManager(stageNode, stagePattern);
+    ASSERT_NE(stageManager, nullptr);
+    stagePattern->mode_ = PageMode::SPLIT;
+
+    auto homePage = CreateRouterPage("home", RouterPageType::HOME_PAGE);
+    auto detailPage = CreateRouterPage("detail");
+    MountRouterPage(stageNode, homePage);
+    MountRouterPage(stageNode, detailPage);
+
+    bool initFlag = true;
+    EXPECT_TRUE(stageManager->ExchangePageFocus(initFlag));
+    EXPECT_FALSE(initFlag);
+}
+
+/**
+ * @tc.name: ExchangePageFocusNotSplit001
+ * @tc.desc: Test ExchangePageFocus returns false in stack mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, ExchangePageFocusNotSplit001, TestSize.Level1)
+{
+    RefPtr<FrameNode> stageNode;
+    RefPtr<ParallelStagePattern> stagePattern;
+    auto stageManager = CreateParallelStageManager(stageNode, stagePattern);
+    ASSERT_NE(stageManager, nullptr);
+    stagePattern->mode_ = PageMode::STACK;
+
+    auto detailPage = CreateRouterPage("detail");
+    MountRouterPage(stageNode, detailPage);
+
+    bool initFlag = true;
+    EXPECT_FALSE(stageManager->ExchangePageFocus(initFlag));
+}
+
+/**
+ * @tc.name: UpdatePageFocus001
+ * @tc.desc: Test UpdatePageFocus moves focus to head child when not already focused.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, UpdatePageFocus001, TestSize.Level1)
+{
+    RefPtr<FrameNode> stageNode;
+    RefPtr<ParallelStagePattern> stagePattern;
+    auto stageManager = CreateParallelStageManager(stageNode, stagePattern);
+    ASSERT_NE(stageManager, nullptr);
+
+    auto page = CreateRouterPage("detail");
+    MountRouterPage(stageNode, page);
+    RefPtr<FrameNode> focusPage = page;
+
+    EXPECT_TRUE(stageManager->UpdatePageFocus(focusPage));
+}
+
+/**
+ * @tc.name: IsEmptyInSplitMode001
+ * @tc.desc: Test IsEmptyInSplitMode returns correct empty state.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, IsEmptyInSplitMode001, TestSize.Level1)
+{
+    RefPtr<FrameNode> stageNode;
+    RefPtr<ParallelStagePattern> stagePattern;
+    auto stageManager = CreateParallelStageManager(stageNode, stagePattern);
+    ASSERT_NE(stageManager, nullptr);
+
+    EXPECT_TRUE(stageManager->IsEmptyInSplitMode());
+
+    auto page = CreateRouterPage("detail");
+    MountRouterPage(stageNode, page);
+    EXPECT_FALSE(stageManager->IsEmptyInSplitMode());
+}
+
+/**
+ * @tc.name: RemoveSecondaryPagesOfPrimaryPage001
+ * @tc.desc: Test RemoveSecondaryPagesOfPrimaryPage clears secondary stack.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, RemoveSecondaryPagesOfPrimaryPage001, TestSize.Level1)
+{
+    RefPtr<FrameNode> stageNode;
+    RefPtr<ParallelStagePattern> stagePattern;
+    auto stageManager = CreateParallelStageManager(stageNode, stagePattern);
+    ASSERT_NE(stageManager, nullptr);
+
+    auto homePage = CreateRouterPage("home", RouterPageType::HOME_PAGE);
+    auto secondaryPage = CreateRouterPage("secondary");
+    MountRouterPage(stageNode, homePage);
+    MountRouterPage(stageNode, secondaryPage);
+    stageManager->secondaryPageStack_.emplace_back(secondaryPage);
+
+    stageManager->RemoveSecondaryPagesOfPrimaryPage();
+    EXPECT_TRUE(stageManager->secondaryPageStack_.empty());
+}
+
+/**
+ * @tc.name: FireParallelPageShowAlreadyShown001
+ * @tc.desc: Test FireParallelPageShow skips when page is already shown.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, FireParallelPageShowAlreadyShown001, TestSize.Level1)
+{
+    RefPtr<FrameNode> stageNode;
+    RefPtr<ParallelStagePattern> stagePattern;
+    auto stageManager = CreateParallelStageManager(stageNode, stagePattern);
+    ASSERT_NE(stageManager, nullptr);
+
+    auto page = CreateRouterPage("detail");
+    MountRouterPage(stageNode, page);
+    auto pattern = GetRouterPagePattern(page);
+    ASSERT_NE(pattern, nullptr);
+    pattern->isOnShow_ = true;;
+
+    stageManager->FireParallelPageShow(page, PageTransitionType::NONE);
+    EXPECT_TRUE(pattern->GetIsShow());
+}
+
+/**
+ * @tc.name: FireParallelPageHideAlreadyHidden001
+ * @tc.desc: Test FireParallelPageHide processes hide state when page is hidden.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, FireParallelPageHideAlreadyHidden001, TestSize.Level1)
+{
+    RefPtr<FrameNode> stageNode;
+    RefPtr<ParallelStagePattern> stagePattern;
+    auto stageManager = CreateParallelStageManager(stageNode, stagePattern);
+    ASSERT_NE(stageManager, nullptr);
+
+    auto page = CreateRouterPage("detail");
+    MountRouterPage(stageNode, page);
+    auto pattern = GetRouterPagePattern(page);
+    ASSERT_NE(pattern, nullptr);
+    pattern->isOnShow_ = false;;
+    page->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+
+    stageManager->FireParallelPageHide(page, PageTransitionType::NONE);
+    EXPECT_EQ(page->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::INVISIBLE);
+}
+
+/**
+ * @tc.name: UpdateSecondaryPageNeedRemoved001
+ * @tc.desc: Test UpdateSecondaryPageNeedRemoved collects secondary pages when needClearSecondaryPage is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, UpdateSecondaryPageNeedRemoved001, TestSize.Level1)
+{
+    RefPtr<FrameNode> stageNode;
+    RefPtr<ParallelStagePattern> stagePattern;
+    auto stageManager = CreateParallelStageManager(stageNode, stagePattern);
+    ASSERT_NE(stageManager, nullptr);
+
+    auto homePage = CreateRouterPage("home", RouterPageType::HOME_PAGE);
+    auto secondaryPage = CreateRouterPage("secondary");
+    MountRouterPage(stageNode, homePage);
+    MountRouterPage(stageNode, secondaryPage);
+
+    auto count = stageManager->UpdateSecondaryPageNeedRemoved(true);
+    EXPECT_EQ(count, 1);
+    EXPECT_EQ(stageManager->secondaryPageStack_.size(), 1);
+    EXPECT_EQ(stageManager->secondaryPageStack_.back().Upgrade(), secondaryPage);
+}
+
+/**
+ * @tc.name: UpdateSecondaryPageNeedRemovedNotClear001
+ * @tc.desc: Test UpdateSecondaryPageNeedRemoved returns zero when needClearSecondaryPage is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, UpdateSecondaryPageNeedRemovedNotClear001, TestSize.Level1)
+{
+    RefPtr<FrameNode> stageNode;
+    RefPtr<ParallelStagePattern> stagePattern;
+    auto stageManager = CreateParallelStageManager(stageNode, stagePattern);
+    ASSERT_NE(stageManager, nullptr);
+
+    auto homePage = CreateRouterPage("home", RouterPageType::HOME_PAGE);
+    auto secondaryPage = CreateRouterPage("secondary");
+    MountRouterPage(stageNode, homePage);
+    MountRouterPage(stageNode, secondaryPage);
+
+    auto count = stageManager->UpdateSecondaryPageNeedRemoved(false);
+    EXPECT_EQ(count, 0);
+    EXPECT_TRUE(stageManager->secondaryPageStack_.empty());
+}
+
+/**
+ * @tc.name: GetTopPagesWithTransition001
+ * @tc.desc: Test GetTopPagesWithTransition returns primary and last page in split mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, GetTopPagesWithTransition001, TestSize.Level1)
+{
+    RefPtr<FrameNode> stageNode;
+    RefPtr<ParallelStagePattern> stagePattern;
+    auto stageManager = CreateParallelStageManager(stageNode, stagePattern);
+    ASSERT_NE(stageManager, nullptr);
+    stagePattern->mode_ = PageMode::SPLIT;
+
+    auto homePage = CreateRouterPage("home", RouterPageType::HOME_PAGE);
+    auto detailPage = CreateRouterPage("detail");
+    MountRouterPage(stageNode, homePage);
+    MountRouterPage(stageNode, detailPage);
+    stagePattern->SetHomePage(homePage);
+
+    auto pages = stageManager->GetTopPagesWithTransition();
+    EXPECT_EQ(pages.size(), 2);
+}
+
+/**
+ * @tc.name: IsSplitMode001
+ * @tc.desc: Test IsSplitMode returns correct split mode state.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, IsSplitMode001, TestSize.Level1)
+{
+    RefPtr<FrameNode> stageNode;
+    RefPtr<ParallelStagePattern> stagePattern;
+    auto stageManager = CreateParallelStageManager(stageNode, stagePattern);
+    ASSERT_NE(stageManager, nullptr);
+
+    stagePattern->mode_ = PageMode::STACK;
+    EXPECT_FALSE(stageManager->IsSplitMode());
+
+    stagePattern->mode_ = PageMode::SPLIT;
+    EXPECT_TRUE(stageManager->IsSplitMode());
+}
+
+/**
+ * @tc.name: GetRelatedOrPlaceHolderPage001
+ * @tc.desc: Test GetRelatedOrPlaceHolderPage returns placeholder or related page.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, GetRelatedOrPlaceHolderPage001, TestSize.Level1)
+{
+    RefPtr<FrameNode> stageNode;
+    RefPtr<ParallelStagePattern> stagePattern;
+    auto stageManager = CreateParallelStageManager(stageNode, stagePattern);
+    ASSERT_NE(stageManager, nullptr);
+
+    auto placeholderPage = CreateRouterPage("placeholder", RouterPageType::PLACEHOLDER_PAGE);
+    stagePattern->SetPlaceholderPage(placeholderPage);
+
+    auto result = stageManager->GetRelatedOrPlaceHolderPage();
+    EXPECT_EQ(result, placeholderPage);
+}
+
+/**
+ * @tc.name: IsDisplaySplitMode001
+ * @tc.desc: Test IsDisplaySplitMode returns true when home page exists in split mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, IsDisplaySplitMode001, TestSize.Level1)
+{
+    RefPtr<FrameNode> stageNode;
+    RefPtr<ParallelStagePattern> stagePattern;
+    auto stageManager = CreateParallelStageManager(stageNode, stagePattern);
+    ASSERT_NE(stageManager, nullptr);
+    stagePattern->mode_ = PageMode::SPLIT;
+
+    auto homePage = CreateRouterPage("home", RouterPageType::HOME_PAGE);
+    MountRouterPage(stageNode, homePage);
+    stagePattern->SetHomePage(homePage);
+
+    EXPECT_TRUE(stageManager->IsDisplaySplitMode());
+}
+
+/**
+ * @tc.name: IsDisplaySplitModeNoHomePage001
+ * @tc.desc: Test IsDisplaySplitMode returns false when home page does not exist.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, IsDisplaySplitModeNoHomePage001, TestSize.Level1)
+{
+    RefPtr<FrameNode> stageNode;
+    RefPtr<ParallelStagePattern> stagePattern;
+    auto stageManager = CreateParallelStageManager(stageNode, stagePattern);
+    ASSERT_NE(stageManager, nullptr);
+    stagePattern->mode_ = PageMode::SPLIT;
+
+    auto detailPage = CreateRouterPage("detail");
+    MountRouterPage(stageNode, detailPage);
+
+    EXPECT_FALSE(stageManager->IsDisplaySplitMode());
+}
+
+/**
+ * @tc.name: IsVirtualStackBasedSplit001
+ * @tc.desc: Test IsVirtualStackBasedSplit returns correct state based on ForceSplitManager.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, IsVirtualStackBasedSplit001, TestSize.Level1)
+{
+    auto forceSplitManager = GetForceSplitManager();
+    ASSERT_NE(forceSplitManager, nullptr);
+    ResetForceSplitBehaviorConfig(forceSplitManager);
+
+    RefPtr<FrameNode> stageNode;
+    RefPtr<ParallelStagePattern> stagePattern;
+    auto stageManager = CreateParallelStageManager(stageNode, stagePattern);
+    ASSERT_NE(stageManager, nullptr);
+
+    forceSplitManager->SetBehaviorMode(ForceSplitBehaviorMode::NAVIGATION);
+    EXPECT_FALSE(stageManager->IsVirtualStackBasedSplit());
+
+    forceSplitManager->SetBehaviorMode(ForceSplitBehaviorMode::DISPLACE);
+    EXPECT_TRUE(stageManager->IsVirtualStackBasedSplit());
+}
+
+/**
+ * @tc.name: SyncPageSafeArea001
+ * @tc.desc: Test SyncPageSafeArea in split mode marks dirty for focus page when KeyboardSafeArea is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, SyncPageSafeArea001, TestSize.Level1)
+{
+    RefPtr<FrameNode> stageNode;
+    RefPtr<ParallelStagePattern> stagePattern;
+    auto stageManager = CreateParallelStageManager(stageNode, stagePattern);
+    ASSERT_NE(stageManager, nullptr);
+    stagePattern->mode_ = PageMode::SPLIT;
+
+    auto homePage = CreateRouterPage("home", RouterPageType::HOME_PAGE);
+    auto detailPage = CreateRouterPage("detail");
+    MountRouterPage(stageNode, homePage);
+    MountRouterPage(stageNode, detailPage);
+    stagePattern->SetHomePage(homePage);
+
+    auto homePattern = GetRouterPagePattern(homePage);
+    ASSERT_NE(homePattern, nullptr);
+    auto detailPattern = GetRouterPagePattern(detailPage);
+    ASSERT_NE(detailPattern, nullptr);
+
+    stageManager->SyncPageSafeArea(true);
+    EXPECT_TRUE(stageManager->IsSplitMode());
+}
+
+/**
+ * @tc.name: CheckPageFocus001
+ * @tc.desc: Test CheckPageFocus returns true when focus page is focused in split mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, CheckPageFocus001, TestSize.Level1)
+{
+    RefPtr<FrameNode> stageNode;
+    RefPtr<ParallelStagePattern> stagePattern;
+    auto stageManager = CreateParallelStageManager(stageNode, stagePattern);
+    ASSERT_NE(stageManager, nullptr);
+
+    auto page = CreateRouterPage("detail");
+    MountRouterPage(stageNode, page);
+    auto focusHub = page->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+
+    EXPECT_TRUE(stageManager->CheckPageFocus() || !focusHub->IsCurrentFocus());
 }
 } // namespace OHOS::Ace::NG

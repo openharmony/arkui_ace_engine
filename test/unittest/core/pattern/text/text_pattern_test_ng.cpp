@@ -15,15 +15,18 @@
 #include "text_base.h"
 
 #include "base/memory/ace_type.h"
+#include "core/accessibility/accessibility_manager_ng.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/common/mock_resource_adapter_v2.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/common/mock_udmf.h"
 #include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 #include "test/mock/frameworks/core/rosen/mock_canvas.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -108,6 +111,85 @@ HWTEST_F(TextPatternTestNg, OnAttachToFrameNode004, TestSize.Level1)
     pipeline->minPlatformVersion_ = 6;
     textPattern->OnAttachToFrameNode();
     EXPECT_EQ(frameNode->GetRenderContext(), 1);
+}
+
+/**
+ * @tc.name: OnLanguageConfigurationUpdate001
+ * @tc.desc: Test TextPattern::OnLanguageConfigurationUpdate with small-language truncation disabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, OnLanguageConfigurationUpdate001, TestSize.Level1)
+{
+    auto backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    auto textPattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, textPattern);
+    ASSERT_NE(frameNode, nullptr);
+    textPattern->frameNode_.Upgrade() = frameNode;
+    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateIncludeFontPadding(true);
+    textLayoutProperty->UpdateFallbackLineSpacing(true);
+    textLayoutProperty->UpdateEnableSmallLanguageTruncation(false);
+    textPattern->OnLanguageConfigurationUpdate();
+    EXPECT_FALSE(textLayoutProperty->GetEnableSmallLanguageTruncationValue(true));
+    EXPECT_TRUE(textLayoutProperty->GetIncludeFontPaddingValue(false));
+    EXPECT_TRUE(textLayoutProperty->GetFallbackLineSpacingValue(false));
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: OnLanguageConfigurationUpdate002
+ * @tc.desc: Test TextPattern::OnLanguageConfigurationUpdate with small-language truncation enabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, OnLanguageConfigurationUpdate002, TestSize.Level1)
+{
+    auto backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    auto textPattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, textPattern);
+    ASSERT_NE(frameNode, nullptr);
+    textPattern->frameNode_.Upgrade() = frameNode;
+    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateIncludeFontPadding(true);
+    textLayoutProperty->UpdateFallbackLineSpacing(true);
+    textLayoutProperty->UpdateEnableSmallLanguageTruncation(true);
+    textPattern->OnLanguageConfigurationUpdate();
+    EXPECT_TRUE(textLayoutProperty->GetEnableSmallLanguageTruncationValue(false));
+    EXPECT_FALSE(textLayoutProperty->GetIncludeFontPaddingValue(true));
+    EXPECT_FALSE(textLayoutProperty->GetFallbackLineSpacingValue(true));
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: UpdateEnableSmallLanguageTruncation001
+ * @tc.desc: Test TextLayoutProperty::UpdateEnableSmallLanguageTruncation updates actual small-language props.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, UpdateEnableSmallLanguageTruncation001, TestSize.Level1)
+{
+    auto backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    auto textPattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, textPattern);
+    ASSERT_NE(frameNode, nullptr);
+    textPattern->frameNode_.Upgrade() = frameNode;
+    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateIncludeFontPadding(true);
+    textLayoutProperty->UpdateFallbackLineSpacing(true);
+
+    textLayoutProperty->UpdateEnableSmallLanguageTruncation(true);
+
+    EXPECT_TRUE(textLayoutProperty->GetEnableSmallLanguageTruncationValue(false));
+    EXPECT_FALSE(textLayoutProperty->GetIncludeFontPaddingValue(true));
+    EXPECT_FALSE(textLayoutProperty->GetFallbackLineSpacingValue(true));
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -2109,10 +2191,14 @@ HWTEST_F(TextPatternTestNg, HandleSurfaceChanged005, TestSize.Level1)
  */
 HWTEST_F(TextPatternTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
     auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(frameNode, nullptr);
     auto textPattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
+
     textPattern->magnifierController_ =
         AceType::MakeRefPtr<MagnifierController>(AccessibilityManagerNG::WeakClaim(AceType::RawPtr(textPattern)));
     textPattern->OnColorConfigurationUpdate();
@@ -2126,10 +2212,14 @@ HWTEST_F(TextPatternTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
  */
 HWTEST_F(TextPatternTestNg, OnColorConfigurationUpdate002, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
     auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(frameNode, nullptr);
     auto textPattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
+
     textPattern->magnifierController_ = nullptr;
     textPattern->OnColorConfigurationUpdate();
     EXPECT_EQ(textPattern->magnifierController_->colorModeChange_, true);

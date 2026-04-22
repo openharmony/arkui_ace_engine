@@ -14,6 +14,7 @@
  */
 
 #include <optional>
+#include "core/accessibility/accessibility_manager.h"
 #include <utility>
 
 #include "gtest/gtest.h"
@@ -21,6 +22,7 @@
 #define private public
 #define protected public
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/test_ng.h"
@@ -101,6 +103,7 @@ protected:
 void BadgeTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
+    MockContainer::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto themeConstants = CreateThemeConstants(THEME_PATTERN_BADGE);
@@ -113,6 +116,7 @@ void BadgeTestNg::SetUpTestSuite()
 void BadgeTestNg::TearDownTestSuite()
 {
     TestNG::TearDownTestSuite();
+    MockContainer::TearDown();
 }
 
 void BadgeTestNg::SetUp() {}
@@ -1356,6 +1360,24 @@ HWTEST_F(BadgeTestNg, BadgePatternTest011, TestSize.Level0)
 
     layoutProperty_->UpdateBadgeCount(-0);
     pattern_->OnModifyDone();
+}
+
+HWTEST_F(BadgeTestNg, BadgePatternTextProperty001, TestSize.Level0)
+{
+    auto backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
+    auto textNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, textNodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    textNode->MountToParent(frameNode_);
+    pattern_->textNodeId_ = textNodeId;
+    pattern_->OnModifyDone();
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_TRUE(textLayoutProperty->GetEnableSmallLanguageTruncationValue(false));
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**

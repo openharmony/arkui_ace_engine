@@ -492,4 +492,101 @@ HWTEST_F(ForceSplitUtilsTest, ParseSystemForceSplitConfig0025, TestSize.Level1)
     EXPECT_TRUE(ret);
     EXPECT_FALSE(config.wideSplitRatio.has_value());
 }
+
+/**
+ * @tc.name: ParsePagePairs001
+ * @tc.desc: Branch: ParsePagePairs returns false and keeps old config when pagePairs is not an array.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitUtilsTest, ParsePagePairs001, TestSize.Level1)
+{
+    auto pagePairs = JsonUtil::ParseJsonString("{ \"from\": \"home\", \"to\": \"detail\" }");
+    ASSERT_NE(pagePairs, nullptr);
+    NG::ForceSplitConfig config;
+    config.pagePairs["old"].emplace("target");
+
+    auto ret = NG::ForceSplitUtils::ParsePagePairs(pagePairs, config);
+    EXPECT_FALSE(ret);
+    ASSERT_EQ(config.pagePairs.count("old"), 1);
+    EXPECT_EQ(config.pagePairs["old"].count("target"), 1);
+}
+
+/**
+ * @tc.name: ParsePagePairs002
+ * @tc.desc: Branch: ParsePagePairs skips invalid items and handles wildcard pair.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitUtilsTest, ParsePagePairs002, TestSize.Level1)
+{
+    auto pagePairs = JsonUtil::ParseJsonString(R"([
+        { "from": "home", "to": "detail1" },
+        { "from": "home", "to": "detail2" },
+        { "from": "cart", "to": "detail3" },
+        { "from": "cart", "to": "*" },
+        { "from": "cart", "to": "detail4" },
+        { "from": "bad", "to": "" },
+        { "from": "", "to": "bad" },
+        { "from": 123, "to": "bad" },
+        { "from": "bad" },
+        []
+    ])");
+    ASSERT_NE(pagePairs, nullptr);
+    NG::ForceSplitConfig config;
+    config.pagePairs["old"].emplace("target");
+
+    auto ret = NG::ForceSplitUtils::ParsePagePairs(pagePairs, config);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(config.pagePairs.count("old"), 0);
+    ASSERT_EQ(config.pagePairs.count("home"), 1);
+    EXPECT_EQ(config.pagePairs["home"].size(), 2);
+    EXPECT_EQ(config.pagePairs["home"].count("detail1"), 1);
+    EXPECT_EQ(config.pagePairs["home"].count("detail2"), 1);
+    ASSERT_EQ(config.pagePairs.count("cart"), 1);
+    EXPECT_TRUE(config.pagePairs["cart"].empty());
+    EXPECT_EQ(config.pagePairs.count("bad"), 0);
+}
+
+/**
+ * @tc.name: ParseTransPages001
+ * @tc.desc: Branch: ParseTransPages returns false and keeps old config when transPages is not an array.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitUtilsTest, ParseTransPages001, TestSize.Level1)
+{
+    auto transPages = JsonUtil::ParseJsonString("{ \"page\": \"dialog\" }");
+    ASSERT_NE(transPages, nullptr);
+    NG::ForceSplitConfig config;
+    config.transPages.emplace("oldDialog");
+
+    auto ret = NG::ForceSplitUtils::ParseTransPages(transPages, config);
+    EXPECT_FALSE(ret);
+    EXPECT_EQ(config.transPages.count("oldDialog"), 1);
+}
+
+/**
+ * @tc.name: ParseTransPages002
+ * @tc.desc: Branch: ParseTransPages skips invalid or empty items and de-duplicates valid pages.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitUtilsTest, ParseTransPages002, TestSize.Level1)
+{
+    auto transPages = JsonUtil::ParseJsonString(R"([
+        "dialog1",
+        "",
+        123,
+        { "page": "dialog2" },
+        "dialog2",
+        "dialog1"
+    ])");
+    ASSERT_NE(transPages, nullptr);
+    NG::ForceSplitConfig config;
+    config.transPages.emplace("oldDialog");
+
+    auto ret = NG::ForceSplitUtils::ParseTransPages(transPages, config);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(config.transPages.count("oldDialog"), 0);
+    EXPECT_EQ(config.transPages.size(), 2);
+    EXPECT_EQ(config.transPages.count("dialog1"), 1);
+    EXPECT_EQ(config.transPages.count("dialog2"), 1);
+}
 } // namespace OHOS::Ace

@@ -113,6 +113,9 @@ declare class ArkUIObjectFinalizationRegisterProxy {
     public static call(ref: WeakRef<any>, info: string): void;
 }
 
+declare function registerArkUIObjectLifeCycleCallback(callback: (weakRef: WeakRef<object>, msg: string) => void): void;
+declare function unregisterArkUIObjectLifeCycleCallback(): void;
+
 declare class InteropConfigureStateMgmt {
     public static needsInterop(): boolean;
 }
@@ -638,6 +641,74 @@ export class PuViewTestsV2 implements ITestFile {
      */
     public testArkUIObjectFinalizationCall(): void {
         eq(typeof ArkUIObjectFinalizationRegisterProxy.call, 'function', "should be a function");
+    }
+
+    /**
+     * Test registerArkUIObjectLifeCycleCallback updates proxy callback
+     * Expected: callbackFunc_ points to the registered callback
+     */
+    public testArkUIObjectFinalizationRegisterCallback(): void {
+        unregisterArkUIObjectLifeCycleCallback();
+        const callback = (_weakRef: WeakRef<object>, _msg: string): void => {};
+        registerArkUIObjectLifeCycleCallback(callback);
+        eq(ArkUIObjectFinalizationRegisterProxy.callbackFunc_, callback, "registered callback should be stored");
+        unregisterArkUIObjectLifeCycleCallback();
+    }
+
+    /**
+     * Test ArkUIObjectFinalizationRegisterProxy.call dispatches registered callback
+     * Expected: callback receives the same weakRef and message
+     */
+    public testArkUIObjectFinalizationCallDispatchesRegisteredCallback(): void {
+        unregisterArkUIObjectLifeCycleCallback();
+        const target = { id: 1 };
+        const weakRef = new WeakRef(target);
+        let receivedRef: WeakRef<object> | undefined = undefined;
+        let receivedMsg = '';
+        registerArkUIObjectLifeCycleCallback((ref: WeakRef<object>, msg: string): void => {
+            receivedRef = ref;
+            receivedMsg = msg;
+        });
+        ArkUIObjectFinalizationRegisterProxy.call(weakRef, 'finalized');
+        eq(receivedRef, weakRef, "callback should receive original weakRef");
+        eq(receivedMsg, 'finalized', "callback should receive original message");
+        unregisterArkUIObjectLifeCycleCallback();
+    }
+
+    /**
+     * Test registering a second callback overwrites the first one
+     * Expected: only the latest callback is invoked
+     */
+    public testArkUIObjectFinalizationRegisterOverridesPreviousCallback(): void {
+        unregisterArkUIObjectLifeCycleCallback();
+        let firstCallCount = 0;
+        let secondCallCount = 0;
+        registerArkUIObjectLifeCycleCallback((): void => {
+            firstCallCount++;
+        });
+        registerArkUIObjectLifeCycleCallback((): void => {
+            secondCallCount++;
+        });
+        ArkUIObjectFinalizationRegisterProxy.call(new WeakRef({ id: 2 }), 'override');
+        eq(firstCallCount, 0, "previous callback should be replaced");
+        eq(secondCallCount, 1, "latest callback should be invoked");
+        unregisterArkUIObjectLifeCycleCallback();
+    }
+
+    /**
+     * Test unregisterArkUIObjectLifeCycleCallback clears callback dispatch
+     * Expected: callback is cleared and call becomes a no-op
+     */
+    public testArkUIObjectFinalizationUnregisterCallback(): void {
+        unregisterArkUIObjectLifeCycleCallback();
+        let callCount = 0;
+        registerArkUIObjectLifeCycleCallback((): void => {
+            callCount++;
+        });
+        unregisterArkUIObjectLifeCycleCallback();
+        eq(ArkUIObjectFinalizationRegisterProxy.callbackFunc_, undefined, "callback should be cleared");
+        ArkUIObjectFinalizationRegisterProxy.call(new WeakRef({ id: 3 }), 'after unregister');
+        eq(callCount, 0, "unregistered callback should not be invoked");
     }
 
     // =========================================================================

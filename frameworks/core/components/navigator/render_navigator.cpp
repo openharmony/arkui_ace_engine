@@ -15,6 +15,8 @@
 
 #include "core/components/navigator/render_navigator.h"
 
+#include "core/accessibility/accessibility_manager.h"
+
 #include "base/log/event_report.h"
 #include "core/components/page/page_target.h"
 

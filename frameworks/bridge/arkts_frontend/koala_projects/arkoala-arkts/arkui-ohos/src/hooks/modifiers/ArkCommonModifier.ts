@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -129,9 +129,9 @@ export function applyAttributeModifierBase<T, MethodSet extends CommonMethodModi
 export function applyCommonModifier(peerNode: ArkCommonMethodPeer, modifier: AttributeModifier<CommonMethod>) {
     let attributeSet = (): CommonMethodModifier => {
         let commonModifier = modifier as object as CommonModifier;
-        let initModifier = peerNode.attributeSet ? peerNode.attributeSet! : new CommonMethodModifier();
+        let initModifier = peerNode.commonMethodAttributeSet ? peerNode.commonMethodAttributeSet! : new CommonMethodModifier();
         initModifier.mergeModifier(commonModifier);
-        peerNode.attributeSet = initModifier;
+        peerNode.commonMethodAttributeSet = initModifier;
         return initModifier;
     }
     let constructParam = (component:ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {

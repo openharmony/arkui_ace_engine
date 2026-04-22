@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BOX_RENDER_BOX_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BOX_RENDER_BOX_H
 
-#include "base/image/pixel_map.h"
 #include "core/animation/animator.h"
 #include "core/animation/keyframe_animation.h"
 #include "core/components/box/box_component.h"

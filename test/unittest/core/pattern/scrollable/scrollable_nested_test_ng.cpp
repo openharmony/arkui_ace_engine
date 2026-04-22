@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {

@@ -55,6 +55,7 @@
 #include "core/pipeline/base/composed_element.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
+#include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;

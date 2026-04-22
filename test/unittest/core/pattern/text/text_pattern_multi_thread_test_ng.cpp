@@ -21,6 +21,7 @@
 
 #include "core/common/font_manager.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
 namespace {

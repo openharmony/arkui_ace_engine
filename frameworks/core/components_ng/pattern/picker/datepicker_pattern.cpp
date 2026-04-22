@@ -15,16 +15,11 @@
 
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
 
-#include "core/components_ng/render/drawing.h"
-
 #include <functional>
 #include <stdint.h>
 #include <string>
 #include <utility>
 #include <vector>
-
-#include "core/interfaces/native/node/view_model.h"
-#include "core/interfaces/native/node/node_timepicker_modifier.h"
 
 #include "base/i18n/date_time_sequence.h"
 #include "base/memory/ace_type.h"
@@ -33,20 +28,15 @@
 #include "compatible/components/picker/picker_base_component.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/components/theme/icon_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/inspector_filter.h"
-#include "core/components_ng/event/click_event.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/picker/datepicker_column_pattern.h"
-#include "core/components_ng/pattern/time_picker/bridge/timepicker_util.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
+#include "core/interfaces/native/node/view_model.h"
+#include "core/interfaces/native/node/node_timepicker_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -156,6 +146,7 @@ bool DatePickerPattern::UpdateFocusStyles(const RefPtr<PickerTheme>& pickerTheme
         buttonConfirmLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(width - buttonSpace.ConvertToPx()), CalcLength(buttonHeight)));
         buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        buttonConfirmLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     } else {
         auto pickerPadding = pickerTheme->GetPickerPadding();
         standardButtonHeight = static_cast<float>((height - pickerPadding * RATE).ConvertToPx());
@@ -231,6 +222,11 @@ void DatePickerPattern::AddIsFocusActiveUpdateEvent()
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     context->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
+}
+
+RefPtr<EventHub> DatePickerPattern::CreateEventHub()
+{
+    return MakeRefPtr<DatePickerEventHub>();
 }
 
 void DatePickerPattern::RemoveIsFocusActiveUpdateEvent()

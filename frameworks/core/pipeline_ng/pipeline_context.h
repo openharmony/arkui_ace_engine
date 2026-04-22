@@ -30,7 +30,6 @@
 #include "base/memory/referenced.h"
 #include "base/utils/device_config.h"
 #include "base/view_data/view_data_wrap.h"
-#include "core/accessibility/accessibility_manager_ng.h"
 #include "core/common/ai/ai_write_adapter.h"
 #include "core/common/color_inverter.h"
 #include "core/common/frontend.h"
@@ -91,12 +90,14 @@ class InspectorOffscreenNodesMgr;
 class SafeAreaManager;
 class SelectOverlayManager;
 class UIExtensionManager;
+class AccessibilityManagerNG;
 class ForceSplitManager;
 class FormVisibleManager;
 class FormEventManager;
 class FormGestureManager;
 class RecycleManager;
 class BackPressHandlerManager;
+class DynamicComponentSafeManager;
 
 enum class MockFlushEventType : int32_t {
     REJECT = -1,
@@ -145,7 +146,7 @@ public:
 
     static float GetCurrentRootHeight();
 
-    void MarkDirtyOverlay();
+    void OnKeyboardAvoidOverlay();
 
     void SetupRootElement() override;
 
@@ -242,6 +243,8 @@ public:
     // Called by container when key event received.
     // if return false, then this event needs platform to handle it.
     bool OnNonPointerEvent(const NonPointerEvent& event) override;
+
+    void ProcessCommand(const std::string& command);
 
     // ReDispatch KeyEvent from Web process.
     void ReDispatch(KeyEvent& keyEvent);
@@ -453,6 +456,7 @@ public:
     void UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea, bool checkSystemWindow = false) override;
     void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea, bool checkSystemWindow = false) override;
     void UpdateNavSafeArea(const SafeAreaInsets& navSafeArea, bool checkSystemWindow = false) override;
+    void UpdateFloatNavSafeArea(const SafeAreaInsets& floatNavSafeArea) override;
 
     void UpdateSystemSafeAreaWithoutAnimation(
         const SafeAreaInsets& systemSafeArea, bool checkSceneBoardWindow = false) override;
@@ -462,6 +466,8 @@ public:
 
     void UpdateNavSafeAreaWithoutAnimation(
         const SafeAreaInsets& navSafeArea, bool checkSceneBoardWindow = false) override;
+    
+    void UpdateFloatNavSafeAreaWithoutAnimation(const SafeAreaInsets& floatNavSafeArea) override;
 
     void UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) override;
 
@@ -1350,7 +1356,8 @@ public:
     void RegisterLpxDirtyNode(const WeakPtr<FrameNode>& node);
     void UnRegisterLpxDirtyNode(const WeakPtr<FrameNode>& node);
     void MarkLpxDirtyNodes();
-
+    void SetDynamicComponentSafeManager(const RefPtr<DynamicComponentSafeManager>& manager);
+    RefPtr<DynamicComponentSafeManager> GetDynamicComponentSafeManager();
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr,
@@ -1448,6 +1455,7 @@ private:
     void FlushCompatibleTouchEvents();
     void FlushWindowPatternInfo();
     void FlushFocusView();
+    void FlushRelaxedInteraction();
     void FlushFocusScroll();
     void FlushZindexUpdate();
 
@@ -1748,6 +1756,7 @@ private:
     CompatibleManager compatibleManager_;
     std::list<TouchEvent> compatibleTouchEvents_;
     RefPtr<BackPressHandlerManager> backPressHandlerManager_;
+    RefPtr<DynamicComponentSafeManager> dynamicComponentSafeManager_;
 };
 
 /**

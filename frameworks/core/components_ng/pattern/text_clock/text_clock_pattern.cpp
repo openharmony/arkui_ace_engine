@@ -176,6 +176,7 @@ void TextClockPattern::OnDetachFromMainTree()
 void TextClockPattern::UpdateTextLayoutProperty(
     RefPtr<TextClockLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty)
 {
+    textLayoutProperty->UpdateEnableSmallLanguageTruncation(true);
     if (layoutProperty->GetFontSize().has_value()) {
         textLayoutProperty->UpdateFontSize(layoutProperty->GetFontSize().value());
     }

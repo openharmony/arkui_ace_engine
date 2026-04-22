@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include <vector>
+#include "core/accessibility/accessibility_manager.h"
 #include "gtest/gtest.h"
 #include "gtest/internal/gtest-internal.h"
 #define private public
@@ -36,6 +37,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components/button/button_theme.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
@@ -44,6 +46,7 @@
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/pipeline/base/constants.h"
+#include "core/components/theme/icon_theme.h"
 #undef private
 #undef protected
 
@@ -2105,7 +2108,7 @@ HWTEST_F(SelectOverlayTestNg, OnDetachFromFrameNode001, TestSize.Level1)
     pattern->OnDetachFromFrameNode(
         FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton", ElementRegister::GetInstance()->MakeUniqueId(), []() {
             return AceType::MakeRefPtr<ButtonPattern>();
-        }).rawPtr_);
+        }).GetRawPtr());
     EXPECT_FALSE(pattern->closedByGlobalTouchEvent_);
     EXPECT_EQ(callBackFlag, 0);
 }

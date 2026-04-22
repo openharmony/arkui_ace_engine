@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_SVG_ROSEN_RENDER_SVG_FE_H
 #define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_SVG_ROSEN_RENDER_SVG_FE_H
 
-#include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/drawing_forward.h"
 
 #include "base/memory/ace_type.h"
 

@@ -49,6 +49,7 @@
 #include "core/common/resource/resource_configuration.h"
 #include "core/common/router_recover_record.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Accessibility {
@@ -63,6 +64,12 @@ class UIEventTracker;
 namespace OHOS::AppExecFwk {
 class FormAshmem;
 }
+
+namespace OHOS::Ace::NG {
+enum class UIContentBusinessCode : uint32_t;
+enum class BusinessDataSendType : uint32_t;
+}
+
 namespace OHOS::Ace::Platform {
 class HighContrastObserver;
 

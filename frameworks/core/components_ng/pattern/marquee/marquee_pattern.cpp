@@ -127,6 +127,7 @@ void MarqueePattern::CreateSecondChild()
     CHECK_NULL_VOID(secondChild);
     auto secondLayoutProperty = secondChild->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(secondLayoutProperty);
+    secondLayoutProperty->UpdateEnableSmallLanguageTruncation(true);
     secondLayoutProperty->UpdateMaxLines(1);
     host->AddChild(secondChild);
 }
@@ -162,7 +163,8 @@ void MarqueePattern::OnModifyDone()
         measureChanged_ = true;
     } else if (OnlyPlayStatusChange()) {
         ChangeAnimationPlayStatus();
-    } else if (marqueeUpdateStrategy == MarqueeUpdateStrategy::DEFAULT || !NeedSecondChild()) {
+    } else if (marqueeUpdateStrategy == MarqueeUpdateStrategy::DEFAULT ||
+            !NeedSecondChild() || AnimationParamChange()) {
         auto paintProperty = host->GetPaintProperty<MarqueePaintProperty>();
         CHECK_NULL_VOID(paintProperty);
         auto playStatus = paintProperty->GetPlayerStatus().value_or(false);
@@ -552,17 +554,37 @@ bool MarqueePattern::OnlyPlayStatusChange()
     CHECK_NULL_RETURN(host, false);
     auto paintProperty = host->GetPaintProperty<MarqueePaintProperty>();
     CHECK_NULL_RETURN(paintProperty, false);
+    auto layoutProperty = host->GetLayoutProperty<MarqueeLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
     auto playStatus = paintProperty->GetPlayerStatus().value_or(false);
     auto scrollAmount = paintProperty->GetScrollAmount().value_or(DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx());
     auto loop = paintProperty->GetLoop().value_or(DEFAULT_MARQUEE_LOOP);
     auto direction = paintProperty->GetDirection().value_or(MarqueeDirection::LEFT);
-    if (!NearEqual(scrollAmount_, scrollAmount) || loop_ != loop || direction_ != direction) {
+    auto delay = layoutProperty->HasMarqueeDelay() ? layoutProperty->GetMarqueeDelayValue() : 0;
+    if (!NearEqual(scrollAmount_, scrollAmount) || loop_ != loop || direction_ != direction || delay_ != delay) {
         return false;
     }
     if (playStatus_ != playStatus) {
         return true;
     }
     return false;
+}
+
+bool MarqueePattern::AnimationParamChange()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto paintProperty = host->GetPaintProperty<MarqueePaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+    auto layoutProperty = host->GetLayoutProperty<MarqueeLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto playStatus = paintProperty->GetPlayerStatus().value_or(false);
+    auto scrollAmount = paintProperty->GetScrollAmount().value_or(DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx());
+    auto loop = paintProperty->GetLoop().value_or(DEFAULT_MARQUEE_LOOP);
+    auto direction = paintProperty->GetDirection().value_or(MarqueeDirection::LEFT);
+    auto delay = layoutProperty->HasMarqueeDelay() ? layoutProperty->GetMarqueeDelayValue() : 0;
+    return playStatus_ != playStatus || !NearEqual(scrollAmount_, scrollAmount) || loop_ != loop ||
+           direction_ != direction || delay_ != delay;
 }
 
 void MarqueePattern::ChangeAnimationPlayStatus()
@@ -593,6 +615,9 @@ void MarqueePattern::StoreProperties()
     scrollAmount_ = paintProperty->GetScrollAmount().value_or(DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx());
     loop_ = paintProperty->GetLoop().value_or(DEFAULT_MARQUEE_LOOP);
     direction_ = paintProperty->GetDirection().value_or(MarqueeDirection::LEFT);
+    auto layoutProperty = host->GetLayoutProperty<MarqueeLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    delay_ = layoutProperty->HasMarqueeDelay() ? layoutProperty->GetMarqueeDelayValue() : 0;
 }
 
 float MarqueePattern::CalculateStart()

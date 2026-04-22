@@ -131,8 +131,7 @@ WidthBreakpoint Window::GetWidthBreakpoint(const WidthLayoutBreakPoint &layoutBr
     if (pipeline) {
         width = pipeline->CalcPageWidth(width);
     }
-    double density = PipelineBase::GetCurrentDensity();
-    return GetCalcWidthBreakpoint(layoutBreakpoints, density, width);
+    return GetCalcWidthBreakpoint(layoutBreakpoints, density_, width);
 }
 
 HeightBreakpoint Window::GetHeightBreakpoint(const HeightLayoutBreakPoint& layoutBreakpoints) const

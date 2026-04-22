@@ -19,6 +19,7 @@
 #include <thread>
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 
 namespace OHOS::Ace::NG {
 

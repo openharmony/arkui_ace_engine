@@ -395,7 +395,13 @@ float ScrollableModelNG::GetMaxFlingSpeed(FrameNode* frameNode)
 
 void ScrollableModelNG::SetContentClip(ContentClipMode mode, const RefPtr<ShapeRect>& shape)
 {
-    ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ContentClip, std::make_pair(mode, shape));
+    ContentClip contentClip = std::make_pair(mode, shape);
+    ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ContentClip, contentClip);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<ScrollableLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateContentClip(contentClip);
 }
 
 ContentClipMode ScrollableModelNG::GetContentClip(FrameNode* frameNode)
@@ -413,7 +419,12 @@ ContentClipMode ScrollableModelNG::GetContentClip(FrameNode* frameNode)
 
 void ScrollableModelNG::SetContentClip(FrameNode* frameNode, ContentClipMode mode, const RefPtr<ShapeRect>& rect)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ContentClip, std::make_pair(mode, rect), frameNode);
+    ContentClip contentClip = std::make_pair(mode, rect);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ContentClip, contentClip, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<ScrollableLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateContentClip(contentClip);
 }
 
 void ScrollableModelNG::ResetContentClip(FrameNode* frameNode)
@@ -422,6 +433,9 @@ void ScrollableModelNG::ResetContentClip(FrameNode* frameNode)
     auto paintProperty = frameNode->GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     paintProperty->UpdateContentClip({ paintProperty->GetDefaultContentClip(), nullptr });
+    auto layoutProperty = frameNode->GetLayoutProperty<ScrollableLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateContentClip(std::nullopt);
 }
 
 bool ScrollableModelNG::GetFadingEdge(FrameNode* frameNode)

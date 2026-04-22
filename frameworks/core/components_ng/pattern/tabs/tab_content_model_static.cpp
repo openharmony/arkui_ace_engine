@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/tabs/tab_content_model_static.h"
 
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_item_pattern.h"

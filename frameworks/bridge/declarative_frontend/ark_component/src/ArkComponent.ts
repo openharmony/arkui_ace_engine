@@ -4104,6 +4104,20 @@ class AccessibilityActionOptionsModifier extends ModifierWithKey<object> {
     }
   }
 }
+
+class SmartGestureShortcutModifier extends ModifierWithKey<object> {
+  constructor(value: object) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('smartGestureShortcut');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetSmartGestureShortcut(node);
+    } else {
+      getUINativeModule().common.setSmartGestureShortcut(node, this.value);
+    }
+  }
+}
 class FreezeModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -4328,10 +4342,13 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         if (this._instanceId !== -1) {
           __JSScopeUtil__.syncInstanceId(this._instanceId);
         }
-        value.applyStageImmediately(this.nativePtr, this);
-        getUINativeModule().frameNode.propertyUpdate(this.nativePtr);
-        if (this._instanceId !== -1) {
-          __JSScopeUtil__.restoreInstanceId();
+        try {
+          value.applyStageImmediately(this.nativePtr, this);
+          getUINativeModule().frameNode.propertyUpdate(this.nativePtr);
+        } finally {
+          if (this._instanceId !== -1) {
+            __JSScopeUtil__.restoreInstanceId();
+          }
         }
       });
       (this._modifiersWithKeys as ObservedMap).setFrameNode(true);
@@ -6025,6 +6042,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   accessibilityActionOptions(value: object): this {
     modifierWithKey(this._modifiersWithKeys, AccessibilityActionOptionsModifier.identity, AccessibilityActionOptionsModifier, value);
+    return this;
+  }
+
+  smartGestureShortcut(value: object): this {
+    modifierWithKey(this._modifiersWithKeys, SmartGestureShortcutModifier.identity, SmartGestureShortcutModifier, value);
     return this;
   }
 

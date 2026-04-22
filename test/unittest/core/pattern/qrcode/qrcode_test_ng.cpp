@@ -14,6 +14,7 @@
  */
 
 #include <cstddef>
+#include "core/accessibility/accessibility_manager.h"
 #include <cstdint>
 #include <optional>
 #include <string>
@@ -1441,6 +1442,54 @@ HWTEST_F(QRCodeTestNg, QRCodeOnThemeScopeUpdateTest004, TestSize.Level1)
     ASSERT_NE(focusHub, nullptr);
     EXPECT_TRUE(focusHub->HasPaintColor());
 
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: QRCodeOnThemeScopeUpdateTest005
+ * @tc.desc: Test OnThemeScopeUpdate qrcode color update with QRCodeColorSetByUser flag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(QRCodeTestNg, QRCodeOnThemeScopeUpdateTest005, TestSize.Level1)
+{
+    auto backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(PLATFORM_VERSION_26);
+
+    QRCodeModelNG qrCodeModelNG;
+    qrCodeModelNG.Create(CREATE_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<QRCodePattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<QRCodePaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto pipeline = frameNode->GetContextWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetIsSystemColorChange(true);
+
+    auto qrCodeTheme = frameNode->GetTheme<QrcodeTheme>(true);
+    ASSERT_NE(qrCodeTheme, nullptr);
+    auto themeColor = qrCodeTheme->GetQrcodeColor();
+    Color customColor = (themeColor == Color::BLACK) ? Color::BLUE : Color::BLACK;
+
+    paintProperty->UpdateBackgroundColor(Color::WHITE);
+
+    paintProperty->UpdateColor(customColor);
+    paintProperty->ResetQRCodeColorSetByUser();
+    EXPECT_FALSE(pattern->OnThemeScopeUpdate(1));
+    EXPECT_EQ(paintProperty->GetColorValue(), themeColor);
+
+    paintProperty->UpdateColor(customColor);
+    paintProperty->UpdateQRCodeColorSetByUser(false);
+    EXPECT_FALSE(pattern->OnThemeScopeUpdate(1));
+    EXPECT_EQ(paintProperty->GetColorValue(), themeColor);
+
+    paintProperty->UpdateColor(customColor);
+    paintProperty->UpdateQRCodeColorSetByUser(true);
+    EXPECT_FALSE(pattern->OnThemeScopeUpdate(1));
+    EXPECT_EQ(paintProperty->GetColorValue(), customColor);
+
+    pipeline->SetIsSystemColorChange(false);
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 } // namespace OHOS::Ace::NG

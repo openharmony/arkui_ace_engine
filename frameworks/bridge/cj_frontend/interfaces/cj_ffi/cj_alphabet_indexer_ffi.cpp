@@ -20,6 +20,7 @@
 #include "core/common/dynamic_module_helper.h"
 
 #include "bridge/common/utils/utils.h"
+#include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/indexer/indexer_model.h"
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
 
@@ -199,5 +200,20 @@ void FfiOHOSAceFrameworkAlphabetIndexerPopupItemBorderRadius(double radius)
 void FfiOHOSAceFrameworkAlphabetIndexerEnableHapticFeedback(bool state)
 {
     GetIndexerModel()->SetEnableHapticFeedback(state);
+}
+void FfiOHOSAceFrameworkAlphabetIndexerSetWidth(double width, int32_t unit)
+{
+    Dimension value(width, static_cast<DimensionUnit>(unit));
+
+    if (LessNotEqual(value.Value(), 0.0)) {
+        value.SetValue(0.0);
+    }
+    ViewAbstractModel::GetInstance()->SetWidth(value);
+
+    if (value.Unit() == DimensionUnit::AUTO) {
+        GetIndexerModel()->SetAdaptiveWidth(true);
+        return;
+    }
+    GetIndexerModel()->SetAdaptiveWidth(false);
 }
 }

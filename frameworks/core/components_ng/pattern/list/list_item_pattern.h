@@ -23,6 +23,8 @@
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components/list/list_item_theme.h"
 #include "core/components_ng/event/focus_type.h"
+#include "core/components_ng/event/input_event.h"
+#include "core/components_ng/event/pan_event.h"
 #include "core/components_ng/pattern/list/list_item_drag_manager.h"
 #include "core/components_ng/pattern/list/list_properties.h"
 #include "core/components_ng/pattern/scrollable/selectable_item_pattern.h"
@@ -225,10 +227,21 @@ public:
     void OnHoverWithHightLight(bool isHover) override;
     void OnPaintFocusState(bool isFocus) override;
     void NotifyItemState(ItemState itemState, bool isEffective);
+    virtual void ApplyListItemDefaultAttributes(const RefPtr<FrameNode>& listItemNode);
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+
+    bool GetIsCardStyleInitialized() const
+    {
+        return isCardStyleInitialized_;
+    }
+
+    void SetIsCardStyleInitialized(bool isCardStyleInitialized)
+    {
+        isCardStyleInitialized_ = isCardStyleInitialized;
+    }
 
 protected:
     void OnModifyDone() override;
-    virtual void SetListItemDefaultAttributes(const RefPtr<FrameNode>& listItemNode);
     virtual Color GetBlendGgColor();
     virtual void HandleHoverEvent(bool isHover, const RefPtr<NG::FrameNode>& itemNode);
     virtual void HandlePressEvent(bool isPressed, const RefPtr<NG::FrameNode>& itemNode);
@@ -246,8 +259,6 @@ private:
     float GetFriction();
     void ChangeDeleteAreaStage();
     void StartSpringMotion(float start, float end, float velocity, bool isCloseAllSwipeActions = false);
-    void OnAttachToFrameNode() override;
-    void OnAttachToFrameNodeMultiThread();
     void OnAttachToMainTree() override;
     void OnAttachToMainTreeMultiThread();
     void OnColorConfigurationUpdate() override;
@@ -309,6 +320,7 @@ private:
     bool isLayouted_ = false;
     bool isSpringMotionRunning_ = false;
     bool isDragging_ = false;
+    bool isCardStyleInitialized_ = false;
     std::optional<ListItemSwipeIndex> expandSwipeAction_;
     
     PendingSwipeFunc pendingSwipeFunc_ = nullptr;

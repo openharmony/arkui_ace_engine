@@ -46,6 +46,7 @@
 #include "core/common/ime/text_input_type.h"
 #include "core/common/ime/text_selection.h"
 #include "core/components/text_field/textfield_theme.h"
+#include "core/components/text_overlay/text_overlay_manager.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/pattern/overlay/keyboard_base_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
@@ -799,6 +800,9 @@ public:
     {
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
         imeShown_ = keyboardShown;
+        if (keyboardShown && !voiceKbShown_) {
+            voiceButtonKeyboardOpened_ = false;
+        }
 #endif
     }
     void NotifyKeyboardClosedByUser() override;
@@ -1061,7 +1065,7 @@ public:
     void SetSelection(int32_t start, int32_t end,
         const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) override;
     void HandleBlurEvent();
-    bool IsCloseKeyboard(RefPtr<TextFieldManagerNG> textFieldManager);
+    bool IsCloseKeyboard(const RefPtr<TextFieldManagerNG>& textFieldManager);
     void HandleFocusEvent();
     void CheckAndUpdateInputTypeForOTP();
     void SetFocusStyle();
@@ -1076,6 +1080,7 @@ public:
     void HandleDoubleClickEvent(GestureEvent& info);
     void HandleTripleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info, bool firstGetFocus = false);
+    void CloseVoiceKeyboardOpenedByButton();
     bool HandleBetweenSelectedPosition(const GestureEvent& info);
     void HandleSetTextCommand(const std::unique_ptr<JsonValue>& params);
     void HandleAddTextCommand(const std::unique_ptr<JsonValue>& params);
@@ -2354,6 +2359,8 @@ private:
     RefPtr<Paragraph> paragraph_;
     InlineMeasureItem inlineMeasureItem_;
     bool voiceKbShown_ = false;
+    bool voiceKbOpenedByButton_ = false;
+    bool voiceButtonKeyboardOpened_ = false;
 
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;
@@ -2557,6 +2564,7 @@ private:
     WeakPtr<FrameNode> firstAutoFillContainerNode_;
     std::optional<float> lastCaretPos_ = std::nullopt;
     bool firstClickAfterLosingFocus_ = true;
+    bool UnFocusOnHandleClick_ = false;
     CancelableCallback<void()> firstClickResetTask_;
     RequestFocusReason requestFocusReason_ = RequestFocusReason::UNKNOWN;
     bool directionKeysMoveFocusOut_ = false;

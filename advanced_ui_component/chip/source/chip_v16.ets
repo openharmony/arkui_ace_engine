@@ -19,6 +19,8 @@ import { KeyCode } from '@kit.InputKit';
 import mediaquery from '@ohos.mediaquery';
 import EnvironmentCallback from '@ohos.app.ability.EnvironmentCallback';
 import common from '@ohos.app.ability.common';
+import deviceInfo from '@ohos.deviceInfo';
+import { uiMaterial } from '@kit.ArkUI';
 
 export enum ChipSize {
   NORMAL = 'NORMAL',
@@ -129,6 +131,7 @@ interface DefaultSymbolTheme {
 interface LabelTheme {
   normalFontSize: Dimension;
   smallFontSize: Dimension;
+  adaptiveItemFontSize: Dimension;
   focusFontColor: ResourceColor;
   focusActiveFontColor: ResourceColor;
   fontColor: ResourceColor;
@@ -205,7 +208,7 @@ const RESOURCE_TYPE_FLOAT = 10002;
 const RESOURCE_TYPE_INTEGER = 10007;
 const HOT_SPOT_MIN_HEIGHT: number = 32;
 
-interface ChipOptions {
+export interface ChipOptions {
   prefixIcon?: PrefixIconOptions;
   prefixSymbol?: ChipSymbolGlyphOptions;
   label: LabelOptions;
@@ -218,6 +221,8 @@ interface ChipOptions {
   activated?: boolean;
   backgroundColor?: ResourceColor;
   activatedBackgroundColor?: ResourceColor;
+  backgroundSystemMaterial?: uiMaterial.Material;
+  activatedBackgroundSystemMaterial?: uiMaterial.Material;
   borderRadius?: Dimension;
   size?: ChipSize | SizeOptions;
   direction?: Direction;
@@ -290,6 +295,8 @@ export function Chip(options: ChipOptions) {
     chipActivated: options.activated,
     chipNodeBackgroundColor: options.backgroundColor,
     chipNodeActivatedBackgroundColor: options.activatedBackgroundColor,
+    backgroundSystemMaterial: options.backgroundSystemMaterial,
+    activatedBackgroundSystemMaterial: options.activatedBackgroundSystemMaterial,
     chipNodeRadius: options.borderRadius,
     chipDirection: options.direction,
     chipAccessibilitySelectedType: options.accessibilitySelectedType,
@@ -325,6 +332,7 @@ export struct ChipComponent {
     label: {
       normalFontSize: $r('sys.float.chip_normal_font_size'),
       smallFontSize: $r('sys.float.chip_small_font_size'),
+      adaptiveItemFontSize: $r('sys.float.Caption_M'),
       focusFontColor: $r('sys.color.chip_focus_text'),
       focusActiveFontColor: $r('sys.color.chip_activated_focus_font_color'),
       fontColor: $r('sys.color.chip_font_color'),
@@ -442,31 +450,34 @@ export struct ChipComponent {
         breakPointSmMaxWidth: 156,
         breakPointMdMaxWidth: 280,
         breakPointLgMaxWidth: 400
-      }
+      },
     }
   };
   @Prop chipSize?: ChipSize | SizeOptions = ChipSize.NORMAL;
-  @Prop allowClose?: boolean;
-  @Prop closeOptions?: CloseOptions;
+  @Prop allowClose?: boolean = undefined;
+  @Prop closeOptions?: CloseOptions = undefined;
   @Prop chipDirection?: Direction = Direction.Auto;
-  @Prop prefixIcon?: PrefixIconOptions;
-  @Prop prefixSymbol?: ChipSymbolGlyphOptions;
+  @Prop prefixIcon?: PrefixIconOptions = undefined;
+  @Prop prefixSymbol?: ChipSymbolGlyphOptions = undefined;
   @Require @Prop label: LabelOptions;
-  @Prop suffixIcon?: SuffixIconOptions;
-  @Prop suffixSymbol?: ChipSymbolGlyphOptions;
-  @Prop suffixSymbolOptions?: ChipSuffixSymbolGlyphOptions;
-  @Prop chipNodeBackgroundColor?: ResourceColor;
-  @Prop chipNodeActivatedBackgroundColor?: ResourceColor;
-  @Prop chipNodeRadius?: Dimension;
+  @Prop suffixIcon?: SuffixIconOptions = undefined;
+  @Prop suffixSymbol?: ChipSymbolGlyphOptions = undefined;
+  @Prop suffixSymbolOptions?: ChipSuffixSymbolGlyphOptions = undefined;
+  @Prop chipNodeBackgroundColor?: ResourceColor = undefined;
+  @Prop chipNodeActivatedBackgroundColor?: ResourceColor = undefined;
+  @Prop backgroundSystemMaterial?: uiMaterial.Material = undefined;
+  @Prop activatedBackgroundSystemMaterial?: uiMaterial.Material = undefined;
+  @Prop chipNodeRadius?: Dimension = undefined;
   @Prop chipEnabled?: boolean = true;
-  @Prop chipActivated?: boolean;
-  @Prop chipAccessibilitySelectedType?: AccessibilitySelectedType;
-  @Prop chipAccessibilityDescription?: ResourceStr;
-  @Prop chipAccessibilityLevel?: string;
-  @Prop maxFontScale?: number | Resource;
-  @Prop minFontScale?: number | Resource;
-  @Prop chipPadding?: LocalizedPadding;
-  @Prop chipFontSize?: Dimension;
+  @Prop chipActivated?: boolean = undefined;
+  @Prop chipAccessibilitySelectedType?: AccessibilitySelectedType = undefined;
+  @Prop chipAccessibilityDescription?: ResourceStr = undefined;
+  @Prop chipAccessibilityLevel?: string = undefined;
+  @Prop maxFontScale?: number | Resource = undefined;
+  @Prop minFontScale?: number | Resource = undefined;
+  @Prop chipPadding?: LocalizedPadding = undefined;
+  @Prop chipFontSize?: Dimension = undefined;
+  @Consume inGroup: boolean = false;
   @State isChipExist: boolean = true;
   @State chipScale: ScaleOptions = { x: 1, y: 1 };
   @State chipOpacity: number = 1;
@@ -474,6 +485,7 @@ export struct ChipComponent {
   @State suffixSymbolWidth: number = 0;
   @State breakPoint: BreakPointsType = BreakPointsType.SM;
   @State fontSizeScale: number = 1;
+  @State useAdaptiveLineHeight: boolean = false;
   private isSuffixIconFocusStyleCustomized = this.resourceToNumber(this.theme.suffixIcon.isShowMargin, 0) !== 0;
   private isSuffixIconFocusable = this.resourceToNumber(this.theme.suffixIcon.isShowMargin, 0) !== 1;
   public onClose?: VoidCallback;
@@ -487,10 +499,27 @@ export struct ChipComponent {
   private environmentCallback: EnvironmentCallback = {
     onConfigurationUpdated: (configuration) => {
       this.fontSizeScale = configuration.fontSizeScale ?? 1;
+      this.updateLanguageLineHeight();
     },
     onMemoryLevel() {
     }
   };
+
+  updateLanguageLineHeight(): void {
+    if (deviceInfo.sdkApiVersion < 26) {
+      return;
+    }
+    const resourceManager = this.getUIContext().getHostContext()?.resourceManager;
+    if (!resourceManager) {
+      console.error(`[Chip] failed to get resourceManager`);
+      return;
+    }
+    try {
+      this.useAdaptiveLineHeight = resourceManager!.getStringByNameSync('text_fallback_line_spacing') === 'true';
+    } catch (e) {
+      console.error(`[Chip] failed to get text_fallback_line_spacing resource`);
+    }
+  }
 
   aboutToAppear(): void {
     this.smListener.on('change', (mediaQueryResult: mediaquery.MediaQueryResult) => {
@@ -508,6 +537,7 @@ export struct ChipComponent {
         this.breakPoint = BreakPointsType.LG;
       }
     });
+    this.updateLanguageLineHeight();
     let abilityContext = this.getUIContext().getHostContext() as common.UIAbilityContext | undefined;
     if (abilityContext) {
       this.fontSizeScale = abilityContext.config?.fontSizeScale ?? 1;
@@ -600,6 +630,8 @@ export struct ChipComponent {
           .maxFontScale(this.maxFontScale)
           .minFontScale(this.minFontScale)
           .margin(this.getLabelMargin())
+          .includeFontPadding(this.useAdaptiveLineHeight)
+          .fallbackLineSpacing(this.useAdaptiveLineHeight)
 
         if (this.hasSuffixSymbol()) {
           Button({ type: ButtonType.Normal }) {
@@ -691,6 +723,8 @@ export struct ChipComponent {
     .enabled(this.isChipEnabled())
     .direction(this.chipDirection)
     .backgroundColor(this.getChipBackgroundColor())
+    .systemMaterial(this.getBackgroundSystemMaterial())
+    .useEffect(this.inGroup ? true : undefined)
     .borderWidth(this.getChipNodeBorderWidth())
     .borderColor(this.getChipNodeBorderColor())
     .borderRadius(this.getChipBorderRadius())
@@ -1185,12 +1219,18 @@ export struct ChipComponent {
     return this.chipNodeInFocus ? this.theme.label.focusFontColor : this.theme.label.fontColor;
   }
 
-  private getChipNodeBorderColor(): ResourceColor {
+  private getChipNodeBorderColor(): ResourceColor | undefined {
+    if (this.getBackgroundSystemMaterial()) {
+      return undefined;
+    }
     let themeChipNode = this.theme.chipNode;
     return this.isChipActivated() ? themeChipNode.activatedBorderColor : themeChipNode.borderColor;
   }
 
-  private getChipNodeBorderWidth(): Dimension {
+  private getChipNodeBorderWidth(): Dimension | undefined {
+    if (this.getBackgroundSystemMaterial()) {
+      return undefined;
+    }
     let themeChipNode = this.theme.chipNode;
     return this.isChipActivated() ? themeChipNode.activatedBorderWidth : themeChipNode.defaultBorderWidth;
   }
@@ -1210,9 +1250,9 @@ export struct ChipComponent {
       return this.chipFontSize;
     }
     if (this.isSmallChipSize()) {
-      return this.theme.label.smallFontSize;
+      return this.useAdaptiveLineHeight ? this.theme.label.adaptiveItemFontSize : this.theme.label.smallFontSize;
     }
-    return this.theme.label.normalFontSize;
+    return this.useAdaptiveLineHeight ? this.theme.label.adaptiveItemFontSize : this.theme.label.normalFontSize;
   }
 
   getChipText(): ResourceStr {
@@ -1298,6 +1338,16 @@ export struct ChipComponent {
     }
     return this.chipNodeInFocus && !this.isSetNormalChipBgColor() ? themeChipNode.focusBgColor :
       this.getColor(this.chipNodeBackgroundColor, this.theme.chipNode.backgroundColor);
+  }
+
+  getBackgroundSystemMaterial(): uiMaterial.Material | undefined {
+    if (deviceInfo.sdkApiVersion < 26 || this.inGroup) {
+      return undefined;
+    }
+    if (this.isChipActivated()) {
+      return this.activatedBackgroundSystemMaterial;
+    }
+    return this.backgroundSystemMaterial;
   }
 
   getColor(color: ResourceColor | undefined, defaultColor: ResourceColor): ResourceColor {

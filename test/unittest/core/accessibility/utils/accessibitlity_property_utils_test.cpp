@@ -24,6 +24,7 @@
 #include "base/log/dump_log.h"
 #include "core/accessibility/node_utils/accessibility_frame_node_utils.h"
 #include "core/accessibility/utils/accessibility_property_utils.h"
+#include "core/components/common/properties/border_image.h"
 #include "core/components_ng/property/accessibility_property.h"
 
 using namespace OHOS::Accessibility;

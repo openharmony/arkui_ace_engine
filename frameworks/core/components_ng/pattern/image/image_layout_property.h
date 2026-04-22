@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_LAYOUT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_LAYOUT_PROPERTY_H
 
-#include "core/common/ace_application_info.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
@@ -30,16 +29,7 @@ struct ImageSizeStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AutoResize, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SourceSize, SizeF);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FitOriginalSize, bool);
-    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
-    {
-        /* no fixed attr below, just return */
-        if (filter.IsFastFilter()) {
-            return;
-        }
-        json->PutExtAttr("sourceSize", propSourceSize.value_or(SizeF()).ToString().c_str(), filter);
-        json->PutExtAttr("fitOriginalSize", propFitOriginalSize.value_or(false) ? "true" : "false", filter);
-        json->PutExtAttr("autoResize", propAutoResize.value_or(false) ? "true" : "false", filter);
-    }
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 };
 
 class ACE_EXPORT ImageLayoutProperty : public LayoutProperty {
@@ -50,27 +40,8 @@ public:
 
     ~ImageLayoutProperty() override = default;
 
-    RefPtr<LayoutProperty> Clone() const override
-    {
-        auto value = MakeRefPtr<ImageLayoutProperty>();
-        value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
-        value->propImageSourceInfo_ = CloneImageSourceInfo();
-        value->propAlt_ = CloneAlt();
-        value->propImageFit_ = CloneImageFit();
-        value->propImageSizeStyle_ = CloneImageSizeStyle();
-        value->propVerticalAlign_ = CloneVerticalAlign();
-        return value;
-    }
-
-    void Reset() override
-    {
-        LayoutProperty::Reset();
-        ResetImageSourceInfo();
-        ResetAlt();
-        ResetImageFit();
-        ResetImageSizeStyle();
-        ResetVerticalAlign();
-    }
+    RefPtr<LayoutProperty> Clone() const override;
+    void Reset() override;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 

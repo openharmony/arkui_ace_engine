@@ -19,14 +19,20 @@ import { UIUtils } from '../utils';
 import { DecoratedV2VariableBase } from './decoratorBase';
 import { uiUtils } from '../base/uiUtilsImpl';
 import { StateMgmtDFX } from '../tools/stateMgmtDFX';
+import { isDynamicObject, getV2ObservedObject } from '../../component/interop';
 export class ProviderDecoratedVariable<T> extends DecoratedV2VariableBase<T> implements IProviderDecoratedVariable<T> {
     private readonly provideAlias_: string;
     private readonly backing_: IBackingValue<T>;
-    public viewV2?: Object;
+    public viewV2: Any = undefined;
     constructor(owningView: IVariableOwner, varName: string, provideAlias: string, initValue: T) {
         super('@Provider', owningView, varName);
         this.provideAlias_ = provideAlias;
-        this.backing_ = FactoryInternal.mkDecoratorValue(varName, initValue);
+         if (isDynamicObject(initValue)) {
+            initValue = getV2ObservedObject(initValue);
+            this.backing_ = FactoryInternal.mkInteropV2DecoratorValue(varName, initValue);
+        } else {
+            this.backing_ = FactoryInternal.mkDecoratorValue(varName, initValue);
+        }
         owningView.__addProvider__Internal(provideAlias, this);
 
         // Register the relationship between this Provider variable and the observed object it uses
@@ -50,7 +56,9 @@ export class ProviderDecoratedVariable<T> extends DecoratedV2VariableBase<T> imp
         if (value === newValue) {
             return;
         }
-        const makeObserved = uiUtils.autoProxyObject(newValue) as T;
+        const makeObserved = isDynamicObject(newValue)
+            ? getV2ObservedObject(newValue)
+            : (uiUtils.autoProxyObject(newValue) as T);
 
         // Update ObservedObjectRegistry registration before setting the new value
         this.updateObservedObjectRegistration(value, makeObserved);

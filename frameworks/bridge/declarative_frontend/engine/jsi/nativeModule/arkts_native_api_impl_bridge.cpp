@@ -4714,6 +4714,10 @@ void ArkUINativeModule::RegisterWebAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnInputMethodAttached));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnInputMethodAttached"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnInputMethodAttached));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setKeyboardAppearance"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetKeyboardAppearance));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetKeyboardAppearance"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetKeyboardAppearance));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "web"), web);
 }
 #endif
@@ -5477,6 +5481,11 @@ void ArkUINativeModule::RegisterCommonAttributes(Local<panda::ObjectRef> object,
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAccessibilityActionOptions"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetAccessibilityActionOptions));
 
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSmartGestureShortcut"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetSmartGestureShortcut));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSmartGestureShortcut"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetSmartGestureShortcut));
+
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAccessibilityHoverTransparent"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetAccessibilityHoverTransparent));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAccessibilityHoverTransparent"),
@@ -6022,6 +6031,10 @@ void ArkUINativeModule::RegisterStackAttributes(Local<panda::ObjectRef> object, 
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StackBridge::SetAlignContent));
     stack->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAlignContent"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StackBridge::ResetAlignContent));
+    stack->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSyncLoad"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StackBridge::SetSyncLoad));
+    stack->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSyncLoad"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StackBridge::ResetSyncLoad));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "stack"), stack);
 }
 

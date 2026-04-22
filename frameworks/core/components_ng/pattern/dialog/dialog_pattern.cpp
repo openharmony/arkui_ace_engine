@@ -43,12 +43,14 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/dialog/dialog_layout_algorithm.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_model_ng.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_algorithm.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
@@ -375,16 +377,39 @@ void DialogPattern::RecordEvent(int32_t btnIndex) const
     Recorder::EventRecorder::Get().OnEvent(std::move(builder));
 }
 
+bool CheckIsEnableMaterial(const DialogProperties& dialogProperties)
+{
+    if (dialogProperties.shadow.has_value() || dialogProperties.backgroundColor.has_value() ||
+    dialogProperties.backgroundBlurStyle.has_value() ||
+    dialogProperties.blurStyleOption.has_value() || dialogProperties.effectOption.has_value() ||
+    dialogProperties.borderWidth.has_value() || dialogProperties.borderColor.has_value() ||
+    dialogProperties.borderStyle.has_value()) {
+        return false;
+    }
+    return true;
+}
+
 void SetDialogSystemMaterial(const RefPtr<FrameNode>& columnNode, const DialogProperties& dialogProperties)
 {
-    CHECK_NULL_VOID(columnNode);
-    if (dialogProperties.systemMaterial &&
-        MaterialUtils::CheckMaterialValid(dialogProperties.systemMaterial->GetType())) {
-        auto renderContext = columnNode->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        renderContext->UpdateBackBlurStyle(std::nullopt);
-        ViewAbstract::SetSystemMaterial(AceType::RawPtr(columnNode), AceType::RawPtr(dialogProperties.systemMaterial));
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return;
     }
+    CHECK_NULL_VOID(columnNode);
+    if (!MaterialUtils::IsMaterialEnabled() && !CheckIsEnableMaterial(dialogProperties) &&
+        !dialogProperties.systemMaterial) {
+        return;
+    }
+    auto material = MaterialUtils::GetInitMaterial(UiMaterialStyle::THICK);
+    if (dialogProperties.systemMaterial) {
+        material = dialogProperties.systemMaterial;
+    }
+    if (!MaterialUtils::IsEnableMaterialParam(material)) {
+        return;
+    }
+    auto renderContext = columnNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackBlurStyle(std::nullopt);
+    ViewAbstract::SetSystemMaterial(AceType::RawPtr(columnNode), AceType::RawPtr(material));
 }
 
 void UpdateAdditionalContentRenderContext(const RefPtr<FrameNode>& contentNode,
@@ -694,6 +719,7 @@ RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogPr
     ACE_UINODE_TRACE(title);
     auto titleProp = AceType::DynamicCast<TextLayoutProperty>(title->GetLayoutProperty());
     CHECK_NULL_RETURN(titleProp, nullptr);
+    titleProp->UpdateEnableSmallLanguageTruncation(true);
     titleProp->UpdateMaxLines(DIALOG_TITLE_MAXLINES);
     titleProp->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     std::string titleContent = dialogProperties.title.empty() ? dialogProperties.subtitle : dialogProperties.title;
@@ -707,6 +733,9 @@ RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogPr
         titleProp->UpdateAdaptMinFontSize(ADAPT_TITLE_MIN_FONT_SIZE);
         titleProp->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
         titleProp->UpdateMaxLines(ADAPT_TITLE_MAX_LINES);
+        if (title->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            titleProp->UpdateOrphanCharOptimization(true);
+        }
     }
     PaddingProperty titlePadding;
     auto paddingInTheme = (dialogProperties.content.empty() && dialogProperties.buttons.empty())
@@ -759,6 +788,7 @@ RefPtr<FrameNode> DialogPattern::BuildSubTitle(const DialogProperties& dialogPro
     ACE_UINODE_TRACE(subtitle);
     auto titleProp = AceType::DynamicCast<TextLayoutProperty>(subtitle->GetLayoutProperty());
     CHECK_NULL_RETURN(titleProp, nullptr);
+    titleProp->UpdateEnableSmallLanguageTruncation(true);
     auto titleStyle = dialogTheme_->GetSubTitleTextStyle();
     titleProp->UpdateMaxLines(DIALOG_TITLE_MAXLINES);
     titleProp->UpdateTextOverflow(TextOverflow::ELLIPSIS);
@@ -770,6 +800,9 @@ RefPtr<FrameNode> DialogPattern::BuildSubTitle(const DialogProperties& dialogPro
         titleProp->UpdateAdaptMinFontSize(ADAPT_SUBTITLE_MIN_FONT_SIZE);
         titleProp->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
         titleProp->UpdateMaxLines(ADAPT_TITLE_MAX_LINES);
+        if (subtitle->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            titleProp->UpdateOrphanCharOptimization(true);
+        }
     }
     PaddingProperty titlePadding;
     titlePadding.left = CalcLength(DIALOG_SUBTITLE_PADDING_LEFT);
@@ -819,6 +852,17 @@ RefPtr<FrameNode> DialogPattern::BuildTitle(const DialogProperties& dialogProper
     return titleRow;
 }
 
+void DialogPattern::UpdateContentTextProperty(
+    const RefPtr<FrameNode>& contentNode, const RefPtr<TextLayoutProperty>& contentProp)
+{
+    contentProp->UpdateEnableSmallLanguageTruncation(true);
+    if (contentNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        contentProp->UpdateOrphanCharOptimization(true);
+    }
+    // textAlign always align start. When text line count 1 and title doesn't exist, set text center position.
+    contentProp->UpdateTextAlign(TextAlign::START);
+}
+
 RefPtr<FrameNode> DialogPattern::BuildContent(const DialogProperties& props)
 {
     // Make Content node
@@ -827,8 +871,7 @@ RefPtr<FrameNode> DialogPattern::BuildContent(const DialogProperties& props)
     ACE_UINODE_TRACE(contentNode);
     auto contentProp = AceType::DynamicCast<TextLayoutProperty>(contentNode->GetLayoutProperty());
     CHECK_NULL_RETURN(contentProp, nullptr);
-    // textAlign always align start. When text line count 1 and title doesn't exist, set text center position.
-    contentProp->UpdateTextAlign(TextAlign::START);
+    UpdateContentTextProperty(contentNode, contentProp);
     contentProp->UpdateContent(props.content);
     auto contentStyle = dialogTheme_->GetContentTextStyle();
     contentProp->UpdateFontSize(contentStyle.GetFontSize());
@@ -990,6 +1033,9 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
     auto renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
     renderContext->UpdateBackgroundColor(bgColor.value());
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_RETURN(buttonLayoutProperty, nullptr);
+    buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
 
     // set button default height
     auto layoutProps = buttonNode->GetLayoutProperty();
@@ -1166,6 +1212,7 @@ RefPtr<FrameNode> DialogPattern::CreateButtonText(const std::string& text, const
     textNode->GetOrCreateFocusHub()->SetFocusable(true);
     auto textProps = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textProps, nullptr);
+    textProps->UpdateEnableSmallLanguageTruncation(true);
     textProps->UpdateContent(text);
     textProps->UpdateFontWeight(FontWeight::MEDIUM);
     textProps->UpdateMaxLines(1);
@@ -1259,6 +1306,11 @@ RefPtr<FrameNode> DialogPattern::BuildSheetInfoTitle(const std::string& title)
     // update text style
     auto style = dialogTheme_->GetContentTextStyle();
     auto props = titleNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(props, nullptr);
+    props->UpdateEnableSmallLanguageTruncation(true);
+    if (titleNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        props->UpdateOrphanCharOptimization(true);
+    }
     props->UpdateContent(title);
     props->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     props->UpdateAdaptMaxFontSize(style.GetFontSize());
@@ -2503,6 +2555,7 @@ void DialogPattern::OnAttachToMainTree()
 void DialogPattern::OnAttachToMainTreeImpl()
 {
     AddFollowParentWindowLayoutNode();
+    AddForceSplitRatioListener();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto parentNode = AceType::DynamicCast<FrameNode>(host->GetParent());
@@ -2532,6 +2585,7 @@ void DialogPattern::OnDetachFromMainTreeImpl()
         dialogProperties_.destroyCallback(customNode_);
     }
     RemoveFollowParentWindowLayoutNode();
+    RemoveForceSplitRatioListener();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
@@ -2603,6 +2657,33 @@ void DialogPattern::RemoveFollowParentWindowLayoutNode()
     auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(containerId, SubwindowType::TYPE_DIALOG);
     CHECK_NULL_VOID(subwindow);
     subwindow->RemoveFollowParentWindowLayoutNode(host->GetId());
+}
+
+void DialogPattern::AddForceSplitRatioListener()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto forceSplitMgr = AceType::DynamicCast<ForceSplitManager>(pipeline->GetForceSplitManager());
+    CHECK_NULL_VOID(forceSplitMgr);
+    forceSplitMgr->AddForceSplitRatioListener(
+        host->GetId(), [weakHost = AceType::WeakClaim(AceType::RawPtr(host))](float splitRatio) {
+        auto host = weakHost.Upgrade();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    });
+}
+
+void DialogPattern::RemoveForceSplitRatioListener()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto forceSplitMgr = AceType::DynamicCast<ForceSplitManager>(pipeline->GetForceSplitManager());
+    CHECK_NULL_VOID(forceSplitMgr);
+    forceSplitMgr->RemoveForceSplitRatioListener(host->GetId());
 }
 
 int32_t DialogPattern::OnInjectionEvent(const std::string& command)

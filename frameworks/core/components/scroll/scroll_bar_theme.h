@@ -54,7 +54,7 @@ public:
             return theme;
         }
 
-    private:
+    protected:
         void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<ScrollBarTheme>& theme) const
         {
             RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_SCROLL_BAR);
@@ -231,6 +231,8 @@ public:
 protected:
     ScrollBarTheme() = default;
 
+    Color foregroundColor_;
+
 private:
     ShapeMode shapeMode_ = ShapeMode::DEFAULT;
     Dimension normalWidth_;
@@ -243,7 +245,6 @@ private:
     Dimension defaultWidth_;
     Dimension defaultHeight_;
     Color backgroundColor_;
-    Color foregroundColor_;
     Color foregroundHoverBlendColor_;
     Color foregroundPressedBlendColor_;
     Edge padding_;

@@ -56,6 +56,7 @@ using panda::ecmascript::EcmaVM;
 class PandaFunctionData;
 
 using DebuggerPostTask = std::function<void(std::function<void()>&&)>;
+using ReleaseSecureMemCallback = std::function<void(void* fileMapper)>;
 
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class ArkJSRuntime final : public JsRuntime, public std::enable_shared_from_this<ArkJSRuntime> {
@@ -107,6 +108,9 @@ public:
         const std::string &bundleName, const std::string &moduleName, const std::string &ohmurl);
     bool IsStaticOrInvalidFile(const uint8_t *data, int32_t size);
     bool ExecuteModuleBuffer(const uint8_t *data, int32_t size, const std::string &filename, bool needUpdate = false);
+    bool ExecuteModuleBufferSecure(uint8_t *data, int32_t size, const std::string &filename,
+        bool needUpdate = false, void *fileMapper = nullptr);
+    void SetReleaseWorkerSafeMemFunc(ReleaseWorkerSafeMemFunc func);
 
     int32_t LoadDestinationFile(const std::string& bundleName, const std::string& moduleName,
         const std::string& pageSourceFile, bool isSingleton);

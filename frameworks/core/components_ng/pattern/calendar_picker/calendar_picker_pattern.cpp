@@ -19,7 +19,6 @@
 
 #include "base/i18n/localization.h"
 #include "base/utils/utf_helper.h"
-#include "core/common/container.h"
 #include "core/components/calendar/calendar_theme.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
@@ -63,7 +62,7 @@ void CalendarPickerPattern::OnModifyDone()
     pipelineContext->AddWindowSizeChangeCallback(host->GetId());
     UpdateEntryButtonColor();
     UpdateEntryButtonBorderWidth();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         UpdateHostEntryBorderColor();
     }
     UpdateAccessibilityText();
@@ -1292,11 +1291,11 @@ void CalendarPickerPattern::OnColorConfigurationUpdate()
 
 bool CalendarPickerPattern::OnThemeScopeUpdate(int32_t themeScopeId)
 {
-    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
-        return false;
-    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
+    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return false;
+    }
     auto layoutProperty = host->GetLayoutProperty<CalendarPickerLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     host->SetNeedCallChildrenUpdate(false);

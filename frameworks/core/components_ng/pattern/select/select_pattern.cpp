@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/select/select_pattern.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include <cstdint>
 #include <optional>
@@ -357,6 +358,10 @@ void SelectPattern::ConfigMenuParam()
     menuParam.keyboardAvoidMode = selectLayoutProps->GetMenuKeyboardAvoidMode();
     menuParam.minKeyboardAvoidDistance = selectLayoutProps->GetMinKeyboardAvoidDistance();
     menuParam.systemMaterial = GetMenuSystemMaterial();
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)
+        && MaterialUtils::IsMaterialEnabled() && !menuParam.systemMaterial) {
+        menuParam.systemMaterial = MaterialUtils::GetInitMaterial(UiMaterialStyle::THICK);
+    }
     auto menuNode = GetMenuNode();
     CHECK_NULL_VOID(menuNode);
     ACE_UINODE_TRACE(menuNode);
@@ -1668,6 +1673,7 @@ void SelectPattern::InitTextProps(const RefPtr<TextLayoutProperty>& textProps)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>(select->GetThemeScopeId());
     CHECK_NULL_VOID(theme);
+    textProps->UpdateEnableSmallLanguageTruncation(true);
     textProps->UpdateFontSize(theme->GetFontSize());
     textProps->UpdateFontWeight(FontWeight::MEDIUM);
     textProps->UpdateTextColor(theme->GetFontColor());
@@ -2160,8 +2166,9 @@ void SelectPattern::OnColorConfigurationUpdate()
     } else {
         renderContext->UpdateBackgroundColor(selectTheme->GetBackgroundColor());
     }
-
-    UpdateMenuChildColorConfiguration(menuNode, pipeline->GetConfigurationChange());
+    auto configurationChange = pipeline->GetConfigurationChange();
+    configurationChange.colorModeUpdate = true;
+    UpdateMenuChildColorConfiguration(menuNode, configurationChange);
     auto optionNode = menuModifier->getOptions(menuNode);
     auto menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
     for (auto child : optionNode) {
@@ -2279,9 +2286,7 @@ void SelectPattern::UpdateMenuChildColorConfiguration(
     const RefPtr<FrameNode>& menuNode, const ConfigurationChange& configurationChange)
 {
     CHECK_NULL_VOID(menuNode);
-    auto scrollNode = menuNode->GetFirstChild();
-    CHECK_NULL_VOID(scrollNode);
-    scrollNode->UpdateConfigurationUpdate(configurationChange);
+    menuNode->UpdateConfigurationUpdate(configurationChange);
 }
 
 bool SelectPattern::OnThemeScopeUpdate(int32_t themeScopeId)
