@@ -723,6 +723,14 @@ std::shared_ptr<Rosen::RSNode> RosenRenderContext::CreateHardwareTexture(
     auto surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::SURFACE_TEXTURE_NODE, false);
     return surfaceNode;
 }
+
+void RosenRenderContext::SetSurfaceCaptureCallback(std::function<std::shared_ptr<Media::PixelMap>()> callback)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto surfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
+    CHECK_NULL_VOID(surfaceNode);
+    surfaceNode->SetSurfaceCaptureCallback(callback);
+}
 #endif
 
 void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition, bool force)
