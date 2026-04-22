@@ -387,8 +387,10 @@ HWTEST_F(WindowPatternTest, CreateStartingWindow_StartWindowType_Default_NoPrelo
     ASSERT_NE(windowScene_->GetHost(), nullptr);
     sceneSession_->sessionInfo_.startWindowType_ = Rosen::StartWindowType::DEFAULT;
     sceneSession_->ResetPreloadStartingWindow();
-    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
-    std::pair<std::shared_ptr<uint8_t[]>, size_t> bufferInfo = { nullptr, 0 };
+    std::shared_ptr<Media::PixelMap> pixelMap;
+    std::pair<std::shared_ptr<uint8_t[]>, size_t> bufferInfo;
+    pixelMap = nullptr;
+    bufferInfo = {nullptr, 0};
     windowScene_->WindowPattern::CreateStartingWindow();
     sceneSession_->GetPreloadStartingWindow(pixelMap, bufferInfo);
     EXPECT_EQ(pixelMap, nullptr);
@@ -407,9 +409,9 @@ HWTEST_F(WindowPatternTest, CreateStartingWindow_WithValidPreloadPixelMap, TestS
     ASSERT_NE(windowScene_, nullptr);
     ASSERT_NE(windowScene_->GetHost(), nullptr);
     sceneSession_->ResetPreloadStartingWindow();
-    std::shared_ptr<Media::PixelMap> pixelMap;	 
-    std::pair<std::shared_ptr<uint8_t[]>, size_t> bufferInfo;	 
-    pixelMap = nullptr; 
+    std::shared_ptr<Media::PixelMap> pixelMap;
+    std::pair<std::shared_ptr<uint8_t[]>, size_t> bufferInfo;
+    pixelMap = nullptr;
     bufferInfo = {nullptr, 0};
     std::shared_ptr<Media::PixelMap> validPixelMap = std::make_shared<Media::PixelMap>();
     sceneSession_->SetPreloadStartingWindow(validPixelMap);
@@ -435,9 +437,9 @@ HWTEST_F(WindowPatternTest, CreateStartingWindow_WithValidPreloadSvgBuffer, Test
     ASSERT_NE(windowScene_, nullptr);
     ASSERT_NE(windowScene_->GetHost(), nullptr);
     sceneSession_->ResetPreloadStartingWindow();
-    std::shared_ptr<Media::PixelMap> pixelMap;	 
-    std::pair<std::shared_ptr<uint8_t[]>, size_t> bufferInfo;	 
-    pixelMap = nullptr; 
+    std::shared_ptr<Media::PixelMap> pixelMap; 
+    std::pair<std::shared_ptr<uint8_t[]>, size_t> bufferInfo;
+    pixelMap = nullptr;
     bufferInfo = {nullptr, 0};
     auto svgBufferVec = std::make_shared<std::vector<uint8_t>>(10);
     std::shared_ptr<uint8_t[]> validSvgBuffer(svgBufferVec->data(), [](uint8_t*) {});
