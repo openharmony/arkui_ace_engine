@@ -3,11 +3,9 @@
         "types/*.d.ts"
     ],
     "files": [
-        // utility
         "src/utility/ArkResourcesHelper.ts",
         "src/utility/ArkThemeNativeHelper.ts",
 
-        // theme management
         "src/theme/lazy_for_each/ArkLazyForEachBindings.ts",
         "src/theme/list_item/ArkListItemBindings.ts",
         "src/theme/ArkThemeCache.ts",
@@ -23,7 +21,7 @@
         "src/theme/ArkThemeImpl.ts",
         "src/theme/ArkThemeScope.ts",
         "src/theme/ArkThemeScopeManager.ts",
-        "src/theme/ArkThemeWhiteList.ts",
+        "src/theme/ArkThemeWhiteList.ts"
     ],
     "compilerOptions": {
         "module": "none",
@@ -37,6 +35,6 @@
         "removeComments": true,
         "lib": [
             "ES2020"
-        ],
+        ]
     }
 }
