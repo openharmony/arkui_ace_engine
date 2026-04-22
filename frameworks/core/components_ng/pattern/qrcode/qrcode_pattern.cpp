@@ -222,12 +222,16 @@ bool QRCodePattern::OnThemeScopeUpdate(int32_t themeScopeId)
     CHECK_NULL_RETURN(paintProperty, result);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     result = !paintProperty->HasColor() || !paintProperty->HasBackgroundColor();
+    auto qrcodeTheme = host->GetTheme<QrcodeTheme>(true);
+    CHECK_NULL_RETURN(qrcodeTheme, result);
     if (!paintProperty->HasBackgroundColor()) {
-        auto qrcodeTheme = host->GetTheme<QrcodeTheme>(true);
-        CHECK_NULL_RETURN(qrcodeTheme, result);
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, result);
         renderContext->UpdateBackgroundColor(qrcodeTheme->GetBackgroundColor());
+    }
+    if (!paintProperty->HasQRCodeColorSetByUser() ||
+        (paintProperty->HasQRCodeColorSetByUser() && !paintProperty->GetQRCodeColorSetByUserValue())) {
+        UpdateColor(qrcodeTheme->GetQrcodeColor(), false);
     }
     UpdateFocusPaintColorByTheme(host);
     return result;
