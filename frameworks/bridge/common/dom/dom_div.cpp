@@ -446,7 +446,6 @@ void DOMDiv::SetCardThemeAttrs()
 {
     cardTheme_ = GetTheme<CardTheme>();
     if (!cardTheme_) {
-        EventReport::SendComponentException(ComponentExcepType::GET_THEME_ERR);
         return;
     }
     if (boxComponent_) {

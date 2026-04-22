@@ -122,10 +122,12 @@ RefPtr<FrameNode> XComponentPropertyTestTwoNg::CreateXComponentNode(TestProperty
         XComponentModelNG().SetControllerOnCreated(std::move(testProperty.surfaceCreatedEvent.value()));
     }
     if (testProperty.surfaceChangedEvent.has_value()) {
-        XComponentModelNG().SetControllerOnChanged(std::move(testProperty.surfaceChangedEvent.value()));
+        XComponentModelNG().SetControllerOnChanged(
+            std::move(testProperty.surfaceChangedEvent.value()));
     }
     if (testProperty.surfaceDestroyedEvent.has_value()) {
-        XComponentModelNG().SetControllerOnDestroyed(std::move(testProperty.surfaceDestroyedEvent.value()));
+        XComponentModelNG().SetControllerOnDestroyed(
+            std::move(testProperty.surfaceDestroyedEvent.value()));
     }
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish(); // pop
     return AceType::DynamicCast<FrameNode>(element);
@@ -145,7 +147,8 @@ HWTEST_F(XComponentPropertyTestTwoNg, XComponentModelNGTest038, TestSize.Level1)
      */
     auto xComponentController = std::make_shared<XComponentControllerNG>();
     XComponentModelNG xComponent;
-    xComponent.Create(XCOMPONENT_ID, XCOMPONENT_SURFACE_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME, xComponentController);
+    xComponent.Create(XCOMPONENT_ID,
+        XCOMPONENT_SURFACE_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME, xComponentController);
     xComponent.SetSoPath(XCOMPONENT_SO_PATH);
     auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::XCOMPONENT_ETS_TAG);
