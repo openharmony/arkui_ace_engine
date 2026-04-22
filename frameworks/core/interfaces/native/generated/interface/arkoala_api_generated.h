@@ -25763,10 +25763,12 @@ typedef struct GENERATED_ArkUINavDestinationModifier {
 typedef struct GENERATED_ArkUINavigationModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
-    void (*setNavigationOptions0)(Ark_NativePointer node,
+    void (*setNavigationOptions0)(Ark_VMContext vmContext,
+                                  Ark_NativePointer node,
                                   const Opt_NavPathStack* pathInfos,
                                   const Opt_NavigationModuleInfo* moduleInfo);
-    void (*setNavigationOptions1)(Ark_NativePointer node,
+    void (*setNavigationOptions1)(Ark_VMContext vmContext,
+                                  Ark_NativePointer node,
                                   const Opt_NavPathStack* pathInfos,
                                   const Opt_HomePathInfo* homeDestination,
                                   const Opt_NavigationModuleInfo* moduleInfo);

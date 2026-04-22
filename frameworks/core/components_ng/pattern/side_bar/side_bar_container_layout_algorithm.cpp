@@ -298,6 +298,7 @@ void SideBarContainerLayoutAlgorithm::GetAllPropertyValue(
     MeasureRealSideBarWidth(parentWidth);
 
     auto sideBarContainerPattern = AceType::DynamicCast<SideBarContainerPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(sideBarContainerPattern);
     sideBarContainerPattern->SetMinSideBarWidth(minSideBarWidth_);
     sideBarContainerPattern->SetMaxSideBarWidth(maxSideBarWidth_);
     sideBarContainerPattern->SetMinContentWidth(minContentWidth_);
