@@ -415,6 +415,7 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     previewScale_ = LessOrEqual(afterAnimationScale, 0.0f) ? previewScale_ : afterAnimationScale;
     position_ = props->GetMenuOffset().value_or(OffsetF());
     anchorPosition_ = props->GetAnchorPosition();
+    UpdatePropTargetSpace(props, menuPattern);
     dumpInfo_.globalLocation = position_;
     // user-set offset
     positionOffset_ = props->GetPositionOffset().value_or(OffsetF());
@@ -1167,20 +1168,7 @@ void MenuLayoutAlgorithm::CalculateIdealSize(LayoutWrapper* layoutWrapper,
     RefPtr<FrameNode> parentItem)
 {
     if (parentItem != nullptr) {
-        auto parentPattern = parentItem->GetPattern<MenuItemPattern>();
-        CHECK_NULL_VOID(parentPattern);
-        auto expandingMode = parentPattern->GetExpandingMode();
-        if (expandingMode == SubMenuExpandingMode::STACK) {
-            auto parentPattern = parentItem->GetPattern<MenuItemPattern>();
-            CHECK_NULL_VOID(parentPattern);
-            auto parentMenu = parentPattern->GetMenu();
-            auto parentWidth = parentMenu->GetGeometryNode()->GetFrameSize().Width();
-            childConstraint.minSize.SetWidth(parentWidth);
-            childConstraint.maxSize.SetWidth(parentWidth);
-            childConstraint.selfIdealSize.SetWidth(parentWidth);
-            auto subMenuMaxHeight = CalcSubMenuMaxHeightConstraint(childConstraint, parentItem);
-            childConstraint.maxSize.SetHeight(std::min(subMenuMaxHeight, childConstraint.maxSize.Height()));
-        }
+        UpdateExpandSize(layoutWrapper, childConstraint, parentItem);
     }
     PrepareExtensionMenuConstraint(layoutWrapper, childConstraint);
 
@@ -2112,6 +2100,7 @@ OffsetF MenuLayoutAlgorithm::UpdateMenuPosition(LayoutWrapper* layoutWrapper, co
     auto avoidanceMode = menuProp->GetSelectAvoidanceMode().value_or(AvoidanceMode::COVER_TARGET);
     if (useLastPosition) {
         menuPosition = lastPosition_.value();
+        UpdateEmbeddedPosition(menuPosition, menuPattern, size, menuNode);
         auto lastPlacement = menuPattern->GetLastPlacement();
         if (lastPlacement.has_value()) {
             placement_ = lastPlacement.value();
@@ -2474,7 +2463,12 @@ OffsetF MenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(const RefPtr<MenuLayoutPro
         if (layoutWrapper != nullptr) {
             PlacementRTL(layoutWrapper, placement_);
         }
-        auto childOffset = GetChildPosition(size, didNeedArrow);
+        OffsetF childOffset;
+        if (propTargetSpace_.has_value()) {
+            childOffset = GetTargetSpacePosition(size, didNeedArrow);
+        } else {
+            childOffset = GetChildPosition(size, didNeedArrow);
+        }
         x = childOffset.GetX();
         y = childOffset.GetY();
     } else {
@@ -2651,6 +2645,7 @@ void MenuLayoutAlgorithm::UpdateConstraintHeight(LayoutWrapper* layoutWrapper, L
     }
     UpdateMaxSpaceHeightByMenuMaxHeight(menuPattern, menuLayoutProps, maxAvailableHeight, maxSpaceHeight);
     constraint.maxSize.SetHeight(maxSpaceHeight);
+    UpdateTargetSpaceScroll(layoutWrapper, constraint);
 }
 
 void MenuLayoutAlgorithm::UpdateConstraintSelectHeight(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint)
@@ -3052,6 +3047,7 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(
         }
         OffsetF offset = GetMenuWrapperOffset(layoutWrapper);
         targetOffset_ -= offset;
+        UpdateTargetValue(layoutWrapper);
         return;
     }
 
@@ -3064,6 +3060,7 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(
         OffsetF offset = GetMenuWrapperOffset(layoutWrapper);
         targetOffset_ -= offset;
     }
+    UpdateTargetValue(layoutWrapper);
 }
 
 OffsetF MenuLayoutAlgorithm::FitToScreen(const OffsetF& position, const SizeF& childSize, bool didNeedArrow)

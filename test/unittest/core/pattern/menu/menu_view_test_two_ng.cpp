@@ -536,4 +536,48 @@ HWTEST_F(MenuViewTwoTestNg, ReloadMenuParam003, TestSize.Level1)
     EXPECT_TRUE(menuParamValue.isDarkMode);
     g_isConfigChangePerform = false;
 }
+
+/**
+ * @tc.name: UpdateMenuProperties003
+ * @tc.desc: Verify UpdateMenuProperties function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTwoTestNg, UpdateMenuProperties003, TestSize.Level1)
+{
+    std::vector<OptionParam> optionParams;
+    OptionParam param1;
+    optionParams.emplace_back(param1);
+    MenuParam menuParam;
+    menuParam.placement = Placement::TOP;
+    menuParam.placement = OHOS::Ace::Placement::TOP;
+    menuParam.targetSpace = Dimension(TWO_HUNDRED);
+    ASSERT_NE(wrapperNode_, nullptr);
+    ASSERT_NE(menuFrameNode_, nullptr);
+    MenuView::UpdateMenuProperties(wrapperNode_, menuFrameNode_, menuParam, MenuType::MENU);
+    auto menuProperty = menuFrameNode_->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuProperty, nullptr);
+    EXPECT_TRUE(menuProperty->HasMenuTargetSpace());
+}
+
+/**
+ * @tc.name: UpdateMenuProperties004
+ * @tc.desc: Verify UpdateMenuProperties function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTwoTestNg, UpdateMenuProperties004, TestSize.Level1)
+{
+    std::vector<OptionParam> optionParams;
+    OptionParam param1;
+    optionParams.emplace_back(param1);
+    MenuParam menuParam;
+    menuParam.placement = Placement::TOP;
+    menuParam.placement = OHOS::Ace::Placement::TOP;
+    menuParam.targetSpace = Dimension(TWO_HUNDRED);
+    ASSERT_NE(wrapperNode_, nullptr);
+    ASSERT_NE(menuFrameNode_, nullptr);
+    MenuView::UpdateMenuLayoutProperty(menuFrameNode_, menuParam);
+    auto menuProperty = menuFrameNode_->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuProperty, nullptr);
+    EXPECT_TRUE(menuProperty->HasMenuTargetSpace());
+}
 } // namespace OHOS::Ace::NG

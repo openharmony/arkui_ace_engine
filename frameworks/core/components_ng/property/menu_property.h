@@ -145,6 +145,9 @@ struct ACE_FORCE_EXPORT MenuParam {
     std::optional<AvailableLayoutAreaMode> availableLayoutAreaMode;
     std::optional<MenuKeyboardAvoidMode> keyboardAvoidMode;
     std::optional<Dimension> minKeyboardAvoidDistance;
+    std::optional<Dimension> targetSpace;
+    std::optional<OffsetF> targetOffset;
+    std::optional<SizeF> targetSize;
     RefPtr<UiMaterial> systemMaterial;
     std::optional<DisplayMode> scrollBar;
     std::optional<Dimension> maxHeight;
