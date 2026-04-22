@@ -41,6 +41,7 @@
 #include "core/components_ng/property/particle_property.h"
 #include "core/components_ng/property/particle_property_animation.h"
 #include "core/components_ng/property/progress_mask_property.h"
+#include "core/components_ng/property/sidebar_content_mask_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/render/animation_utils.h"
@@ -917,6 +918,8 @@ public:
     virtual void UpdateDistortionParam(const DistortionParam& param) {}
 
     virtual void UpdateForegroundFilterDistortionParam(const DistortionParam& param) {}
+
+    virtual void OnSidebarContentMaskUpdate(const RefPtr<SidebarContentMaskProperty>& maskProperty) {}
 protected:
     RenderContext();
     std::unique_ptr<BorderImageProperty> propBdImage_;

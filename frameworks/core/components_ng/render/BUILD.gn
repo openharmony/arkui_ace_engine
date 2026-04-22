@@ -66,6 +66,7 @@ build_component_ng("render_ng") {
     "adapter/focus_state_modifier.cpp",
     "adapter/gradient_style_modifier.cpp",
     "adapter/moon_progress_modifier.cpp",
+    "adapter/sidebar_content_mask_modifier.cpp",
     "adapter/rosen_animation_utils.cpp",
     "adapter/rosen_effect_converter.cpp",
     "adapter/rosen_media_player.cpp",
