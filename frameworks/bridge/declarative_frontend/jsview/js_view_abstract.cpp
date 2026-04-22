@@ -4005,6 +4005,9 @@ void JSViewAbstract::JsSpatialEffect(const JSCallbackInfo& info)
 
 DepthVector3 JSViewAbstract::ParseDepthVector3(const JSRef<JSVal>& vectorValue)
 {
+    if (!vectorValue->IsObject()) {
+        return DepthVector3();
+    }
     auto vectorObj = JSRef<JSObject>::Cast(vectorValue);
     DepthVector3 vector;
     auto xValue = vectorObj->GetProperty("x");
