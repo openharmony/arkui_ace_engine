@@ -594,9 +594,11 @@ enum class DragAction {
 };
 
 namespace NG {
+class FrameNode;
 class WebPattern;
 }; // namespace NG
 
+class AccessibilityManager;
 class RenderWeb;
 
 class NWebDragEventImpl : public OHOS::NWeb::NWebDragEvent {
@@ -1641,6 +1643,14 @@ private:
     void WebComponentClickReport(int64_t accessibilityId);
     void AccessibilityReleasePageEvent();
     void AccessibilitySendPageChange();
+    void AccessibilitySendPageChange(int32_t retryCount);
+    void HandleAccessibilitySendPageChange(int32_t retryCount);
+    bool CheckAccessibilityPageChangeState(const RefPtr<NG::WebPattern>& webPattern,
+        const RefPtr<NG::FrameNode>& webNode, const RefPtr<NG::PipelineContext>& context,
+        const RefPtr<AccessibilityManager>& accessibilityManager);
+    bool CheckAccessibilityNodeReady(const RefPtr<NG::FrameNode>& webNode, int32_t retryCount);
+    void SendAccessibilityPageChangeEvent(const RefPtr<NG::FrameNode>& webNode,
+        const RefPtr<AccessibilityManager>& accessibilityManager);
     void HandleNativeEmbedLifecycle(std::shared_ptr<NWeb::NWebNativeEmbedDataInfo> dataInfo);
 
 #ifdef OHOS_STANDARD_SYSTEM

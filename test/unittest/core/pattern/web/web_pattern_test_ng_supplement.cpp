@@ -902,6 +902,30 @@ HWTEST_F(WebPatternTestNgSupplement, GetAccessibilityNodeByFocusMove001, TestSiz
 }
 
 /**
+ * @tc.name: CheckAccessibilityNodeReady001
+ * @tc.desc: CheckAccessibilityNodeReady.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNgSupplement, CheckAccessibilityNodeReady001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    OHOS::Ace::SetReturnStatus("true");
+    EXPECT_TRUE(webPattern->delegate_->CheckAccessibilityNodeReady(frameNode, 0));
+#endif
+}
+
+/**
  * @tc.name: SetAccessibilityState001
  * @tc.desc: SetAccessibilityState.
  * @tc.type: FUNC

@@ -1273,6 +1273,10 @@ std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetAccessibi
     }
     return nullptr;
 }
+bool WebDelegate::CheckAccessibilityNodeReady(const RefPtr<NG::FrameNode>&, int32_t)
+{
+    return GetAccessibilityNodeInfoByFocusMove(-1, 16) != nullptr;
+}
 OHOS::NWeb::NWebPreference::CopyOptionMode WebDelegate::GetCopyOptionMode() const
 {
     if (g_setReturnStatus == STATUS_TRUE) {
