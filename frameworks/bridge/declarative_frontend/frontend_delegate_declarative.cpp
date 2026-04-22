@@ -3886,7 +3886,7 @@ void FrontendDelegateDeclarative::CreateSnapshotFromComponent(const RefPtr<NG::U
     NG::ComponentSnapshot::JsCallback&& callback, bool enableInspector, const NG::SnapshotParam& param)
 {
 #ifdef ENABLE_ROSEN_BACKEND
-    ViewStackModel::GetInstance()->NewScope();
+    NG::ScopedViewStackProcessor scopedViewStackProcessor;
     NG::ComponentSnapshot::Create(nodeWk, std::move(callback), enableInspector, param);
 #endif
 }
