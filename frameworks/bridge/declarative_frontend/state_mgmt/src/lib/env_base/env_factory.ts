@@ -133,3 +133,29 @@ const envFactoryMap: {
     return new DisplayIdEnv(context);
   },
 };
+
+
+type SimpleEnvValueType = 'number' | 'boolean';
+
+interface SimpleEnvMetaItem<K extends keyof EnvTypeMap> {
+  prop: keyof EnvTypeMap[K];
+  type: SimpleEnvValueType;
+}
+
+type SimpleEnvMeta = Partial<{
+  [K in keyof EnvTypeMap]: SimpleEnvMetaItem<K>;
+}>;
+
+// add env key and property name and type here
+const simpleEnvMetaMap = {
+  'system.window.systemdensity': {
+    prop: 'systemDensity',
+    type: 'number',
+  },
+  'system.window.displayid': {
+    prop: 'displayId',
+    type: 'number',
+  },
+} as const satisfies SimpleEnvMeta;
+
+type SimpleTypeEnvKey = keyof typeof simpleEnvMetaMap;
