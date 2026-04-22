@@ -123,23 +123,26 @@ class FrameNode {
     }
     let result;
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    if (type === undefined || type === "CustomFrameNode") {
-      this.renderNode_ = new RenderNode('CustomFrameNode');
-      if (nativePointer === null || nativePointer === undefined) {
-        result = getUINativeModule().frameNode.createFrameNode(this);
+    try {
+      if (type === undefined || type === "CustomFrameNode") {
+        this.renderNode_ = new RenderNode('CustomFrameNode');
+        if (nativePointer === null || nativePointer === undefined) {
+          result = getUINativeModule().frameNode.createFrameNode(this);
+        }
+        else {
+          result = getUINativeModule().frameNode.createTransFrameNode(this, nativePointer);
+        }
       }
       else {
-        result = getUINativeModule().frameNode.createTransFrameNode(this, nativePointer);
+        if (nativePointer === undefined || nativePointer === null) {
+          result = getUINativeModule().frameNode.createTypedFrameNode(this, type, options);
+        } else {
+          result = getUINativeModule().frameNode.createTransTypedFrameNode(this, type, options, nativePointer);
+        }
       }
+    } finally {
+      __JSScopeUtil__.restoreInstanceId();
     }
-    else {
-      if (nativePointer === undefined || nativePointer === null) {
-        result = getUINativeModule().frameNode.createTypedFrameNode(this, type, options);
-      } else {
-        result = getUINativeModule().frameNode.createTransTypedFrameNode(this, type, options, nativePointer);
-      }
-    }
-    __JSScopeUtil__.restoreInstanceId();
     this._nativeRef = result?.nativeStrongRef;
     this._nodeId = result?.nodeId;
     this.nodePtr_ = this._nativeRef?.getNativeHandle();
@@ -179,8 +182,11 @@ class FrameNode {
     this._nativeRef = nativeRef;
     this.nodePtr_ = nodePtr ? nodePtr : this._nativeRef?.getNativeHandle();
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    this._nodeId = getUINativeModule().frameNode.getIdByNodePtr(this.nodePtr_);
-    __JSScopeUtil__.restoreInstanceId();
+    try {
+      this._nodeId = getUINativeModule().frameNode.getIdByNodePtr(this.nodePtr_);
+    } finally {
+      __JSScopeUtil__.restoreInstanceId();
+    }
     if (this._nodeId === -1) {
       return;
     }
@@ -273,9 +279,13 @@ class FrameNode {
     if (count === 0 || count < 0) {
       return [];
     }
+    let result;
     __JSScopeUtil__.syncInstanceId(uiContext.instanceId_);
-    const result = getUINativeModule().frameNode.createFrameNodes(count);
-    __JSScopeUtil__.restoreInstanceId();
+    try {
+      result = getUINativeModule().frameNode.createFrameNodes(count);
+    } finally {
+      __JSScopeUtil__.restoreInstanceId();
+    }
     if (!Array.isArray(result) || result.length === 0) {
       return [];
     }
@@ -333,8 +343,11 @@ class FrameNode {
   convertToFrameNode(nodePtr: NodePtr, nodeId: number = -1): FrameNode | null {
     if (nodeId === -1) {
       __JSScopeUtil__.syncInstanceId(this.instanceId_);
-      nodeId = getUINativeModule().frameNode.getIdByNodePtr(nodePtr);
-      __JSScopeUtil__.restoreInstanceId();
+      try {
+        nodeId = getUINativeModule().frameNode.getIdByNodePtr(nodePtr);
+      } finally {
+        __JSScopeUtil__.restoreInstanceId();
+      }
     }
     if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
       let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
@@ -343,10 +356,15 @@ class FrameNode {
       }
     }
     if (nodeId !== -1 && !getUINativeModule().frameNode.isModifiable(nodePtr)) {
+      let frameNode: ProxyFrameNode;
+      let node: NativeWeakRef;
       __JSScopeUtil__.syncInstanceId(this.instanceId_);
-      let frameNode = new ProxyFrameNode(this.uiContext_);
-      let node = getUINativeModule().nativeUtils.createNativeWeakRef(nodePtr);
-      __JSScopeUtil__.restoreInstanceId();
+      try {
+        frameNode = new ProxyFrameNode(this.uiContext_);
+        node = getUINativeModule().nativeUtils.createNativeWeakRef(nodePtr);
+      } finally {
+        __JSScopeUtil__.restoreInstanceId();
+      }
       frameNode.setNodePtr(node);
       frameNode._nodeId = nodeId;
       FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(frameNode._nodeId, new WeakRef(frameNode));
@@ -368,10 +386,14 @@ class FrameNode {
       (!getUINativeModule().frameNode.checkIfCanCrossLanguageTreeOperating(node.nodePtr_))) || !this.checkValid(node)) {
       throw { message: 'The FrameNode is not modifiable.', code: 100021 };
     }
+    let flag;
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    let flag = getUINativeModule().frameNode.appendChild(this.nodePtr_, node.nodePtr_);
-    getUINativeModule().frameNode.addBuilderNode(this.nodePtr_, node.nodePtr_);
-    __JSScopeUtil__.restoreInstanceId();
+    try {
+      flag = getUINativeModule().frameNode.appendChild(this.nodePtr_, node.nodePtr_);
+      getUINativeModule().frameNode.addBuilderNode(this.nodePtr_, node.nodePtr_);
+    } finally {
+      __JSScopeUtil__.restoreInstanceId();
+    }
     if (flag === ERROR_CODE_NODE_IS_ADOPTED) {
       throw { message: "The parameter 'node' is invalid: the node has already been adopted.", code: 100025 };
     }
@@ -388,10 +410,14 @@ class FrameNode {
     if (!this.checkValid() || !this.isModifiable()) {
       throw { message: 'The FrameNode is not modifiable.', code: 100021 };
     }
+    let flag;
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    let flag = getUINativeModule().frameNode.appendChild(this.nodePtr_, content.getNodeWithoutProxy());
-    getUINativeModule().frameNode.addBuilderNode(this.nodePtr_, content.getNodePtr());
-    __JSScopeUtil__.restoreInstanceId();
+    try {
+      flag = getUINativeModule().frameNode.appendChild(this.nodePtr_, content.getNodeWithoutProxy());
+      getUINativeModule().frameNode.addBuilderNode(this.nodePtr_, content.getNodePtr());
+    } finally {
+      __JSScopeUtil__.restoreInstanceId();
+    }
     if (flag !== ERROR_CODE_NO_ERROR) {
       throw { message: 'The FrameNode is not modifiable.', code: 100021 };
     } else {
@@ -404,10 +430,13 @@ class FrameNode {
       return;
     }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    getUINativeModule().frameNode.removeBuilderNode(this.nodePtr_, content.getNodePtr());
-    getUINativeModule().frameNode.removeChild(this.nodePtr_, content.getNodePtr());
-    content.setAttachedParent(undefined);
-    __JSScopeUtil__.restoreInstanceId();
+    try {
+      getUINativeModule().frameNode.removeBuilderNode(this.nodePtr_, content.getNodePtr());
+      getUINativeModule().frameNode.removeChild(this.nodePtr_, content.getNodePtr());
+      content.setAttachedParent(undefined);
+    } finally {
+      __JSScopeUtil__.restoreInstanceId();
+    }
   }
 
   insertChildAfter(child: FrameNode, sibling: FrameNode): void {
@@ -420,13 +449,16 @@ class FrameNode {
     }
     let flag = 0;
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    if (sibling === undefined || sibling === null) {
-      flag = getUINativeModule().frameNode.insertChildAfter(this.nodePtr_, child.nodePtr_, null);
-    } else {
-      flag = getUINativeModule().frameNode.insertChildAfter(this.nodePtr_, child.nodePtr_, sibling.getNodePtr());
+    try {
+      if (sibling === undefined || sibling === null) {
+        flag = getUINativeModule().frameNode.insertChildAfter(this.nodePtr_, child.nodePtr_, null);
+      } else {
+        flag = getUINativeModule().frameNode.insertChildAfter(this.nodePtr_, child.nodePtr_, sibling.getNodePtr());
+      }
+      getUINativeModule().frameNode.addBuilderNode(this.nodePtr_, child.nodePtr_);
+    } finally {
+      __JSScopeUtil__.restoreInstanceId();
     }
-    getUINativeModule().frameNode.addBuilderNode(this.nodePtr_, child.nodePtr_);
-    __JSScopeUtil__.restoreInstanceId();
     if (flag === ERROR_CODE_NODE_IS_ADOPTED) {
       throw { message: "The parameter 'child' is invalid: the node has already been adopted.", code: 100025 };
     }
@@ -441,17 +473,23 @@ class FrameNode {
       return;
     }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    getUINativeModule().frameNode.removeBuilderNode(this.nodePtr_, node.nodePtr_);
-    getUINativeModule().frameNode.removeChild(this.nodePtr_, node.nodePtr_);
-    __JSScopeUtil__.restoreInstanceId();
+    try {
+      getUINativeModule().frameNode.removeBuilderNode(this.nodePtr_, node.nodePtr_);
+      getUINativeModule().frameNode.removeChild(this.nodePtr_, node.nodePtr_);
+    } finally {
+      __JSScopeUtil__.restoreInstanceId();
+    }
     this._childList.delete(node._nodeId);
   }
 
   clearChildren(): void {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    getUINativeModule().frameNode.clearBuilderNode(this.nodePtr_);
-    getUINativeModule().frameNode.clearChildren(this.nodePtr_);
-    __JSScopeUtil__.restoreInstanceId();
+    try {
+      getUINativeModule().frameNode.clearBuilderNode(this.nodePtr_);
+      getUINativeModule().frameNode.clearChildren(this.nodePtr_);
+    } finally {
+      __JSScopeUtil__.restoreInstanceId();
+    }
     this._childList.clear();
   }
 
@@ -467,8 +505,12 @@ class FrameNode {
       throw { message: 'The FrameNode is not modifiable.', code: 100021 };
     }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    let result = getUINativeModule().frameNode.moveTo(this.nodePtr_, targetParent.nodePtr_, index);
-    __JSScopeUtil__.restoreInstanceId();
+    let result;
+    try {
+      result = getUINativeModule().frameNode.moveTo(this.nodePtr_, targetParent.nodePtr_, index);
+    } finally {
+      __JSScopeUtil__.restoreInstanceId();
+    }
     if (result === ERROR_CODE_NODE_IS_ADOPTED) {
       throw { message: 'The current node has already been adopted.', code: 100027 };
     }
@@ -542,9 +584,13 @@ class FrameNode {
 
   getParent(): FrameNode | null {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    const result = getUINativeModule().frameNode.getParent(this.getNodePtr());
+    let result;
+    try {
+      result = getUINativeModule().frameNode.getParent(this.getNodePtr());
+    } finally {
+      __JSScopeUtil__.restoreInstanceId();
+    }
     const nodeId = result?.nodeId;
-    __JSScopeUtil__.restoreInstanceId();
     if (nodeId === undefined || nodeId === -1) {
       return null;
     }
@@ -553,8 +599,12 @@ class FrameNode {
 
   getChildrenCount(isExpanded?: boolean): number {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    const childrenCount = getUINativeModule().frameNode.getChildrenCount(this.getNodePtr(), isExpanded);
-    __JSScopeUtil__.restoreInstanceId();
+    let childrenCount;
+    try {
+      childrenCount = getUINativeModule().frameNode.getChildrenCount(this.getNodePtr(), isExpanded);
+    } finally {
+      __JSScopeUtil__.restoreInstanceId();
+    }
     return childrenCount;
   }
 
@@ -678,8 +728,12 @@ class FrameNode {
 
   getInspectorInfo(): Object {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    const inspectorInfoStr = getUINativeModule().frameNode.getInspectorInfo(this.getNodePtr());
-    __JSScopeUtil__.restoreInstanceId();
+    let inspectorInfoStr;
+    try {
+      inspectorInfoStr = getUINativeModule().frameNode.getInspectorInfo(this.getNodePtr());
+    } finally {
+      __JSScopeUtil__.restoreInstanceId();
+    }
     const inspectorInfo = JSON.parse(inspectorInfoStr);
     return inspectorInfo;
   }
@@ -717,15 +771,21 @@ class FrameNode {
     const maxSize: Size = constraint.maxSize;
     const percentReference: Size = constraint.percentReference;
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    getUINativeModule().frameNode.measureNode(this.getNodePtr(), minSize.width, minSize.height, maxSize.width,
-      maxSize.height, percentReference.width, percentReference.height);
-    __JSScopeUtil__.restoreInstanceId();
+    try {
+      getUINativeModule().frameNode.measureNode(this.getNodePtr(), minSize.width, minSize.height, maxSize.width,
+        maxSize.height, percentReference.width, percentReference.height);
+    } finally {
+      __JSScopeUtil__.restoreInstanceId();
+    }
   }
 
   layout(position: Position): void {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    getUINativeModule().frameNode.layoutNode(this.getNodePtr(), position.x, position.y);
-    __JSScopeUtil__.restoreInstanceId();
+    try {
+      getUINativeModule().frameNode.layoutNode(this.getNodePtr(), position.x, position.y);
+    } finally {
+      __JSScopeUtil__.restoreInstanceId();
+    }
   }
 
   setNeedsLayout(): void {
@@ -737,8 +797,12 @@ class FrameNode {
       throw { message: 'The FrameNode cannot be set whether to support cross-language common attribute setting.', code: 100022 };
     }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    const result = getUINativeModule().frameNode.setCrossLanguageOptions(this.getNodePtr(), options.attributeSetting ?? false, options.treeOperating);
-    __JSScopeUtil__.restoreInstanceId();
+    let result;
+    try {
+      result = getUINativeModule().frameNode.setCrossLanguageOptions(this.getNodePtr(), options.attributeSetting ?? false, options.treeOperating);
+    } finally {
+      __JSScopeUtil__.restoreInstanceId();
+    }
     if (result !== 0) {
       throw { message: 'The FrameNode cannot be set whether to support cross-language common attribute setting.', code: 100022 };
     }
@@ -746,9 +810,14 @@ class FrameNode {
 
   getCrossLanguageOptions(): CrossLanguageOptions {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    const attributeSetting = getUINativeModule().frameNode.getCrossLanguageOptions(this.getNodePtr());
-    const treeOperating = getUINativeModule().frameNode.getCrossLanguageTreeOperating(this.getNodePtr());
-    __JSScopeUtil__.restoreInstanceId();
+    let attributeSetting;
+    let treeOperating;
+    try {
+      attributeSetting = getUINativeModule().frameNode.getCrossLanguageOptions(this.getNodePtr());
+      treeOperating = getUINativeModule().frameNode.getCrossLanguageTreeOperating(this.getNodePtr());
+    } finally {
+      __JSScopeUtil__.restoreInstanceId();
+    }
     return { attributeSetting: attributeSetting ?? false, treeOperating: treeOperating ?? false };
   }
 
@@ -888,9 +957,13 @@ class FrameNode {
       throw { message: "The parameter 'position' is invalid: it cannot be null. Provide a non-null position object.", code: 100025 };
     }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    const offsetPosition = getUINativeModule().frameNode.convertPoint(
-      this.getNodePtr(), position.x, position.y, targetNode.nodePtr_);
-    __JSScopeUtil__.restoreInstanceId();
+    let offsetPosition;
+    try {
+      offsetPosition = getUINativeModule().frameNode.convertPoint(
+        this.getNodePtr(), position.x, position.y, targetNode.nodePtr_);
+    } finally {
+      __JSScopeUtil__.restoreInstanceId();
+    }
     if (offsetPosition[0] === 0) {
       throw { message: 'The current FrameNode and the target FrameNode do not have a common ancestor node.', code: 100024 };
     }
@@ -907,9 +980,13 @@ class FrameNode {
       throw new BusinessError(100026, 'The current FrameNode has been disposed.');
     }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    const offsetPosition = getUINativeModule().frameNode.convertPositionToWindow(
-      this.getNodePtr(), positionByLocal.x, positionByLocal.y);
-    __JSScopeUtil__.restoreInstanceId();
+    let offsetPosition;
+    try {
+      offsetPosition = getUINativeModule().frameNode.convertPositionToWindow(
+        this.getNodePtr(), positionByLocal.x, positionByLocal.y);
+    } finally {
+      __JSScopeUtil__.restoreInstanceId();
+    }
     if (offsetPosition[0] === 2) {
       throw new BusinessError(401, "The param 'x' or 'y' of the parameter 'positionByLocal' is invalid.");
     }
@@ -929,9 +1006,13 @@ class FrameNode {
       throw new BusinessError(100026, 'The current FrameNode has been disposed.');
     }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    const offsetPosition = getUINativeModule().frameNode.convertPositionFromWindow(
-      this.getNodePtr(), positionByWindow.x, positionByWindow.y);
-    __JSScopeUtil__.restoreInstanceId();
+    let offsetPosition;
+    try {
+      offsetPosition = getUINativeModule().frameNode.convertPositionFromWindow(
+        this.getNodePtr(), positionByWindow.x, positionByWindow.y);
+    } finally {
+      __JSScopeUtil__.restoreInstanceId();
+    }
     if (offsetPosition[0] === 2) {
       throw new BusinessError(401, "The param 'x' or 'y' of the parameter 'positionByWindow' is invalid.");
     }
@@ -960,8 +1041,12 @@ class FrameNode {
       throw { message: "The parameter 'child' is invalid: the child node has been disposed.", code: 100025 };
     }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    let result = getUINativeModule().frameNode.adoptChild(this.getNodePtr(), child.getNodePtr());
-    __JSScopeUtil__.restoreInstanceId();
+    let result;
+    try {
+      result = getUINativeModule().frameNode.adoptChild(this.getNodePtr(), child.getNodePtr());
+    } finally {
+      __JSScopeUtil__.restoreInstanceId();
+    }
     let errorInfo = errorMap_.get(result);
     if (errorInfo !== undefined) {
       throw { message: errorInfo, code: 100025 };
@@ -984,8 +1069,12 @@ class FrameNode {
       throw { message: "The parameter 'child' is invalid: the child node has been disposed.", code: 100025 };
     }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    let result = getUINativeModule().frameNode.removeAdoptedChild(this.getNodePtr(), child.getNodePtr());
-    __JSScopeUtil__.restoreInstanceId();
+    let result;
+    try {
+      result = getUINativeModule().frameNode.removeAdoptedChild(this.getNodePtr(), child.getNodePtr());
+    } finally {
+      __JSScopeUtil__.restoreInstanceId();
+    }
     let errorInfo = errorMap_.get(result);
     if (errorInfo !== undefined) {
       throw { message: errorInfo, code: 100025 };
