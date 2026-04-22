@@ -2586,7 +2586,6 @@ ArkUINativeModuleValue CommonBridge::SetShadow(ArkUIRuntimeCallInfo *runtimeCall
     ParseJsShadowRadiusResObj(vm, radiusArg, radius, vectorResObj);
     shadows[NUM_0].f32 = radius;
 
-    shadows[NUM_0].f32 = (LessNotEqual(shadows[NUM_0].f32, 0.0)) ? 0.0 : shadows[NUM_0].f32;
     CalcDimension offsetX;
     if (ParseJsShadowDimension(vm, offsetXArg, offsetX, vectorResObj)) {
         shadows[NUM_2].f32 = offsetX.Value();

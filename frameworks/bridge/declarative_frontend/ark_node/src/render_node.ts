@@ -679,7 +679,9 @@ class RenderNode {
     getUINativeModule().renderNode.setShadowElevation(this.nodePtr, this.shadowElevationValue);
   }
   set shadowRadius(radius: number) {
-    this.shadowRadiusValue = this.checkUndefinedOrNullWithDefaultValue<number>(radius, 0);
+    this.shadowRadiusValue = this.checkUndefinedOrNullWithDefaultValue<number>(radius,
+      ((typeof ViewStackProcessor['getApiVersion'] === 'function') &&
+      (ViewStackProcessor['getApiVersion']() >= 26)) ? -1 : 0);
     getUINativeModule().renderNode.setShadowRadius(this.nodePtr, this.shadowRadiusValue);
   }
   set size(size: Size) {

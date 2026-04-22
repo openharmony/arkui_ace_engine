@@ -894,7 +894,7 @@ bool GetShadowOptionsOffset(ani_env *env, ani_object object, const char *name, d
 
 bool GetShadowOptionsParam(ani_env *env, ani_object object, OHOS::Ace::Shadow& result)
 {
-    double blurRadius = 0.0;
+    double blurRadius = -1.0;
     GetShadowOptionsRadiusParam(env, object, blurRadius);
     result.SetBlurRadius(blurRadius);
 

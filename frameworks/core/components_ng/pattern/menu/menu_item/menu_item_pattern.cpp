@@ -498,7 +498,7 @@ void MenuItemPattern::ClearFocusStyle()
     }
     if (isFocusShadowSet_) {
         renderContext->ResetBackShadow();
-        renderContext->SetShadowRadius(0.0f);
+        renderContext->SetShadowRadius(-1.0f);
         isFocusShadowSet_ = false;
     }
     auto paintProperty = GetPaintProperty<MenuItemPaintProperty>();
@@ -564,7 +564,7 @@ void MenuItemPattern::HandleBlurEvent()
     }
     if (isFocusShadowSet_) {
         renderContext->ResetBackShadow();
-        renderContext->SetShadowRadius(0.0f);
+        renderContext->SetShadowRadius(-1.0f);
         isFocusShadowSet_ = false;
     }
 

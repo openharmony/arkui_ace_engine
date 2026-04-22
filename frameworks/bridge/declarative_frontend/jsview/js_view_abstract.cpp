@@ -10882,11 +10882,8 @@ void JSViewAbstract::ParseShadowPropsUpdate(const JSRef<JSObject>& jsObj, double
     ParseJsDouble(jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::RADIUS)), radius, radiusResObj);
     if (SystemProperties::ConfigChangePerform() && radiusResObj) {
         auto&& updateFunc = [](const RefPtr<ResourceObject>& radiusResObj, Shadow& shadow) {
-            double radius = 0.0;
+            double radius = -1.0;
             ResourceParseUtils::ParseResDouble(radiusResObj, radius);
-            if (LessNotEqual(radius, 0.0)) {
-                radius = 0.0;
-            }
             shadow.SetBlurRadius(radius);
         };
         shadow.AddResource("shadow.radius", radiusResObj, std::move(updateFunc));
@@ -10905,11 +10902,8 @@ bool JSViewAbstract::ParseShadowProps(
         return false;
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    double radius = 0.0;
+    double radius = -1.0;
     ParseShadowPropsUpdate(jsObj, radius, shadow);
-    if (LessNotEqual(radius, 0.0)) {
-        radius = 0.0;
-    }
     shadow.SetBlurRadius(radius);
     ParseShadowOffsetXY(jsObj, shadow);
 

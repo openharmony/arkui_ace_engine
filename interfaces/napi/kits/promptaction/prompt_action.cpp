@@ -292,17 +292,14 @@ void GetToastObjectShadow(napi_env env, napi_value shadowNApi, Shadow& shadowPro
     napi_get_named_property(env, shadowNApi, "type", &typeApi);
     napi_get_named_property(env, shadowNApi, "fill", &fillApi);
     ResourceInfo recv;
-    double radiusValue = 0.0;
+    double radiusValue = -1.0;
     if (ParseResourceParam(env, radiusApi, recv)) {
         CalcDimension radius;
         if (ParseResource(recv, radius)) {
-            radiusValue = LessNotEqual(radius.Value(), 0.0) ? 0.0 : radius.Value();
+            radiusValue = radius.Value();
         }
     } else {
         napi_get_value_double(env, radiusApi, &radiusValue);
-        if (LessNotEqual(radiusValue, 0.0)) {
-            radiusValue = 0.0;
-        }
     }
     shadowProps.SetBlurRadius(radiusValue);
     Color color;
@@ -1260,11 +1257,8 @@ void GetNapiObjectShadow(napi_env env, const std::shared_ptr<PromptAsyncContext>
     napi_get_named_property(env, asyncContext->shadowApi, "color", &colorApi);
     napi_get_named_property(env, asyncContext->shadowApi, "type", &typeApi);
     napi_get_named_property(env, asyncContext->shadowApi, "fill", &fillApi);
-    double radius = 0.0;
+    double radius = -1.0;
     napi_get_value_double(env, radiusApi, &radius);
-    if (LessNotEqual(radius, 0.0)) {
-        radius = 0.0;
-    }
     shadow.SetBlurRadius(radius);
     Color color;
     ShadowColorStrategy shadowColorStrategy;

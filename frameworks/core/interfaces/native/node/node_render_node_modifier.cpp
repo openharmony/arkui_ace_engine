@@ -1033,7 +1033,12 @@ int32_t SetShadowRadius(ArkUIRenderNodeHandle handle, float radius, void* errorI
         SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Render node is invalid");
         return ERROR_CODE_PARAM_INVALID;
     }
-    rsNode->SetShadowRadius(radius);
+    if (radius >= 0.0f) {
+        rsNode->SetShadowRadius(radius);
+        return ERROR_CODE_NO_ERROR;
+    }
+    rsNode->SetShadowRadius(
+        Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX) ? 0.0f : radius);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -1050,6 +1055,9 @@ int32_t GetShadowRadius(ArkUIRenderNodeHandle handle, float* radius, void* error
         return ERROR_CODE_PARAM_INVALID;
     }
     *radius = rsNode->GetStagingProperties().GetShadowRadius();
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        *radius = std::max(*radius, 0.0f);
+    }
     return ERROR_CODE_NO_ERROR;
 }
 

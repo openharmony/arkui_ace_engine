@@ -172,7 +172,8 @@ HWTEST_F(TextClockTestNG, TextClockTest001, TestSize.Level0)
     errSetShadows.emplace_back(errShadow);
     textClockLayoutProperty->UpdateTextShadow(errSetShadows);
     EXPECT_EQ(textClockLayoutProperty->GetTextShadow(), errSetShadows);
-    EXPECT_EQ(errShadow.GetBlurRadius(), 0);
+    EXPECT_EQ(errShadow.GetBlurRadius(),
+        Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX) ? 0 : -0.1f);
 
     FONT_FEATURES_LIST fontFeatures;
     fontFeatures.emplace_back(std::make_pair("ss01", 1));
@@ -971,7 +972,8 @@ HWTEST_F(TextClockTestNG, TextClockLayoutPropertyTest001, TestSize.Level1)
     errSetShadows.emplace_back(errShadow);
     textClockLayoutProperty->UpdateTextShadow(errSetShadows);
     EXPECT_EQ(textClockLayoutProperty->GetTextShadow(), errSetShadows);
-    EXPECT_EQ(errShadow.GetBlurRadius(), 0);
+    EXPECT_EQ(errShadow.GetBlurRadius(),
+        Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX) ? 0 : -0.1f);
 
     FONT_FEATURES_LIST fontFeatures;
     fontFeatures.emplace_back(std::make_pair("ss01", 1));
