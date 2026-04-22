@@ -125,7 +125,6 @@ export class ArkCustomComponentRootPeer extends PeerNode {
         }
         this.component?.__removeChildWhenDispose__IExtendableComponent_Internal();
         this.freezeRoot.clear();
-        this.component?.__clearDelegate__Internal();
         this.component = undefined;
         this.buildFunc = undefined;
         this.customNodeBuilder = undefined;
