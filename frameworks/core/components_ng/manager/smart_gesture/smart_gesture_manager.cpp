@@ -21,7 +21,9 @@
 #include <set>
 #include <unordered_set>
 
+#ifndef CROSS_PLATFORM
 #include "interfaces/inner_api/ace/ui_content.h"
+#endif
 #include "ui/base/utils/utils.h"
 
 #include "base/log/log_wrapper.h"
@@ -814,12 +816,14 @@ bool SmartGestureManager::ExecuteScrollProposal(const SmartGestureProposal& prop
 
 void SmartGestureManager::ExecuteBackPressProposal()
 {
+#ifndef CROSS_PLATFORM
     auto context = GetPipelineContext();
     CHECK_NULL_VOID(context);
     int32_t instanceId = context->GetInstanceId();
     auto uiContent = UIContent::GetUIContent(instanceId);
     CHECK_NULL_VOID(uiContent);
     uiContent->ProcessBackPressed();
+#endif
 }
 
 bool SmartGestureManager::IsPrimaryActionNodeActive(const RefPtr<FrameNode>& node) const
