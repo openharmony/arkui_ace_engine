@@ -574,7 +574,7 @@ HWTEST_F(SliderContentModifierTestNg, SliderContentModifierTest010, TestSize.Lev
 /**
  * @tc.name: SliderContentModifier_DrawBackground_HDRTagColor
  * @tc.desc: Test DrawBackground with HDR track color where headRoom is greater than 1.0,
- *           verifying GetHDRUIColorByHeadRoom passes clamped RGBA and headRoom to RSUIColor.
+ *           verifying GetHDRColor4fByHeadRoom applies headRoom scaling to clamped RGBA and returns RSColor4f.
  * @tc.type: FUNC
  */
 HWTEST_F(SliderContentModifierTestNg, SliderContentModifier_DrawBackground_HDRTagColor, TestSize.Level1)
@@ -615,7 +615,7 @@ HWTEST_F(SliderContentModifierTestNg, SliderContentModifier_DrawBackground_HDRTa
 /**
  * @tc.name: SliderContentModifier_DrawBackground_HDRDefaultHeadRoom
  * @tc.desc: Test DrawBackground with HDR track color where headRoom equals 1.0,
- *           verifying GetHDRUIColorByHeadRoom uses clamped RGBA without headRoom parameter.
+ *           verifying GetHDRColor4fByHeadRoom returns clamped RGBA as RSColor4f without headRoom scaling.
  * @tc.type: FUNC
  */
 HWTEST_F(SliderContentModifierTestNg, SliderContentModifier_DrawBackground_HDRDefaultHeadRoom, TestSize.Level1)
@@ -861,7 +861,7 @@ HWTEST_F(SliderContentModifierTestNg, SliderContentModifier_DrawBackground_Displ
 /**
  * @tc.name: SliderContentModifier_DrawBackground_NonHDRNormalColor
  * @tc.desc: Test DrawBackground with normal (non-HDR) track color without HeadRoomColor,
- *           verifying GetUIColorsByGradientColors uses the LinearColor to RSUIColor conversion path.
+ *           verifying GetColorsByGradientColors converts LinearColor to RSColor4f via RSColor.
  * @tc.type: FUNC
  */
 HWTEST_F(SliderContentModifierTestNg, SliderContentModifier_DrawBackground_NonHDRNormalColor, TestSize.Level1)
@@ -902,7 +902,7 @@ HWTEST_F(SliderContentModifierTestNg, SliderContentModifier_DrawBackground_NonHD
 /**
  * @tc.name: SliderContentModifier_DrawBackground_MixedHDRAndNonHDR
  * @tc.desc: Test DrawBackground with gradient containing both HDR (with headRoom) and non-HDR colors,
- *           verifying GetUIColorsByGradientColors correctly handles mixed color types and returns max headRoom.
+ *           verifying GetColorsByGradientColors correctly handles mixed color types and returns max headRoom.
  * @tc.type: FUNC
  */
 HWTEST_F(SliderContentModifierTestNg, SliderContentModifier_DrawBackground_MixedHDRAndNonHDR, TestSize.Level1)
@@ -954,7 +954,7 @@ HWTEST_F(SliderContentModifierTestNg, SliderContentModifier_DrawBackground_Mixed
 /**
  * @tc.name: SliderContentModifier_DrawBackground_ReverseWithHDR
  * @tc.desc: Test DrawBackground with reverse direction and HDR gradient color,
- *           verifying reversed start/end points are passed to CreateLinearGradient.
+ *           verifying reversed start/end points are passed to CreateLinearGradientShader.
  * @tc.type: FUNC
  */
 HWTEST_F(SliderContentModifierTestNg, SliderContentModifier_DrawBackground_ReverseWithHDR, TestSize.Level1)
@@ -996,7 +996,7 @@ HWTEST_F(SliderContentModifierTestNg, SliderContentModifier_DrawBackground_Rever
 /**
  * @tc.name: SliderContentModifier_DrawBackground_HDRColorClamp
  * @tc.desc: Test DrawBackground with HDR color values exceeding 1.0,
- *           verifying GetHDRUIColorByHeadRoom clamps RGBA to [0.0, 1.0] range.
+ *           verifying GetHDRColor4fByHeadRoom clamps RGBA values to [0.0, 1.0] before constructing RSColor4f.
  * @tc.type: FUNC
  */
 HWTEST_F(SliderContentModifierTestNg, SliderContentModifier_DrawBackground_HDRColorClamp, TestSize.Level1)
