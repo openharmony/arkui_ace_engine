@@ -20,8 +20,10 @@
 #define private public
 #define protected public
 #include "core/components/common/properties/border_image.h"
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
 #include "core/components_ng/manager/gesture_debug/gesture_debug_boundary_manager.h"
 #include "core/components_ng/render/adapter/gesture_debug_boundary_modifier.h"
+#endif
 #include "test/unittest/core/rosen/rosen_render_context_test.h"
 #undef private
 #undef protected
@@ -32,12 +34,14 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 constexpr char SRC_JPG[] = "file://data/data/com.example.test/res/exampleAlt.jpg";
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
 constexpr float GESTURE_DEBUG_TEST_FRAME_WIDTH = 120.0f;
 constexpr float GESTURE_DEBUG_TEST_FRAME_HEIGHT = 90.0f;
 constexpr uint8_t GESTURE_DEBUG_TEST_MASK = 0x03;
 constexpr uint8_t GESTURE_DEBUG_SECOND_MASK = 0x04;
 constexpr float GESTURE_DEBUG_TEST_STROKE = 8.0f;
 const std::vector<Color> GESTURE_DEBUG_TEST_COLORS = { Color::RED, Color::BLUE };
+#endif
 
 template <typename T>
 bool CompareVector(const std::vector<T>& vec1, const std::vector<T>& vec2)
@@ -2523,6 +2527,7 @@ HWTEST_F(RosenRenderContextTest, IsOnRenderTreeTest001, TestSize.Level1)
     EXPECT_EQ(isOnRenderTree, false);
 }
 
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
 /**
  * @tc.name: PaintGestureDebugBoundary001
  * @tc.desc: Test PaintGestureDebugBoundary returns directly when there is no info and no modifier.
@@ -2666,6 +2671,7 @@ HWTEST_F(RosenRenderContextTest, GestureDebugBoundaryModifier002, TestSize.Level
     EXPECT_EQ(modifier->property_, firstProperty);
     EXPECT_EQ(modifier->property_->Get(), GESTURE_DEBUG_SECOND_MASK);
 }
+#endif // GESTURE_DEBUG_BOUNDARY_SUPPORTED
 
 /**
  * @tc.name: GetModalNode001

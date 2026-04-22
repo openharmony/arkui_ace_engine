@@ -164,6 +164,7 @@ ace_unittest("gesture_debug_boundary_manager_test_ng") {
   module_name = "Gesture-DebugBoundaryManager"
   type = "new"
   sources = [ "gesture_debug_boundary_manager_test_ng.cpp" ]
+  defines = [ "GESTURE_DEBUG_BOUNDARY_SUPPORTED" ]
 }
 
 ace_unittest("focus_manager_test_ng") {

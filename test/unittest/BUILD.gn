@@ -270,12 +270,13 @@ ohos_source_set("ace_components_base") {
   }
   deps = []
   configs = [ ":ace_unittest_config" ]
+  defines = [ "GESTURE_DEBUG_BOUNDARY_SUPPORTED" ]
   external_deps = [ "cJSON:cjson" ]
   if (current_os == "ohos") {
     external_deps += [ "c_utils:utils" ]
   }
   if (defined(ffrt_support) && ffrt_support) {
-    defines = [ "FFRT_SUPPORT" ]
+    defines += [ "FFRT_SUPPORT" ]
     external_deps += [ "ffrt:libffrt" ]
   }
 }
@@ -353,6 +354,7 @@ ohos_source_set("ace_components_gestures") {
   ]
   deps = []
   configs = [ ":ace_unittest_config" ]
+  defines = [ "GESTURE_DEBUG_BOUNDARY_SUPPORTED" ]
   if (current_os == "ohos") {
     external_deps = [ "c_utils:utils" ]
   }
@@ -464,6 +466,7 @@ ohos_source_set("ace_components_manager") {
   ]
   deps = []
   configs = [ ":ace_unittest_config" ]
+  defines = [ "GESTURE_DEBUG_BOUNDARY_SUPPORTED" ]
   if (current_os == "ohos") {
     external_deps = [ "c_utils:utils" ]
   }
@@ -542,6 +545,7 @@ ohos_source_set("ace_components_render") {
   ]
   deps = []
   configs = [ ":ace_unittest_config" ]
+  defines = [ "GESTURE_DEBUG_BOUNDARY_SUPPORTED" ]
   if (current_os == "ohos") {
     external_deps = [ "c_utils:utils" ]
   }
@@ -730,6 +734,7 @@ ohos_source_set("ace_core_extra") {
     "icu:static_icui18n",
     "icu:static_icuuc",
   ]
+  defines = [ "GESTURE_DEBUG_BOUNDARY_SUPPORTED" ]
   configs = [ ":ace_unittest_config" ]
   if (current_os == "ohos") {
     external_deps += [

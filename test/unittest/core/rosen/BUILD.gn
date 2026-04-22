@@ -208,6 +208,7 @@ ohos_unittest("arkui_rosen_render_context_test") {
   if (defined(use_rosen_drawing) && use_rosen_drawing) {
     defines += [ "USE_ROSEN_DRAWING" ]
   }
+  defines += [ "GESTURE_DEBUG_BOUNDARY_SUPPORTED" ]
 }
 
 ohos_unittest("gradient_style_modifier_test") {
@@ -343,7 +344,9 @@ ohos_unittest("gradient_style_modifier_test") {
     "skia:skia_canvaskit",
     "window_manager:libwm",
   ]
+
+  defines = [ "GESTURE_DEBUG_BOUNDARY_SUPPORTED" ]
   if (defined(use_rosen_drawing) && use_rosen_drawing) {
-    defines = [ "USE_ROSEN_DRAWING" ]
+    defines += [ "USE_ROSEN_DRAWING" ]
   }
 }
