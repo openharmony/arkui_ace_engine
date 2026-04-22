@@ -80,6 +80,10 @@ class __ReusePool_Internal__ implements IReusePool {
     // Track all names a constructor has been known by
     private static ctorKnownNames_: WeakMap<Function, Set<string>> = new WeakMap();
 
+    // Tracks reuse pool under pruning to prevent re-entrant loops
+    // when resetRecycleCustomNode() triggers maxCount updates on the same pool
+    private pruning_: Set<string> = new Set();
+
     // Registers a constructor name so aliased imports are recognized as defaults
     // Used to construct reuse component key with func ptrs of component class
     static registerCtorName(ctor: Function, name: string): void {
@@ -203,23 +207,40 @@ class __ReusePool_Internal__ implements IReusePool {
 
         if (id === undefined) {
             this.maxCounts_.set(componentLimitKey, value);
-            // Prune ALL buckets for this class
-            for (const [k, arr] of this.cached_) {
+            // Snapshot keys first — cached_ may be mutated by teardown callbacks
+            const keys: string[] = [];
+            for (const k of this.cached_.keys()) {
                 if (k.startsWith(prefix)) {
-                    while (arr.length > value) {
-                        arr.pop()?.resetRecycleCustomNode();
-                    }
+                    keys.push(k);
                 }
+            }
+            for (const k of keys) {
+                this.pruneBucket_(k, value);
             }
         } else {
             const key = prefix + id;
             this.maxCounts_.set(key, value);
+            this.pruneBucket_(key, value);
+        }
+    }
+
+    // Evicts cached nodes from a single bucket until its length is <= value.
+    // Re-entrant calls on the same bucket are no-ops: the outer frame finishes the work.
+    private pruneBucket_(key: string, value: number): void {
+        if (this.pruning_.has(key)) {
+            return;
+        }
+        this.pruning_.add(key);
+        try {
             const arr = this.cached_.get(key);
-            if (arr) {
-                while (arr.length > value) {
-                    arr.pop()?.resetRecycleCustomNode();
-                }
+            if (!arr) {
+                return;
             }
+            while (arr.length > value) {
+                arr.pop()?.resetRecycleCustomNode();
+            }
+        } finally {
+            this.pruning_.delete(key);
         }
     }
 
