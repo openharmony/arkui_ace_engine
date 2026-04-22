@@ -1317,7 +1317,7 @@ void NavigationPattern::SyncWithJsStackIfNeeded()
     }
     auto indexes = navigationStack_->GetAllPathIndex();
     auto toIndex = indexes.size() - 1;
-    auto topNavPath = navigationStack_->GetTopNavPath();
+    auto topNavPath = navigationStack_->GetPreTopNavPath();
     FireNavigateChangeCallback();
     FireInterceptionBeforeLifeCycleEvent(topNavPath, toIndex);
     needSyncWithJsStack_ = false;
