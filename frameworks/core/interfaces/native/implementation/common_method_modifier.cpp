@@ -3273,6 +3273,7 @@ void SetOnClick0Impl(Ark_NativePointer node,
     }
     auto onClick = [callback = CallbackHelper(*optValue)](GestureEvent& info) {
         const auto event = Converter::SyncEvent<Ark_ClickEvent>(info);
+        ACE_BENCH_MARK_TRACE("OnClickEvent_end");
         callback.InvokeSync(event.ArkValue());
     };
     if (frameNode->GetTag() == V2::TEXT_ETS_TAG) {
@@ -3296,6 +3297,7 @@ void SetOnHoverImpl(Ark_NativePointer node,
         PipelineContext::SetCallBackNode(node);
         Ark_Boolean arkIsHover = Converter::ArkValue<Ark_Boolean>(isHover);
         const auto event = Converter::SyncEvent<Ark_HoverEvent>(hoverInfo);
+        ACE_BENCH_MARK_TRACE("OnHoverEvent_end isHover:%d", isHover);
         arkCallback.InvokeSync(arkIsHover, event.ArkValue());
     };
     ViewAbstract::SetOnHover(frameNode, std::move(onHover));
@@ -3389,6 +3391,8 @@ void SetOnMouseImpl(Ark_NativePointer node,
     auto onMouse = [arkCallback = CallbackHelper(*optValue), node = weakNode](MouseInfo& mouseInfo) {
         PipelineContext::SetCallBackNode(node);
         const auto event = Converter::SyncEvent<Ark_MouseEvent>(mouseInfo);
+        ACE_BENCH_MARK_TRACE("OnMouseEvent_end type:%d button:%d", static_cast<int32_t>(mouseInfo.GetAction()),
+            static_cast<int32_t>(mouseInfo.GetButton()));
         arkCallback.InvokeSync(event.ArkValue());
     };
     ViewAbstract::SetOnMouse(frameNode, std::move(onMouse));
@@ -3421,6 +3425,9 @@ void SetOnTouchImpl(Ark_NativePointer node,
             .changedTouches = Converter::ArkValue<Array_TouchObject>(info.GetChangedTouches(), Converter::FC),
             .ptr = &info
         };
+        ACE_BENCH_MARK_TRACE("OnTouchEvent_end type:%d",
+            static_cast<int32_t>(info.GetChangedTouches().size() > 0 ?
+            info.GetChangedTouches().front().GetTouchType() : static_cast<TouchType>(0)));
         arkCallback.InvokeSync(proxy);
     };
     ViewAbstract::SetOnTouch(frameNode, std::move(onEvent));
@@ -3439,6 +3446,7 @@ void SetOnKeyEventImpl(Ark_NativePointer node,
         auto onKeyEvent = [arkCallback = CallbackHelper(*optValue), node = weakNode](KeyEventInfo& info) -> bool {
             PipelineContext::SetCallBackNode(node);
             const auto event = Converter::SyncEvent<Ark_KeyEvent>(info);
+            ACE_BENCH_MARK_TRACE("OnKeyEvent_end type:%d", info.GetKeyType());
             auto arkResult = arkCallback.InvokeWithObtainResult<Ark_Boolean, synthetic_Callback_Boolean_Void>(
                 event.ArkValue());
             return Converter::Convert<bool>(arkResult);
@@ -3551,6 +3559,7 @@ void SetOnAxisEventImpl(Ark_NativePointer node,
     auto onAxis = [callback = CallbackHelper(*optValue), node = weakNode](AxisInfo& info) {
         PipelineContext::SetCallBackNode(node);
         const auto arkInfo = Converter::SyncEvent<Ark_AxisEvent>(info);
+        ACE_BENCH_MARK_TRACE("OnAxisEvent_end type:%d", info.GetAction());
         callback.InvokeSync(arkInfo.ArkValue());
     };
     ViewAbstract::SetOnAxisEvent(frameNode, std::move(onAxis));
@@ -5773,6 +5782,7 @@ void SetOnClick1Impl(Ark_NativePointer node,
     }
     auto onEvent = [callback = CallbackHelper(*optEvent)](GestureEvent& info) {
         const auto event = Converter::SyncEvent<Ark_ClickEvent>(info);
+        ACE_BENCH_MARK_TRACE("OnClickEvent_end");
         callback.InvokeSync(event.ArkValue());
     };
     auto convValue = Converter::OptConvertPtr<float>(distanceThreshold);
