@@ -585,6 +585,7 @@ public:
     static void SetMotionPath(const MotionPathOption &motionPath);
     // progress mask
     static void SetProgressMask(const RefPtr<ProgressMaskProperty> &progress);
+    static void SetEdgeLightParam(const std::optional<EdgeLightParam>& param);
 
     static void Pop();
 

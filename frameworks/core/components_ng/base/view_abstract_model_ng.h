@@ -1145,6 +1145,11 @@ public:
         ViewAbstract::SetCenterGravityOptions(centerGravityOptions);
     }
 
+    void SetEdgeLightParam(const std::optional<EdgeLightParam>& param) override
+    {
+        ViewAbstract::SetEdgeLightParam(param);
+    }
+
     void SetUseShadowBatching(bool useShadowBatching) override
     {
         ViewAbstract::SetUseShadowBatching(useShadowBatching);

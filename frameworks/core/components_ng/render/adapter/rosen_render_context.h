@@ -70,7 +70,7 @@ class PipelineContext;
 class RosenRenderContext : public RenderContext {
     DECLARE_ACE_TYPE(RosenRenderContext, NG::RenderContext);
 public:
-    RosenRenderContext() = default;
+    RosenRenderContext();
     ~RosenRenderContext() override;
 
     void SetEffectLayer(const ContextParam& param);
@@ -586,6 +586,17 @@ public:
 
     void SetMaterialWithQualityLevel(
         const std::shared_ptr<Rosen::RSNGFilterBase>& materialFilter, UiMaterialFilterQuality quality) override;
+        
+    void OnEdgeLightParamUpdate(const NG::EdgeLightParam& param) override;
+
+    void UpdateEdgeLightFilter(const SizeF& frameSize) override;
+
+    void UpdateEdgeLightFilterWithLightMask(const SizeF& frameSize) override;
+
+    void ParseEdgeLightPosition(const NG::EdgeLightPosition position, float& angle, float& positionX, float& positionY,
+        float rectH, const SizeF& frameSize) override;
+
+    void ResetEdgeLightFilter() override;
 
     void OnSidebarContentMaskUpdate(const RefPtr<SidebarContentMaskProperty>& maskProperty) override;
 
@@ -963,6 +974,8 @@ private:
     static std::timed_mutex taskMtx_;
     CancelableCallback<void()> pendingDecodeTask_;
     CancelableCallback<void()> pendingUITask_;
+    class EdgeLightImpl;
+    std::unique_ptr<EdgeLightImpl> edgeLightImpl_;
 };
 } // namespace OHOS::Ace::NG
 

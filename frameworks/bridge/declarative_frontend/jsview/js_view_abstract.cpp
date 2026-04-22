@@ -94,6 +94,7 @@
 #include "core/components_ng/pattern/toolbaritem/toolbaritem_model.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/property/union_effect_container_options.h"
+#include "core/components_ng/property/edgelight_property.h"
 #include "core/event/key_event.h"
 
 #include "interfaces/inner_api/ace_kit/include/ui/properties/safe_area_insets.h"
@@ -1659,6 +1660,53 @@ void RegisterRadiusRes(NG::BorderRadiusProperty& radius,
         radius.AddResource("radius.bottomEnd", bottomEndResObj, std::move(updateFunc));
     } else {
         radius.RemoveResource("radius.bottomEnd");
+    }
+}
+
+void ParseEdgeLightParam(const JSRef<JSObject>& jsObj, NG::EdgeLightParam& param)
+{
+    auto length = jsObj->GetProperty("length");
+    CalcDimension edgeLightLength;
+    if (!JSViewAbstract::ParseJsDimensionVpNG(length, edgeLightLength, false)) {
+        edgeLightLength.Reset();
+    }
+    param.length = edgeLightLength;
+
+    auto intensity = jsObj->GetProperty("intensity");
+    auto edgeLightIntensity = 1.0;
+    if (JSViewAbstract::ParseJsDouble(intensity, edgeLightIntensity)) {
+        if (LessNotEqual(edgeLightIntensity, 0.0)) {
+            edgeLightIntensity = 0.0;
+        } else if (GreatNotEqual(edgeLightIntensity, 1.0)) {
+            edgeLightIntensity = 1.0;
+        }
+    }
+    param.intensity = edgeLightIntensity;
+
+    auto thickness = jsObj->GetProperty("thickness");
+    CalcDimension edgeLightThickness;
+    if (!JSViewAbstract::ParseJsDimensionVpNG(thickness, edgeLightThickness, true)) {
+        edgeLightThickness.Reset();
+    }
+    param.thickness = edgeLightThickness;
+
+    auto position = jsObj->GetProperty("position");
+    auto edgeLightPosition = NG::EdgeLightPosition::TOP_LEFT;
+    if (position->IsNumber()) {
+        int32_t posValue = position->ToNumber<int32_t>();
+        if (posValue >= static_cast<int32_t>(NG::EdgeLightPosition::TOP_LEFT) &&
+            posValue <= static_cast<int32_t>(NG::EdgeLightPosition::RIGHT)) {
+            edgeLightPosition = static_cast<NG::EdgeLightPosition>(posValue);
+        }
+    }
+    param.edgeLightPosition = edgeLightPosition;
+
+    auto color = jsObj->GetProperty("color");
+    Color edgeLightColor = Color::WHITE;
+    if (JSViewAbstract::ParseJsColor(color, edgeLightColor)) {
+        param.color = edgeLightColor;
+    } else {
+        param.color = Color::WHITE;
     }
 }
 } // namespace
@@ -6228,6 +6276,25 @@ void JSViewAbstract::JsWindowBlur(const JSCallbackInfo& info)
     info.SetReturnValue(info.This());
 }
 
+void JSViewAbstract::JSEdgeLight(const JSCallbackInfo& info)
+{
+    auto jsVal = info[0];
+    if (!jsVal->IsObject()) {
+        ViewAbstractModel::GetInstance()->SetEdgeLightParam(std::nullopt);
+        return;
+    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsVal);
+    NG::EdgeLightParam param {
+        .edgeLightPosition = NG::EdgeLightPosition::TOP_LEFT,
+        .length = CalcDimension(),
+        .intensity = 1.0f,
+        .thickness = CalcDimension(),
+        .color = Color::WHITE 
+    };
+    ParseEdgeLightParam(jsObj, param);
+    ViewAbstractModel::GetInstance()->SetEdgeLightParam(param);
+}
+
 bool JSViewAbstract::ParseDollarResource(const JSRef<JSVal>& jsValue, std::string& targetModule, ResourceType& resType,
     std::string& resName, bool isParseType)
 {
@@ -10235,6 +10302,8 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
 
     JSClass<JSViewAbstract>::StaticMethod("allowForceDark", &JSViewAbstract::JSAllowForceDark);
     JSClass<JSViewAbstract>::StaticMethod("onNeedSoftkeyboard", &JSViewAbstract::JSOnNeedSoftkeyboard);
+
+    JSClass<JSViewAbstract>::StaticMethod("edgeLight", &JSViewAbstract::JSEdgeLight);
 
     JSClass<JSViewAbstract>::Bind(globalObj);
 }

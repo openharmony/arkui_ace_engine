@@ -44,6 +44,7 @@
 #include "core/components_ng/property/sidebar_content_mask_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/property/transition_property.h"
+#include "core/components_ng/property/edgelight_property.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/property/union_effect_container_options.h"
 #include "core/components_ng/render/drawing_forward.h"
@@ -73,7 +74,6 @@ class Modifier;
 }
 
 namespace OHOS::Ace::NG {
-
 typedef enum {
     OPINC_INVALID,
     OPINC_NODE,
@@ -801,6 +801,9 @@ public:
     // AttractionEffect
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AttractionEffect, AttractionEffect);
 
+    // EdgeLight
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(EdgeLightParam, NG::EdgeLightParam);
+
     virtual void SetUsingContentRectForRenderFrame(bool value, bool adjustRSFrameByContentRect = false) {}
     virtual void SetFrameGravity(OHOS::Rosen::Gravity gravity) {}
 
@@ -910,6 +913,16 @@ public:
     virtual void UpdateCustomBackground() {}
 
     virtual void UpdateOverlayText() {}
+
+    virtual void UpdateEdgeLightFilter(const SizeF& frameSize) {}
+
+    virtual void UpdateEdgeLightFilterWithLightMask(const SizeF& frameSize) {}
+
+    virtual void ParseEdgeLightPosition(const NG::EdgeLightPosition position, float& angle, float& positionX,
+        float& positionY, float rectH, const SizeF& frameSize)
+    {}
+
+    virtual void ResetEdgeLightFilter() {}
 
     void SetIsFree(bool isFree)
     {
@@ -1030,6 +1043,8 @@ protected:
     virtual void OnFreezeUpdate(bool isFreezed) {}
     virtual void OnObscuredUpdate(const std::vector<ObscuredReasons>& reasons) {}
     virtual void OnAttractionEffectUpdate(const AttractionEffect& effect) {}
+
+    virtual void OnEdgeLightParamUpdate(const NG::EdgeLightParam& param) {}
 
 private:
     void RequestNextFrameMultiThread(bool isOffScreenNode) const;

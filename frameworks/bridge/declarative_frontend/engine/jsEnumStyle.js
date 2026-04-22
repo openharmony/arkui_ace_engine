@@ -5365,3 +5365,15 @@ let GestureShortcut;
   GestureShortcut[GestureShortcut.PRIMARY = 0] = 'PRIMARY';
 })(GestureShortcut || (GestureShortcut = {}));
 globalThis.GestureShortcut = GestureShortcut;
+
+let EdgeLightPosition;
+(function (EdgeLightPosition) {
+  EdgeLightPosition[EdgeLightPosition.TOP_LEFT = 0] = 'TOP_LEFT';
+  EdgeLightPosition[EdgeLightPosition.TOP_RIGHT = 1] = 'TOP_RIGHT';
+  EdgeLightPosition[EdgeLightPosition.BOTTOM_LEFT = 2] = 'BOTTOM_LEFT';
+  EdgeLightPosition[EdgeLightPosition.BOTTOM_RIGHT = 3] = 'BOTTOM_RIGHT';
+  EdgeLightPosition[EdgeLightPosition.TOP = 4] = 'TOP';
+  EdgeLightPosition[EdgeLightPosition.BOTTOM = 5] = 'BOTTOM';
+  EdgeLightPosition[EdgeLightPosition.LEFT = 6] = 'LEFT';
+  EdgeLightPosition[EdgeLightPosition.RIGHT = 7] = 'RIGHT';
+})(EdgeLightPosition || (EdgeLightPosition = {}));
