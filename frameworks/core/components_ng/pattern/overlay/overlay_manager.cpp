@@ -6838,6 +6838,38 @@ void OverlayManager::AddFrameNodeWithOrder(const RefPtr<FrameNode>& node, std::o
     }
 }
 
+bool OverlayManager::TopNodeIsModelUEC()
+{
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_RETURN(rootNode, false);
+    auto topNode = rootNode->GetLastChild();
+    CHECK_NULL_RETURN(topNode, false);
+    return topNode->GetTag() == V2::MODAL_PAGE_TAG && !topNode->IsAllowAddChildBelowModalUec();
+}
+
+void OverlayManager::OpenOrderOverlay(const RefPtr<FrameNode>& node, const OrderOverlayOptions& options,
+    const std::function<void(int32_t)>&& callback)
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "OpenOrderOverlay enter");
+    CHECK_NULL_VOID(node);
+    if (TopNodeIsModelUEC()) {
+        if (callback) {
+            callback(ERROR_CODE_OVERLAY_CANNOT_OPEN_DUE_TO_SYSTEM_WINDOW);
+        }
+        return;
+    }
+
+    auto levelOrder = options.levelOrder;
+    if (!levelOrder.has_value()) {
+        levelOrder = std::make_optional(LevelOrder::ORDER_DEFAULT);
+    }
+
+    AddFrameNodeWithOrder(node, levelOrder);
+    if (callback) {
+        callback(ERROR_CODE_NO_ERROR);
+    }
+}
+
 void OverlayManager::RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
 {
     OHOS::Ace::ResSchedReport::GetInstance().ResSchedDataReport("overlay_remove");
