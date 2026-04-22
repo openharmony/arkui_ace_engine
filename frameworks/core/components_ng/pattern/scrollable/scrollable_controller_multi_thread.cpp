@@ -16,7 +16,6 @@
 #include "core/components_ng/pattern/scrollable/scrollable_controller.h"
 
 #include "base/memory/referenced.h"
-#include "base/utils/multi_thread.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 

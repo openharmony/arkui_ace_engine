@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/// <reference path='../../types/theme.d.ts' />
 
 /**
  * Theme counter used to generate next theme id
@@ -194,10 +195,6 @@ class ArkThemeBase implements ThemeInternal {
             copyTheme.darkColors = {};
             // For properties missing in darkColors, use the values from colors
             Object.assign(copyTheme.darkColors, customTheme?.colors, customTheme.darkColors);
-        } else if (customTheme.colors) {
-            // If the user does not provide darkColors, use the values from colors
-            copyTheme.darkColors = {};
-            Object.assign(copyTheme.darkColors, customTheme.colors);
         }
         if (customTheme.shapes) {
             copyTheme.shapes = {};

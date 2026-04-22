@@ -28,7 +28,7 @@ import { global_resource_Resource_serializer } from './../framework/resource'
 import { TextDecorationType, Color as arkui_component_enums_Color, TextDecorationStyle, ImageSpanAlignment, ImageFit, TextAlign, TextOverflow, WordBreak, FontStyle, FontWeight } from './enums'
 import { Resource as global_resource_Resource } from 'global.resource'
 import { drawing_ColorFilter_serializer } from './../framework/ohos.graphics.drawing'
-import { PixelMap, ShadowOptions_serializer, ShadowOptions, ClickEvent, Callback as arkui_component_common_Callback, TouchEvent, ClickEvent_serializer } from './common'
+import { PixelMap, ShadowOptions_serializer, ShadowOptions, ClickEvent, Callback as arkui_component_common_Callback, TouchEvent, LayoutPolicy, ClickEvent_serializer } from './common'
 // instuctive change begin
 // no need import the CustomSpan
 import { extractors } from '#handwritten'
@@ -36,8 +36,8 @@ import { extractors } from '#handwritten'
 import { default as image } from '@ohos.multimedia.image'
 import { DrawingColorFilter } from './image'
 import { default as drawing } from '@ohos.graphics.drawing'
+import { LineSpacingOptions_serializer, LineSpacingOptions, TextVerticalAlign, TextDirection, FontConfigs_serializer, FontConfigs, SuperscriptStyle, FontVariation } from './textCommon'
 import { LeadingMarginPlaceholder_serializer, LeadingMarginPlaceholder } from './richEditor'
-import { TextVerticalAlign, TextDirection, FontConfigs_serializer, FontConfigs, SuperscriptStyle, FontVariation } from './textCommon'
 import { CustomSpanWrapper, CustomSpanWrapper_serializer } from './idlize'
 import { text_FontVariation_serializer } from './../framework/ohos.graphics.text'
 import { default as text } from '@ohos.graphics.text'
@@ -616,18 +616,33 @@ export class LineHeightStyle implements MaterializedBase {
         return this.peer
     }
     public readonly lineHeight: double
+    public readonly lineHeightMultiple?: double | undefined
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, LineHeightStyle.getFinalizer())
         this.lineHeight = this.getLineHeight()
+        this.lineHeightMultiple = this.getLineHeightMultiple()
     }
     constructor(lineHeight: arkui_component_units_LengthMetrics) {
-        this(MaterializedBaseTag.NOP, LineHeightStyle.construct(lineHeight))
+        this(MaterializedBaseTag.NOP, LineHeightStyle.construct0(lineHeight))
         this.lineHeight = this.getLineHeight()
+        this.lineHeightMultiple = this.getLineHeightMultiple()
     }
-    static construct(lineHeight: arkui_component_units_LengthMetrics): KPointer {
+    constructor(lineHeight: arkui_component_units_LengthMetrics, lineHeightMultiple: double) {
+        this(MaterializedBaseTag.NOP, LineHeightStyle.construct1(lineHeight, lineHeightMultiple))
+        this.lineHeight = this.getLineHeight()
+        this.lineHeightMultiple = this.getLineHeightMultiple()
+    }
+    static construct0(lineHeight: arkui_component_units_LengthMetrics): KPointer {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, lineHeight)
-        const retval = ArkUIGeneratedNativeModule._LineHeightStyle_construct(thisSerializer.asBuffer(), thisSerializer.length())
+        const retval = ArkUIGeneratedNativeModule._LineHeightStyle_construct0(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static construct1(lineHeight: arkui_component_units_LengthMetrics, lineHeightMultiple: double): KPointer {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, lineHeight)
+        const retval = ArkUIGeneratedNativeModule._LineHeightStyle_construct1(thisSerializer.asBuffer(), thisSerializer.length(), lineHeightMultiple)
         thisSerializer.release()
         return retval
     }
@@ -637,9 +652,84 @@ export class LineHeightStyle implements MaterializedBase {
     private getLineHeight(): double {
         return this.getLineHeight_serialize()
     }
+    private getLineHeightMultiple(): double | undefined {
+        return this.getLineHeightMultiple_serialize()
+    }
     private getLineHeight_serialize(): double {
         const retval = ArkUIGeneratedNativeModule._LineHeightStyle_getLineHeight(this.peer!.ptr)
         return retval
+    }
+    private getLineHeightMultiple_serialize(): double | undefined {
+        const retval = ArkUIGeneratedNativeModule._LineHeightStyle_getLineHeightMultiple(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: double | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readFloat64()
+        }
+        const returnResult: double | undefined = buffer
+        return returnResult
+    }
+}
+export class LineSpacingStyleInternal {
+    public static fromPtr(ptr: KPointer): LineSpacingStyle {
+        return new LineSpacingStyle(MaterializedBaseTag.NOP, ptr)
+    }
+}
+export class LineSpacingStyle implements MaterializedBase {
+    public peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    public readonly lineSpacing: double
+    public readonly options?: LineSpacingOptions | undefined
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, LineSpacingStyle.getFinalizer())
+        this.lineSpacing = this.getLineSpacing()
+        this.options = this.getOptions()
+    }
+    constructor(lineSpacing: arkui_component_units_LengthMetrics, options?: LineSpacingOptions) {
+        this(MaterializedBaseTag.NOP, LineSpacingStyle.construct(lineSpacing, options))
+        this.lineSpacing = this.getLineSpacing()
+        this.options = this.getOptions()
+    }
+    static construct(lineSpacing: arkui_component_units_LengthMetrics, options?: LineSpacingOptions): KPointer {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, lineSpacing)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue = options!
+            LineSpacingOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval = ArkUIGeneratedNativeModule._LineSpacingStyle_construct(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._LineSpacingStyle_getFinalizer()
+    }
+    private getLineSpacing(): double {
+        return this.getLineSpacing_serialize()
+    }
+    private getOptions(): LineSpacingOptions | undefined {
+        return this.getOptions_serialize()
+    }
+    private getLineSpacing_serialize(): double {
+        const retval = ArkUIGeneratedNativeModule._LineSpacingStyle_getLineSpacing(this.peer!.ptr)
+        return retval
+    }
+    private getOptions_serialize(): LineSpacingOptions | undefined {
+        const retval = ArkUIGeneratedNativeModule._LineSpacingStyle_getOptions(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: LineSpacingOptions | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = LineSpacingOptions_serializer.read(retvalDeserializer)
+        }
+        const returnResult: LineSpacingOptions | undefined = buffer
+        return returnResult
     }
 }
 export class ParagraphStyleInternal {
@@ -1477,7 +1567,7 @@ export interface ParagraphStyleInterface {
     textDirection?: TextDirection;
     leadingMarginSpan?: LeadingMarginSpan;
 }
-export type StyledStringValue = TextStyle | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle;
+export type StyledStringValue = TextStyle | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle | LineSpacingStyle;
 export enum StyledStringKey {
     FONT = 0,
     DECORATION = 1,
@@ -1487,6 +1577,7 @@ export enum StyledStringKey {
     LINE_HEIGHT = 5,
     BACKGROUND_COLOR = 6,
     URL = 7,
+    LINE_SPACING = 8,
     GESTURE = 100,
     PARAGRAPH_STYLE = 200,
     IMAGE = 300,
@@ -1540,6 +1631,8 @@ export interface CustomSpanDrawInfo {
 }
 export interface CustomSpanMeasureInfo {
     fontSize: double;
+    maxWidth?: double;
+    layoutPolicy?: LayoutPolicy;
 }
 export class UserDataSpan {
 }
@@ -1631,6 +1724,17 @@ export class LineHeightStyle_serializer {
         return LineHeightStyleInternal.fromPtr(ptr)
     }
 }
+export class LineSpacingStyle_serializer {
+    public static write(buffer: SerializerBase, value: LineSpacingStyle): void {
+        let valueSerializer: SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): LineSpacingStyle {
+        let valueDeserializer: DeserializerBase = buffer
+        let ptr: KPointer = valueDeserializer.readPointer()
+        return LineSpacingStyleInternal.fromPtr(ptr)
+    }
+}
 export class MutableStyledString_serializer {
     public static write(buffer: SerializerBase, value: MutableStyledString): void {
         let valueSerializer: SerializerBase = buffer
@@ -1716,19 +1820,6 @@ export class CustomSpanDrawInfo_serializer {
         const lineBottomTmpResult: double = valueDeserializer.readFloat64()
         const baselineTmpResult: double = valueDeserializer.readFloat64()
         let value: CustomSpanDrawInfo = ({x: xTmpResult, lineTop: lineTopTmpResult, lineBottom: lineBottomTmpResult, baseline: baselineTmpResult} as CustomSpanDrawInfo)
-        return value
-    }
-}
-export class CustomSpanMeasureInfo_serializer {
-    public static write(buffer: SerializerBase, value: CustomSpanMeasureInfo): void {
-        let valueSerializer: SerializerBase = buffer
-        const valueHolderForFontSize = value.fontSize
-        valueSerializer.writeFloat64(valueHolderForFontSize)
-    }
-    public static read(buffer: DeserializerBase): CustomSpanMeasureInfo {
-        let valueDeserializer: DeserializerBase = buffer
-        const fontSizeTmpResult: double = valueDeserializer.readFloat64()
-        let value: CustomSpanMeasureInfo = ({fontSize: fontSizeTmpResult} as CustomSpanMeasureInfo)
         return value
     }
 }
@@ -1963,6 +2054,10 @@ export class StyleOptions_serializer {
             valueSerializer.writeInt8((12).toByte())
             const valueHolderForStyledValueForIdx12 = valueHolderForStyledValue as BackgroundColorStyle
             BackgroundColorStyle_serializer.write(valueSerializer, valueHolderForStyledValueForIdx12)
+        } else if (valueHolderForStyledValue instanceof LineSpacingStyle) {
+            valueSerializer.writeInt8((13).toByte())
+            const valueHolderForStyledValueForIdx13 = valueHolderForStyledValue as LineSpacingStyle
+            LineSpacingStyle_serializer.write(valueSerializer, valueHolderForStyledValueForIdx13)
         }
     }
     public static read(buffer: DeserializerBase): StyleOptions {
@@ -1981,7 +2076,7 @@ export class StyleOptions_serializer {
         const lengthTmpResult: int32 | undefined = lengthTmpBuf
         const styledKeyTmpResult: StyledStringKey = StyledStringKey.fromValue(valueDeserializer.readInt32())
         const styledValueTmpBufUnionSelector: int32 = valueDeserializer.readInt8()
-        let styledValueTmpBuf: TextStyle | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle | undefined
+        let styledValueTmpBuf: TextStyle | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle | LineSpacingStyle | undefined
         if (styledValueTmpBufUnionSelector == (0).toByte()) {
             styledValueTmpBuf = (TextStyle_serializer.read(valueDeserializer) as TextStyle)
         } else if (styledValueTmpBufUnionSelector == (1).toByte()) {
@@ -2009,10 +2104,12 @@ export class StyleOptions_serializer {
             styledValueTmpBuf = (valueDeserializer.readObject() as UserDataSpan)
         } else if (styledValueTmpBufUnionSelector == (12).toByte()) {
             styledValueTmpBuf = (BackgroundColorStyle_serializer.read(valueDeserializer) as BackgroundColorStyle)
+        } else if (styledValueTmpBufUnionSelector == (13).toByte()) {
+            styledValueTmpBuf = (LineSpacingStyle_serializer.read(valueDeserializer) as LineSpacingStyle)
         } else {
             throw new Error('One of the branches for styledValueTmpBuf has to be chosen through deserialisation.')
         }
-        const styledValueTmpResult: StyledStringValue = (styledValueTmpBuf as TextStyle | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle)
+        const styledValueTmpResult: StyledStringValue = (styledValueTmpBuf as TextStyle | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle | LineSpacingStyle)
         let value: StyleOptions = ({start: startTmpResult, length: lengthTmpResult, styledKey: styledKeyTmpResult, styledValue: styledValueTmpResult} as StyleOptions)
         return value
     }
@@ -2161,6 +2258,10 @@ export class SpanStyle_serializer {
             valueSerializer.writeInt8((12).toByte())
             const valueHolderForStyledValueForIdx12 = valueHolderForStyledValue as BackgroundColorStyle
             BackgroundColorStyle_serializer.write(valueSerializer, valueHolderForStyledValueForIdx12)
+        } else if (valueHolderForStyledValue instanceof LineSpacingStyle) {
+            valueSerializer.writeInt8((13).toByte())
+            const valueHolderForStyledValueForIdx13 = valueHolderForStyledValue as LineSpacingStyle
+            LineSpacingStyle_serializer.write(valueSerializer, valueHolderForStyledValueForIdx13)
         }
     }
     public static read(buffer: DeserializerBase): SpanStyle {
@@ -2169,7 +2270,7 @@ export class SpanStyle_serializer {
         const lengthTmpResult: int32 = valueDeserializer.readInt32()
         const styledKeyTmpResult: StyledStringKey = StyledStringKey.fromValue(valueDeserializer.readInt32())
         const styledValueTmpBufUnionSelector: int32 = valueDeserializer.readInt8()
-        let styledValueTmpBuf: TextStyle | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle | undefined
+        let styledValueTmpBuf: TextStyle | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle | LineSpacingStyle | undefined
         if (styledValueTmpBufUnionSelector == (0).toByte()) {
             styledValueTmpBuf = (TextStyle_serializer.read(valueDeserializer) as TextStyle)
         } else if (styledValueTmpBufUnionSelector == (1).toByte()) {
@@ -2197,10 +2298,12 @@ export class SpanStyle_serializer {
             styledValueTmpBuf = (valueDeserializer.readObject() as UserDataSpan)
         } else if (styledValueTmpBufUnionSelector == (12).toByte()) {
             styledValueTmpBuf = (BackgroundColorStyle_serializer.read(valueDeserializer) as BackgroundColorStyle)
+        } else if (styledValueTmpBufUnionSelector == (13).toByte()) {
+            styledValueTmpBuf = (LineSpacingStyle_serializer.read(valueDeserializer) as LineSpacingStyle)
         } else {
             throw new Error('One of the branches for styledValueTmpBuf has to be chosen through deserialisation.')
         }
-        const styledValueTmpResult: StyledStringValue = (styledValueTmpBuf as TextStyle | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle)
+        const styledValueTmpResult: StyledStringValue = (styledValueTmpBuf as TextStyle | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle | LineSpacingStyle)
         let value: SpanStyle = ({start: startTmpResult, length: lengthTmpResult, styledKey: styledKeyTmpResult, styledValue: styledValueTmpResult} as SpanStyle)
         return value
     }

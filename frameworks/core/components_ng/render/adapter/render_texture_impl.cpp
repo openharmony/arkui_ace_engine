@@ -15,6 +15,10 @@
 
 #include "core/components_ng/render/adapter/render_texture_impl.h"
 
+#ifdef RENDER_EXTRACT_SUPPORTED
+#include "core/components_ng/render/adapter/render_capture_utils.h"
+#endif
+
 #include "base/memory/referenced.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/system_properties.h"
@@ -27,6 +31,7 @@
 #include "render_service_base/include/platform/common/rs_system_properties.h"
 #endif
 #endif
+#include "pixel_map.h"
 
 namespace OHOS::Ace::NG {
 RenderTextureImpl::~RenderTextureImpl()
@@ -144,6 +149,8 @@ void RenderTextureImpl::SetExtSurfaceBounds(int32_t left, int32_t top, int32_t w
 {
     LOGI("RenderTextureImpl::SetExtSurfaceBounds (%{public}d, %{public}d) - (%{public}d x %{public}d)", left, top,
         width, height);
+    surfaceHeight_ = height;
+    surfaceWidth_ = width;
 #if defined(RS_ENABLE_VK) && defined(ANDROID_PLATFORM)
     if (OHOS::Rosen::RSSystemProperties::IsUseVulkan()) {
         if (extTexture_ == nullptr) {
@@ -205,5 +212,15 @@ void RenderTextureImpl::AddInitTypeCallBack(int32_t& textureId)
         extTexture_->GetTextureId(textureId);
     }
 }
+
+std::shared_ptr<Media::PixelMap> RenderTextureImpl::SurfaceCapture()
+{
+    CHECK_NULL_RETURN(extTexture_, nullptr);
+    return CapturePixelMap(surfaceWidth_, surfaceHeight_, "RenderTextureImpl::SurfaceCapture",
+        [texture = extTexture_](uintptr_t pointerVal, int32_t width, int32_t height) {
+            return texture->SurfaceCapture(pointerVal, width, height);
+        });
+}
+
 #endif
 } // namespace OHOS::Ace::NG

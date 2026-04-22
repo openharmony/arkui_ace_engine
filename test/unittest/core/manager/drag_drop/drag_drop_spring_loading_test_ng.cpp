@@ -16,6 +16,7 @@
 #include "drag_drop_spring_loading_test_ng.h"
 
 #include <cstdint>
+#include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 
 using namespace testing;
 using namespace testing::ext;

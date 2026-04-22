@@ -15,6 +15,7 @@
 
 #include "core/components/scroll/scroll_bar_controller.h"
 
+#include "core/animation/curve_animation.h"
 #include "core/common/vibrator/vibrator_proxy.h"
 #include "core/components/scroll/render_scroll.h"
 

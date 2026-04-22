@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
 #include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #undef private
 #undef protected
 
@@ -49,6 +50,7 @@ const int YEARINDEX = 1;
 const int BIG_SHOWCOUNT = 5;
 const int SMALL_SHOWCOUNT = 3;
 const int MIDDLE_OF_COUNTS = 2;
+constexpr int32_t DEFAULT_INDEX = -1;
 const vector<int> DEFAULT_DATE = { 1999, 9, 9 };
 const std::string CONNECTER = "-";
 const std::vector<int> DEFAULT_VALUE = { 1970, 1971, 1972 };

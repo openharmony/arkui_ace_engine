@@ -14,7 +14,7 @@
  */
 
 class InteropExtractorModule {
-    static getInteropObservedObject<T extends Object>(newValue: T, owningProperty: ObservedPropertyPU<T>): T {
+    static getInteropObservedObject<T extends Object>(newValue: T, owningProperty: ObservedPropertyAbstractPU<T>): T {
         const isStaBuiltin =
           globalThis.Panda.STValue.isSTArray(newValue) ||
           globalThis.Panda.STValue.isSTSet(newValue) ||

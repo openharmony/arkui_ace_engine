@@ -32,4 +32,9 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
 {
     return nullptr;
 }
+
+bool DynamicModuleHelper::IsDynamicModuleLoaded(const std::string& name)
+{
+    return true;
+}
 } // namespace OHOS::Ace

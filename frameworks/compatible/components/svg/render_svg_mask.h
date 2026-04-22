@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_SVG_RENDER_SVG_MASK_H
 
 #include "base/memory/ace_type.h"
+#include "core/components_ng/render/drawing_forward.h"
 #include "frameworks/compatible/components/svg/render_svg_base.h"
 #include "frameworks/core/animation/animator.h"
 #include "frameworks/core/components/common/properties/svg_paint_state.h"

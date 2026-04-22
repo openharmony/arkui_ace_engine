@@ -24,7 +24,6 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/common/container.h"
 #include "core/common/resource/resource_object.h"
 #include "core/common/resource/resource_parse_utils.h"
 
@@ -60,7 +59,7 @@ void CalendarPickerModelNG::CreateCalendarPicker(const CalendarSettingData& sett
     stack->Push(pickerNode);
 
     // apply default PickerTextStyle after Push (scopeId is only valid after Push).
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+    if (pickerNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         PickerTextStyle textStyle;
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
         CHECK_NULL_VOID(frameNode);
@@ -461,9 +460,9 @@ void CalendarPickerModelNG::ClearPadding()
 
 RefPtr<CalendarTheme> GetCalendarTheme()
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    return frameNode->GetTheme<CalendarTheme>(true);
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    return pipeline->GetTheme<CalendarTheme>();
 }
 
 PickerTextStyle CalendarPickerModelNG::GetTextStyle(FrameNode* frameNode)

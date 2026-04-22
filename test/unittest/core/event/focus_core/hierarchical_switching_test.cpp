@@ -26,6 +26,7 @@
 #include "test/unittest/core/event/focus_core/focus_request_test.h"
 #include "test/unittest/core/event/focus_core/hierarchical_switching_test.h"
 #include "test/unittest/core/pattern/test_ng.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;

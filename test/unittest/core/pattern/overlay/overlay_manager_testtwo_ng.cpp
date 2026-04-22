@@ -32,6 +32,7 @@
 #include "core/components/drag_bar/drag_bar_theme.h"
 #include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components/select/select_theme.h"
+#include "core/components/toast/toast_theme.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -48,6 +49,9 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
+#include "core/components/theme/icon_theme.h"
+#include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
+#include "core/components_ng/pattern/toast/toast_layout_property.h"
 
 using namespace testing;
 using namespace testing::ext;

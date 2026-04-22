@@ -39,6 +39,7 @@
 #endif
 #ifdef FORM_SUPPORTED
 #include "extractor.h"
+#include "file_mapper.h"
 #endif
 
 #include "ace_forward_compatibility.h"
@@ -57,6 +58,7 @@
 #include "core/common/container_scope.h"
 #include "core/common/layout_inspector.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "frameworks/base/utils/utils.h"
 #include "frameworks/bridge/card_frontend/card_frontend_declarative.h"
 #include "frameworks/bridge/card_frontend/form_frontend_declarative.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
@@ -95,29 +97,23 @@ extern const char _binary_jsMockSystemPlugin_abc_start[];
 extern const char _binary_jsMockSystemPlugin_abc_end[];
 #endif
 extern const char _binary_stateMgmt_abc_start[];
-extern const char _binary_jsEnumStyle_abc_start[];
 extern const char _binary_jsUIContext_abc_start[];
 extern const char _binary_arkCommon_abc_start[];
 extern const char _binary_arkDynamicComponent_abc_start[];
-extern const char _binary_arkComponent_abc_start[];
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 extern const char _binary_jsPreload_abc_start[];
 extern const char _binary_jsPreload_abc_end[];
 #endif
 #if !defined(IOS_PLATFORM)
 extern const char _binary_stateMgmt_abc_end[];
-extern const char _binary_jsEnumStyle_abc_end[];
 extern const char _binary_jsUIContext_abc_end[];
 extern const char _binary_arkCommon_abc_end[];
 extern const char _binary_arkDynamicComponent_abc_end[];
-extern const char _binary_arkComponent_abc_end[];
 #else
 extern const char* _binary_stateMgmt_abc_end;
-extern const char* _binary_jsEnumStyle_abc_end;
 extern const char* _binary_jsUIContext_abc_end;
 extern const char* _binary_arkCommon_abc_end;
 extern const char* _binary_arkDynamicComponent_abc_end;
-extern const char* _binary_arkComponent_abc_end;
 #endif
 
 namespace OHOS::Ace::Framework {
@@ -252,15 +248,7 @@ bool EvaluateAbcFile(const shared_ptr<JsRuntime>& runtime, const std::string& fi
 
 inline bool PreloadJsEnums(const shared_ptr<JsRuntime>& runtime)
 {
-#if defined(CROSS_PLATFORM)
-    std::string str("arkui_binary_jsEnumStyle_abc_loadFile");
-    return runtime->EvaluateJsCode(
-        (uint8_t*)_binary_jsEnumStyle_abc_start, _binary_jsEnumStyle_abc_end - _binary_jsEnumStyle_abc_start, str);
-#elif defined(PREVIEW)
-    return EvaluateAbcFile(runtime, "./module/arkui/jsEnumStyle.abc");
-#else
-    return EvaluateAbcFile(runtime, "/etc/abc/framework/jsEnumStyle.abc");
-#endif
+    return EvaluateAbcFile(runtime, NG::GetSystemPath("jsEnumStyle.abc"));
 }
 
 inline bool PreloadStateManagement(const shared_ptr<JsRuntime>& runtime)
@@ -304,15 +292,7 @@ inline bool PreloadArkDynamicComponent(const shared_ptr<JsRuntime>& runtime)
 
 inline bool PreloadArkComponent(const shared_ptr<JsRuntime>& runtime)
 {
-#if defined(CROSS_PLATFORM)
-    std::string str("arkui_binary_arkComponent_abc_loadFile");
-    return runtime->EvaluateJsCode(
-        (uint8_t*)_binary_arkComponent_abc_start, _binary_arkComponent_abc_end - _binary_arkComponent_abc_start, str);
-#elif defined(PREVIEW)
-    return EvaluateAbcFile(runtime, "./module/arkui/arkComponent.abc");
-#else
-    return EvaluateAbcFile(runtime, "/etc/abc/framework/arkComponent.abc");
-#endif
+    return EvaluateAbcFile(runtime, NG::GetSystemPath("arkComponent.abc"));
 }
 
 bool PreloadConsole(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& global)
@@ -1727,10 +1707,10 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
         if (instance == nullptr) {
             return;
         }
+        auto vm = const_cast<EcmaVM*>(arkNativeEngine->GetEcmaVm());
 #ifdef OHOS_PLATFORM
         auto tid = gettid();
         ConnectServerManager::Get().AddInstance(tid, "ets");
-        auto vm = const_cast<EcmaVM*>(arkNativeEngine->GetEcmaVm());
         auto workerPostTask = [nativeEngine](std::function<void()>&& callback) {
             nativeEngine->CallDebuggerPostTaskFunc(std::move(callback));
         };
@@ -1739,9 +1719,11 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
         JSNApi::NotifyDebugMode(tid, vm, debugOption, tid, workerPostTask, debugVersion);
 #endif
         instance->InitConsoleModule(arkNativeEngine);
-
-        std::vector<uint8_t> buffer((uint8_t*)_binary_jsEnumStyle_abc_start, (uint8_t*)_binary_jsEnumStyle_abc_end);
-        arkNativeEngine->RunBufferScript(buffer);
+        std::shared_ptr<ArkJSRuntime> arkRuntime = std::make_shared<ArkJSRuntime>();
+        if (!arkRuntime->InitializeFromExistVM(vm)) {
+            return;
+        }
+        EvaluateAbcFile(arkRuntime, NG::GetSystemPath("jsEnumStyle.abc"));
     };
     nativeEngine_->SetInitWorkerFunc(initWorkerFunc);
 }
@@ -1827,6 +1809,17 @@ bool JsiDeclarativeEngine::ExecuteJs(const uint8_t* content, int32_t size)
     return true;
 }
 
+#ifdef FORM_SUPPORTED
+void ReleaseWorkerSafeMemFunc(void* mapper)
+{
+    if (mapper) {
+        AbilityBase::FileMapper* fileMapper = static_cast<AbilityBase::FileMapper*>(mapper);
+        fileMapper->SetAutoReleaseMem(true);
+        delete fileMapper;
+    }
+}
+#endif
+
 bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t cardId)
 {
     auto runtime = engineInstance_->GetJsRuntime();
@@ -1891,12 +1884,17 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
                 TAG_LOGE(AceLogTag::ACE_FORM, "null data");
                 return false;
             }
-            data->SetAutoReleaseMem(true);
             extractor->SetAutoCloseFd(true);
+            arkRuntime->SetReleaseWorkerSafeMemFunc(ReleaseWorkerSafeMemFunc);
             if (arkRuntime->IsStaticOrInvalidFile(data->GetDataPtr(), data->GetDataLen())) {
+                data->SetAutoReleaseMem(true);
                 return false;
             }
-            if (!arkRuntime->ExecuteModuleBuffer(data->GetDataPtr(), data->GetDataLen(), abcPath, true)) {
+            auto fileMapperPtr = data.release();
+            if (!arkRuntime->ExecuteModuleBufferSecure(fileMapperPtr->GetDataPtr(), fileMapperPtr->GetDataLen(),
+                abcPath, true, static_cast<void*>(fileMapperPtr))) {
+                fileMapperPtr->SetAutoReleaseMem(true);
+                delete fileMapperPtr;
                 return false;
             }
         }

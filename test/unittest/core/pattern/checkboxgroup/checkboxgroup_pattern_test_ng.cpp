@@ -29,6 +29,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/common/multi_thread_build_manager.h"
 #include "core/components/checkable/checkable_component.h"
 #include "core/components/checkable/checkable_theme.h"

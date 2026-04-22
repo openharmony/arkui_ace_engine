@@ -78,6 +78,14 @@ public:
         return GetCachedCountValue(defCachedCount_);
     }
 
+    void UpdateContentClip(std::optional<ContentClip> contentClip) override
+    {
+        if (contentClip_ != contentClip) {
+            contentClip_ = contentClip;
+            UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
+        }
+    }
+
     void DumpInfo();
 
     void DumpInfo(std::unique_ptr<JsonValue>& json);
@@ -111,6 +119,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CacheRange, CacheRange, PROPERTY_UPDATE_MEASURE_SELF);
 
     int32_t defCachedCount_ = 1;
+    std::optional<ContentClip> contentClip_;
 protected:
     void Clone(RefPtr<LayoutProperty> layoutProperty) const override;
 };

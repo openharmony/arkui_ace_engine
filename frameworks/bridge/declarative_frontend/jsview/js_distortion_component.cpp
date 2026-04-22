@@ -84,39 +84,13 @@ NG::Vector4F ParseVector4Option(const JSRef<JSObject>& obj, const char* property
     );
 }
 
-void ParseBuilderComponentContent(const JSRef<JSVal>& contentParam, RefPtr<NG::FrameNode>& refPtrFrameNode)
-{
-    if (!contentParam->IsObject()) {
-        return;
-    }
-    JSRef<JSObject> contentObject = JSRef<JSObject>::Cast(contentParam);
-    JSRef<JSVal> builderNodeParam = contentObject->GetProperty("builderNode_");
-    if (!builderNodeParam->IsObject()) {
-        return ;
-    }
-    JSRef<JSObject> builderNodeObject = JSRef<JSObject>::Cast(builderNodeParam);
-    JSRef<JSVal> nodeptr = builderNodeObject->GetProperty("nodePtr_");
-    if (nodeptr.IsEmpty()) {
-        return ;
-    }
-    const auto* vm = nodeptr->GetEcmaVM();
-    auto* node = nodeptr->GetLocalHandle()->ToNativePointer(vm)->Value();
-    auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    refPtrFrameNode = AceType::Claim(frameNode);
-}
-
 } // namespace
 
 void JSDistortionComponent::Create(const JSCallbackInfo& info)
 {
-    RefPtr<NG::FrameNode> builderNode;
+    DistortionComponentModel::GetInstance()->Create();
     if (info.Length() > 0 && info[0]->IsObject()) {
-        ParseBuilderComponentContent(info[0], builderNode);
-    }
-    DistortionComponentModel::GetInstance()->Create(builderNode);
-    if (info.Length() > 0 && info[1]->IsObject()) {
-        auto obj = JSRef<JSObject>::Cast(info[1]);
+        auto obj = JSRef<JSObject>::Cast(info[0]);
         auto distortion = obj->GetProperty("distortion");
         Distortion(distortion);
     }

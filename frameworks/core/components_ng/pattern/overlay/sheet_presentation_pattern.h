@@ -1179,6 +1179,7 @@ private:
     RefPtr<FrameNode> GetTitleNode();
     float GetCloseIconPosX(const SizeF& sheetSize, const RefPtr<SheetTheme>& sheetTheme);
     void UpdateSheetTitle();
+    void UpdateSheetTitleLineOptimize(bool newLineOptimize);
     void UpdateFontScaleStatus();
     void InitSheetObjectDragEvent(RefPtr<SheetObject> sheetObject);
 
@@ -1331,6 +1332,7 @@ private:
     Placement finalPlacement_ = Placement::BOTTOM;
     bool showArrow_ = true;
     bool sheetOffsetYChanged_ = false;
+    bool lineSpacingOptimizeFlag_ = false; // whether the line spacing needs to be optimized for minority languages.
     SheetArrowPosition arrowPosition_ = SheetArrowPosition::NONE;
     SheetPopupInfo sheetPopupInfo_;
     WeakPtr<FrameNode> closeButtonNode_;

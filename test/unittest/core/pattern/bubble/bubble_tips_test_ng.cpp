@@ -20,6 +20,7 @@
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 
 #include "base/memory/ace_type.h"
@@ -35,8 +36,10 @@
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/bubble/bubble_render_property.h"
 #include "core/components_ng/pattern/bubble/bubble_view.h"
+#include "core/components/button/button_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components/common/properties/placement.h"
 
 using namespace testing;
 using namespace testing::ext;

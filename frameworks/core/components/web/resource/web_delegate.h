@@ -1623,6 +1623,7 @@ public:
     void RequestWebDomJsonString(const std::function<void(const std::string)>&& callback);
     void SetScrollbarLayoutPolicy(ScrollbarLayoutPolicy policy);
     void SetIsSystemRtlEnable(bool enable);
+    void FetchCloudControlWebAutoLayoutConfig();
 private:
     void InitWebEvent();
     void RegisterWebEvent();

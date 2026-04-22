@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -678,6 +678,7 @@ RefPtr<FrameNode> SideBarContainerPattern::CreateControlButton(const RefPtr<Side
     auto buttonRenderContext = buttonNode->GetRenderContext();
     CHECK_NULL_RETURN(buttonRenderContext, nullptr);
     buttonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     buttonRenderContext->UpdateZIndex(DEFAULT_CONTROL_BUTTON_ZINDEX);
     auto focusHub = buttonNode->GetOrCreateFocusHub();
     CHECK_NULL_RETURN(focusHub, nullptr);
@@ -763,6 +764,39 @@ void SideBarContainerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
     PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
         { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
     dividerGestureHub->AddPanEvent(dragEvent_, panDirection, DEFAULT_PAN_FINGER, distanceMap);
+}
+
+bool SideBarContainerPattern::IsInContentRegion(const Offset& globalLocation)
+{
+    auto host = GetHost();
+    auto contentNode = GetContentNode(host);
+    CHECK_NULL_RETURN(contentNode, false);
+    return contentNode->GetTransformRectRelativeToWindow().IsInRegion(
+        PointF(globalLocation.GetX(), globalLocation.GetY()));
+}
+
+void SideBarContainerPattern::SetClickEvent(bool showSideBar)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+
+    if (contentClickEvent_ == nullptr) {
+        auto clickCallback = [weak = WeakClaim(this)](const GestureEvent& info) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            if (pattern->IsInContentRegion(info.GetGlobalLocation()) && !pattern->inAnimation_) {
+                pattern->DoAnimation();
+            }
+        };
+        contentClickEvent_ = AceType::MakeRefPtr<ClickEvent>(clickCallback);
+    }
+    if (showSideBar) {
+        gesture->AddClickEvent(contentClickEvent_);
+    } else {
+        gesture->RemoveClickEvent(contentClickEvent_);
+    }
 }
 
 void SideBarContainerPattern::CreateAnimation()
@@ -1035,6 +1069,46 @@ bool SideBarContainerPattern::OnDirtyLayoutWrapperSwap(
     return paddingProperty != nullptr;
 }
 
+Color SideBarContainerPattern::GetMaskColor() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, Color());
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_RETURN(context, Color());
+    auto sideBarTheme = context->GetTheme<SideBarTheme>(host->GetThemeScopeId());
+    CHECK_NULL_RETURN(sideBarTheme, Color());
+    return sideBarTheme->GetContentMaskColor();
+}
+
+void SideBarContainerPattern::SetContentClickEvent(bool showSideBar)
+{
+    if (type_ == SideBarContainerType::DISPLACE) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto contentNode = GetContentNode(host);
+        CHECK_NULL_VOID(contentNode);
+        auto eventHub = contentNode->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(eventHub);
+        auto contentNodeContext = contentNode->GetRenderContext();
+        CHECK_NULL_VOID(contentNodeContext);
+        if (showSideBar) {
+            eventHub->SetEnabled(false);
+            SetClickEvent(showSideBar);
+            RefPtr<SidebarContentMaskProperty> maskProperty =
+                MakeRefPtr<SidebarContentMaskProperty>(true, GetMaskColor());
+            CHECK_NULL_VOID(maskProperty);
+            contentNodeContext->OnSidebarContentMaskUpdate(maskProperty);
+        } else {
+            eventHub->SetEnabled(true);
+            SetClickEvent(showSideBar);
+            RefPtr<SidebarContentMaskProperty> maskProperty =
+                MakeRefPtr<SidebarContentMaskProperty>(false, GetMaskColor());
+            CHECK_NULL_VOID(maskProperty);
+            contentNodeContext->OnSidebarContentMaskUpdate(maskProperty);
+        }
+    }
+}
+
 void SideBarContainerPattern::UpdateSideBarStatus()
 {
     auto host = GetHost();
@@ -1072,6 +1146,7 @@ void SideBarContainerPattern::UpdateSideBarStatus()
     }
     SetSideBarWidthToolBarManager(
         showSideBar, realSideBarWidth_.ConvertToPxWithSize(frameSize.Width()), realDividerWidth_);
+    SetContentClickEvent(showSideBar);
 }
 
 void SideBarContainerPattern::AddDividerHotZoneRect(const RefPtr<SideBarContainerLayoutAlgorithm>& layoutAlgorithm)

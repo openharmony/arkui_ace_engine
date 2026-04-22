@@ -320,6 +320,8 @@ export struct CounterComponent {
   private controller1: TextInputController = new TextInputController();
   private controller2: TextInputController = new TextInputController();
   private controller3: TextInputController = new TextInputController();
+  private yearTextWidth: double = 0;
+  private monthDayTextWidth: double = 0;
   private increaseStrCache: string | undefined = undefined;
   private reduceStrCache: string | undefined = undefined;
   private lastOptionValue: int = -1;
@@ -631,12 +633,35 @@ export struct CounterComponent {
         this.dateStyleOptions = options;
       }
       this.updateDateStyleOptions();
+      if (this.yearTextWidth <= 0) {
+        this.yearTextWidth = this.getMeasuredTextWidth('0000');
+      }
+      if (this.monthDayTextWidth <= 0) {
+        this.monthDayTextWidth = this.getMeasuredTextWidth('00');
+      }
     } else {
 
     }
   }
 
+  private validateInlineInput() {
+    if (this.type !== CounterType.INLINE) {
+      return;
+    }
+    if (!this.hasInputText1) {
+      return;
+    }
+    let num: number = Number(this.inputValue);
+    if (this.inputValue !== '' && !isNaN(num) && Number.isInteger(num) && num <= this.max && num >= this.min) {
+      this.value = Double.toInt(num);
+    } else {
+      this.inputValue = String(this.value);
+    }
+    this.hasInputText1 = false;
+  }
+
   private subValue(): void {
+    this.validateInlineInput();
     if (this.subBtnStateEffect) {
       this.value -= this.step;
     }
@@ -675,6 +700,7 @@ export struct CounterComponent {
   }
 
   private addValue(): void {
+    this.validateInlineInput();
     if (this.addBtnStateEffect) {
       this.value += this.step;
     }
@@ -1052,7 +1078,7 @@ export struct CounterComponent {
     this.focusWithTarget('DateTextInput3' + String(this.timeStamp));
   }
 
-  private updateInlineEnableSate() {
+  private updateInlineEnableState() {
     if (this.value >= this.max) {
       this.addOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
       this.addBtnStateEffect = false;
@@ -1073,7 +1099,7 @@ export struct CounterComponent {
     }
   }
 
-  private updateDateEnableSate() {
+  private updateDateEnableState() {
     if (this.year === this.maxYear && this.focusText === FocusText.TEXT1) {
       this.addOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
       this.addBtnStateEffect = false;
@@ -1186,8 +1212,14 @@ export struct CounterComponent {
     return this.hasInputText1 ? this.inputValue : String(this.value);
   }
 
-  private getValueLength() {
-    return this.getValue().length > 0 ? this.getValue().length : 1;
+  private getMeasuredTextWidth(text: string): double {
+    let measureUtils = this.getUIContext().getMeasureUtils();
+    let widthPx = measureUtils.measureText({
+      textContent: text,
+      fontSize: this.getTextInputFontSize(),
+      fontWeight: FontWeight.Medium,
+    });
+    return this.getUIContext().px2vp(widthPx);
   }
 
   private getYear(): string {
@@ -1939,7 +1971,7 @@ export struct CounterComponent {
                 center: { anchor: '__container__', align: VerticalAlign.Center } as LocalizedVerticalAlignParam,
                 middle: { anchor: '__container__', align: HorizontalAlign.Center } as LocalizedHorizontalAlignParam
               } as LocalizedAlignRuleOptions)
-              .width(Math.min(this.getValueLength() * 9.6, this.textWidth))
+              .width('100%')
               .height('20vp')
               .padding(0)
               .borderRadius(0)
@@ -1948,9 +1980,9 @@ export struct CounterComponent {
               .copyOption(CopyOptions.None)
               .fontSize(this.getTextInputFontSize())
               .fontWeight(FontWeight.Medium)
-              .fontColor(this.hasFocusText1 ? Color.White : CounterResource.COUNTER_TEXT_COLOR)
+              .fontColor(CounterResource.COUNTER_TEXT_COLOR)
               .maxLength(this.getMaxLength())
-              .backgroundColor(this.hasFocusText1 ? CounterResource.BUTTON_BORDER_FOCUSED_COLOR : Color.Transparent)
+              .backgroundColor(Color.Transparent)
               .key('InlineTextInput' + String(this.timeStamp))
               .onKeyEvent((event: KeyEvent) => {
                 this.focusCurrentText(FocusText.TEXT1)
@@ -1999,76 +2031,23 @@ export struct CounterComponent {
               })
               .onChange((value: string) => {
                 this.inputValue = value;
-                for (let i = 0; i < value.length; i++) {
-                  let c: string = value[i];
-                  if (c === '+' || c === '*' || c === '#') {
-                    this.value -= 1;
-                    this.value += 1;
-                    this.inputValue = String(this.value);
-                    return;
-                  }
-                  if (c === '-' && i !== 0) {
-                    this.inputValue = c;
-                    break;
-                  }
-                }
-
                 this.hasInputText1 = true;
-                let c: string = '';
-                if (value.length > 0) {
-                  c = value[value.length - 1];
-                }
+                let c = value[value.length - 1];
                 if (value.length === this.getMaxLength()) {
                   this.inputValue = c;
                 }
-                if (this.timeoutID1 !== -1) {
-                  clearTimeout(this.timeoutID1);
-                  this.timeoutID1 = -1;
-                }
-                const inputValueToInt: int = Double.toInt(Number.parseInt(this.inputValue));
-                if (this.inputValue !== '' && inputValueToInt <= this.max &&
-                  inputValueToInt >= this.min) {
-                  this.value = inputValueToInt;
-                  this.onChange?.(this.value);
-                  this.hasInputText1 = false;
-                } else {
-                  if (inputValueToInt > this.max ||
-                    (inputValueToInt < this.min &&
-                      this.inputValue.length <= String(this.min).length)) {
-                    this.inputValue = c;
-                  }
-                  if (value.length < this.getMaxLength()) {
-                    this.timeoutID1 = setTimeout(() => {
-                      const inputValueInTimer: int = Double.toInt(Number.parseInt(this.inputValue));
-                      if (this.inputValue !== '' && inputValueInTimer <= this.max &&
-                        inputValueInTimer >= this.min) {
-                        this.value = inputValueInTimer;
-                        this.onChange?.(this.value);
-                      }
-                      this.inputValue = String(this.value);
-                      this.hasInputText1 = false;
-                      this.updateInlineEnableSate();
-                    }, 1500);
-                  }
-                }
-                this.updateInlineEnableSate();
+                this.updateInlineEnableState();
               } as EditableTextOnChangeCallback)
               .onSubmit((enterKey: EnterKeyType) => {
-                if (this.timeoutID1 != -1) {
-                  clearTimeout(this.timeoutID1);
-                  this.timeoutID1 = -1;
-                }
                 this.hasInputText1 = false;
-                this.value -= 1;
-                const inputValueToInt: int = Double.toInt(Number.parseInt(this.inputValue));
-                if (inputValueToInt >= this.min && inputValueToInt <= this.max) {
-                  this.value = inputValueToInt;
+                let submitNum = Number(this.inputValue);
+                if (Number.isInteger(submitNum) && submitNum >= this.min && submitNum <= this.max) {
+                  this.value = Double.toInt(submitNum);
                   this.onChange?.(this.value);
-                  this.updateInlineEnableSate();
                 } else {
-                  this.value += 1;
                   this.inputValue = String(this.value);
                 }
+                this.updateInlineEnableState();
               } as OnSubmitCallback)
               .focusable(true)
               .focusOnTouch(true)
@@ -2078,6 +2057,13 @@ export struct CounterComponent {
                 this.controller1.caretPosition(String(this.value).length);
               })
               .onBlur(() => {
+                if (this.hasInputText1) {
+                  let oldValue: int = this.value;
+                  this.validateInlineInput();
+                  if (this.value !== oldValue) {
+                    this.onChange?.(this.value);
+                  }
+                }
                 this.focusText = FocusText.NONE;
                 this.hasFocusText1 = false;
               })
@@ -2103,7 +2089,7 @@ export struct CounterComponent {
             })
               .accessibilityDescription($r('sys.string.input_counter_double_click_description'))
               .direction(this.counterDirection)
-              .width(this.getValueLength() * 9.6)
+              .width(this.getMeasuredTextWidth(this.getValue()))
               .height('20vp')
               .padding(0)
               .borderRadius(0)
@@ -2112,9 +2098,9 @@ export struct CounterComponent {
               .copyOption(CopyOptions.None)
               .fontSize(this.getTextInputFontSize())
               .fontWeight(FontWeight.Medium)
-              .fontColor(this.hasFocusText1 ? Color.White : CounterResource.COUNTER_TEXT_COLOR)
+              .fontColor(CounterResource.COUNTER_TEXT_COLOR)
               .maxLength(this.getMaxLength())
-              .backgroundColor(this.hasFocusText1 ? CounterResource.BUTTON_BORDER_FOCUSED_COLOR : Color.Transparent)
+              .backgroundColor(Color.Transparent)
               .key('InlineTextInput' + String(this.timeStamp))
               .onKeyEvent((event: KeyEvent) => {
                 this.focusCurrentText(FocusText.TEXT1)
@@ -2151,75 +2137,23 @@ export struct CounterComponent {
               })
               .onChange((value: string) => {
                 this.inputValue = value;
-                for (let i = 0; i < value.length; i++) {
-                  let c: string = value[i];
-                  if (c === '+' || c === '*' || c === '#') {
-                    this.value -= 1;
-                    this.value += 1;
-                    this.inputValue = String(this.value);
-                    return;
-                  }
-                  if (c === '-' && i !== 0) {
-                    this.inputValue = c;
-                    break;
-                  }
-                }
                 this.hasInputText1 = true;
-                let c: string = '';
-                if (value.length > 0) {
-                  c = value[value.length - 1];
-                }
+                let c = value[value.length -1];
                 if (value.length === this.getMaxLength()) {
                   this.inputValue = c;
                 }
-                if (this.timeoutID1 !== -1) {
-                  clearTimeout(this.timeoutID1);
-                  this.timeoutID1 = -1;
-                }
-                const inputValueToInt: int = Double.toInt(Number.parseInt(this.inputValue));
-                if (this.inputValue !== '' && inputValueToInt <= this.max &&
-                  inputValueToInt >= this.min) {
-                  this.value = inputValueToInt;
-                  this.onChange?.(this.value);
-                  this.hasInputText1 = false;
-                } else {
-                  if (inputValueToInt > this.max ||
-                    (inputValueToInt < this.min &&
-                      this.inputValue.length <= String(this.min).length)) {
-                    this.inputValue = c;
-                  }
-                  if (value.length < this.getMaxLength()) {
-                    this.timeoutID1 = setTimeout(() => {
-                      const inputValueInTimer: int = Double.toInt(Number.parseInt(this.inputValue));
-                      if (this.inputValue !== '' && inputValueInTimer <= this.max &&
-                        inputValueInTimer >= this.min) {
-                        this.value = inputValueInTimer;
-                        this.onChange?.(this.value);
-                      }
-                      this.inputValue = String(this.value)
-                      this.hasInputText1 = false;
-                      this.updateInlineEnableSate();
-                    }, 1500);
-                  }
-                }
-                this.updateInlineEnableSate();
+                this.updateInlineEnableState();
               })
               .onSubmit((enterKey: EnterKeyType) => {
-                if (this.timeoutID1 !== -1) {
-                  clearTimeout(this.timeoutID1);
-                  this.timeoutID1 = -1;
-                }
                 this.hasInputText1 = false;
-                this.value -= 1;
-                const inputValueToInt: int = Double.toInt(Number.parseInt(this.inputValue));
-                if (inputValueToInt >= this.min && inputValueToInt <= this.max) {
-                  this.value = inputValueToInt;
+                let submitNum = Number(this.inputValue);
+                if (Number.isInteger(submitNum) && submitNum >= this.min && submitNum <= this.max) {
+                  this.value = Double.toInt(submitNum);
                   this.onChange?.(this.value);
-                  this.updateInlineEnableSate();
                 } else {
-                  this.value += 1;
                   this.inputValue = String(this.value);
                 }
+                this.updateInlineEnableState();
               } as OnSubmitCallback)
               .focusable(true)
               .focusOnTouch(true)
@@ -2229,6 +2163,13 @@ export struct CounterComponent {
                 this.controller1.caretPosition(String(this.value).length);
               })
               .onBlur(() => {
+                if (this.hasInputText1) {
+                  let oldValue: int = this.value;
+                  this.validateInlineInput();
+                  if (this.value !== oldValue) {
+                    this.onChange?.(this.value);
+                  }
+                }
                 this.focusText = FocusText.NONE;
                 this.hasFocusText1 = false;
               })
@@ -2258,7 +2199,7 @@ export struct CounterComponent {
                 ['0vp', '0vp'],
                 ['0vp', '0vp']])
               .strokeWidth(this.addBtnFocusWidth)
-              .stroke(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
+              // .stroke(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
               .margin({ end: LengthMetrics.vp(2) } as LocalizedMargin)
               .fillOpacity(0)
             Image(CounterResource.BUTTON_ARROW_UP)
@@ -2279,6 +2220,7 @@ export struct CounterComponent {
               .enabled(this.addBtnEnabled)
               .onClick((event: ClickEvent) => {
                 this.addValue();
+                this.onChange?.(this.value);
                 if (event.source === SourceType.Mouse ||
                   event.source === SourceType.TouchScreen) {
                   this.addBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
@@ -2361,7 +2303,7 @@ export struct CounterComponent {
                 ['0vp', '0vp']
               ])
               .strokeWidth(this.subBtnFocusWidth)
-              .stroke(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
+              // .stroke(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
               .margin({ top: LengthMetrics.vp(1), end: LengthMetrics.vp(1), bottom: LengthMetrics.vp(2) } as LocalizedMargin)
               .fillOpacity(0)
             Image(CounterResource.BUTTON_ARROW_DOWN)
@@ -2381,6 +2323,7 @@ export struct CounterComponent {
               .enabled(this.subBtnEnabled)
               .onClick((event: ClickEvent) => {
                 this.subValue();
+                this.onChange?.(this.value);
                 if (event.source === SourceType.Mouse ||
                   event.source === SourceType.TouchScreen) {
                   this.subBtnFocusWidth = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
@@ -2478,7 +2421,7 @@ export struct CounterComponent {
             .maxLength(5)
             .padding(0)
             .backgroundColor(this.hasFocusText1 ? CounterResource.BUTTON_BORDER_FOCUSED_COLOR : Color.Transparent)
-            .width('38vp')
+            .width(this.yearTextWidth)
             .height('20vp')
             .borderRadius(0)
             .borderWidth(0)
@@ -2544,13 +2487,13 @@ export struct CounterComponent {
               this.timeoutID1 = setTimeout(() => {
                 this.hasInputText1 = false;
                 this.inputYear = this.year;
-                this.updateDateEnableSate();
+                this.updateDateEnableState();
                 this.updateDay();
               }, 1500);
 
               if (this.inputYear >= this.minYear && this.inputYear <= this.maxYear) {
                 this.year = this.inputYear;
-                this.updateDateEnableSate();
+                this.updateDateEnableState();
                 this.updateDay();
               }
 
@@ -2572,7 +2515,7 @@ export struct CounterComponent {
                 this.year += 1;
                 this.inputYear = this.year;
               }
-              this.updateDateEnableSate();
+              this.updateDateEnableState();
               this.updateDay();
             } as OnSubmitCallback)
             .tabIndex(0)
@@ -2581,18 +2524,18 @@ export struct CounterComponent {
             .onFocus(() => {
               this.focusText = FocusText.TEXT1;
               this.hasFocusText1 = true;
-              this.updateDateEnableSate();
+              this.updateDateEnableState();
               this.controller1.caretPosition(this.getYear().length);
             })
             .onBlur(() => {
               this.focusText = FocusText.NONE;
               this.hasFocusText1 = false;
-              this.updateDateEnableSate();
+              this.updateDateEnableState();
             })
             .onClick((event: ClickEvent) => {
               this.focusText = FocusText.TEXT1;
               this.hasFocusText1 = true;
-              this.updateDateEnableSate();
+              this.updateDateEnableState();
               this.controller1.caretPosition(this.getYear().length);
             })
           Text('/')
@@ -2618,7 +2561,7 @@ export struct CounterComponent {
             .maxLength(3)
             .padding(0)
             .backgroundColor(this.hasFocusText2 ? CounterResource.BUTTON_BORDER_FOCUSED_COLOR : Color.Transparent)
-            .width('19vp')
+            .width(this.monthDayTextWidth)
             .height('20vp')
             .borderRadius(0)
             .key('DateTextInput2' + String(this.timeStamp))
@@ -2766,7 +2709,7 @@ export struct CounterComponent {
             .maxLength(3)
             .padding(0)
             .backgroundColor(this.hasFocusText3 ? CounterResource.BUTTON_BORDER_FOCUSED_COLOR : Color.Transparent)
-            .width('19vp')
+            .width(this.monthDayTextWidth)
             .height('20vp')
             .borderRadius(0)
             .key('DateTextInput3' + String(this.timeStamp))
@@ -2910,7 +2853,7 @@ export struct CounterComponent {
                 ['0vp', '0vp'],
                 ['0vp', '0vp']])
               .strokeWidth(this.addBtnFocusWidth)
-              .stroke(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
+              // .stroke(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
               .margin({ end: LengthMetrics.vp(1) } as LocalizedMargin)
               .fillOpacity(0)
             Image(CounterResource.BUTTON_ARROW_UP)
@@ -2980,7 +2923,7 @@ export struct CounterComponent {
                 ['0vp', '0vp']
               ])
               .strokeWidth(this.subBtnFocusWidth)
-              .stroke(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
+              // .stroke(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
               .margin({ top: LengthMetrics.vp(1), end: LengthMetrics.vp(1), bottom: LengthMetrics.vp(2) } as LocalizedMargin)
               .fillOpacity(0)
             Image(CounterResource.BUTTON_ARROW_DOWN)

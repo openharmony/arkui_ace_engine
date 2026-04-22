@@ -2388,15 +2388,29 @@ HWTEST_F(SpanTestNg, SpanItemGetFontWeightConfigs002, TestSize.Level1)
 HWTEST_F(SpanTestNg, SpanItemToJsonValue003, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Initialize SpanModelNG and SpanNode
+     * @tc.steps: step1. Create SpanModelNG instance and set font properties
+     *            - variableFontWeight: 350
+     *            - enableVariableFontWeight: true
+     *            - enableDeviceFontWeightCategory: false
+     * @tc.expected: SpanModelNG is initialized with specified properties
      */
     SpanModelNG spanModelNG;
     spanModelNG.Create(CREATE_VALUE_W);
     spanModelNG.SetVariableFontWeight(350);
     spanModelNG.SetEnableVariableFontWeight(true);
     spanModelNG.SetEnableDeviceFontWeightCategory(false);
+
+    /**
+     * @tc.steps: step2. Create SpanNode from ViewStackProcessor
+     * @tc.expected: SpanNode is created successfully
+     */
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(spanNode, nullptr);
+
+    /**
+     * @tc.steps: step3. Create TextFrameNode and TextPattern, then set to SpanItem
+     * @tc.expected: TextPattern is created and set successfully
+     */
     auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<TextPattern>());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
@@ -2458,7 +2472,7 @@ HWTEST_F(SpanTestNg, SpanItemToJsonValue004, TestSize.Level1)
 
 /**
  * @tc.name: SpanItemFontWeightConfigsIndependence001
- * @tc.desc: Test enableVariableFontWeight and enableDeviceFontWeightCategory are independent - both true
+ * @tc.desc: Test enableVariableFontWeight and enableDeviceFontWeightCategory are independent
  * @tc.type: FUNC
  */
 HWTEST_F(SpanTestNg, SpanItemFontWeightConfigsIndependence001, TestSize.Level1)

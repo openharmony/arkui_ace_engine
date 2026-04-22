@@ -857,6 +857,8 @@ uint32_t SelectOverlayLayoutAlgorithm::GetSafeAreaTop()
     uint32_t topArea = 0;
     if (safeAreaManager) {
         topArea = safeAreaManager->GetSystemSafeArea().top_.Length();
+        auto cutoutLen = safeAreaManager->GetCutoutSafeAreaWithoutProcess().top_.Length();
+        topArea = std::max(topArea, cutoutLen);
     }
     auto avoidInfoMgr = pipeline->GetAvoidInfoManager();
     if (avoidInfoMgr && avoidInfoMgr->NeedAvoidContainerModal()) {

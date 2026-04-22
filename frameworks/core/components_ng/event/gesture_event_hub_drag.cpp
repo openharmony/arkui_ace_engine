@@ -50,6 +50,7 @@
 #include "core/components_ng/render/adapter/component_snapshot.h"
 #ifdef WEB_SUPPORTED
 #include "core/components_ng/pattern/web/web_pattern.h"
+#include "core/components/common/properties/placement.h"
 #endif
 namespace OHOS::Ace::NG {
 struct DragStartContext {

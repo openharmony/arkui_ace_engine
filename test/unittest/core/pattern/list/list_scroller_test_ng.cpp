@@ -15,6 +15,7 @@
 
 #include "list_test_ng.h"
 #include "test/mock/frameworks/core/animation/mock_animation_manager.h"
+#include "core/animation/velocity_motion.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 
 #define private public
@@ -411,7 +412,8 @@ HWTEST_F(ListScrollerTestNg, ScrollToIndex008, TestSize.Level1)
     MockAnimationManager::GetInstance().SetTicks(12);
     AnimateTo(Dimension(0), 100.0f, nullptr, true);
     for (int32_t i = 0; i < 11; i++) {
-        TickPosition(-550.0f + i * 50);
+        MockAnimationManager::GetInstance().TickByVelocity(-550.0f + i * 50);
+        FlushUITasks();
     }
     EXPECT_TRUE(TickPosition(0));
 }

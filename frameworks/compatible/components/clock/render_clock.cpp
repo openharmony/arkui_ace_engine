@@ -14,6 +14,7 @@
  */
 
 #include "compatible/components/clock/render_clock.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/i18n/localization.h"
 #include "compatible/components/clock/clock_component.h"

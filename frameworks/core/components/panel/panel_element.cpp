@@ -14,6 +14,7 @@
  */
 
 #include "core/components/panel/panel_element.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "core/components/panel/sliding_panel_component.h"
 #include "core/components/stack/stack_element.h"

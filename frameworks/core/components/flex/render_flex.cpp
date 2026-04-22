@@ -15,6 +15,8 @@
 
 #include "core/components/flex/render_flex.h"
 
+#include "core/accessibility/accessibility_manager.h"
+
 #include "base/log/dump_log.h"
 #include "core/components/flex/flex_component.h"
 #include "core/components/box/render_box.h"

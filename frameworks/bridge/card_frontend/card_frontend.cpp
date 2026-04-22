@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/bridge/card_frontend/card_frontend.h"
+#include "core/accessibility/accessibility_manager.h"
 
 namespace OHOS::Ace {
 namespace {

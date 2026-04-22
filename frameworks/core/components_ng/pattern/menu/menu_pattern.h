@@ -31,10 +31,9 @@
 #include "core/components_ng/pattern/menu/menu_paint_property.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_paint_method.h"
-#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select/select_model.h"
-#include "core/components_ng/property/border_property.h"
+#include "core/components_ng/pattern/select/select_model_ng.h"
 
 constexpr int32_t DEFAULT_CLICK_DISTANCE = 15;
 constexpr uint32_t MAX_SEARCH_DEPTH = 5;

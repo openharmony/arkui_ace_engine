@@ -14,17 +14,20 @@
  */
 
 #include "core/components_ng/base/view_abstract_model_static.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/utils/multi_thread.h"
 #include "core/common/ace_engine.h"
 #include "core/common/event_manager.h"
 #include "core/common/vibrator/vibrator_utils.h"
+#include "core/components/common/properties/border_image.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/gestures/long_press_gesture.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
+#include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
@@ -37,6 +40,8 @@
 #include "core/components_ng/syntax/static/detached_free_root_proxy_node.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
+#include "core/components/common/properties/placement.h"
+#include "core/components_ng/animation/geometry_transition.h"
 #endif
 
 namespace OHOS::Ace::NG {
@@ -874,7 +879,7 @@ void ViewAbstractModelStatic::SetBloom(FrameNode *frameNode, const std::optional
     double bloomRadius = themeConstants->GetDoubleByName(BLOOM_RADIUS_SYS_RES_NAME);
     Color bloomColor = themeConstants->GetColorByName(BLOOM_COLOR_SYS_RES_NAME);
     Shadow shadow;
-    shadow.SetBlurRadius(value.value_or(0.0f) * bloomRadius);
+    shadow.SetBlurRadius(value.value_or(-1.0f) * bloomRadius);
     shadow.SetColor(bloomColor);
     std::vector<Shadow> shadows { shadow };
     ViewAbstractModelStatic::SetBackShadow(frameNode, shadows);
@@ -1682,6 +1687,16 @@ void ViewAbstractModelStatic::SetPixelStretchEffect(FrameNode* frameNode,
     } else {
         auto target = frameNode->GetRenderContext();
         ACE_RESET_NODE_RENDER_CONTEXT(target, PixelStretchEffect, frameNode);
+    }
+}
+
+void ViewAbstractModelStatic::SetSpatialEffect(FrameNode* frameNode, const std::optional<SpatialEffectParams>& params)
+{
+    if (params.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(SpatialEffect, params.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, SpatialEffect, frameNode);
     }
 }
 

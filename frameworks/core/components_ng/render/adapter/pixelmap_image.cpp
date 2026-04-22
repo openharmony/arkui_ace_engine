@@ -27,6 +27,7 @@
 #include "core/components_ng/render/adapter/image_painter_utils.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing_forward.h"
+#include "core/image/image_cache.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {

@@ -14,6 +14,7 @@
  */
 
 #include "gtest/gtest.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "search_base.h"
 #include "ui/base/geometry/dimension.h"
 #include "ui/properties/color.h"
@@ -27,6 +28,7 @@
 #include "core/components_ng/pattern/search/search_pattern.h"
 #include "core/components_ng/pattern/search/search_text_field.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -643,7 +645,7 @@ HWTEST_F(SearchTestNg, Pattern007, TestSize.Level1)
     info.AddTouchLocationInfo(std::move(touchInfo1));
     ASSERT_NE(events.size(), 0);
     for (auto event : events) {
-        event->callback_(info);
+        (*event)(info);
     }
 }
 
@@ -678,7 +680,7 @@ HWTEST_F(SearchTestNg, Pattern008, TestSize.Level1)
     info.AddTouchLocationInfo(std::move(touchInfo1));
     ASSERT_NE(events.size(), 0);
     for (auto event : events) {
-        event->callback_(info);
+        (*event)(info);
     }
 }
 

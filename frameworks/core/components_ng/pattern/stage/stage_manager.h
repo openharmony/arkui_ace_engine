@@ -100,13 +100,28 @@ public:
         srcPageNode_ = pageNode;
     }
 
-    void AddAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation, bool isPush)
+    std::function<void()> AddAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation, bool isPush)
     {
+        std::weak_ptr<AnimationUtils::Animation> weakAnim(animation);
+        auto weakMgr = WeakClaim(this);
         if (isPush) {
             pushAnimations_.emplace_back(animation);
-            return;
+            return [weakAnim, weakMgr]() {
+                auto anim = weakAnim.lock();
+                auto mgr = weakMgr.Upgrade();
+                if (anim && mgr) {
+                    mgr->pushAnimations_.remove(anim);
+                }
+            };
         }
         popAnimations_.emplace_back(animation);
+        return [weakAnim, weakMgr]() {
+            auto anim = weakAnim.lock();
+            auto mgr = weakMgr.Upgrade();
+            if (anim && mgr) {
+                mgr->popAnimations_.remove(anim);
+            }
+        };
     }
 
     void AbortAnimation();

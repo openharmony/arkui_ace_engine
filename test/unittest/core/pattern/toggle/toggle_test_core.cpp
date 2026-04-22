@@ -34,7 +34,7 @@ class ToggleContentModifierAddTestCore : public ToggleTestBase {};
 class ToggleModelStaticTestCore : public ToggleTestBase {};
 
 // Placeholder test to ensure compilation
-HWTEST_F(ToggleTestCore, ToggleTestPlaceholder, TestSize.Level1)
+HWTEST_F(ToggleTestCore, ToggleTestPlaceholder, TestSize.Level0)
 {
     EXPECT_TRUE(true);
 }

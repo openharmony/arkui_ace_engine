@@ -148,52 +148,76 @@ void PluginElement::Prepare(const WeakPtr<Element>& parent)
 
     if (!pluginManagerBridge_) {
         pluginManagerBridge_ = AceType::MakeRefPtr<PluginManagerDelegate>(GetContext());
-        pluginManagerBridge_->AddPluginCompleteCallback([weak = WeakClaim(this)]() {
-            auto element = weak.Upgrade();
-            auto uiTaskExecutor = SingleTaskExecutor::Make(
-                element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-            uiTaskExecutor.PostTask(
-                [weak] {
-                    auto plugin = weak.Upgrade();
-                    if (plugin) {
-                        plugin->HandleOnCompleteEvent();
-                    }
-                }, "ArkUIPluginCompleteCallback");
-        });
-        pluginManagerBridge_->AddPluginUpdateCallback([weak = WeakClaim(this)](int64_t id, std::string data) {
-            auto element = weak.Upgrade();
-            auto uiTaskExecutor = SingleTaskExecutor::Make(
-                element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-            uiTaskExecutor.PostTask(
-                [data, weak] {
-                    auto plugin = weak.Upgrade();
-                    if (plugin) {
-                        plugin->GetPluginSubContainer()->UpdatePlugin(data);
-                    }
-                }, "ArkUIPluginUpdateCallback");
-        });
-        pluginManagerBridge_->AddPluginErrorCallback([weak = WeakClaim(this)](std::string code, std::string msg) {
-            auto element = weak.Upgrade();
-            auto uiTaskExecutor = SingleTaskExecutor::Make(
-                element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-            uiTaskExecutor.PostTask(
-                [code, msg, weak] {
-                    auto plugin = weak.Upgrade();
-                    if (plugin) {
-                        plugin->HandleOnErrorEvent(code, msg);
-                    }
-
-                    auto render = plugin->GetRenderNode();
-                    if (!render) {
-                        return;
-                    }
-                    auto renderPlugin = AceType::DynamicCast<RenderPlugin>(render);
-                    if (renderPlugin) {
-                        renderPlugin->RemoveChildren();
-                    }
-                }, "ArkUIPluginErrorCallback");
-        });
+        RegisterCompleteEvent();
+        RegisterUpdateEvent();
+        RegisterErrorEvent();
     }
+}
+
+void PluginElement::RegisterCompleteEvent()
+{
+    pluginManagerBridge_->AddPluginCompleteCallback([weak = WeakClaim(this)]() {
+        auto element = weak.Upgrade();
+        CHECK_NULL_VOID(element);
+        auto context = element->GetContext().Upgrade();
+        CHECK_NULL_VOID(context);
+        auto uiTaskExecutor = SingleTaskExecutor::Make(
+            context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        uiTaskExecutor.PostTask(
+            [weak] {
+                auto plugin = weak.Upgrade();
+                if (plugin) {
+                    plugin->HandleOnCompleteEvent();
+                }
+            }, "ArkUIPluginCompleteCallback");
+    });
+}
+
+void PluginElement::RegisterUpdateEvent()
+{
+    pluginManagerBridge_->AddPluginUpdateCallback([weak = WeakClaim(this)](int64_t id, std::string data) {
+        auto element = weak.Upgrade();
+        CHECK_NULL_VOID(element);
+        auto context = element->GetContext().Upgrade();
+        CHECK_NULL_VOID(context);
+        auto uiTaskExecutor = SingleTaskExecutor::Make(
+            context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        uiTaskExecutor.PostTask(
+            [data, weak] {
+                auto plugin = weak.Upgrade();
+                if (plugin) {
+                    plugin->GetPluginSubContainer()->UpdatePlugin(data);
+                }
+            }, "ArkUIPluginUpdateCallback");
+    });
+}
+
+void PluginElement::RegisterErrorEvent()
+{
+    pluginManagerBridge_->AddPluginErrorCallback([weak = WeakClaim(this)](std::string code, std::string msg) {
+        auto element = weak.Upgrade();
+        CHECK_NULL_VOID(element);
+        auto context = element->GetContext().Upgrade();
+        CHECK_NULL_VOID(context);
+        auto uiTaskExecutor = SingleTaskExecutor::Make(
+            context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        uiTaskExecutor.PostTask(
+            [code, msg, weak] {
+                auto plugin = weak.Upgrade();
+                if (plugin) {
+                    plugin->HandleOnErrorEvent(code, msg);
+                }
+
+                auto render = plugin->GetRenderNode();
+                if (!render) {
+                    return;
+                }
+                auto renderPlugin = AceType::DynamicCast<RenderPlugin>(render);
+                if (renderPlugin) {
+                    renderPlugin->RemoveChildren();
+                }
+            }, "ArkUIPluginErrorCallback");
+    });
 }
 
 void PluginElement::OnActionEvent(const std::string& action) const

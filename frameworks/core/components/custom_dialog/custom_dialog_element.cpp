@@ -14,6 +14,7 @@
  */
 
 #include "core/components/custom_dialog/custom_dialog_element.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "core/components/dialog/dialog_component.h"
 #include "core/components/stack/stack_element.h"

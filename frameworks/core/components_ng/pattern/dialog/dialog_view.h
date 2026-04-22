@@ -19,10 +19,11 @@
 #include <string>
 
 #include "base/memory/referenced.h"
-#include "core/components/dialog/dialog_theme.h"
-#include "core/components_ng/base/frame_node.h"
+#include "core/components/dialog/dialog_properties.h"
 
 namespace OHOS::Ace::NG {
+class FrameNode;
+class UINode;
 
 class ACE_FORCE_EXPORT DialogView {
 public:

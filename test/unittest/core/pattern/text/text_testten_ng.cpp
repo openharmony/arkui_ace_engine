@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/text/text_select_overlay.h"
 #include "core/event/mouse_event.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -914,6 +915,30 @@ HWTEST_F(TextFieldTenPatternNg, SetResponseRegion001, TestSize.Level1)
     pattern->SetIsUserSetResponseRegion(true);
     pattern->SetResponseRegion(frameSize, boundsSize);
     EXPECT_TRUE(pattern->isUserSetResponseRegion_);
+}
+
+/**
+ * @tc.name: SetResponseRegion002
+ * @tc.desc: test SetResponseRegion with symbol tag
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, SetResponseRegion002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: create symbol frame node and call SetResponseRegion.
+     * @tc.expected: gestureHub response region remains empty.
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SYMBOL_ETS_TAG, 0, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    SizeF frameSize(10.0f, 20.0f);
+    SizeF boundsSize(30.0f, 40.0f);
+
+    pattern->SetResponseRegion(frameSize, boundsSize);
+
+    EXPECT_TRUE(gestureHub->GetResponseRegion().empty());
 }
 
 /**

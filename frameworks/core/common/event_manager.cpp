@@ -24,6 +24,7 @@
 #include "core/components/text_overlay/text_overlay_manager.h"
 #include "core/components_ng/event/error_reporter/general_interaction_error_reporter.h"
 #include "core/components_ng/gestures/recognizers/gestures_extra_handler.h"
+#include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
 #include "core/components_ng/manager/gesture_debug/gesture_debug_boundary_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
@@ -31,6 +32,7 @@
 #include "core/event/crown_event.h"
 #include "core/event/coasting_axis_event_generator.h"
 #include "core/pipeline/base/render_node.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #ifdef RELAXED_INTERACTION_SUPPORT
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/relaxed_interaction/relaxed_interaction_manager.h"
@@ -113,6 +115,14 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
             touchPoint.convertInfo.first == UIInputEventType::NONE && touchPoint.sourceType == SourceType::TOUCH);
     hitTestRecordInfo_ = { isRealTouch, touchPoint.screenX, touchPoint.screenY, touchPoint.id, touchPoint.time,
         touchPoint.type };
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
+    // Reset all gesture debug boundaries when a new gesture round starts.
+    if (SystemProperties::GetGestureDebugBoundaryEnabled() && downFingerIds_.size() == 1) {
+        auto& gestureDebugBoundaryManager = GetGestureDebugBoundaryManager();
+        CHECK_NULL_VOID(gestureDebugBoundaryManager);
+        gestureDebugBoundaryManager->ResetAllGesturesOnNewRound();
+    }
+#endif
     // For root node, the parent local point is the same as global point.
     frameNode->TouchTest(point, point, point, touchRestrict, hitTestResult, touchPoint.id, responseLinkResult);
     NotifyHitTestFrameNodeListener(touchPoint);
@@ -1113,6 +1123,32 @@ void EventManager::AddDumpTouchInfo(const TouchEvent& event)
             eventTouchInfoRecord.AddTouchPoint(event, time);
             CheckTouchInfoDump();
         }
+    }
+    if (touchTimingCallback_ && !event.isFalsified && event.sourceTool == SourceTool::FINGER) {
+        auto callback = touchTimingCallback_;
+        auto time = std::chrono::high_resolution_clock::now();
+        TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW,
+            "touchTimingCallback:%{public}d/%{public}d sensorTime:%{public}s receiveTime:%{public}s "
+            "dispatchTime:%{public}s", static_cast<int32_t>(event.type), static_cast<int32_t>(event.history.size()),
+            std::to_string(event.sensorTime.time_since_epoch().count()).c_str(),
+            std::to_string(event.processTime.time_since_epoch().count()).c_str(),
+            std::to_string(time.time_since_epoch().count()).c_str()
+        );
+        if (!event.history.empty()) {
+            for (const auto& point : event.history) {
+                callback(static_cast<uint64_t>(point.sensorTime.time_since_epoch().count()),
+                    static_cast<uint64_t>(point.processTime.time_since_epoch().count()),
+                    static_cast<uint64_t>(time.time_since_epoch().count()),
+                    static_cast<int32_t>(point.type)
+                );
+            }
+            return;
+        }
+        callback(static_cast<uint64_t>(event.sensorTime.time_since_epoch().count()),
+            static_cast<uint64_t>(event.processTime.time_since_epoch().count()),
+            static_cast<uint64_t>(time.time_since_epoch().count()),
+            static_cast<int32_t>(event.type)
+        );
     }
 }
 
@@ -2400,6 +2436,36 @@ EventManager::EventManager()
 
 EventManager::~EventManager() = default;
 
+const RefPtr<NG::SmartGestureManager>& EventManager::GetOrCreateSmartGestureManager()
+{
+    if (!smartGestureManager_) {
+        auto container = Container::GetContainer(instanceId_);
+        CHECK_NULL_RETURN(container, smartGestureManager_);
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+        CHECK_NULL_RETURN(pipeline, smartGestureManager_);
+        smartGestureManager_ = AceType::MakeRefPtr<NG::SmartGestureManager>(WeakPtr<NG::PipelineContext>(pipeline));
+    }
+    return smartGestureManager_;
+}
+
+const RefPtr<NG::SmartGestureManager>& EventManager::GetSmartGestureManager() const
+{
+    return smartGestureManager_;
+}
+
+void EventManager::ClearSmartGestureSelected()
+{
+    auto smartGestureManager = GetSmartGestureManager();
+    if (smartGestureManager) {
+        smartGestureManager->ClearSelected();
+    }
+}
+
+void EventManager::ResetSmartGestureManager()
+{
+    smartGestureManager_.Reset();
+}
+
 void EventManager::AddRectCallback(std::function<void(std::vector<Rect>&)>&& getRectCallback,
     std::function<void()>&& touchCallback, std::function<void()>&& mouseCallback)
 {
@@ -2434,9 +2500,11 @@ void EventManager::DumpEvent(NG::EventTreeType type, bool hasJson)
 
 const RefPtr<NG::GestureDebugBoundaryManager>& EventManager::GetGestureDebugBoundaryManager()
 {
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
     if (!gestureDebugBoundaryManager_) {
         gestureDebugBoundaryManager_ = AceType::MakeRefPtr<NG::GestureDebugBoundaryManager>();
     }
+#endif
     return gestureDebugBoundaryManager_;
 }
 

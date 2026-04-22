@@ -25,7 +25,6 @@
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/radius.h"
 #include "core/components/theme/resource_adapter.h"
 #include "core/components/theme/theme_attributes.h"

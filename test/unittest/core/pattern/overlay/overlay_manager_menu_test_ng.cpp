@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include <mutex>
+#include "core/accessibility/accessibility_manager.h"
 #include <optional>
 #include <string>
 
@@ -60,6 +61,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/theme/icon_theme.h"
 
 using namespace testing;
 using namespace testing::ext;

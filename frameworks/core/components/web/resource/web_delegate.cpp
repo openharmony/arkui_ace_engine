@@ -28,6 +28,7 @@
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "arkweb_net_error_list.h"
+#include "base/utils/feature_param.h"
 #include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
@@ -36,6 +37,7 @@
 #include "base/utils/utils.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "core/accessibility/accessibility_manager.h"
+#include "core/accessibility/accessibility_manager_ng.h"
 #include "core/components_ng/pattern/web/web_agent_event_reporter.h"
 #include "core/components_ng/render/detached_rs_node_manager.h"
 #include "core/components/container_modal/container_modal_constants.h"
@@ -2575,6 +2577,7 @@ void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineBase>& context)
 #endif
         }
     }
+    FetchCloudControlWebAutoLayoutConfig();
 }
 void WebDelegate::RegisterOHOSWebEventAndMethord()
 {
@@ -10318,6 +10321,22 @@ void WebDelegate::UpdateKeyboardAppearanceMode(const WebKeyboardAppearanceMode& 
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebKeyboardAppearnaceMode");
+}
+
+void WebDelegate::FetchCloudControlWebAutoLayoutConfig()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                delegate->nweb_->SetWebAutoLayoutConfig(FeatureParam::GetArkWebAutoLayoutConfig());
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebFetchCloudControlWebAutoLayoutConfig");
 }
 
 } // namespace OHOS::Ace

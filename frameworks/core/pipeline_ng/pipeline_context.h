@@ -30,7 +30,6 @@
 #include "base/memory/referenced.h"
 #include "base/utils/device_config.h"
 #include "base/view_data/view_data_wrap.h"
-#include "core/accessibility/accessibility_manager_ng.h"
 #include "core/common/ai/ai_write_adapter.h"
 #include "core/common/color_inverter.h"
 #include "core/common/frontend.h"
@@ -91,6 +90,7 @@ class InspectorOffscreenNodesMgr;
 class SafeAreaManager;
 class SelectOverlayManager;
 class UIExtensionManager;
+class AccessibilityManagerNG;
 class ForceSplitManager;
 class FormVisibleManager;
 class FormEventManager;
@@ -1337,6 +1337,11 @@ public:
     {
         xComponentDisplayConstraintEnabled_ = isEnable;
     }
+
+    void RegisterTouchTimingCallback(
+        const std::function<void(uint64_t sensorTime, uint64_t receiveTime, uint64_t dispatchTime,
+            int32_t eventType)>&& callback);
+    void UnregisterTouchTimingCallback();
 
     bool GetXComponentDisplayConstraintEnabled() override
     {

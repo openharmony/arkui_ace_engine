@@ -14,6 +14,7 @@
  */
 
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/common/mock_data_detector_mgr.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"

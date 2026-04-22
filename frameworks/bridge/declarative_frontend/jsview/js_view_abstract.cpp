@@ -86,6 +86,7 @@
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_wrapper.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components/common/properties/depth_option.h"
 #include "core/components_ng/base/extension_handler.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
@@ -93,9 +94,11 @@
 #include "core/components_ng/pattern/toolbaritem/toolbaritem_model.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/property/union_effect_container_options.h"
+#include "core/components_ng/property/edgelight_property.h"
 #include "core/event/key_event.h"
 
 #include "interfaces/inner_api/ace_kit/include/ui/properties/safe_area_insets.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 
 namespace OHOS::Ace::NG {
 constexpr uint32_t DEFAULT_GRID_SPAN = 1;
@@ -158,6 +161,7 @@ constexpr double VISIBLE_RATIO_MAX = 1.0;
 constexpr int32_t PARAMETER_LENGTH_FIRST = 1;
 constexpr int32_t PARAMETER_LENGTH_SECOND = 2;
 constexpr int32_t PARAMETER_LENGTH_THIRD = 3;
+constexpr int32_t SMART_GESTURE_SHORTCUT_PRIMARY = 0;
 constexpr int32_t SECOND_INDEX = 2;
 constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
 constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
@@ -1656,6 +1660,53 @@ void RegisterRadiusRes(NG::BorderRadiusProperty& radius,
         radius.AddResource("radius.bottomEnd", bottomEndResObj, std::move(updateFunc));
     } else {
         radius.RemoveResource("radius.bottomEnd");
+    }
+}
+
+void ParseEdgeLightParam(const JSRef<JSObject>& jsObj, NG::EdgeLightParam& param)
+{
+    auto length = jsObj->GetProperty("length");
+    CalcDimension edgeLightLength;
+    if (!JSViewAbstract::ParseJsDimensionVpNG(length, edgeLightLength, false)) {
+        edgeLightLength.Reset();
+    }
+    param.length = edgeLightLength;
+
+    auto intensity = jsObj->GetProperty("intensity");
+    auto edgeLightIntensity = 1.0;
+    if (JSViewAbstract::ParseJsDouble(intensity, edgeLightIntensity)) {
+        if (LessNotEqual(edgeLightIntensity, 0.0)) {
+            edgeLightIntensity = 0.0;
+        } else if (GreatNotEqual(edgeLightIntensity, 1.0)) {
+            edgeLightIntensity = 1.0;
+        }
+    }
+    param.intensity = edgeLightIntensity;
+
+    auto thickness = jsObj->GetProperty("thickness");
+    CalcDimension edgeLightThickness;
+    if (!JSViewAbstract::ParseJsDimensionVpNG(thickness, edgeLightThickness, true)) {
+        edgeLightThickness.Reset();
+    }
+    param.thickness = edgeLightThickness;
+
+    auto position = jsObj->GetProperty("position");
+    auto edgeLightPosition = NG::EdgeLightPosition::TOP_LEFT;
+    if (position->IsNumber()) {
+        int32_t posValue = position->ToNumber<int32_t>();
+        if (posValue >= static_cast<int32_t>(NG::EdgeLightPosition::TOP_LEFT) &&
+            posValue <= static_cast<int32_t>(NG::EdgeLightPosition::RIGHT)) {
+            edgeLightPosition = static_cast<NG::EdgeLightPosition>(posValue);
+        }
+    }
+    param.edgeLightPosition = edgeLightPosition;
+
+    auto color = jsObj->GetProperty("color");
+    Color edgeLightColor = Color::WHITE;
+    if (JSViewAbstract::ParseJsColor(color, edgeLightColor)) {
+        param.color = edgeLightColor;
+    } else {
+        param.color = Color::WHITE;
     }
 }
 } // namespace
@@ -3909,6 +3960,73 @@ void JSViewAbstract::JsLightUpEffect(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetLightUpEffect(std::clamp(radio, 0.0, 1.0));
 }
 
+void JSViewAbstract::JsSpatialEffect(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || info[0]->IsUndefined() || info[0]->IsNull()) {
+        ViewAbstractModel::GetInstance()->SetSpatialEffect(std::nullopt);
+        return;
+    }
+
+    if (!info[0]->IsObject()) {
+        return;
+    }
+
+    SpatialEffectParams params;
+    auto jsObject = JSRef<JSObject>::Cast(info[0]);
+    auto positionValue = jsObject->GetProperty("position");
+    if (positionValue->IsObject()) {
+        DepthPosition position;
+        auto positionObject = JSRef<JSObject>::Cast(positionValue);
+        auto leftTopValue = positionObject->GetProperty("leftTop");
+        if (leftTopValue->IsObject()) {
+            position.leftTop = ParseDepthVector3(leftTopValue);
+        }
+        auto rightTopValue = positionObject->GetProperty("rightTop");
+        if (rightTopValue->IsObject()) {
+            position.rightTop = ParseDepthVector3(rightTopValue);
+        }
+        auto leftBottomValue = positionObject->GetProperty("leftBottom");
+        if (leftBottomValue->IsObject()) {
+            position.leftBottom = ParseDepthVector3(leftBottomValue);
+        }
+        auto rightBottomValue = positionObject->GetProperty("rightBottom");
+        if (rightBottomValue->IsObject()) {
+            position.rightBottom = ParseDepthVector3(rightBottomValue);
+        }
+        params.position = position;
+    }
+
+    auto occlusionWeightValue = jsObject->GetProperty("occlusionWeight");
+    if (occlusionWeightValue->IsNumber()) {
+        params.occlusionWeight = occlusionWeightValue->ToNumber<float>();
+    }
+    ViewAbstractModel::GetInstance()->SetSpatialEffect(params);
+}
+
+DepthVector3 JSViewAbstract::ParseDepthVector3(const JSRef<JSVal>& vectorValue)
+{
+    if (!vectorValue->IsObject()) {
+        return DepthVector3();
+    }
+    auto vectorObj = JSRef<JSObject>::Cast(vectorValue);
+    DepthVector3 vector;
+    auto xValue = vectorObj->GetProperty("x");
+    if (xValue->IsNumber()) {
+        vector.x = xValue->ToNumber<float>();
+    }
+
+    auto yValue = vectorObj->GetProperty("y");
+    if (yValue->IsNumber()) {
+        vector.y = yValue->ToNumber<float>();
+    }
+
+    auto zValue = vectorObj->GetProperty("z");
+    if (zValue->IsNumber()) {
+        vector.z = zValue->ToNumber<float>();
+    }
+    return vector;
+}
+
 void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
 {
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT };
@@ -6159,6 +6277,25 @@ void JSViewAbstract::JsWindowBlur(const JSCallbackInfo& info)
 
     SetWindowBlur(static_cast<float>(progress), static_cast<WindowBlurStyle>(style));
     info.SetReturnValue(info.This());
+}
+
+void JSViewAbstract::JSEdgeLight(const JSCallbackInfo& info)
+{
+    auto jsVal = info[0];
+    if (!jsVal->IsObject()) {
+        ViewAbstractModel::GetInstance()->SetEdgeLightParam(std::nullopt);
+        return;
+    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsVal);
+    NG::EdgeLightParam param {
+        .edgeLightPosition = NG::EdgeLightPosition::TOP_LEFT,
+        .length = CalcDimension(),
+        .intensity = 1.0f,
+        .thickness = CalcDimension(),
+        .color = Color::WHITE 
+    };
+    ParseEdgeLightParam(jsObj, param);
+    ViewAbstractModel::GetInstance()->SetEdgeLightParam(param);
 }
 
 bool JSViewAbstract::ParseDollarResource(const JSRef<JSVal>& jsValue, std::string& targetModule, ResourceType& resType,
@@ -9939,6 +10076,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("lightUpEffect", &JSViewAbstract::JsLightUpEffect);
     JSClass<JSViewAbstract>::StaticMethod("sphericalEffect", &JSViewAbstract::JsSphericalEffect);
     JSClass<JSViewAbstract>::StaticMethod("pixelStretchEffect", &JSViewAbstract::JsPixelStretchEffect);
+    JSClass<JSViewAbstract>::StaticMethod("spatialEffect", &JSViewAbstract::JsSpatialEffect);
     JSClass<JSViewAbstract>::StaticMethod("outline", &JSViewAbstract::JsOutline);
     JSClass<JSViewAbstract>::StaticMethod("outlineWidth", &JSViewAbstract::JsOutlineWidth);
     JSClass<JSViewAbstract>::StaticMethod("outlineStyle", &JSViewAbstract::JsOutlineStyle);
@@ -10119,6 +10257,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("onVisibleAreaChange", &JSViewAbstract::JsOnVisibleAreaChange);
     JSClass<JSViewAbstract>::StaticMethod(
         "onVisibleAreaApproximateChange", &JSViewAbstract::JsOnVisibleAreaApproximateChange);
+    JSClass<JSViewAbstract>::StaticMethod("smartGestureShortcut", &JSViewAbstract::JsSmartGestureShortcut);
     JSClass<JSViewAbstract>::StaticMethod("hitTestBehavior", &JSViewAbstract::JsHitTestBehavior);
     JSClass<JSViewAbstract>::StaticMethod("onChildTouchTest", &JSViewAbstract::JsOnChildTouchTest);
     JSClass<JSViewAbstract>::StaticMethod("keyboardShortcut", &JSViewAbstract::JsKeyboardShortcut);
@@ -10166,6 +10305,8 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
 
     JSClass<JSViewAbstract>::StaticMethod("allowForceDark", &JSViewAbstract::JSAllowForceDark);
     JSClass<JSViewAbstract>::StaticMethod("onNeedSoftkeyboard", &JSViewAbstract::JSOnNeedSoftkeyboard);
+
+    JSClass<JSViewAbstract>::StaticMethod("edgeLight", &JSViewAbstract::JSEdgeLight);
 
     JSClass<JSViewAbstract>::Bind(globalObj);
 }
@@ -10744,11 +10885,8 @@ void JSViewAbstract::ParseShadowPropsUpdate(const JSRef<JSObject>& jsObj, double
     ParseJsDouble(jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::RADIUS)), radius, radiusResObj);
     if (SystemProperties::ConfigChangePerform() && radiusResObj) {
         auto&& updateFunc = [](const RefPtr<ResourceObject>& radiusResObj, Shadow& shadow) {
-            double radius = 0.0;
+            double radius = -1.0;
             ResourceParseUtils::ParseResDouble(radiusResObj, radius);
-            if (LessNotEqual(radius, 0.0)) {
-                radius = 0.0;
-            }
             shadow.SetBlurRadius(radius);
         };
         shadow.AddResource("shadow.radius", radiusResObj, std::move(updateFunc));
@@ -10767,11 +10905,8 @@ bool JSViewAbstract::ParseShadowProps(
         return false;
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    double radius = 0.0;
+    double radius = -1.0;
     ParseShadowPropsUpdate(jsObj, radius, shadow);
-    if (LessNotEqual(radius, 0.0)) {
-        radius = 0.0;
-    }
     shadow.SetBlurRadius(radius);
     ParseShadowOffsetXY(jsObj, shadow);
 
@@ -11768,6 +11903,41 @@ void JSViewAbstract::JsOnVisibleAreaApproximateChange(const JSCallbackInfo& info
     };
     ViewAbstractModel::GetInstance()->SetOnVisibleAreaApproximateChange(
         std::move(onVisibleChange), ratioVec, expectedUpdateInterval, measureFromViewport);
+}
+
+void JSViewAbstract::JsSmartGestureShortcut(const JSCallbackInfo& info)
+{
+    if (info.Length() != PARAMETER_LENGTH_FIRST) {
+        return;
+    }
+
+    if (info[0]->IsUndefined() || info[0]->IsNull()) {
+        ViewAbstractModel::GetInstance()->ResetSmartGestureShortcut();
+        return;
+    }
+
+    if (!info[0]->IsObject()) {
+        return;
+    }
+
+    auto options = JSRef<JSObject>::Cast(info[0]);
+    auto actionValue = options->GetProperty("action");
+    auto enabledValue = options->GetProperty("enabled");
+    if (!actionValue->IsNumber() || !enabledValue->IsBoolean()) {
+        return;
+    }
+
+    int32_t action = actionValue->ToNumber<int32_t>();
+    if (action != SMART_GESTURE_SHORTCUT_PRIMARY) {
+        return;
+    }
+    bool enabled = enabledValue->ToBoolean();
+    bool selectable = false;
+    auto selectableValue = options->GetProperty("selectable");
+    if (selectableValue->IsBoolean()) {
+        selectable = selectableValue->ToBoolean();
+    }
+    ViewAbstractModel::GetInstance()->SetSmartGestureShortcut(action, enabled, selectable);
 }
 
 void JSViewAbstract::JsHitTestBehavior(const JSCallbackInfo& info)

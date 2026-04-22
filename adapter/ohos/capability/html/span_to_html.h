@@ -32,6 +32,7 @@ private:
     static std::string ImageToHtml(RefPtr<NG::SpanItem> item);
     static std::string FontStyleToHtml(const std::optional<Ace::FontStyle>& value);
     static std::string FontSizeToHtml(const std::optional<Dimension>& value);
+    static std::string ActualFontSizeToHtml(const NG::FontStyle& fontStyle);
     static std::string FontWeightToHtml(const std::optional<FontWeight>& value);
     static std::string ColorToHtml(const std::optional<Color>& value);
     static std::string StrokeWidthToHtml(const std::optional<Dimension>& value);

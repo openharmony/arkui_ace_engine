@@ -29,7 +29,7 @@ void DistortionComponentPattern::SetDistortion(const DistortionParam& options)
     UpdateDistortion();
 }
 
-void DistortionComponentPattern::CreateContentNode(const RefPtr<FrameNode>& builderNode)
+void DistortionComponentPattern::CreateContentNode()
 {
     if (contentNode_) {
         return; // Already created
@@ -44,14 +44,6 @@ void DistortionComponentPattern::CreateContentNode(const RefPtr<FrameNode>& buil
     
     // Add content node as child of distortion component
     host->AddChild(contentNode_);
-    
-    contentNode_->AddChild(builderNode);
-
-    // Apply same size as parent
-    auto contentLayoutProperty = contentNode_->GetLayoutProperty();
-    CHECK_NULL_VOID(contentLayoutProperty);
-
-    contentLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     // Mark dirty to trigger layout
     contentNode_->MarkModifyDone();
 }

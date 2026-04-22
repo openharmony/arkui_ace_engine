@@ -30,6 +30,7 @@
 #include "core/common/ace_engine.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
 #include "core/interfaces/native/implementation/drag_springloadingcontext_peer.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 
 namespace OHOS::Ace::Ani {
 namespace {

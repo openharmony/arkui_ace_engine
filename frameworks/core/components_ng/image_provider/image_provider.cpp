@@ -28,6 +28,7 @@
 #include "core/components_ng/image_provider/pixel_map_image_object.h"
 #include "core/components_ng/image_provider/static_image_object.h"
 #include "core/components_ng/image_provider/svg_image_object.h"
+#include "core/image/image_cache.h"
 #include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/components_ng/render/adapter/drawing_image.h"
 #include "core/image/image_loader.h"

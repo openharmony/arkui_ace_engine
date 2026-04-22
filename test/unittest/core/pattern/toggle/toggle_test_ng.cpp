@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "gtest/gtest.h"
+#include "core/accessibility/accessibility_manager.h"
 #define protected public
 #define private public
 #include "base/geometry/dimension.h"

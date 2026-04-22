@@ -732,6 +732,7 @@ void AssignUnionTo(std::optional<T>& dst,
         case SELECTOR_ID_10: AssignTo(dst, src.value10); break;
         case SELECTOR_ID_11: AssignTo(dst, src.value11); break;
         case SELECTOR_ID_12: AssignTo(dst, src.value12); break;
+        case SELECTOR_ID_13: AssignTo(dst, src.value13); break;
         default:
         {
             LOGE("Unexpected src->selector: %{public}d\n", src.selector);
@@ -874,6 +875,22 @@ void AssignUnionTo(std::optional<T>& dst,
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
         case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_Array_ResourceColor_Array_ColorMetricsExt_Array_Union_ResourceColor_ColorMetricsExt& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
         default:
         {
             LOGE("Unexpected src->selector: %{public}d\n", src.selector);
@@ -3800,8 +3817,10 @@ ASSIGN_OPT(Opt_LineBreakStrategy)
 ASSIGN_OPT(Opt_LineCapStyle)
 ASSIGN_OPT(Opt_LineHeightStyle)
 ASSIGN_OPT(Opt_LineJoinStyle)
+ASSIGN_OPT(Opt_LineSpacingStyle)
 ASSIGN_OPT(Opt_ListItemAlign)
 ASSIGN_OPT(Opt_ListItemGroupArea)
+ASSIGN_OPT(Opt_ListItemGroupHeaderFooterStyle)
 ASSIGN_OPT(Opt_ListItemGroupStyle)
 ASSIGN_OPT(Opt_ListItemStyle)
 ASSIGN_OPT(Opt_ListItemSwipeActionDirection)
@@ -4250,6 +4269,7 @@ ASSIGN_OPT(Opt_Array_Array_String)
 ASSIGN_OPT(Opt_Array_BarrierStyle)
 ASSIGN_OPT(Opt_Array_BlankScreenDetectionMethod)
 ASSIGN_OPT(Opt_Array_Buffer)
+ASSIGN_OPT(Opt_Array_ColorMetricsExt)
 ASSIGN_OPT(Opt_Array_ColorMetricsStop)
 ASSIGN_OPT(Opt_Array_ColorStop)
 ASSIGN_OPT(Opt_Array_DateRange)
@@ -4342,6 +4362,7 @@ ASSIGN_OPT(Opt_Array_Tuple_ResourceColor_F64)
 ASSIGN_OPT(Opt_Array_Tuple_Union_ResourceColor_LinearGradient_F64)
 ASSIGN_OPT(Opt_Array_Tuple_Union_ResourceColor_Undefined_F64)
 ASSIGN_OPT(Opt_Array_uniformTypeDescriptor_UniformDataType)
+ASSIGN_OPT(Opt_Array_Union_ResourceColor_ColorMetricsExt)
 ASSIGN_OPT(Opt_Array_Union_ResourceColor_LinearGradient)
 ASSIGN_OPT(Opt_Array_Union_RichEditorImageSpanResult_RichEditorTextSpanResult)
 ASSIGN_OPT(Opt_Array_Union_RichEditorTextSpanResult_RichEditorImageSpanResult)
@@ -4784,7 +4805,7 @@ ASSIGN_OPT(Opt_CrownEvent)
 ASSIGN_OPT(Opt_CustomDialogControllerExternalOptions)
 ASSIGN_OPT(Opt_CustomDialogControllerExternalOptionsExtender)
 ASSIGN_OPT(Opt_CustomSpanDrawInfo)
-ASSIGN_OPT(Opt_CustomSpanMeasureInfo)
+ASSIGN_OPT(Opt_CustomSpanMeasureInfoProxy)
 ASSIGN_OPT(Opt_CustomSpanMetrics)
 ASSIGN_OPT(Opt_CustomSpanWrapper)
 ASSIGN_OPT(Opt_CustomTheme)
@@ -4982,6 +5003,7 @@ ASSIGN_OPT(Opt_SlideRange)
 ASSIGN_OPT(Opt_SliderConfiguration)
 ASSIGN_OPT(Opt_SliderShowStepOptions)
 ASSIGN_OPT(Opt_SnapshotOptions)
+ASSIGN_OPT(Opt_SpatialPosition)
 ASSIGN_OPT(Opt_SslErrorEvent)
 ASSIGN_OPT(Opt_StackOptions)
 ASSIGN_OPT(Opt_StyledStringChangedListener)
@@ -5029,6 +5051,7 @@ ASSIGN_OPT(Opt_Union_Array_BarrierStyle_Array_LocalizedBarrierStyle)
 ASSIGN_OPT(Opt_Union_Array_MenuElement_CustomNodeBuilder)
 ASSIGN_OPT(Opt_Union_Array_NavigationMenuItem_CustomNodeBuilder)
 ASSIGN_OPT(Opt_Union_Array_Opt_ShaderStyle_ShaderStyle)
+ASSIGN_OPT(Opt_Union_Array_ResourceColor_Array_ColorMetricsExt_Array_Union_ResourceColor_ColorMetricsExt)
 ASSIGN_OPT(Opt_Union_Array_String_Array_Array_String_Resource_Array_TextPickerRangeContent_Array_TextCascadePickerRangeContent)
 ASSIGN_OPT(Opt_Union_Array_ToolbarItem_CustomNodeBuilder)
 ASSIGN_OPT(Opt_Union_Array_uniformTypeDescriptor_UniformDataType_Array_String)
@@ -5231,6 +5254,7 @@ ASSIGN_OPT(Opt_SliderPrefixOptions)
 ASSIGN_OPT(Opt_SliderStepItemAccessibility)
 ASSIGN_OPT(Opt_SliderSuffixOptions)
 ASSIGN_OPT(Opt_SpanStyle)
+ASSIGN_OPT(Opt_SpatialEffectParams)
 ASSIGN_OPT(Opt_StarStyleOptions)
 ASSIGN_OPT(Opt_StyledStringChangeValue)
 ASSIGN_OPT(Opt_SwitchStyle)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,6 +50,14 @@ void ButtonModelNG::SetFontFamily(const std::vector<std::string>& fontFamily)
 void ButtonModelNG::SetFontColor(const Color& textColor)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontColor, textColor);
+    ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontColorFlagByUser, true);
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, textColor);
+}
+
+void ButtonModelNG::SetFontColorDefault(const Color& textColor)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontColor, textColor);
+    ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontColorFlagByUser, false);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, textColor);
 }
 
@@ -78,18 +86,17 @@ void ButtonModelNG::SetButtonStyle(const std::optional<ButtonStyleMode>& buttonS
 {
     if (buttonStyle.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, ButtonStyle, buttonStyle.value());
-        auto context = PipelineBase::GetCurrentContextSafely();
-        CHECK_NULL_VOID(context);
-        auto buttonTheme = context->GetTheme<ButtonTheme>();
-        CHECK_NULL_VOID(buttonTheme);
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto buttonTheme = frameNode->GetTheme<ButtonTheme>(true);
+        CHECK_NULL_VOID(buttonTheme);
         auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
         ButtonRole buttonRole = layoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL);
         auto bgColor = buttonTheme->GetBgColor(buttonStyle.value(), buttonRole);
         auto textColor = buttonTheme->GetTextColor(buttonStyle.value(), buttonRole);
-        BackgroundColor(bgColor, true);
-        SetFontColor(textColor);
+        BackgroundColorDefault(bgColor);
+        SetFontColorDefault(textColor);
     }
 }
 
@@ -100,15 +107,13 @@ void ButtonModelNG::SetButtonStyleOnly(const std::optional<ButtonStyleMode>& but
     }
 }
 
-void ButtonModelNG::ParseButtonResColor(
+void ButtonModelNG::ParseButtonResColor(const RefPtr<FrameNode>& frameNode,
     const RefPtr<ResourceObject>& resObj, Color& result, const ButtonColorType buttonColorType)
 {
-    bool adaptMaterial = buttonColorType == ButtonColorType::FONT_COLOR;
-    auto parseFlag = ResourceParseUtils::ParseResColor(resObj, result, adaptMaterial);
+    auto parseFlag = ResourceParseUtils::ParseResColor(resObj, result);
     CHECK_EQUAL_VOID(parseFlag, true);
-    auto context = PipelineBase::GetCurrentContextSafely();
-    CHECK_NULL_VOID(context);
-    auto buttonTheme = context->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(frameNode);
+    auto buttonTheme = frameNode->GetTheme<ButtonTheme>(true);
     CHECK_NULL_VOID(buttonTheme);
     switch (buttonColorType) {
         case ButtonColorType::FONT_COLOR:
@@ -135,7 +140,7 @@ void ButtonModelNG::UpdateResColor(FrameNode* frameNode, Color result, const But
     CHECK_NULL_VOID(frameNode);
     switch (buttonColorType) {
         case ButtonColorType::FONT_COLOR:
-            SetFontColor(frameNode, result);
+            SetFontColor(frameNode, result, true);
             break;
         case ButtonColorType::BACKGROUND_COLOR:
             BackgroundColor(frameNode, result, true);
@@ -161,7 +166,7 @@ void ButtonModelNG::CreateWithColorResourceObj(
         auto frameNode = weak.Upgrade();
         CHECK_NULL_VOID(frameNode);
         Color result;
-        ParseButtonResColor(resObj, result, buttonColorType);
+        ParseButtonResColor(frameNode, resObj, result, buttonColorType);
         UpdateResColor(AceType::RawPtr(frameNode), result, buttonColorType);
     };
     pattern->AddResObj(key, resObj, std::move(updateFunc));
@@ -203,7 +208,7 @@ void ButtonModelNG::UpdateDefaultFamilies(
     CHECK_NULL_VOID(frameNode);
     auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto buttonTheme = pipelineContext->GetTheme<ButtonTheme>();
+    auto buttonTheme = frameNode->GetTheme<ButtonTheme>(true);
     CHECK_NULL_VOID(buttonTheme);
     value = buttonTheme->GetTextStyle().GetFontFamilies();
 
@@ -227,7 +232,6 @@ void ButtonModelNG::UpdateComponentFamilies(
     CHECK_NULL_VOID(frameNode);
     auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto buttonTheme = pipelineContext->GetTheme<ButtonTheme>();
     if (pipelineContext->IsSystemColorChange()) {
         switch (buttonStringType) {
             case ButtonStringType::FONT_FAMILY:
@@ -416,18 +420,17 @@ void ButtonModelNG::SetRole(const std::optional<ButtonRole>& buttonRole)
 {
     if (buttonRole.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, ButtonRole, buttonRole.value());
-        auto context = PipelineBase::GetCurrentContextSafely();
-        CHECK_NULL_VOID(context);
-        auto buttonTheme = context->GetTheme<ButtonTheme>();
-        CHECK_NULL_VOID(buttonTheme);
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto buttonTheme = frameNode->GetTheme<ButtonTheme>(true);
+        CHECK_NULL_VOID(buttonTheme);
         auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
         ButtonStyleMode buttonStyleMode = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
         auto bgColor = buttonTheme->GetBgColor(buttonStyleMode, buttonRole.value());
         auto textColor = buttonTheme->GetTextColor(buttonStyleMode, buttonRole.value());
-        BackgroundColor(bgColor, true);
-        SetFontColor(textColor);
+        BackgroundColorDefault(bgColor);
+        SetFontColorDefault(textColor);
     }
 }
 
@@ -442,12 +445,10 @@ void ButtonModelNG::SetControlSize(const std::optional<ControlSize>& controlSize
 {
     if (controlSize.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, ControlSize, controlSize.value());
-        auto context = PipelineBase::GetCurrentContextSafely();
-        CHECK_NULL_VOID(context);
-        auto buttonTheme = context->GetTheme<ButtonTheme>();
-        CHECK_NULL_VOID(buttonTheme);
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
         CHECK_NULL_VOID(frameNode);
+        auto buttonTheme = frameNode->GetTheme<ButtonTheme>();
+        CHECK_NULL_VOID(buttonTheme);
         SetButtonSize(frameNode, controlSize, buttonTheme);
         Dimension fontSize = buttonTheme->GetTextSize(controlSize.value());
         SetFontSize(fontSize);
@@ -458,17 +459,15 @@ void ButtonModelNG::SetRole(FrameNode* frameNode, const std::optional<ButtonRole
 {
     if (buttonRole.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, ButtonRole, buttonRole.value(), frameNode);
-        auto context = PipelineBase::GetCurrentContextSafely();
-        CHECK_NULL_VOID(context);
-        auto buttonTheme = context->GetTheme<ButtonTheme>();
+        auto buttonTheme = frameNode->GetTheme<ButtonTheme>(true);
         CHECK_NULL_VOID(buttonTheme);
         auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
         ButtonStyleMode buttonStyleMode = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
         auto bgColor = buttonTheme->GetBgColor(buttonStyleMode, buttonRole.value());
         auto textColor = buttonTheme->GetTextColor(buttonStyleMode, buttonRole.value());
-        BackgroundColor(frameNode, bgColor, true);
-        SetFontColor(frameNode, textColor);
+        BackgroundColor(frameNode, bgColor, false);
+        SetFontColor(frameNode, textColor, false);
     }
 }
 
@@ -476,17 +475,15 @@ void ButtonModelNG::SetButtonStyle(FrameNode* frameNode, const std::optional<But
 {
     if (buttonStyle.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, ButtonStyle, buttonStyle.value(), frameNode);
-        auto context = PipelineBase::GetCurrentContextSafely();
-        CHECK_NULL_VOID(context);
-        auto buttonTheme = context->GetTheme<ButtonTheme>();
+        auto buttonTheme = frameNode->GetTheme<ButtonTheme>(true);
         CHECK_NULL_VOID(buttonTheme);
         auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
         ButtonRole buttonRole = layoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL);
         auto bgColor = buttonTheme->GetBgColor(buttonStyle.value(), buttonRole);
         auto textColor = buttonTheme->GetTextColor(buttonStyle.value(), buttonRole);
-        BackgroundColor(frameNode, bgColor, true);
-        SetFontColor(frameNode, textColor);
+        BackgroundColor(frameNode, bgColor, false);
+        SetFontColor(frameNode, textColor, false);
     }
 }
 
@@ -514,11 +511,10 @@ void ButtonModelNG::SetButtonSize(FrameNode* frameNode, const std::optional<Cont
 
 void ButtonModelNG::SetControlSize(FrameNode* frameNode, const std::optional<ControlSize>& controlSize)
 {
+    CHECK_NULL_VOID(frameNode);
     if (controlSize.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, ControlSize, controlSize.value(), frameNode);
-        auto context = PipelineBase::GetCurrentContextSafely();
-        CHECK_NULL_VOID(context);
-        auto buttonTheme = context->GetTheme<ButtonTheme>();
+        auto buttonTheme = frameNode->GetTheme<ButtonTheme>(true);
         CHECK_NULL_VOID(buttonTheme);
         SetButtonSize(frameNode, controlSize, buttonTheme);
         Dimension fontSize = buttonTheme->GetTextSize(controlSize.value());
@@ -562,9 +558,7 @@ void ButtonModelNG::CreateWithLabel(const std::string& label)
     if (layoutProperty->GetPaddingProperty()) {
         return;
     }
-    auto context = PipelineBase::GetCurrentContextSafely();
-    CHECK_NULL_VOID(context);
-    auto buttonTheme = context->GetTheme<ButtonTheme>();
+    auto buttonTheme = buttonNode->GetTheme<ButtonTheme>(true);
     CHECK_NULL_VOID(buttonTheme);
     auto padding = buttonTheme->GetPadding();
     PaddingProperty defaultPadding = { CalcLength(padding.Left()), CalcLength(padding.Right()),
@@ -593,9 +587,7 @@ void ButtonModelNG::SetLabel(FrameNode* frameNode, const char* label)
     if (layoutProperty->GetPaddingProperty()) {
         return;
     }
-    auto context = frameNode->GetContext();
-    CHECK_NULL_VOID(context);
-    auto buttonTheme = context->GetTheme<ButtonTheme>();
+    auto buttonTheme = frameNode->GetTheme<ButtonTheme>(true);
     CHECK_NULL_VOID(buttonTheme);
     auto padding = buttonTheme->GetPadding();
     PaddingProperty defaultPadding = { CalcLength(padding.Left()), CalcLength(padding.Right()),
@@ -643,9 +635,7 @@ RefPtr<FrameNode> ButtonModelNG::CreateFrameNode(int32_t nodeId)
     if (layoutProperty->GetPaddingProperty()) {
         return frameNode;
     }
-    auto context = PipelineBase::GetCurrentContextSafely();
-    CHECK_NULL_RETURN(context, nullptr);
-    auto buttonTheme = context->GetTheme<ButtonTheme>();
+    auto buttonTheme = frameNode->GetTheme<ButtonTheme>(true);
     CHECK_NULL_RETURN(buttonTheme, nullptr);
     auto padding = buttonTheme->GetPadding();
     PaddingProperty defaultPadding = { CalcLength(padding.Left()), CalcLength(padding.Right()),
@@ -681,11 +671,19 @@ void ButtonModelNG::OnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& cl
 void ButtonModelNG::BackgroundColor(const Color& color, const bool& colorFlag)
 {
     ViewAbstract::SetBackgroundColor(color);
+    ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, BackgroundColorFlagByUser, true);
+}
+
+void ButtonModelNG::BackgroundColorDefault(const Color& color)
+{
+    ViewAbstract::SetBackgroundColor(color);
+    ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, BackgroundColorFlagByUser, false);
 }
 
 void ButtonModelNG::BackgroundColor(FrameNode* frameNode, const Color& color, const bool& colorFlag)
 {
     ViewAbstract::SetBackgroundColor(frameNode, color);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, BackgroundColorFlagByUser, colorFlag, frameNode);
 }
 
 void ButtonModelNG::SetSize(const std::optional<Dimension>& width, const std::optional<Dimension>& height)
@@ -787,9 +785,7 @@ void ButtonModelNG::SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, const
     CHECK_NULL_VOID(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    auto context = textNode->GetContext();
-    CHECK_NULL_VOID(context);
-    auto buttonTheme = context->GetTheme<ButtonTheme>();
+    auto buttonTheme = textNode->GetTheme<ButtonTheme>(true);
     CHECK_NULL_VOID(buttonTheme);
     auto textStyle = buttonTheme->GetTextStyle();
     textLayoutProperty->UpdateEnableSmallLanguageTruncation(true);
@@ -832,9 +828,10 @@ void ButtonModelNG::SetFontFamily(FrameNode* frameNode, const std::vector<std::s
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontColorSetByUser, true, frameNode);
 }
 
-void ButtonModelNG::SetFontColor(FrameNode* frameNode, const Color& textColor)
+void ButtonModelNG::SetFontColor(FrameNode* frameNode, const Color& textColor, bool isUserSet)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontColor, textColor, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontColorFlagByUser, isUserSet, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, textColor, frameNode);
 }
 
@@ -879,9 +876,7 @@ void ButtonModelNG::SetLabelStyle(FrameNode* frameNode, const ButtonParameters& 
         } else {
             auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
             CHECK_NULL_VOID(layoutProperty);
-            auto context = PipelineBase::GetCurrentContextSafely();
-            CHECK_NULL_VOID(context);
-            auto buttonTheme = context->GetTheme<ButtonTheme>();
+            auto buttonTheme = frameNode->GetTheme<ButtonTheme>(true);
             CHECK_NULL_VOID(buttonTheme);
             auto themeFontSize = buttonTheme->GetTextSize(layoutProperty->GetControlSizeValue(ControlSize::NORMAL));
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontSize, themeFontSize, frameNode);
@@ -1013,19 +1008,17 @@ ButtonType ButtonModelNG::GetType(FrameNode* frameNode)
 
 void ButtonModelNG::ApplyTheme(FrameNode* frameNode, ButtonStyleMode buttonStyle, ButtonRole buttonRole)
 {
-    auto context = PipelineBase::GetCurrentContextSafely();
-    CHECK_NULL_VOID(context);
-    auto buttonTheme = context->GetTheme<ButtonTheme>();
+    auto buttonTheme = frameNode->GetTheme<ButtonTheme>(true);
     CHECK_NULL_VOID(buttonTheme);
     auto bgColor = buttonTheme->GetBgColor(buttonStyle, buttonRole);
     auto textColor = buttonTheme->GetTextColor(buttonStyle, buttonRole);
-    BackgroundColor(frameNode, bgColor, true);
+    BackgroundColor(frameNode, bgColor, false);
     auto property = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(property);
     if (!property->GetCreateWithLabelValue(false)) {
         return;
     }
-    SetFontColor(frameNode, textColor);
+    SetFontColor(frameNode, textColor, false);
 }
 
 void ButtonModelNG::SetLabelWithCheck(FrameNode* frameNode, const char* label)

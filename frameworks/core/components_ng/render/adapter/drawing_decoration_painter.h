@@ -29,12 +29,7 @@ class DrawingDecorationPainter : public virtual AceType {
 public:
     DrawingDecorationPainter() = default;
     ~DrawingDecorationPainter() override = default;
-    static float ConvertRadiusToSigma(float radius)
-    {
-        constexpr float BLUR_SIGMA_SCALE = 0.57735f;
-        constexpr float SCALE_HALF = 0.5f;
-        return radius > 0.0f ? BLUR_SIGMA_SCALE * radius + SCALE_HALF : 0.0f;
-    }
+    static float ConvertRadiusToSigma(float radius);
 
     static std::shared_ptr<RSShaderEffect> CreateGradientShader(const NG::Gradient& gradient, const SizeF& size);
     static void EndPointsFromAngle(float angle, const RSSize& size, RSPoint& firstPoint, RSPoint& secondPoint);

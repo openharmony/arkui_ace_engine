@@ -623,6 +623,9 @@ typedef struct Opt_LinearGradientStyle Opt_LinearGradientStyle;
 typedef struct LineHeightStylePeer LineHeightStylePeer;
 typedef struct LineHeightStylePeer* Ark_LineHeightStyle;
 typedef struct Opt_LineHeightStyle Opt_LineHeightStyle;
+typedef struct LineSpacingStylePeer LineSpacingStylePeer;
+typedef struct LineSpacingStylePeer* Ark_LineSpacingStyle;
+typedef struct Opt_LineSpacingStyle Opt_LineSpacingStyle;
 typedef struct ListItemSwipeActionManagerPeer ListItemSwipeActionManagerPeer;
 typedef struct ListItemSwipeActionManagerPeer* Ark_ListItemSwipeActionManager;
 typedef struct Opt_ListItemSwipeActionManager Opt_ListItemSwipeActionManager;
@@ -1205,6 +1208,8 @@ typedef struct Array_BlankScreenDetectionMethod Array_BlankScreenDetectionMethod
 typedef struct Opt_Array_BlankScreenDetectionMethod Opt_Array_BlankScreenDetectionMethod;
 typedef struct Array_Buffer Array_Buffer;
 typedef struct Opt_Array_Buffer Opt_Array_Buffer;
+typedef struct Array_ColorMetricsExt Array_ColorMetricsExt;
+typedef struct Opt_Array_ColorMetricsExt Opt_Array_ColorMetricsExt;
 typedef struct Array_ColorMetricsStop Array_ColorMetricsStop;
 typedef struct Opt_Array_ColorMetricsStop Opt_Array_ColorMetricsStop;
 typedef struct Array_ColorStop Array_ColorStop;
@@ -1389,6 +1394,8 @@ typedef struct Array_Tuple_Union_ResourceColor_Undefined_F64 Array_Tuple_Union_R
 typedef struct Opt_Array_Tuple_Union_ResourceColor_Undefined_F64 Opt_Array_Tuple_Union_ResourceColor_Undefined_F64;
 typedef struct Array_uniformTypeDescriptor_UniformDataType Array_uniformTypeDescriptor_UniformDataType;
 typedef struct Opt_Array_uniformTypeDescriptor_UniformDataType Opt_Array_uniformTypeDescriptor_UniformDataType;
+typedef struct Array_Union_ResourceColor_ColorMetricsExt Array_Union_ResourceColor_ColorMetricsExt;
+typedef struct Opt_Array_Union_ResourceColor_ColorMetricsExt Opt_Array_Union_ResourceColor_ColorMetricsExt;
 typedef struct Array_Union_ResourceColor_LinearGradient Array_Union_ResourceColor_LinearGradient;
 typedef struct Opt_Array_Union_ResourceColor_LinearGradient Opt_Array_Union_ResourceColor_LinearGradient;
 typedef struct Array_Union_RichEditorImageSpanResult_RichEditorTextSpanResult Array_Union_RichEditorImageSpanResult_RichEditorTextSpanResult;
@@ -2273,8 +2280,8 @@ typedef struct Ark_CustomDialogControllerExternalOptionsExtender Ark_CustomDialo
 typedef struct Opt_CustomDialogControllerExternalOptionsExtender Opt_CustomDialogControllerExternalOptionsExtender;
 typedef struct Ark_CustomSpanDrawInfo Ark_CustomSpanDrawInfo;
 typedef struct Opt_CustomSpanDrawInfo Opt_CustomSpanDrawInfo;
-typedef struct Ark_CustomSpanMeasureInfo Ark_CustomSpanMeasureInfo;
-typedef struct Opt_CustomSpanMeasureInfo Opt_CustomSpanMeasureInfo;
+typedef struct Ark_CustomSpanMeasureInfoProxy Ark_CustomSpanMeasureInfoProxy;
+typedef struct Opt_CustomSpanMeasureInfoProxy Opt_CustomSpanMeasureInfoProxy;
 typedef struct Ark_CustomSpanMetrics Ark_CustomSpanMetrics;
 typedef struct Opt_CustomSpanMetrics Opt_CustomSpanMetrics;
 typedef struct Ark_CustomSpanWrapper Ark_CustomSpanWrapper;
@@ -2669,6 +2676,8 @@ typedef struct Ark_SliderShowStepOptions Ark_SliderShowStepOptions;
 typedef struct Opt_SliderShowStepOptions Opt_SliderShowStepOptions;
 typedef struct Ark_SnapshotOptions Ark_SnapshotOptions;
 typedef struct Opt_SnapshotOptions Opt_SnapshotOptions;
+typedef struct Ark_SpatialPosition Ark_SpatialPosition;
+typedef struct Opt_SpatialPosition Opt_SpatialPosition;
 typedef struct Ark_SslErrorEvent Ark_SslErrorEvent;
 typedef struct Opt_SslErrorEvent Opt_SslErrorEvent;
 typedef struct Ark_StackOptions Ark_StackOptions;
@@ -2763,6 +2772,8 @@ typedef struct Ark_Union_Array_NavigationMenuItem_CustomNodeBuilder Ark_Union_Ar
 typedef struct Opt_Union_Array_NavigationMenuItem_CustomNodeBuilder Opt_Union_Array_NavigationMenuItem_CustomNodeBuilder;
 typedef struct Ark_Union_Array_Opt_ShaderStyle_ShaderStyle Ark_Union_Array_Opt_ShaderStyle_ShaderStyle;
 typedef struct Opt_Union_Array_Opt_ShaderStyle_ShaderStyle Opt_Union_Array_Opt_ShaderStyle_ShaderStyle;
+typedef struct Ark_Union_Array_ResourceColor_Array_ColorMetricsExt_Array_Union_ResourceColor_ColorMetricsExt Ark_Union_Array_ResourceColor_Array_ColorMetricsExt_Array_Union_ResourceColor_ColorMetricsExt;
+typedef struct Opt_Union_Array_ResourceColor_Array_ColorMetricsExt_Array_Union_ResourceColor_ColorMetricsExt Opt_Union_Array_ResourceColor_Array_ColorMetricsExt_Array_Union_ResourceColor_ColorMetricsExt;
 typedef struct Ark_Union_Array_String_Array_Array_String_Resource_Array_TextPickerRangeContent_Array_TextCascadePickerRangeContent Ark_Union_Array_String_Array_Array_String_Resource_Array_TextPickerRangeContent_Array_TextCascadePickerRangeContent;
 typedef struct Opt_Union_Array_String_Array_Array_String_Resource_Array_TextPickerRangeContent_Array_TextCascadePickerRangeContent Opt_Union_Array_String_Array_Array_String_Resource_Array_TextPickerRangeContent_Array_TextCascadePickerRangeContent;
 typedef struct Ark_Union_Array_ToolbarItem_CustomNodeBuilder Ark_Union_Array_ToolbarItem_CustomNodeBuilder;
@@ -3167,6 +3178,8 @@ typedef struct Ark_SliderSuffixOptions Ark_SliderSuffixOptions;
 typedef struct Opt_SliderSuffixOptions Opt_SliderSuffixOptions;
 typedef struct Ark_SpanStyle Ark_SpanStyle;
 typedef struct Opt_SpanStyle Opt_SpanStyle;
+typedef struct Ark_SpatialEffectParams Ark_SpatialEffectParams;
+typedef struct Opt_SpatialEffectParams Opt_SpatialEffectParams;
 typedef struct Ark_StarStyleOptions Ark_StarStyleOptions;
 typedef struct Opt_StarStyleOptions Opt_StarStyleOptions;
 typedef struct Ark_StyledStringChangeValue Ark_StyledStringChangeValue;
@@ -5724,6 +5737,14 @@ typedef struct Opt_ListItemGroupArea {
     Ark_Tag tag;
     Ark_ListItemGroupArea value;
 } Opt_ListItemGroupArea;
+typedef enum Ark_ListItemGroupHeaderFooterStyle {
+    ARK_LIST_ITEM_GROUP_HEADER_FOOTER_STYLE_NONE = 0,
+    ARK_LIST_ITEM_GROUP_HEADER_FOOTER_STYLE_FLOATING = 1,
+} Ark_ListItemGroupHeaderFooterStyle;
+typedef struct Opt_ListItemGroupHeaderFooterStyle {
+    Ark_Tag tag;
+    Ark_ListItemGroupHeaderFooterStyle value;
+} Opt_ListItemGroupHeaderFooterStyle;
 typedef enum Ark_ListItemGroupStyle {
     ARK_LIST_ITEM_GROUP_STYLE_NONE = 0,
     ARK_LIST_ITEM_GROUP_STYLE_CARD = 1,
@@ -6992,6 +7013,7 @@ typedef enum Ark_StyledStringKey {
     ARK_STYLED_STRING_KEY_LINE_HEIGHT = 5,
     ARK_STYLED_STRING_KEY_BACKGROUND_COLOR = 6,
     ARK_STYLED_STRING_KEY_URL = 7,
+    ARK_STYLED_STRING_KEY_LINE_SPACING = 8,
     ARK_STYLED_STRING_KEY_GESTURE = 100,
     ARK_STYLED_STRING_KEY_PARAGRAPH_STYLE = 200,
     ARK_STYLED_STRING_KEY_IMAGE = 300,
@@ -8673,6 +8695,10 @@ typedef struct Opt_LineHeightStyle {
     Ark_Tag tag;
     Ark_LineHeightStyle value;
 } Opt_LineHeightStyle;
+typedef struct Opt_LineSpacingStyle {
+    Ark_Tag tag;
+    Ark_LineSpacingStyle value;
+} Opt_LineSpacingStyle;
 typedef struct Opt_ListItemSwipeActionManager {
     Ark_Tag tag;
     Ark_ListItemSwipeActionManager value;
@@ -10404,6 +10430,15 @@ typedef struct Opt_Array_Buffer {
     Ark_Tag tag;
     Array_Buffer value;
 } Opt_Array_Buffer;
+typedef struct Array_ColorMetricsExt {
+    /* kind: ContainerType */
+    Ark_ColorMetricsExt* array;
+    Ark_Int32 length;
+} Array_ColorMetricsExt;
+typedef struct Opt_Array_ColorMetricsExt {
+    Ark_Tag tag;
+    Array_ColorMetricsExt value;
+} Opt_Array_ColorMetricsExt;
 typedef struct Array_ColorMetricsStop {
     /* kind: ContainerType */
     Ark_ColorMetricsStop* array;
@@ -11232,6 +11267,15 @@ typedef struct Opt_Array_uniformTypeDescriptor_UniformDataType {
     Ark_Tag tag;
     Array_uniformTypeDescriptor_UniformDataType value;
 } Opt_Array_uniformTypeDescriptor_UniformDataType;
+typedef struct Array_Union_ResourceColor_ColorMetricsExt {
+    /* kind: ContainerType */
+    Ark_Union_ResourceColor_ColorMetricsExt* array;
+    Ark_Int32 length;
+} Array_Union_ResourceColor_ColorMetricsExt;
+typedef struct Opt_Array_Union_ResourceColor_ColorMetricsExt {
+    Ark_Tag tag;
+    Array_Union_ResourceColor_ColorMetricsExt value;
+} Opt_Array_Union_ResourceColor_ColorMetricsExt;
 typedef struct Array_Union_ResourceColor_LinearGradient {
     /* kind: ContainerType */
     Ark_Union_ResourceColor_LinearGradient* array;
@@ -11489,8 +11533,8 @@ typedef struct Opt_Callback_CrownEvent_Void {
 typedef struct Callback_CustomSpanMeasureInfo_CustomSpanMetrics {
     /* kind: Callback */
     Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_CustomSpanMeasureInfo measureInfo, const Callback_CustomSpanMetrics_Void continuation);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_CustomSpanMeasureInfo measureInfo, const Callback_CustomSpanMetrics_Void continuation);
+    void (*call)(const Ark_Int32 resourceId, const Ark_CustomSpanMeasureInfoProxy measureInfo, const Callback_CustomSpanMetrics_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_CustomSpanMeasureInfoProxy measureInfo, const Callback_CustomSpanMetrics_Void continuation);
 } Callback_CustomSpanMeasureInfo_CustomSpanMetrics;
 typedef struct Opt_Callback_CustomSpanMeasureInfo_CustomSpanMetrics {
     Ark_Tag tag;
@@ -15617,16 +15661,16 @@ typedef struct Opt_CustomSpanDrawInfo {
     Ark_Tag tag;
     Ark_CustomSpanDrawInfo value;
 } Opt_CustomSpanDrawInfo;
-typedef struct Ark_CustomSpanMeasureInfo {
+typedef struct Ark_CustomSpanMeasureInfoProxy {
     /* kind: Interface */
     Ark_Float64 fontSize;
     Opt_Float64 maxWidth;
-    Opt_LayoutPolicy layoutPolicy;
-} Ark_CustomSpanMeasureInfo;
-typedef struct Opt_CustomSpanMeasureInfo {
+    Opt_NativePointer layoutPolicyPtr;
+} Ark_CustomSpanMeasureInfoProxy;
+typedef struct Opt_CustomSpanMeasureInfoProxy {
     Ark_Tag tag;
-    Ark_CustomSpanMeasureInfo value;
-} Opt_CustomSpanMeasureInfo;
+    Ark_CustomSpanMeasureInfoProxy value;
+} Opt_CustomSpanMeasureInfoProxy;
 typedef struct Ark_CustomSpanMetrics {
     /* kind: Interface */
     Ark_Float64 width;
@@ -16570,6 +16614,8 @@ typedef struct Ark_ListItemGroupOptions {
     Opt_ComponentContentBase footerComponent;
     Opt_Union_F64_String space;
     Opt_ListItemGroupStyle style;
+    Opt_ListItemGroupHeaderFooterStyle headerStyle;
+    Opt_ListItemGroupHeaderFooterStyle footerStyle;
 } Ark_ListItemGroupOptions;
 typedef struct Opt_ListItemGroupOptions {
     Ark_Tag tag;
@@ -17655,6 +17701,17 @@ typedef struct Opt_SnapshotOptions {
     Ark_Tag tag;
     Ark_SnapshotOptions value;
 } Opt_SnapshotOptions;
+typedef struct Ark_SpatialPosition {
+    /* kind: Interface */
+    Ark_DepthVector3 leftTop;
+    Ark_DepthVector3 rightTop;
+    Ark_DepthVector3 leftBottom;
+    Ark_DepthVector3 rightBottom;
+} Ark_SpatialPosition;
+typedef struct Opt_SpatialPosition {
+    Ark_Tag tag;
+    Ark_SpatialPosition value;
+} Opt_SpatialPosition;
 typedef struct Ark_SslErrorEvent {
     /* kind: Interface */
     Ark_SslErrorHandler handler;
@@ -17704,6 +17761,7 @@ typedef struct Ark_StyledStringValue {
         Ark_CustomSpanWrapper value10;
         Ark_UserDataSpan value11;
         Ark_BackgroundColorStyle value12;
+        Ark_LineSpacingStyle value13;
     };
 } Ark_StyledStringValue;
 typedef struct Opt_StyledStringValue {
@@ -18166,6 +18224,19 @@ typedef struct Opt_Union_Array_Opt_ShaderStyle_ShaderStyle {
     Ark_Tag tag;
     Ark_Union_Array_Opt_ShaderStyle_ShaderStyle value;
 } Opt_Union_Array_Opt_ShaderStyle_ShaderStyle;
+typedef struct Ark_Union_Array_ResourceColor_Array_ColorMetricsExt_Array_Union_ResourceColor_ColorMetricsExt {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Array_ResourceColor value0;
+        Array_ColorMetricsExt value1;
+        Array_Union_ResourceColor_ColorMetricsExt value2;
+    };
+} Ark_Union_Array_ResourceColor_Array_ColorMetricsExt_Array_Union_ResourceColor_ColorMetricsExt;
+typedef struct Opt_Union_Array_ResourceColor_Array_ColorMetricsExt_Array_Union_ResourceColor_ColorMetricsExt {
+    Ark_Tag tag;
+    Ark_Union_Array_ResourceColor_Array_ColorMetricsExt_Array_Union_ResourceColor_ColorMetricsExt value;
+} Opt_Union_Array_ResourceColor_Array_ColorMetricsExt_Array_Union_ResourceColor_ColorMetricsExt;
 typedef struct Ark_Union_Array_String_Array_Array_String_Resource_Array_TextPickerRangeContent_Array_TextCascadePickerRangeContent {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -20473,6 +20544,15 @@ typedef struct Opt_SpanStyle {
     Ark_Tag tag;
     Ark_SpanStyle value;
 } Opt_SpanStyle;
+typedef struct Ark_SpatialEffectParams {
+    /* kind: Interface */
+    Ark_SpatialPosition position;
+    Opt_Float64 occlusionWeight;
+} Ark_SpatialEffectParams;
+typedef struct Opt_SpatialEffectParams {
+    Ark_Tag tag;
+    Ark_SpatialEffectParams value;
+} Opt_SpatialEffectParams;
 typedef struct Ark_StarStyleOptions {
     /* kind: Interface */
     Opt_ResourceStr backgroundUri;
@@ -22886,6 +22966,7 @@ typedef struct Ark_ContextMenuOptions {
     Opt_AnchoredColorMode colorMode;
     Opt_MenuKeyboardAvoidMode keyboardAvoidMode;
     Opt_LengthMetrics minKeyboardAvoidDistance;
+    Opt_LengthMetrics targetSpace;
     Opt_uiMaterial_Material systemMaterial;
     Opt_BarState scrollBar;
     Opt_LengthMetrics maxHeight;
@@ -23117,6 +23198,7 @@ typedef struct Ark_MenuOptions {
     Opt_AnchoredColorMode colorMode;
     Opt_MenuKeyboardAvoidMode keyboardAvoidMode;
     Opt_LengthMetrics minKeyboardAvoidDistance;
+    Opt_LengthMetrics targetSpace;
     Opt_uiMaterial_Material systemMaterial;
     Opt_BarState scrollBar;
     Opt_LengthMetrics maxHeight;
@@ -24622,6 +24704,8 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                                const Opt_Float64* value);
     void (*setLightUpEffect)(Ark_NativePointer node,
                              const Opt_Float64* value);
+    void (*setSpatialEffect)(Ark_NativePointer node,
+                             const Opt_SpatialEffectParams* value);
     void (*setPixelStretchEffect)(Ark_NativePointer node,
                                   const Opt_PixelStretchEffectOptions* value);
     void (*setAccessibilityNextFocusId)(Ark_NativePointer node,
@@ -24969,7 +25053,7 @@ typedef struct GENERATED_ArkUIDepthComponentModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
     void (*setDepthComponentOptions)(Ark_NativePointer node,
-                                     const Ark_ResourceStr* background,
+                                     const Ark_Union_ResourceStr_image_PixelMap* background,
                                      const Opt_DepthComponentOptions* options);
     void (*setDepthMap)(Ark_NativePointer node,
                         const Ark_Union_ResourceStr_image_PixelMap* value);
@@ -26816,6 +26900,8 @@ typedef struct GENERATED_ArkUISymbolGlyphModifier {
                         const Opt_Union_F64_String_Resource* value);
     void (*setFontColor)(Ark_NativePointer node,
                          const Opt_Array_ResourceColor* value);
+    void (*setSymbolColor)(Ark_NativePointer node,
+                           const Opt_Union_Array_ResourceColor_Array_ColorMetricsExt_Array_Union_ResourceColor_ColorMetricsExt* value);
     void (*setFontWeight)(Ark_NativePointer node,
                           const Opt_Union_I32_FontWeight_String* value);
     void (*setEffectStrategy)(Ark_NativePointer node,
@@ -29954,10 +30040,22 @@ typedef struct GENERATED_ArkUILinearGradientStyleAccessor {
 
 typedef struct GENERATED_ArkUILineHeightStyleAccessor {
     void (*destroyPeer)(Ark_LineHeightStyle peer);
-    Ark_LineHeightStyle (*construct)(const Ark_LengthMetrics* lineHeight);
+    Ark_LineHeightStyle (*construct0)(const Ark_LengthMetrics* lineHeight);
+    Ark_LineHeightStyle (*construct1)(const Ark_LengthMetrics* lineHeight,
+                                      Ark_Float64 lineHeightMultiple);
     Ark_NativePointer (*getFinalizer)();
     Ark_Float64 (*getLineHeight)(Ark_LineHeightStyle peer);
+    Opt_Float64 (*getLineHeightMultiple)(Ark_LineHeightStyle peer);
 } GENERATED_ArkUILineHeightStyleAccessor;
+
+typedef struct GENERATED_ArkUILineSpacingStyleAccessor {
+    void (*destroyPeer)(Ark_LineSpacingStyle peer);
+    Ark_LineSpacingStyle (*construct)(const Ark_LengthMetrics* lineSpacing,
+                                      const Opt_LineSpacingOptions* options);
+    Ark_NativePointer (*getFinalizer)();
+    Ark_Float64 (*getLineSpacing)(Ark_LineSpacingStyle peer);
+    Opt_LineSpacingOptions (*getOptions)(Ark_LineSpacingStyle peer);
+} GENERATED_ArkUILineSpacingStyleAccessor;
 
 typedef struct GENERATED_ArkUIListItemSwipeActionManagerAccessor {
     void (*destroyPeer)(Ark_ListItemSwipeActionManager peer);
@@ -32265,6 +32363,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUILinearGradientAccessor* (*getLinearGradientAccessor)();
     const GENERATED_ArkUILinearGradientStyleAccessor* (*getLinearGradientStyleAccessor)();
     const GENERATED_ArkUILineHeightStyleAccessor* (*getLineHeightStyleAccessor)();
+    const GENERATED_ArkUILineSpacingStyleAccessor* (*getLineSpacingStyleAccessor)();
     const GENERATED_ArkUIListItemSwipeActionManagerAccessor* (*getListItemSwipeActionManagerAccessor)();
     const GENERATED_ArkUIListScrollerAccessor* (*getListScrollerAccessor)();
     const GENERATED_ArkUILongPressGestureEventAccessor* (*getLongPressGestureEventAccessor)();

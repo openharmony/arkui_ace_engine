@@ -19,8 +19,10 @@
 
 struct LayoutPolicyPeer final {
     OHOS::Ace::LayoutCalPolicy layoutPolicy;
+    bool isOwned = true;
 protected:
-    explicit LayoutPolicyPeer(const OHOS::Ace::LayoutCalPolicy& layoutPolicy) : layoutPolicy(layoutPolicy) {}
+    explicit LayoutPolicyPeer(const OHOS::Ace::LayoutCalPolicy& layoutPolicy, bool isOwned = true)
+        : layoutPolicy(layoutPolicy), isOwned(isOwned) {}
     ~LayoutPolicyPeer() = default;
     friend OHOS::Ace::NG::PeerUtils;
 };

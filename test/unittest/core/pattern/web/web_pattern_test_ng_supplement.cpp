@@ -14,6 +14,7 @@
  */
 
 #include <gmock/gmock.h>
+#include "core/accessibility/accessibility_manager.h"
 
 #include "gtest/gtest.h"
 #define protected public
@@ -1637,8 +1638,8 @@ HWTEST_F(WebPatternTestNgSupplement, ReleaseResizeHoldTest001, TestSize.Level1)
     webPattern->layoutMode_ = WebLayoutMode::NONE;
     webPattern->rootLayerChangeSize_ = Size(100, 200);
     webPattern->ReleaseResizeHold();
-    EXPECT_NE(webPattern->rootLayerChangeSize_.width_, webPattern->drawSize_.width_);
-    EXPECT_NE(webPattern->rootLayerChangeSize_.height_, webPattern->drawSize_.height_);
+    EXPECT_NE(webPattern->rootLayerChangeSize_.Width(), webPattern->drawSize_.Width());
+    EXPECT_NE(webPattern->rootLayerChangeSize_.Height(), webPattern->drawSize_.Height());
 #endif
 }
 

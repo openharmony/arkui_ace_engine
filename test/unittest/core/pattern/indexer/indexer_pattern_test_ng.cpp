@@ -2215,4 +2215,125 @@ HWTEST_F(IndexerPatternTestNg, UpdateBubbleListItemTest003, TestSize.Level1)
         }
     }
 }
+namespace {
+    const std::vector<std::pair<std::string, bool>> COLLAPSED_ARRAY_VALUE = {
+        { "A", false }, { "B", true }, { "G", false }
+    };
+    const std::vector<std::string> FULL_ARRAY_VALUE = { "A", "B", "C", "D", "E", "F", "G" };
+    const std::vector<int32_t> COLLAPSED_ITEM_NUMS = { 1, 5, 1 };
+}
+
+/**
+ * @tc.name: GetCollapsedItemTextTest001
+ * @tc.desc: Test GetCollapsedItemText returns empty string when autoCollapse is disabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, GetCollapsedItemTextTest001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<IndexerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->autoCollapse_ = false;
+    pattern->arrayValue_ = COLLAPSED_ARRAY_VALUE;
+    pattern->fullArrayValue_ = FULL_ARRAY_VALUE;
+    pattern->collapsedIndex_ = 0;
+    pattern->collapsedItemNums_ = COLLAPSED_ITEM_NUMS;
+
+    auto result = pattern->GetCollapsedItemText(1);
+    EXPECT_EQ(result, "");
+}
+
+/**
+ * @tc.name: GetCollapsedItemTextTest002
+ * @tc.desc: Test GetCollapsedItemText returns empty string when displayIndex is out of range
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, GetCollapsedItemTextTest002, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<IndexerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->autoCollapse_ = true;
+    pattern->arrayValue_ = COLLAPSED_ARRAY_VALUE;
+    pattern->fullArrayValue_ = FULL_ARRAY_VALUE;
+
+    auto resultNeg = pattern->GetCollapsedItemText(-1);
+    EXPECT_EQ(resultNeg, "");
+
+    auto resultOver = pattern->GetCollapsedItemText(3);
+    EXPECT_EQ(resultOver, "");
+}
+
+/**
+ * @tc.name: GetCollapsedItemTextTest003
+ * @tc.desc: Test GetCollapsedItemText returns original text when item is not collapsed
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, GetCollapsedItemTextTest003, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<IndexerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->autoCollapse_ = true;
+    pattern->arrayValue_ = COLLAPSED_ARRAY_VALUE;
+    pattern->fullArrayValue_ = FULL_ARRAY_VALUE;
+
+    auto result = pattern->GetCollapsedItemText(0);
+    EXPECT_EQ(result, "A");
+
+    auto resultG = pattern->GetCollapsedItemText(2);
+    EXPECT_EQ(resultG, "G");
+}
+
+/**
+ * @tc.name: GetCollapsedItemTextTest004
+ * @tc.desc: Test GetCollapsedItemText returns correct letter within collapsed group at various offsets
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, GetCollapsedItemTextTest004, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<IndexerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->autoCollapse_ = true;
+    pattern->arrayValue_ = COLLAPSED_ARRAY_VALUE;
+    pattern->fullArrayValue_ = FULL_ARRAY_VALUE;
+    pattern->collapsedItemNums_ = COLLAPSED_ITEM_NUMS;
+
+    pattern->collapsedIndex_ = 0;
+    EXPECT_EQ(pattern->GetCollapsedItemText(1), "B");
+
+    pattern->collapsedIndex_ = 1;
+    EXPECT_EQ(pattern->GetCollapsedItemText(1), "C");
+
+    pattern->collapsedIndex_ = 2;
+    EXPECT_EQ(pattern->GetCollapsedItemText(1), "D");
+
+    pattern->collapsedIndex_ = 3;
+    EXPECT_EQ(pattern->GetCollapsedItemText(1), "E");
+
+    pattern->collapsedIndex_ = 4;
+    EXPECT_EQ(pattern->GetCollapsedItemText(1), "F");
+}
+
+/**
+ * @tc.name: GetCollapsedItemTextTest005
+ * @tc.desc: Test GetCollapsedItemText falls back to display text when actualIndex is out of bounds
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, GetCollapsedItemTextTest005, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<IndexerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->autoCollapse_ = true;
+    pattern->arrayValue_ = COLLAPSED_ARRAY_VALUE;
+    pattern->fullArrayValue_ = FULL_ARRAY_VALUE;
+    pattern->collapsedItemNums_ = COLLAPSED_ITEM_NUMS;
+
+    pattern->collapsedIndex_ = 100;
+    auto result = pattern->GetCollapsedItemText(1);
+    EXPECT_EQ(result, "B");
+}
+
 } // namespace OHOS::Ace::NG

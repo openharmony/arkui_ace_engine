@@ -14,6 +14,7 @@
  */
 
 #include "arkts_dynamic_component_renderer_impl.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include <iterator>
 #include <memory>

@@ -14,6 +14,9 @@
  */
 
 #include "adapter/ohos/entrance/ace_container.h"
+#include "core/accessibility/accessibility_manager.h"
+#include "core/accessibility/accessibility_manager_ng.h"
+#include "core/common/container_handler.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include <chrono>
@@ -29,9 +32,11 @@
 #include "system_ability_definition.h"
 #include "wm_common.h"
 #include "form_ashmem.h"
+#include "pointer_event.h"
 
 #include "base/utils/layout_break_point.h"
 #include "adapter/ohos/entrance/ace_view_ohos.h"
+#include "core/image/image_cache.h"
 #include "adapter/ohos/entrance/cj_utils/cj_utils.h"
 #include "adapter/ohos/entrance/data_ability_helper_standard.h"
 #include "adapter/ohos/entrance/data_share_observer_helper.h"
@@ -88,6 +93,7 @@
 #include "base/ressched/ressched_report.h"
 
 #include "accessibility_config.h"
+#include "core/components/common/properties/placement.h"
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -926,7 +932,12 @@ bool AceContainer::OnBackPressed(int32_t instanceId)
                 TAG_LOGI(AceLogTag::ACE_UIEVENT, "subwindow consumed backpressed event");
                 return true;
             }
-            instanceId = SubwindowManager::GetInstance()->GetParentContainerId(instanceId);
+            auto parentInstanceId = SubwindowManager::GetInstance()->GetParentContainerId(instanceId);
+            if (RemoveOverlayBySubwindowManager(parentInstanceId)) {
+                TAG_LOGI(AceLogTag::ACE_UIEVENT, "subwindow consumed backpressed event");
+                return true;
+            }
+            return false;
         } else {
             SubwindowManager::GetInstance()->CloseMenu();
             TAG_LOGI(AceLogTag::ACE_UIEVENT, "Menu consumed backpressed event");

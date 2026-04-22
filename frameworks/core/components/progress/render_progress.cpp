@@ -15,6 +15,8 @@
 
 #include "core/components/progress/render_progress.h"
 
+#include "core/accessibility/accessibility_manager.h"
+
 namespace OHOS::Ace {
 
 void RenderProgress::Update(const RefPtr<Component>& component)

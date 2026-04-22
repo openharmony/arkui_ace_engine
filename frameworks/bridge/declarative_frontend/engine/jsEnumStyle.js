@@ -1444,6 +1444,7 @@ let SeekMode;
 
 let SideBarContainerType;
 (function (SideBarContainerType) {
+  SideBarContainerType[SideBarContainerType.DISPLACE = 3] = 'DISPLACE';
   SideBarContainerType[SideBarContainerType.AUTO = 2] = 'AUTO';
   SideBarContainerType[SideBarContainerType.Overlay = 1] = 'Overlay';
   SideBarContainerType[SideBarContainerType.Embed = 0] = 'Embed';
@@ -4239,6 +4240,12 @@ let ListItemGroupStyle;
   ListItemGroupStyle[ListItemGroupStyle.CARD = 1] = 'CARD';
 })(ListItemGroupStyle || (ListItemGroupStyle = {}));
 
+let ListItemGroupHeaderFooterStyle;
+(function (ListItemGroupHeaderFooterStyle) {
+  ListItemGroupHeaderFooterStyle[ListItemGroupHeaderFooterStyle.NONE = 0] = 'NONE';
+  ListItemGroupHeaderFooterStyle[ListItemGroupHeaderFooterStyle.FLOATING = 1] = 'FLOATING';
+})(ListItemGroupHeaderFooterStyle || (ListItemGroupHeaderFooterStyle = {}));
+
 let ListItemGroupArea;
 (function (ListItemGroupArea) {
   ListItemGroupArea[ListItemGroupArea.NONE = 0] = 'NONE';
@@ -4691,6 +4698,7 @@ let StyledStringKey;
   StyledStringKey[StyledStringKey.PARAGRAPH_STYLE = 200] = 'PARAGRAPH_STYLE';
   StyledStringKey[StyledStringKey.BACKGROUND_COLOR = 6] = 'BACKGROUND_COLOR';
   StyledStringKey[StyledStringKey.URL = 7] = 'URL';
+  StyledStringKey[StyledStringKey.LINE_SPACING = 8] = 'LINE_SPACING';
   StyledStringKey[StyledStringKey.GESTURE = 100] = 'GESTURE';
   StyledStringKey[StyledStringKey.IMAGE = 300] = 'IMAGE';
   StyledStringKey[StyledStringKey.CUSTOM_SPAN = 400] = 'CUSTOM_SPAN';
@@ -5233,6 +5241,10 @@ let SystemProperties;
   SystemProperties.WINDOW_SIZE_PX = 'system.window.size.px';
   SystemProperties.WINDOW_AVOID_AREA = 'system.window.avoidarea';
   SystemProperties.WINDOW_AVOID_AREA_PX = 'system.window.avoidarea.px';
+  SystemProperties.WINDOW_IS_FOCUSED = 'system.window.focused';
+  SystemProperties.WINDOW_IS_HIGHLIGHTED = 'system.window.highlighted';
+  SystemProperties.SYSTEM_DENSITY = 'system.window.systemdensity';
+  SystemProperties.DISPLAY_ID = 'system.window.displayid';
 })(SystemProperties || (SystemProperties = {}));
 
 let PinVerifyResult;
@@ -5347,3 +5359,21 @@ let LazyForEachCustomComponentFreezeMode ;
   LazyForEachCustomComponentFreezeMode.DISABLED = 1;
   LazyForEachCustomComponentFreezeMode.ENABLED = 2;
 })(LazyForEachCustomComponentFreezeMode  || (LazyForEachCustomComponentFreezeMode  = {}));
+
+let GestureShortcut;
+(function (GestureShortcut) {
+  GestureShortcut[GestureShortcut.PRIMARY = 0] = 'PRIMARY';
+})(GestureShortcut || (GestureShortcut = {}));
+globalThis.GestureShortcut = GestureShortcut;
+
+let EdgeLightPosition;
+(function (EdgeLightPosition) {
+  EdgeLightPosition[EdgeLightPosition.TOP_LEFT = 0] = 'TOP_LEFT';
+  EdgeLightPosition[EdgeLightPosition.TOP_RIGHT = 1] = 'TOP_RIGHT';
+  EdgeLightPosition[EdgeLightPosition.BOTTOM_LEFT = 2] = 'BOTTOM_LEFT';
+  EdgeLightPosition[EdgeLightPosition.BOTTOM_RIGHT = 3] = 'BOTTOM_RIGHT';
+  EdgeLightPosition[EdgeLightPosition.TOP = 4] = 'TOP';
+  EdgeLightPosition[EdgeLightPosition.BOTTOM = 5] = 'BOTTOM';
+  EdgeLightPosition[EdgeLightPosition.LEFT = 6] = 'LEFT';
+  EdgeLightPosition[EdgeLightPosition.RIGHT = 7] = 'RIGHT';
+})(EdgeLightPosition || (EdgeLightPosition = {}));

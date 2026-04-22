@@ -22,12 +22,12 @@
 #include "base/geometry/ng/offset_t.h"
 #include "core/animation/spring_curve.h"
 #include "core/common/container.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/radio/radio_modifier.h"
 #include "core/components_ng/pattern/toggle/switch_paint_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/animation_utils.h"
-#include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/paint_wrapper.h"
 namespace OHOS::Ace::NG {

@@ -84,7 +84,8 @@ void CalendarDialogPattern::OnModifyDone()
     InitEntryChangeEvent();
 
     auto host = GetHost();
-    const bool isTargetApi26Plus = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX);
+    CHECK_NULL_VOID(host);
+    const bool isTargetApi26Plus = host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX);
     const bool freezeTitleArrowsInThemeScope =
         isTargetApi26Plus && host && host->GetThemeScopeId() != 0 && hasInitTitleArrowsColor_;
     // Target API 26+: non-default theme scope (e.g. WithTheme) should keep title arrow images and tint
@@ -1399,7 +1400,11 @@ void CalendarDialogPattern::OnLanguageConfigurationUpdate()
             ACE_UPDATE_NODE_PAINT_PROPERTY(
                 CalendarPaintProperty, WeekFontSize, theme->GetCalendarSmallDayFontSize(), monthFrameNode);
         } else {
-            if (fontSizeScale < theme->GetCalendarPickerLargeScale() || CalendarDialogView::CheckOrientationChange()) {
+            const bool skipDialogDayGridAging =
+                monthFrameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
+                CalendarDialogView::SkipCalendarPickerDayGridAgingAdapt(pipelineContext);
+            if (fontSizeScale < theme->GetCalendarPickerLargeScale() || CalendarDialogView::CheckOrientationChange() ||
+                skipDialogDayGridAging) {
                 ACE_UPDATE_NODE_PAINT_PROPERTY(CalendarPaintProperty, WeekFontSize, fontSize, monthFrameNode);
             } else {
                 fontSizeScale = fontSizeScale > theme->GetCalendarPickerLargerScale()
@@ -1541,7 +1546,7 @@ void CalendarDialogPattern::OnColorConfigurationUpdate()
     // Target API 26+: non-default theme scope (e.g. WithTheme) keeps the dialog title in the originally
     // scoped palette and ignores subsequent system dark/light configuration updates here.
     // Below target API 26: always apply configuration-driven title color refresh.
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
+    if (titleNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
         titleNode->GetThemeScopeId() != 0) {
         return;
     }

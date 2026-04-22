@@ -49,6 +49,7 @@
 #include "core/components_ng/pattern/sheet/minimize/sheet_presentation_minimize_layout_algorithm.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/property/accessibility_property_helper.h"
 #ifdef WINDOW_SCENE_SUPPORTED
@@ -64,6 +65,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/inner_api/ui_session/param_config.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "core/components/common/properties/placement.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -369,6 +371,7 @@ void SheetPresentationPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(sheetTheme);
     sheetThemeType_ = sheetTheme->GetSheetType();
     scale_ = targetNodeContext->GetFontScale();
+    lineSpacingOptimizeFlag_ = SheetView::GetFallbackLineSpacingStyleOptimizeFlag(targetNodeContext);
     OnAreaChangedFunc onAreaChangedFunc = [sheetNodeWk = WeakPtr<FrameNode>(host)](const RectF& /* oldRect */,
                                               const OffsetF& /* oldOrigin */, const RectF& /* rect */,
                                               const OffsetF& /* origin */) {
@@ -1300,8 +1303,10 @@ void SheetPresentationPattern::UpdateTitleColumnSize()
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
 
+    bool needSpacingOptimize = SheetView::GetFallbackLineSpacingStyleOptimizeFlag(pipeline);
+    // layout constraints can be added only in non-senior-friendly and non-minority language scenarios.
     if (operationColumn && sheetStyle.sheetTitle.has_value() &&
-        NearEqual(pipeline->GetFontScale(), sheetTheme->GetSheetNormalScale())) {
+        NearEqual(pipeline->GetFontScale(), sheetTheme->GetSheetNormalScale()) && !needSpacingOptimize) {
         auto layoutProps = operationColumn->GetLayoutProperty<LinearLayoutProperty>();
         CHECK_NULL_VOID(layoutProps);
         layoutProps->UpdateUserDefinedIdealSize(CalcSize(
@@ -1464,6 +1469,38 @@ void SheetPresentationPattern::UpdateSheetTitle()
     }
 }
 
+void SheetPresentationPattern::UpdateSheetTitleLineOptimize(bool newLineOptimize)
+{
+    if (newLineOptimize == lineSpacingOptimizeFlag_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto sheetStyle = layoutProperty->GetSheetStyle();
+    if (sheetStyle && sheetStyle->sheetTitle.has_value()) {
+        auto titleId = GetTitleId();
+        auto titleNode = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetNodeById(titleId));
+        CHECK_NULL_VOID(titleNode);
+        auto titlePattern = titleNode->GetPattern<TextPattern>();
+        CHECK_NULL_VOID(titlePattern);
+        titlePattern->SetFallbackLineSpacingAndIncludeFontPadding(newLineOptimize);
+        titleNode->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE_SELF);
+        if (sheetStyle->sheetSubtitle.has_value()) {
+            auto subtitleId = GetSubtitleId();
+            auto subtitleNode = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetNodeById(subtitleId));
+            CHECK_NULL_VOID(subtitleNode);
+            auto subtitlePattern = subtitleNode->GetPattern<TextPattern>();
+            CHECK_NULL_VOID(subtitlePattern);
+            subtitlePattern->SetFallbackLineSpacingAndIncludeFontPadding(newLineOptimize);
+            subtitleNode->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE_SELF);
+        }
+    }
+}
+
 Dimension SheetPresentationPattern::GetDragBarHeight(const RefPtr<FrameNode>& dragBarNode)
 {
     CHECK_NULL_RETURN(dragBarNode, 0.0_vp);
@@ -1484,7 +1521,8 @@ void SheetPresentationPattern::UpdateFontScaleStatus()
     auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
-    if (pipeline->GetFontScale() != scale_) {
+    bool needSpacingOptimize = SheetView::GetFallbackLineSpacingStyleOptimizeFlag(AceType::RawPtr(pipeline));
+    if (pipeline->GetFontScale() != scale_ || needSpacingOptimize != lineSpacingOptimizeFlag_) {
         auto operationNode = GetTitleBuilderNode();
         CHECK_NULL_VOID(operationNode);
         auto titleColumnNode = DynamicCast<FrameNode>(operationNode->GetChildAtIndex(0));
@@ -1496,9 +1534,11 @@ void SheetPresentationPattern::UpdateFontScaleStatus()
         auto sheetTheme = pipeline->GetTheme<SheetTheme>();
         CHECK_NULL_VOID(sheetTheme);
         bool isSheetHasNoTitle = !sheetStyle.isTitleBuilder.has_value();
-        bool isFontScaledInSystemTitle = sheetStyle.isTitleBuilder.has_value() && !sheetStyle.isTitleBuilder.value() &&
-                                         GreatNotEqual(pipeline->GetFontScale(), sheetTheme->GetSheetNormalScale());
-        if (isSheetHasNoTitle || isFontScaledInSystemTitle) {
+        // the value is true when the title is a character string and in age-friendly or minority language scenario.
+        bool isFontScaledOrOptimizeInSystemTitle =
+            sheetStyle.isTitleBuilder.has_value() && !sheetStyle.isTitleBuilder.value() &&
+            (GreatNotEqual(pipeline->GetFontScale(), sheetTheme->GetSheetNormalScale()) || needSpacingOptimize);
+        if (isSheetHasNoTitle || isFontScaledOrOptimizeInSystemTitle) {
             layoutProps->ClearUserDefinedIdealSize(false, true);
             titleLayoutProps->ClearUserDefinedIdealSize(false, true);
         } else if (sheetStyle.isTitleBuilder.has_value()) {
@@ -1518,7 +1558,9 @@ void SheetPresentationPattern::UpdateFontScaleStatus()
             }
         }
         UpdateSheetTitle();
+        UpdateSheetTitleLineOptimize(needSpacingOptimize);
         scale_ = pipeline->GetFontScale();
+        lineSpacingOptimizeFlag_ = needSpacingOptimize;
         auto sheetWrapper = host->GetParent();
         CHECK_NULL_VOID(sheetWrapper);
         sheetWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -4809,6 +4851,10 @@ void SheetPresentationPattern::ResetScrollUserDefinedIdealSize(
 void SheetPresentationPattern::OnLanguageConfigurationUpdate()
 {
     sheetObject_->OnLanguageConfigurationUpdate();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        // read spacingOptimizeFlag again, check whether the lineSpacingOptimizeFlag_ changes.
+        UpdateFontScaleStatus();
+    }
 }
 
 bool SheetPresentationPattern::IsPcOrPadFreeMultiWindowMode() const

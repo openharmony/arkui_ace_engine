@@ -15,6 +15,8 @@
 
 #include "core/pipeline/base/render_node.h"
 
+#include "core/accessibility/accessibility_manager.h"
+
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_canvas_node.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
@@ -223,6 +225,37 @@ void RenderNode::SetInspectorNode(const RefPtr<V2::InspectorNode>& inspectorNode
 void RenderNode::ClearChildren()
 {
     children_.clear();
+}
+
+int32_t RenderNode::GetAccessibilityNodeId() const
+{
+    auto accessibilityNode = accessibilityNode_.Upgrade();
+    if (accessibilityNode) {
+        return accessibilityNode->GetNodeId();
+    }
+    return 0;
+}
+
+void RenderNode::ClearAccessibilityRect()
+{
+    auto node = accessibilityNode_.Upgrade();
+    if (node) {
+        node->ClearRect();
+    }
+    for (auto& child : children_) {
+        child->ClearAccessibilityRect();
+    }
+}
+
+void RenderNode::SetAccessibilityVisible(bool visible)
+{
+    auto node = accessibilityNode_.Upgrade();
+    if (node) {
+        node->SetVisible(visible);
+    }
+    for (auto& child : children_) {
+        child->SetAccessibilityVisible(visible);
+    }
 }
 
 void RenderNode::UpdateTouchRect()

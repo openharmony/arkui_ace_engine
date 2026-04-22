@@ -48,6 +48,7 @@ namespace NG {
 class FrameNode;
 class GestureDebugBoundaryManager;
 class SelectOverlayManager;
+class SmartGestureManager;
 class ResponseCtrl;
 #ifdef RELAXED_INTERACTION_SUPPORT
 class RelaxedInteractionManager;
@@ -126,6 +127,10 @@ public:
     bool HasDifferentDirectionGesture();
 
     bool OnNonPointerEvent(const NonPointerEvent& event);
+    ACE_FORCE_EXPORT const RefPtr<NG::SmartGestureManager>& GetOrCreateSmartGestureManager();
+    const RefPtr<NG::SmartGestureManager>& GetSmartGestureManager() const;
+    void ClearSmartGestureSelected();
+    void ResetSmartGestureManager();
     ACE_NON_VIRTUAL bool DispatchTouchEvent(const TouchEvent& point, bool sendOnTouch = true);
     bool DispatchTouchEvent(const AxisEvent& event, bool sendOnTouch = true);
     void DispatchTouchCancelToRecognizer(
@@ -477,6 +482,16 @@ public:
     void AddTouchpadInteractionListenerInner(int32_t frameNodeId, NG::TouchpadInteractionListener&& listener);
     void UnregisterTouchpadInteractionListenerInner(int32_t frameNodeId);
     void NotifyTouchpadInteraction();
+    void RegisterTouchTimingCallback(
+        const std::function<void(uint64_t sensorTime, uint64_t receiveTime, uint64_t dispatchTime,
+            int32_t eventType)>&& callback)
+    {
+        touchTimingCallback_ = std::move(callback);
+    }
+    void UnregisterTouchTimingCallback()
+    {
+        touchTimingCallback_ = nullptr;
+    }
     void ProcessCommand(const std::string& command, std::function<void()> requestFrameCallback);
     void FlushRelaxedInteraction(std::function<void()> requestFrameCallback);
 
@@ -575,6 +590,7 @@ private:
     RefPtr<NG::GestureReferee> refereeNG_;
     RefPtr<NG::GestureReferee> postEventRefereeNG_;
     std::unordered_map<int32_t, RefPtr<NG::GestureReferee>> postEventRefereeWithStrategyNG_;
+    RefPtr<NG::SmartGestureManager> smartGestureManager_;
     RefPtr<NG::GestureDebugBoundaryManager> gestureDebugBoundaryManager_;
     RefPtr<MouseStyleManager> mouseStyleManager_;
     RefPtr<InputEventMonitorManager> inputMonitorManager_;
@@ -613,6 +629,8 @@ private:
     std::optional<HitTestRecordInfo> hitTestRecordInfo_ = std::nullopt;
     std::unordered_map<int32_t, std::function<void(const TouchEvent&)>> hitTestFrameNodeListener_;
     std::unique_ptr<RectCallbackListImpl> rectCallbackListImpl_;
+    std::function<void(uint64_t sensorTime, uint64_t receiveTime, uint64_t dispatchTime, int32_t eventType)>
+        touchTimingCallback_;
 #ifdef RELAXED_INTERACTION_SUPPORT
     RefPtr<NG::RelaxedInteractionManager> relaxedInteractionManager_;
 #endif

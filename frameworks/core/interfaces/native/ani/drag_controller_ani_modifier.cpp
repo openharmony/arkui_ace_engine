@@ -36,6 +36,7 @@
 #include "frameworks/base/error/error_code.h"
 #include "frameworks/base/subwindow/subwindow.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 
 namespace OHOS::Ace::NG {
 using DragAction = OHOS::Ace::Ani::DragAction;

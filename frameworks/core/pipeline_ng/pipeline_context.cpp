@@ -13,7 +13,10 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/accessibility/accessibility_manager.h"
+#include "core/accessibility/accessibility_manager_ng.h"
 
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/event_manager.h"
@@ -53,6 +56,7 @@
 #include "core/common/back_press_handler_manager.h"
 #include "core/common/font_change_observer.h"
 #include "core/common/font_manager.h"
+#include "core/image/image_cache.h"
 #include "core/common/ime/input_method_manager.h"
 #include "core/common/layout_inspector.h"
 #include "core/common/resource/resource_configuration.h"
@@ -69,6 +73,7 @@
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
+#include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
 #include "core/components_ng/pattern/app_bar/atomic_service_pattern.h"
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view_factory.h"
@@ -81,6 +86,9 @@
 #include "core/components_ng/pattern/recycle_view/recycle_manager.h"
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 #include "core/components_ng/base/inspector.h"
+#ifdef RELAXED_INTERACTION_SUPPORT
+#include "core/components_ng/relaxed_interaction/utils/workflow_dumper.h"
+#endif
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/components_ng/pattern/window_scene/scene/window_scene_layout_manager.h"
@@ -3569,6 +3577,9 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         }
         // Set focus state inactive while touch down event received
         SetIsFocusActive(false, FocusActiveReason::POINTER_EVENT);
+        if (eventManager_) {
+            eventManager_->ClearSmartGestureSelected();
+        }
         TouchRestrict touchRestrict { TouchRestrict::NONE };
         touchRestrict.sourceType = point.sourceType;
         touchRestrict.touchEvent = point;
@@ -4279,6 +4290,10 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         std::string info = contentChangeMgr_ ? contentChangeMgr_->DumpInfo() : "No available ContentChangeManager";
         DumpLog::GetInstance().Print(info);
 #endif
+#ifdef RELAXED_INTERACTION_SUPPORT
+    } else if (params[0] == "-relaxedinteractionlog") {
+        DumpLog::GetInstance().Print(1, WorkflowDumper::GetInstance().Dump());
+#endif
     }
     return true;
 }
@@ -4734,6 +4749,9 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
         // Mouse right button press event set focus inactive here.
         // Mouse left button press event will set focus inactive in touch process.
         SetIsFocusActive(false, FocusActiveReason::POINTER_EVENT);
+        if (eventManager_) {
+            eventManager_->ClearSmartGestureSelected();
+        }
     }
 
     if (event.action == MouseAction::RELEASE || event.action == MouseAction::CANCEL ||
@@ -5624,6 +5642,9 @@ void PipelineContext::Destroy()
     buildFinishCallbacks_.clear();
     onWindowStateChangedCallbacks_.clear();
     onWindowFocusChangedCallbacks_.clear();
+    if (eventManager_) {
+        eventManager_->ResetSmartGestureManager();
+    }
     nodesToNotifyMemoryLevel_.clear();
     dirtyFocusNode_.Reset();
     dirtyFocusScope_.Reset();
@@ -7937,6 +7958,19 @@ const RefPtr<FormGestureManager>& PipelineContext::GetFormGestureManager() const
 const std::unique_ptr<RecycleManager>& PipelineContext::GetRecycleManager() const
 {
     return recycleManager_;
+}
+
+void PipelineContext::RegisterTouchTimingCallback(
+    const std::function<void(uint64_t sensorTime, uint64_t receiveTime, uint64_t dispatchTime, int32_t eventType)>&&
+        callback)
+{
+    CHECK_NULL_VOID(eventManager_);
+    eventManager_->RegisterTouchTimingCallback(std::move(callback));
+}
+void PipelineContext::UnregisterTouchTimingCallback()
+{
+    CHECK_NULL_VOID(eventManager_);
+    eventManager_->UnregisterTouchTimingCallback();
 }
 
 void PipelineContext::ProcessCommand(const std::string& command)

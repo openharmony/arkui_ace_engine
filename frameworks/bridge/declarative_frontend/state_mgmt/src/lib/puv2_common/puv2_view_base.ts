@@ -28,6 +28,10 @@
 
 type ExtraInfo = { page: string, line: number, col: number };
 type ProfileRecursionCounter = { total: number };
+type AnonymousEnvMonitorEntry<K extends SimpleTypeEnvKey = SimpleTypeEnvKey> = {
+  anonymousMonitorFunc: (mon: IMonitor) => void;
+  envValue: IEnvironmentValue<EnvTypeMap[K]>;
+};
 enum PrebuildPhase {
   None = 0,
   BuildPrebuildCmd = 1,
@@ -124,20 +128,20 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   private activeChangeListenerForInterop_: Set<(active: boolean) => void> = new Set<(active: boolean) => void>();
 
   protected __isEntryValue__Internal = false;
-  protected readonly ___reusePool?: __ReusePool;
-  protected static preRenderingPool_: __ReusePool | undefined;
+  protected readonly ___reusePool?: __ReusePool_Internal__;
+  protected static preRenderingPool_: __ReusePool_Internal__ | undefined;
   protected preRenderedChildren_?: Map<string, PUV2ViewBase>;
   public isPreRendered: boolean = false;
   public __isGlobalPoolActive : boolean = false;
   static preRenderCounter: number = 0;
 
-  static beginPreRender(pool: __ReusePool): void {
+  static beginPreRender(pool: __ReusePool_Internal__): void {
     PUV2ViewBase.preRenderingPool_ = pool;
   }
   static endPreRender(): void {
     PUV2ViewBase.preRenderingPool_ = undefined;
   }
-  static getCurrentPreRenderPool(): __ReusePool | undefined {
+  static getCurrentPreRenderPool(): __ReusePool_Internal__ | undefined {
     return PUV2ViewBase.preRenderingPool_;
   }
 
@@ -194,6 +198,23 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     preRenderedChild.isPreRendered = false;
     PUV2ViewBase.createRecycle(preRenderedChild, false, reuseId, () => {});
     return true;
+  }
+
+  protected __anonymousEnvMonitorFuncMap__Internal?: Map<SimpleTypeEnvKey, AnonymousEnvMonitorEntry<SimpleTypeEnvKey>>;
+
+  __setAnonymousEnvMonitorFunc__Internal<K extends SimpleTypeEnvKey>(key: K, anonymousMonitorFunc: (mon: IMonitor) => void,
+    envValue: IEnvironmentValue<EnvTypeMap[K]>): void {
+    if (!this.__anonymousEnvMonitorFuncMap__Internal) {
+      this.__anonymousEnvMonitorFuncMap__Internal = new Map<SimpleTypeEnvKey, AnonymousEnvMonitorEntry<SimpleTypeEnvKey>>();
+    }
+    this.__anonymousEnvMonitorFuncMap__Internal.set(key, {
+      anonymousMonitorFunc,
+      envValue,
+    } as AnonymousEnvMonitorEntry<SimpleTypeEnvKey>);
+  }
+
+  __getAnonymousEnvMonitorFuncBySpeficKey__Internal<K extends SimpleTypeEnvKey>(key: K): AnonymousEnvMonitorEntry<K> | undefined {
+    return this.__anonymousEnvMonitorFuncMap__Internal?.get(key) as AnonymousEnvMonitorEntry<K> | undefined;
   }
 
   public __triggerLifecycle__Internal(eventId: LifeCycleEvent): boolean {
@@ -674,14 +695,14 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
    * 3. If a legacy per-instance pool exists, return it.
    * 4. Otherwise, search up the ancestor hierarchy for the nearest accepting pool.
    *
-   * @returns {__ReusePool | undefined} The `__ReusePool` instance for managing component recycling.
+   * @returns {__ReusePool | undefined} The `__ReusePool_Internal__` instance for managing component recycling.
   */
-  getReusePoolInternal(componentClass?: new (...args: PUV2ViewBase[]) => PUV2ViewBase): __ReusePool | undefined {
+  getReusePoolInternal(componentClass?: new (...args: PUV2ViewBase[]) => PUV2ViewBase): __ReusePool_Internal__ | undefined {
     const cls = componentClass ?? (this.constructor as new (...args: PUV2ViewBase[]) => PUV2ViewBase);
     let current: PUV2ViewBase | IView | undefined = this;
 
     while (current) {
-        const pool: __ReusePool | undefined = (current as PUV2ViewBase).___reusePool;
+        const pool: __ReusePool_Internal__ | undefined = (current as PUV2ViewBase).___reusePool;
         if (pool && pool.acceptsComponent(cls)) {
             return pool;
         }

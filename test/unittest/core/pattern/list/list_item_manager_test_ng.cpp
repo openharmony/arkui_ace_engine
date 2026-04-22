@@ -37,8 +37,8 @@ HWTEST_F(ListItemManagerTestNg, GetListFrameNode001, TestSize.Level1)
 {
     RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> groupItemPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> groupItemPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     groupItemPattern->itemTotalCount_ = 2;
     auto node = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, groupItemPattern);
     ASSERT_NE(node, nullptr);
@@ -89,8 +89,8 @@ HWTEST_F(ListItemManagerTestNg, HandleScrollCallback001, TestSize.Level1)
 {
     RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
-    RefPtr<ListItemGroupPattern> groupItemPattern =
-        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    RefPtr<ListItemGroupPattern> groupItemPattern = AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder,
+        V2::ListItemGroupOptions{V2::ListItemGroupStyle::CARD});
     groupItemPattern->itemTotalCount_ = 2;
     auto node = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, listPattern);
     ASSERT_NE(node, nullptr);

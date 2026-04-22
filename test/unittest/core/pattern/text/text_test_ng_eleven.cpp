@@ -31,6 +31,7 @@
 #include "test/unittest/core/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/image_span_view_static.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 using namespace testing;
 using namespace testing::ext;

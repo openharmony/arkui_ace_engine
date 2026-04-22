@@ -143,7 +143,7 @@ function secondaryTitleStyles(this: TextAttribute, fontStyle: FontStyle): TextAt
   this.align(fontStyle?.alignment);
   this.fallbackLineSpacing(true);
   this.wordBreak(WordBreak.HYPHENATION);
-  this.optimizeTrailingSpace(true);
+  this.orphanCharOptimization(true);
   return this;
 }
 
@@ -156,7 +156,7 @@ function primaryTitleStyles(this: TextAttribute, fontStyle: FontStyle): TextAttr
   this.align(fontStyle?.alignment);
   this.fallbackLineSpacing(true);
   this.wordBreak(WordBreak.HYPHENATION);
-  this.optimizeTrailingSpace(true);
+  this.orphanCharOptimization(true);
   return this;
 }
 

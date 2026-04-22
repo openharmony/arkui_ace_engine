@@ -19,6 +19,7 @@
 #include "base/ressched/ressched_report.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/common/event_manager.h"
 #include "core/common/container.h"
 #include "core/components/dialog/dialog_theme.h"

@@ -22,9 +22,11 @@
 #include <list>
 
 #include "base/memory/ace_type.h"
-#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
+class FrameNode;
+class UINode;
+
 class MemoryManager : public virtual AceType {
     DECLARE_ACE_TYPE(MemoryManager, AceType);
 public:

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SVG2 Radial Gradient Test File -->
+<!-- Tests SVG2 enhanced radialGradient parsing with focal point and fr attribute -->
+<svg width="300" height="300" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- SVG2 radialGradient with focal point offset -->
+    <radialGradient id="radialGrad1" cx="50%" cy="50%" r="50%" fx="25%" fy="25%" fr="0%" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="30%" stop-color="#FF0000"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </radialGradient>
+    
+    <!-- SVG2 radialGradient with fr attribute (focal radius) -->
+    <radialGradient id="radialGrad2" cx="50%" cy="50%" r="50%" fx="50%" fy="50%" fr="20%" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#00FF00"/>
+      <stop offset="50%" stop-color="#FFFF00"/>
+      <stop offset="100%" stop-color="#FF6600"/>
+    </radialGradient>
+    
+    <!-- SVG2 radialGradient with userSpaceOnUse -->
+    <radialGradient id="radialGrad3" cx="150" cy="150" r="100" fx="120" fy="120" fr="10" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#4169E1"/>
+      <stop offset="50%" stop-color="#9370DB"/>
+      <stop offset="100%" stop-color="#FFB6C1"/>
+    </radialGradient>
+    
+    <!-- SVG2 radialGradient with spreadMethod -->
+    <radialGradient id="radialGrad4" cx="50%" cy="50%" r="30%" fx="50%" fy="50%" spreadMethod="repeat">
+      <stop offset="0%" stop-color="#32CD32"/>
+      <stop offset="100%" stop-color="#8B4513"/>
+    </radialGradient>
+    
+    <!-- SVG2 radialGradient with gradientTransform -->
+    <radialGradient id="radialGrad5" cx="50%" cy="50%" r="50%" gradientTransform="scale(1.5)">
+      <stop offset="0%" stop-color="#FF1493"/>
+      <stop offset="70%" stop-color="#00CED1"/>
+      <stop offset="100%" stop-color="#1E90FF"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Circle with focal point offset -->
+  <circle cx="70" cy="70" r="60" fill="url(#radialGrad1)" stroke="#333" stroke-width="2"/>
+  
+  <!-- Circle with fr attribute (focal radius) -->
+  <circle cx="225" cy="70" r="60" fill="url(#radialGrad2)" stroke="#333" stroke-width="2"/>
+  
+  <!-- Rectangle with userSpaceOnUse radial gradient -->
+  <rect x="50" y="150" width="100" height="100" fill="url(#radialGrad3)" rx="15"/>
+  
+  <!-- Circle with spreadMethod repeat -->
+  <circle cx="225" cy="200" r="50" fill="url(#radialGrad4)" stroke="#333" stroke-width="2"/>
+  
+  <!-- Ellipse with gradientTransform -->
+  <ellipse cx="150" cy="280" rx="70" ry="30" fill="url(#radialGrad5)" stroke="#333" stroke-width="2"/>
+  
+  <!-- Text labels -->
+  <text x="70" y="70" fill="white" font-size="10" text-anchor="middle">focal point</text>
+  <text x="225" y="70" fill="white" font-size="10" text-anchor="middle">fr attribute</text>
+  <text x="100" y="200" fill="white" font-size="10" text-anchor="middle">userSpace</text>
+  <text x="225" y="200" fill="white" font-size="10" text-anchor="middle">repeat</text>
+  <text x="150" y="280" fill="white" font-size="10" text-anchor="middle">transform</text>
+</svg>

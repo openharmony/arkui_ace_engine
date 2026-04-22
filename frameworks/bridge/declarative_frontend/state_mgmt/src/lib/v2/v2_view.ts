@@ -56,7 +56,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
     public defaultConsumerV2__?: Map<string, string>;
     public connectConsumerV2__?: Map<string, string>;
 
-    private myReusePool__ : __ReusePool  | undefined;
+    private myReusePool__ : __ReusePool_Internal__  | undefined;
     private recyclePoolV2_: RecyclePoolV2 | undefined = undefined;
 
     public hasBeenRecycled_: boolean = false;
@@ -428,6 +428,13 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
             this.parent_.removeChild(this);
         }
         ViewBuildNodeBase.arkThemeScopeManager?.onViewPUDelete(this);
+
+        if (this.__anonymousEnvMonitorFuncMap__Internal) {
+          this.__anonymousEnvMonitorFuncMap__Internal.forEach((entry, key) => {
+            ObserveV2.getObserve().clearMonitorPath(entry.envValue, simpleEnvMetaMap[key].prop, entry.anonymousMonitorFunc);
+          });
+          this.__anonymousEnvMonitorFuncMap__Internal.clear();
+        }
         // if memory watch register the callback func, then report such information to memory watch
         // when custom node destroyed
         if (ArkUIObjectFinalizationRegisterProxy.callbackFunc_) {
@@ -956,7 +963,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
     // GLOBAL POOL PATH
     // Component may come from a different parent entirely,
     // so we need to re-parent and update its id_.
-    private reparentFromGlobalPool(recycledNode: ViewV2, elmtId: number, globalPool: __ReusePool): void {
+    private reparentFromGlobalPool(recycledNode: ViewV2, elmtId: number, globalPool: __ReusePool_Internal__): void {
         const oldParent = recycledNode.getParent?.();
         const oldElmtId = recycledNode.id__();
 
@@ -1013,7 +1020,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
     	// In aliasing cases, matching reuseId strings alone can cause duplicates,
     	// so we use the constructor reference to uniquely store/retrieve pool keys.
         if (globalPool && componentClass && (!reuseId || reuseId === componentClass.name)) {
-            __ReusePool.registerCtorName(componentClass, reuseId);
+            __ReusePool_Internal__.registerCtorName(componentClass, reuseId);
         }
 
         this.observeComponentCreation2((elmtId, isInitialRender) => {

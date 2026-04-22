@@ -72,7 +72,7 @@ abstract class ViewPU extends PUV2ViewBase
   private watchedProps: Map<string, (propName: string) => void> = new Map<string, (propName: string) => void>();
 
   private recycleManager_: RecycleManager = undefined;
-  private myReusePool__ : __ReusePool  | undefined;
+  private myReusePool__ : __ReusePool_Internal__  | undefined;
 
   public hasBeenRecycled_: boolean = false;
 
@@ -354,6 +354,13 @@ abstract class ViewPU extends PUV2ViewBase
     this.localStoragebackStore_ = undefined;
     PUV2ViewBase.prebuildFuncQueues.delete(this.id__());
     PUV2ViewBase.propertyChangedFuncQueues.delete(this.id__());
+
+    if (this.__anonymousEnvMonitorFuncMap__Internal) {
+      this.__anonymousEnvMonitorFuncMap__Internal.forEach((entry, key) => {
+        ObserveV2.getObserve().clearMonitorPath(entry.envValue, simpleEnvMetaMap[key].prop, entry.anonymousMonitorFunc);
+      });
+      this.__anonymousEnvMonitorFuncMap__Internal.clear();
+    }
     // if memory watch register the callback func, then report such information to memory watch
     // when custom node destroyed
     if (ArkUIObjectFinalizationRegisterProxy.callbackFunc_) {
@@ -1181,17 +1188,17 @@ abstract class ViewPU extends PUV2ViewBase
       recycleUpdateFunc(element, isFirstRender, undefined, false);
     };
 
-    const newElmtId: number = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
     const globalPool = this.__isGlobalPoolActive ? this.getReusePoolInternal(componentClass) : undefined;
     // In aliasing cases, matching reuseId strings alone can cause duplicates,
     // so we use the constructor reference to uniquely store/retrieve pool keys.
     if (globalPool && componentClass && (!name || name === componentClass.name)) {
-      __ReusePool.registerCtorName(componentClass, name);
+      __ReusePool_Internal__.registerCtorName(componentClass, name);
     }
 
     // PRE-RENDER mode: queue for later creation
     const preRenderPool = ViewPU.getCurrentPreRenderPool();
     if (preRenderPool) {
+      const newElmtId: number = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
       stateMgmtConsole.debug(`${this.debugInfo__()} [PreRender] Active..Creating pre-render instance for ${componentClass.name}`);
       ObserveV2.getObserve().queuePreRenderCreation(this, componentClass, {}, newElmtId, preRenderPool, name);
       return;
@@ -1221,7 +1228,7 @@ abstract class ViewPU extends PUV2ViewBase
       this.observeComponentCreation(compilerAssignedUpdateFunc);
       return;
     }
-
+    const newElmtId: number = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
     const oldElmtId: number = node.id__();
     let recycleElmtId: number;
 

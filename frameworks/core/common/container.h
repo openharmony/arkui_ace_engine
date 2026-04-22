@@ -37,7 +37,6 @@
 #include "base/view_data/hint_to_type_wrap.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container_consts.h"
-#include "core/common/container_handler.h"
 #include "core/common/display_info.h"
 #include "core/common/display_info_utils.h"
 #include "core/common/frontend.h"
@@ -88,6 +87,7 @@ using TouchpadInteractionBeginCallback = std::function<void(const NonPointerEven
 using AbilityRuntimeContextCallback = std::function<void(int32_t)>;
 
 class PipelineBase;
+class ContainerHandler;
 
 class ACE_FORCE_EXPORT Container : public virtual AceType {
     DECLARE_ACE_TYPE(Container, AceType);
@@ -750,15 +750,9 @@ public:
         return false;
     }
 
-    void RegisterContainerHandler(const RefPtr<ContainerHandler>& containerHandler)
-    {
-        containerHandler_ = containerHandler;
-    }
+    void RegisterContainerHandler(const RefPtr<ContainerHandler>& containerHandler);
 
-    RefPtr<ContainerHandler> GetContainerHandler()
-    {
-        return containerHandler_;
-    }
+    RefPtr<ContainerHandler> GetContainerHandler();
 
     void SetCurrentDisplayId(uint64_t displayId)
     {

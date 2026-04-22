@@ -4990,6 +4990,18 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setLightUpEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setSpatialEffectAttribute(value: SpatialEffectParams | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            SpatialEffectParams_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setSpatialEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setPixelStretchEffectAttribute(value: PixelStretchEffectOptions | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -8150,6 +8162,21 @@ export class TouchResult {
     strategy: TouchTestStrategy = initializers.arkui.component.common.TouchResultNS.strategy;
     id?: string | undefined;
 }
+export interface DepthVector3 {
+    x: double;
+    y: double;
+    z: double;
+}
+export interface SpatialPosition {
+    leftTop: DepthVector3;
+    rightTop: DepthVector3;
+    leftBottom: DepthVector3;
+    rightBottom: DepthVector3;
+}
+export interface SpatialEffectParams {
+    position: SpatialPosition;
+    occlusionWeight?: double;
+}
 export interface PixelStretchEffectOptions {
     top?: Length;
     bottom?: Length;
@@ -9865,6 +9892,18 @@ export interface CommonMethod {
             }
         }
         throw new Error('Unimplemented method lightUpEffect')
+    }
+    spatialEffect(params: SpatialEffectParams | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => instance.spatialEffect(params));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error("Common method 'spatialEffect' can only be set when creating a custom component.")
+            }
+        }
+        throw new Error('Unimplemented method spatialEffect')
     }
     pixelStretchEffect(value: PixelStretchEffectOptions | undefined): this {
         const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
@@ -11860,6 +11899,11 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     public lightUpEffect(value: double | undefined): this {
         const value_casted = value as (double | undefined)
         this.getPeer()?.setLightUpEffectAttribute(value_casted)
+        return this
+    }
+    public spatialEffect(params: SpatialEffectParams | undefined): this {
+        const params_casted = params as (SpatialEffectParams | undefined)
+        this.getPeer()?.setSpatialEffectAttribute(params_casted)
         return this
     }
     public pixelStretchEffect(value: PixelStretchEffectOptions | undefined): this {
@@ -18452,6 +18496,71 @@ export class DividerStyle_serializer {
         }
         const endMarginTmpResult: Length | undefined = endMarginTmpBuf
         let value: DividerStyle = ({strokeWidth: strokeWidthTmpResult, color: colorTmpResult, startMargin: startMarginTmpResult, endMargin: endMarginTmpResult} as DividerStyle)
+        return value
+    }
+}
+export class DepthVector3_serializer {
+    public static write(buffer: SerializerBase, value: DepthVector3): void {
+        let valueSerializer: SerializerBase = buffer
+        valueSerializer.writeFloat64(value.x)
+        valueSerializer.writeFloat64(value.y)
+        valueSerializer.writeFloat64(value.z)
+    }
+    public static read(buffer: DeserializerBase): DepthVector3 {
+        let valueDeserializer: DeserializerBase = buffer
+        const xTmpResult: double = valueDeserializer.readFloat64()
+        const yTmpResult: double = valueDeserializer.readFloat64()
+        const zTmpResult: double = valueDeserializer.readFloat64()
+        let value: DepthVector3 = ({x: xTmpResult, y: yTmpResult, z: zTmpResult} as DepthVector3)
+        return value
+    }
+}
+export class SpatialPosition_serializer {
+    public static write(buffer: SerializerBase, value: SpatialPosition): void {
+        let valueSerializer: SerializerBase = buffer
+        DepthVector3_serializer.write(valueSerializer, value.leftTop)
+        DepthVector3_serializer.write(valueSerializer, value.rightTop)
+        DepthVector3_serializer.write(valueSerializer, value.leftBottom)
+        DepthVector3_serializer.write(valueSerializer, value.rightBottom)
+    }
+    public static read(buffer: DeserializerBase): SpatialPosition {
+        let valueDeserializer: DeserializerBase = buffer
+        const leftTopTmpResult: DepthVector3 = DepthVector3_serializer.read(valueDeserializer)
+        const rightTopTmpResult: DepthVector3 = DepthVector3_serializer.read(valueDeserializer)
+        const leftBottomTmpResult: DepthVector3 = DepthVector3_serializer.read(valueDeserializer)
+        const rightBottomTmpResult: DepthVector3 = DepthVector3_serializer.read(valueDeserializer)
+        let value: SpatialPosition = ({leftTop: leftTopTmpResult, rightTop: rightTopTmpResult, leftBottom: leftBottomTmpResult, rightBottom: rightBottomTmpResult} as SpatialPosition)
+        return value
+    }
+}
+export class SpatialEffectParams_serializer {
+    public static write(buffer: SerializerBase, value: SpatialEffectParams): void {
+        let valueSerializer: SerializerBase = buffer
+        valueSerializer.writeInt8(RuntimeType.OBJECT)
+        SpatialPosition_serializer.write(valueSerializer, value.position)
+        const valueHolderForOcclusionWeight = value.occlusionWeight
+        if (valueHolderForOcclusionWeight !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOcclusionWeightTmpValue = valueHolderForOcclusionWeight!
+            valueSerializer.writeFloat64(valueHolderForOcclusionWeightTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): SpatialEffectParams {
+        let valueDeserializer: DeserializerBase = buffer
+        const positionTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let positionTmpResult: SpatialPosition = { leftTop: { x: 0.0, y: 0.0, z: 0.0 }, rightTop: { x: 0.0, y: 0.0, z: 0.0 }, leftBottom: { x: 0.0, y: 0.0, z: 0.0 }, rightBottom: { x: 0.0, y: 0.0, z: 0.0 } }
+        if ((positionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            positionTmpResult = SpatialPosition_serializer.read(valueDeserializer)
+        }
+        const occlusionWeightTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let occlusionWeightTmpBuf: double | undefined = undefined
+        if ((occlusionWeightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            occlusionWeightTmpBuf = valueDeserializer.readFloat64()
+        }
+        const occlusionWeightTmpResult: double | undefined = occlusionWeightTmpBuf
+        let value: SpatialEffectParams = ({position: positionTmpResult, occlusionWeight: occlusionWeightTmpResult} as SpatialEffectParams)
         return value
     }
 }

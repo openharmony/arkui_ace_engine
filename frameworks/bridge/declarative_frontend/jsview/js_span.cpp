@@ -222,7 +222,7 @@ void JSSpan::ProcessVariableFontWeight(const JSCallbackInfo& info)
 void JSSpan::ProcessFontConfigs(const JSCallbackInfo& info)
 {
     auto tmpInfo = info[1];
-    if (tmpInfo->IsNull() || tmpInfo->IsUndefined()) {
+    if (tmpInfo->IsNull() || tmpInfo->IsUndefined() || !tmpInfo->IsObject()) {
         SpanModel::GetInstance()->ResetEnableVariableFontWeight();
         SpanModel::GetInstance()->ResetEnableDeviceFontWeightCategory();
         return;

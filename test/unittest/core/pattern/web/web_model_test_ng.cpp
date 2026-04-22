@@ -15,6 +15,7 @@
  */
 
 #include "gtest/gtest.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #define private public
 #include "base/memory/ace_type.h"

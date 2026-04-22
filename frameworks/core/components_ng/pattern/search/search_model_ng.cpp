@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1171,6 +1171,9 @@ void SearchModelNG::CreateButton(const RefPtr<SearchNode>& parentNode, bool hasB
 
     auto buttonRenderContext = frameNode->GetRenderContext();
     buttonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    auto buttonLayoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     CHECK_NULL_VOID(buttonPattern);
     buttonPattern->SetApplyShadow(false);
@@ -1259,6 +1262,7 @@ void SearchModelNG::CreateCancelButton(const RefPtr<SearchNode>& parentNode, boo
     auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
     textLayoutProperty->UpdateFontSize(searchTheme->GetFontSize());
     auto cancelButtonLayoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    cancelButtonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     cancelButtonLayoutProperty->UpdateType(ButtonType::CIRCLE);
     cancelButtonLayoutProperty->UpdateFontSize(searchTheme->GetFontSize());
     auto cancelButtonEvent = frameNode->GetEventHub<ButtonEventHub>();
@@ -1565,6 +1569,7 @@ void SearchModelNG::SetSearchButtonFontColor(FrameNode* frameNode, const Color& 
     CHECK_NULL_VOID(buttonLayoutProperty);
 
     buttonLayoutProperty->UpdateFontColor(color);
+    buttonLayoutProperty->UpdateFontColorFlagByUser(true);
 
     buttonFrameNode->MarkModifyDone();
     buttonFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);

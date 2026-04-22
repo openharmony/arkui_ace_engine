@@ -21,7 +21,6 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
-#include "core/components/common/properties/border_image.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/render_property.h"

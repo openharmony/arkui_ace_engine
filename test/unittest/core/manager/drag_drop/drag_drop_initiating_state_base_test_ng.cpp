@@ -173,9 +173,10 @@ HWTEST_F(DragDropInitiatingStateBaseTestNG, DragDropInitiatingStateBaseTestNG002
     layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
 
     /**
-     * @tc.steps: step4. trigger HidePixelMap.
+     * @tc.steps: step4. trigger HidePixelMap with default currentState (-1).
+     * Since currentState is not MOVING, HideDragNodeCopyWithAnimation should be called normally.
      */
-    stateIdle->HidePixelMap(false, 0, 0, false);
+    stateIdle->HidePixelMap(false, 0, 0, false, -1);
     layoutProperty = frameNode->GetLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
     auto type = layoutProperty->GetVisibilityValue(VisibleType::INVISIBLE);
@@ -506,5 +507,84 @@ HWTEST_F(DragDropInitiatingStateBaseTestNG, DragDropInitiatingStateBaseTestNG008
         stateIdle->HandleTextDragStart(frameNode, info);
         EXPECT_EQ(gestureHub->isTextDraggable_, testCase.expectResult);
     }
+}
+
+/**
+ * @tc.name: DragDropInitiatingStateBaseTestNG010
+ * @tc.desc: Test HidePixelMap with currentState parameter to avoid duplicate calls.
+ * This test verifies the fix for duplicate calls when transitioning from MOVING to IDLE state.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropInitiatingStateBaseTestNG, DragDropInitiatingStateBaseTestNG010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DragDropEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SEARCH_Field_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto dragDropEventActuator =
+        AceType::MakeRefPtr<DragDropEventActuator>(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    ASSERT_NE(dragDropEventActuator, nullptr);
+    auto handler = dragDropEventActuator->dragDropInitiatingHandler_;
+    ASSERT_NE(handler, nullptr);
+    auto machine = handler->initiatingFlow_;
+    ASSERT_NE(machine, nullptr);
+    machine->InitializeState();
+    machine->currentState_ = static_cast<int32_t>(DragDropInitiatingStatus::IDLE);
+
+    /**
+     * @tc.steps: step2. get DragDropInitiatingStateBase.
+     */
+    auto state = GetDragDropState(dragDropEventActuator, DragDropInitiatingStatus::IDLE);
+    ASSERT_NE(state, nullptr);
+    auto stateIdle = AceType::DynamicCast<DragDropInitiatingStateBase>(state);
+    ASSERT_NE(stateIdle, nullptr);
+
+    /**
+     * @tc.steps: step3. set multi drag and default animation, simulate gather node scenario.
+     */
+    auto& params = machine->GetDragDropInitiatingParams();
+    params.hasGatherNode = true;
+    params.isNeedGather = true;
+    auto dragPreviewOption = frameNode->GetDragPreviewOption();
+    dragPreviewOption.defaultAnimationBeforeLifting = true;
+    frameNode->SetDragPreviewOptions(dragPreviewOption);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+
+    /**
+     * @tc.steps: step4. trigger HidePixelMap with currentState=MOVING.
+     * This simulates the scenario when transitioning from MOVING to IDLE state where
+     * HideGatherNode() has already been called in Init(), so HidePixelMap should skip
+     * calling HideDragNodeCopyWithAnimation() to avoid duplicate operation.
+     */
+    stateIdle->HidePixelMap(false, 0, 0, false, static_cast<int32_t>(DragDropInitiatingStatus::MOVING));
+    layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    /**
+     * @tc.expected: Visibility should remain INVISIBLE since currentState=MOVING prevents
+     * the duplicate HideDragNodeCopyWithAnimation call that would otherwise set it to VISIBLE.
+     */
+    auto type = layoutProperty->GetVisibilityValue(VisibleType::VISIBLE);
+    EXPECT_EQ(type, VisibleType::INVISIBLE);
+
+    /**
+     * @tc.steps: step5. trigger HidePixelMap with currentState=PRESS (not MOVING).
+     * This simulates the scenario when transitioning from other states (e.g., PRESS) to IDLE.
+     */
+    stateIdle->HidePixelMap(false, 0, 0, false, static_cast<int32_t>(DragDropInitiatingStatus::PRESS));
+    layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    /**
+     * @tc.expected: Visibility should now be VISIBLE after HideDragNodeCopyWithAnimation is called.
+     */
+    type = layoutProperty->GetVisibilityValue(VisibleType::INVISIBLE);
+    EXPECT_EQ(type, VisibleType::VISIBLE);
 }
 } // namespace OHOS::Ace::NG

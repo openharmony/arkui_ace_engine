@@ -1032,7 +1032,7 @@ export function registerCreateCompatibleStaticState(): void {
     registerCallback.invoke(createCompatibleStaticState<undefined>);
 }
 
-function createCompatibleStaticState<T>(dynamicValue: Object): IDecoratedV1Variable<T> {
+function createCompatibleStaticState<T>(dynamicValue: Any): IDecoratedV1Variable<T> {
     const value = ESValue.wrap(dynamicValue);
     const getProxy = value.invokeMethod('getProxy').unwrap();
     if (getProxy === undefined) {
@@ -1156,7 +1156,7 @@ function registerLocalStorageSetProxy(): void {
     registerCallback.invoke(localStorageSetProxy);
 }
 
-function localStorageSetProxy(storage: LocalStorage, proxy: Object): void {
+function localStorageSetProxy(storage: LocalStorage, proxy: Any): void {
     storage.setProxy(ESValue.wrap(proxy));
 }
 

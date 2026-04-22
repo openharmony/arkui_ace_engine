@@ -211,6 +211,19 @@ std::string Color::ColorToString() const
     return colorStr;
 }
 
+std::string Color::ColorWithHdrToString() const
+{
+    auto colorStr = ColorToString();
+    if (!colorWithHeadRoom_.has_value()) {
+        return colorStr;
+    }
+    const auto& hdrColor = colorWithHeadRoom_.value();
+    std::ostringstream oss;
+    oss << colorStr << "|HDR:" << hdrColor.red << "," << hdrColor.green << "," << hdrColor.blue << ","
+        << hdrColor.alpha << "," << hdrColor.headRoom << "|CS:" << static_cast<int32_t>(GetColorSpace());
+    return oss.str();
+}
+
 // for example str = #FFFFFFFF
 Color Color::ColorFromString(const std::string& str)
 {

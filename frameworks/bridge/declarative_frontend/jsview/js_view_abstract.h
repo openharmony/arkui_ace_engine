@@ -216,6 +216,7 @@ public:
     static bool InitPixStretchEffect(
         CalcDimension& left, CalcDimension& right, CalcDimension& top, CalcDimension bottom);
     static void JsLightUpEffect(const JSCallbackInfo& info);
+    static void JsSpatialEffect(const JSCallbackInfo& info);
     static void JsBackground(const JSCallbackInfo& info);
     static void JsBindMenu(const JSCallbackInfo& info);
     static void JsBindContextMenu(const JSCallbackInfo& info);
@@ -358,6 +359,7 @@ public:
     static void JsRestoreId(int32_t restoreId);
     static void JsOnVisibleAreaChange(const JSCallbackInfo& info);
     static void JsOnVisibleAreaApproximateChange(const JSCallbackInfo& info);
+    static void JsSmartGestureShortcut(const JSCallbackInfo& info);
     static void JsHitTestBehavior(const JSCallbackInfo& info);
     static void JsOnChildTouchTest(const JSCallbackInfo& info);
     static void JsForegroundColor(const JSCallbackInfo& info);
@@ -935,8 +937,10 @@ public:
         Color& color, bool state);
     static void JSAllowForceDark(const JSCallbackInfo& info);
     static std ::string TryLocalizeNumberStr(const std::string& numStr, int32_t precision);
+    static void JSEdgeLight(const JSCallbackInfo& info);
 
 private:
+    static DepthVector3 ParseDepthVector3(const JSRef<JSVal>& vectorValue);
     static bool ParseJsStrArrayInternal(const JSRef<JSArray>& jsArray, std::vector<std::string>& result,
         std::vector<RefPtr<ResourceObject>>& resObjArray);
     static bool ParseJsIntegerArrayInternal(const JSRef<JSArray>& jsArray, std::vector<uint32_t>& result,

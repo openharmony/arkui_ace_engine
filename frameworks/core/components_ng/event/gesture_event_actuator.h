@@ -16,10 +16,17 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_GESTURE_EVENT_ACTUATOR_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_GESTURE_EVENT_ACTUATOR_H
 
+#include <cstddef>
+#include <functional>
+#include <utility>
+
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
-#include "core/accessibility/accessibility_utils.h"
 #include "core/event/touch_event.h"
+
+namespace OHOS::Ace {
+enum class AccessibilityEventType : size_t;
+}
 
 namespace OHOS::Ace::NG {
 

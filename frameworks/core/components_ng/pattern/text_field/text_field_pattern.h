@@ -2564,6 +2564,7 @@ private:
     WeakPtr<FrameNode> firstAutoFillContainerNode_;
     std::optional<float> lastCaretPos_ = std::nullopt;
     bool firstClickAfterLosingFocus_ = true;
+    bool UnFocusOnHandleClick_ = false;
     CancelableCallback<void()> firstClickResetTask_;
     RequestFocusReason requestFocusReason_ = RequestFocusReason::UNKNOWN;
     bool directionKeysMoveFocusOut_ = false;

@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/ui_extension/preview_ui_extension_component/preview_ui_extension_pattern.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include <optional>
 

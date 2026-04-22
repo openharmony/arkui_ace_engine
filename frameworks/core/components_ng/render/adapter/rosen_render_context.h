@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,11 +44,14 @@
 #include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/progress_mask_property.h"
+#include "core/components_ng/property/sidebar_content_mask_property.h"
 #include "core/components_ng/render/adapter/focus_animation_modifier.h"
 #include "core/components_ng/render/adapter/graphic_modifier.h"
+#include "core/components_ng/render/adapter/sidebar_content_mask_modifier.h"
 #include "core/components_ng/render/adapter/moon_progress_modifier.h"
 #include "core/components_ng/render/adapter/rosen_transition_effect.h"
 #include "core/components_ng/render/render_context.h"
@@ -69,7 +72,7 @@ class PipelineContext;
 class RosenRenderContext : public RenderContext {
     DECLARE_ACE_TYPE(RosenRenderContext, NG::RenderContext);
 public:
-    RosenRenderContext() = default;
+    RosenRenderContext();
     ~RosenRenderContext() override;
 
     void SetEffectLayer(const ContextParam& param);
@@ -242,6 +245,7 @@ public:
     void ResetBackBlurStyleMultiThread();
     void OnSphericalEffectUpdate(double radio) override;
     void OnPixelStretchEffectUpdate(const PixStretchEffectOption& option) override;
+    void OnSpatialEffectUpdate(const SpatialEffectParams& params) override;
     void OnLightUpEffectUpdate(double radio) override;
     void OnParticleOptionArrayUpdate(const std::list<ParticleOption>& optionList) override;
     void OnClickEffectLevelUpdate(const ClickEffectInfo& info) override;
@@ -455,7 +459,7 @@ public:
     int32_t CalcExpectedFrameRate(const std::string& scene, float speed) override;
 
     void SetBackgroundShader(const std::shared_ptr<Rosen::RSShader>& shader);
-    void SetHDRColorHeadRoom(float headRoom);
+    ACE_FORCE_EXPORT void SetHDRColorHeadRoom(float headRoom);
 
     // used in arkts_native_render_node_modifier set property directly to rsNode
     void SetRotation(float rotationX, float rotationY, float rotationZ) override;
@@ -584,7 +588,24 @@ public:
 
     void SetMaterialWithQualityLevel(
         const std::shared_ptr<Rosen::RSNGFilterBase>& materialFilter, UiMaterialFilterQuality quality) override;
+        
+    void OnEdgeLightParamUpdate(const NG::EdgeLightParam& param) override;
 
+    void UpdateEdgeLightFilter(const SizeF& frameSize) override;
+
+    void UpdateEdgeLightFilterWithLightMask(const SizeF& frameSize) override;
+
+    void ParseEdgeLightPosition(const NG::EdgeLightPosition position, float& angle, float& positionX, float& positionY,
+        float rectH, const SizeF& frameSize) override;
+
+    void ResetEdgeLightFilter() override;
+
+    void OnSidebarContentMaskUpdate(const RefPtr<SidebarContentMaskProperty>& maskProperty) override;
+
+#ifdef RENDER_EXTRACT_SUPPORTED
+    // cross-platform only: used by XComponent to register a surface capture callback for component snapshot.
+    void SetSurfaceCaptureCallback(std::function<std::shared_ptr<Media::PixelMap>()> callback);
+#endif
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
     void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) override;
@@ -712,6 +733,7 @@ protected:
     void PaintClipMask(const std::unique_ptr<ClipProperty>& clip, const SizeF& frameSize);
     void PaintClip(const SizeF& frameSize);
     void PaintProgressMask();
+    void PaintSideBarContentMask(const Color& maskColor);
     void PaintGradient(const SizeF& frameSize);
     void PaintGraphics();
     void PaintOverlayText();
@@ -874,6 +896,7 @@ protected:
     std::shared_ptr<BorderImageModifier> borderImageModifier_;
     std::shared_ptr<MouseSelectModifier> mouseSelectModifier_;
     RefPtr<MoonProgressModifier> moonProgressModifier_;
+    RefPtr<SidebarContentMaskModifier> sidebarContentMaskModifier_;
     RefPtr<FocusAnimationModifier> focusAnimationModifier_;
 
     std::shared_ptr<FocusStateModifier> focusStateModifier_;
@@ -957,6 +980,8 @@ private:
     static std::timed_mutex taskMtx_;
     CancelableCallback<void()> pendingDecodeTask_;
     CancelableCallback<void()> pendingUITask_;
+    class EdgeLightImpl;
+    std::unique_ptr<EdgeLightImpl> edgeLightImpl_;
 };
 } // namespace OHOS::Ace::NG
 

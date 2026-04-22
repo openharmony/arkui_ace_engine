@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include <mutex>
+#include "core/accessibility/accessibility_manager.h"
 #include <optional>
 #include <string>
 
@@ -80,6 +81,7 @@
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/theme/icon_theme.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -252,7 +254,7 @@ void OverlayManagerTestNg::CreateSheetContentNode()
  * @tc.desc: Test OverlayManager::DeleteModal
  * @tc.type: FUNC
  */
-HWTEST_F(OverlayManagerTestNg, DeleteModal001, TestSize.Level1)
+HWTEST_F(OverlayManagerTestNg, DeleteModal001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create target node and toast node.

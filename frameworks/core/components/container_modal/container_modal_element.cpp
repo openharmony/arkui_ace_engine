@@ -15,6 +15,8 @@
 
 #include "core/components/container_modal/container_modal_element.h"
 
+#include "core/accessibility/accessibility_manager.h"
+
 #include "core/components/clip/clip_element.h"
 #include "core/components/clip/render_clip.h"
 #include "core/components/container_modal/container_modal_constants.h"
@@ -347,6 +349,7 @@ void ContainerModalElement::Update()
             containerElement->controller_->ClearStopListeners();
             containerElement->controller_->AddStopListener([weak] {
                 auto container = weak.Upgrade();
+                CHECK_NULL_VOID(container);
                 container->SetTitleAccessibilityNodeOffset();
             });
             containerElement->controller_->Forward();
@@ -367,6 +370,7 @@ void ContainerModalElement::Update()
             containerElement->controller_->ClearStopListeners();
             containerElement->controller_->AddStopListener([weak] {
                 auto container = weak.Upgrade();
+                CHECK_NULL_VOID(container);
                 container->SetTitleAccessibilityNodeOffset();
             });
             containerElement->controller_->Forward();

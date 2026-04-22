@@ -146,6 +146,7 @@ bool DatePickerPattern::UpdateFocusStyles(const RefPtr<PickerTheme>& pickerTheme
         buttonConfirmLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(width - buttonSpace.ConvertToPx()), CalcLength(buttonHeight)));
         buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        buttonConfirmLayoutProperty->UpdateBackgroundColorFlagByUser(true);
     } else {
         auto pickerPadding = pickerTheme->GetPickerPadding();
         standardButtonHeight = static_cast<float>((height - pickerPadding * RATE).ConvertToPx());

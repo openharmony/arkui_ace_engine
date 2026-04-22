@@ -28,6 +28,7 @@
 #include "core/common/interaction/interaction_interface.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_converter.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"

@@ -158,6 +158,8 @@ public:
                 indexerPattern->GetAttr<Color>("popup_clicked_bg_area_color", Color(POPUP_CLICKED_BG_AREA_COLOR));
             theme->popupTitleBackground_ =
                 indexerPattern->GetAttr<Color>("popup_title_color", Color(POPUP_TITLE_BG_AREA_COLOR));
+            theme->popupLowMaterialBgColor_ =
+                indexerPattern->GetAttr<Color>("popup_low_material_color", Color(POPUP_BACKGROUND_COLOR));
         }
 
         void ParseDimensionAttributes(const RefPtr<ThemeStyle>& indexerPattern, const RefPtr<IndexerTheme>& theme) const
@@ -301,6 +303,10 @@ public:
     {
         return popupTitleBackground_;
     }
+    const Color& GetPopupLowMaterialBgColor() const
+    {
+        return popupLowMaterialBgColor_;
+    }
     const std::string& GetAccessibilityExpand() const
     {
         return accessibilityExpand_;
@@ -354,6 +360,7 @@ protected:
     Color slipPressedBackgroundColor_;
     Color popupClickedBgAreaColor_;
     Color popupTitleBackground_;
+    Color popupLowMaterialBgColor_;
     Color popupUnclickedBgAreaColor_;
     std::string accessibilityExpand_;
     std::string accessibilityExpanded_;

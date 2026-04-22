@@ -14,6 +14,7 @@
  */
 
 #include "text_base.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
@@ -23,6 +24,7 @@
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 
 namespace OHOS::Ace::NG {

@@ -215,6 +215,13 @@ void ExtTexture::GetTextureIsVideo(int32_t& type)
     });
 }
 
+#ifdef RENDER_EXTRACT_SUPPORTED
+bool ExtTexture::SurfaceCapture(uintptr_t pointerVal, int32_t width, int32_t height)
+{
+    return CaptureToNativeBuffer(TEXTURE_WIDTH, TEXTURE_HEIGHT, pointerVal, width, height);
+}
+#endif
+
 void ExtTexture::SetSizeSync(int64_t textureId, int32_t textureWidth, int32_t textureHeight, int32_t left, int32_t top)
 {
 #if defined(ANDROID_PLATFORM)

@@ -19,6 +19,8 @@
 
 #include "test/mock/frameworks/base/image/mock_pixel_map.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;

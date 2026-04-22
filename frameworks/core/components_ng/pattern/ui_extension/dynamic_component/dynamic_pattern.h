@@ -23,6 +23,11 @@
 #include "core/components_ng/pattern/ui_extension/platform_pattern.h"
 #include "core/components_ng/pattern/ui_extension/surface_proxy_node.h"
 
+namespace OHOS::Ace {
+class AccessibilityChildTreeCallback;
+class AccessibilitySAObserverCallback;
+}
+
 namespace OHOS::Ace::NG {
 enum DCResultCode : int32_t {
     DC_NO_ERRORS = 0,

@@ -140,6 +140,7 @@ public:
     static const std::string& GetUICorrectionConfig();
     static bool SetUICorrectionConfig(const std::string& configStr);
     virtual ~UIContent() = default;
+    virtual OHOS::Rosen::Window* GetUIContentWindow() { return nullptr; };
 
     // UI content life-cycles
     virtual UIContentErrorCode Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) = 0;
@@ -659,6 +660,11 @@ public:
     {
         return nullptr;
     }
+
+    virtual void RegisterTouchTimingCallback(
+        const std::function<void(uint64_t sensorTime, uint64_t receiveTime, uint64_t dispatchTime,
+            int32_t eventType)>&& callback) {};
+    virtual void UnregisterTouchTimingCallback() {};
 
 private:
     static std::atomic<bool> successFlag_;

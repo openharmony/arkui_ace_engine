@@ -86,6 +86,7 @@ ohos_unittest("arkui_rosen_render_context_test") {
     "$ace_root/frameworks/core/components_ng/render/adapter/focus_state_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/render/adapter/gradient_style_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/render/adapter/moon_progress_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/render/adapter/sidebar_content_mask_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/render/adapter/rosen_animation_utils.cpp",
     "$ace_root/frameworks/core/components_ng/render/adapter/rosen_effect_converter.cpp",
     "$ace_root/frameworks/core/components_ng/render/adapter/rosen_modifier_adapter.cpp",
@@ -208,6 +209,7 @@ ohos_unittest("arkui_rosen_render_context_test") {
   if (defined(use_rosen_drawing) && use_rosen_drawing) {
     defines += [ "USE_ROSEN_DRAWING" ]
   }
+  defines += [ "GESTURE_DEBUG_BOUNDARY_SUPPORTED" ]
 }
 
 ohos_unittest("gradient_style_modifier_test") {
@@ -227,6 +229,7 @@ ohos_unittest("gradient_style_modifier_test") {
     "$ace_root/frameworks/core/components_ng/render/adapter/focus_state_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/render/adapter/gradient_style_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/render/adapter/moon_progress_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/render/adapter/sidebar_content_mask_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/render/adapter/rosen_animation_utils.cpp",
     "$ace_root/frameworks/core/components_ng/render/adapter/rosen_effect_converter.cpp",
     "$ace_root/frameworks/core/components_ng/render/adapter/rosen_modifier_adapter.cpp",
@@ -343,7 +346,9 @@ ohos_unittest("gradient_style_modifier_test") {
     "skia:skia_canvaskit",
     "window_manager:libwm",
   ]
+
+  defines = [ "GESTURE_DEBUG_BOUNDARY_SUPPORTED" ]
   if (defined(use_rosen_drawing) && use_rosen_drawing) {
-    defines = [ "USE_ROSEN_DRAWING" ]
+    defines += [ "USE_ROSEN_DRAWING" ]
   }
 }

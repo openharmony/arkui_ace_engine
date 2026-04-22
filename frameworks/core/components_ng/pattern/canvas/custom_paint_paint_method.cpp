@@ -244,7 +244,7 @@ bool CustomPaintPaintMethod::ParseFilter(std::string& filter, std::vector<Filter
 bool CustomPaintPaintMethod::HasShadow() const
 {
     return !(NearZero(state_.shadow.GetOffset().GetX()) && NearZero(state_.shadow.GetOffset().GetY()) &&
-             NearZero(state_.shadow.GetBlurRadius()));
+        NearZero(state_.shadow.GetBlurRadius()));
 }
 
 void CustomPaintPaintMethod::UpdateLineDash(RSPen& pen)

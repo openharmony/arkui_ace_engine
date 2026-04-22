@@ -38,6 +38,7 @@
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #undef private
 #undef protected
 

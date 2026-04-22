@@ -89,7 +89,8 @@ void DragDropInitiatingStateBase::FireCustomerOnDragEnd()
     gestureHub->FireCustomerOnDragEnd(pipelineContext, eventHub);
 }
 
-void DragDropInitiatingStateBase::HidePixelMap(bool startDrag, double x, double y, bool showAnimation)
+void DragDropInitiatingStateBase::HidePixelMap(bool startDrag, double x, double y, bool showAnimation,
+    int32_t currentState)
 {
     auto machine = GetStateMachine();
     CHECK_NULL_VOID(machine);
@@ -102,7 +103,9 @@ void DragDropInitiatingStateBase::HidePixelMap(bool startDrag, double x, double 
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);
-    if (params.hasGatherNode) {
+    // When coming from MOVING state, HideGatherNode() has already been called in Init(),
+    // so skip HideDragNodeCopyWithAnimation to avoid duplicate call
+    if (currentState != static_cast<int32_t>(DragDropInitiatingStatus::MOVING) && params.hasGatherNode) {
         DragAnimationHelper::HideDragNodeCopyWithAnimation(manager, frameNode);
     }
 

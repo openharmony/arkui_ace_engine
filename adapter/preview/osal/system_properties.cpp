@@ -34,6 +34,7 @@ constexpr char PROPERTY_DEVICE_TYPE_CAR[] = "car";
 constexpr int32_t DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD = 20;
 
 constexpr int32_t DEFAULT_VELOCITY_TRACKER_POINTNUMBER_VALUE = 20;
+constexpr int32_t DEFAULT_FORM_TASK_PRIORITY = 2;
 
 static constexpr char UNDEFINED_PARAM[] = "undefined parameter";
 
@@ -117,6 +118,7 @@ bool SystemProperties::gridIrregularLayoutEnable_ = false;
 bool SystemProperties::sideBarContainerBlurEnable_ = false;
 std::atomic<bool> SystemProperties::acePerformanceMonitorEnable_(false);
 std::atomic<bool> SystemProperties::focusCanBeActive_(true);
+bool SystemProperties::smartGestureEnabled_ = false;
 bool SystemProperties::aceCommercialLogEnable_ = false;
 std::pair<float, float> SystemProperties::brightUpPercent_ = {};
 bool SystemProperties::faultInjectEnabled_ = false;
@@ -640,5 +642,10 @@ void SystemProperties::SetFocusCanBeActive(bool focusCanBeActive)
 UiMaterialLevel SystemProperties::GetUiMaterialLevel()
 {
     return UiMaterialLevel::DEFAULT;
+}
+
+int32_t SystemProperties::GetFormTaskPriority()
+{
+    return DEFAULT_FORM_TASK_PRIORITY;
 }
 } // namespace OHOS::Ace

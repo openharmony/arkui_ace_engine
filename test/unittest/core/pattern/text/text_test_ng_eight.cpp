@@ -14,6 +14,7 @@
  */
 
 #include "text_base.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
@@ -25,6 +26,7 @@
 #include "core/components_ng/pattern/text/text_select_overlay.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/text/text_select_overlay.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
 

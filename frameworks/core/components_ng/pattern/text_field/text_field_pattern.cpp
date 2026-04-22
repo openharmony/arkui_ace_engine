@@ -16,6 +16,7 @@
 #define NAPI_VERSION 8
 
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include <algorithm>
@@ -2327,6 +2328,7 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle, bool
         if (IsSelected()) {
             selectOverlay_->SetSelectionHoldCallback();
         }
+        ReportSelectionChangeEvent(tmpHost->GetId(), "selectionChange", 0, textSize);
         return;
     }
     selectOverlay_->ProcessSelectAllOverlay({ .menuIsShow = showMenu, .animation = true });
@@ -3524,6 +3526,7 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
             StopTwinkling();
             return;
         }
+        UnFocusOnHandleClick_ = true;
     }
     firstGetFocus = firstGetFocus || firstClickAfterLosingFocus_;
     firstClickAfterLosingFocus_ = false;
@@ -3548,6 +3551,7 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     isFocusedBeforeClick_ = false;
+    UnFocusOnHandleClick_ = false;
 }
 
 bool TextFieldPattern::CheckMousePressedOverScrollBar(GestureEvent& info)
@@ -3573,6 +3577,9 @@ bool TextFieldPattern::HandleBetweenSelectedPosition(const GestureEvent& info)
 {
     if (!IsUsingMouse() && SelectOverlayIsOn() && BetweenSelectedPosition(info.GetGlobalLocation())) {
         CHECK_NULL_RETURN(selectOverlay_, false);
+        if (UnFocusOnHandleClick_ && QuerySmartEdgeState()) {
+            return true;
+        }
         // click selected area to switch show/hide state
         selectOverlay_->ToggleMenu();
         return true;
@@ -3639,6 +3646,7 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info, bool firstGetF
     if (needCloseOverlay || GetIsPreviewText()) {
         CloseSelectOverlay(true);
         StartTwinkling();
+        contentController_->lastReportSelectionText_ = "";
     }
     DoProcessAutoFill(RequestAutoFillReason::SINGLE_CLICK, info.GetSourceDevice());
     // emulate clicking bottom of the textField
@@ -5597,11 +5605,6 @@ void TextFieldPattern::HandleLeftMousePressEvent(MouseInfo& info)
     blockPress_ = false;
     leftMouseCanMove_ = true;
     FocusAndUpdateCaretByMouse(info);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto startIndex = selectController_->GetStartIndex();
-    auto endIndex = selectController_->GetEndIndex();
-    ReportSelectionChangeEvent(host->GetId(), "selectionChange", startIndex, endIndex);
 }
 
 void TextFieldPattern::FocusAndUpdateCaretByMouse(MouseInfo& info)
@@ -5683,6 +5686,11 @@ void TextFieldPattern::HandleLeftMouseReleaseEvent(MouseInfo& info)
         StartTwinkling();
         tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
+    if (mouseStatus_ == MouseStatus::MOVE) {
+ 	    auto startIndex = selectController_->GetStartIndex();
+ 	    auto endIndex = selectController_->GetEndIndex();
+ 	    ReportSelectionChangeEvent(tmpHost->GetId(), "selectionChange", startIndex, endIndex);
+ 	}
     FreeMouseStyleHoldNode(info.GetLocalLocation());
     mouseStatus_ = MouseStatus::NONE;
     blockPress_ = false;
@@ -5830,7 +5838,7 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     }
     ACE_LAYOUT_SCOPED_TRACE("RequestKeyboard[id:%d][WId:%u]", tmpHost->GetId(), textConfig.windowId);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "node:%{public}d, RequestKeyboard set calling window id:%{public}u"
-        " inputType:%{public}d, enterKeyType:%{public}d, customSettings size: %{public}u, needKeyboard:%{public}d"
+        " inputType:%{public}d, enterKeyType:%{public}d, customSettings size: %{public}zu, needKeyboard:%{public}d"
         " sourceType:%{public}u, placeholderLength:%{public}zu",
         tmpHost->GetId(), textConfig.windowId, textConfig.inputAttribute.inputPattern,
         textConfig.inputAttribute.enterKeyType, textConfig.inputAttribute.extraConfig.customSettings.size(),

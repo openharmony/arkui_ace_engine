@@ -564,6 +564,77 @@ public:
         return hasTransition_;
     }
 
+    // Lifecycle callbacks
+    using LifecycleCallback = std::function<void()>;
+
+    void SetOnWillAppear(LifecycleCallback&& callback)
+    {
+        onWillAppear_ = std::move(callback);
+    }
+
+    const LifecycleCallback& GetOnWillAppear() const
+    {
+        return onWillAppear_;
+    }
+
+    void SetOnDidAppear(LifecycleCallback&& callback)
+    {
+        onDidAppear_ = std::move(callback);
+    }
+
+    const LifecycleCallback& GetOnDidAppear() const
+    {
+        return onDidAppear_;
+    }
+
+    void SetOnWillDisappear(LifecycleCallback&& callback)
+    {
+        onWillDisappear_ = std::move(callback);
+    }
+
+    const LifecycleCallback& GetOnWillDisappear() const
+    {
+        return onWillDisappear_;
+    }
+
+    void SetOnDidDisappear(LifecycleCallback&& callback)
+    {
+        onDidDisappear_ = std::move(callback);
+    }
+
+    const LifecycleCallback& GetOnDidDisappear() const
+    {
+        return onDidDisappear_;
+    }
+
+    void FireOnWillAppear()
+    {
+        if (onWillAppear_) {
+            onWillAppear_();
+        }
+    }
+
+    void FireOnDidAppear()
+    {
+        if (onDidAppear_) {
+            onDidAppear_();
+        }
+    }
+
+    void FireOnWillDisappear()
+    {
+        if (onWillDisappear_) {
+            onWillDisappear_();
+        }
+    }
+
+    void FireOnDidDisappear()
+    {
+        if (onDidDisappear_) {
+            onDidDisappear_();
+        }
+    }
+
     void SetTransitionEffects(const RefPtr<NG::ChainedTransitionEffect>& transitionEffects)
     {
         transitionEffects_ = transitionEffects;
@@ -883,6 +954,10 @@ private:
     ButtonProperties primaryButtonProperties_;   // first button.
     ButtonProperties secondaryButtonProperties_; // second button.
     OnWillDismiss onWillDismiss_;
+    LifecycleCallback onWillAppear_;
+    LifecycleCallback onDidAppear_;
+    LifecycleCallback onWillDisappear_;
+    LifecycleCallback onDidDisappear_;
     bool hasTransition_ = false;
     RefPtr<NG::ChainedTransitionEffect> transitionEffects_ = nullptr;
     StateChangeFunc doubleBindCallback_;

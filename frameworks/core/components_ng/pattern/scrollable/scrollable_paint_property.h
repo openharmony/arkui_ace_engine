@@ -41,15 +41,6 @@ struct FadingEdgeProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FadingEdgeLength, Dimension);
 };
 
-enum class ContentClipMode {
-    CONTENT_ONLY, // area excluding margin & padding & SafeAreaPadding
-    BOUNDARY,     // corresponding to FrameRect, area excluding margin
-    SAFE_AREA,    // CONTENT_ONLY area + SafeAreaPadding (which can stack up with ancestor's SafeAreaPadding)
-    CUSTOM,       // inner enum, not present in frontend. Custom shape's offset is relative to FrameOffset.
-    DEFAULT,      // Different scrollable components have different default clip values.
-};
-using ContentClip = std::pair<ContentClipMode, RefPtr<ShapeRect>>;
-
 class ACE_FORCE_EXPORT ScrollablePaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(ScrollablePaintProperty, PaintProperty);
 

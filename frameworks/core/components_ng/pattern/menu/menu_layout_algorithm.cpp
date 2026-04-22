@@ -16,7 +16,10 @@
 #include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
+#include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
+#include "core/components_ng/pattern/menu/menu_layout_property.h"
+#include "core/components_ng/pattern/menu/menu_paint_property.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
@@ -28,6 +31,7 @@
 #include "core/components_ng/pattern/menu/menu_tag_constants.h"
 #if defined(ENABLE_ROSEN_BACKEND)
 #include "render_service_client/core/ui_effect/property/include/rs_ui_shape_base.h"
+#include "core/components/common/properties/placement.h"
 #endif
 
 namespace OHOS::Ace::NG {
@@ -411,6 +415,7 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     previewScale_ = LessOrEqual(afterAnimationScale, 0.0f) ? previewScale_ : afterAnimationScale;
     position_ = props->GetMenuOffset().value_or(OffsetF());
     anchorPosition_ = props->GetAnchorPosition();
+    UpdatePropTargetSpace(props, menuPattern);
     dumpInfo_.globalLocation = position_;
     // user-set offset
     positionOffset_ = props->GetPositionOffset().value_or(OffsetF());
@@ -628,39 +633,10 @@ void MenuLayoutAlgorithm::InitWrapperRect(
             LimitContainerModalMenuRect(width_, height_, menuPattern);
         }
     }
-    CalculateSafeAreaIntersection(safeAreaInsets);
+    wrapperRect_.SetRect(left_, top_, width_ - left_ - right_, height_ - top_ - bottom_);
     wrapperSize_ = SizeF(wrapperRect_.Width(), wrapperRect_.Height());
     dumpInfo_.wrapperRect = wrapperRect_;
     TAG_LOGI(AceLogTag::ACE_MENU, "InitWrapperRect with safeAreaInsets : %{public}s", wrapperRect_.ToString().c_str());
-}
-
-void MenuLayoutAlgorithm::CalculateSafeAreaIntersection(const SafeAreaInsets& safeAreaInsets)
-{
-    if (targetInUIExtention_) {
-        auto rectOffset = Offset(0.0, 0.0);
-        auto rectSize = Size(param_.menuWindowRect.Width(), param_.menuWindowRect.Height());
-        if (GreatNotEqual(safeAreaInsets.top_.Length(), 0.0)) {
-            auto offsetTop = std::max(safeAreaInsets.top_.end - param_.menuWindowRect.Top(), 0.0);
-            rectOffset.SetY(offsetTop);
-            rectSize.MinusHeight(offsetTop);
-        }
-        if (GreatNotEqual(safeAreaInsets.bottom_.Length(), 0.0)) {
-            auto offsetBottom = std::max(param_.menuWindowRect.Bottom() - safeAreaInsets.bottom_.start, 0.0);
-            rectSize.MinusHeight(offsetBottom);
-        }
-        if (GreatNotEqual(safeAreaInsets.left_.Length(), 0.0)) {
-            auto offsetLeft = std::max(safeAreaInsets.left_.end - param_.menuWindowRect.Left(), 0.0);
-            rectOffset.SetX(offsetLeft);
-            rectSize.MinusWidth(offsetLeft);
-        }
-        if (GreatNotEqual(safeAreaInsets.right_.Length(), 0.0)) {
-            auto offsetRight = std::max(param_.menuWindowRect.Right() - safeAreaInsets.right_.start, 0.0);
-            rectSize.MinusWidth(offsetRight);
-        }
-        wrapperRect_.SetRect(rectOffset, rectSize);
-    } else {
-        wrapperRect_.SetRect(left_, top_, width_ - left_ - right_, height_ - top_ - bottom_);
-    }
 }
 
 void MenuLayoutAlgorithm::UpdateWrapperRectForHoverMode(const RefPtr<MenuLayoutProperty>& props,
@@ -1192,20 +1168,7 @@ void MenuLayoutAlgorithm::CalculateIdealSize(LayoutWrapper* layoutWrapper,
     RefPtr<FrameNode> parentItem)
 {
     if (parentItem != nullptr) {
-        auto parentPattern = parentItem->GetPattern<MenuItemPattern>();
-        CHECK_NULL_VOID(parentPattern);
-        auto expandingMode = parentPattern->GetExpandingMode();
-        if (expandingMode == SubMenuExpandingMode::STACK) {
-            auto parentPattern = parentItem->GetPattern<MenuItemPattern>();
-            CHECK_NULL_VOID(parentPattern);
-            auto parentMenu = parentPattern->GetMenu();
-            auto parentWidth = parentMenu->GetGeometryNode()->GetFrameSize().Width();
-            childConstraint.minSize.SetWidth(parentWidth);
-            childConstraint.maxSize.SetWidth(parentWidth);
-            childConstraint.selfIdealSize.SetWidth(parentWidth);
-            auto subMenuMaxHeight = CalcSubMenuMaxHeightConstraint(childConstraint, parentItem);
-            childConstraint.maxSize.SetHeight(std::min(subMenuMaxHeight, childConstraint.maxSize.Height()));
-        }
+        UpdateExpandSize(layoutWrapper, childConstraint, parentItem);
     }
     PrepareExtensionMenuConstraint(layoutWrapper, childConstraint);
 
@@ -2137,6 +2100,7 @@ OffsetF MenuLayoutAlgorithm::UpdateMenuPosition(LayoutWrapper* layoutWrapper, co
     auto avoidanceMode = menuProp->GetSelectAvoidanceMode().value_or(AvoidanceMode::COVER_TARGET);
     if (useLastPosition) {
         menuPosition = lastPosition_.value();
+        UpdateEmbeddedPosition(menuPosition, menuPattern, size, menuNode);
         auto lastPlacement = menuPattern->GetLastPlacement();
         if (lastPlacement.has_value()) {
             placement_ = lastPlacement.value();
@@ -2499,7 +2463,12 @@ OffsetF MenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(const RefPtr<MenuLayoutPro
         if (layoutWrapper != nullptr) {
             PlacementRTL(layoutWrapper, placement_);
         }
-        auto childOffset = GetChildPosition(size, didNeedArrow);
+        OffsetF childOffset;
+        if (propTargetSpace_.has_value()) {
+            childOffset = GetTargetSpacePosition(size, didNeedArrow);
+        } else {
+            childOffset = GetChildPosition(size, didNeedArrow);
+        }
         x = childOffset.GetX();
         y = childOffset.GetY();
     } else {
@@ -2676,6 +2645,7 @@ void MenuLayoutAlgorithm::UpdateConstraintHeight(LayoutWrapper* layoutWrapper, L
     }
     UpdateMaxSpaceHeightByMenuMaxHeight(menuPattern, menuLayoutProps, maxAvailableHeight, maxSpaceHeight);
     constraint.maxSize.SetHeight(maxSpaceHeight);
+    UpdateTargetSpaceScroll(layoutWrapper, constraint);
 }
 
 void MenuLayoutAlgorithm::UpdateConstraintSelectHeight(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint)
@@ -3077,6 +3047,7 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(
         }
         OffsetF offset = GetMenuWrapperOffset(layoutWrapper);
         targetOffset_ -= offset;
+        UpdateTargetValue(layoutWrapper);
         return;
     }
 
@@ -3089,6 +3060,7 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(
         OffsetF offset = GetMenuWrapperOffset(layoutWrapper);
         targetOffset_ -= offset;
     }
+    UpdateTargetValue(layoutWrapper);
 }
 
 OffsetF MenuLayoutAlgorithm::FitToScreen(const OffsetF& position, const SizeF& childSize, bool didNeedArrow)
@@ -3634,14 +3606,6 @@ void MenuLayoutAlgorithm::InitCanExpandCurrentWindow(bool isContextMenu,
     const RefPtr<MenuLayoutProperty>& menuLayoutProperty, const RefPtr<MenuPattern>& menuPattern)
 {
     CHECK_NULL_VOID(menuLayoutProperty && menuPattern);
-    auto containerId = Container::CurrentId();
-    auto container = AceEngine::Get().GetContainer(containerId);
-    if (containerId >= MIN_SUBCONTAINER_ID) {
-        auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
-        container = AceEngine::Get().GetContainer(parentContainerId);
-    }
-    CHECK_NULL_VOID(container);
-    targetInUIExtention_ = container->IsUIExtensionWindow();
     showInSubWindow_ = menuLayoutProperty->GetShowInSubWindowValue(false) || isContextMenu ||
         menuPattern->IsSelectOverlayShowInSubWindow();
     dumpInfo_.showInSubWindow = showInSubWindow_;
@@ -3652,8 +3616,15 @@ void MenuLayoutAlgorithm::InitCanExpandCurrentWindow(bool isContextMenu,
     // subwindow on phone has the same size as the main window
     // so menu showed in subwindow can not expand the current window on phone
     canExpandCurrentWindow_ = IsExpandDisplay();
+    auto containerId = Container::CurrentId();
+    auto container = AceEngine::Get().GetContainer(containerId);
     if (containerId >= MIN_SUBCONTAINER_ID) {
-        isUIExtensionSubWindow_ = targetInUIExtention_;
+        auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
+        container = AceEngine::Get().GetContainer(parentContainerId);
+    }
+    CHECK_NULL_VOID(container);
+    if (containerId >= MIN_SUBCONTAINER_ID) {
+        isUIExtensionSubWindow_ = container->IsUIExtensionWindow();
         if (isUIExtensionSubWindow_) {
             // menu can show expand the UIExtension window
             canExpandCurrentWindow_ = true;

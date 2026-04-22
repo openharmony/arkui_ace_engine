@@ -69,6 +69,14 @@ public:
             auto divider = JsonUtil::Create(true);
             json->PutExtAttr("divider", divider, filter);
         }
+        if (propHeaderStyle_.has_value()) {
+            json->PutExtAttr("headerStyle",
+                propHeaderStyle_.value() == V2::ListItemGroupHeaderFooterStyle::FLOATING ? "FLOATING" : "NONE", filter);
+        }
+        if (propFooterStyle_.has_value()) {
+            json->PutExtAttr("footerStyle",
+                propFooterStyle_.value() == V2::ListItemGroupHeaderFooterStyle::FLOATING ? "FLOATING" : "NONE", filter);
+        }
     }
 
     void UpdateListLanes(std::optional<int32_t> lanes,
@@ -118,6 +126,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Space, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Divider, V2::ItemDivider, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DividerColorSetByUser, bool, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HeaderStyle, V2::ListItemGroupHeaderFooterStyle, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FooterStyle, V2::ListItemGroupHeaderFooterStyle, PROPERTY_UPDATE_MEASURE);
 
 private:
     std::optional<int32_t> listLanes_;

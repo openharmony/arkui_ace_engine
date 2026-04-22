@@ -66,8 +66,8 @@ public:
     static RefPtr<FrameNode> CreateTimeNode(std::map<std::string, PickerTime> timePickerProperty,
         const PickerTextProperties& properties, bool useMilitaryTime);
     static RefPtr<FrameNode> CreateLunarSwitchTextNode();
-    static const Dimension ConvertFontScaleValue(
-        const Dimension& fontSizeValue, const Dimension& fontSizeLimit = 0.0_vp, bool isUserSetFont = false);
+    static const Dimension ConvertFontScaleValue(const Dimension& fontSizeValue,
+        const Dimension& fontSizeLimit = 0.0_vp, bool isUserSetFont = false, bool skipOptimizeFlag = false);
 
     static bool switchFlag_;
 
@@ -116,8 +116,8 @@ private:
         const RefPtr<FrameNode>& dateNode, const RefPtr<FrameNode>& dialogNode, const RefPtr<FrameNode>& contentColumn,
         std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
-    static void UpdateConfirmButtonTextLayoutProperty(
-        const RefPtr<TextLayoutProperty>& textLayoutProperty, const RefPtr<PickerTheme>& pickerTheme);
+    static void UpdateConfirmButtonTextLayoutProperty(const RefPtr<TextLayoutProperty>& textLayoutProperty,
+        const RefPtr<PickerTheme>& pickerTheme, const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty);
     static void UpdateButtonLayoutProperty(
         const RefPtr<ButtonLayoutProperty>& buttonConfirmLayoutProperty, const RefPtr<PickerTheme>& pickerTheme);
     static void UpdateConfirmButtonMargin(
@@ -143,7 +143,8 @@ private:
         const RefPtr<FrameNode> &dateNode, const RefPtr<FrameNode> &dialogNode,
         const RefPtr<FrameNode> &contentColumn, std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
-    static bool NeedAdaptForAging();
+    static bool NeedAdaptForAging(bool skipOptimizeFlag = false);
+    static bool IsEnableFallbackLineSpacingStyleOptimize();
     static RefPtr<FrameNode> CreateButtonNodeForAging(const DatePickerSettingData& settingData,
         const RefPtr<FrameNode>& timePickerNode, const RefPtr<FrameNode>& monthAndDayNode,
         const RefPtr<FrameNode>& datePickerNode, const std::vector<ButtonInfo>& buttonInfos,
@@ -169,8 +170,8 @@ private:
     static const Dimension ConvertTitleFontScaleValue(const Dimension& fontSizeValue);
     static const Dimension AdjustFontSizeScale(const Dimension& fontSizeValue, double fontScale);
     static void GetUserSettingLimit();
-    static void UpdateCancelButtonTextLayoutProperty(
-        const RefPtr<TextLayoutProperty>& textCancelLayoutProperty, const RefPtr<PickerTheme>& pickerTheme);
+    static void UpdateCancelButtonTextLayoutProperty(const RefPtr<TextLayoutProperty>& textCancelLayoutProperty,
+        const RefPtr<PickerTheme>& pickerTheme, const RefPtr<ButtonLayoutProperty>& buttonCancelLayoutProperty);
     static void UpdateTimePickerChildrenStatus(const RefPtr<FrameNode>& timePickerNode);
     static void SwitchFocusStatus(
         const RefPtr<FrameNode>& timePickerNode, const RefPtr<FrameNode>& monthAndDayPickerNode);

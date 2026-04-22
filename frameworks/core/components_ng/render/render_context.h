@@ -31,6 +31,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/depth_option.h"
 #include "core/components/common/properties/effect_option.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/render_node/render_node_properties.h"
@@ -40,8 +41,10 @@
 #include "core/components_ng/property/particle_property.h"
 #include "core/components_ng/property/particle_property_animation.h"
 #include "core/components_ng/property/progress_mask_property.h"
+#include "core/components_ng/property/sidebar_content_mask_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/property/transition_property.h"
+#include "core/components_ng/property/edgelight_property.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/property/union_effect_container_options.h"
 #include "core/components_ng/render/drawing_forward.h"
@@ -71,7 +74,6 @@ class Modifier;
 }
 
 namespace OHOS::Ace::NG {
-
 typedef enum {
     OPINC_INVALID,
     OPINC_NODE,
@@ -109,7 +111,7 @@ class ACE_FORCE_EXPORT RenderContext : public virtual AceType {
     DECLARE_ACE_TYPE(NG::RenderContext, AceType);
 
 public:
-    ~RenderContext() override = default;
+    ~RenderContext() override;
 
     static RefPtr<RenderContext> Create();
 
@@ -577,6 +579,7 @@ public:
     virtual void SetAlphaOffscreen(bool isOffScreen) {}
     virtual void OnSphericalEffectUpdate(double radio) {}
     virtual void OnPixelStretchEffectUpdate(const PixStretchEffectOption& option) {}
+    virtual void OnSpatialEffectUpdate(const SpatialEffectParams& params) {}
     virtual void OnLightUpEffectUpdate(double radio) {}
     virtual void OnClickEffectLevelUpdate(const ClickEffectInfo& info) {}
     virtual void OnRenderGroupUpdate(bool isRenderGroup) {}
@@ -590,6 +593,7 @@ public:
     virtual void OnParticleOptionArrayUpdate(const std::list<ParticleOption>& optionArray) {}
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SphericalEffect, double);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PixelStretchEffect, PixStretchEffectOption);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SpatialEffect, SpatialEffectParams);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(LightUpEffect, double);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(DynamicDimDegree, float);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ParticleOptionArray, std::list<ParticleOption>);
@@ -637,8 +641,17 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImageResizableSlice, ImageResizableSlice);
 
     // BorderImage
-    ACE_DEFINE_PROPERTY_GROUP(BdImage, BorderImageProperty);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(BdImage, BorderImage, RefPtr<BorderImage>);
+    const std::unique_ptr<BorderImageProperty>& GetOrCreateBdImage();
+    const std::unique_ptr<BorderImageProperty>& GetBdImage() const;
+    std::unique_ptr<BorderImageProperty> CloneBdImage() const;
+    void ResetBdImage();
+
+    std::optional<RefPtr<BorderImage>> GetBorderImage() const;
+    bool HasBorderImage() const;
+    RefPtr<BorderImage> GetBorderImageValue(const RefPtr<BorderImage>& defaultValue) const;
+    void ResetBorderImage();
+    void UpdateBorderImage(const RefPtr<BorderImage>& value);
+
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(BdImage, BorderImageSource, ImageSourceInfo);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(BdImage, HasBorderImageSlice, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(BdImage, HasBorderImageWidth, bool);
@@ -788,6 +801,9 @@ public:
     // AttractionEffect
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AttractionEffect, AttractionEffect);
 
+    // EdgeLight
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(EdgeLightParam, NG::EdgeLightParam);
+
     virtual void SetUsingContentRectForRenderFrame(bool value, bool adjustRSFrameByContentRect = false) {}
     virtual void SetFrameGravity(OHOS::Rosen::Gravity gravity) {}
 
@@ -898,6 +914,16 @@ public:
 
     virtual void UpdateOverlayText() {}
 
+    virtual void UpdateEdgeLightFilter(const SizeF& frameSize) {}
+
+    virtual void UpdateEdgeLightFilterWithLightMask(const SizeF& frameSize) {}
+
+    virtual void ParseEdgeLightPosition(const NG::EdgeLightPosition position, float& angle, float& positionX,
+        float& positionY, float rectH, const SizeF& frameSize)
+    {}
+
+    virtual void ResetEdgeLightFilter() {}
+
     void SetIsFree(bool isFree)
     {
         isFree_ = isFree;
@@ -905,8 +931,11 @@ public:
     virtual void UpdateDistortionParam(const DistortionParam& param) {}
 
     virtual void UpdateForegroundFilterDistortionParam(const DistortionParam& param) {}
+
+    virtual void OnSidebarContentMaskUpdate(const RefPtr<SidebarContentMaskProperty>& maskProperty) {}
 protected:
-    RenderContext() = default;
+    RenderContext();
+    std::unique_ptr<BorderImageProperty> propBdImage_;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;
     std::shared_ptr<UiMaterialInfo> uiMaterial_;
     ShareId shareId_;
@@ -1014,6 +1043,8 @@ protected:
     virtual void OnFreezeUpdate(bool isFreezed) {}
     virtual void OnObscuredUpdate(const std::vector<ObscuredReasons>& reasons) {}
     virtual void OnAttractionEffectUpdate(const AttractionEffect& effect) {}
+
+    virtual void OnEdgeLightParamUpdate(const NG::EdgeLightParam& param) {}
 
 private:
     void RequestNextFrameMultiThread(bool isOffScreenNode) const;

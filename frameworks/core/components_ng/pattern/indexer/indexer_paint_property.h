@@ -17,7 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_INDEXER_INDEXER_PAINT_PROPERTY_H
 
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/decoration.h"
+#include "core/components/common/properties/blur_style_option.h"
 #include "core/components/indexer/indexer_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/indexer/indexer_theme.h"

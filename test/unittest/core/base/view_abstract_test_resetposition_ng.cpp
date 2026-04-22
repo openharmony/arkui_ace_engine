@@ -19,6 +19,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/syntax/if_else_model_ng.h"
 #include "core/components_ng/syntax/if_else_node.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;

@@ -16,14 +16,46 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("relaxed_interaction_manager_test_ng") {
   module_name = "Pattern-RelaxedInteraction"
   type = "new"
+  cflags = [ "-fno-access-control" ]
   sources = [
-    "$ace_root/interfaces/inner_api/ace/ui_content.cpp",
     "$ace_root/frameworks/core/components_ng/relaxed_interaction/executor_choreographer.cpp",
     "$ace_root/frameworks/core/components_ng/relaxed_interaction/executor_generator.cpp",
-    "$ace_root/frameworks/core/components_ng/relaxed_interaction/executors/backpress_executor.cpp",
     "$ace_root/frameworks/core/components_ng/relaxed_interaction/parsers/backpress_command_parser.cpp",
     "$ace_root/frameworks/core/components_ng/relaxed_interaction/relaxed_interaction_manager.cpp",
     "relaxed_interaction_manager_test_ng.cpp",
+  ]
+
+  sources += [
+    "$ace_root/frameworks/core/components_ng/relaxed_interaction/base_executor.cpp",
+    "$ace_root/frameworks/core/components_ng/relaxed_interaction/frame_node_finder.cpp",
+    "$ace_root/frameworks/core/components_ng/relaxed_interaction/executors/scroll_simulating_executor.cpp",
+    "$ace_root/frameworks/core/components_ng/relaxed_interaction/executors/scroll_touch_executor.cpp",
+    "$ace_root/frameworks/core/components_ng/relaxed_interaction/executors/simulate_touch_executor.cpp",
+    "$ace_root/frameworks/core/components_ng/relaxed_interaction/executors/strict_click_executor.cpp",
+    "$ace_root/frameworks/core/components_ng/relaxed_interaction/executors/strict_content_switch_executor.cpp",
+    "$ace_root/frameworks/core/components_ng/relaxed_interaction/executors/fallback_executor.cpp",
+    "$ace_root/frameworks/core/components_ng/relaxed_interaction/parsers/click_command_parser.cpp",
+    "$ace_root/frameworks/core/components_ng/relaxed_interaction/parsers/content_switch_command_parser.cpp",
+    "$ace_root/frameworks/core/components_ng/relaxed_interaction/parsers/fallback_command_parser.cpp",
+    "$ace_root/frameworks/core/components_ng/relaxed_interaction/parsers/scroll_command_parser.cpp",
+    "$ace_root/frameworks/core/components_ng/relaxed_interaction/utils/json_utils.cpp",
+    "$ace_root/frameworks/core/components_ng/relaxed_interaction/utils/relaxed_event_factory.cpp",
+    "$ace_root/frameworks/core/components_ng/relaxed_interaction/utils/workflow_dumper.cpp",
+    "click_command_parser_test.cpp",
+    "content_switch_command_parser_test.cpp",
+    "fallback_command_parser_test.cpp",
+    "frame_node_finder_test.cpp",
+    "fallback_executor_test.cpp",
+    "json_utils_test.cpp",
+    "mock_backpress_executor.cpp",
+    "relaxed_event_factory_test.cpp",
+    "scroll_command_parser_test.cpp",
+    "scroll_simulating_executor_test.cpp",
+    "scroll_touch_executor_test.cpp",
+    "simulate_touch_executor_test.cpp",
+    "strict_click_executor_test.cpp",
+    "strict_content_switch_executor_test.cpp",
+    "workflow_dumper_test.cpp",
   ]
 
   if (!ace_enable_full_test_suite) {

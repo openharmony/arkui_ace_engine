@@ -14,6 +14,7 @@
  */
 
 #include "test/unittest/core/pipeline/pipeline_context_test_ng.h"
+#include "core/accessibility/accessibility_manager.h"
 // Add the following two macro definitions to test the private and protected method.
 #define private public
 #define protected public

@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/menu/menu_model_ng.h"
 
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components/select/select_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_inner_modifier.h"
 #include "core/components_ng/pattern/menu/menu_tag_constants.h"

@@ -95,7 +95,7 @@ import { default as curves } from '@ohos.curves'
 import { default as uiMaterial } from '@ohos.arkui.uiMaterial'
 import { ParticleUpdater, ParticleColorOptions, VelocityOptions, EmitterParticleOptions, ParticleEmitterShape, DistributionType, DisturbanceFieldShape, ParticleColorOptions_serializer, EmitterParticleOptions_serializer, VelocityOptions_serializer } from './particle'
 import { default as router } from '@ohos.router'
-import { CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, CustomSpanMeasureInfo_serializer, CustomSpanDrawInfo_serializer } from './styledString'
+import { CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, CustomSpanDrawInfo_serializer } from './styledString'
 import { RootModifier } from './../RootModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
@@ -7278,6 +7278,11 @@ export interface CustomSpanWrapper {
     onMeasure_callback: ((measureInfo: CustomSpanMeasureInfo) => CustomSpanMetrics);
     onDraw_callback: ((context: arkui_Graphics_DrawContext,drawInfo: CustomSpanDrawInfo) => void);
 }
+export interface CustomSpanMeasureInfoProxy {
+    fontSize: double;
+    maxWidth?: double | undefined;
+    layoutPolicyPtr?: KPointer | undefined;
+}
 export interface TransformationMatrix {
     matrix4x4: Array<number>;
 }
@@ -7817,6 +7822,47 @@ export class CustomDialogControllerExternalOptionsExtender_serializer {
         return value
     }
 }
+export class CustomSpanMeasureInfoProxy_serializer {
+    public static write(buffer: SerializerBase, value: CustomSpanMeasureInfoProxy): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForFontSize = value.fontSize
+        valueSerializer.writeFloat64(valueHolderForFontSize)
+        const valueHolderForMaxWidth = value.maxWidth
+        if (valueHolderForMaxWidth !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMaxWidthTmpValue = valueHolderForMaxWidth!
+            valueSerializer.writeFloat64(valueHolderForMaxWidthTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForLayoutPolicyPtr = value.layoutPolicyPtr
+        if (valueHolderForLayoutPolicyPtr !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForLayoutPolicyPtrTmpValue = valueHolderForLayoutPolicyPtr!
+            valueSerializer.writePointer(valueHolderForLayoutPolicyPtrTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): CustomSpanMeasureInfoProxy {
+        let valueDeserializer: DeserializerBase = buffer
+        const fontSizeTmpResult: double = valueDeserializer.readFloat64()
+        const maxWidthTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let maxWidthTmpBuf: double | undefined = undefined
+        if ((maxWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            maxWidthTmpBuf = valueDeserializer.readFloat64()
+        }
+        const maxWidthTmpResult: double | undefined = maxWidthTmpBuf
+        const layoutPolicyPtrTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let layoutPolicyPtrTmpBuf: KPointer | undefined = undefined
+        if ((layoutPolicyPtrTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            layoutPolicyPtrTmpBuf = valueDeserializer.readPointer()
+        }
+        const layoutPolicyPtrTmpResult: KPointer | undefined = layoutPolicyPtrTmpBuf
+        let value: CustomSpanMeasureInfoProxy = ({fontSize: fontSizeTmpResult, maxWidth: maxWidthTmpResult, layoutPolicyPtr: layoutPolicyPtrTmpResult} as CustomSpanMeasureInfoProxy)
+        return value
+    }
+}
 export class CustomSpanWrapper_serializer {
     public static write(buffer: SerializerBase, value: CustomSpanWrapper): void {
         let valueSerializer: SerializerBase = buffer
@@ -7841,7 +7887,8 @@ export class CustomSpanWrapper_serializer {
             onMeasure_callbackTmpBufBufArgsSerializer.writeInt32(onMeasure_callbackTmpBufBufResource.resourceId);
             onMeasure_callbackTmpBufBufArgsSerializer.writePointer(onMeasure_callbackTmpBufBufCall);
             onMeasure_callbackTmpBufBufArgsSerializer.writePointer(onMeasure_callbackTmpBufBufCallSync);
-            CustomSpanMeasureInfo_serializer.write(onMeasure_callbackTmpBufBufArgsSerializer, measureInfo);
+            const measureInfoTransformed: CustomSpanMeasureInfoProxy = extractors.transform_Ark_CustomSpanMeasureInfo_to_Ark_CustomSpanMeasureInfoProxy(measureInfo);
+            CustomSpanMeasureInfoProxy_serializer.write(onMeasure_callbackTmpBufBufArgsSerializer, measureInfoTransformed);
             let onMeasure_callbackTmpBufBufContinuationValue: CustomSpanMetrics | undefined;
             const onMeasure_callbackTmpBufBufContinuationCallback: ((value: CustomSpanMetrics) => void) = (value: CustomSpanMetrics):void => {
             onMeasure_callbackTmpBufBufContinuationValue = value;

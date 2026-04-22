@@ -18,10 +18,8 @@
 
 #include "base/geometry/axis.h"
 #include "base/geometry/size.h"
-#include "base/memory/referenced.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/toggle/switch_accessibility_property.h"
 #include "core/components_ng/pattern/toggle/switch_event_hub.h"
 #include "core/components_ng/pattern/toggle/switch_layout_algorithm.h"
@@ -29,7 +27,6 @@
 #include "core/components_ng/pattern/toggle/switch_paint_property.h"
 #include "core/components_ng/pattern/toggle/toggle_base_pattern.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
-#include "core/components/theme/app_theme.h"
 
 namespace OHOS::Ace::NG {
 

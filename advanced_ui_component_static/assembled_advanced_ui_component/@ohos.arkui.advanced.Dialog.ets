@@ -64,7 +64,7 @@ class CustomThemeImpl implements CustomTheme {
 function textAttributeExtension(this: TextAttribute): TextAttribute {
   this.fallbackLineSpacing(true);
   this.wordBreak(WordBreak.HYPHENATION);
-  this.optimizeTrailingSpace(true);
+  this.orphanCharOptimization(true);
   return this;
 }
 

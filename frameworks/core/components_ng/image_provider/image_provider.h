@@ -19,9 +19,7 @@
 #include <functional>
 #include <set>
 #include <unordered_map>
-
 #include "base/image/image_defines.h"
-#include "base/image/pixel_map.h"
 #include "base/thread/cancelable_callback.h"
 #include "core/components_ng/image_provider/image_data.h"
 #include "core/components_ng/image_provider/image_state_manager.h"

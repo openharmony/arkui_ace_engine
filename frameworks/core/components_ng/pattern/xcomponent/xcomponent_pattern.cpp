@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include <cmath>
 #include <cstdlib>
@@ -228,6 +229,22 @@ void XComponentPattern::InitSurface()
     }
     surfaceId_ = renderSurface_->GetUniqueId();
     initialSurfaceId_ = surfaceId_;
+#ifdef RENDER_EXTRACT_SUPPORTED
+#ifdef ENABLE_ROSEN_BACKEND
+    auto context = AceType::DynamicCast<RosenRenderContext>(handlingSurfaceRenderContext_);
+    if (context) {
+        context->SetSurfaceCaptureCallback([weak = WeakClaim(this)]() -> std::shared_ptr<Media::PixelMap> {
+            std::shared_ptr<Media::PixelMap> ret = nullptr;
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_RETURN(pattern, nullptr);
+            auto renderSurface = pattern->renderSurface_;
+            CHECK_NULL_RETURN(renderSurface, nullptr);
+            ret = renderSurface->SurfaceCapture();
+            return ret;
+        });
+    }
+#endif
+#endif
     UpdateTransformHint();
     RegisterNode();
 }
@@ -913,10 +930,10 @@ void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& conf
             XComponentSizeInit();
         }
 #endif
-        if (handlingSurfaceRenderContext_) {
-            handlingSurfaceRenderContext_->SetBounds(
-                paintRect_.GetX(), paintRect_.GetY(), paintRect_.Width(), paintRect_.Height());
-        }
+    }
+    if (handlingSurfaceRenderContext_) {
+        handlingSurfaceRenderContext_->SetBounds(
+            paintRect_.GetX(), paintRect_.GetY(), paintRect_.Width(), paintRect_.Height());
     }
 #endif
     if (type_ == XComponentType::SURFACE && renderType_ == NodeRenderType::RENDER_TYPE_TEXTURE) {

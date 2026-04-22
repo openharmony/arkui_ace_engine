@@ -768,6 +768,15 @@ namespace OHOS::Ace::NG::Converter {
             .value12 = ArkValue<Which>(src, ctx),
         };
     }
+    template<typename To, typename Which, typename From,
+        std::enable_if_t<std::is_same_v<Which, decltype(To().value13)>, int> = SELECTOR_ID_13>
+    To ArkUnion(const From& src, ConvContext *ctx = nullptr)
+    {
+        return {
+            .selector = SELECTOR_ID_13,
+            .value13 = ArkValue<Which>(src, ctx),
+        };
+    }
     template<typename To, typename Which,
         std::enable_if_t<std::is_same_v<Which, Ark_Empty> && std::is_same_v<Ark_Int32, decltype(To().selector)>,
             int> = -1>

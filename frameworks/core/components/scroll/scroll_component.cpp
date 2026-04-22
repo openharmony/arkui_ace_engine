@@ -17,6 +17,8 @@
 
 #include "core/components/scroll/render_single_child_scroll.h"
 #include "core/components/scroll/scroll_element.h"
+#include "core/components/scroll/scroll_fade_effect.h"
+#include "core/components/scroll/scroll_spring_effect.h"
 
 namespace OHOS::Ace {
 

@@ -15,10 +15,16 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CALENDAR_UTILS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CALENDAR_UTILS_H
+
+namespace OHOS::Ace {
+class PipelineBase;
+} // namespace OHOS::Ace
+
 namespace OHOS::Ace::NG {
 class CalendarUtils {
 public:
     static bool CheckOrientationChange();
+    static bool SkipCalendarPickerDayGridAgingAdapt(OHOS::Ace::PipelineBase* pipeline);
 };
-}
+} // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CALENDAR_UTILS_H

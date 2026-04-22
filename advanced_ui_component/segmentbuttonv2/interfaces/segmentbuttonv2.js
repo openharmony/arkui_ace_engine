@@ -37,6 +37,7 @@ const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const LengthUnit = requireNapi('arkui.node').LengthUnit;
 const i18n = requireNapi('i18n');
 const util = requireNapi('util');
+const uiMaterial = requireNapi('arkui.uiMaterial');
 const deviceInfo = requireNapi('deviceInfo');
 const SMALLEST_MAX_FONT_SCALE = 1;
 const LARGEST_MAX_FONT_SCALE = 2;
@@ -97,6 +98,13 @@ const tabSimpleTheme = {
     id: -1,
     type: 10002,
     params: ['sys.float.ohos_id_text_size_button2'],
+    bundleName: '__harDefaultBundleName__',
+    moduleName: '__harDefaultModuleName__',
+  },
+  adaptiveItemFontSize: {
+    id: -1,
+    type: 10002,
+    params: ['sys.float.Caption_M'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
@@ -252,6 +260,13 @@ const capsuleSimpleTheme = {
     id: -1,
     type: 10002,
     params: ['sys.float.ohos_id_text_size_button2'],
+    bundleName: '__harDefaultBundleName__',
+    moduleName: '__harDefaultModuleName__',
+  },
+  adaptiveItemFontSize: {
+    id: -1,
+    type: 10002,
+    params: ['sys.float.Caption_M'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
@@ -485,6 +500,93 @@ export class TabSegmentButtonV2 extends ViewV2 {
     );
     this.finalizeConstruction();
   }
+  resetStateVarsOnReuse(params) {
+    this.resetParam('items', params && 'items' in params ? params.items : undefined);
+    this.resetParam('selectedIndex', params && 'selectedIndex' in params ? params.selectedIndex : undefined);
+    this.$selectedIndex = '$selectedIndex' in params ? params.$selectedIndex : () => {};
+    this.onItemClicked = 'onItemClicked' in params ? params.onItemClicked : () => {};
+    this.resetParam('itemMinFontScale', params && 'itemMinFontScale' in params ? params.itemMinFontScale : undefined);
+    this.resetParam('itemMaxFontScale', params && 'itemMaxFontScale' in params ? params.itemMaxFontScale : undefined);
+    this.resetParam('itemSpace', params && 'itemSpace' in params ? params.itemSpace : undefined);
+    this.resetParam('itemFontSize', params && 'itemFontSize' in params ? params.itemFontSize : undefined);
+    this.resetParam(
+      'itemSelectedFontSize',
+      params && 'itemSelectedFontSize' in params ? params.itemSelectedFontSize : undefined
+    );
+    this.resetParam('itemFontColor', params && 'itemFontColor' in params ? params.itemFontColor : undefined);
+    this.resetParam(
+      'itemSelectedFontColor',
+      params && 'itemSelectedFontColor' in params ? params.itemSelectedFontColor : undefined
+    );
+    this.resetParam('itemFontWeight', params && 'itemFontWeight' in params ? params.itemFontWeight : undefined);
+    this.resetParam(
+      'itemSelectedFontWeight',
+      params && 'itemSelectedFontWeight' in params ? params.itemSelectedFontWeight : undefined
+    );
+    this.resetParam('itemBorderRadius', params && 'itemBorderRadius' in params ? params.itemBorderRadius : undefined);
+    this.resetParam(
+      'itemSelectedBackgroundColor',
+      params && 'itemSelectedBackgroundColor' in params ? params.itemSelectedBackgroundColor : undefined
+    );
+    this.resetParam('itemIconSize', params && 'itemIconSize' in params ? params.itemIconSize : undefined);
+    this.resetParam(
+      'itemIconFillColor',
+      params && 'itemIconFillColor' in params ? params.itemIconFillColor : undefined
+    );
+    this.resetParam(
+      'itemSelectedIconFillColor',
+      params && 'itemSelectedIconFillColor' in params ? params.itemSelectedIconFillColor : undefined
+    );
+    this.resetParam(
+      'itemSymbolFontSize',
+      params && 'itemSymbolFontSize' in params ? params.itemSymbolFontSize : undefined
+    );
+    this.resetParam(
+      'itemSymbolFontColor',
+      params && 'itemSymbolFontColor' in params ? params.itemSymbolFontColor : undefined
+    );
+    this.resetParam(
+      'itemSelectedSymbolFontColor',
+      params && 'itemSelectedSymbolFontColor' in params ? params.itemSelectedSymbolFontColor : undefined
+    );
+    this.resetParam('itemMinHeight', params && 'itemMinHeight' in params ? params.itemMinHeight : undefined);
+    this.resetParam('itemPadding', params && 'itemPadding' in params ? params.itemPadding : undefined);
+    this.resetParam('itemShadow', params && 'itemShadow' in params ? params.itemShadow : undefined);
+    this.resetParam(
+      'buttonBackgroundColor',
+      params && 'buttonBackgroundColor' in params ? params.buttonBackgroundColor : undefined
+    );
+    this.resetParam(
+      'buttonBackgroundBlurStyle',
+      params && 'buttonBackgroundBlurStyle' in params ? params.buttonBackgroundBlurStyle : undefined
+    );
+    this.resetParam(
+      'buttonBackgroundBlurStyleOptions',
+      params && 'buttonBackgroundBlurStyleOptions' in params ? params.buttonBackgroundBlurStyleOptions : undefined
+    );
+    this.resetParam(
+      'buttonBackgroundEffect',
+      params && 'buttonBackgroundEffect' in params ? params.buttonBackgroundEffect : undefined
+    );
+    this.resetParam(
+      'buttonBorderRadius',
+      params && 'buttonBorderRadius' in params ? params.buttonBorderRadius : undefined
+    );
+    this.resetParam('buttonMinHeight', params && 'buttonMinHeight' in params ? params.buttonMinHeight : undefined);
+    this.resetParam('buttonPadding', params && 'buttonPadding' in params ? params.buttonPadding : undefined);
+    this.resetParam(
+      'languageDirection',
+      params && 'languageDirection' in params ? params.languageDirection : undefined
+    );
+    this.resetParam(
+      'backgroundSystemMaterial',
+      params && 'backgroundSystemMaterial' in params ? params.backgroundSystemMaterial : undefined
+    );
+    this.resetParam(
+      'enableStateAnimation',
+      params && 'enableStateAnimation' in params ? params.enableStateAnimation : false
+    );
+  }
   initialRender() {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
     {
@@ -535,11 +637,7 @@ export class TabSegmentButtonV2 extends ViewV2 {
               undefined,
               elmtId,
               () => {},
-              {
-                page: 'advancedComponents/src/main/ets/components/SegmentButtonV2.ets',
-                line: 295,
-                col: 5,
-              }
+              { page: 'library/src/main/ets/components/MainPage.ets', line: 299, col: 5 }
             );
             ViewV2.create(componentCall);
             let paramsLambda = () => {
@@ -852,6 +950,93 @@ export class CapsuleSegmentButtonV2 extends ViewV2 {
     );
     this.finalizeConstruction();
   }
+  resetStateVarsOnReuse(params) {
+    this.resetParam('items', params && 'items' in params ? params.items : undefined);
+    this.resetParam('selectedIndex', params && 'selectedIndex' in params ? params.selectedIndex : undefined);
+    this.$selectedIndex = '$selectedIndex' in params ? params.$selectedIndex : () => {};
+    this.onItemClicked = 'onItemClicked' in params ? params.onItemClicked : () => {};
+    this.resetParam('itemMinFontScale', params && 'itemMinFontScale' in params ? params.itemMinFontScale : undefined);
+    this.resetParam('itemMaxFontScale', params && 'itemMaxFontScale' in params ? params.itemMaxFontScale : undefined);
+    this.resetParam('itemSpace', params && 'itemSpace' in params ? params.itemSpace : undefined);
+    this.resetParam('itemFontColor', params && 'itemFontColor' in params ? params.itemFontColor : undefined);
+    this.resetParam(
+      'itemSelectedFontColor',
+      params && 'itemSelectedFontColor' in params ? params.itemSelectedFontColor : undefined
+    );
+    this.resetParam('itemFontSize', params && 'itemFontSize' in params ? params.itemFontSize : undefined);
+    this.resetParam(
+      'itemSelectedFontSize',
+      params && 'itemSelectedFontSize' in params ? params.itemSelectedFontSize : undefined
+    );
+    this.resetParam('itemFontWeight', params && 'itemFontWeight' in params ? params.itemFontWeight : undefined);
+    this.resetParam(
+      'itemSelectedFontWeight',
+      params && 'itemSelectedFontWeight' in params ? params.itemSelectedFontWeight : undefined
+    );
+    this.resetParam('itemBorderRadius', params && 'itemBorderRadius' in params ? params.itemBorderRadius : undefined);
+    this.resetParam(
+      'itemSelectedBackgroundColor',
+      params && 'itemSelectedBackgroundColor' in params ? params.itemSelectedBackgroundColor : undefined
+    );
+    this.resetParam('itemIconSize', params && 'itemIconSize' in params ? params.itemIconSize : undefined);
+    this.resetParam(
+      'itemIconFillColor',
+      params && 'itemIconFillColor' in params ? params.itemIconFillColor : undefined
+    );
+    this.resetParam(
+      'itemSelectedIconFillColor',
+      params && 'itemSelectedIconFillColor' in params ? params.itemSelectedIconFillColor : undefined
+    );
+    this.resetParam(
+      'itemSymbolFontSize',
+      params && 'itemSymbolFontSize' in params ? params.itemSymbolFontSize : undefined
+    );
+    this.resetParam(
+      'itemSymbolFontColor',
+      params && 'itemSymbolFontColor' in params ? params.itemSymbolFontColor : undefined
+    );
+    this.resetParam(
+      'itemSelectedSymbolFontColor',
+      params && 'itemSelectedSymbolFontColor' in params ? params.itemSelectedSymbolFontColor : undefined
+    );
+    this.resetParam('itemMinHeight', params && 'itemMinHeight' in params ? params.itemMinHeight : undefined);
+    this.resetParam('itemPadding', params && 'itemPadding' in params ? params.itemPadding : undefined);
+    this.resetParam('itemShadow', params && 'itemShadow' in params ? params.itemShadow : undefined);
+    this.resetParam(
+      'buttonBackgroundColor',
+      params && 'buttonBackgroundColor' in params ? params.buttonBackgroundColor : undefined
+    );
+    this.resetParam(
+      'buttonBackgroundBlurStyle',
+      params && 'buttonBackgroundBlurStyle' in params ? params.buttonBackgroundBlurStyle : undefined
+    );
+    this.resetParam(
+      'buttonBackgroundBlurStyleOptions',
+      params && 'buttonBackgroundBlurStyleOptions' in params ? params.buttonBackgroundBlurStyleOptions : undefined
+    );
+    this.resetParam(
+      'buttonBackgroundEffect',
+      params && 'buttonBackgroundEffect' in params ? params.buttonBackgroundEffect : undefined
+    );
+    this.resetParam(
+      'buttonBorderRadius',
+      params && 'buttonBorderRadius' in params ? params.buttonBorderRadius : undefined
+    );
+    this.resetParam('buttonMinHeight', params && 'buttonMinHeight' in params ? params.buttonMinHeight : undefined);
+    this.resetParam('buttonPadding', params && 'buttonPadding' in params ? params.buttonPadding : undefined);
+    this.resetParam(
+      'languageDirection',
+      params && 'languageDirection' in params ? params.languageDirection : undefined
+    );
+    this.resetParam(
+      'backgroundSystemMaterial',
+      params && 'backgroundSystemMaterial' in params ? params.backgroundSystemMaterial : undefined
+    );
+    this.resetParam(
+      'enableStateAnimation',
+      params && 'enableStateAnimation' in params ? params.enableStateAnimation : false
+    );
+  }
   initialRender() {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
     {
@@ -902,11 +1087,7 @@ export class CapsuleSegmentButtonV2 extends ViewV2 {
               undefined,
               elmtId,
               () => {},
-              {
-                page: 'advancedComponents/src/main/ets/components/SegmentButtonV2.ets',
-                line: 405,
-                col: 5,
-              }
+              { page: 'library/src/main/ets/components/MainPage.ets', line: 415, col: 5 }
             );
             ViewV2.create(componentCall);
             let paramsLambda = () => {
@@ -1153,7 +1334,55 @@ class SimpleSegmentButtonV2 extends ViewV2 {
         Flex.direction(this.languageDirection);
         Flex.focusScopeId(this.focusGroupId, true);
         Flex.padding(this.getButtonPadding());
-        Gesture.create(GesturePriority.High);
+        globalThis.Gesture.create(GesturePriority.High);
+        GestureGroup.create(GestureMode.Parallel);
+        LongPressGesture.create({ repeat: false, duration: 200 });
+        LongPressGesture.onAction(event => {
+          if (!this.isBackgroundSystemMaterialEnabled()) {
+            return;
+          }
+          const finger = event.fingerList.find(Boolean);
+          if (!finger) {
+            return;
+          }
+          const index = this.getIndexByPosition(finger.globalX, finger.globalY);
+          if (!this.isItemEnabled(index)) {
+            return;
+          }
+          if (index === this.normalizedSelectedIndex) {
+            this.isPressing = true;
+          }
+          if (this.isPressing && !this.openSelectedItemSystemMaterial) {
+            this.startSelectMaterialAnimation();
+          }
+        });
+        LongPressGesture.onActionCancel(event => {
+          if (!this.isBackgroundSystemMaterialEnabled()) {
+            return;
+          }
+          const finger = event.fingerList.find(Boolean);
+          if (!finger) {
+            return;
+          }
+          if (!this.isDragging && this.isPressing && this.openSelectedItemSystemMaterial) {
+            this.finishSelectMaterialAnimation();
+          }
+          this.isPressing = false;
+        });
+        LongPressGesture.onActionEnd(event => {
+          if (!this.isBackgroundSystemMaterialEnabled()) {
+            return;
+          }
+          const finger = event.fingerList.find(Boolean);
+          if (!finger) {
+            return;
+          }
+          if (!this.isDragging && this.openSelectedItemSystemMaterial) {
+            this.finishSelectMaterialAnimation();
+          }
+          this.isPressing = false;
+        });
+        LongPressGesture.pop();
         PanGesture.create();
         PanGesture.onActionStart(event => {
           const finger = event.fingerList.find(Boolean);
@@ -1171,8 +1400,36 @@ class SimpleSegmentButtonV2 extends ViewV2 {
           if (index === this.normalizedSelectedIndex) {
             this.isDragging = true;
           }
+          if (this.isPressing) {
+            this.dragWithPress = true;
+          }
           this.panStartGlobalX = finger.globalX;
           this.panStartIndex = index;
+          if (this.isBackgroundSystemMaterialEnabled() && this.isDragging) {
+            this.backplatePosition = {
+              x: this.selectedItemRect.position.x,
+              y: this.selectedItemRect.position.y,
+            };
+            if (!this.dragWithPress) {
+              this.getUIContext().animateTo(
+                {
+                  curve: curves.interpolatingSpring(0, 1, 195, 14),
+                },
+                () => {
+                  this.openSelectedItemSystemMaterial = true;
+                }
+              );
+            }
+            this.getUIContext().animateTo(
+              {
+                curve: curves.interpolatingSpring(0, 1, 195, 14),
+                delay: 300,
+              },
+              () => {
+                this.selectedItemScale = { x: 1.01, y: 0.99 };
+              }
+            );
+          }
         });
         PanGesture.onActionUpdate(event => {
           if (!this.isDragging) {
@@ -1182,8 +1439,18 @@ class SimpleSegmentButtonV2 extends ViewV2 {
           if (!finger) {
             return;
           }
-          const index = this.getIndexByPosition(finger.globalX, finger.globalY);
-          this.updateSelectedIndex(index);
+          if (this.isBackgroundSystemMaterialEnabled()) {
+            let nowX = finger.globalX - this.panStartGlobalX + this.selectedItemRect.position.x;
+            nowX = Math.max(this.itemRects[0].position.x, nowX);
+            nowX = Math.min(this.itemRects[this.items.length - 1].position.x, nowX);
+            this.backplatePosition = {
+              x: nowX,
+              y: this.backplatePosition.y,
+            };
+          } else {
+            const index = this.getIndexByPosition(finger.globalX, finger.globalY);
+            this.updateSelectedIndex(index);
+          }
         });
         PanGesture.onActionEnd(event => {
           if (!this.isItemEnabled(this.panStartIndex)) {
@@ -1199,7 +1466,50 @@ class SimpleSegmentButtonV2 extends ViewV2 {
           }
           // handle drag event
           if (this.isDragging) {
+            if (this.isBackgroundSystemMaterialEnabled()) {
+              const finger = event.fingerList.find(Boolean);
+              if (!finger) {
+                return;
+              }
+              let realIndex = -1;
+              let selectedInfo = finger.localX;
+              for (let i = 0; i < this.items.length; i++) {
+                selectedInfo = selectedInfo - this.itemRects[i].size.width;
+                if (selectedInfo < 0) {
+                  realIndex = this.isRTL() ? this.items.length - 1 - i : i;
+                  break;
+                }
+              }
+              if (realIndex === -1) {
+                realIndex = this.isRTL() ? 0 : this.items.length - 1;
+              }
+              this.tempDisableAnimation = true;
+              this.getUIContext().animateTo({ curve: curves.springMotion(0.347, 0.99) }, () => {
+                this.$selectedIndex?.(realIndex);
+                this.backplatePosition = {
+                  x: this.itemRects[realIndex].position.x,
+                  y: this.itemRects[realIndex].position.y,
+                };
+              });
+              if (!this.dragWithPress) {
+                this.getUIContext().animateTo(
+                  {
+                    curve: curves.interpolatingSpring(0, 1, 195, 14),
+                    onFinish: () => {
+                      this.tempDisableAnimation = false;
+                    },
+                  },
+                  () => {
+                    this.openSelectedItemSystemMaterial = false;
+                    this.selectedItemScale = undefined;
+                  }
+                );
+              } else {
+                this.finishSelectMaterialAnimation();
+              }
+            }
             this.isDragging = false;
+            this.dragWithPress = false;
             return;
           }
           // handle swipe event
@@ -1220,9 +1530,27 @@ class SimpleSegmentButtonV2 extends ViewV2 {
           this.isDragging = false;
           this.isMouseWheelScroll = false;
           this.panStartIndex = -1;
+          this.dragWithPress = false;
+          if (!this.dragWithPress) {
+            this.getUIContext().animateTo(
+              {
+                curve: curves.interpolatingSpring(0, 1, 195, 14),
+                onFinish: () => {
+                  this.tempDisableAnimation = false;
+                },
+              },
+              () => {
+                this.openSelectedItemSystemMaterial = false;
+                this.selectedItemScale = undefined;
+              }
+            );
+          } else {
+            this.finishSelectMaterialAnimation();
+          }
         });
         PanGesture.pop();
-        Gesture.pop();
+        GestureGroup.pop();
+        globalThis.Gesture.pop();
       }, Flex);
       this.observeComponentCreation2((elmtId, isInitialRender) => {
         Repeat(this.getItems(), this)
@@ -1260,14 +1588,14 @@ class SimpleSegmentButtonV2 extends ViewV2 {
                   },
                 };
               });
-              Gesture.create(GesturePriority.Low);
+              globalThis.Gesture.create(GesturePriority.Low);
               TapGesture.create();
               TapGesture.onAction(() => {
                 this.onItemClicked?.(repeatItem.index);
                 this.updateSelectedIndex(repeatItem.index);
               });
               TapGesture.pop();
-              Gesture.pop();
+              globalThis.Gesture.pop();
               Button.onTouch(event => {
                 if (event.type === TouchType.Down) {
                   if (this.isSelected(repeatItem)) {
@@ -1326,11 +1654,7 @@ class SimpleSegmentButtonV2 extends ViewV2 {
                       undefined,
                       elmtId,
                       () => {},
-                      {
-                        page: 'advancedComponents/src/main/ets/components/SegmentButtonV2.ets',
-                        line: 577,
-                        col: 13,
-                      }
+                      { page: 'library/src/main/ets/components/MainPage.ets', line: 599, col: 13 }
                     );
                     ViewV2.create(componentCall);
                     let paramsLambda = () => {
@@ -1406,15 +1730,17 @@ class SimpleSegmentButtonV2 extends ViewV2 {
           this.ifElseBranchUpdateFunction(0, () => {
             this.observeComponentCreation2((elmtId, isInitialRender) => {
               Stack.create();
-              Context.animation(this.enableStateAnimation ? { curve: curves.springMotion(0.347, 0.99) } : undefined);
-              Stack.position({
-                x: this.selectedItemRect.position.x,
-                y: this.selectedItemRect.position.y,
-              });
-              Context.animation(null);
+              globalThis.Context.animation(
+                !this.tempDisableAnimation && this.enableStateAnimation
+                  ? { curve: curves.springMotion(0.347, 0.99) }
+                  : undefined
+              );
+              Stack.position(this.getBackplatePosition());
+              globalThis.Context.animation(null);
               Stack.backgroundColor(this.getItemSelectedBackgroundColor());
               Stack.borderRadius(this.getItemBorderRadius());
-              Stack.scale({ x: this.itemScale, y: this.itemScale });
+              Stack.scale(this.getBackplateScale());
+              Stack.opacity(this.getBackplateOpacity());
               Stack.shadow(this.getItemBackplateShadow());
               Stack.height(this.selectedItemRect.size.height);
               Stack.width(this.selectedItemRect.size.width);
@@ -1535,14 +1861,119 @@ class SimpleSegmentButtonV2 extends ViewV2 {
     this.touchPressedItemIndex = -1;
     this.isMouseWheelScroll = false;
     this.isDragging = false;
+    this.isPressing = false;
     this.panStartGlobalX = 0;
     this.panStartIndex = -1;
+    this.dragWithPress = false;
     this.focusGroupId = GroupIdGenerator.getInstance().generate();
     this.initParam(
       'enableStateAnimation',
       params && 'enableStateAnimation' in params ? params.enableStateAnimation : false
     );
+    this.openSelectedItemSystemMaterial = false;
+    this.selectedItemScale = undefined;
+    this.tempDisableAnimation = false;
+    this.backplatePosition = { x: 0, y: 0 };
     this.finalizeConstruction();
+  }
+  resetStateVarsOnReuse(params) {
+    this.resetParam('items', params && 'items' in params ? params.items : undefined);
+    this.resetParam('selectedIndex', params && 'selectedIndex' in params ? params.selectedIndex : undefined);
+    this.$selectedIndex = '$selectedIndex' in params ? params.$selectedIndex : () => {};
+    this.resetParam('theme', params && 'theme' in params ? params.theme : undefined);
+    this.onItemClicked = 'onItemClicked' in params ? params.onItemClicked : () => {};
+    this.resetParam('itemMinFontScale', params && 'itemMinFontScale' in params ? params.itemMinFontScale : undefined);
+    this.resetParam('itemMaxFontScale', params && 'itemMaxFontScale' in params ? params.itemMaxFontScale : undefined);
+    this.resetParam('itemSpace', params && 'itemSpace' in params ? params.itemSpace : undefined);
+    this.resetParam('itemFontColor', params && 'itemFontColor' in params ? params.itemFontColor : undefined);
+    this.resetParam(
+      'itemSelectedFontColor',
+      params && 'itemSelectedFontColor' in params ? params.itemSelectedFontColor : undefined
+    );
+    this.resetParam('itemFontSize', params && 'itemFontSize' in params ? params.itemFontSize : undefined);
+    this.resetParam(
+      'itemSelectedFontSize',
+      params && 'itemSelectedFontSize' in params ? params.itemSelectedFontSize : undefined
+    );
+    this.resetParam('itemFontWeight', params && 'itemFontWeight' in params ? params.itemFontWeight : undefined);
+    this.resetParam(
+      'itemSelectedFontWeight',
+      params && 'itemSelectedFontWeight' in params ? params.itemSelectedFontWeight : undefined
+    );
+    this.resetParam('itemBorderRadius', params && 'itemBorderRadius' in params ? params.itemBorderRadius : undefined);
+    this.resetParam(
+      'itemSelectedBackgroundColor',
+      params && 'itemSelectedBackgroundColor' in params ? params.itemSelectedBackgroundColor : undefined
+    );
+    this.resetParam('itemIconSize', params && 'itemIconSize' in params ? params.itemIconSize : undefined);
+    this.resetParam(
+      'itemIconFillColor',
+      params && 'itemIconFillColor' in params ? params.itemIconFillColor : undefined
+    );
+    this.resetParam(
+      'itemSelectedIconFillColor',
+      params && 'itemSelectedIconFillColor' in params ? params.itemSelectedIconFillColor : undefined
+    );
+    this.resetParam(
+      'itemSymbolFontSize',
+      params && 'itemSymbolFontSize' in params ? params.itemSymbolFontSize : undefined
+    );
+    this.resetParam(
+      'itemSymbolFontColor',
+      params && 'itemSymbolFontColor' in params ? params.itemSymbolFontColor : undefined
+    );
+    this.resetParam(
+      'itemSelectedSymbolFontColor',
+      params && 'itemSelectedSymbolFontColor' in params ? params.itemSelectedSymbolFontColor : undefined
+    );
+    this.resetParam('itemMinHeight', params && 'itemMinHeight' in params ? params.itemMinHeight : undefined);
+    this.resetParam('itemPadding', params && 'itemPadding' in params ? params.itemPadding : undefined);
+    this.resetParam('itemShadow', params && 'itemShadow' in params ? params.itemShadow : undefined);
+    this.resetParam(
+      'buttonBackgroundColor',
+      params && 'buttonBackgroundColor' in params ? params.buttonBackgroundColor : undefined
+    );
+    this.resetParam(
+      'buttonBackgroundBlurStyle',
+      params && 'buttonBackgroundBlurStyle' in params ? params.buttonBackgroundBlurStyle : undefined
+    );
+    this.resetParam(
+      'buttonBackgroundBlurStyleOptions',
+      params && 'buttonBackgroundBlurStyleOptions' in params ? params.buttonBackgroundBlurStyleOptions : undefined
+    );
+    this.resetParam(
+      'buttonBackgroundEffect',
+      params && 'buttonBackgroundEffect' in params ? params.buttonBackgroundEffect : undefined
+    );
+    this.resetParam(
+      'buttonBorderRadius',
+      params && 'buttonBorderRadius' in params ? params.buttonBorderRadius : undefined
+    );
+    this.resetParam('buttonMinHeight', params && 'buttonMinHeight' in params ? params.buttonMinHeight : undefined);
+    this.resetParam('buttonPadding', params && 'buttonPadding' in params ? params.buttonPadding : undefined);
+    this.resetParam(
+      'languageDirection',
+      params && 'languageDirection' in params ? params.languageDirection : undefined
+    );
+    this.resetParam(
+      'backgroundSystemMaterial',
+      params && 'backgroundSystemMaterial' in params ? params.backgroundSystemMaterial : undefined
+    );
+    this.itemRects = [];
+    this.itemScale = 1;
+    this.hoveredItemIndex = -1;
+    this.mousePressedItemIndex = -1;
+    this.touchPressedItemIndex = -1;
+    this.resetParam(
+      'enableStateAnimation',
+      params && 'enableStateAnimation' in params ? params.enableStateAnimation : false
+    );
+    this.openSelectedItemSystemMaterial = false;
+    this.selectedItemScale = undefined;
+    this.tempDisableAnimation = false;
+    this.backplatePosition = { x: 0, y: 0 };
+    this.resetComputed('normalizedSelectedIndex');
+    this.resetComputed('selectedItemRect');
   }
   get normalizedSelectedIndex() {
     const items = this.getItems();
@@ -1554,12 +1985,88 @@ class SimpleSegmentButtonV2 extends ViewV2 {
   getFocusPriority(repeatItem) {
     return this.normalizedSelectedIndex === repeatItem.index ? FocusPriority.PREVIOUS : FocusPriority.AUTO;
   }
+  getSystemMaterial(inputMaterial) {
+    let info = uiMaterial.getMaterialInfo();
+    if (info.state === uiMaterial.MaterialState.ENABLE && !inputMaterial) {
+      return new uiMaterial.ImmersiveMaterial({
+        style: uiMaterial.ImmersiveStyle.THIN
+      });
+    } else if (info.state === uiMaterial.MaterialState.DISABLE) {
+      return undefined;
+    }
+    return inputMaterial;
+  }
+  startSelectMaterialAnimation() {
+    this.backplatePosition = {
+      x: this.selectedItemRect.position.x,
+      y: this.selectedItemRect.position.y,
+    };
+    if (!this.openSelectedItemSystemMaterial) {
+      this.getUIContext().animateTo(
+        {
+          curve: curves.interpolatingSpring(0, 1, 195, 14),
+        },
+        () => {
+          this.selectedItemScale = { x: 1.23, y: 1.18 };
+          this.openSelectedItemSystemMaterial = true;
+        }
+      );
+    }
+  }
+  finishSelectMaterialAnimation() {
+    if (this.openSelectedItemSystemMaterial) {
+      this.tempDisableAnimation = true;
+      this.getUIContext().animateTo({ curve: curves.interpolatingSpring(0, 1, 195, 14) }, () => {
+        this.selectedItemScale = { x: 1.23, y: 1.18 };
+      });
+      this.getUIContext().animateTo(
+        {
+          curve: curves.interpolatingSpring(0, 1, 195, 14),
+          delay: 300,
+          onFinish: () => {
+            this.tempDisableAnimation = false;
+          },
+        },
+        () => {
+          this.openSelectedItemSystemMaterial = false;
+          this.selectedItemScale = undefined;
+        }
+      );
+    }
+  }
+  isBackgroundSystemMaterialEnabled() {
+    return this.backgroundSystemMaterial !== undefined;
+  }
   isItemEnabled(index) {
     const items = this.getItems();
     if (index < 0 || index >= items.length) {
       return false;
     }
     return items[index].enabled;
+  }
+  getBackplatePosition() {
+    if (this.openSelectedItemSystemMaterial) {
+      return this.backplatePosition;
+    } else {
+      return {
+        x: this.selectedItemRect.position.x,
+        y: this.selectedItemRect.position.y,
+      };
+    }
+  }
+  getBackplateOpacity() {
+    if (this.openSelectedItemSystemMaterial) {
+      return 0.7;
+    } else {
+      return 1;
+    }
+  }
+  getBackplateScale() {
+    if (this.openSelectedItemSystemMaterial) {
+      return this.selectedItemScale;
+    } else {
+      return { x: this.itemScale, y: this.itemScale };
+    }
   }
   getItemRects() {
     if (!this.items) {
@@ -1575,7 +2082,7 @@ class SimpleSegmentButtonV2 extends ViewV2 {
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       Stack.create();
       Stack.backgroundColor(this.getButtonBackgroundColor());
-      Stack.systemMaterial(this.backgroundSystemMaterial);
+      Stack.systemMaterial(this.getSystemMaterial(this.backgroundSystemMaterial));
       Stack.backgroundEffect(this.buttonBackgroundEffect, { disableSystemAdaptation: true });
       Stack.borderRadius(this.getButtonBorderRadius());
       Stack.clip(false);
@@ -1660,7 +2167,7 @@ class SimpleSegmentButtonV2 extends ViewV2 {
   getEffectBackgroundColor(repeatItem) {
     if (repeatItem.index === this.mousePressedItemIndex) {
       return {
-        id: -1,
+        id: 125831024,
         type: 10001,
         params: ['sys.color.interactive_click'],
         bundleName: '__harDefaultBundleName__',
@@ -1669,7 +2176,7 @@ class SimpleSegmentButtonV2 extends ViewV2 {
     }
     if (repeatItem.index === this.hoveredItemIndex) {
       return {
-        id: -1,
+        id: 125831019,
         type: 10001,
         params: ['sys.color.interactive_hover'],
         bundleName: '__harDefaultBundleName__',
@@ -1723,9 +2230,35 @@ class SimpleSegmentButtonV2 extends ViewV2 {
     if (!this.isItemEnabled(selectedIndex) || selectedIndex === this.selectedIndex) {
       return;
     }
-      this.getUIContext().animateTo({ curve: curves.springMotion(0.347, 0.99) }, () => {
-        this.$selectedIndex?.(selectedIndex);
-      });
+    if (this.isBackgroundSystemMaterialEnabled() && !this.tempDisableAnimation) {
+      this.getUIContext().animateTo(
+        {
+          curve: curves.interpolatingSpring(0, 1, 195, 14),
+        },
+        () => {
+          this.selectedItemScale = { x: 1.01, y: 0.99 };
+          this.openSelectedItemSystemMaterial = true;
+        }
+      );
+    }
+    this.getUIContext().animateTo({ curve: curves.springMotion(0.347, 0.99) }, () => {
+      this.$selectedIndex?.(selectedIndex);
+      this.backplatePosition = {
+        x: this.itemRects[selectedIndex].position.x,
+        y: this.itemRects[selectedIndex].position.y,
+      };
+    });
+    if (this.isBackgroundSystemMaterialEnabled() && !this.tempDisableAnimation) {
+      this.getUIContext().animateTo(
+        {
+          curve: curves.interpolatingSpring(0, 1, 195, 14),
+          delay: 250,
+        },
+        () => {
+          this.openSelectedItemSystemMaterial = false;
+        }
+      );
+    }
   }
   updateItemScale(scale) {
     if (this.itemScale === scale) {
@@ -1919,25 +2452,29 @@ __decorate([Local], SimpleSegmentButtonV2.prototype, 'hoveredItemIndex', void 0)
 __decorate([Local], SimpleSegmentButtonV2.prototype, 'mousePressedItemIndex', void 0);
 __decorate([Local], SimpleSegmentButtonV2.prototype, 'touchPressedItemIndex', void 0);
 __decorate([Param], SimpleSegmentButtonV2.prototype, 'enableStateAnimation', void 0);
+__decorate([Local], SimpleSegmentButtonV2.prototype, 'openSelectedItemSystemMaterial', void 0);
+__decorate([Local], SimpleSegmentButtonV2.prototype, 'selectedItemScale', void 0);
+__decorate([Local], SimpleSegmentButtonV2.prototype, 'tempDisableAnimation', void 0);
+__decorate([Local], SimpleSegmentButtonV2.prototype, 'backplatePosition', void 0);
 __decorate([Computed], SimpleSegmentButtonV2.prototype, 'normalizedSelectedIndex', null);
 __decorate([Computed], SimpleSegmentButtonV2.prototype, 'selectedItemRect', null);
 const multiplyCapsuleTheme = {
   itemBorderRadius: {
-    id: -1,
+    id: 125834846,
     type: 10002,
     params: ['sys.float.segment_button_v2_multi_corner_radius'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   itemBackgroundColor: {
-    id: -1,
+    id: 125834836,
     type: 10001,
     params: ['sys.color.segment_button_v2_multi_capsule_button_background'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   itemSelectedBackgroundColor: {
-    id: -1,
+    id: 125831009,
     type: 10001,
     params: ['sys.color.comp_background_emphasize'],
     bundleName: '__harDefaultBundleName__',
@@ -1945,14 +2482,14 @@ const multiplyCapsuleTheme = {
   },
   itemSpace: LengthMetrics.vp(1),
   itemFontColor: {
-    id: -1,
+    id: 125830983,
     type: 10001,
     params: ['sys.color.font_secondary'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   itemSelectedFontColor: {
-    id: -1,
+    id: 125830987,
     type: 10001,
     params: ['sys.color.font_on_primary'],
     bundleName: '__harDefaultBundleName__',
@@ -1961,37 +2498,44 @@ const multiplyCapsuleTheme = {
   itemFontWeight: FontWeight.Medium,
   itemSelectedFontWeight: FontWeight.Medium,
   itemIconFillColor: {
-    id: -1,
+    id: 125830992,
     type: 10001,
     params: ['sys.color.icon_secondary'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   itemSelectedIconFillColor: {
-    id: -1,
+    id: 125830987,
     type: 10001,
     params: ['sys.color.font_on_primary'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   itemSymbolFontColor: {
-    id: -1,
+    id: 125830983,
     type: 10001,
     params: ['sys.color.font_secondary'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   itemSelectedSymbolFontColor: {
-    id: -1,
+    id: 125830987,
     type: 10001,
     params: ['sys.color.font_on_primary'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   itemFontSize: {
-    id: -1,
+    id: 125829682,
     type: 10002,
     params: ['sys.float.ohos_id_text_size_button2'],
+    bundleName: '__harDefaultBundleName__',
+    moduleName: '__harDefaultModuleName__',
+  },
+  adaptiveItemFontSize: {
+    id: -1,
+    type: 10002,
+    params: ['sys.float.Caption_M'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
@@ -1999,28 +2543,28 @@ const multiplyCapsuleTheme = {
   itemSymbolFontSize: 20,
   itemPadding: {
     top: LengthMetrics.resource({
-      id: -1,
+      id: 125830921,
       type: 10002,
       params: ['sys.float.padding_level2'],
       bundleName: '__harDefaultBundleName__',
       moduleName: '__harDefaultModuleName__',
     }),
     bottom: LengthMetrics.resource({
-      id: -1,
+      id: 125830921,
       type: 10002,
       params: ['sys.float.padding_level2'],
       bundleName: '__harDefaultBundleName__',
       moduleName: '__harDefaultModuleName__',
     }),
     start: LengthMetrics.resource({
-      id: -1,
+      id: 125830923,
       type: 10002,
       params: ['sys.float.padding_level4'],
       bundleName: '__harDefaultBundleName__',
       moduleName: '__harDefaultModuleName__',
     }),
     end: LengthMetrics.resource({
-      id: -1,
+      id: 125830923,
       type: 10002,
       params: ['sys.float.padding_level4'],
       bundleName: '__harDefaultBundleName__',
@@ -2028,14 +2572,14 @@ const multiplyCapsuleTheme = {
     }),
   },
   itemMinHeight: {
-    id: -1,
+    id: 125834842,
     type: 10002,
     params: ['sys.float.segment_button_v2_multi_singleline_height'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   hybridItemMinHeight: {
-    id: -1,
+    id: 125834843,
     type: 10002,
     params: ['sys.float.segment_button_v2_multi_doubleline_height'],
     bundleName: '__harDefaultBundleName__',
@@ -2118,6 +2662,78 @@ export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
     this.theme = multiplyCapsuleTheme;
     this.focusGroupId = GroupIdGenerator.getInstance().generate();
     this.finalizeConstruction();
+  }
+  resetStateVarsOnReuse(params) {
+    this.resetParam('items', params && 'items' in params ? params.items : undefined);
+    this.resetParam('selectedIndexes', params && 'selectedIndexes' in params ? params.selectedIndexes : undefined);
+    this.$selectedIndexes = '$selectedIndexes' in params ? params.$selectedIndexes : () => {};
+    this.onItemClicked = 'onItemClicked' in params ? params.onItemClicked : () => {};
+    this.resetParam('itemMinFontScale', params && 'itemMinFontScale' in params ? params.itemMinFontScale : undefined);
+    this.resetParam('itemMaxFontScale', params && 'itemMaxFontScale' in params ? params.itemMaxFontScale : undefined);
+    this.resetParam('itemSpace', params && 'itemSpace' in params ? params.itemSpace : undefined);
+    this.resetParam('itemFontColor', params && 'itemFontColor' in params ? params.itemFontColor : undefined);
+    this.resetParam(
+      'itemSelectedFontColor',
+      params && 'itemSelectedFontColor' in params ? params.itemSelectedFontColor : undefined
+    );
+    this.resetParam('itemFontSize', params && 'itemFontSize' in params ? params.itemFontSize : undefined);
+    this.resetParam(
+      'itemSelectedFontSize',
+      params && 'itemSelectedFontSize' in params ? params.itemSelectedFontSize : undefined
+    );
+    this.resetParam('itemFontWeight', params && 'itemFontWeight' in params ? params.itemFontWeight : undefined);
+    this.resetParam(
+      'itemSelectedFontWeight',
+      params && 'itemSelectedFontWeight' in params ? params.itemSelectedFontWeight : undefined
+    );
+    this.resetParam('itemBorderRadius', params && 'itemBorderRadius' in params ? params.itemBorderRadius : undefined);
+    this.resetParam(
+      'itemBackgroundColor',
+      params && 'itemBackgroundColor' in params ? params.itemBackgroundColor : undefined
+    );
+    this.resetParam(
+      'itemBackgroundEffect',
+      params && 'itemBackgroundEffect' in params ? params.itemBackgroundEffect : undefined
+    );
+    this.resetParam(
+      'itemBackgroundBlurStyle',
+      params && 'itemBackgroundBlurStyle' in params ? params.itemBackgroundBlurStyle : undefined
+    );
+    this.resetParam(
+      'itemBackgroundBlurStyleOptions',
+      params && 'itemBackgroundBlurStyleOptions' in params ? params.itemBackgroundBlurStyleOptions : undefined
+    );
+    this.resetParam(
+      'itemSelectedBackgroundColor',
+      params && 'itemSelectedBackgroundColor' in params ? params.itemSelectedBackgroundColor : undefined
+    );
+    this.resetParam('itemIconSize', params && 'itemIconSize' in params ? params.itemIconSize : undefined);
+    this.resetParam(
+      'itemIconFillColor',
+      params && 'itemIconFillColor' in params ? params.itemIconFillColor : undefined
+    );
+    this.resetParam(
+      'itemSelectedIconFillColor',
+      params && 'itemSelectedIconFillColor' in params ? params.itemSelectedIconFillColor : undefined
+    );
+    this.resetParam(
+      'itemSymbolFontSize',
+      params && 'itemSymbolFontSize' in params ? params.itemSymbolFontSize : undefined
+    );
+    this.resetParam(
+      'itemSymbolFontColor',
+      params && 'itemSymbolFontColor' in params ? params.itemSymbolFontColor : undefined
+    );
+    this.resetParam(
+      'itemSelectedSymbolFontColor',
+      params && 'itemSelectedSymbolFontColor' in params ? params.itemSelectedSymbolFontColor : undefined
+    );
+    this.resetParam('itemMinHeight', params && 'itemMinHeight' in params ? params.itemMinHeight : undefined);
+    this.resetParam('itemPadding', params && 'itemPadding' in params ? params.itemPadding : undefined);
+    this.resetParam(
+      'languageDirection',
+      params && 'languageDirection' in params ? params.languageDirection : undefined
+    );
   }
   initialRender() {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
@@ -2208,11 +2824,7 @@ export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
                     undefined,
                     elmtId,
                     () => {},
-                    {
-                      page: 'advancedComponents/src/main/ets/components/SegmentButtonV2.ets',
-                      line: 1109,
-                      col: 13,
-                    }
+                    { page: 'library/src/main/ets/components/MainPage.ets', line: 1366, col: 13 }
                   );
                   ViewV2.create(componentCall);
                   let paramsLambda = () => {
@@ -2523,6 +3135,57 @@ class SegmentButtonV2ItemContent extends ViewV2 {
     };
     this.finalizeConstruction();
   }
+  resetStateVarsOnReuse(params) {
+    this.resetParam('hasHybrid', params && 'hasHybrid' in params ? params.hasHybrid : undefined);
+    this.resetParam('item', params && 'item' in params ? params.item : undefined);
+    this.resetParam('selected', params && 'selected' in params ? params.selected : undefined);
+    this.resetParam('theme', params && 'theme' in params ? params.theme : undefined);
+    this.resetParam('itemMinFontScale', params && 'itemMinFontScale' in params ? params.itemMinFontScale : undefined);
+    this.resetParam('itemMaxFontScale', params && 'itemMaxFontScale' in params ? params.itemMaxFontScale : undefined);
+    this.resetParam('itemFontColor', params && 'itemFontColor' in params ? params.itemFontColor : undefined);
+    this.resetParam(
+      'itemSelectedFontColor',
+      params && 'itemSelectedFontColor' in params ? params.itemSelectedFontColor : undefined
+    );
+    this.resetParam('itemFontSize', params && 'itemFontSize' in params ? params.itemFontSize : undefined);
+    this.resetParam(
+      'itemSelectedFontSize',
+      params && 'itemSelectedFontSize' in params ? params.itemSelectedFontSize : undefined
+    );
+    this.resetParam('itemFontWeight', params && 'itemFontWeight' in params ? params.itemFontWeight : undefined);
+    this.resetParam(
+      'itemSelectedFontWeight',
+      params && 'itemSelectedFontWeight' in params ? params.itemSelectedFontWeight : undefined
+    );
+    this.resetParam('itemIconSize', params && 'itemIconSize' in params ? params.itemIconSize : undefined);
+    this.resetParam(
+      'itemIconFillColor',
+      params && 'itemIconFillColor' in params ? params.itemIconFillColor : undefined
+    );
+    this.resetParam(
+      'itemSelectedIconFillColor',
+      params && 'itemSelectedIconFillColor' in params ? params.itemSelectedIconFillColor : undefined
+    );
+    this.resetParam(
+      'itemSymbolFontSize',
+      params && 'itemSymbolFontSize' in params ? params.itemSymbolFontSize : undefined
+    );
+    this.resetParam(
+      'itemSymbolFontColor',
+      params && 'itemSymbolFontColor' in params ? params.itemSymbolFontColor : undefined
+    );
+    this.resetParam(
+      'itemSelectedSymbolFontColor',
+      params && 'itemSelectedSymbolFontColor' in params ? params.itemSelectedSymbolFontColor : undefined
+    );
+    this.resetParam('itemMinHeight', params && 'itemMinHeight' in params ? params.itemMinHeight : undefined);
+    this.resetParam('itemPadding', params && 'itemPadding' in params ? params.itemPadding : undefined);
+    this.resetParam(
+      'languageDirection',
+      params && 'languageDirection' in params ? params.languageDirection : undefined
+    );
+    this.useAdaptiveLineHeight = false;
+  }
   updateLanguageLineHeight() {
     const resourceManager = this.getUIContext().getHostContext()?.resourceManager;
     if (!resourceManager) {
@@ -2711,7 +3374,7 @@ class SegmentButtonV2ItemContent extends ViewV2 {
       ) {
         return LengthMetricsUtils.getInstance().stringify(this.itemSelectedFontSize);
       }
-      return this.theme.itemFontSize;
+      return this.useAdaptiveLineHeight ? this.theme.adaptiveItemFontSize : this.theme.itemFontSize;
     }
     if (
       this.itemFontSize &&
@@ -2720,7 +3383,7 @@ class SegmentButtonV2ItemContent extends ViewV2 {
     ) {
       return LengthMetricsUtils.getInstance().stringify(this.itemFontSize);
     }
-    return this.theme.itemFontSize;
+    return this.useAdaptiveLineHeight ? this.theme.adaptiveItemFontSize : this.theme.itemFontSize;
   }
   getItemIconHeight() {
     if (this.itemIconSize?.height && LengthMetricsUtils.getInstance().isNaturalNumber(this.itemIconSize.height)) {
@@ -2841,6 +3504,7 @@ __decorate([Param], SegmentButtonV2ItemContent.prototype, 'itemSelectedSymbolFon
 __decorate([Param], SegmentButtonV2ItemContent.prototype, 'itemMinHeight', void 0);
 __decorate([Param], SegmentButtonV2ItemContent.prototype, 'itemPadding', void 0);
 __decorate([Param], SegmentButtonV2ItemContent.prototype, 'languageDirection', void 0);
+__decorate([Local], SegmentButtonV2ItemContent.prototype, 'useAdaptiveLineHeight', void 0);
 class LengthMetricsUtils {
   constructor() {}
   static getInstance() {

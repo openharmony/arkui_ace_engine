@@ -14,6 +14,7 @@
  */
 
 #include "compatible/components/list_v2/render_list.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/memory/ace_type.h"
 #include "base/utils/string_utils.h"
@@ -23,6 +24,7 @@
 #include "core/components/box/drag_drop_event.h"
 #include "core/components/scroll/render_scroll.h"
 #include "core/components/scroll/render_single_child_scroll.h"
+#include "core/components/scroll/scroll_fade_effect.h"
 #include "core/components/scroll/scroll_spring_effect.h"
 #include "core/components/scroll/scrollable.h"
 #include "core/components/stack/stack_element.h"

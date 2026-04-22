@@ -14,6 +14,7 @@
  */
 
 #include "test/unittest/core/manager/drag_drop_manager_test_ng.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "test/mock/frameworks/base/image/mock_pixel_map.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/mock/frameworks/core/common/mock_udmf.h"

@@ -29,11 +29,20 @@ public:
 
     ExecutorResult ExecuteStep() override;
 
-    std::string GetType() const override;
+    std::string GetType() const override
+    {
+        return BACKPRESS;
+    }
 
-    std::string GetDescription() const override;
+    std::string GetDescription() const override
+    {
+        return BaseExecutor::GetDescription();
+    }
 
-    bool IsSingleStep() const override;
+    bool IsSingleStep() const override
+    {
+        return true;
+    }
 };
 
 } // namespace OHOS::Ace::NG

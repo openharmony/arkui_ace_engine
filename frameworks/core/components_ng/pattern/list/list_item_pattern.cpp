@@ -33,7 +33,6 @@
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/syntax/shallow_builder.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/common/container.h"
 #include "core/components_ng/property/measure_utils.h"
 

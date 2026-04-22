@@ -18,6 +18,7 @@
 
 #include "base/want/want_wrap.h"
 #include "core/common/container.h"
+#include "core/components_ng/event/input_event.h"
 #include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/ui_extension/accessibility_session_adapter_ui_extension.h"

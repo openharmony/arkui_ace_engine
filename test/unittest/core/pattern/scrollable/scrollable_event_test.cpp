@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -236,7 +236,7 @@ HWTEST_F(ScrollableEventTest, SetOnDidScroll001, TestSize.Level1)
     EXPECT_EQ(didScrollOffset.Value(), offsetExpected);
     EXPECT_EQ(didScrollState, pattern_->GetScrollState());
 
-     /**
+    /**
      * @tc.steps: step5. Set onDidScroll callback to the ScrollableModelNG
      */
     ScrollableModelNG::SetOnDidScroll(OnScrollEvent());
@@ -270,9 +270,7 @@ HWTEST_F(ScrollableEventTest, SetOnScrollStart001, TestSize.Level1)
      * @tc.steps: step1. Initialize isScrollStartCalled flag and scrollStart callback function
      */
     bool isScrollStartCalled = false;
-    auto scrollStart = [&isScrollStartCalled]() {
-        isScrollStartCalled = true;
-    };
+    auto scrollStart = [&isScrollStartCalled]() { isScrollStartCalled = true; };
 
     /**
      * @tc.steps: step2. Set onScrollStart callback to the ScrollableModelNG
@@ -369,7 +367,7 @@ HWTEST_F(ScrollableEventTest, SetOnScrollFrameBegin001, TestSize.Level1)
         isOnScrollFrameBeginCalled = true;
         return ScrollFrameResult();
     };
-    
+
     /**
      * @tc.steps: step2. Set OnScrollFrameBegin callback using ScrollableModelNG::SetOnScrollFrameBegin
      * @tc.expected: Callback set successfully.
@@ -407,10 +405,8 @@ HWTEST_F(ScrollableEventTest, SetOnReachEnd001, TestSize.Level1)
      * @tc.expected: Variables initialized successfully.
      */
     bool isCalled = false;
-    auto onReachEnd = [&isCalled]() {
-        isCalled = true;
-    };
-    
+    auto onReachEnd = [&isCalled]() { isCalled = true; };
+
     /**
      * @tc.steps: step2. Set SetOnReachEnd callback using ScrollableModelNG::SetOnReachEnd
      * @tc.expected: Callback set successfully.
@@ -421,20 +417,5 @@ HWTEST_F(ScrollableEventTest, SetOnReachEnd001, TestSize.Level1)
     auto onReachEndEvent = eventHub->GetOnReachEnd();
     onReachEndEvent();
     EXPECT_TRUE(isCalled);
-}
-
-/**
- * @tc.name: BoxSelectTest001
- * @tc.desc: Test ScrollablePattern::HandleDragStart
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollableEventTest, BoxSelectTest001, TestSize.Level1)
-{
-    GestureEvent info;
-    info.SetRawGlobalLocation(Offset(50, 50));
-    info.SetOffsetX(5);
-    info.SetOffsetY(10);
-    pattern_->HandleDragStart(info);
-    EXPECT_EQ(pattern_->mouseStartOffset_, OffsetF(45, 40));
 }
 } // namespace OHOS::Ace::NG

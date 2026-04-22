@@ -22,6 +22,7 @@
 #include "test/mock/frameworks/core/rosen/mock_canvas.h"
 #include "ui/properties/ui_material.h"
 
+#include "core/components/common/properties/border_image.h"
 #include "core/components_ng/pattern/particle/particle_model_ng.h"
 #include "core/components_ng/pattern/particle/particle_pattern.h"
 

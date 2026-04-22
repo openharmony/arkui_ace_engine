@@ -17,6 +17,7 @@
 #include "test/mock/frameworks/core/components_ng/pattern/mock_nestable_scroll_container.h"
 
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_method.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 namespace OHOS::Ace::NG {
 class SwiperAttrTestNg : public SwiperTestNg {};
 

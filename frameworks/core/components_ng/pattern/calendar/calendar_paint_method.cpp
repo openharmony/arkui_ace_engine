@@ -697,7 +697,11 @@ void CalendarPaintMethod::ApplyCalendarThemeFontScaleDependent(
     CHECK_NULL_VOID(pipelineContext);
     CHECK_NULL_VOID(theme);
     auto fontSizeScale = pipelineContext->GetFontScale();
-    if (fontSizeScale < theme->GetCalendarPickerLargeScale() ||
+    auto fontManager = pipelineContext->GetFontManager();
+    const bool skipDialogDayGridAging = isCalendarDialog_ &&
+        themeNode_ && themeNode_->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) && fontManager &&
+        fontManager->GetFallbackLineSpacingStyleOptimizeFlag();
+    if (skipDialogDayGridAging || fontSizeScale < theme->GetCalendarPickerLargeScale() ||
         Dimension(pipelineContext->GetRootHeight()).ConvertToVp() < DEVICE_HEIGHT_LIMIT) {
         calendarDayKeyFocusedWidth_ = theme->GetCalendarDayKeyFocusedWidth().ConvertToPx();
     } else {

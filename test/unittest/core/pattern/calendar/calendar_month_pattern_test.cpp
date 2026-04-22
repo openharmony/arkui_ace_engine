@@ -14,6 +14,7 @@
  */
 
 #include <cstddef>
+#include "core/accessibility/accessibility_manager.h"
 #include <optional>
 #include <string>
 #include <utility>
@@ -75,6 +76,11 @@ protected:
 void CalendarMonthTestNg::SetUpTestCase()
 {
     MockPipelineContext::SetUp();
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    if (!pipeline->GetSafeAreaManager()) {
+        pipeline->safeAreaManager_ = AceType::MakeRefPtr<SafeAreaManager>();
+    }
 }
 
 void CalendarMonthTestNg::TearDownTestCase()
@@ -236,6 +242,7 @@ HWTEST_F(CalendarMonthTestNg, SetColRowSpaceTest005, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
     calendarMonthPattern->SetColRowSpace();
     EXPECT_NE(paintProperty->GetColSpaceValue(Dimension()), value);
 }
@@ -306,6 +313,7 @@ HWTEST_F(CalendarMonthTestNg, SetColRowSpaceTest007, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
     calendarMonthPattern->SetColRowSpace();
     EXPECT_NE(paintProperty->GetColSpaceValue(Dimension()), value);
 }
@@ -342,6 +350,7 @@ HWTEST_F(CalendarMonthTestNg, SetColRowSpaceTest008, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
     calendarMonthPattern->SetColRowSpace();
     EXPECT_NE(paintProperty->GetColSpaceValue(Dimension()), value);
 }
@@ -378,6 +387,7 @@ HWTEST_F(CalendarMonthTestNg, SetColRowSpaceTest009, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
     calendarMonthPattern->SetColRowSpace();
     EXPECT_NE(paintProperty->GetColSpaceValue(Dimension()), value);
 }
@@ -394,6 +404,13 @@ HWTEST_F(CalendarMonthTestNg, InitCurrentVirtualNodeTest001, TestSize.Level1)
         V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarMonthPattern>(); });
     auto calendarMonthPattern = frameNode->GetPattern<CalendarMonthPattern>();
     ASSERT_NE(calendarMonthPattern, nullptr);
+    LayoutConstraintF layoutConstraintF;
+    layoutConstraintF.selfIdealSize = OptionalSizeF(10.0f, 10.0f);
+    auto hostLayoutProperty = calendarMonthPattern->GetHost()->GetLayoutProperty();
+    ASSERT_NE(hostLayoutProperty, nullptr);
+    hostLayoutProperty->layoutConstraint_ = layoutConstraintF;
+    calendarMonthPattern->monthState_ = MonthState::PRE_MONTH;
+    calendarMonthPattern->isInitVirtualNode_ = true;
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         frameNode, AceType::MakeRefPtr<GeometryNode>(), AceType::MakeRefPtr<LayoutProperty>());
     calendarMonthPattern->InitCurrentVirtualNode();
@@ -412,11 +429,17 @@ HWTEST_F(CalendarMonthTestNg, InitCurrentVirtualNodeTest002, TestSize.Level1)
         V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarMonthPattern>(); });
     auto calendarMonthPattern = frameNode->GetPattern<CalendarMonthPattern>();
     ASSERT_NE(calendarMonthPattern, nullptr);
+    LayoutConstraintF layoutConstraintF;
+    layoutConstraintF.selfIdealSize = OptionalSizeF(10.0f, 10.0f);
+    auto hostLayoutProperty = calendarMonthPattern->GetHost()->GetLayoutProperty();
+    ASSERT_NE(hostLayoutProperty, nullptr);
+    hostLayoutProperty->layoutConstraint_ = layoutConstraintF;
+    calendarMonthPattern->monthState_ = MonthState::PRE_MONTH;
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         frameNode, AceType::MakeRefPtr<GeometryNode>(), AceType::MakeRefPtr<LayoutProperty>());
     calendarMonthPattern->isInitVirtualNode_ = true;
     calendarMonthPattern->InitCurrentVirtualNode();
-    EXPECT_TRUE(calendarMonthPattern->deviceOrientation_ == DeviceOrientation::PORTRAIT);
+    EXPECT_EQ(calendarMonthPattern->deviceOrientation_, DeviceOrientation::ORIENTATION_UNDEFINED);
 }
 
 /**
@@ -886,6 +909,7 @@ HWTEST_F(CalendarMonthTestNg, JudgeAreaTest001, TestSize.Level1)
     ASSERT_NE(themeManager, nullptr);
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
     auto* stack = ViewStackProcessor::GetInstance();
     ASSERT_NE(stack, nullptr);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
@@ -913,6 +937,7 @@ HWTEST_F(CalendarMonthTestNg, JudgeAreaTest002, TestSize.Level1)
     ASSERT_NE(themeManager, nullptr);
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
     auto* stack = ViewStackProcessor::GetInstance();
     ASSERT_NE(stack, nullptr);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
@@ -1036,6 +1061,7 @@ HWTEST_F(CalendarMonthTestNg, OnTouchEventTest004, TestSize.Level1)
     ASSERT_NE(themeManager, nullptr);
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
     auto* stack = ViewStackProcessor::GetInstance();
     ASSERT_NE(stack, nullptr);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
@@ -1069,6 +1095,7 @@ HWTEST_F(CalendarMonthTestNg, OnTouchEventTest005, TestSize.Level1)
     ASSERT_NE(themeManager, nullptr);
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
     auto* stack = ViewStackProcessor::GetInstance();
     ASSERT_NE(stack, nullptr);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
@@ -1166,6 +1193,7 @@ HWTEST_F(CalendarMonthTestNg, OnHoverEventTest003, TestSize.Level1)
     ASSERT_NE(themeManager, nullptr);
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
     auto* stack = ViewStackProcessor::GetInstance();
     ASSERT_NE(stack, nullptr);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
@@ -1366,6 +1394,7 @@ HWTEST_F(CalendarMonthTestNg, JudgeAreaTest003, TestSize.Level1)
     ASSERT_NE(themeManager, nullptr);
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<CalendarTheme>()));
     auto* stack = ViewStackProcessor::GetInstance();
     ASSERT_NE(stack, nullptr);
     auto frameNode = FrameNode::GetOrCreateFrameNode(

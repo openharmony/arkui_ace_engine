@@ -15,6 +15,7 @@
  */
 
 #include <gmock/gmock.h>
+#include "core/accessibility/accessibility_manager.h"
 
 #include "gtest/gtest.h"
 
@@ -34,6 +35,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/common/properties/placement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1198,6 +1200,265 @@ HWTEST_F(WebPatternWindowTestNg, UninitRotationEventCallback_001, TestSize.Level
     webPattern->UninitRotationEventCallback();
     MockPipelineContext::TearDown();
     EXPECT_EQ(webPattern->rotationEndCallbackId_, 0);
+#endif
+}
+
+/**
+ * @tc.name: GetPositionForPlacement_Basic_001
+ * @tc.desc: Test GetPositionForPlacement with basic directions
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWindowTestNg, GetPositionForPlacement_Basic_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+
+    float mouseX = 500.0f;
+    float mouseY = 300.0f;
+    float tooltipWidth = 100.0f;
+    float tooltipHeight = 50.0f;
+
+    // Test BOTTOM placement
+    auto posBottom = webPattern->GetPositionForPlacement(Placement::BOTTOM, mouseX, mouseY,
+        tooltipWidth, tooltipHeight);
+    EXPECT_FLOAT_EQ(posBottom.x, mouseX - tooltipWidth / 2.0f);
+    EXPECT_GT(posBottom.y, mouseY);
+
+    // Test TOP placement
+    auto posTop = webPattern->GetPositionForPlacement(Placement::TOP, mouseX, mouseY, tooltipWidth, tooltipHeight);
+    EXPECT_FLOAT_EQ(posTop.x, mouseX - tooltipWidth / 2.0f);
+    EXPECT_LT(posTop.y, mouseY);
+
+    // Test RIGHT placement
+    auto posRight = webPattern->GetPositionForPlacement(Placement::RIGHT, mouseX, mouseY, tooltipWidth, tooltipHeight);
+    EXPECT_GT(posRight.x, mouseX);
+    EXPECT_FLOAT_EQ(posRight.y, mouseY - tooltipHeight / 2.0f);
+
+    // Test LEFT placement
+    auto posLeft = webPattern->GetPositionForPlacement(Placement::LEFT, mouseX, mouseY, tooltipWidth, tooltipHeight);
+    EXPECT_LT(posLeft.x, mouseX);
+    EXPECT_FLOAT_EQ(posLeft.y, mouseY - tooltipHeight / 2.0f);
+
+    // Test corner positions
+    auto posTopLeft = webPattern->GetPositionForPlacement(Placement::TOP_LEFT, mouseX, mouseY,
+        tooltipWidth, tooltipHeight);
+    EXPECT_LT(posTopLeft.x, mouseX);
+    EXPECT_LT(posTopLeft.y, mouseY);
+
+    auto posBottomRight = webPattern->GetPositionForPlacement(Placement::BOTTOM_RIGHT, mouseX,
+        mouseY, tooltipWidth, tooltipHeight);
+    EXPECT_GT(posBottomRight.x, mouseX);
+    EXPECT_GT(posBottomRight.y, mouseY);
+#endif
+}
+
+/**
+ * @tc.name: GetPositionForPlacement_Default_001
+ * @tc.desc: Test GetPositionForPlacement with default (NONE) placement
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWindowTestNg, GetPositionForPlacement_Default_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+
+    float mouseX = 500.0f;
+    float mouseY = 300.0f;
+    float tooltipWidth = 100.0f;
+    float tooltipHeight = 50.0f;
+
+    // Test default (NONE) placement - should use BOTTOM strategy
+    auto posDefault = webPattern->GetPositionForPlacement(Placement::NONE, mouseX, mouseY, tooltipWidth, tooltipHeight);
+    EXPECT_FLOAT_EQ(posDefault.x, mouseX - tooltipWidth / 2.0f);
+    EXPECT_GT(posDefault.y, mouseY);
+#endif
+}
+
+/**
+ * @tc.name: CheckPlacementAvailable_BoundsAndOverlap_001
+ * @tc.desc: Test CheckPlacementAvailable with out of bounds and mouse overlap
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWindowTestNg, CheckPlacementAvailable_BoundsAndOverlap_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+
+    WebPattern::TooltipCalculationContext context = {500.0f, 300.0f, 100.0f, 50.0f, 1000.0f, 800.0f};
+
+    // Test out of bounds - left
+    WebPattern::TooltipPosition posLeft = {-10.0f, 300.0f};
+    EXPECT_FALSE(webPattern->CheckPlacementAvailable(posLeft, context));
+
+    // Test out of bounds - top
+    WebPattern::TooltipPosition posTop = {500.0f, -10.0f};
+    EXPECT_FALSE(webPattern->CheckPlacementAvailable(posTop, context));
+
+    // Test out of bounds - right
+    WebPattern::TooltipPosition posRight = {950.0f, 300.0f};
+    EXPECT_FALSE(webPattern->CheckPlacementAvailable(posRight, context));
+
+    // Test out of bounds - bottom
+    WebPattern::TooltipPosition posBottom = {500.0f, 760.0f};
+    EXPECT_FALSE(webPattern->CheckPlacementAvailable(posBottom, context));
+
+    // Test mouse overlap
+    WebPattern::TooltipPosition posOverlap = {500.0f, 300.0f};
+    EXPECT_FALSE(webPattern->CheckPlacementAvailable(posOverlap, context));
+#endif
+}
+
+/**
+ * @tc.name: CheckPlacementAvailable_Valid_001
+ * @tc.desc: Test CheckPlacementAvailable with valid position
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWindowTestNg, CheckPlacementAvailable_Valid_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+
+    WebPattern::TooltipCalculationContext context = {500.0f, 300.0f, 100.0f, 50.0f, 1000.0f, 800.0f};
+
+    // Test valid position - bottom right
+    WebPattern::TooltipPosition posValid = {520.0f, 350.0f};
+    EXPECT_TRUE(webPattern->CheckPlacementAvailable(posValid, context));
+
+    // Test valid position - top left (no overlap)
+    WebPattern::TooltipPosition posValid2 = {380.0f, 250.0f};
+    EXPECT_TRUE(webPattern->CheckPlacementAvailable(posValid2, context));
+#endif
+}
+
+/**
+ * @tc.name: CalculateTooltipOffsetWithPlacement_InvalidParams_001
+ * @tc.desc: Test CalculateTooltipOffsetWithPlacement with invalid parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWindowTestNg, CalculateTooltipOffsetWithPlacement_InvalidParams_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+
+    // Test invalid tooltip width
+    WebPattern::TooltipCalculationContext context1 = {500.0f, 300.0f, 0.0f, 50.0f, 1000.0f, 800.0f};
+    auto result1 = webPattern->CalculateTooltipOffsetWithPlacement(context1);
+    EXPECT_FLOAT_EQ(result1.GetX(), 0.0f);
+    EXPECT_FLOAT_EQ(result1.GetY(), 0.0f);
+
+    // Test invalid tooltip height
+    WebPattern::TooltipCalculationContext context2 = {500.0f, 300.0f, 100.0f, -1.0f, 1000.0f, 800.0f};
+    auto result2 = webPattern->CalculateTooltipOffsetWithPlacement(context2);
+    EXPECT_FLOAT_EQ(result2.GetX(), 0.0f);
+    EXPECT_FLOAT_EQ(result2.GetY(), 0.0f);
+
+    // Test invalid mouse X
+    WebPattern::TooltipCalculationContext context3 = {-1.0f, 300.0f, 100.0f, 50.0f, 1000.0f, 800.0f};
+    auto result3 = webPattern->CalculateTooltipOffsetWithPlacement(context3);
+    EXPECT_FLOAT_EQ(result3.GetX(), 0.0f);
+    EXPECT_FLOAT_EQ(result3.GetY(), 0.0f);
+
+    // Test invalid mouse Y
+    WebPattern::TooltipCalculationContext context4 = {500.0f, -1.0f, 100.0f, 50.0f, 1000.0f, 800.0f};
+    auto result4 = webPattern->CalculateTooltipOffsetWithPlacement(context4);
+    EXPECT_FLOAT_EQ(result4.GetX(), 0.0f);
+    EXPECT_FLOAT_EQ(result4.GetY(), 0.0f);
+#endif
+}
+
+/**
+ * @tc.name: CalculateTooltipOffsetWithPlacement_PlacementStrategy_001
+ * @tc.desc: Test CalculateTooltipOffsetWithPlacement with placement priority
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWindowTestNg, CalculateTooltipOffsetWithPlacement_PlacementStrategy_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+
+    // Test scenario where RIGHT_BOTTOM should work
+    WebPattern::TooltipCalculationContext context1 = {500.0f, 300.0f, 100.0f, 50.0f, 1000.0f, 800.0f};
+    auto result1 = webPattern->CalculateTooltipOffsetWithPlacement(context1);
+    EXPECT_GT(result1.GetX(), 500.0f);  // Should be to the right
+    EXPECT_GT(result1.GetY(), 300.0f);  // Should be below
+
+    // Test scenario where RIGHT_BOTTOM fails but LEFT_BOTTOM works
+    WebPattern::TooltipCalculationContext context2 = {50.0f, 300.0f, 100.0f, 50.0f, 100.0f, 800.0f};
+    auto result2 = webPattern->CalculateTooltipOffsetWithPlacement(context2);
+    EXPECT_LT(result2.GetX(), 50.0f);  // Should be to the left
+    EXPECT_GT(result2.GetY(), 300.0f);  // Should be below
+#endif
+}
+
+/**
+ * @tc.name: CalculateTooltipOffsetWithPlacement_Fallback_001
+ * @tc.desc: Test CalculateTooltipOffsetWithPlacement fallback strategy
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWindowTestNg, CalculateTooltipOffsetWithPlacement_Fallback_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+
+    // Test fallback when tooltip is larger than available space
+    // Large tooltip that doesn't fit anywhere, should use max space strategy
+    WebPattern::TooltipCalculationContext context = {500.0f, 400.0f, 600.0f, 600.0f, 1000.0f, 800.0f};
+    auto result = webPattern->CalculateTooltipOffsetWithPlacement(context);
+
+    // Result should be within bounds
+    EXPECT_GE(result.GetX(), 0.0f);
+    EXPECT_LE(result.GetX() + 600.0f, 1000.0f);
+    EXPECT_GE(result.GetY(), 0.0f);
+    EXPECT_LE(result.GetY() + 600.0f, 800.0f);
 #endif
 }
 } // namespace OHOS::Ace::NG

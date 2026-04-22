@@ -63,6 +63,10 @@
             "to": "arkui.component.idlize.CustomSpanWrapper"
         },
         {
+            "from": "arkui.component.styledString.CustomSpanMeasureInfo",
+            "to": "arkui.component.idlize.CustomSpanMeasureInfoProxy"
+        },
+        {
             "from": "arkui.component.common.TouchEvent",
             "to": "arkui.component.idlize.TouchEventProxy"
         }

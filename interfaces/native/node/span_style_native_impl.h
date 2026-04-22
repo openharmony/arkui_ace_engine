@@ -33,6 +33,7 @@ namespace OHOS::Ace::SpanStyleModel {
     ArkUITextShadowStyle ConvertToOriginTextShadowStyle(const OH_ArkUI_TextShadowStyle& style);
     ArkUIDecorationStyle ConvertToOriginDecorationStyle(const OH_ArkUI_DecorationStyle& style);
     ArkUILineHeightStyle ConvertToOriginLineHeightStyle(const OH_ArkUI_LineHeightStyle& style);
+    ArkUILineSpacingStyle ConvertToOriginLineSpacingStyle(const OH_ArkUI_LineSpacingStyle& style);
     ArkUILetterSpacingStyle ConvertToOriginLetterSpacing(const OH_ArkUI_LetterSpacingStyle& style);
     ArkUIImageAttachment ConvertToOriginImageAttachment(const OH_ArkUI_ImageAttachment& attachment);
     ArkUIBaselineOffsetStyle ConvertToOriginBaselineOffset(const OH_ArkUI_BaselineOffsetStyle& style);
@@ -48,6 +49,7 @@ namespace OHOS::Ace::SpanStyleModel {
     OH_ArkUI_TextShadowStyle ConvertToCTextShadowStyle(const ArkUITextShadowStyle& style);
     OH_ArkUI_DecorationStyle ConvertToCDecorationStyle(const ArkUIDecorationStyle& style);
     OH_ArkUI_LineHeightStyle ConvertToCLineHeightStyle(const ArkUILineHeightStyle& style);
+    OH_ArkUI_LineSpacingStyle ConvertToCLineSpacingStyle(const ArkUILineSpacingStyle& style);
     OH_ArkUI_LetterSpacingStyle ConvertToCLetterSpacing(const ArkUILetterSpacingStyle& style);
     OH_ArkUI_ImageAttachment ConvertToCImageAttachment(const ArkUIImageAttachment& attachment);
     OH_ArkUI_BaselineOffsetStyle ConvertToCBaselineOffset(const ArkUIBaselineOffsetStyle& style);
@@ -117,6 +119,12 @@ struct OH_ArkUI_TextShadowStyle {
 
 struct OH_ArkUI_LineHeightStyle {
     float lineHeight;
+    std::optional<float> lineHeightMultiple;
+};
+
+struct OH_ArkUI_LineSpacingStyle {
+    float lineSpacing = 0.0f;
+    bool onlyBetweenLines = false;
 };
 
 struct OH_ArkUI_BackgroundColorStyle {
@@ -173,6 +181,7 @@ struct OH_ArkUI_SpanStyle {
     OH_ArkUI_GestureStyle gestureStyle;
     OH_ArkUI_ParagraphStyle paragraphStyle;
     OH_ArkUI_LineHeightStyle lineHeightStyle;
+    OH_ArkUI_LineSpacingStyle lineSpacingStyle;
     OH_ArkUI_DecorationStyle decorationStyle;
     OH_ArkUI_TextShadowStyle textShadowStyle;
     OH_ArkUI_ImageAttachment imageAttachment;

@@ -20,6 +20,7 @@
 #include "interfaces/inner_api/ace_kit/include/ui/base/geometry/dimension.h"
 #include "interfaces/inner_api/ace_kit/include/ui/gestures/gesture_event.h"
 
+#include "core/common/font_manager.h"
 #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
@@ -282,6 +283,21 @@ const Dimension ConvertFontScaleValue(
     }
     if (pipeline->IsFollowSystem() && (!NearZero(maxAppFontScale))) {
         fontSizeScale = std::min(fontSizeScale, maxAppFontScale);
+    }
+    auto fontManager = pipeline->GetFontManager();
+    CHECK_NULL_RETURN(fontManager, fontSizeValue);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
+        fontManager->GetFallbackLineSpacingStyleOptimizeFlag()) {
+        if (NearZero(fontSizeScale) || (fontSizeValue.Unit() == DimensionUnit::VP)) {
+            return fontSizeValue;
+        }
+        if (GreatOrEqualCustomPrecision(fontSizeScale, 1.0f) && pipeline->IsFollowSystem()) {
+            fontSizeScale = std::clamp(fontSizeScale, 0.0f, maxAppFontScale);
+            if (fontSizeScale != 0.0f) {
+                return Dimension(fontSizeValue / fontSizeScale);
+            }
+        }
+        return fontSizeValue;
     }
     if (NeedAdaptForAging()) {
         if (isUserSetFont) {

@@ -99,6 +99,7 @@ public:
     void SetHostParams(const OHOS::AAFwk::WantParams& params) override;
     void UpdateFontScale(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
     static int32_t GetUIContentWindowID(int32_t instanceId);
+    OHOS::Rosen::Window* GetUIContentWindow() override;
     // UI content event process
     bool ProcessBackPressed() override;
     void UpdateDialogResourceConfiguration(RefPtr<Container>& container,
@@ -485,6 +486,11 @@ public:
     void SetContentChangeDetectCallback(const WeakPtr<TaskExecutor>& taskExecutor);
     void SetXComponentDisplayConstraintEnabled(bool isEnable) override;
 
+    void RegisterTouchTimingCallback(
+        const std::function<void(uint64_t sensorTime, uint64_t receiveTime, uint64_t dispatchTime,
+            int32_t eventType)>&& callback) override;
+    void UnregisterTouchTimingCallback() override;
+
     // get PointerEvent ptr from ts
     const std::shared_ptr<const OHOS::MMI::PointerEvent> GetPointerEventFromAxisEvent(napi_value event) override;
     const std::shared_ptr<const OHOS::MMI::PointerEvent> GetPointerEventFromTouchEvent(napi_value event) override;
@@ -608,7 +614,7 @@ protected:
     VMType vmType_ = VMType::NORMAL;
 
 private:
-    void ProcessWindowSizeLayoutBreakPointChange();
+    void ProcessWindowSizeLayoutBreakPointChange(double density);
 };
 
 } // namespace OHOS::Ace

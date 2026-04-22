@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 
 #include "menu_item_model.h"
@@ -497,7 +498,7 @@ void MenuItemPattern::ClearFocusStyle()
     }
     if (isFocusShadowSet_) {
         renderContext->ResetBackShadow();
-        renderContext->SetShadowRadius(0.0f);
+        renderContext->SetShadowRadius(-1.0f);
         isFocusShadowSet_ = false;
     }
     auto paintProperty = GetPaintProperty<MenuItemPaintProperty>();
@@ -563,7 +564,7 @@ void MenuItemPattern::HandleBlurEvent()
     }
     if (isFocusShadowSet_) {
         renderContext->ResetBackShadow();
-        renderContext->SetShadowRadius(0.0f);
+        renderContext->SetShadowRadius(-1.0f);
         isFocusShadowSet_ = false;
     }
 
@@ -722,6 +723,9 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
     if (menuPattern->GetScrollBar().has_value()) {
         param.scrollBar = menuPattern->GetScrollBar().value();
     }
+    param.targetSpace = outterMenuLayoutProps->GetMenuTargetSpace();
+    param.targetOffset = outterMenuLayoutProps->GetTargetOffset();
+    param.targetSize = outterMenuLayoutProps->GetTargetMenuSize();
     ParseMenuRadius(param);
     auto subMenu = MenuView::Create(customNode, host->GetId(), host->GetTag(), param);
     CHECK_NULL_VOID(subMenu);
@@ -780,7 +784,8 @@ void MenuItemPattern::ShowSubMenuWithAnimation(const RefPtr<FrameNode>& subMenu)
 void MenuItemPattern::SendSubMenuOpenToAccessibility(RefPtr<FrameNode>& subMenu, ShowSubMenuType type)
 {
     CHECK_NULL_VOID(subMenu);
-    auto accessibilityProperty = subMenu->GetAccessibilityProperty<MenuAccessibilityProperty>();
+    auto accessibilityProperty = AceType::DynamicCast<MenuAccessibilityProperty>(
+        subMenu->GetAccessibilityProperty<AccessibilityProperty>());
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetAccessibilityIsShow(true);
     subMenu->OnAccessibilityEvent(AccessibilityEventType::PAGE_OPEN);
@@ -3695,14 +3700,20 @@ void MenuItemPattern::UpdateFontByThemeColor(RefPtr<MenuLayoutProperty>& menuPro
     auto fontNode = isLabel ? label_ : content_;
     CHECK_NULL_VOID(fontNode);
     CHECK_NULL_VOID(itemProperty);
-    CHECK_NULL_VOID(menuProperty);
-
-    auto fontColor = isLabel ? itemProperty->GetLabelFontColor() : itemProperty->GetFontColor();
-    auto textProperty = fontNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textProperty);
-    if (!fontColor.has_value() && !menuProperty->GetFontColor().has_value()) {
-        fontNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto fontColor = itemProperty->GetLabelFontColor();
+    if (isLabel && (!fontColor.has_value() || !itemProperty->GetLabelFontColorSetByUser().value_or(false))) {
+        CHECK_NULL_VOID(menuProperty);
+        auto textProperty = fontNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textProperty);
+        if (menuProperty->GetFontColorSetByUser().value_or(false) && menuProperty->GetFontColor().has_value()) {
+            textProperty->UpdateTextColor(menuProperty->GetFontColor().value());
+            itemProperty->UpdateLabelFontColor(menuProperty->GetFontColor().value());
+        } else {
+            textProperty->UpdateTextColor(menuTheme->GetMenuFontColor());
+            itemProperty->UpdateLabelFontColor(menuTheme->GetMenuFontColor());
+        }
     }
+    fontNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 bool MenuItemPattern::OnThemeScopeUpdate(int32_t themeScopeId)
@@ -3720,6 +3731,7 @@ bool MenuItemPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     CHECK_NULL_RETURN(itemProperty, false);
     auto menuProperty = menu->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_RETURN(menuProperty, false);
+    host->MarkModifyDone();
     UpdateFontByThemeColor(menuProperty, itemProperty, menuTheme, true);
     UpdateFontByThemeColor(menuProperty, itemProperty, menuTheme, false);
     UpdateStartIconByThemeColor(menuTheme);
@@ -3727,7 +3739,6 @@ bool MenuItemPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     UpdateexpandIconByThemeColor(menuTheme);
     UpdateSelectIconByThemeColor(menuTheme);
     UpdateCheckMarkIconByThemeColor(menuTheme);
-    host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     return true;
 }

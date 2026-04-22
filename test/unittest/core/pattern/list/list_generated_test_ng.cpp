@@ -30,6 +30,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t ITEM_COUNT = 10;
+constexpr int32_t TEST_NODE_ID = 2;
 } // namespace
 
 class ListGeneratedTestNg : public ListTestNg {
@@ -1570,5 +1571,91 @@ HWTEST_F(ListGeneratedTestNg, ListModelNGGetShowCachedDefault001, TestSize.Level
     // Get with null frameNode - should return default value (false)
     auto result = model.GetShowCached(nullptr);
     EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ListItemGroupSetHeaderStyle001
+ * @tc.desc: Test SetHeaderStyle when changing from NONE to FLOATING
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListItemGroupSetHeaderStyle001, TestSize.Level1)
+{
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern =
+        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupOptions{});
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, TEST_NODE_ID, listItemGroupPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->frameNode_ = frameNode;
+
+    EXPECT_EQ(pattern->GetHeaderStyle(), V2::ListItemGroupHeaderFooterStyle::NONE);
+    pattern->SetHeaderStyle(V2::ListItemGroupHeaderFooterStyle::FLOATING);
+    EXPECT_EQ(pattern->GetHeaderStyle(), V2::ListItemGroupHeaderFooterStyle::FLOATING);
+}
+
+/**
+ * @tc.name: ListItemGroupSetFooterStyle001
+ * @tc.desc: Test SetFooterStyle when changing from NONE to FLOATING
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListItemGroupSetFooterStyle001, TestSize.Level1)
+{
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemGroupPattern> listItemGroupPattern =
+        AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupOptions{});
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, TEST_NODE_ID, listItemGroupPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->frameNode_ = frameNode;
+
+    EXPECT_EQ(pattern->GetFooterStyle(), V2::ListItemGroupHeaderFooterStyle::NONE);
+    pattern->SetFooterStyle(V2::ListItemGroupHeaderFooterStyle::FLOATING);
+    EXPECT_EQ(pattern->GetFooterStyle(), V2::ListItemGroupHeaderFooterStyle::FLOATING);
+}
+
+/**
+ * @tc.name: ListItemGroupModelSetHeaderStyle001
+ * @tc.desc: Test ListItemGroupModelNG SetHeaderStyle with FLOATING
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListItemGroupModelSetHeaderStyle001, TestSize.Level1)
+{
+    ListItemGroupModelNG model;
+    V2::ListItemGroupOptions options;
+    options.style = V2::ListItemGroupStyle::NONE;
+    model.Create(options);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListItemGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    EXPECT_EQ(pattern->GetHeaderStyle(), V2::ListItemGroupHeaderFooterStyle::NONE);
+    ListItemGroupModelNG::SetHeaderStyle(listNode, V2::ListItemGroupHeaderFooterStyle::FLOATING);
+    EXPECT_EQ(pattern->GetHeaderStyle(), V2::ListItemGroupHeaderFooterStyle::FLOATING);
+    CreateDone();
+}
+
+/**
+ * @tc.name: ListItemGroupModelSetFooterStyle001
+ * @tc.desc: Test ListItemGroupModelNG SetFooterStyle with FLOATING
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListItemGroupModelSetFooterStyle001, TestSize.Level1)
+{
+    ListItemGroupModelNG model;
+    V2::ListItemGroupOptions options;
+    options.style = V2::ListItemGroupStyle::NONE;
+    model.Create(options);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListItemGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    EXPECT_EQ(pattern->GetFooterStyle(), V2::ListItemGroupHeaderFooterStyle::NONE);
+    ListItemGroupModelNG::SetFooterStyle(listNode, V2::ListItemGroupHeaderFooterStyle::FLOATING);
+    EXPECT_EQ(pattern->GetFooterStyle(), V2::ListItemGroupHeaderFooterStyle::FLOATING);
+    CreateDone();
 }
 } // namespace OHOS::Ace::NG

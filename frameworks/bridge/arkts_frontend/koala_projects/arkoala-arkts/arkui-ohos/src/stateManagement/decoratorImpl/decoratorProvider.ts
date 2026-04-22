@@ -23,7 +23,7 @@ import { isDynamicObject, getV2ObservedObject } from '../../component/interop';
 export class ProviderDecoratedVariable<T> extends DecoratedV2VariableBase<T> implements IProviderDecoratedVariable<T> {
     private readonly provideAlias_: string;
     private readonly backing_: IBackingValue<T>;
-    public viewV2?: Object;
+    public viewV2: Any = undefined;
     constructor(owningView: IVariableOwner, varName: string, provideAlias: string, initValue: T) {
         super('@Provider', owningView, varName);
         this.provideAlias_ = provideAlias;

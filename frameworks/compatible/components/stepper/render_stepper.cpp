@@ -14,6 +14,7 @@
  */
 
 #include "compatible/components/stepper/render_stepper.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/i18n/localization.h"
 #include "compatible/components/stepper/render_stepper_item.h"

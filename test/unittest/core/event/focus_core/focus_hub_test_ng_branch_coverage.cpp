@@ -594,9 +594,9 @@ HWTEST_F(FocusHubTestNg, ScrollByOffsetToParent001, TestSize.Level1)
      */
     auto listNode = FrameNodeOnTree::CreateFrameNode(
         V2::LIST_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ListPattern>());
-    auto listItemGroupNode =
-        FrameNodeOnTree::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            AceType::MakeRefPtr<ListItemGroupPattern>(nullptr, V2::ListItemGroupStyle::NONE));
+    auto listItemGroupNode = FrameNodeOnTree::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ListItemGroupPattern>(nullptr, V2::ListItemGroupOptions{V2::ListItemGroupStyle::NONE}));
     auto listItemPattern = AceType::MakeRefPtr<ListItemPattern>(nullptr);
     auto listItemNode = FrameNodeOnTree::CreateFrameNode(
         V2::LIST_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), listItemPattern);

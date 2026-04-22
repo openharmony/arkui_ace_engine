@@ -24,7 +24,6 @@
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components_ng/property/calc_length.h"
-#include "core/components_ng/property/border_property.h"
 
 namespace OHOS::Ace {
 
@@ -654,6 +653,10 @@ public:
     {
         return hoverColor_;
     }
+    void SetHoverColor(const Color& value)
+    {
+        hoverColor_ = value;
+    }
 
     const Color& GetBackgroundColor() const
     {
@@ -748,6 +751,11 @@ public:
     const Color& GetSecondaryFontColor() const
     {
         return secondaryFontColor_;
+    }
+
+    void SetSecondaryFontColor(const Color& value)
+    {
+        secondaryFontColor_ = value;
     }
 
     const std::string& GetFontFamily() const
@@ -1092,6 +1100,11 @@ public:
     const Color& GetLineColor() const
     {
         return lineColor_;
+    }
+
+    void SetLineColor(const Color& value)
+    {
+        lineColor_ = value;
     }
 
     const TextStyle& GetOptionTextStyle() const

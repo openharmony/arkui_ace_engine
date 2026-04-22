@@ -30,7 +30,6 @@
 #include "base/utils/utils.h"
 #include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/alignment.h"
-#include "core/components/common/properties/border_image.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model.h"
@@ -47,6 +46,10 @@
 
 namespace OHOS::Rosen {
     class BrightnessBlender;
+}
+
+namespace OHOS::Ace {
+class BorderImage;
 }
 
 namespace OHOS::Ace::NG {
@@ -66,6 +69,11 @@ public:
     static void UpdateLayoutPolicyProperty(FrameNode* frameNode, const LayoutCalPolicy layoutPolicy, bool isWidth)
     {
         ViewAbstract::UpdateLayoutPolicyProperty(frameNode, layoutPolicy, isWidth);
+    }
+
+    static void ResetLayoutPolicyProperty(FrameNode* frameNode, bool isWidth)
+    {
+        ViewAbstract::ResetLayoutPolicyProperty(frameNode, isWidth);
     }
 
     static void SetHeight(FrameNode* frameNode, const CalcDimension& height)
@@ -355,6 +363,7 @@ public:
     static void SetLightUpEffect(FrameNode* frameNode, const std::optional<double> radio);
     static void SetPixelStretchEffect(FrameNode* frameNode,
         const std::optional<PixStretchEffectOption>& option);
+    static void SetSpatialEffect(FrameNode* frameNode, const std::optional<SpatialEffectParams>& params);
     static void SetBlendApplyType(FrameNode* frameNode, const std::optional<BlendApplyType>& blendApplyType);
     static void SetPrivacySensitive(FrameNode* frameNode, const std::optional<bool>& flag);
     static void SetOnTouchTestFunc(FrameNode* frameNode, NG::OnChildTouchTestFunc&& onChildTouchTest);

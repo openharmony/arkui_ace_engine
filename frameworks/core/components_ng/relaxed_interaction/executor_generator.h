@@ -37,11 +37,6 @@ public:
 
     std::vector<std::unique_ptr<BaseExecutor>> ParseCommand(const std::unique_ptr<JsonValue>& json);
 
-    std::string GetLastError() const
-    {
-        return lastError_;
-    }
-
 private:
     void RegisterDefaultParsers();
 
@@ -51,7 +46,6 @@ private:
 
     WeakPtr<PipelineContext> context_;
     std::unordered_map<std::string, std::unique_ptr<BaseCommandParser>> parserRegistry_;
-    std::string lastError_;
 };
 
 } // namespace OHOS::Ace::NG

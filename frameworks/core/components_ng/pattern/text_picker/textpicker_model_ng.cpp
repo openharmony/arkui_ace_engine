@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include <securec.h>
 

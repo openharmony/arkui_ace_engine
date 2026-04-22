@@ -22,6 +22,7 @@
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/frameworks/core/common/mock_window.h"
 #include "test/mock/frameworks/core/common/mock_frontend.h"
+#include "core/common/ace_engine.h"
 
 using namespace testing;
 using namespace testing::ext;

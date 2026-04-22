@@ -23,6 +23,7 @@
 #include "gmock/gmock.h"
 
 #include "base/memory/ace_type.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/common/ace_page.h"
 #include "core/common/frontend.h"
 

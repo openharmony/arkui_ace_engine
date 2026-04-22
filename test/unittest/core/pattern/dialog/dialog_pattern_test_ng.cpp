@@ -48,6 +48,7 @@
 #include "core/components_ng/pattern/dialog/dialog_layout_algorithm.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
@@ -58,6 +59,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components/common/properties/ui_material.h"
 #include "test/unittest/core/event/frame_node_on_tree.h"
+#include "core/common/ace_engine.h"
 
 using namespace testing;
 using namespace testing::ext;

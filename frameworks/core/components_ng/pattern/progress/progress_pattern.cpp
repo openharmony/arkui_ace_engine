@@ -319,7 +319,7 @@ void ProgressPattern::ClearFocusStyle()
 
     if (isFocusShadowSet_) {
         renderContext->ResetBackShadow();
-        renderContext->SetShadowRadius(0.0f);
+        renderContext->SetShadowRadius(-1.0f);
         renderContext->ResetBorderRadius();
         isFocusShadowSet_ = false;
     }

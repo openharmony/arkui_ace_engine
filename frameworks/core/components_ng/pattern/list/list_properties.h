@@ -81,6 +81,17 @@ enum class ListItemGroupStyle {
     CARD,
 };
 
+enum class ListItemGroupHeaderFooterStyle {
+    NONE = 0,
+    FLOATING,
+};
+
+struct ListItemGroupOptions {
+    ListItemGroupStyle style = ListItemGroupStyle::NONE;
+    ListItemGroupHeaderFooterStyle headerStyle = ListItemGroupHeaderFooterStyle::NONE;
+    ListItemGroupHeaderFooterStyle footerStyle = ListItemGroupHeaderFooterStyle::NONE;
+};
+
 struct EditMode {
     enum : uint32_t {
         NONE = 0,

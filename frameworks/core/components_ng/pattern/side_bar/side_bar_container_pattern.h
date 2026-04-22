@@ -260,6 +260,10 @@ private:
     void SetSideBarWidthToolBarManager(bool isShow, float sideBarWidth, float dividerWidth);
     void SideBarModifyDoneToolBarManager();
     void UpdateSideBarColorToToolbarManager();
+    void SetContentClickEvent(bool showSideBar);
+    bool IsInContentRegion(const Offset& globalLocation);
+    void SetClickEvent(bool showSideBar);
+    Color GetMaskColor() const;
 
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<InputEvent> dividerMouseEvent_;
@@ -314,6 +318,7 @@ private:
     void HandleLongPressActionEnd();
     void ShowDialogWithNode();
     bool isDialogShow_ = false;
+    RefPtr<ClickEvent> contentClickEvent_;
 };
 
 } // namespace OHOS::Ace::NG

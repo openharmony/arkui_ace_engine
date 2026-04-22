@@ -41,6 +41,7 @@
 #include "adapter/ohos/capability/html/span_to_html.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/rect.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/image/file_uri_helper.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
@@ -52,9 +53,11 @@
 #include "base/utils/utils.h"
 #include "arkweb_utils.h"
 #include "bridge/common/utils/engine_helper.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/common/ace_engine_ext.h"
 #include "core/common/ai/image_analyzer_manager.h"
 #include "core/common/container.h"
+#include "core/components/common/properties/placement.h"
 #include "core/common/ime/input_method_manager.h"
 #include "core/common/recorder/event_definition.h"
 #include "core/common/recorder/event_recorder.h"
@@ -580,6 +583,7 @@ constexpr Dimension TOOLTIP_FONT_SIZE = 14.0_vp;
 constexpr Dimension TOOLTIP_PADDING = 8.0_vp;
 constexpr Dimension TOOLTIP_MOUSE_HEIGHT = 24.0_vp;
 constexpr Dimension TOOLTIP_MARGIN = 8.0_vp;
+constexpr Dimension TOOLTIP_MOUSE_WIDTH = 16.0_vp;
 constexpr float TOOLTIP_MAX_PORTION = 0.35f;
 constexpr float TOOLTIP_DELAY_MS = 700;
 constexpr uint32_t ADJUST_WEB_DRAW_LENGTH = 3000;
@@ -6861,6 +6865,122 @@ void WebPattern::ShowTooltip(const std::string& tooltip, int64_t tooltipTimestam
     taskExecutor->PostDelayedTask(tooltipTask, TaskExecutor::TaskType::UI, TOOLTIP_DELAY_MS, "ArkUIWebShowTooltip");
 }
 
+WebPattern::TooltipPosition WebPattern::GetPositionForPlacement(
+    Placement placement,
+    float mouseX, float mouseY,
+    float tooltipWidth, float tooltipHeight)
+{
+    float margin = TOOLTIP_MARGIN.ConvertToPx();
+    float mouseHeight = TOOLTIP_MOUSE_HEIGHT.ConvertToPx();
+
+    switch (placement) {
+        case Placement::BOTTOM:
+            return { mouseX, mouseY + mouseHeight + margin };
+        case Placement::RIGHT:
+            return { mouseX, mouseY - tooltipHeight / 2.0f };
+        case Placement::RIGHT_TOP:
+            return { mouseX, mouseY - tooltipHeight - margin };
+        case Placement::RIGHT_BOTTOM:
+            return { mouseX, mouseY + mouseHeight + margin };
+        case Placement::LEFT:
+            return { mouseX - tooltipWidth, mouseY - tooltipHeight / 2.0f };
+        case Placement::TOP_LEFT:
+            return { mouseX - tooltipWidth, mouseY - tooltipHeight - margin };
+        case Placement::BOTTOM_LEFT:
+            return { mouseX - tooltipWidth, mouseY + mouseHeight + margin };
+        case Placement::LEFT_TOP:
+            return { mouseX - tooltipWidth, mouseY - tooltipHeight - margin };
+        case Placement::LEFT_BOTTOM:
+            return { mouseX - tooltipWidth, mouseY + mouseHeight + margin };
+        case Placement::TOP:
+            return { mouseX - tooltipWidth / 2.0f, mouseY - tooltipHeight - margin };
+        case Placement::TOP_RIGHT:
+            return { mouseX, mouseY - tooltipHeight - margin };
+        default:
+            return { mouseX, mouseY + mouseHeight + margin };
+    }
+}
+
+bool WebPattern::CheckPlacementAvailable(
+    const TooltipPosition& pos,
+    const TooltipCalculationContext& context)
+{
+    bool outOfBounds = pos.x < 0.0f || pos.y < 0.0f ||
+                       pos.x + context.tooltipWidth > context.webWidth ||
+                       pos.y + context.tooltipHeight > context.webHeight;
+
+    if (outOfBounds) {
+        return false;
+    }
+
+    float mouseWidth = TOOLTIP_MOUSE_WIDTH.ConvertToPx();
+    float mouseHeight = TOOLTIP_MOUSE_HEIGHT.ConvertToPx();
+
+    bool overlapX = !(pos.x + context.tooltipWidth < context.mouseX || pos.x > context.mouseX + mouseWidth);
+    bool overlapY = !(pos.y + context.tooltipHeight < context.mouseY || pos.y > context.mouseY + mouseHeight);
+
+    if (overlapX && overlapY) {
+        return false;
+    }
+
+    return true;
+}
+
+OffsetF WebPattern::CalculateTooltipOffsetWithPlacement(const TooltipCalculationContext& context)
+{
+    static const std::vector<Placement> placementOrder = {
+        Placement::RIGHT_BOTTOM, Placement::LEFT_BOTTOM, Placement::RIGHT_TOP,
+        Placement::RIGHT, Placement::LEFT, Placement::TOP, Placement::BOTTOM,
+        Placement::BOTTOM_LEFT, Placement::TOP_LEFT, Placement::NONE
+    };
+
+    if (context.tooltipWidth <= 0.0f || context.tooltipHeight <= 0.0f ||
+        context.webWidth <= 0.0f || context.webHeight <= 0.0f ||
+        context.mouseX < 0.0f || context.mouseY < 0.0f) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "Invalid tooltip context params");
+        return OffsetF(0.0f, 0.0f);
+    }
+
+    int placementCount = 0;
+    for (const Placement& placement : placementOrder) {
+        if (placement == Placement::NONE) { break; }
+        placementCount++;
+        TooltipPosition pos = GetPositionForPlacement(
+            placement, context.mouseX, context.mouseY, context.tooltipWidth, context.tooltipHeight);
+        if (CheckPlacementAvailable(pos, context)) {
+            return OffsetF(pos.x, pos.y);
+        }
+    }
+
+    TAG_LOGI(AceLogTag::ACE_WEB,
+            "GetPositionForPlacement: All %{public}d placements unavailable, using fallback strategy", placementCount);
+    float margin = TOOLTIP_MARGIN.ConvertToPx();
+    float spaceTop = context.mouseY;
+    float spaceBottom = context.webHeight - context.mouseY;
+    float spaceLeft = context.mouseX;
+    float spaceRight = context.webWidth - context.mouseX;
+    float maxSpace = std::max({spaceTop, spaceBottom, spaceLeft, spaceRight});
+    float finalX = 0.0f, finalY = 0.0f;
+
+    if (maxSpace == spaceRight) {
+        finalX = std::min(context.mouseX + margin, context.webWidth - context.tooltipWidth);
+        finalY = std::max(0.0f, std::min(context.mouseY - context.tooltipHeight / 2.0f,
+                                          context.webHeight - context.tooltipHeight));
+    } else if (maxSpace == spaceLeft) {
+        finalX = std::max(0.0f, context.mouseX - context.tooltipWidth - margin);
+        finalY = std::max(0.0f, std::min(context.mouseY - context.tooltipHeight / 2.0f,
+                                          context.webHeight - context.tooltipHeight));
+    } else if (maxSpace == spaceBottom) {
+        finalX = std::max(0.0f, std::min(context.mouseX, context.webWidth - context.tooltipWidth));
+        finalY = std::min(context.mouseY + margin, context.webHeight - context.tooltipHeight);
+    } else {
+        finalX = std::max(0.0f, std::min(context.mouseX, context.webWidth - context.tooltipWidth));
+        finalY = std::max(0.0f, context.mouseY - context.tooltipHeight - margin);
+    }
+
+    return OffsetF(finalX, finalY);
+}
+
 void WebPattern::CalculateTooltipOffset(RefPtr<FrameNode>& tooltipNode, OffsetF& tooltipOffset)
 {
     auto textLayoutWrapper = tooltipNode->CreateLayoutWrapper(true);
@@ -6880,24 +7000,19 @@ void WebPattern::CalculateTooltipOffset(RefPtr<FrameNode>& tooltipNode, OffsetF&
     CHECK_NULL_VOID(rootNode);
     auto root = rootNode->GetTransformRectRelativeToWindow();
 
-    auto offsetX = offset.GetX() - root.GetX() + mouseHoveredX_;
-    auto offsetY = offset.GetY() - root.GetY() + mouseHoveredY_ + TOOLTIP_MARGIN.ConvertToPx() +
-                   TOOLTIP_MOUSE_HEIGHT.ConvertToPx();
+    float mouseX = offset.GetX() - root.GetX() + mouseHoveredX_;
+    float mouseY = offset.GetY() - root.GetY() + mouseHoveredY_;
 
-    ScopedLayout scope(Referenced::RawPtr(pipeline));
-    if (GreatNotEqual(offsetX + textWidth, root.Width())) {
-        offsetX = root.Width() - textWidth;
-    }
-    if (GreatNotEqual(offsetY + textHeight, root.Height())) {
-        offsetX = offsetX + TOOLTIP_MARGIN.ConvertToPx();
-        offsetY = root.Height() - textHeight;
-    }
-    tooltipOffset.SetX(offsetX);
-    tooltipOffset.SetY(offsetY);
+    TooltipCalculationContext context = {mouseX, mouseY, textWidth, textHeight, root.Width(), root.Height()};
+    OffsetF result = CalculateTooltipOffsetWithPlacement(context);
+
+    tooltipOffset.SetX(result.GetX());
+    tooltipOffset.SetY(result.GetY());
     TAG_LOGI(AceLogTag::ACE_WEB,
         "CalculateTooltipOffset [Tooltip] width: %{public}f height: %{public}f offset:(%{public}f, %{public}f)"
-        " [Web] width: %{public}f height: %{public}f offset:(%{public}f, %{public}f)",
-        textWidth, textHeight, offsetX, offsetY, drawSize_.Width(), drawSize_.Height(), offset.GetX(), offset.GetY());
+        " [Web] width: %{public}f height: %{public}f mouse:(%{public}f, %{public}f)",
+        textWidth, textHeight, result.GetX(), result.GetY(),
+        drawSize_.Width(), drawSize_.Height(), mouseX, mouseY);
 }
 
 void WebPattern::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,

@@ -14,6 +14,7 @@
  */
 
 #include <algorithm>
+#include "core/components_ng/pattern/picker/picker_data.h"
 
 #include "validators.h"
 #include "base/utils/system_properties.h"

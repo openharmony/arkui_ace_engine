@@ -17,6 +17,7 @@
 
 #include <algorithm>
 
+#include "base/subwindow/subwindow_manager.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/dimension_rect.h"
 #include "base/geometry/calc_dimension_rect.h"

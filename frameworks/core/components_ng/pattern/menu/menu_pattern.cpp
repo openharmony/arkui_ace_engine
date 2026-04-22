@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 
+#include "base/subwindow/subwindow_manager.h"
 #include "base/geometry/dimension.h"
 #include "base/log/dump_log.h"
 #include "core/components/common/layout/grid_system_manager.h"
@@ -46,6 +47,7 @@
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/common/properties/placement.h"
 
 namespace OHOS::Ace::NG {
 namespace {

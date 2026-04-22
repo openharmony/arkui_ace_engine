@@ -507,20 +507,16 @@ void LsSolver::UpdateSingleLitDelta(uint64_t litIdx, RationNum currLitDeltaNew)
     if (lits[litIdx].isEqual) {
         if (lits[litIdx].delta == 0 && currLitDeltaNew != 0) {
             lits[litIdx].isTrue = -1;
-            return;
         }
         if (lits[litIdx].delta != 0 && currLitDeltaNew == 0) {
             lits[litIdx].isTrue = 1;
-            return;
         }
     } else {
         if (lits[litIdx].delta <= 0 && currLitDeltaNew > 0) {
             lits[litIdx].isTrue = -1;
-            return;
         }
         if (lits[litIdx].delta > 0 && currLitDeltaNew <= 0) {
             lits[litIdx].isTrue = 1;
-            return;
         }
     }
     lits[litIdx].delta = currLitDeltaNew;

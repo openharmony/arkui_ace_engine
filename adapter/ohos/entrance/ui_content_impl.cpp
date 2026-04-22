@@ -14,6 +14,7 @@
  */
 
 #include "adapter/ohos/entrance/ui_content_impl.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include <atomic>
@@ -43,6 +44,7 @@
 #include "ui_extension_context.h"
 #include "wm_common.h"
 #include "form_ashmem.h"
+#include "pointer_event.h"
 
 #include "base/log/event_report.h"
 #include "base/log/log_wrapper.h"
@@ -3823,7 +3825,7 @@ void KeyboardAvoid(OHOS::Rosen::WindowSizeChangeReason reason, int32_t instanceI
     pipelineContext->OnVirtualKeyboardAreaChange(keyboardRect, textFieldPositionY, textFieldHeight);
 }
 
-void UIContentImpl::ProcessWindowSizeLayoutBreakPointChange()
+void UIContentImpl::ProcessWindowSizeLayoutBreakPointChange(double density)
 {
     auto container = Platform::AceContainer::GetContainer(GetInstanceId());
     CHECK_NULL_VOID(container);
@@ -3832,7 +3834,7 @@ void UIContentImpl::ProcessWindowSizeLayoutBreakPointChange()
 
     auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
 
-    auto task = [instanceId = GetInstanceId()]() {
+    auto task = [instanceId = GetInstanceId(), density]() {
         auto container = Platform::AceContainer::GetContainer(instanceId);
         CHECK_NULL_VOID(container);
 
@@ -3842,6 +3844,7 @@ void UIContentImpl::ProcessWindowSizeLayoutBreakPointChange()
         CHECK_NULL_VOID(pipelineContext);
         auto window = pipelineContext->GetWindow();
         CHECK_NULL_VOID(window);
+        window->SetDensity(density);
 
         window->NotifyBreakpointChangeIfNeeded(instanceId, layoutWidthBreakpoints, layoutHeightBreakpoints);
     };
@@ -3859,7 +3862,7 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas,
     const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info)
 {
-    ProcessWindowSizeLayoutBreakPointChange();
+    ProcessWindowSizeLayoutBreakPointChange(config.Density());
     if (KeyFrameActionPolicy(config, reason, rsTransaction, avoidAreas)) {
         return;
     }
@@ -4098,8 +4101,11 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
             if (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION ||
                 reason == OHOS::Rosen::WindowSizeChangeReason::SCENE_WITH_ANIMATION) {
                 pipelineContext->FlushBuild();
+                LOGI("StartWindowAnimation with reason: %{public}d", reason);
                 pipelineContext->StartWindowAnimation();
-                if (container->GetUIContentType() != UIContentType::DYNAMIC_COMPONENT) {
+                // SCENE_WITH_ANIMATION does not require refreshing all nodes
+                if (container->GetUIContentType() != UIContentType::DYNAMIC_COMPONENT &&
+                    reason != OHOS::Rosen::WindowSizeChangeReason::SCENE_WITH_ANIMATION) {
                     container->NotifyDirectionUpdate();
                 }
             }
@@ -4436,6 +4442,8 @@ void UIContentImpl::UpdateTitleInTargetPos(bool isShow, int32_t height)
 
 void UIContentImpl::NotifyRotationAnimationEnd()
 {
+    LOGI("[%{public}s][%{public}s][%{public}d]: NotifyRotationAnimationEnd", bundleName_.c_str(), moduleName_.c_str(),
+        instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId_);
@@ -4445,6 +4453,7 @@ void UIContentImpl::NotifyRotationAnimationEnd()
         [container]() {
             auto pipelineContext = container->GetPipelineContext();
             if (pipelineContext) {
+                LOGI("StopWindowAnimation: %{public}d", pipelineContext->GetInstanceId());
                 pipelineContext->StopWindowAnimation();
             }
         },
@@ -6079,7 +6088,8 @@ void UIContentImpl::RelaxedCommandCallbackInner(const WeakPtr<TaskExecutor>& tas
             [command]() {
                 auto pipelineContext = NG::PipelineContext::GetCurrentContextSafely();
                 if (pipelineContext == nullptr) {
-                    LOGE("Failed to process relaxed command because pipelineContext is nullptr");
+                    TAG_LOGE(
+                        AceLogTag::ACE_UIEVENT, "Failed to process relaxed command because pipelineContext is nullptr");
                     return;
                 }
                 pipelineContext->ProcessCommand(command);
@@ -6651,6 +6661,11 @@ int32_t UIContentImpl::GetUIContentWindowID(int32_t instanceId)
     return static_cast<int32_t>(windowId);
 }
 
+OHOS::Rosen::Window* UIContentImpl::GetUIContentWindow()
+{
+    return window_;
+}
+
 void UIContentImpl::SetContentChangeDetectCallback(const WeakPtr<TaskExecutor>& taskExecutor)
 {
     UiSessionManager::GetInstance()->SetStartContentChangeDetectCallback([weakTaskExecutor = taskExecutor]
@@ -6705,6 +6720,27 @@ void UIContentImpl::SetXComponentDisplayConstraintEnabled(bool isEnable)
         pipelineContext->SetXComponentDisplayConstraintEnabled(isEnable);
     };
     ExecuteUITask(std::move(task), "ArkUISetXComponentDisplayConstraintEnabled");
+}
+
+void UIContentImpl::RegisterTouchTimingCallback(
+    const std::function<void(uint64_t sensorTime, uint64_t receiveTime, uint64_t dispatchTime, int32_t eventType)>&&
+        callback)
+{
+    CHECK_NULL_VOID(callback);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RegisterTouchTimingCallback(std::move(callback));
+}
+
+void UIContentImpl::UnregisterTouchTimingCallback()
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipeline);
+    pipeline->UnregisterTouchTimingCallback();
 }
 
 void UIContentImpl::SaveGetStateMgmtInfoFunction(const WeakPtr<TaskExecutor>& taskExecutor)

@@ -2865,6 +2865,12 @@ struct ArkUILetterSpacingStyle {
 
 struct ArkUILineHeightStyle {
     float lineHeight;
+    std::optional<double> lineHeightMultiple;
+};
+
+struct ArkUILineSpacingStyle {
+    float lineSpacing = 0.0f;
+    bool onlyBetweenLines = false;
 };
 
 struct ArkUIBackgroundColorStyle {
@@ -2929,6 +2935,7 @@ struct ArkUISpanStyle {
     ArkUIBaselineOffsetStyle baselineOffsetStyle;
     ArkUILetterSpacingStyle letterSpacingStyle;
     ArkUILineHeightStyle lineHeightStyle;
+    ArkUILineSpacingStyle lineSpacingStyle;
     ArkUIUrlStyle urlStyle;
     ArkUIBackgroundColorStyle backgroundColorStyle;
     ArkUIUserDataSpan userDataSpan;
@@ -3037,6 +3044,8 @@ struct ArkUICommonModifier {
     void (*setBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* bgColorRawPtr);
     void (*setBackgroundColorWithColorSpace)(
         ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace, void* bgColorRawPtr);
+    void (*setBackgroundColorForHDR)(
+        ArkUINodeHandle node, ArkUI_Int32 colorSpace, const ArkUI_Float32* hdrValues, void* bgColorRawPtr);
     void (*resetBackgroundColor)(ArkUINodeHandle node);
     void (*setWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue,
         void* widthResPtr);
@@ -4474,6 +4483,10 @@ struct ArkUIListItemGroupModifier {
     void (*resetListItemGroupSpace)(ArkUINodeHandle node);
     void (*setListItemGroupStyle)(ArkUINodeHandle node, ArkUI_Uint32 style);
     void (*resetListItemGroupStyle)(ArkUINodeHandle node);
+    void (*setListItemGroupHeaderStyle)(ArkUINodeHandle node, ArkUI_Uint32 style);
+    void (*resetListItemGroupHeaderStyle)(ArkUINodeHandle node);
+    void (*setListItemGroupFooterStyle)(ArkUINodeHandle node, ArkUI_Uint32 style);
+    void (*resetListItemGroupFooterStyle)(ArkUINodeHandle node);
     ArkUI_Int32 (*setListItemGroupNodeAdapter)(ArkUINodeHandle node, ArkUINodeAdapterHandle handle);
     void (*resetListItemGroupNodeAdapter)(ArkUINodeHandle node);
     ArkUINodeAdapterHandle (*getListItemGroupNodeAdapter)(ArkUINodeHandle node);
@@ -7198,7 +7211,7 @@ enum class ArkUIWidthType : uint32_t {
     MAX_SIDEBAR_WIDTH,
 };
 
-enum class ArkUISideBarContainerType { EMBED, OVERLAY, AUTO };
+enum class ArkUISideBarContainerType { EMBED, OVERLAY, AUTO, DISPLACE };
 
 struct ArkUISideBarContainerModifier {
     void (*setSideBarWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* sideBarWidthPtr);

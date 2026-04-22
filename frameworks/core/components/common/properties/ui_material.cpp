@@ -377,17 +377,12 @@ MaterialState MaterialUtils::ParseMaterialState(const std::string& value)
         return MaterialState::ENABLE;
     } else if (value == "disable") {
         return MaterialState::DISABLE;
-    } else if (value.empty() || value == "default") {
-        return MaterialState::DEFAULT;
     }
     return MaterialState::DEFAULT;
 }
 
 MaterialType MaterialUtils::ParseMaterialType(const std::string& value)
 {
-    if (value.empty() || value == "immersive") {
-        return MaterialType::IMMERSIVE; // IMMERSIVE
-    }
     return MaterialType::IMMERSIVE; // IMMERSIVE
 }
 

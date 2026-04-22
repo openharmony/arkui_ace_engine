@@ -418,7 +418,9 @@ void SwipeRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
         callbackFunction(info);
         HandleReports(info, type);
     }
+#ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
     ReportToGestureDebugManager(type, GestureListenerType::SWIPE);
+#endif
 }
 
 void SwipeRecognizer::GetGestureEventInfo(GestureEvent& info)

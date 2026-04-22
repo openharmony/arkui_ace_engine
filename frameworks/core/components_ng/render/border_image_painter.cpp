@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/render/border_image_painter.h"
+#include "core/components/common/properties/border_image.h"
 
 namespace {
 constexpr double EXTRA_OFFSET = 1.0;

@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/event/ace_events.h"
+#include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;

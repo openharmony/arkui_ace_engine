@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SVG2 Filter Effects Test File -->
+<!-- Tests SVG2 enhanced filter primitives: feBlend, feComposite, feColorMatrix, feGaussianBlur -->
+<svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- SVG2 feGaussianBlur filter -->
+    <filter id="blurFilter" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"/>
+    </filter>
+    
+    <!-- SVG2 feColorMatrix filter (hue rotate) -->
+    <filter id="colorMatrixFilter" x="-50%" y="-50%" width="200%" height="200%">
+      <feColorMatrix in="SourceGraphic" type="hueRotate" values="90" result="hueRotate"/>
+    </filter>
+    
+    <!-- SVG2 feBlend filter -->
+    <filter id="blendFilter" x="-50%" y="-50%" width="200%" height="200%">
+      <feFlood flood-color="#FF0000" flood-opacity="0.5" result="flood"/>
+      <feBlend in="SourceGraphic" in2="flood" mode="multiply" result="blend"/>
+    </filter>
+    
+    <!-- SVG2 feComposite filter -->
+    <filter id="compositeFilter" x="-50%" y="-50%" width="200%" height="200%">
+      <feFlood flood-color="#0000FF" flood-opacity="0.7" result="flood"/>
+      <feComposite in="SourceGraphic" in2="flood" operator="in" result="composite"/>
+    </filter>
+    
+    <!-- SVG2 combined filter -->
+    <filter id="combinedFilter" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
+      <feColorMatrix in="blur" type="saturate" values="0.5" result="saturate"/>
+      <feOffset in="saturate" dx="5" dy="5" result="offset"/>
+      <feFlood flood-color="#800080" flood-opacity="0.3" result="flood"/>
+      <feComposite in="offset" in2="flood" operator="over"/>
+    </filter>
+    
+    <!-- SVG2 feBlend with different modes -->
+    <filter id="screenBlend">
+      <feFlood flood-color="#00FF00" result="greenFlood"/>
+      <feBlend in="SourceGraphic" in2="greenFlood" mode="screen"/>
+    </filter>
+    
+    <filter id="overlayBlend">
+      <feFlood flood-color="#FFFF00" result="yellowFlood"/>
+      <feBlend in="SourceGraphic" in2="yellowFlood" mode="overlay"/>
+    </filter>
+    
+    <!-- SVG2 feColorMatrix with matrix type -->
+    <filter id="matrixFilter">
+      <feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0"/>
+    </filter>
+  </defs>
+  
+  <!-- Source image -->
+  <rect x="10" y="10" width="80" height="80" fill="#4CAF50" rx="10"/>
+  <text x="50" y="50" fill="white" font-size="10" text-anchor="middle">Original</text>
+  
+  <!-- Gaussian blur -->
+  <rect x="110" y="10" width="80" height="80" fill="#4CAF50" rx="10" filter="url(#blurFilter)"/>
+  <text x="150" y="50" fill="white" font-size="10" text-anchor="middle">Blur</text>
+  
+  <!-- Color matrix (hue rotate) -->
+  <rect x="210" y="10" width="80" height="80" fill="#4CAF50" rx="10" filter="url(#colorMatrixFilter)"/>
+  <text x="250" y="50" fill="white" font-size="10" text-anchor="middle">HueRotate</text>
+  
+  <!-- Blend (multiply) -->
+  <rect x="310" y="10" width="80" height="80" fill="#4CAF50" rx="10" filter="url(#blendFilter)"/>
+  <text x="350" y="50" fill="white" font-size="10" text-anchor="middle">Multiply</text>
+  
+  <!-- Composite (in) -->
+  <circle cx="50" cy="150" r="40" fill="#2196F3" filter="url(#compositeFilter)"/>
+  <text x="50" y="150" fill="white" font-size="10" text-anchor="middle">Composite</text>
+  
+  <!-- Combined filter -->
+  <circle cx="150" cy="150" r="40" fill="#FF5722" filter="url(#combinedFilter)"/>
+  <text x="150" y="150" fill="white" font-size="10" text-anchor="middle">Combined</text>
+  
+  <!-- Screen blend -->
+  <ellipse cx="250" cy="150" rx="50" ry="30" fill="#9C27B0" filter="url(#screenBlend)"/>
+  <text x="250" y="150" fill="white" font-size="10" text-anchor="middle">Screen</text>
+  
+  <!-- Overlay blend -->
+  <ellipse cx="350" cy="150" rx="50" ry="30" fill="#E91E63" filter="url(#overlayBlend)"/>
+  <text x="350" y="150" fill="white" font-size="10" text-anchor="middle">Overlay</text>
+  
+  <!-- More complex examples -->
+  <g>
+    <rect x="10" y="250" width="180" height="80" fill="#3F51B5" rx="15" filter="url(#blurFilter)"/>
+    <rect x="30" y="260" width="140" height="60" fill="#FFEB3B" rx="10" filter="url(#colorMatrixFilter)"/>
+    <text x="100" y="290" fill="black" font-size="12" text-anchor="middle">Nested Filters</text>
+  </g>
+  
+  <!-- Matrix filter test -->
+  <path d="M250 250 L350 250 L350 330 L250 330 Z" fill="#00BCD4" filter="url(#matrixFilter)"/>
+  <text x="300" y="290" fill="white" font-size="12" text-anchor="middle">Matrix Filter</text>
+</svg>

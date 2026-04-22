@@ -18,9 +18,11 @@
 
 #include "core/components/common/properties/color.h"
 #include "core/components/text_field/textfield_theme.h"
+#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select_overlay/magnifier.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_pattern.h"
 #include "core/components_ng/pattern/text/text_base.h"
+#include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -80,6 +82,12 @@ bool MagnifierController::UpdateMagnifierEdgeY(const RefPtr<PipelineContext>& pi
     CHECK_NULL_RETURN(pattern, false);
     auto node = pattern->GetHost();
     CHECK_NULL_RETURN(node, false);
+    if (node->GetTag() == V2::SEARCH_Field_ETS_TAG) {
+        auto searchNode = AceType::DynamicCast<FrameNode>(node->GetParent());
+        if (searchNode && searchNode->GetTag() == V2::SEARCH_ETS_TAG) {
+            node = searchNode;
+        }
+    }
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
     RectF visibleRect;
     RectF frameRect;

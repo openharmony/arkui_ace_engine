@@ -103,6 +103,7 @@ template("ace_osal_ohos_source_set") {
       "thp_extra_manager_impl.cpp",
       "thread_priority.cpp",
       "trace_id_impl.cpp",
+      "utils.cpp",
       "view_data_wrap_ohos.cpp",
       "want_wrap_ohos.cpp",
       "websocket_manager.cpp",

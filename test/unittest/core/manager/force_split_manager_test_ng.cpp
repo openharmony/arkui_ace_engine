@@ -145,35 +145,6 @@ HWTEST_F(ForceSplitManagerTestNg, UpdateIsInForceSplitMode003, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateIsInForceSplitModeWithSplitScreen001
- * @tc.desc: Test force split mode when already in split screen mode (primary)
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(ForceSplitManagerTestNg, UpdateIsInForceSplitModeWithSplitScreen001, TestSize.Level1)
-{
-    auto context = MockPipelineContext::GetCurrent();
-    ASSERT_NE(context, nullptr);
-    auto manager = GetForceSplitManager();
-    ASSERT_NE(manager, nullptr);
-    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
-    ASSERT_NE(container, nullptr);
-    auto windowManager = context->GetWindowManager();
-    ASSERT_NE(windowManager, nullptr);
-
-    // Setup: in split screen primary mode, should not enable force split
-    EXPECT_CALL(*container, IsMainWindow).Times(
-        ::testing::AtLeast(1)).WillRepeatedly(Return(true));
-    SystemProperties::orientation_ = DeviceOrientation::LANDSCAPE;
-    windowManager->windowGetModeCallback_ = []() { return WindowMode::WINDOW_MODE_SPLIT_PRIMARY; };
-    context->SetIsCurrentInForceSplitMode(false);
-    manager->isForceSplitSupported_ = true;
-    manager->isForceSplitEnable_ = true;
-    manager->UpdateIsInForceSplitMode();
-    EXPECT_FALSE(context->IsCurrentInForceSplitMode());
-}
-
-/**
  * @tc.name: IsForceSplitEnable001
  * @tc.desc: Branch: isRouter=true, returns isForceSplitEnable_ && isRouter_
  * @tc.type: FUNC

@@ -4774,4 +4774,119 @@ HWTEST_F(ImagePatternTestNg, LoadingContext016, TestSize.Level0)
     EXPECT_NE(imagePattern->altImage_, nullptr);
 }
 
+/**
+ * @tc.name: StartDecodingAltErrorCtx001
+ * @tc.desc: Test StartDecoding altErrorCtx_ branch: verify altErrorCtx_->MakeCanvasImageIfNeed
+ *           is called when altErrorCtx_ exists and GeometryNode has valid Content
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, StartDecodingAltErrorCtx001, TestSize.Level0)
+{
+    // Step 1: Create Image frameNode
+    auto frameNode = CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    // Step 2: Set GeometryNode Content (CRITICAL: StartDecoding returns early if GetContent() is null)
+    frameNode->GetGeometryNode()->SetContentSize(SizeF(WIDTH, HEIGHT));
+    ASSERT_NE(frameNode->GetGeometryNode()->GetContent(), nullptr);
+
+    // Step 3: Set up ImageLayoutProperty to control decoding parameters
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    imageLayoutProperty->UpdateAutoResize(true);
+    imageLayoutProperty->UpdateImageFit(ImageFit::COVER);
+
+    // Step 4: Create altErrorCtx_ to trigger target branch
+    imagePattern->altErrorCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(ALT_SRC_URL), LoadNotifier(nullptr, nullptr, nullptr));
+    ASSERT_NE(imagePattern->altErrorCtx_, nullptr);
+
+    // Step 5: Execute StartDecoding
+    SizeF dstSize(WIDTH, HEIGHT);
+    imagePattern->StartDecoding(dstSize);
+
+    // Step 6: Verify branch execution through Mock stub state changes
+    // Mock MakeCanvasImageIfNeed sets dstSize_, imageFit_, autoResize_ when called
+    EXPECT_EQ(imagePattern->altErrorCtx_->GetDstSize(), dstSize);
+    EXPECT_EQ(imagePattern->altErrorCtx_->GetImageFit(), ImageFit::COVER);
+    EXPECT_TRUE(imagePattern->altErrorCtx_->GetAutoResize());
+
+    // Step 7: Verify SetIsHdrDecoderNeed was called (no HDR properties set, should be false)
+    EXPECT_FALSE(imagePattern->altErrorCtx_->GetIsHdrDecoderNeed());
+}
+
+/**
+ * @tc.name: StartDecodingAltErrorCtx002
+ * @tc.desc: Test StartDecoding altErrorCtx_ branch with HDR properties:
+ *           verify SetIsHdrDecoderNeed(true) when ImageRenderProperty has DynamicMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, StartDecodingAltErrorCtx002, TestSize.Level0)
+{
+    // Step 1: Create Image frameNode
+    auto frameNode = CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    // Step 2: Set GeometryNode Content
+    frameNode->GetGeometryNode()->SetContentSize(SizeF(WIDTH, HEIGHT));
+    ASSERT_NE(frameNode->GetGeometryNode()->GetContent(), nullptr);
+
+    // Step 3: Set ImageRenderProperty with DynamicMode to trigger HDR branch
+    auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+    imageRenderProperty->UpdateDynamicMode(DynamicRangeMode::HIGH);
+
+    // Step 4: Create altErrorCtx_
+    imagePattern->altErrorCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(ALT_SRC_URL), LoadNotifier(nullptr, nullptr, nullptr));
+    ASSERT_NE(imagePattern->altErrorCtx_, nullptr);
+
+    // Step 5: Execute StartDecoding
+    SizeF dstSize(WIDTH, HEIGHT);
+    imagePattern->StartDecoding(dstSize);
+
+    // Step 6: Verify HDR flag was set to true (isHdrDecoderNeed = true when HasDynamicMode)
+    EXPECT_TRUE(imagePattern->altErrorCtx_->GetIsHdrDecoderNeed());
+}
+
+/**
+ * @tc.name: StartDecodingAltErrorCtx003
+ * @tc.desc: Test StartDecoding early return when GeometryNode GetContent() returns null:
+ *           verify altErrorCtx_ branch is NOT executed when Content is not set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, StartDecodingAltErrorCtx003, TestSize.Level0)
+{
+    // Step 1: Create Image frameNode
+    auto frameNode = CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    // Step 2: DO NOT set Content - triggers early return at line 839-841 of image_pattern.cpp
+    // GetContent() returns nullptr when SetContentSize is not called
+    EXPECT_EQ(frameNode->GetGeometryNode()->GetContent(), nullptr);
+
+    // Step 3: Create altErrorCtx_
+    imagePattern->altErrorCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(ALT_SRC_URL), LoadNotifier(nullptr, nullptr, nullptr));
+    ASSERT_NE(imagePattern->altErrorCtx_, nullptr);
+
+    // Step 4: Execute StartDecoding - should return early without processing altErrorCtx_
+    SizeF dstSize(WIDTH, HEIGHT);
+    imagePattern->StartDecoding(dstSize);
+
+    // Step 5: Verify altErrorCtx_ branch was NOT executed
+    // Mock GetDstSize() returns default SizeF(0, 0) when MakeCanvasImageIfNeed is not called
+    // This proves StartDecoding returned early and skipped the altErrorCtx_ processing
+    auto actualDstSize = imagePattern->altErrorCtx_->GetDstSize();
+    // dstSize_ from Mock returns the SizeF passed to constructor, which is empty
+    // If MakeCanvasImageIfNeed was called, dstSize_ would equal WIDTH/HEIGHT
+    EXPECT_FALSE(actualDstSize.IsPositive());
+}
+
 } // namespace OHOS::Ace::NG

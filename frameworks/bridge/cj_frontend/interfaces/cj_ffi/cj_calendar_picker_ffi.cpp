@@ -68,9 +68,6 @@ NG::BorderRadiusProperty ParseNativeBorderRadiuses(const NativeBorderRadiuses& n
 Shadow ParseNativeShadowOptions(NativeShadowOptions shadowOptions)
 {
     Shadow shadow;
-    if (LessNotEqual(shadowOptions.radius, 0.0)) {
-        shadowOptions.radius = 0.0;
-    }
     shadow.SetBlurRadius(shadowOptions.radius);
     Color shadowColor = Color(shadowOptions.color);
     shadow.SetColor(shadowColor);

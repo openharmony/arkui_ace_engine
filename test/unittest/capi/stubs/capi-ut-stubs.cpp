@@ -59,9 +59,6 @@ std::optional<NG::SizeF> NG::PathLayoutAlgorithm::MeasureContent(
 
 void NG::PathLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper) {}
 
-void AnimationUtils::AddDurationKeyFrame(int duration, const RefPtr<Curve>& curve,
-    const PropertyCallback& callback, const RefPtr<PipelineBase>& context) {}
-
 bool SystemProperties::IsFormAnimationLimited()
 {
     return true;

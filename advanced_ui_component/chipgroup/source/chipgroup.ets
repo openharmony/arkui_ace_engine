@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,8 @@ import {
   PrefixIconOptions,
   SuffixIconOptions
 } from '@ohos.arkui.advanced.Chip';
+import { uiMaterial } from '@kit.ArkUI';
+import deviceInfo from '@ohos.deviceInfo';
 
 interface ChipGroupTheme {
   itemStyle: ChipGroupStyleTheme;
@@ -210,6 +212,7 @@ function isValidDimensionNoPercentageString(dimension: string): boolean {
 export struct IconGroupSuffix {
   @Consume chipSize: ChipSize | SizeOptions;
   @Prop items: Array<IconItemOptions | SymbolGlyphModifier | SymbolItemOptions> = [];
+  @Prop iconBackgroundSystemMaterial?: uiMaterial.Material;
   symbolEffect: SymbolEffect = new SymbolEffect();
 
   private getBackgroundSize(): number {
@@ -223,8 +226,8 @@ export struct IconGroupSuffix {
   private getIconSize(val?: Length): Length {
     if (val === undefined) {
       return this.chipSize === ChipSize.SMALL ?
-      iconGroupSuffixTheme.smallIconSize :
-      iconGroupSuffixTheme.normalIconSize;
+        iconGroupSuffixTheme.smallIconSize :
+        iconGroupSuffixTheme.normalIconSize;
     }
     let value: Length;
     if (this.chipSize === ChipSize.SMALL) {
@@ -258,7 +261,8 @@ export struct IconGroupSuffix {
       .focusable(true)
   }
 
-  build() {
+  @Builder
+  IconButtonsBuilder(useEffect: boolean | undefined) {
     Row({ space: 8 }) {
       ForEach(this.items || [], (suffixItem: IconItemOptions | SymbolGlyphModifier | SymbolItemOptions) => {
         Button() {
@@ -292,7 +296,19 @@ export struct IconGroupSuffix {
           }
         })
         .borderRadius(iconGroupSuffixTheme.borderRadius)
+        .useEffect(useEffect)
       })
+    }
+  }
+
+  build() {
+    if (deviceInfo.sdkApiVersion >= 26) {
+      EffectComponent() {
+        this.IconButtonsBuilder(true)
+      }
+      .systemMaterial(this.iconBackgroundSystemMaterial)
+    } else {
+      this.IconButtonsBuilder(undefined)
     }
   }
 
@@ -329,9 +345,11 @@ export struct ChipGroup {
   @Prop @Watch('onItemsChange') items: ChipGroupItemOptions[] = [];
   @Prop @Watch('itemStyleOnChange') itemStyle: ChipItemStyle = defaultTheme.itemStyle;
   @Provide chipSize: ChipSize | SizeOptions = defaultTheme.itemStyle.size;
+  @Provide inGroup: boolean = true;
   @Prop selectedIndexes: Array<number> = [0];
   @Prop @Watch('onMultipleChange') multiple: boolean = false;
   @Prop chipGroupSpace: ChipGroupSpaceOptions = defaultTheme.chipGroupSpace;
+  @Prop backgroundSystemMaterial?: uiMaterial.Material = undefined;
   @BuilderParam suffix?: Callback<void>;
   public onChange: Callback<Array<number>> = noop;
   private scroller: Scroller = new Scroller();
@@ -559,73 +577,99 @@ export struct ChipGroup {
     }
   }
 
+  @Builder
+  ChipRowBuilder() {
+    ForEach(this.items || [], (chipItem: ChipGroupItemOptions, index) => {
+      if (chipItem) {
+        Chip({
+          prefixIcon: this.getPrefixIcon(chipItem),
+          prefixSymbol: chipItem?.prefixSymbol,
+          label: {
+            text: chipItem?.label?.text ?? ' ',
+            fontColor: this.getFontColor(),
+            activatedFontColor: this.getSelectedFontColor(),
+          },
+          suffixIcon: this.getSuffixIcon(chipItem),
+          suffixSymbol: chipItem?.suffixSymbol,
+          suffixSymbolOptions: chipItem.suffixSymbolOptions,
+          allowClose: chipItem.allowClose ?? false,
+          closeOptions: chipItem.closeOptions,
+          enabled: true,
+          activated: this.isSelected(index),
+          backgroundColor: this.getBackgroundColor(),
+          size: this.getChipSize(),
+          activatedBackgroundColor: this.getSelectedBackgroundColor(),
+          accessibilitySelectedType:
+          this.multiple ? AccessibilitySelectedType.CHECKED : AccessibilitySelectedType.SELECTED,
+          accessibilityDescription: chipItem.accessibilityDescription,
+          accessibilityLevel: chipItem.accessibilityLevel,
+          onClicked: () => {
+            if (this.isSelected(index)) {
+              if (!(!this.isMultiple())) {
+                if (this.getSelectedIndexes().length > 1) {
+                  this.selectedIndexes.splice(this.selectedIndexes.indexOf(index), 1);
+                }
+              }
+            } else {
+              if (!this.selectedIndexes || this.selectedIndexes.length === 0) {
+                this.selectedIndexes = this.getSelectedIndexes();
+              }
+              if (!this.isMultiple()) {
+                this.selectedIndexes = [];
+              }
+              this.selectedIndexes.push(index);
+            }
+            this.getOnChange()(this.getSelectedIndexes());
+          }
+        })
+      }
+    }, () => {
+      return JSON.stringify(this.isRefresh);
+    });
+  }
+
+  @Builder
+  ChipListBuilder() {
+    Scroll(this.scroller) {
+      if (deviceInfo.sdkApiVersion >= 26) {
+        EffectComponent() {
+          Row({ space: this.getChipGroupItemSpace() }) {
+            this.ChipRowBuilder()
+          }
+        }
+        .systemMaterial(this.backgroundSystemMaterial)
+      } else {
+        Row({ space: this.getChipGroupItemSpace() }) {
+          this.ChipRowBuilder()
+        }
+      }
+    }
+    .padding({
+      left: this.getChipGroupStartSpace(),
+      right: this.getChipGroupEndSpace()
+    })
+    .constraintSize({ minWidth: '100%' })
+    .scrollable(ScrollDirection.Horizontal)
+    .scrollBar(BarState.Off)
+    .align(Alignment.Start)
+    .width('100%')
+    .clip(false)
+    .onScroll(() => {
+      this.isReachEnd = this.scroller.isAtEnd();
+    })
+  }
+
   build() {
     Row() {
       Stack() {
-        Scroll(this.scroller) {
-          Row({ space: this.getChipGroupItemSpace() }) {
-            ForEach(this.items || [], (chipItem: ChipGroupItemOptions, index) => {
-              if (chipItem) {
-                Chip({
-                  prefixIcon: this.getPrefixIcon(chipItem),
-                  prefixSymbol: chipItem?.prefixSymbol,
-                  label: {
-                    text: chipItem?.label?.text ?? ' ',
-                    fontColor: this.getFontColor(),
-                    activatedFontColor: this.getSelectedFontColor(),
-                  },
-                  suffixIcon: this.getSuffixIcon(chipItem),
-                  suffixSymbol: chipItem?.suffixSymbol,
-                  suffixSymbolOptions: chipItem.suffixSymbolOptions,
-                  allowClose: chipItem.allowClose ?? false,
-                  closeOptions: chipItem.closeOptions,
-                  enabled: true,
-                  activated: this.isSelected(index),
-                  backgroundColor: this.getBackgroundColor(),
-                  size: this.getChipSize(),
-                  activatedBackgroundColor: this.getSelectedBackgroundColor(),
-                  accessibilitySelectedType:
-                  this.multiple ? AccessibilitySelectedType.CHECKED : AccessibilitySelectedType.SELECTED,
-                  accessibilityDescription: chipItem.accessibilityDescription,
-                  accessibilityLevel: chipItem.accessibilityLevel,
-                  onClicked: () => {
-                    if (this.isSelected(index)) {
-                      if (!(!this.isMultiple())) {
-                        if (this.getSelectedIndexes().length > 1) {
-                          this.selectedIndexes.splice(this.selectedIndexes.indexOf(index), 1);
-                        }
-                      }
-                    } else {
-                      if (!this.selectedIndexes || this.selectedIndexes.length === 0) {
-                        this.selectedIndexes = this.getSelectedIndexes();
-                      }
-                      if (!this.isMultiple()) {
-                        this.selectedIndexes = [];
-                      }
-                      this.selectedIndexes.push(index);
-                    }
-                    this.getOnChange()(this.getSelectedIndexes());
-                  }
-                })
-              }
-            }, () => {
-              return JSON.stringify(this.isRefresh);
-            });
+        if (deviceInfo.sdkApiVersion >= 26) {
+          EffectComponent() {
+            this.ChipListBuilder()
           }
-          .padding({
-            left: this.getChipGroupStartSpace(),
-            right: this.getChipGroupEndSpace()
-          })
-          .constraintSize({ minWidth: '100%' })
+          .systemMaterial(this.backgroundSystemMaterial)
+        } else {
+          this.ChipListBuilder()
         }
-        .scrollable(ScrollDirection.Horizontal)
-        .scrollBar(BarState.Off)
-        .align(Alignment.Start)
-        .width('100%')
-        .clip(false)
-        .onScroll(() => {
-          this.isReachEnd = this.scroller.isAtEnd();
-        })
 
         if (this.suffix && !this.isReachEnd) {
           Stack()

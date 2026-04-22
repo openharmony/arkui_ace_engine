@@ -21,6 +21,7 @@
 
 #include "base/image/pixel_map.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/image/image_cache.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline/base/element_register.h"
 #if defined(PLAYER_FRAMEWORK_EXISTS)

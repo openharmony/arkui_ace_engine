@@ -21,6 +21,7 @@
 
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/rect_t.h"
+#include "core/components/common/properties/border_image.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/render/render_context.h"
 
@@ -302,6 +303,16 @@ public:
         return sysOptions_;
     }
 
+    bool IsUniRenderEnabled() override
+    {
+        return isUniRenderEnabled_;
+    }
+
+    bool HasBackgroundColor()
+    {
+        return isHasBackgroundColor_;
+    }
+
     bool isVisible_ = true;
     bool hasDisappearTransition_ = false;
     RectF rect_;
@@ -319,6 +330,8 @@ public:
     std::optional<SysOptions> sysOptions_;
 private:
     size_t animationsCount_ = 0;
+    bool isHasBackgroundColor_ = false;
+    bool isUniRenderEnabled_ = true;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_CONTEXT_H

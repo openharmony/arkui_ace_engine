@@ -288,6 +288,11 @@ RefPtr<FrameNode> ToggleModelNG::CreateSwitchFrameNode(int32_t nodeId, bool isOn
 {
     auto frameNode = FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, nodeId, AceType::MakeRefPtr<SwitchPattern>());
     UpdateSwitchIsOn(frameNode, isOn);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)
+        && MaterialUtils::IsMaterialEnabled()) {
+        auto material = MaterialUtils::GetInitMaterial(UiMaterialStyle::ULTRA_THIN);
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(frameNode), AceType::RawPtr(material));
+    }
     return frameNode;
 }
 

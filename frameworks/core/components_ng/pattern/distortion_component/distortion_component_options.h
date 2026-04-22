@@ -25,9 +25,9 @@ namespace OHOS::Ace::NG {
 struct DistortionParam {
     DistortionParam() = default;
     VectorF luCorner { 0.0f, 0.0f };
-    VectorF ruCorner { 0.0f, 0.0f };
-    VectorF lbCorner { 0.0f, 0.0f };
-    VectorF rbCorner { 0.0f, 0.0f };
+    VectorF ruCorner { 1.0f, 0.0f };
+    VectorF lbCorner { 0.0f, 1.0f };
+    VectorF rbCorner { 1.0f, 1.0f };
     Vector4F barrelDistortion { 0.0f, 0.0f, 0.0f, 0.0f };
 };
 

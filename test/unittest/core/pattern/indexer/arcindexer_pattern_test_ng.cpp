@@ -14,6 +14,8 @@
  */
 
 #include <optional>
+#include "core/accessibility/accessibility_manager.h"
+#include "core/accessibility/accessibility_manager_ng.h"
 
 #include "gtest/gtest.h"
 
@@ -31,6 +33,7 @@
 #include "core/common/container.h"
 #include "base/memory/memory_monitor_def.h"
 #include "base/memory/referenced.h"
+#include "core/components/common/properties/border_image.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/indexer/arc_indexer_pattern.h"

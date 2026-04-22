@@ -44,6 +44,7 @@ static const std::unordered_set<std::string> supportedTargetsInCustomEnv = {
     "ImageAttachment",
     "ParagraphStyleSpan",
     "LineHeightSpan",
+    "LineSpacingSpan",
     "TextLayout",
     "Button",
     "Canvas",

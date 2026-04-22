@@ -2511,4 +2511,34 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvertSmallTagWithBold, TestSize.Level1)
     EXPECT_TRUE(hasScale);
 }
 
+/**
+ * @tc.name: HtmlConvertSmallTagRoundTripFontSize
+ * @tc.desc: Verify <small> round-trip conversion outputs the scaled font-size in HTML.
+ * @tc.level: 1
+ */
+HWTEST_F(HtmlConvertTestNg, HtmlConvertSmallTagRoundTripFontSize, TestSize.Level1)
+{
+    const std::string html = "<html><body><small>small text</small></body></html>";
+    auto spanString = HtmlToSpan().ToSpanString(html);
+    ASSERT_NE(spanString, nullptr);
+
+    auto out = SpanToHtml().ToHtml(*spanString);
+    EXPECT_NE(out.find("font-size: 12.80px;"), std::string::npos);
+}
+
+/**
+ * @tc.name: HtmlConvertSmallTagWithInlineFontSizeRoundTrip
+ * @tc.desc: Verify <small> with explicit font-size outputs the scaled actual font-size in HTML.
+ * @tc.level: 1
+ */
+HWTEST_F(HtmlConvertTestNg, HtmlConvertSmallTagWithInlineFontSizeRoundTrip, TestSize.Level1)
+{
+    const std::string html = "<html><body><small style=\"font-size: 25px;\">scaled text</small></body></html>";
+    auto spanString = HtmlToSpan().ToSpanString(html);
+    ASSERT_NE(spanString, nullptr);
+
+    auto out = SpanToHtml().ToHtml(*spanString);
+    EXPECT_NE(out.find("font-size: 20.00px;"), std::string::npos);
+}
+
 } // namespace OHOS::Ace::NG

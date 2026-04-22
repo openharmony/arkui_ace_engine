@@ -15,11 +15,14 @@
 
 #include "core/components_ng/pattern/menu/menu_view.h"
 
+#include "base/subwindow/subwindow_manager.h"
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
@@ -46,6 +49,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components/button/button_theme.h"
 #include "frameworks/base/utils/measure_util.h"
+#include "core/components/common/properties/placement.h"
 
 namespace OHOS::Ace::NG {
 /**
@@ -1661,6 +1665,11 @@ void MenuView::UpdateMenuLayoutProperty(const RefPtr<FrameNode>& menuNode, const
             menuProperty->UpdateMenuPlacement(menuParam.placement.value_or(OHOS::Ace::Placement::BOTTOM));
         }
     }
+    if (menuParam.targetSpace.has_value() && !menuParam.anchorPosition.has_value() && menuParam.placement.has_value()) {
+        menuProperty->UpdateMenuTargetSpace(menuParam.targetSpace.value_or(Dimension(0)));
+        menuProperty->UpdateTargetOffset(menuParam.targetOffset.value_or(OffsetF()));
+        menuProperty->UpdateTargetMenuSize(menuParam.targetSize.value_or(SizeF()));
+    }
 }
 
 void MenuView::UpdateMenuScrollBarAndMaxHeight(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
@@ -1698,6 +1707,11 @@ void MenuView::UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const 
     if (menuProperty) {
         menuProperty->UpdateTitle(menuParam.title);
         menuProperty->UpdatePositionOffset(menuParam.positionOffset);
+        if (menuParam.targetSpace.has_value()) {
+            menuProperty->UpdateMenuTargetSpace(menuParam.targetSpace.value_or(Dimension(0)));
+            menuProperty->UpdateTargetOffset(menuParam.targetOffset.value_or(OffsetF()));
+            menuProperty->UpdateTargetMenuSize(menuParam.targetSize.value_or(SizeF()));
+        }
         if (menuParam.placement.has_value() && !menuParam.anchorPosition.has_value()) {
             menuProperty->UpdateMenuPlacement(menuParam.placement.value());
         }

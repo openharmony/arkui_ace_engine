@@ -15,6 +15,8 @@
 
 #include "core/components/grid_layout/render_grid_layout.h"
 
+#include "core/accessibility/accessibility_manager.h"
+
 #include <numeric>
 
 #include "base/log/event_report.h"

@@ -47,6 +47,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "frameworks/core/accessibility/static/accessibility_static_utils.h"
 #include "frameworks/core/components_ng/pattern/text/span_model_ng.h"
+#include "frameworks/core/components_ng/property/smart_gesture_property.h"
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
@@ -55,6 +56,7 @@
 #include "bridge/declarative_frontend/jsview/js_popups.h"
 #include "bridge/declarative_frontend/style_string/js_span_string.h"
 #include "interfaces/native/native_type.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 
 using namespace OHOS::Ace::Framework;
 
@@ -1777,8 +1779,22 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundColor(ArkUIRuntimeCallInfo *ru
         GetArkUINodeModifiers()->getCommonModifier()->resetBackgroundColor(nativeNode);
     } else {
         auto bgColorRawPtr = AceType::RawPtr(backgroundColorResObj);
-        GetArkUINodeModifiers()->getCommonModifier()->setBackgroundColorWithColorSpace(
-            nativeNode, color.GetValue(), color.GetColorSpace(), bgColorRawPtr);
+        auto headRoomOptional = color.GetHeadRoomColor();
+        if (headRoomOptional.has_value()) {
+            auto colorWithHeadRoom = headRoomOptional.value();
+            ArkUI_Float32 hdrValues[5] = {
+                static_cast<ArkUI_Float32>(colorWithHeadRoom.red),
+                static_cast<ArkUI_Float32>(colorWithHeadRoom.green),
+                static_cast<ArkUI_Float32>(colorWithHeadRoom.blue),
+                static_cast<ArkUI_Float32>(colorWithHeadRoom.alpha),
+                static_cast<ArkUI_Float32>(colorWithHeadRoom.headRoom)
+            };
+            GetArkUINodeModifiers()->getCommonModifier()->setBackgroundColorForHDR(
+                nativeNode, color.GetColorSpace(), hdrValues, bgColorRawPtr);
+        } else {
+            GetArkUINodeModifiers()->getCommonModifier()->setBackgroundColorWithColorSpace(
+                nativeNode, color.GetValue(), color.GetColorSpace(), bgColorRawPtr);
+        }
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -2584,7 +2600,6 @@ ArkUINativeModuleValue CommonBridge::SetShadow(ArkUIRuntimeCallInfo *runtimeCall
     ParseJsShadowRadiusResObj(vm, radiusArg, radius, vectorResObj);
     shadows[NUM_0].f32 = radius;
 
-    shadows[NUM_0].f32 = (LessNotEqual(shadows[NUM_0].f32, 0.0)) ? 0.0 : shadows[NUM_0].f32;
     CalcDimension offsetX;
     if (ParseJsShadowDimension(vm, offsetXArg, offsetX, vectorResObj)) {
         shadows[NUM_2].f32 = offsetX.Value();
@@ -5057,6 +5072,50 @@ ArkUINativeModuleValue CommonBridge::ResetAccessibilityActionOptions(ArkUIRuntim
     auto* frameNode = GetFrameNode(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     ViewAbstractModelNG::ResetAccessibilityActionOptions(frameNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetSmartGestureShortcut(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    if (runtimeCallInfo->GetArgsNumber() < 2) {
+        ViewAbstractModelNG::ResetSmartGestureShortcut(frameNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto argObj = runtimeCallInfo->GetCallArgRef(1);
+    if (!argObj->IsObject(vm)) {
+        ViewAbstractModelNG::ResetSmartGestureShortcut(frameNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    SmartGestureShortcutConfig config;
+    auto jsObj = panda::Local<panda::ObjectRef>(argObj->ToObject(vm));
+    auto actionVal = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "action"));
+    auto enabledVal = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "enabled"));
+    auto selectableVal = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "selectable"));
+    if (!actionVal->IsNumber() || !enabledVal->IsBoolean()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    if (actionVal->Int32Value(vm) != static_cast<int32_t>(SmartGestureShortcutAction::PRIMARY)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    config.enabled = enabledVal->BooleaValue(vm);
+    if (!selectableVal->IsUndefined() && selectableVal->IsBoolean()) {
+        config.selectable = selectableVal->BooleaValue(vm);
+    }
+    ViewAbstractModelNG::SetSmartGestureShortcut(frameNode, config);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetSmartGestureShortcut(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    ViewAbstractModelNG::ResetSmartGestureShortcut(frameNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

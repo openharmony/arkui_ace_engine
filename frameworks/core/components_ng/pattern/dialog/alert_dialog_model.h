@@ -17,9 +17,11 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DIALOG_DIALOG_MODEL_H
 
 #include <mutex>
+#include <functional>
+#include <memory>
+#include <string>
 
 #include "core/components/dialog/dialog_properties.h"
-#include "core/components_ng/pattern/dialog/dialog_event_hub.h"
 
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT AlertDialogModel {

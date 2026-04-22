@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 
+#include "core/animation/scroll_motion.h"
+
 namespace OHOS::Ace::NG {
 
 void ScrollSpringEffect::RegisterSpringCallback()

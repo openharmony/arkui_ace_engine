@@ -2533,9 +2533,10 @@ double ArkTSUtils::parseShadowRadius(const EcmaVM* vm, const Local<JSValueRef>& 
 double ArkTSUtils::parseShadowRadiusWithResObj(const EcmaVM* vm, const Local<JSValueRef>& jsValue,
     RefPtr<ResourceObject>& resObj, const std::optional<NodeInfo>& nodeInfo)
 {
-    double radius = 0.0;
+    double radius = -1.0;
     ArkTSUtils::ParseJsDouble(vm, jsValue, radius, resObj);
-    if (LessNotEqual(radius, 0.0)) {
+    if (LessNotEqual(radius, 0.0) &&
+        Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         radius = 0.0;
     }
     return radius;
@@ -4318,11 +4319,8 @@ void ArkTSUtils::ParseShadowPropsUpdate(
         vm, GetProperty(vm, jsObj, static_cast<int32_t>(Framework::ArkUIIndex::RADIUS)), radius, radiusResObj);
     if (SystemProperties::ConfigChangePerform() && radiusResObj) {
         auto&& updateFunc = [](const RefPtr<ResourceObject>& radiusResObj, Shadow& shadow) {
-            double radius = 0.0;
+            double radius = -1.0;
             ResourceParseUtils::ParseResDouble(radiusResObj, radius);
-            if (LessNotEqual(radius, 0.0)) {
-                radius = 0.0;
-            }
             shadow.SetBlurRadius(radius);
         };
         shadow.AddResource("shadow.radius", radiusResObj, std::move(updateFunc));
@@ -4651,11 +4649,8 @@ bool ArkTSUtils::ParseShadowProps(
         return false;
     }
     auto jsObj = jsValue->ToObject(vm);
-    double radius = 0.0;
+    double radius = -1.0;
     ParseShadowPropsUpdate(vm, jsObj, radius, shadow);
-    if (LessNotEqual(radius, 0.0)) {
-        radius = 0.0;
-    }
     shadow.SetBlurRadius(radius);
     ParseShadowOffsetXY(vm, jsObj, shadow);
 
