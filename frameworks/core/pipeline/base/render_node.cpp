@@ -348,7 +348,9 @@ void RenderNode::DumpTree(int32_t depth)
     }
     const auto& children = GetChildren();
     if (DumpLog::GetInstance().GetDumpFile()) {
-        auto dirtyRect = context_.Upgrade()->GetDirtyRect();
+        auto context = context_.Upgrade();
+        CHECK_NULL_VOID(context);
+        auto dirtyRect = context->GetDirtyRect();
         std::string touchRectList = "[";
         for (auto& rect : touchRectList_) {
             touchRectList.append("{").append(rect.ToString()).append("}");
