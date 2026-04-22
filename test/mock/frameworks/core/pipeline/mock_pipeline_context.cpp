@@ -18,6 +18,7 @@
 #include "mock_pipeline_context.h"
 
 #include "base/memory/ace_type.h"
+#include "core/common/ai/ai_write_adapter.h"
 #include "core/common/clipboard/clipboard.h"
 #include "base/memory/referenced.h"
 #include "base/mousestyle/mouse_style.h"
@@ -1270,6 +1271,14 @@ const RefPtr<NodeRenderStatusMonitor>& PipelineContext::GetNodeRenderStatusMonit
         nodeRenderStatusMonitor_ = AceType::MakeRefPtr<NodeRenderStatusMonitor>();
     }
     return nodeRenderStatusMonitor_;
+}
+
+WeakPtr<AIWriteAdapter> PipelineContext::GetOrCreateAIWriteAdapter()
+{
+    if (!aiWriteAdapter_) {
+        aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
+    }
+    return aiWriteAdapter_;
 }
 
 void PipelineContext::FlushDirtyPropertyNodes()

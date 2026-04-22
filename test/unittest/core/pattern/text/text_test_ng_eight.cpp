@@ -771,7 +771,7 @@ HWTEST_F(TextTestNgEight, InitCopyOption001, TestSize.Level1)
     RefPtr<GestureEventHub> gestureEventHub =
         AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
     auto longPressCallback = [](GestureEvent& info) {};
-    pattern->longPressEvent_ = AIWriteAdapter::MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
+    pattern->longPressEvent_ = AceType::MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
     pattern->hasSpanStringLongPressEvent_ = false;
     pattern->onClick_ = [](GestureEvent& info) {};
     pattern->textDetectEnable_ = true;

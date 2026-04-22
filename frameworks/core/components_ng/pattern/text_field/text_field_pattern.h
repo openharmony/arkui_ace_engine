@@ -32,7 +32,6 @@
 #include "base/utils/utf_helper.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/ace_application_info.h"
-#include "core/common/ai/ai_write_adapter.h"
 #include "base/view_data/hint_to_type_wrap.h"
 #include "core/common/ai/data_detector_adapter.h"
 #include "core/common/clipboard/clipboard.h"
@@ -91,6 +90,8 @@ struct TextConfig;
 #endif
 
 namespace OHOS::Ace {
+class AIWriteAdapter;
+struct AIWriteInfo;
 class SpanString;
 }
 

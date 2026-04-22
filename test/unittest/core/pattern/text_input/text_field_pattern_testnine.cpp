@@ -29,6 +29,7 @@
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/common/mock_font_manager.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_property.h"
+#include "core/common/ai/ai_write_adapter.h"
 #include "core/common/recorder/event_controller.h"
 #include "core/components_ng/pattern/select_content_overlay/select_content_overlay_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -1050,7 +1051,7 @@ HWTEST_F(TextFieldPatternTestNine, OnModifyDone001, TestSize.Level0)
 
     auto host = pattern_->GetHost();
     auto pipeline = host->GetContext();
-    auto textFieldManager = AIWriteAdapter::DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
     auto size = textFieldManager->textFieldInfoMap_.size();
     pattern_->firstAutoFillContainerNode_ =  pattern_->frameNode_;
     pattern_->OnModifyDone();
