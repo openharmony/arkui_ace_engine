@@ -2328,6 +2328,7 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle, bool
         if (IsSelected()) {
             selectOverlay_->SetSelectionHoldCallback();
         }
+        ReportSelectionChangeEvent(tmpHost->GetId(), "selectionChange", 0, textSize);
         return;
     }
     selectOverlay_->ProcessSelectAllOverlay({ .menuIsShow = showMenu, .animation = true });
@@ -3645,6 +3646,7 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info, bool firstGetF
     if (needCloseOverlay || GetIsPreviewText()) {
         CloseSelectOverlay(true);
         StartTwinkling();
+        contentController_->lastReportSelectionText_ = "";
     }
     DoProcessAutoFill(RequestAutoFillReason::SINGLE_CLICK, info.GetSourceDevice());
     // emulate clicking bottom of the textField
@@ -5603,11 +5605,6 @@ void TextFieldPattern::HandleLeftMousePressEvent(MouseInfo& info)
     blockPress_ = false;
     leftMouseCanMove_ = true;
     FocusAndUpdateCaretByMouse(info);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto startIndex = selectController_->GetStartIndex();
-    auto endIndex = selectController_->GetEndIndex();
-    ReportSelectionChangeEvent(host->GetId(), "selectionChange", startIndex, endIndex);
 }
 
 void TextFieldPattern::FocusAndUpdateCaretByMouse(MouseInfo& info)
@@ -5689,6 +5686,11 @@ void TextFieldPattern::HandleLeftMouseReleaseEvent(MouseInfo& info)
         StartTwinkling();
         tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
+    if (mouseStatus_ == MouseStatus::MOVE) {
+ 	    auto startIndex = selectController_->GetStartIndex();
+ 	    auto endIndex = selectController_->GetEndIndex();
+ 	    ReportSelectionChangeEvent(tmpHost->GetId(), "selectionChange", startIndex, endIndex);
+ 	}
     FreeMouseStyleHoldNode(info.GetLocalLocation());
     mouseStatus_ = MouseStatus::NONE;
     blockPress_ = false;
