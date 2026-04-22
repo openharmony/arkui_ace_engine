@@ -17,6 +17,7 @@
 
 #include <malloc.h>
 
+#include "ui/gestures/gesture_event.h"
 #include "bridge/cj_frontend/runtime/cj_runtime_delegate.h"
 #include "core/gestures/gesture_event.h"
 #include "core/pipeline/pipeline_base.h"

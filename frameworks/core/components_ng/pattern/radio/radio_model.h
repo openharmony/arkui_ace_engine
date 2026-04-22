@@ -21,6 +21,7 @@
 
 #include "core/common/resource/resource_object.h"
 #include "core/components_ng/pattern/radio/radio_event_hub.h"
+#include "core/event/mouse_constants.h"
 
 namespace OHOS::Ace {
 enum class RadioColorType {

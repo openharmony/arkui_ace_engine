@@ -17,6 +17,7 @@
 
 #include "base/log/ace_performance_monitor.h"
 #include "base/log/frame_report.h"
+#include "base/utils/time_util.h"
 #include "core/common/container.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_context.h"

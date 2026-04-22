@@ -29,6 +29,8 @@
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/manager/smart_gesture/smart_gesture_types.h"
 #include "core/components_ng/layout/vertical_overflow_handler.h"
+#include "core/components_ng/property/accessibility_property.h"
+#include "core/components_ng/property/property.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/event/pointer_event.h"
 

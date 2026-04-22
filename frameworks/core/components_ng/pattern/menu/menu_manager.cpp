@@ -825,7 +825,8 @@ void MenuManager::SendToAccessibility(const WeakPtr<FrameNode> node,
     CHECK_NULL_VOID(wrapperPattern);
     auto menu = wrapperPattern->GetMenu();
     CHECK_NULL_VOID(menu);
-    auto accessibilityProperty = menu->GetAccessibilityProperty<MenuAccessibilityProperty>();
+    auto accessibilityProperty =
+        AceType::DynamicCast<MenuAccessibilityProperty>(menu->GetAccessibilityProperty<AccessibilityProperty>());
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetAccessibilityIsShow(isShow);
     auto overlayManager = overlayWeak.Upgrade();

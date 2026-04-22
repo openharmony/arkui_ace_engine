@@ -16,6 +16,7 @@
 #include "core/components_ng/event/click_event.h"
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/gestures/click_info.h"
 #include <algorithm>

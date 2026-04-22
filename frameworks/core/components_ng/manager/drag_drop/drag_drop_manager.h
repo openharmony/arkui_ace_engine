@@ -24,6 +24,7 @@
 #include "core/common/interaction/interaction_data.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 #include "core/components_ng/manager/drag_drop/utils/internal_drag_action.h"
 #include "core/event/pointer_event.h"

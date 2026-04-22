@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <iterator>
 
+#include "base/utils/time_util.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/utils.h"
 #include "core/components_ng/property/measure_utils.h"

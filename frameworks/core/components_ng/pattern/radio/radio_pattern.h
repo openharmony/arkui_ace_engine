@@ -31,6 +31,9 @@ class RadioTheme;
 }
 
 namespace OHOS::Ace::NG {
+class ClickEvent;
+class InputEvent;
+class TouchEventImpl;
 class GroupManager;
 constexpr float DEFAULT_RADIO_IMAGE_SCALE = 0.7F;
 

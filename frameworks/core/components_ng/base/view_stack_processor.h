@@ -21,10 +21,14 @@
 #include <unordered_map>
 #include <vector>
 
+#include "base/memory/referenced.h"
+#include "base/utils/time_util.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/event/input_event_hub.h"
 #include "core/components_ng/event/state_style_manager.h"
 #include "core/gestures/gesture_processor.h"
 
@@ -329,9 +333,9 @@ public:
         elementsStack_.swap(emptyStack);
     }
 
-    RefPtr<GestureProcessor> GetOrCreateGestureProcessor();
+    ACE_FORCE_EXPORT RefPtr<GestureProcessor> GetOrCreateGestureProcessor();
 
-    void ResetGestureProcessor();
+    ACE_FORCE_EXPORT void ResetGestureProcessor();
 
     /**
      * when nesting observeComponentCreation functions, such as in the case of

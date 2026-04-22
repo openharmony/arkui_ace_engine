@@ -23,6 +23,8 @@
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components/list/list_item_theme.h"
 #include "core/components_ng/event/focus_type.h"
+#include "core/components_ng/event/input_event.h"
+#include "core/components_ng/event/pan_event.h"
 #include "core/components_ng/pattern/list/list_item_drag_manager.h"
 #include "core/components_ng/pattern/list/list_properties.h"
 #include "core/components_ng/pattern/scrollable/selectable_item_pattern.h"

@@ -780,7 +780,8 @@ void MenuItemPattern::ShowSubMenuWithAnimation(const RefPtr<FrameNode>& subMenu)
 void MenuItemPattern::SendSubMenuOpenToAccessibility(RefPtr<FrameNode>& subMenu, ShowSubMenuType type)
 {
     CHECK_NULL_VOID(subMenu);
-    auto accessibilityProperty = subMenu->GetAccessibilityProperty<MenuAccessibilityProperty>();
+    auto accessibilityProperty = AceType::DynamicCast<MenuAccessibilityProperty>(
+        subMenu->GetAccessibilityProperty<AccessibilityProperty>());
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetAccessibilityIsShow(true);
     subMenu->OnAccessibilityEvent(AccessibilityEventType::PAGE_OPEN);
