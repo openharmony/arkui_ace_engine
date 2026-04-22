@@ -57,7 +57,7 @@ export class ImageAnalyzerController implements MaterializedBase {
         })
         const returnResult: Array<ImageAnalyzerType> = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as Array<ImageAnalyzerType>)
     }
 }
 export enum ImageAnalyzerType {

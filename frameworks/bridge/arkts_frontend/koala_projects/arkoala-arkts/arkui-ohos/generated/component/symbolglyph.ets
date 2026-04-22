@@ -735,7 +735,7 @@ export class AppearSymbolEffect extends SymbolEffect implements MaterializedBase
         }
         const returnResult: EffectScope | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as EffectScope | undefined)
     }
     private setScope_serialize(scope: EffectScope | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -817,7 +817,7 @@ export class BounceSymbolEffect extends SymbolEffect implements MaterializedBase
         }
         const returnResult: EffectScope | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as EffectScope | undefined)
     }
     private setScope_serialize(scope: EffectScope | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -841,7 +841,7 @@ export class BounceSymbolEffect extends SymbolEffect implements MaterializedBase
         }
         const returnResult: EffectDirection | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as EffectDirection | undefined)
     }
     private setDirection_serialize(direction: EffectDirection | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -905,7 +905,7 @@ export class DisappearSymbolEffect extends SymbolEffect implements MaterializedB
         }
         const returnResult: EffectScope | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as EffectScope | undefined)
     }
     private setScope_serialize(scope: EffectScope | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -969,7 +969,7 @@ export class HierarchicalSymbolEffect extends SymbolEffect implements Materializ
         }
         const returnResult: EffectFillStyle | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as EffectFillStyle | undefined)
     }
     private setFillStyle_serialize(fillStyle: EffectFillStyle | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -1071,7 +1071,7 @@ export class ReplaceSymbolEffect extends SymbolEffect implements MaterializedBas
         }
         const returnResult: EffectScope | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as EffectScope | undefined)
     }
     private setScope_serialize(scope: EffectScope | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -1095,7 +1095,7 @@ export class ReplaceSymbolEffect extends SymbolEffect implements MaterializedBas
         }
         const returnResult: ReplaceEffectType | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as ReplaceEffectType | undefined)
     }
     private setReplaceType_serialize(replaceType: ReplaceEffectType | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -1177,7 +1177,7 @@ export class ScaleSymbolEffect extends SymbolEffect implements MaterializedBase 
         }
         const returnResult: EffectScope | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as EffectScope | undefined)
     }
     private setScope_serialize(scope: EffectScope | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -1201,7 +1201,7 @@ export class ScaleSymbolEffect extends SymbolEffect implements MaterializedBase 
         }
         const returnResult: EffectDirection | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as EffectDirection | undefined)
     }
     private setDirection_serialize(direction: EffectDirection | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()

@@ -39,7 +39,7 @@ import { ModifierStateManager } from './../CommonModifier'
 import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
 import { global_resource_Resource_serializer } from './../framework/resource'
 export class ArkUIPickerComponentPeer extends ArkCommonMethodPeer {
-    uiPickerComponentAttributeSet?: UIPickerComponentModifier;
+    uIPickerComponentAttributeSet?: UIPickerComponentModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

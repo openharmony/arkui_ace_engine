@@ -21,9 +21,6 @@ import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule
 import { int32, int64, float32, unsafeCast } from '@koalaui/common'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { extractors } from '#handwritten'
-// instructive change begin
-import { Set_String_serializer } from './stdlib'
-// instructive change end
 export class unifiedDataChannel_ProgressInfo_serializer {
     public static write(buffer: SerializerBase, value: unifiedDataChannel.ProgressInfo): void {
         let valueSerializer: SerializerBase = buffer
@@ -69,7 +66,10 @@ export class unifiedDataChannel_DataLoadInfo_serializer {
         if (valueHolderForTypes !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForTypesTmpValue = valueHolderForTypes!
-            Set_String_serializer.write(valueSerializer, valueHolderForTypesTmpValue)
+            valueSerializer.writeInt32((valueHolderForTypesTmpValue.size).toInt())
+            for (let valueHolderForTypesTmpValueElement of valueHolderForTypesTmpValue) {
+                valueSerializer.writeString(valueHolderForTypesTmpValueElement)
+            }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -87,7 +87,12 @@ export class unifiedDataChannel_DataLoadInfo_serializer {
         const typesTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let typesTmpBuf: Set<string> | undefined = undefined
         if ((typesTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            typesTmpBuf = Set_String_serializer.read(valueDeserializer)
+            const typesTmpBufOptLength: int32 = valueDeserializer.readInt32()
+            let typesTmpBufOpt = new Set<string>()
+            for (let typesTmpBufOptBufCounterI = 0; typesTmpBufOptBufCounterI < typesTmpBufOptLength; typesTmpBufOptBufCounterI++) {
+                typesTmpBufOpt.add((valueDeserializer.readString() as string))
+            }
+            typesTmpBuf = typesTmpBufOpt
         }
         const typesTmpResult: Set<string> | undefined = typesTmpBuf
         const recordCountTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
@@ -133,10 +138,8 @@ export class unifiedDataChannel_DataLoadParams_serializer {
             } else {
                 loadHandlerTmpBufBufArgsSerializer.writeInt8(RuntimeType.UNDEFINED);
             }
-            // instructive change start
-            let loadHandlerTmpBufBufContinuationValue: unifiedDataChannel.UnifiedData | null = null;
+            let loadHandlerTmpBufBufContinuationValue: unifiedDataChannel.UnifiedData | null | undefined;
             const loadHandlerTmpBufBufContinuationCallback: ((value: unifiedDataChannel.UnifiedData | null) => void) = (value: unifiedDataChannel.UnifiedData | null):void => {
-            // instructive change end
             loadHandlerTmpBufBufContinuationValue = value;
         }
             loadHandlerTmpBufBufArgsSerializer.holdAndWriteCallback(loadHandlerTmpBufBufContinuationCallback);
@@ -165,17 +168,14 @@ export class unifiedDataChannel_DataLoadParams_serializer {
                 } else {
                     delayedDataLoadHandlerTmpBufOptBufArgsSerializer.writeInt8(RuntimeType.UNDEFINED);
                 }
-                let delayedDataLoadHandlerTmpBufOptBufContinuationValue: Promise<unifiedDataChannel.UnifiedData | null> | undefined;
-                // instructive change start
-                const delayedDataLoadHandlerTmpBufOptBufContinuationCallback: ((value?: unifiedDataChannel.UnifiedData | null,error?: Array<string> | undefined) => void) =
-                    (value?: unifiedDataChannel.UnifiedData | null,error?: Array<string> | undefined):void => {
-                    // TODO
-                }
-                // instructive change end
+                let delayedDataLoadHandlerTmpBufOptBufContinuationValue: unifiedDataChannel.UnifiedData | null | undefined;
+                const delayedDataLoadHandlerTmpBufOptBufContinuationCallback: ((value?: unifiedDataChannel.UnifiedData | null | undefined,error?: Array<string> | undefined) => void) = (value?: unifiedDataChannel.UnifiedData | null | undefined, error?: Array<string> | undefined):void => {
+                delayedDataLoadHandlerTmpBufOptBufContinuationValue = value;
+            }
                 delayedDataLoadHandlerTmpBufOptBufArgsSerializer.holdAndWriteCallback(delayedDataLoadHandlerTmpBufOptBufContinuationCallback);
                 InteropNativeModule._CallCallbackSync(10, 1112484936, delayedDataLoadHandlerTmpBufOptBufArgsSerializer.asBuffer(), delayedDataLoadHandlerTmpBufOptBufArgsSerializer.length());
                 delayedDataLoadHandlerTmpBufOptBufArgsSerializer.release();
-                return (delayedDataLoadHandlerTmpBufOptBufContinuationValue as Promise<unifiedDataChannel.UnifiedData | null>);
+                return Promise.resolve((delayedDataLoadHandlerTmpBufOptBufContinuationValue as unifiedDataChannel.UnifiedData | null));
             }
             resourceFinalizerRegister(delayedDataLoadHandlerTmpBufOptClosure, delayedDataLoadHandlerTmpBufOptBufResource)
             delayedDataLoadHandlerTmpBuf = delayedDataLoadHandlerTmpBufOptClosure
@@ -223,7 +223,7 @@ export class unifiedDataChannel_GetDataParams_serializer {
         const dataProgressListenerTmpBufBufResource: CallbackResource = valueDeserializer.readCallbackResource()
         const dataProgressListenerTmpBufBufCall: KPointer = valueDeserializer.readPointer()
         const dataProgressListenerTmpBufBufCallSync: KPointer = valueDeserializer.readPointer()
-        const dataProgressListenerTmpBufClosure = (progressInfo: unifiedDataChannel.ProgressInfo, data?: unifiedDataChannel.UnifiedData | null):void => {
+        const dataProgressListenerTmpBufClosure = (progressInfo: unifiedDataChannel.ProgressInfo, data: unifiedDataChannel.UnifiedData | null):void => {
             const dataProgressListenerTmpBufBufArgsSerializer: SerializerBase = SerializerBase.hold();
             dataProgressListenerTmpBufBufArgsSerializer.writeInt32(dataProgressListenerTmpBufBufResource.resourceId);
             dataProgressListenerTmpBufBufArgsSerializer.writePointer(dataProgressListenerTmpBufBufCall);

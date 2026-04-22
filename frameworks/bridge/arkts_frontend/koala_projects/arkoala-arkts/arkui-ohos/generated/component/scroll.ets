@@ -23,6 +23,7 @@ import { FrameNode_serializer } from './../framework/FrameNode'
 import { Edge, ScrollSource, BarState, Color as arkui_component_enums_Color, EdgeEffect, Curve } from './enums'
 import { Length, Resource as arkui_component_units_Resource, VoidCallback, LengthMetrics as arkui_component_units_LengthMetrics, Dimension } from './units'
 import { Resource as global_resource_Resource } from 'global.resource'
+import { extractors, AttributeModifier, hookScrollAttributeModifier, AttributeUpdater } from '#handwritten'
 import { FrameNode } from 'arkui.FrameNode'
 import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
 import { ArkUIGeneratedNativeModule } from '#components'
@@ -31,7 +32,6 @@ import { ArkThemeScopeManager } from '#arktheme'
 import { ComponentBase } from './../ComponentBase'
 import { PeerNode } from './../PeerNode'
 import { ScrollState, ScrollSnapAlign } from './list'
-import { AttributeModifier, extractors, hookScrollAttributeModifier, AttributeUpdater } from '#handwritten'
 import { CustomBuilder } from './builder'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
@@ -162,7 +162,7 @@ export class Scroller implements MaterializedBase {
         }
         const returnResult: OffsetResult | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as OffsetResult | undefined)
     }
     private offset_serialize(): OffsetResult | undefined {
         const retval = ArkUIGeneratedNativeModule._Scroller_offset(this.peer!.ptr)
@@ -174,7 +174,7 @@ export class Scroller implements MaterializedBase {
         }
         const returnResult: OffsetResult | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as OffsetResult | undefined)
     }
     private scrollToIndex_serialize(value: int32, smooth?: boolean, align?: ScrollAlign, options?: ScrollToIndexOptions): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -242,7 +242,7 @@ export class Scroller implements MaterializedBase {
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: RectResult = RectResult_serializer.read(retvalDeserializer)
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as RectResult)
     }
     private getItemIndex_serialize(x: double, y: double): int32 {
         const retval = ArkUIGeneratedNativeModule._Scroller_getItemIndex(this.peer!.ptr, x, y)
@@ -253,7 +253,7 @@ export class Scroller implements MaterializedBase {
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: SizeResult = SizeResult_serializer.read(retvalDeserializer)
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as SizeResult)
     }
     private getFrameNode_serialize(): FrameNode | undefined {
         const retval = ArkUIGeneratedNativeModule._Scroller_getFrameNode(this.peer!.ptr)
@@ -265,7 +265,7 @@ export class Scroller implements MaterializedBase {
         }
         const returnResult: FrameNode | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as FrameNode | undefined)
     }
 }
 export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
