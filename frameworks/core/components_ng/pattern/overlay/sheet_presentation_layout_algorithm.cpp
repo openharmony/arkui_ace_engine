@@ -36,7 +36,7 @@ void SheetPresentationLayoutAlgorithm::InitParameter(LayoutWrapper* layoutWrappe
     CHECK_NULL_VOID(sheetPattern);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = host->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
 
     // if 2in1, enableHoverMode is true by default.
@@ -260,7 +260,7 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             }
             auto pipeline = host->GetContext();
             CHECK_NULL_VOID(pipeline);
-            auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+            auto sheetTheme = host->GetTheme<SheetTheme>(true);
             CHECK_NULL_VOID(sheetTheme);
             auto bigWindowMinHeight = sheetTheme->GetBigWindowMinHeight();
             auto maxHeight = std::min(sheetMaxHeight, sheetMaxWidth_) * sheetTheme->GetSheetHeightPercentMax();
@@ -468,7 +468,7 @@ void SheetPresentationLayoutAlgorithm::LayoutCloseIcon(const NG::OffsetF& transl
 
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = host->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
     auto sheetGeometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(sheetGeometryNode);
@@ -535,7 +535,7 @@ void SheetPresentationLayoutAlgorithm::LayoutDragBar(const NG::OffsetF& translat
     CHECK_NULL_VOID(geometryNode);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = host->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
     auto sheetGeometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(sheetGeometryNode);
@@ -697,7 +697,7 @@ float SheetPresentationLayoutAlgorithm::GetCenterDefaultWidth(const RefPtr<Frame
     CHECK_NULL_RETURN(host, sheetWidth);
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, sheetWidth);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = host->GetTheme<SheetTheme>(true);
     CHECK_NULL_RETURN(sheetTheme, sheetWidth);
     sheetWidth = sheetTheme->GetCenterDefaultWidth().ConvertToPx();
     return sheetWidth;
@@ -718,7 +718,7 @@ float SheetPresentationLayoutAlgorithm::ComputeMaxHeight(const float parentConst
     CHECK_NULL_RETURN(sheetPattern, 0.0f);
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, 0.0f);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = host->GetTheme<SheetTheme>(true);
     CHECK_NULL_RETURN(sheetTheme, 0.0f);
     auto maxHeight = (std::min(sheetMaxHeight, parentConstraintWidth)) * sheetTheme->GetSheetHeightPercentMax();
     CalcMaxHeightMinusDoubleStatusBarHeight(layoutWrapper, maxHeight, sheetMaxHeight);
@@ -766,7 +766,7 @@ float SheetPresentationLayoutAlgorithm::GetHeightBySheetStyle(const float parent
         CHECK_NULL_RETURN(host, height);
         auto pipeline = host->GetContext();
         CHECK_NULL_RETURN(pipeline, height);
-        auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+        auto sheetTheme = host->GetTheme<SheetTheme>(true);
         CHECK_NULL_RETURN(sheetTheme, height);
         auto bigWindowMinHeight = sheetTheme->GetBigWindowMinHeight();
         maxHeight = SheetInSplitWindow()
@@ -793,7 +793,7 @@ LayoutConstraintF SheetPresentationLayoutAlgorithm::CreateSheetChildConstraint(
     CHECK_NULL_RETURN(host, childConstraint);
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, childConstraint);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = host->GetTheme<SheetTheme>(true);
     CHECK_NULL_RETURN(sheetTheme, childConstraint);
 
     childConstraint.maxSize.SetWidth(sheetWidth_);

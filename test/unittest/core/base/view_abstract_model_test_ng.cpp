@@ -1054,6 +1054,14 @@ HWTEST_F(ViewAbstractModelTestNg, ViewAbstractModelTestNg019, TestSize.Level1)
             return nullptr;
         }
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(
+        [](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+        if (type == SheetTheme::TypeId()) {
+            return AceType::MakeRefPtr<SheetTheme>();
+        } else {
+            return nullptr;
+        }
+    });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto container = Container::Current();
     ASSERT_NE(container, nullptr);
@@ -1111,6 +1119,14 @@ HWTEST_F(ViewAbstractModelTestNg, ViewAbstractModelTestNg020, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     ASSERT_NE(themeManager, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == SheetTheme::TypeId()) {
+            return AceType::MakeRefPtr<SheetTheme>();
+        } else {
+            return nullptr;
+        }
+    });
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(
+        [](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
         if (type == SheetTheme::TypeId()) {
             return AceType::MakeRefPtr<SheetTheme>();
         } else {
@@ -1207,6 +1223,14 @@ HWTEST_F(ViewAbstractModelTestNg, ViewAbstractModelTestNg021, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     ASSERT_NE(themeManager, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == SheetTheme::TypeId()) {
+            return AceType::MakeRefPtr<SheetTheme>();
+        } else {
+            return nullptr;
+        }
+    });
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(
+        [](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
         if (type == SheetTheme::TypeId()) {
             return AceType::MakeRefPtr<SheetTheme>();
         } else {
@@ -1326,6 +1350,14 @@ HWTEST_F(ViewAbstractModelTestNg, ViewAbstractModelTestNg022, TestSize.Level1)
             return nullptr;
         }
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(
+        [](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+        if (type == SheetTheme::TypeId()) {
+            return AceType::MakeRefPtr<SheetTheme>();
+        } else {
+            return nullptr;
+        }
+    });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 
     /**
@@ -1410,6 +1442,14 @@ HWTEST_F(ViewAbstractModelTestNg, ViewAbstractModelTestNg023, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     ASSERT_NE(themeManager, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == SheetTheme::TypeId()) {
+            return AceType::MakeRefPtr<SheetTheme>();
+        } else {
+            return nullptr;
+        }
+    });
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(
+        [](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
         if (type == SheetTheme::TypeId()) {
             return AceType::MakeRefPtr<SheetTheme>();
         } else {

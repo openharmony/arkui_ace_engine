@@ -50,7 +50,7 @@ void SheetWrapperPaintMethod::PaintOuterBorder(RSCanvas& canvas, PaintWrapper* p
     CHECK_NULL_VOID(sheetNode);
     auto pipeline = sheetNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = sheetNode->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
     RSPath path;
     auto outerBorderWidth = sheetTheme->GetSheetOuterBorderWidth().ConvertToPx();
@@ -148,7 +148,7 @@ void SheetWrapperPaintMethod::PaintInnerBorder(RSCanvas& canvas, PaintWrapper* p
     CHECK_NULL_VOID(sheetNode);
     auto pipeline = sheetNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = sheetNode->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
     RSPath path;
     auto innerBorderWidth = -(sheetTheme->GetSheetInnerBorderWidth().ConvertToPx());
@@ -186,7 +186,7 @@ bool SheetWrapperPaintMethod::IsDrawBorder(PaintWrapper* paintWrapper)
     auto sheetType = sheetPattern->GetSheetTypeNoProcess();
     auto pipeline = sheetNode->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    auto sheetTheme = sheetNode->GetTheme<SheetTheme>(true);
     CHECK_NULL_RETURN(sheetTheme, false);
     auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);

@@ -64,6 +64,7 @@ const std::int32_t TARGET_ID_NEW = 2;
 const std::int32_t TARGET_ID_NEW_ONE = 101;
 const std::int32_t TARGET_ID_NEW_TWO = 201;
 const std::int32_t TARGET_ID_NEW_THREE = 3;
+const std::int32_t NODE_ID_SHEET = 3;
 const std::int32_t ZERO = 0;
 const std::int32_t ONE = 1;
 const std::int32_t TWO = 2;
@@ -96,6 +97,14 @@ void OverlayManagerTestFourNg::SetSheetTheme(RefPtr<SheetTheme> sheetTheme)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(
         [sheetTheme = AceType::WeakClaim(AceType::RawPtr(sheetTheme))](ThemeType type) -> RefPtr<Theme> {
+        if (type == SheetTheme::TypeId()) {
+            return sheetTheme.Upgrade();
+        } else {
+            return nullptr;
+        }
+    });
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(
+        [sheetTheme = AceType::WeakClaim(AceType::RawPtr(sheetTheme))](ThemeType type, int32_t) -> RefPtr<Theme> {
         if (type == SheetTheme::TypeId()) {
             return sheetTheme.Upgrade();
         } else {
@@ -603,5 +612,73 @@ HWTEST_F(OverlayManagerTestFourNg, BindKeyboardWithNode002, TestSize.Level1)
     WeakPtr<UINode> weakNode = targetNode;
     overlayManager.rootNodeWeak_ = weakNode;
     overlayManager.BindKeyboardWithNode(customNode, targetId);
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdate001
+ * @tc.desc: Test OnThemeScopeUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFourNg, OnThemeScopeUpdate001, TestSize.Level1)
+{
+    int32_t originApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+
+    RefPtr<FrameNode> rootNode = AceType::MakeRefPtr<FrameNode>("STAGE", TARGET_ID, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", NODE_ID_SHEET,
+        AceType::MakeRefPtr<SheetPresentationPattern>(103, "SheetPresentation", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    SheetStyle sheetStyle;
+    sheetStyle.sheetTitle = "Title";
+    sheetStyle.sheetSubtitle = "SubTitle";
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    auto ret = sheetPattern->OnThemeScopeUpdate(sheetNode->GetThemeScopeId());
+    EXPECT_TRUE(ret);
+    MockContainer::Current()->SetApiTargetVersion(originApiVersion);
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdate002
+ * @tc.desc: Test OnThemeScopeUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFourNg, OnThemeScopeUpdate002, TestSize.Level1)
+{
+    int32_t originApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY);
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+
+    RefPtr<FrameNode> rootNode = AceType::MakeRefPtr<FrameNode>("STAGE", TARGET_ID, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", NODE_ID_SHEET,
+        AceType::MakeRefPtr<SheetPresentationPattern>(103, "SheetPresentation", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    SheetStyle sheetStyle;
+    sheetStyle.sheetTitle = "Title";
+    sheetStyle.sheetSubtitle = "SubTitle";
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    auto ret = sheetPattern->OnThemeScopeUpdate(sheetNode->GetThemeScopeId());
+    EXPECT_FALSE(ret);
+    MockContainer::Current()->SetApiTargetVersion(originApiVersion);
 }
 } // namespace OHOS::Ace::NG
