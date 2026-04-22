@@ -383,7 +383,9 @@ void DialogLayoutAlgorithm::AnalysisLayoutOfContent(LayoutWrapper* layoutWrapper
     CHECK_NULL_VOID(text);
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(text->GetLayoutProperty());
     CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateWordBreak(dialogPattern->GetDialogProperties().wordBreak);
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        textLayoutProperty->UpdateWordBreak(dialogPattern->GetDialogProperties().wordBreak);
+    }
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(text->GetLayoutAlgorithm());
     CHECK_NULL_VOID(layoutAlgorithmWrapper);
     auto textLayoutAlgorithm = DynamicCast<TextLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
