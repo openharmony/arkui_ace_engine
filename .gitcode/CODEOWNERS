@@ -266,6 +266,11 @@ advanced_ui_component/imageGeneratorDialog/source/image_generator_dialog_project
 
 [Advanced UI Components Static]
 advanced_ui_component_static/assembled_advanced_ui_component/ @arkuiadvancedcomponent
+advanced_ui_component_static/assembled_advanced_ui_component/@ohos.arkui.advanced.Chip.ets @arkuitoolchain
+advanced_ui_component_static/assembled_advanced_ui_component/@ohos.arkui.advanced.ChipGroup.ets @arkuitoolchain
+advanced_ui_component_static/assembled_advanced_ui_component/@ohos.arkui.advanced.Counter.ets @arkuitoolchain
+advanced_ui_component_static/assembled_advanced_ui_component/@ohos.arkui.advanced.SegmentButton.ets @arkuitoolchain
+advanced_ui_component_static/assembled_advanced_ui_component/@ohos.arkui.advanced.SegmentButtonV2.ets @arkuitoolchain
 
 [Extend UI Components]
 component_ext/arc_swiper/
