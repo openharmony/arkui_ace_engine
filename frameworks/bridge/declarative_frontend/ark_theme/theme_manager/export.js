@@ -15,23 +15,30 @@
 
 const fs = require("fs");
 
+function AddExportToDistFile(fileName, exportContent) {
+    let content = fs.readFileSync(fileName, 'utf-8');
+    if (content.includes('export default {')) {
+        console.log(`[INFO] Export statement already exists in ${fileName}, skipping.`);
+        return;
+    }
+    fs.writeFileSync(fileName, content + exportContent);
+}
+
+
 function main() {
     if (process.argv.length < 3) {
-        console.log('Usage: node build_postprocess.js <file>');
+        console.error('Usage: node build_postprocess.js <file>');
         process.exit(1);
     }
-    const fileName = process.argv[2];
-    if (!fs.existsSync(fileName)) {
-        console.log('Error: File not found: ' + fileName);
-        process.exit(1);
+
+    let distFileName = process.argv[2];
+    if (!fs.existsSync(distFileName)) {
+        console.error('Error: File not found: ' + distFileName);
     }
-    let content = fs.readFileSync(fileName, 'utf-8');
-    // Remove console.log lines for release build
-    content = content.replace(/console\.log\([^)]*\);?\n?/g, '');
-    const exportStatement = `export default { ArkThemeScopeManager };`;
-    content += exportStatement;
-    fs.writeFileSync(fileName, content);
-    console.log('Post-processed: ' + fileName);
+
+    const exportContent = `export default { ArkThemeScopeManager };`;
+    AddExportToDistFile(distFileName, exportContent);
+    console.log(`Updated export file: ${distFileName}`);
 }
 
 main();
