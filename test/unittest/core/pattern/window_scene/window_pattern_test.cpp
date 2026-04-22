@@ -407,8 +407,10 @@ HWTEST_F(WindowPatternTest, CreateStartingWindow_WithValidPreloadPixelMap, TestS
     ASSERT_NE(windowScene_, nullptr);
     ASSERT_NE(windowScene_->GetHost(), nullptr);
     sceneSession_->ResetPreloadStartingWindow();
-    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
-    std::pair<std::shared_ptr<uint8_t[]>, size_t> bufferInfo = { nullptr, 0 };
+    std::shared_ptr<Media::PixelMap> pixelMap;	 
+    std::pair<std::shared_ptr<uint8_t[]>, size_t> bufferInfo;	 
+    pixelMap = nullptr; 
+    bufferInfo = {nullptr, 0};
     std::shared_ptr<Media::PixelMap> validPixelMap = std::make_shared<Media::PixelMap>();
     sceneSession_->SetPreloadStartingWindow(validPixelMap);
     sceneSession_->GetPreloadStartingWindow(pixelMap, bufferInfo);
@@ -433,11 +435,13 @@ HWTEST_F(WindowPatternTest, CreateStartingWindow_WithValidPreloadSvgBuffer, Test
     ASSERT_NE(windowScene_, nullptr);
     ASSERT_NE(windowScene_->GetHost(), nullptr);
     sceneSession_->ResetPreloadStartingWindow();
-    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
-    std::pair<std::shared_ptr<uint8_t[]>, size_t> bufferInfo = { nullptr, 0 };
+    std::shared_ptr<Media::PixelMap> pixelMap;	 
+    std::pair<std::shared_ptr<uint8_t[]>, size_t> bufferInfo;	 
+    pixelMap = nullptr; 
+    bufferInfo = {nullptr, 0};
     auto svgBufferVec = std::make_shared<std::vector<uint8_t>>(10);
     std::shared_ptr<uint8_t[]> validSvgBuffer(svgBufferVec->data(), [](uint8_t*) {});
-    std::pair<std::shared_ptr<uint8_t[]>, size_t> validBufferInfo = { validSvgBuffer, 10 };
+    std::pair<std::shared_ptr<uint8_t[]>, size_t> validBufferInfo = {validSvgBuffer, 10};
     sceneSession_->SetPreloadStartingWindow(validBufferInfo);
     sceneSession_->GetPreloadStartingWindow(pixelMap, bufferInfo);
     EXPECT_EQ(pixelMap, nullptr);
@@ -535,5 +539,64 @@ HWTEST_F(WindowPatternTest, TransformOrientationForDisMatchSnapshot, TestSize.Le
     snapshotRotation = 2;
     ret = windowScene_->TransformOrientationForDisMatchSnapshot(lastRotation, windowRotation, snapshotRotation);
     EXPECT_EQ(ret, ImageRotateOrientation::UP);
+}
+
+/**
+ * @tc.name: GetSessionTouchable_SessionIsNull
+ * @tc.desc: Test GetSessionTouchable when session is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternTest, GetSessionTouchable_SessionIsNull, TestSize.Level1)
+{
+    ASSERT_NE(windowScene_, nullptr);
+    windowScene_->session_ = nullptr;
+    auto result = windowScene_->GetSessionTouchable();
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: GetSessionTouchable_SystemTouchableFalse
+ * @tc.desc: Test GetSessionTouchable when GetSystemTouchable returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternTest, GetSessionTouchable_SystemTouchableFalse, TestSize.Level1)
+{
+    ASSERT_NE(windowScene_, nullptr);
+    ASSERT_NE(windowScene_->session_, nullptr);
+    sceneSession_->systemTouchable_ = false;
+    sceneSession_->foregroundInteractiveStatus_ = true;
+    auto result = windowScene_->GetSessionTouchable();
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: GetSessionTouchable_ForegroundInteractiveFalse
+ * @tc.desc: Test GetSessionTouchable when GetForegroundInteractiveStatus returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternTest, GetSessionTouchable_ForegroundInteractiveFalse, TestSize.Level1)
+{
+    ASSERT_NE(windowScene_, nullptr);
+    ASSERT_NE(windowScene_->session_, nullptr);
+    sceneSession_->systemTouchable_ = true;
+    sceneSession_->foregroundInteractiveStatus_ = false;
+    auto result = windowScene_->GetSessionTouchable();
+    EXPECT_EQ(result, false);
+}
+    
+/**
+ * @tc.name: GetSessionTouchable_BothTrue
+ * @tc.desc: Test GetSessionTouchable when both GetSystemTouchable and GetForegroundInteractiveStatus return true
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternTest, GetSessionTouchable_BothTrue, TestSize.Level1)
+{
+    ASSERT_NE(windowScene_, nullptr);
+    ASSERT_NE(windowScene_->session_, nullptr);
+    sceneSession_->systemTouchable_ = true;
+    sceneSession_->forceTouchable_ = true;
+    sceneSession_->foregroundInteractiveStatus_ = true;
+    auto result = windowScene_->GetSessionTouchable();
+    EXPECT_EQ(result, true);
 }
 } // namespace OHOS::Ace::NG
