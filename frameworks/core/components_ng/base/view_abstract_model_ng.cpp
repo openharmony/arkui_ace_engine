@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/base/view_abstract_model_ng.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"

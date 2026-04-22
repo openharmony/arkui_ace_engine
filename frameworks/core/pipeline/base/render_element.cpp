@@ -15,6 +15,8 @@
 
 #include "core/pipeline/base/render_element.h"
 
+#include "core/accessibility/accessibility_manager.h"
+
 #include "core/components/focus_animation/render_focus_animation.h"
 #include "core/components/shadow/render_shadow.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"

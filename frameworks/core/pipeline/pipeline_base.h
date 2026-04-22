@@ -20,6 +20,7 @@
 #include <functional>
 #include <memory>
 #include <optional>
+#include <set>
 #include <shared_mutex>
 #include <stack>
 #include <string>
@@ -35,7 +36,6 @@
 #include "base/resource/data_provider_manager.h"
 #include "base/resource/shared_image_manager.h"
 #include "base/thread/task_executor.h"
-#include "core/accessibility/accessibility_manager.h"
 #include "core/animation/schedule_task.h"
 #include "core/common/display_info.h"
 #include "core/common/draw_delegate.h"
@@ -51,7 +51,6 @@
 #include "core/components/theme/resource_adapter.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/manager/display_sync/ui_display_sync_manager.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/event/axis_event.h"
 #include "core/event/key_event.h"
@@ -71,6 +70,8 @@ enum class AvoidAreaType : uint32_t;
 namespace OHOS::Ace {
 namespace NG {
 class FrameNode;
+struct UIExtCallbackEvent;
+enum class UIExtCallbackEventId : uint32_t;
 } // namespace NG
 
 struct KeyboardAnimationCurve {
@@ -107,8 +108,12 @@ class ManagerInterface;
 class NavigationController;
 class StatisticEventReporter;
 class EventManager;
+class AccessibilityManager;
 enum class FrontendType;
 enum class PlatformVersion;
+enum class AccessibilityCallbackEventId : uint32_t;
+struct AccessibilityEvent;
+using NodeId = int32_t;
 using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
 using AceVsyncCallback = std::function<void(uint64_t, uint64_t)>;
 
@@ -293,12 +298,7 @@ public:
         }
     }
 
-    void SendUpdateVirtualNodeFocusEvent()
-    {
-        auto accessibilityManager = GetAccessibilityManager();
-        CHECK_NULL_VOID(accessibilityManager);
-        accessibilityManager->UpdateVirtualNodeFocus();
-    }
+    void SendUpdateVirtualNodeFocusEvent();
 
     void RegisterWindowDensityCallback(std::function<double()>&& callback)
     {
@@ -1915,7 +1915,7 @@ private:
     std::function<void(uint32_t)> uiExtensionEventCallback_;
     std::set<NG::UIExtCallbackEvent> uiExtensionEvents_;
     std::function<void(uint32_t, int64_t)> accessibilityCallback_;
-    std::set<AccessibilityCallbackEvent> accessibilityEvents_;
+    std::set<std::pair<uint32_t, int64_t>> accessibilityEvents_;
     std::shared_ptr<ArkUIPerfMonitor> perfMonitor_;
     ConfigurationChange configurationChange_;
     std::shared_ptr<StatisticEventReporter> statisticEventReporter_;

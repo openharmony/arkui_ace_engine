@@ -53,6 +53,7 @@
 #include "base/utils/utils.h"
 #include "arkweb_utils.h"
 #include "bridge/common/utils/engine_helper.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/common/ace_engine_ext.h"
 #include "core/common/ai/image_analyzer_manager.h"
 #include "core/common/container.h"

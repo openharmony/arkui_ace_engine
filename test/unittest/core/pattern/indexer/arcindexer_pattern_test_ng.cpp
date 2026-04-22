@@ -14,6 +14,8 @@
  */
 
 #include <optional>
+#include "core/accessibility/accessibility_manager.h"
+#include "core/accessibility/accessibility_manager_ng.h"
 
 #include "gtest/gtest.h"
 

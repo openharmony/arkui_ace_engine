@@ -14,6 +14,7 @@
  */
 
 #include "compatible/components/chart/render_chart.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "core/common/font_manager.h"
 

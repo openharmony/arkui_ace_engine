@@ -33,6 +33,7 @@
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
+#include "core/accessibility/accessibility_manager_ng.h"
 #include "base/log/dump_log.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/recorder/event_recorder.h"

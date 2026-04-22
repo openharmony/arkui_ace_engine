@@ -38,8 +38,13 @@
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/components_ng/pattern/toast/toast_view.h"
 #include "core/components_ng/property/safe_area_insets.h"
-#include "interfaces/inner_api/ace/modal_ui_extension_config.h"
+#include "core/pipeline_ng/ui_task_scheduler.h"
 
+namespace OHOS::Ace {
+struct ModalUIExtensionCallbacks;
+struct ModalUIExtensionConfig;
+struct ModalUIExtensionAllowedUpdateConfig;
+} // namespace OHOS::Ace
 namespace OHOS::Ace::NG {
 struct CalendarSettingData;
 

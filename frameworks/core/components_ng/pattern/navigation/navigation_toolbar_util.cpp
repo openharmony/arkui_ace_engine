@@ -18,6 +18,7 @@
 #include "base/i18n/localization.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/common/container.h"

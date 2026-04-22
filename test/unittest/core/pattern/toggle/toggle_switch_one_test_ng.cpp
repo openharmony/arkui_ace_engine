@@ -14,6 +14,7 @@
  */
 
 #include "gtest/gtest.h"
+#include "core/accessibility/accessibility_manager.h"
 #define protected public
 #define private public
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"

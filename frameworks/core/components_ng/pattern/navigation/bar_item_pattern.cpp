@@ -14,6 +14,7 @@
  */
 
 #include "base/utils/utf_helper.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components_ng/pattern/navigation/bar_item_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 

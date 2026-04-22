@@ -22,6 +22,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/pipeline/base/composed_element.h"
 #include "core/pipeline/pipeline_base.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"

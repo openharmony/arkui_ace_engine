@@ -18,6 +18,7 @@
 #include "gtest/gtest.h"
 
 #define private public
+#include "core/accessibility/accessibility_manager.h"
 #include "frameworks/core/event/touch_event.h"
 #undef private
 

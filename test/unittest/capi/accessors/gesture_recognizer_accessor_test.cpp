@@ -14,6 +14,7 @@
  */
 
 #include "core/interfaces/native/implementation/gesture_recognizer_peer_impl.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "accessor_test_base.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"

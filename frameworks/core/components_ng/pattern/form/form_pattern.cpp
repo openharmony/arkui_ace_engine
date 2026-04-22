@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/form/form_pattern.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "form_constants.h"
 #include "form_info_base.h"

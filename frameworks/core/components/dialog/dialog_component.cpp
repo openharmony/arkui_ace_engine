@@ -14,6 +14,7 @@
  */
 
 #include "core/components/dialog/dialog_component.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/i18n/localization.h"
 #include "core/components/dialog/action_sheet/action_sheet_component.h"

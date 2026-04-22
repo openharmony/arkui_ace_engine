@@ -14,6 +14,7 @@
  */
 
 #include "compatible/components/text_field/render_text_field.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/i18n/localization.h"
 #include "base/log/dump_log.h"

@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/compatible/components/list/dom_list.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/log/event_report.h"
 #include "core/components/scroll/scroll_fade_effect.h"

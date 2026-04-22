@@ -14,6 +14,7 @@
  */
 
 #include <string>
+#include "core/accessibility/accessibility_manager.h"
 
 #include "gtest/gtest.h"
 #include "search_base.h"
@@ -751,7 +752,7 @@ HWTEST_F(SearchTestTwoNg, Pattern025, TestSize.Level1)
     ASSERT_NE(events.size(), 0);
     MockContainer::SetMockColorMode(ColorMode::DARK);
     for (auto event : events) {
-        event->callback_(info);
+        (*event)(info);
     }
 }
 
@@ -2902,8 +2903,8 @@ HWTEST_F(SearchTestTwoNg, searchTouchEventTest, TestSize.Level1)
     touchInfo1.SetTouchType(TouchType::UP);
     info.AddTouchLocationInfo(std::move(touchInfo1));
     for (auto event : events) {
-        if (event->callback_) {
-            event->callback_(info);
+        if (event->GetTouchEventCallback()) {
+            (*event)(info);
         }
     }
     EXPECT_NE(events.size(), 0);
@@ -2913,8 +2914,8 @@ HWTEST_F(SearchTestTwoNg, searchTouchEventTest, TestSize.Level1)
     touchInfo2.SetTouchType(TouchType::MOVE);
     info2.AddTouchLocationInfo(std::move(touchInfo2));
     for (auto event : events) {
-        if (event->callback_) {
-            event->callback_(info2);
+        if (event->GetTouchEventCallback()) {
+            (*event)(info2);
         }
     }
     EXPECT_NE(events.size(), 0);
@@ -2950,7 +2951,7 @@ HWTEST_F(SearchTestTwoNg, searchToJsonTest, TestSize.Level1)
     pattern->ToJsonValueForCancelButton(jsonValue, filter);
     pattern->ToJsonValueForCursor(jsonValue, filter);
     pattern->ToJsonValueForSearchButtonOption(jsonValue, filter);
-    EXPECT_EQ(filter.FilterEmpty(), false);
+    EXPECT_TRUE(filter.CheckExtAttr("content"));
     EXPECT_EQ(filter.IsFastFilter(), true);
 
     InspectorFilter filter2;
@@ -3883,11 +3884,9 @@ HWTEST_F(SearchTestTwoNg, SearchTextFieldPatternTest, TestSize.Level1)
 
     TouchEventInfo info("type");
     TouchLocationInfo location(1);
-    Offset pos;
-    pos.deltaX_ = 10.0;
-    pos.deltaY_ = 10.0;
+    Offset pos(10.0, 10.0);
     location.SetLocalLocation(pos);
-    info.touches_.emplace_back(location);
+    info.AddTouchLocationInfo(std::move(location));
     auto offset = info.GetTouches().front().GetLocalLocation();
 
     auto manager = SelectContentOverlayManager::GetOverlayManager();

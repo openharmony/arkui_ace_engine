@@ -15,6 +15,7 @@
 
 #include <optional>
 
+#include "core/accessibility/accessibility_manager.h"
 #include "gtest/gtest.h"
 
 #include "base/geometry/dimension.h"

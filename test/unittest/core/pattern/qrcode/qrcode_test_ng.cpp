@@ -14,6 +14,7 @@
  */
 
 #include <cstddef>
+#include "core/accessibility/accessibility_manager.h"
 #include <cstdint>
 #include <optional>
 #include <string>

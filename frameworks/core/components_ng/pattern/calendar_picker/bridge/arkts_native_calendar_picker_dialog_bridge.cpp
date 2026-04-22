@@ -23,6 +23,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/common/container.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/common/resource/resource_parse_utils.h"

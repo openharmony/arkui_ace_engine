@@ -37,6 +37,7 @@
 #include "base/utils/utils.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "core/accessibility/accessibility_manager.h"
+#include "core/accessibility/accessibility_manager_ng.h"
 #include "core/components_ng/pattern/web/web_agent_event_reporter.h"
 #include "core/components_ng/render/detached_rs_node_manager.h"
 #include "core/components/container_modal/container_modal_constants.h"

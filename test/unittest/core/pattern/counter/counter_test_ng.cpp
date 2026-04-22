@@ -26,6 +26,7 @@
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
+#include "core/accessibility/accessibility_manager.h"
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"

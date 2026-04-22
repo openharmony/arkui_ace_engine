@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include <vector>
+#include "core/accessibility/accessibility_manager.h"
 #include "gtest/gtest.h"
 #include "gtest/internal/gtest-internal.h"
 #define private public
@@ -2107,7 +2108,7 @@ HWTEST_F(SelectOverlayTestNg, OnDetachFromFrameNode001, TestSize.Level1)
     pattern->OnDetachFromFrameNode(
         FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton", ElementRegister::GetInstance()->MakeUniqueId(), []() {
             return AceType::MakeRefPtr<ButtonPattern>();
-        }).rawPtr_);
+        }).GetRawPtr());
     EXPECT_FALSE(pattern->closedByGlobalTouchEvent_);
     EXPECT_EQ(callBackFlag, 0);
 }

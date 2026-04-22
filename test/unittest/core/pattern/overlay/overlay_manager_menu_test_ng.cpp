@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include <mutex>
+#include "core/accessibility/accessibility_manager.h"
 #include <optional>
 #include <string>
 

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "base/utils/date_util.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/common/container.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/calendar/calendar_theme.h"

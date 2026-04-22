@@ -14,11 +14,13 @@
  */
 
 #include "frameworks/bridge/js_frontend/js_command.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "base/log/event_report.h"
 #include "compatible/components/search/dom_search.h"
 #include "compatible/components/text_field/dom_textarea.h"
 #include "core/common/dynamic_module_helper.h"
+#include "frameworks/bridge/common/dom/dom_xcomponent.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine_loader.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
 

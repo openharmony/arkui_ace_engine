@@ -25,6 +25,7 @@
 #include "base/ressched/ressched_touch_optimizer.h"
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_manager.h"
+#include "core/accessibility/accessibility_manager_ng.h"
 #include "core/common/back_press_handler_manager.h"
 #include "core/common/event_manager.h"
 #include "core/common/font_manager.h"
@@ -1432,6 +1433,8 @@ bool PipelineBase::ReachResponseDeadline() const
 }
 
 void PipelineBase::SendEventToAccessibility(const AccessibilityEvent& accessibilityEvent) {}
+
+void PipelineBase::SendUpdateVirtualNodeFocusEvent() {}
 
 void PipelineBase::OnActionEvent(const std::string& action) {}
 

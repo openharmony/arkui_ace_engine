@@ -14,6 +14,7 @@
  */
 
 #include "core/components_v2/inspector/inspector_composed_component.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "compatible/components/component_loader.h"
 

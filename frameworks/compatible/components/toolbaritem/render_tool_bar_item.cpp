@@ -14,6 +14,7 @@
  */
 
 #include "compatible/components/toolbaritem/render_tool_bar_item.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include "core/event/ace_event_helper.h"
 namespace OHOS::Ace {

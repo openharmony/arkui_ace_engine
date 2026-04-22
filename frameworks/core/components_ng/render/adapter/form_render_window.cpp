@@ -18,6 +18,7 @@
 #include "base/log/ace_performance_monitor.h"
 #include "base/log/frame_report.h"
 #include "core/common/container.h"
+#include "core/common/container_handler.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "render_service_client/core/ui/rs_root_node.h"

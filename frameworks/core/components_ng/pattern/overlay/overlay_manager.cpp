@@ -82,6 +82,7 @@
 #include "core/components_ng/pattern/video/video_full_screen_pattern.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
+#include "interfaces/inner_api/ace/modal_ui_extension_config.h"
 
 #ifdef WEB_SUPPORTED
 #include "core/components_ng/pattern/web/web_pattern.h"

@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 
 #include "menu_item_model.h"

@@ -28,6 +28,7 @@
 #include "test/mock/frameworks/core/rosen/mock_canvas.h"
 #include "test/mock/frameworks/core/rosen/testing_canvas.h"
 
+#include "core/accessibility/accessibility_manager.h"
 #include "core/common/ace_engine.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/grid_system_manager.h"

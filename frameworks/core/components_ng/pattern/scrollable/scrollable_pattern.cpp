@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
+#include "core/accessibility/accessibility_utils.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "base/geometry/axis.h"

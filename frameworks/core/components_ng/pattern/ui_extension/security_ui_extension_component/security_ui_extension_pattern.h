@@ -24,6 +24,11 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_hub.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 
+namespace OHOS::Ace {
+class AccessibilityChildTreeCallback;
+class AccessibilitySAObserverCallback;
+}
+
 namespace OHOS::Ace::NG {
 using BusinessDataUECConsumeCallback = std::function<int32_t(const AAFwk::Want&)>;
 using BusinessDataUECConsumeReplyCallback = std::function<int32_t(const AAFwk::Want&, std::optional<AAFwk::Want>&)>;

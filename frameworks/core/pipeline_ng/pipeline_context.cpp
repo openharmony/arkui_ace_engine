@@ -13,7 +13,10 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/accessibility/accessibility_manager.h"
+#include "core/accessibility/accessibility_manager_ng.h"
 
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/event_manager.h"

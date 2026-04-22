@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/search/search_pattern.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include <cstdint>
 #include "base/geometry/dimension.h"

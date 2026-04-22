@@ -15,6 +15,7 @@
  */
 
 #include <gmock/gmock.h>
+#include "core/accessibility/accessibility_manager.h"
 
 #include "gtest/gtest.h"
 

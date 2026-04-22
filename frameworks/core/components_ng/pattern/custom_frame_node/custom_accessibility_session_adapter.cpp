@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/custom_frame_node/custom_accessibility_session_adapter.h"
+#include "core/accessibility/accessibility_manager.h"
 
 #include <cinttypes>
 #include "base/log/log.h"

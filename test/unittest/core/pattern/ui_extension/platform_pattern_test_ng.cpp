@@ -17,6 +17,8 @@
 #include "base/memory/ace_type.h"
 #define private public
 #define protected public
+#include "core/accessibility/accessibility_manager.h"
+#include "core/components_ng/event/touch_event.h"
 #include "frameworks/core/components_ng/pattern/ui_extension/platform_pattern.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "frameworks/base/log/log_wrapper.h"
