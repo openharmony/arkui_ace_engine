@@ -23,7 +23,7 @@ import {
   PrefixIconOptions,
   SuffixIconOptions
 } from '@ohos.arkui.advanced.Chip';
-import { uiMaterial } from '@kit.ArkUI';
+import uiMaterial from '@ohos.arkui.uiMaterial';
 import deviceInfo from '@ohos.deviceInfo';
 
 interface ChipGroupTheme {
@@ -210,7 +210,7 @@ function isValidDimensionNoPercentageString(dimension: string): boolean {
 
 @Component
 export struct IconGroupSuffix {
-  @Consume chipSize: ChipSize | SizeOptions;
+  @Consume chipSize: ChipSize | SizeOptions = ChipSize.NORMAL;
   @Prop items: Array<IconItemOptions | SymbolGlyphModifier | SymbolItemOptions> = [];
   @Prop iconBackgroundSystemMaterial?: uiMaterial.Material;
   symbolEffect: SymbolEffect = new SymbolEffect();
@@ -262,7 +262,7 @@ export struct IconGroupSuffix {
   }
 
   @Builder
-  IconButtonsBuilder(useEffect: boolean | undefined) {
+  IconButtonsBuilder(material: uiMaterial.Material | undefined) {
     Row({ space: 8 }) {
       ForEach(this.items || [], (suffixItem: IconItemOptions | SymbolGlyphModifier | SymbolItemOptions) => {
         Button() {
@@ -287,6 +287,7 @@ export struct IconGroupSuffix {
         })
         .backgroundColor(iconGroupSuffixTheme.backgroundColor)
         .borderRadius(iconGroupSuffixTheme.borderRadius)
+        .systemMaterial(material)
         .accessibilityText(this.getAccessibilityText(suffixItem))
         .accessibilityDescription(this.getAccessibilityDescription(suffixItem))
         .accessibilityLevel(this.getAccessibilityLevel(suffixItem))
@@ -295,18 +296,20 @@ export struct IconGroupSuffix {
             suffixItem.action();
           }
         })
-        .borderRadius(iconGroupSuffixTheme.borderRadius)
-        .useEffect(useEffect)
       })
     }
   }
 
   build() {
     if (deviceInfo.sdkApiVersion >= 26) {
-      EffectComponent() {
-        this.IconButtonsBuilder(true)
+      if (enableEffectComponent(this.iconBackgroundSystemMaterial)) {
+        EffectComponent() {
+          this.IconButtonsBuilder(createSubECMaterial(this.iconBackgroundSystemMaterial))
+        }
+        .systemMaterial(createECMaterial(this.iconBackgroundSystemMaterial))
+      } else {
+        this.IconButtonsBuilder(this.iconBackgroundSystemMaterial)
       }
-      .systemMaterial(this.iconBackgroundSystemMaterial)
     } else {
       this.IconButtonsBuilder(undefined)
     }
@@ -578,98 +581,92 @@ export struct ChipGroup {
   }
 
   @Builder
-  ChipRowBuilder() {
-    ForEach(this.items || [], (chipItem: ChipGroupItemOptions, index) => {
-      if (chipItem) {
-        Chip({
-          prefixIcon: this.getPrefixIcon(chipItem),
-          prefixSymbol: chipItem?.prefixSymbol,
-          label: {
-            text: chipItem?.label?.text ?? ' ',
-            fontColor: this.getFontColor(),
-            activatedFontColor: this.getSelectedFontColor(),
-          },
-          suffixIcon: this.getSuffixIcon(chipItem),
-          suffixSymbol: chipItem?.suffixSymbol,
-          suffixSymbolOptions: chipItem.suffixSymbolOptions,
-          allowClose: chipItem.allowClose ?? false,
-          closeOptions: chipItem.closeOptions,
-          enabled: true,
-          activated: this.isSelected(index),
-          backgroundColor: this.getBackgroundColor(),
-          size: this.getChipSize(),
-          activatedBackgroundColor: this.getSelectedBackgroundColor(),
-          accessibilitySelectedType:
-          this.multiple ? AccessibilitySelectedType.CHECKED : AccessibilitySelectedType.SELECTED,
-          accessibilityDescription: chipItem.accessibilityDescription,
-          accessibilityLevel: chipItem.accessibilityLevel,
-          onClicked: () => {
-            if (this.isSelected(index)) {
-              if (!(!this.isMultiple())) {
-                if (this.getSelectedIndexes().length > 1) {
-                  this.selectedIndexes.splice(this.selectedIndexes.indexOf(index), 1);
+  ChipItemsBuilder(material: uiMaterial.Material | undefined) {
+    Row({ space: this.getChipGroupItemSpace() }) {
+      ForEach(this.items || [], (chipItem: ChipGroupItemOptions, index) => {
+        if (chipItem) {
+          Chip({
+            prefixIcon: this.getPrefixIcon(chipItem),
+            prefixSymbol: chipItem?.prefixSymbol,
+            label: {
+              text: chipItem?.label?.text ?? ' ',
+              fontColor: this.getFontColor(),
+              activatedFontColor: this.getSelectedFontColor(),
+            },
+            suffixIcon: this.getSuffixIcon(chipItem),
+            suffixSymbol: chipItem?.suffixSymbol,
+            suffixSymbolOptions: chipItem.suffixSymbolOptions,
+            allowClose: chipItem.allowClose ?? false,
+            closeOptions: chipItem.closeOptions,
+            enabled: true,
+            activated: this.isSelected(index),
+            backgroundColor: this.getBackgroundColor(),
+            backgroundSystemMaterial: createSubECMaterial(this.backgroundSystemMaterial),
+            size: this.getChipSize(),
+            activatedBackgroundColor: this.getSelectedBackgroundColor(),
+            accessibilitySelectedType:
+            this.multiple ? AccessibilitySelectedType.CHECKED : AccessibilitySelectedType.SELECTED,
+            accessibilityDescription: chipItem.accessibilityDescription,
+            accessibilityLevel: chipItem.accessibilityLevel,
+            onClicked: () => {
+              if (this.isSelected(index)) {
+                if (!(!this.isMultiple())) {
+                  if (this.getSelectedIndexes().length > 1) {
+                    this.selectedIndexes.splice(this.selectedIndexes.indexOf(index), 1);
+                  }
                 }
+              } else {
+                if (!this.selectedIndexes || this.selectedIndexes.length === 0) {
+                  this.selectedIndexes = this.getSelectedIndexes();
+                }
+                if (!this.isMultiple()) {
+                  this.selectedIndexes = [];
+                }
+                this.selectedIndexes.push(index);
               }
-            } else {
-              if (!this.selectedIndexes || this.selectedIndexes.length === 0) {
-                this.selectedIndexes = this.getSelectedIndexes();
-              }
-              if (!this.isMultiple()) {
-                this.selectedIndexes = [];
-              }
-              this.selectedIndexes.push(index);
+              this.getOnChange()(this.getSelectedIndexes());
             }
-            this.getOnChange()(this.getSelectedIndexes());
-          }
-        })
-      }
-    }, () => {
-      return JSON.stringify(this.isRefresh);
-    });
-  }
-
-  @Builder
-  ChipListBuilder() {
-    Scroll(this.scroller) {
-      if (deviceInfo.sdkApiVersion >= 26) {
-        EffectComponent() {
-          Row({ space: this.getChipGroupItemSpace() }) {
-            this.ChipRowBuilder()
-          }
+          })
         }
-        .systemMaterial(this.backgroundSystemMaterial)
-      } else {
-        Row({ space: this.getChipGroupItemSpace() }) {
-          this.ChipRowBuilder()
-        }
-      }
+      }, () => {
+        return JSON.stringify(this.isRefresh);
+      });
     }
-    .padding({
-      left: this.getChipGroupStartSpace(),
-      right: this.getChipGroupEndSpace()
-    })
-    .constraintSize({ minWidth: '100%' })
-    .scrollable(ScrollDirection.Horizontal)
-    .scrollBar(BarState.Off)
-    .align(Alignment.Start)
-    .width('100%')
-    .clip(false)
-    .onScroll(() => {
-      this.isReachEnd = this.scroller.isAtEnd();
-    })
   }
 
   build() {
     Row() {
       Stack() {
-        if (deviceInfo.sdkApiVersion >= 26) {
-          EffectComponent() {
-            this.ChipListBuilder()
+        Scroll(this.scroller) {
+          if (deviceInfo.sdkApiVersion >= 26) {
+            if (enableEffectComponent(this.backgroundSystemMaterial)) {
+              EffectComponent() {
+                Row({ space: this.getChipGroupItemSpace() }) {
+                  this.ChipItemsBuilder(createSubECMaterial(this.backgroundSystemMaterial))
+                }
+              }
+              .systemMaterial(createECMaterial(this.backgroundSystemMaterial))
+            } else {
+              this.ChipItemsBuilder(this.backgroundSystemMaterial)
+            }
+
+          } else {
+            this.ChipItemsBuilder(undefined)
           }
-          .systemMaterial(this.backgroundSystemMaterial)
-        } else {
-          this.ChipListBuilder()
         }
+        .padding({
+          left: this.getChipGroupStartSpace(),
+          right: this.getChipGroupEndSpace()
+        })
+        .constraintSize({ minWidth: '100%' })
+        .scrollable(ScrollDirection.Horizontal)
+        .scrollBar(BarState.Off)
+        .align(Alignment.Start)
+        .width('100%')
+        .clip(false)
+        .onScroll(() => {
+          this.isReachEnd = this.scroller.isAtEnd();
+        })
 
         if (this.suffix && !this.isReachEnd) {
           Stack()
@@ -726,5 +723,49 @@ export struct ChipGroup {
       fillColor: this.getFillColor(),
       activatedFillColor: this.getSelectedFillColor()
     };
+  }
+}
+
+function enableEffectComponent(material: uiMaterial.Material | undefined) {
+  return false;
+}
+
+function createECMaterial(material: uiMaterial.Material | undefined): uiMaterial.Material | undefined {
+  return undefined;
+}
+
+function createSubECMaterial(material: uiMaterial.Material | undefined): uiMaterial.Material | undefined {
+  return material;
+}
+
+
+@Preview
+@Component
+struct ChipGroupExample {
+  @LocalBuilder
+  suffix() {
+    IconGroupSuffix({
+      items: [{
+        icon: { src: $r('sys.media.ohos_ic_public_add') },
+        action: () => {
+          this.getUIContext().getPromptAction().showToast({
+            message: '后缀图标被点击'
+          })
+        }
+      }]
+    })
+  }
+
+  build() {
+    ChipGroup({
+      items: [
+        { label: { text: '选项A' } },
+        { label: { text: '选项B' } },
+        { label: { text: '选项C' } },
+        { label: { text: '选项D' } },
+        { label: { text: '选项E' } },
+      ],
+      suffix: () => this.suffix()
+    })
   }
 }
