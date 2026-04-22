@@ -28,6 +28,7 @@ std::string ReadFileToString(const std::string& packagePathStr, const std::strin
 namespace OHOS::Ace::NG {
 class FrameNode;
 RefPtr<FrameNode> FindSameParentComponent(const RefPtr<FrameNode>& nodeA, const RefPtr<FrameNode>& nodeB);
+std::string GetSystemPath(const std::string& fileName);
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_UTILS_H
