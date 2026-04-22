@@ -22954,6 +22954,7 @@ typedef struct Ark_ContextMenuOptions {
     Opt_AnchoredColorMode colorMode;
     Opt_MenuKeyboardAvoidMode keyboardAvoidMode;
     Opt_LengthMetrics minKeyboardAvoidDistance;
+    Opt_LengthMetrics targetSpace;
     Opt_uiMaterial_Material systemMaterial;
     Opt_BarState scrollBar;
     Opt_LengthMetrics maxHeight;
@@ -23185,6 +23186,7 @@ typedef struct Ark_MenuOptions {
     Opt_AnchoredColorMode colorMode;
     Opt_MenuKeyboardAvoidMode keyboardAvoidMode;
     Opt_LengthMetrics minKeyboardAvoidDistance;
+    Opt_LengthMetrics targetSpace;
     Opt_uiMaterial_Material systemMaterial;
     Opt_BarState scrollBar;
     Opt_LengthMetrics maxHeight;

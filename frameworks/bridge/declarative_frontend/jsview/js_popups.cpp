@@ -1684,6 +1684,18 @@ void JSViewPopups::ParseMenuAnchoredColorMode(const JSRef<JSObject>& menuOptions
     }
 }
 
+void JSViewPopups::ParseMenuTargetSpace(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto targetSpaceProperty = menuOptions->GetProperty("targetSpace");
+    if (targetSpaceProperty->IsObject()) {
+        CalcDimension value;
+        if (JSViewAbstract::ParseLengthMetricsToPositiveDimension(targetSpaceProperty, value) &&
+            value.IsNonNegative() && value.Unit() != DimensionUnit::PERCENT) {
+            menuParam.targetSpace = value;
+        }
+    }
+}
+
 void JSViewPopups::ParseMenuParam(
     const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
@@ -1729,6 +1741,7 @@ void JSViewPopups::ParseMenuParam(
     JSViewPopups::ParseMenuAvoidKeyboard(menuOptions, menuParam);
     JSViewPopups::ParseMenuMaxHeight(menuOptions, menuParam);
     JSViewPopups::ParseMenuAnchoredColorMode(menuOptions, menuParam);
+    JSViewPopups::ParseMenuTargetSpace(menuOptions, menuParam);
 }
 
 void JSViewPopups::ParseMenuLifeCycleParam(

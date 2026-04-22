@@ -1665,6 +1665,11 @@ void MenuView::UpdateMenuLayoutProperty(const RefPtr<FrameNode>& menuNode, const
             menuProperty->UpdateMenuPlacement(menuParam.placement.value_or(OHOS::Ace::Placement::BOTTOM));
         }
     }
+    if (menuParam.targetSpace.has_value() && !menuParam.anchorPosition.has_value() && menuParam.placement.has_value()) {
+        menuProperty->UpdateMenuTargetSpace(menuParam.targetSpace.value_or(Dimension(0)));
+        menuProperty->UpdateTargetOffset(menuParam.targetOffset.value_or(OffsetF()));
+        menuProperty->UpdateTargetMenuSize(menuParam.targetSize.value_or(SizeF()));
+    }
 }
 
 void MenuView::UpdateMenuScrollBarAndMaxHeight(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
@@ -1702,6 +1707,11 @@ void MenuView::UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const 
     if (menuProperty) {
         menuProperty->UpdateTitle(menuParam.title);
         menuProperty->UpdatePositionOffset(menuParam.positionOffset);
+        if (menuParam.targetSpace.has_value()) {
+            menuProperty->UpdateMenuTargetSpace(menuParam.targetSpace.value_or(Dimension(0)));
+            menuProperty->UpdateTargetOffset(menuParam.targetOffset.value_or(OffsetF()));
+            menuProperty->UpdateTargetMenuSize(menuParam.targetSize.value_or(SizeF()));
+        }
         if (menuParam.placement.has_value() && !menuParam.anchorPosition.has_value()) {
             menuProperty->UpdateMenuPlacement(menuParam.placement.value());
         }
