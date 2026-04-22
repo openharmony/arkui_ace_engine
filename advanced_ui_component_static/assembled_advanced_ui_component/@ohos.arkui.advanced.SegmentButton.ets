@@ -126,6 +126,7 @@ interface SegmentButtonThemeInterface {
   CAPSULE_SELECTED_FONT_COLOR: ResourceColor,
   FONT_SIZE: DimensionNoPercentage,
   SELECTED_FONT_SIZE: DimensionNoPercentage,
+  ADAPTIVE_ITEM_FONT_SIZE: DimensionNoPercentage,
   BACKGROUND_COLOR: ResourceColor,
   TAB_SELECTED_BACKGROUND_COLOR: ResourceColor,
   CAPSULE_SELECTED_BACKGROUND_COLOR: ResourceColor,
@@ -147,6 +148,7 @@ const segmentButtonTheme: SegmentButtonThemeInterface = {
   CAPSULE_SELECTED_FONT_COLOR: $r('sys.color.ohos_id_color_foreground_contrary'),
   FONT_SIZE: $r('sys.float.segment_button_unselected_text_size'),
   SELECTED_FONT_SIZE: $r('sys.float.segment_button_checked_text_size'),
+  ADAPTIVE_ITEM_FONT_SIZE: $r('sys.float.Caption_M'),
   BACKGROUND_COLOR: $r('sys.color.segment_button_backboard_color'),
   TAB_SELECTED_BACKGROUND_COLOR: $r('sys.color.segment_button_checked_foreground_color'),
   CAPSULE_SELECTED_BACKGROUND_COLOR: $r('sys.color.ohos_id_color_emphasize'),
@@ -844,14 +846,14 @@ struct MultiSelectItemArray {
 }
 
 export class EnvironmentCallbackEntry implements EnvironmentCallback {
-  private segmentButtonItem: SegmentButtonItem;
+  private segmentButton: SegmentButton;
 
-  constructor(segmentButtonItem: SegmentButtonItem) {
-    this.segmentButtonItem = segmentButtonItem;
+  constructor(segmentButton: SegmentButton) {
+    this.segmentButton = segmentButton;
   }
 
   onConfigurationUpdated(config: Configuration) {
-    this.segmentButtonItem.updateLanguageLineHeight();
+    this.segmentButton.updateLanguageLineHeight();
   }
 
   onMemoryLevel(level: AbilityConstant.MemoryLevel) {}
@@ -872,49 +874,13 @@ struct SegmentButtonItem {
   @State isSegmentFocusStyleCustomized: boolean = false;
   @State isTextInMarqueeCondition: boolean = false;
   @State isButtonTextFadeout?: boolean = false;
+  @Consume useAdaptiveLineHeight: boolean;
   private groupId: string = '';
   @State @Watch('onFocusIndex') hover: boolean = false;
   @Consume buttonItemsSize: SizeOptions[];
   @Consume buttonItemsPosition: LocalizedEdges[];
   @Link buttonItemsRealHeight: number[];
   public onCalculateBorderRadius?: () => void
-  @State useAdaptiveLineHeight: boolean = false;
-  private environmentCallbackID?: int;
-  private environmentCallback: EnvironmentCallbackEntry = new EnvironmentCallbackEntry(this);
-
-  updateLanguageLineHeight(): void {
-    const resourceManager = this.getUIContext().getHostContext()?.resourceManager;
-    if (!resourceManager) {
-      console.error(`[SegmentButton] failed to get resourceManager`);
-      return;
-    }
-    try {
-      this.useAdaptiveLineHeight = resourceManager!.getStringByNameSync('text_fallback_line_spacing') === 'true';
-    } catch (e) {
-      console.error(`[SegmentButton] failed to get text_fallback_line_spacing resource`);
-    }
-  }
-
-  aboutToAppear(): void {
-    this.isButtonTextFadeout = this.isSegmentFocusStyleCustomized;
-    if (deviceInfo.sdkApiVersion >= 26) {
-      this.updateLanguageLineHeight();
-      let abilityContext = this.getUIContext().getHostContext();
-      if (abilityContext) {
-        this.environmentCallbackID = abilityContext.getApplicationContext().onEnvironment(this.environmentCallback);
-      }
-    }
-  }
-
-  aboutToDisappear(): void {
-    if (deviceInfo.sdkApiVersion >= 26 && this.environmentCallbackID !== undefined) {
-      let abilityContext = this.getUIContext().getHostContext();
-      if (abilityContext) {
-        abilityContext.getApplicationContext().offEnvironment(this.environmentCallbackID as int);
-      }
-      this.environmentCallbackID = undefined;
-    }
-  }
 
   private getTextPadding(): Padding | Dimension | LocalizedPadding {
     if (this.options.localizedTextPadding !== undefined) {
@@ -1636,7 +1602,10 @@ export struct SegmentButton {
   private isGestureInProgress: boolean = false;
   @PropRef enableStateAnimation: boolean = false;
   @Provide openSelectedItemSystemMaterial?: boolean = false;
-  @Provide selectedItemScale?: ScaleOptions = undefined
+  @Provide selectedItemScale?: ScaleOptions = undefined;
+  @Provide useAdaptiveLineHeight: boolean = false;
+  private environmentCallbackID?: int;
+  private environmentCallback: EnvironmentCallbackEntry = new EnvironmentCallbackEntry(this);
 
   onItemsPositionChange(a: string) {
     if (this.options === undefined || this.options.buttons === undefined) {
@@ -1734,6 +1703,36 @@ export struct SegmentButton {
     this.updateSelectedIndexes();
     this.setItemsSelected();
     this.updateAnimatedProperty(null);
+    if (deviceInfo.sdkApiVersion >= 26) {
+      this.updateLanguageLineHeight();
+      let abilityContext = this.getUIContext().getHostContext();
+      if (abilityContext) {
+        this.environmentCallbackID = abilityContext.getApplicationContext().onEnvironment(this.environmentCallback);
+      }
+    }
+  }
+
+  aboutToDisappear(): void {
+    if (deviceInfo.sdkApiVersion >= 26 && this.environmentCallbackID !== undefined) {
+      let abilityContext = this.getUIContext().getHostContext();
+      if (abilityContext) {
+        abilityContext.getApplicationContext().offEnvironment(this.environmentCallbackID as int);
+      }
+      this.environmentCallbackID = undefined;
+    }
+  }
+
+  updateLanguageLineHeight(): void {
+    const resourceManager = this.getUIContext().getHostContext()?.resourceManager;
+    if (!resourceManager) {
+      console.error(`[SegmentButton] failed to get resourceManager`);
+      return;
+    }
+    try {
+      this.useAdaptiveLineHeight = resourceManager!.getStringByNameSync('text_fallback_line_spacing') === 'true';
+    } catch (e) {
+      console.error(`[SegmentButton] failed to get text_fallback_line_spacing resource`);
+    }
   }
 
   private isMouseWheelScroll(event: GestureEvent) {
@@ -2328,8 +2327,11 @@ export struct SegmentButton {
     }
 
     this.buttonItemsSelected.forEach((selected, index) => {
-      this.buttonItemProperty[index].fontSize = selected ? this.options.selectedFontSize ??
-        segmentButtonTheme.SELECTED_FONT_SIZE : this.options.fontSize ?? segmentButtonTheme.FONT_SIZE;
+      this.buttonItemProperty[index].fontSize = selected ?
+        (this.useAdaptiveLineHeight ? segmentButtonTheme.ADAPTIVE_ITEM_FONT_SIZE : this.options.selectedFontSize ??
+          segmentButtonTheme.SELECTED_FONT_SIZE) :
+        (this.useAdaptiveLineHeight ? segmentButtonTheme.ADAPTIVE_ITEM_FONT_SIZE : this.options.fontSize ??
+          segmentButtonTheme.FONT_SIZE);
       this.buttonItemProperty[index].fontWeight =
         selected ? this.options.selectedFontWeight ?? FontWeight.Medium :
           this.options.fontWeight ?? FontWeight.Regular;

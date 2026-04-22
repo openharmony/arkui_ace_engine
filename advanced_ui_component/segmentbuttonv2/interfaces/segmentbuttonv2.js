@@ -101,6 +101,13 @@ const tabSimpleTheme = {
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
+  adaptiveItemFontSize: {
+    id: -1,
+    type: 10002,
+    params: ['sys.float.Caption_M'],
+    bundleName: '__harDefaultBundleName__',
+    moduleName: '__harDefaultModuleName__',
+  },
   itemFontColor: {
     id: -1,
     type: 10001,
@@ -253,6 +260,13 @@ const capsuleSimpleTheme = {
     id: -1,
     type: 10002,
     params: ['sys.float.ohos_id_text_size_button2'],
+    bundleName: '__harDefaultBundleName__',
+    moduleName: '__harDefaultModuleName__',
+  },
+  adaptiveItemFontSize: {
+    id: -1,
+    type: 10002,
+    params: ['sys.float.Caption_M'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
@@ -2518,6 +2532,13 @@ const multiplyCapsuleTheme = {
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
+  adaptiveItemFontSize: {
+    id: -1,
+    type: 10002,
+    params: ['sys.float.Caption_M'],
+    bundleName: '__harDefaultBundleName__',
+    moduleName: '__harDefaultModuleName__',
+  },
   itemIconSize: 24,
   itemSymbolFontSize: 20,
   itemPadding: {
@@ -3353,7 +3374,7 @@ class SegmentButtonV2ItemContent extends ViewV2 {
       ) {
         return LengthMetricsUtils.getInstance().stringify(this.itemSelectedFontSize);
       }
-      return this.theme.itemFontSize;
+      return this.useAdaptiveLineHeight ? this.theme.adaptiveItemFontSize : this.theme.itemFontSize;
     }
     if (
       this.itemFontSize &&
@@ -3362,7 +3383,7 @@ class SegmentButtonV2ItemContent extends ViewV2 {
     ) {
       return LengthMetricsUtils.getInstance().stringify(this.itemFontSize);
     }
-    return this.theme.itemFontSize;
+    return this.useAdaptiveLineHeight ? this.theme.adaptiveItemFontSize : this.theme.itemFontSize;
   }
   getItemIconHeight() {
     if (this.itemIconSize?.height && LengthMetricsUtils.getInstance().isNaturalNumber(this.itemIconSize.height)) {

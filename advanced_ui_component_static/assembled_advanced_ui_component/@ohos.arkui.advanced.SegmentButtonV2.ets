@@ -104,6 +104,7 @@ export type OnSelectedIndexesChange = (selectedIndexes: int[]) => void;
 interface SegmentButtonV2ContentTheme {
   itemSpace: LengthMetrics;
   itemFontSize: Dimension;
+  adaptiveItemFontSize: Dimension;
   itemFontColor: ResourceColor;
   itemFontWeight: FontWeight;
   itemSelectedFontWeight: FontWeight;
@@ -156,6 +157,7 @@ const tabSimpleTheme: SimpleSegmentButtonV2Theme = {
   itemBorderRadius: $r('sys.float.segment_button_v2_selected_corner_radius'),
   itemSpace: LengthMetrics.vp(0),
   itemFontSize: $r('sys.float.ohos_id_text_size_button2'),
+  adaptiveItemFontSize: $r('sys.float.Caption_M'),
   itemFontColor: $r('sys.color.font_secondary'),
   itemSelectedFontColor: $r('sys.color.font_primary'),
   itemFontWeight: FontWeight.Medium,
@@ -192,6 +194,7 @@ const capsuleSimpleTheme: SimpleSegmentButtonV2Theme = {
   itemBorderRadius: $r('sys.float.segment_button_v2_selected_corner_radius'),
   itemSpace: LengthMetrics.vp(0),
   itemFontSize: $r('sys.float.ohos_id_text_size_button2'),
+  adaptiveItemFontSize: $r('sys.float.Caption_M'),
   itemFontColor: $r('sys.color.font_secondary'),
   itemSelectedFontColor: $r('sys.color.font_on_primary'),
   itemFontWeight: FontWeight.Medium,
@@ -1179,6 +1182,7 @@ const multiplyCapsuleTheme: MultiplySegmentButtonV2Theme = {
   itemSymbolFontColor: $r('sys.color.font_secondary'),
   itemSelectedSymbolFontColor: $r('sys.color.font_on_primary'),
   itemFontSize: $r('sys.float.ohos_id_text_size_button2'),
+  adaptiveItemFontSize: $r('sys.float.Caption_M'),
   itemIconSize: 24,
   itemSymbolFontSize: 20,
   itemPadding: {
@@ -1619,7 +1623,7 @@ struct SegmentButtonV2ItemContent {
       ) {
         return LengthMetricsUtils.getInstance().stringify(this.itemSelectedFontSize!);
       }
-      return this.theme.itemFontSize;
+      return this.useAdaptiveLineHeight ? this.theme.adaptiveItemFontSize : this.theme.itemFontSize;
     }
     if (
       this.itemFontSize &&
@@ -1628,7 +1632,7 @@ struct SegmentButtonV2ItemContent {
     ) {
       return LengthMetricsUtils.getInstance().stringify(this.itemFontSize!);
     }
-    return this.theme.itemFontSize;
+    return this.useAdaptiveLineHeight ? this.theme.adaptiveItemFontSize : this.theme.itemFontSize;
   }
 
   private getItemIconHeight(): Length {

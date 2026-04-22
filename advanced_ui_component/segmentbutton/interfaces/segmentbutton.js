@@ -944,16 +944,9 @@ class SegmentButtonItem extends ViewPU {
     );
     this.__isTextInMarqueeCondition = new ObservedPropertySimplePU(false, this, 'isTextInMarqueeCondition');
     this.__isButtonTextFadeout = new ObservedPropertySimplePU(false, this, 'isButtonTextFadeout');
-    this.__useAdaptiveLineHeight = new ObservedPropertySimplePU(false, this, 'useAdaptiveLineHeight');
+    this.__useAdaptiveLineHeight = this.initializeConsume('useAdaptiveLineHeight', 'useAdaptiveLineHeight');
     this.groupId = '';
     this.__hover = new SynchedPropertySimpleOneWayPU(params.hover, this, 'hover');
-    this.environmentCallbackID = undefined;
-    this.environmentCallback = {
-      onConfigurationUpdated: configuration => {
-        this.updateLanguageLineHeight();
-      },
-      onMemoryLevel() {},
-    };
     this.setInitiallyProvidedValue(params);
     this.declareWatch('focusIndex', this.onFocusIndex);
     this.declareWatch('hover', this.onFocusIndex);
@@ -972,17 +965,8 @@ class SegmentButtonItem extends ViewPU {
     if (params.isButtonTextFadeout !== undefined) {
       this.isButtonTextFadeout = params.isButtonTextFadeout;
     }
-    if (params.useAdaptiveLineHeight !== undefined) {
-      this.useAdaptiveLineHeight = params.useAdaptiveLineHeight;
-    }
     if (params.groupId !== undefined) {
       this.groupId = params.groupId;
-    }
-    if (params.environmentCallbackID !== undefined) {
-      this.environmentCallbackID = params.environmentCallbackID;
-    }
-    if (params.environmentCallback !== undefined) {
-      this.environmentCallback = params.environmentCallback;
     }
   }
   updateStateVars(params) {
@@ -1104,18 +1088,6 @@ class SegmentButtonItem extends ViewPU {
   set hover(newValue) {
     this.__hover.set(newValue);
   }
-  updateLanguageLineHeight() {
-    const resourceManager = this.getUIContext().getHostContext()?.resourceManager;
-    if (!resourceManager) {
-      console.error(`[SegmentButton] failed to get resourceManager`);
-      return;
-    }
-    try {
-      this.useAdaptiveLineHeight = resourceManager.getStringByNameSync('text_fallback_line_spacing') === 'true';
-    } catch (e) {
-      console.error(`[SegmentButton] failed to get text_fallback_line_spacing resource`);
-    }
-  }
   getTextPadding() {
     if (this.options.localizedTextPadding) {
       return this.options.localizedTextPadding;
@@ -1153,22 +1125,6 @@ class SegmentButtonItem extends ViewPU {
   }
   aboutToAppear() {
     this.isButtonTextFadeout = this.isSegmentFocusStyleCustomized;
-    if (deviceInfo.sdkApiVersion >= 26) {
-      this.updateLanguageLineHeight();
-      let abilityContext = this.getUIContext().getHostContext();
-      if (abilityContext) {
-        this.environmentCallbackID = abilityContext.getApplicationContext().on('environment', this.environmentCallback);
-      }
-    }
-  }
-  aboutToDisappear() {
-    if (deviceInfo.sdkApiVersion >= 26 && this.environmentCallbackID) {
-      let abilityContext = this.getUIContext().getHostContext();
-      if (abilityContext) {
-        abilityContext.getApplicationContext().off('environment', this.environmentCallbackID);
-      }
-      this.environmentCallbackID = void 0;
-    }
   }
   isDefaultSelectedFontColor() {
     if (this.options.type === 'tab') {
@@ -2445,6 +2401,15 @@ export class SegmentButton extends ViewPU {
     this.addProvidedVar('openSelectedItemSystemMaterial', this.__openSelectedItemSystemMaterial, false);
     this.__selectedItemScale = new ObservedPropertyObjectPU(undefined, this, 'selectedItemScale');
     this.addProvidedVar('selectedItemScale', this.__selectedItemScale, false);
+    this.__useAdaptiveLineHeight = new ObservedPropertySimplePU(false, this, 'useAdaptiveLineHeight');
+    this.addProvidedVar('useAdaptiveLineHeight', this.__useAdaptiveLineHeight, false);
+    this.environmentCallbackID = undefined;
+    this.environmentCallback = {
+      onConfigurationUpdated: configuration => {
+        this.updateLanguageLineHeight();
+      },
+      onMemoryLevel() {},
+    };
     this.setInitiallyProvidedValue(params);
     this.declareWatch('options', this.onOptionsChange);
     this.declareWatch('selectedIndexes', this.onSelectedChange);
@@ -2528,6 +2493,15 @@ export class SegmentButton extends ViewPU {
     if (params.selectedItemScale !== undefined) {
       this.selectedItemScale = params.selectedItemScale;
     }
+    if (params.useAdaptiveLineHeight !== undefined) {
+      this.useAdaptiveLineHeight = params.useAdaptiveLineHeight;
+    }
+    if (params.environmentCallbackID !== undefined) {
+      this.environmentCallbackID = params.environmentCallbackID;
+    }
+    if (params.environmentCallback !== undefined) {
+      this.environmentCallback = params.environmentCallback;
+    }
   }
   updateStateVars(params) {
     this.__enableStateAnimation.reset(params.enableStateAnimation);
@@ -2554,6 +2528,7 @@ export class SegmentButton extends ViewPU {
     this.__shouldMirror.purgeDependencyOnElmtId(rmElmtId);
     this.__openSelectedItemSystemMaterial.purgeDependencyOnElmtId(rmElmtId);
     this.__selectedItemScale.purgeDependencyOnElmtId(rmElmtId);
+    this.__useAdaptiveLineHeight.purgeDependencyOnElmtId(rmElmtId);
   }
   aboutToBeDeleted() {
     this.__enableStateAnimation.aboutToBeDeleted();
@@ -2575,6 +2550,7 @@ export class SegmentButton extends ViewPU {
     this.__shouldMirror.aboutToBeDeleted();
     this.__openSelectedItemSystemMaterial.aboutToBeDeleted();
     this.__selectedItemScale.aboutToBeDeleted();
+    this.__useAdaptiveLineHeight.aboutToBeDeleted();
     SubscriberManager.Get().delete(this.id__());
     this.aboutToBeDeletedInternal();
   }
@@ -2683,6 +2659,12 @@ export class SegmentButton extends ViewPU {
   set openSelectedItemSystemMaterial(newValue) {
     this.__openSelectedItemSystemMaterial.set(newValue);
   }
+  get useAdaptiveLineHeight() {
+    return this.__useAdaptiveLineHeight.get();
+  }
+  set useAdaptiveLineHeight(newValue) {
+    this.__useAdaptiveLineHeight.set(newValue);
+  }
   get selectedItemScale() {
     return this.__selectedItemScale.get();
   }
@@ -2747,6 +2729,18 @@ export class SegmentButton extends ViewPU {
     this.setItemsSelected();
     this.updateAnimatedProperty(null);
   }
+  updateLanguageLineHeight() {
+    const resourceManager = this.getUIContext().getHostContext()?.resourceManager;
+    if (!resourceManager) {
+      console.error(`[SegmentButton] failed to get resourceManager`);
+      return;
+    }
+    try {
+      this.useAdaptiveLineHeight = resourceManager.getStringByNameSync('text_fallback_line_spacing') === 'true';
+    } catch (e) {
+      console.error(`[SegmentButton] failed to get text_fallback_line_spacing resource`);
+    }
+  }
   onSelectedChange() {
     if (this.options === void 0 || this.options.buttons === void 0) {
       return;
@@ -2774,6 +2768,22 @@ export class SegmentButton extends ViewPU {
     this.updateSelectedIndexes();
     this.setItemsSelected();
     this.updateAnimatedProperty(null);
+    if (deviceInfo.sdkApiVersion >= 26) {
+      this.updateLanguageLineHeight();
+      let abilityContext = this.getUIContext().getHostContext();
+      if (abilityContext) {
+        this.environmentCallbackID = abilityContext.getApplicationContext().on('environment', this.environmentCallback);
+      }
+    }
+  }
+  aboutToDisappear() {
+    if (deviceInfo.sdkApiVersion >= 26 && this.environmentCallbackID) {
+      let abilityContext = this.getUIContext().getHostContext();
+      if (abilityContext) {
+        abilityContext.getApplicationContext().off('environment', this.environmentCallbackID);
+      }
+      this.environmentCallbackID = void 0;
+    }
   }
   isMouseWheelScroll(event) {
     return event.source === SourceType.Mouse && !this.isPanGestureMoved;
@@ -3520,12 +3530,13 @@ export class SegmentButton extends ViewPU {
       setAnimatedPropertyFunc();
     }
     this.buttonItemsSelected.forEach((selected, index) => {
-      this.buttonItemProperty[index].fontSize = selected
-        ? (this.options.selectedFontSize ?? segmentButtonTheme.SELECTED_FONT_SIZE)
-        : (this.options.fontSize ?? segmentButtonTheme.FONT_SIZE);
-      this.buttonItemProperty[index].fontWeight = selected
-        ? (this.options.selectedFontWeight ?? FontWeight.Medium)
-        : (this.options.fontWeight ?? initFontWeight(FontWeight.Regular));
+      this.buttonItemProperty[index].fontSize = selected ?
+        (this.useAdaptiveLineHeight ? segmentButtonTheme.ADAPTIVE_ITEM_FONT_SIZE : this.options.selectedFontSize ??
+          segmentButtonTheme.SELECTED_FONT_SIZE) :
+        (this.useAdaptiveLineHeight ? segmentButtonTheme.ADAPTIVE_ITEM_FONT_SIZE : this.options.fontSize ??
+          segmentButtonTheme.FONT_SIZE);
+      this.buttonItemProperty[index].fontWeight = selected ? this.options.selectedFontWeight ?? FontWeight.Medium :
+        this.options.fontWeight ?? initFontWeight(FontWeight.Regular);
       this.buttonItemProperty[index].isSelected = selected;
     });
   }
