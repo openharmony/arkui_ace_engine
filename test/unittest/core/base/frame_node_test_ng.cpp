@@ -1229,6 +1229,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeMarkRemoving0029, TestSize.Level1)
      */
     FRAME_NODE2->SetParent(FRAME_NODE_PARENT);
     FRAME_NODE2->AddChild(FRAME_NODE3);
+    auto context = MockPipelineContext::GetCurrent();
+    context->onShow_ = true;
     FRAME_NODE2->layoutProperty_->UpdateGeometryTransition("id");
     auto mark = FRAME_NODE2->MarkRemoving();
     FRAME_NODE2->Clean();
@@ -1237,6 +1239,27 @@ HWTEST_F(FrameNodeTestNg, FrameNodeMarkRemoving0029, TestSize.Level1)
     FRAME_NODE2->layoutProperty_ = nullptr;
     auto mark1 = FRAME_NODE2->MarkRemoving();
     EXPECT_FALSE(mark1);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_MarkRemoving0030
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeMarkRemoving0030, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. callback MarkRemoving.
+     * @tc.expected: expect The function return value is true.
+     */
+    FRAME_NODE2->SetParent(FRAME_NODE_PARENT);
+    FRAME_NODE2->AddChild(FRAME_NODE3);
+    auto context = MockPipelineContext::GetCurrent();
+    context->onShow_ = false;
+    FRAME_NODE2->layoutProperty_->UpdateGeometryTransition("id");
+    auto mark = FRAME_NODE2->MarkRemoving();
+    FRAME_NODE2->Clean();
+    EXPECT_FALSE(mark);
 }
 
 /**

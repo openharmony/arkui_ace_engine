@@ -199,7 +199,7 @@ void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeI
         }
     }
 
-    TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "inAnim: %{public}d, outAnim: %{public}d, follow: %{public}d, "
+    TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "inAnim: %{public}d, outAnim: %{public}d, follow: %{public}d, "
         "inNode: %{public}d, %{public}s, outNode: %{public}d, %{public}s", hasInAnim_, hasOutAnim_, follow,
         inNode->GetId(), inNode->GetTag().c_str(), outNode->GetId(), outNode->GetTag().c_str());
 
@@ -317,7 +317,7 @@ void GeometryTransition::ModifyLayoutConstraint(const RefPtr<LayoutWrapper>& lay
     }
     auto targetSize = CalcSize(NG::CalcLength(size.Width()), NG::CalcLength(size.Height()));
     layoutProperty->UpdateUserDefinedIdealSize(targetSize);
-    TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "node: %{public}d modify size to: %{public}s",
+    TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "node: %{public}d modify size to: %{public}s",
         self->GetId(), targetSize.ToString().c_str());
     // if node has aspect ratio we'll ignore it in active state
     auto& magicItemProperty = layoutProperty->GetMagicItemProperty();
@@ -411,7 +411,7 @@ void GeometryTransition::SyncGeometry(bool isNodeIn)
         auto renderContext = node->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->SetSandBox(std::nullopt, !doRegisterSharedTransition);
-        TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "node %{public}d animation completed", node->GetId());
+        TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "node %{public}d animation completed", node->GetId());
         std::string traceTag = "ACE_GEOMETRY_TRANSITION, node " + std::to_string(node->GetId()) + " animation";
         AceAsyncTraceEndCommercial(currentTraceTaskId, traceTag.c_str());
         auto occlusion = weak.Upgrade();
@@ -433,7 +433,7 @@ void GeometryTransition::SyncGeometry(bool isNodeIn)
         isNodeIn ? geometryNode->GetFrameRect().ToString().c_str() : "no log",
         AnimationUtils::IsImplicitAnimationOpen(pipeline));
 
-    TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "node: %{public}d, parent: %{public}s, target: %{public}s, "
+    TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "node: %{public}d, parent: %{public}s, target: %{public}s, "
         "active frame: %{public}s, identity frame: %{public}s, option: %{public}d",
         self->GetId(), parentPos.ToString().c_str(), targetPos.ToString().c_str(), activeFrameRect.ToString().c_str(),
         isNodeIn ? geometryNode->GetFrameRect().ToString().c_str() : "no log",
@@ -488,7 +488,7 @@ bool GeometryTransition::OnFollowWithoutTransition(std::optional<bool> direction
         parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
         inRenderContext->UnregisterSharedTransition(outRenderContext);
         hasOutAnim_ = false;
-        TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "follow cancelled");
+        TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "follow cancelled");
         holder_ = nullptr;
         SyncGeometryPropertiesAfterLayout(outNode);
         return false;
@@ -506,7 +506,7 @@ bool GeometryTransition::OnFollowWithoutTransition(std::optional<bool> direction
         parent->AddDisappearingChild(outNode, idx);
         MarkLayoutDirty(outNode, -1);
         hasOutAnim_ = true;
-        TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "follow started");
+        TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "follow started");
     } else {
         auto inNode = inNode_.Upgrade();
         CHECK_NULL_RETURN(inNode && inNode->GetGeometryNode() && holder_, false);
@@ -520,7 +520,7 @@ bool GeometryTransition::OnFollowWithoutTransition(std::optional<bool> direction
             MarkLayoutDirty(inNodeParent);
         }
         hasInAnim_ = true;
-        TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "follow ended");
+        TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "follow ended");
         holder_ = nullptr;
     }
     return true;
@@ -587,7 +587,7 @@ void GeometryTransition::AnimateWithSandBox(const OffsetF& inNodeParentPos, bool
         if (renderContext->HasAnimatingGeometryTransition()) {
             renderContext->SetSandBox(std::nullopt, !doRegisterSharedTransition);
         }
-        TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "node %{public}d resync animation completed", node->GetId());
+        TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "node %{public}d resync animation completed", node->GetId());
     }, nullptr, pipeline);
 }
 

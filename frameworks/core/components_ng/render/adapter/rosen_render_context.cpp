@@ -749,12 +749,12 @@ void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition
                 return;
             }
         }
+        animatingGeometryTransitionCount_ = 0;
         if (onlyCountMode) {
             return;
         }
         TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "node[%{public}s] Remove SandBox",
             std::to_string(rsNode_->GetId()).c_str());
-        animatingGeometryTransitionCount_ = 0;
         rsNode_->SetSandBox(std::nullopt);
     }
 }
