@@ -351,7 +351,7 @@ void WindowSceneLayoutManager::FlushWindowPatternInfo(const RefPtr<FrameNode>& s
     TraverseInfo info;
     InitTraverseInfo(*screenNode, info);
     UpdateRootGeometry(info);
-    info.isAncestorDirty = info.rsNode && IsNodeDirty(*info.rsNode),
+    info.isAncestorDirty = info.rsNode && IsNodeDirty(*info.rsNode);
     TraverseTree(info, res);
     if (isCoreDebugEnable_) {
         DumpFlushInfo(screenId, res);
