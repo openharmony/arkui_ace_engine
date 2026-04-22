@@ -885,6 +885,10 @@ ohos_source_set("ace_components_mock") {
 ohos_source_set("ace_components_pattern") {
   testonly = true
   sources = [
+    "$ace_root/frameworks/core/components/button/button_theme.cpp",
+    "$ace_root/frameworks/core/components/rating/rating_theme.cpp",
+    "$ace_root/frameworks/core/components/slider/slider_theme.cpp",
+    "$ace_root/frameworks/core/components/toggle/toggle_theme.cpp",
     "$ace_root/adapter/ohos/capability/html/span_to_html.cpp",
     "$ace_root/component_ext/movingphoto/movingphoto_layout_algorithm.cpp",
     "$ace_root/component_ext/movingphoto/movingphoto_model_ng.cpp",
