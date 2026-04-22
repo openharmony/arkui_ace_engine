@@ -150,7 +150,7 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._GridAttribute_setRowsGap(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setScrollBarWidthAttribute(value: double | string | undefined): void {
+    setScrollBarWidth0Attribute(value: double | string | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -167,7 +167,19 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._GridAttribute_setScrollBarWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._GridAttribute_setScrollBarWidth0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setScrollBarWidth1Attribute(value: arkui_component_units_Resource | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            global_resource_Resource_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._GridAttribute_setScrollBarWidth1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setScrollBarColorAttribute(value: arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined): void {
@@ -611,6 +623,7 @@ export interface GridAttribute extends ScrollableCommonMethod {
         throw new Error('Unimplemented method rowsGap')
     }
     scrollBarWidth(value: double | string | undefined): this
+    scrollBarWidth(value: arkui_component_units_Resource | undefined): this
     scrollBarColor(value: arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined): this
     scrollBar(value: BarState | undefined): this
     onScrollBarUpdate(value: ((index: int32,offset: double) => ComputedBarAttribute) | undefined): this {
@@ -729,7 +742,12 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent impleme
     }
     public scrollBarWidth(value: double | string | undefined): this {
         const value_casted = value as (double | string | undefined)
-        this.getPeer()?.setScrollBarWidthAttribute(value_casted)
+        this.getPeer()?.setScrollBarWidth0Attribute(value_casted)
+        return this
+    }
+    public scrollBarWidth(value: arkui_component_units_Resource | undefined): this {
+        const value_casted = value as (arkui_component_units_Resource | undefined)
+        this.getPeer()?.setScrollBarWidth1Attribute(value_casted)
         return this
     }
     public scrollBarColor(value: arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined): this {

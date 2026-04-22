@@ -304,6 +304,14 @@ ArkUI_Int32 GetScrollEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 (*values)[3])
     return 3; /* 3: param count */
 }
 
+void SetScrollScrollBarWidthResObj(ArkUINodeHandle node, ArkUI_VoidPtr resObjRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::CreateWithResourceObjScrollBarWidth(
+        frameNode, AceType::Claim(reinterpret_cast<ResourceObject*>(resObjRawPtr)));
+}
+
 ArkUI_Int32 GetScrollEdgeEffectCJ(ArkUINodeHandle node, ArkUI_Int32 (*values)[2])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -806,6 +814,7 @@ const ArkUIScrollModifier* GetScrollModifier()
         .setScrollScrollBarWidth = SetScrollScrollBarWidth,
         .resetScrollScrollBarWidth = ResetScrollScrollBarWidth,
         .getScrollEdgeEffect = GetScrollEdgeEffect,
+        .setScrollScrollBarWidthResObj = SetScrollScrollBarWidthResObj,
         .setScrollEdgeEffect = SetScrollEdgeEffect,
         .resetScrollEdgeEffect = ResetScrollEdgeEffect,
         .getEnableScrollInteraction = GetEnableScrollInteraction,

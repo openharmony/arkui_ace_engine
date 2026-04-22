@@ -158,6 +158,8 @@ void ListLayoutProperty::ScrollSnapPropToJsonValue(
         json->PutExtAttr("scrollSnapAlign", "ScrollSnapAlign.NONE", filter);
     }
     json->PutExtAttr("enableScrollInteraction", propScrollEnabled_.value_or(true), filter);
+    json->PutExtAttr(
+        "spaceWidth", propSpaceWidth_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
 }
 
 void ListLayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)
@@ -177,6 +179,7 @@ void ListLayoutProperty::Clone(RefPtr<LayoutProperty> layoutProperty) const
     ScrollableLayoutProperty::Clone(value);
     value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
     value->propSpace_ = CloneSpace();
+    value->propSpaceWidth_ = CloneSpaceWidth();
     value->propInitialIndex_ = CloneInitialIndex();
     value->propListDirection_ = CloneListDirection();
     value->propDivider_ = CloneDivider();
@@ -201,6 +204,7 @@ void ListLayoutProperty::Reset()
 {
     ScrollableLayoutProperty::Reset();
     ResetSpace();
+    ResetSpaceWidth();
     ResetInitialIndex();
     ResetListDirection();
     ResetDivider();

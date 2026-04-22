@@ -312,8 +312,16 @@ void SetScrollBarColorImpl(Ark_NativePointer node,
     auto colorVal = Converter::OptConvertPtr<Color>(value);
     ScrollModelStatic::SetScrollBarColor(frameNode, colorVal);
 }
-void SetScrollBarWidthImpl(Ark_NativePointer node,
-                           const Opt_Union_F64_String* value)
+void SetScrollBarWidth0Impl(Ark_NativePointer node, const Opt_Union_F64_String* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto width = Converter::OptConvertPtr<Dimension>(value);
+    Validator::ValidateNonNegative(width);
+    Validator::ValidateNonPercent(width);
+    ScrollModelStatic::SetScrollBarWidth(frameNode, width);
+}
+void SetScrollBarWidth1Impl(Ark_NativePointer node, const Opt_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -477,7 +485,8 @@ const GENERATED_ArkUIScrollModifier* GetScrollModifier()
         ScrollAttributeModifier::SetOnZoomStopImpl,
         ScrollAttributeModifier::SetScrollBarImpl,
         ScrollAttributeModifier::SetScrollBarColorImpl,
-        ScrollAttributeModifier::SetScrollBarWidthImpl,
+        ScrollAttributeModifier::SetScrollBarWidth0Impl,
+        ScrollAttributeModifier::SetScrollBarWidth1Impl,
         ScrollAttributeModifier::SetOnScrollFrameBeginImpl,
         ScrollAttributeModifier::SetNestedScrollImpl,
         ScrollAttributeModifier::SetEnableScrollInteractionImpl,

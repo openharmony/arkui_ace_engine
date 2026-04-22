@@ -913,7 +913,7 @@ void ListPattern::SetChainAnimationLayoutAlgorithm(
             chainAnimation_->ResetSpaceDelta();
         }
     }
-    if (!listLayoutProperty->GetSpace().has_value() && chainAnimation_) {
+    if ((!listLayoutProperty->GetSpace().has_value() && !listLayoutProperty->GetSpaceWidth()) && chainAnimation_) {
         float chainInterval = CHAIN_INTERVAL_DEFAULT.ConvertToPx();
         auto pipeline = GetContext();
         if (pipeline && pipeline->GetPixelRoundMode() == PixelRoundMode::PIXEL_ROUND_AFTER_MEASURE) {
@@ -2839,7 +2839,9 @@ void ListPattern::SetChainAnimation()
         chainAnimation_.Reset();
         return;
     }
-    auto space = listLayoutProperty->GetSpace().value_or(CHAIN_INTERVAL_DEFAULT).ConvertToPx();
+    auto space = listLayoutProperty->GetSpace()
+                     .value_or(listLayoutProperty->GetSpaceWidth().value_or(CHAIN_INTERVAL_DEFAULT))
+                     .ConvertToPx();
     if (Negative(space)) {
         space = CHAIN_INTERVAL_DEFAULT.ConvertToPx();
     }
@@ -2882,7 +2884,9 @@ void ListPattern::SetChainAnimationOptions(const ChainAnimationOptions& options)
     if (chainAnimation_) {
         auto listLayoutProperty = GetLayoutProperty<ListLayoutProperty>();
         CHECK_NULL_VOID(listLayoutProperty);
-        auto space = listLayoutProperty->GetSpace().value_or(CHAIN_INTERVAL_DEFAULT).ConvertToPx();
+        auto space = listLayoutProperty->GetSpaceWidth()
+                         .value_or(listLayoutProperty->GetSpace().value_or(CHAIN_INTERVAL_DEFAULT))
+                         .ConvertToPx();
         if (Negative(space)) {
             space = CHAIN_INTERVAL_DEFAULT.ConvertToPx();
         }

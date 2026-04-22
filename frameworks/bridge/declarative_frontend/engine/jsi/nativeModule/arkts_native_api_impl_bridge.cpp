@@ -3896,6 +3896,8 @@ void ArkUINativeModule::RegisterListAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetSpace));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSpace"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetSpace));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSpaceWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetSpaceWidth));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setInitialIndex"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetInitialIndex));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetInitialIndex"),

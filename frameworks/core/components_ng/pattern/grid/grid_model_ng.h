@@ -78,6 +78,7 @@ public:
     void CreateWithResourceObjFriction(const RefPtr<ResourceObject>& resObj) override;
     void CreateWithResourceObjScrollBarColor(const RefPtr<ResourceObject>& resObj) override;
     void SetSupportLazyLoadingEmptyBranch(bool enable) override;
+    void CreateWithResourceObjScrollBarWidth(const RefPtr<ResourceObject>& resObj) override;
 
     DisplayMode GetDisplayMode() const override;
 
@@ -173,6 +174,8 @@ public:
         std::optional<float> extraOffset = std::nullopt);
     static void SetSupportLazyLoadingEmptyBranch(FrameNode* frameNode, bool enable);
     static bool GetSupportLazyLoadingEmptyBranch(FrameNode* frameNode);
+    static void CreateWithResourceObjScrollBarWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+
 private:
     static void AddDragFrameNodeToManager(FrameNode* frameNode);
 };

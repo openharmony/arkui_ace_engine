@@ -365,7 +365,8 @@ ArkUINativeModuleValue ScrollBridge::SetScrollBarWidth(ArkUIRuntimeCallInfo* run
     CHECK_NULL_RETURN(nativeNodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
     CalcDimension scrollBarWidth;
-    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, scrollBarArg, scrollBarWidth, false)) {
+    RefPtr<ResourceObject> resObj;
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, scrollBarArg, scrollBarWidth, resObj, false)) {
         GetArkUINodeModifiers()->getScrollModifier()->resetScrollScrollBarWidth(nativeNode);
     } else {
         if (LessNotEqual(scrollBarWidth.Value(), 0.0)) {
@@ -375,6 +376,7 @@ ArkUINativeModuleValue ScrollBridge::SetScrollBarWidth(ArkUIRuntimeCallInfo* run
                 nativeNode, scrollBarWidth.Value(), static_cast<int32_t>(scrollBarWidth.Unit()));
         }
     }
+    GetArkUINodeModifiers()->getScrollModifier()->setScrollScrollBarWidthResObj(nativeNode, resObj.GetRawPtr());
 
     return panda::JSValueRef::Undefined(vm);
 }
@@ -387,6 +389,7 @@ ArkUINativeModuleValue ScrollBridge::ResetScrollBarWidth(ArkUIRuntimeCallInfo* r
     CHECK_NULL_RETURN(nativeNodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getScrollModifier()->resetScrollScrollBarWidth(nativeNode);
+    GetArkUINodeModifiers()->getScrollModifier()->setScrollScrollBarWidthResObj(nativeNode, nullptr);
     return panda::JSValueRef::Undefined(vm);
 }
 

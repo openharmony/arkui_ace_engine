@@ -126,11 +126,13 @@ void GetlistDivider(ArkUINodeHandle node, ArkUIdividerOptions* option, ArkUI_Int
     option->endMargin = divider.endMargin.GetNativeValue(static_cast<DimensionUnit>(unit));
 }
 
-void SetListItemGroupSpace(ArkUINodeHandle node, ArkUI_Float64 space)
+void SetListItemGroupSpace(ArkUINodeHandle node, ArkUI_Float64 space, ArkUI_Uint32 unit, ArkUI_VoidPtr resObjRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ListItemGroupModelNG::SetSpace(frameNode, Dimension(space, DimensionUnit::VP));
+    ListItemGroupModelNG::SetSpace(frameNode, Dimension(space, static_cast<DimensionUnit>(unit)));
+    ListItemGroupModelNG::CreateWithResourceObjSpace(
+        frameNode, AceType::Claim(static_cast<ResourceObject*>(resObjRawPtr)));
 }
 
 void ResetListItemGroupSpace(ArkUINodeHandle node)
@@ -138,6 +140,7 @@ void ResetListItemGroupSpace(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ListItemGroupModelNG::SetSpace(frameNode, Dimension(0.0, DimensionUnit::VP));
+    ListItemGroupModelNG::CreateWithResourceObjSpace(frameNode, nullptr);
 }
 
 void SetListItemGroupStyle(ArkUINodeHandle node, ArkUI_Uint32 style)

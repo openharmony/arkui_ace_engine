@@ -525,10 +525,13 @@ void JSGrid::SetScrollBarColor(const JSCallbackInfo& info)
 
 void JSGrid::SetScrollBarWidth(const JSCallbackInfo& scrollWidth)
 {
-    auto scrollBarWidth = JSScrollable::ParseBarWidth(scrollWidth);
+    RefPtr<ResourceObject> resObj;
+    auto scrollWidthValue = scrollWidth[0];
+    auto scrollBarWidth = JSScrollable::ParseBarWidth(scrollWidth, resObj);
     if (!scrollBarWidth.empty()) {
         GridModel::GetInstance()->SetScrollBarWidth(scrollBarWidth);
     }
+    GridModel::GetInstance()->CreateWithResourceObjScrollBarWidth(resObj);
 }
 
 void JSGrid::SetCachedCount(const JSCallbackInfo& info)

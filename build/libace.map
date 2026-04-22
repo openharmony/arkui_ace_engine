@@ -814,6 +814,7 @@
       "OHOS::Ace::NG::ArkTSUtils::ParseJsColorAlphaForMaterial(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::Color&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&, OHOS::Ace::NG::NodeInfo const&)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsColorFromResource(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::Color&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsDimension(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::CalcDimension&, OHOS::Ace::DimensionUnit, bool, bool)";
+      "OHOS::Ace::NG::ArkTSUtils::ParseJsDimension(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::CalcDimension&, OHOS::Ace::DimensionUnit, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&, bool, bool)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsDimensionFp(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::CalcDimension&, bool, bool)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsDimensionFp(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::CalcDimension&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&, bool, bool)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsDimensionFpNG(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::CalcDimension&, bool)";

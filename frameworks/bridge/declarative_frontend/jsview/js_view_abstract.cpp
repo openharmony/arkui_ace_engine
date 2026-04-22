@@ -6825,7 +6825,6 @@ bool JSViewAbstract::ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& 
     if (!resourceWrapper) {
         return false;
     }
-
     if (resIdNum == -1) {
         return ParseResourceToDoubleByName(jsObj, resType, resourceWrapper, result);
     }

@@ -448,12 +448,11 @@ std::optional<PresetFillType> ParsePresetFillType(const EcmaVM* vm, const Local<
     }
 }
 
-std::string ParseBarWidth(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
+std::string ParseBarWidth(const EcmaVM* vm, const Local<JSValueRef>& jsValue, RefPtr<ResourceObject>& resObj)
 {
     CalcDimension scrollBarWidth;
-    if (!ArkTSUtils::ParseJsDimension(vm, jsValue, scrollBarWidth, DimensionUnit::VP, false, false) ||
-        jsValue->IsNull() || jsValue->IsUndefined() ||
-        (jsValue->IsString(vm) && jsValue->ToString(vm)->ToString(vm).empty()) ||
+    if (!ArkTSUtils::ParseJsDimensionNG(vm, jsValue, scrollBarWidth, DimensionUnit::VP, resObj) || jsValue->IsNull() ||
+        jsValue->IsUndefined() || (jsValue->IsString(vm) && jsValue->ToString(vm)->ToString(vm).empty()) ||
         LessNotEqual(scrollBarWidth.Value(), 0.0) || scrollBarWidth.Unit() == DimensionUnit::PERCENT) {
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(pipelineContext, "");
@@ -1115,14 +1114,18 @@ ArkUINativeModuleValue WaterFlowBridge::SetScrollBarWidth(ArkUIRuntimeCallInfo* 
     auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
 
     CalcDimension scrollBarWidth;
-    if (!ArkTSUtils::ParseJsDimension(vm, scrollBarArg, scrollBarWidth, DimensionUnit::VP) || scrollBarArg->IsNull() ||
-        scrollBarArg->IsUndefined() || (scrollBarArg->IsString(vm) && scrollBarWidth.ToString().empty()) ||
+    RefPtr<ResourceObject> resObj;
+    if (!ArkTSUtils::ParseJsDimensionNG(vm, scrollBarArg, scrollBarWidth, DimensionUnit::VP, resObj) ||
+        scrollBarArg->IsNull() || scrollBarArg->IsUndefined() ||
+        (scrollBarArg->IsString(vm) && scrollBarWidth.ToString().empty()) ||
         LessNotEqual(scrollBarWidth.Value(), 0.0) || scrollBarWidth.Unit() == DimensionUnit::PERCENT) {
         GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterFlowScrollBarWidth(nativeNode);
     } else {
         GetArkUINodeModifiers()->getWaterFlowModifier()->setWaterFlowScrollBarWidth(
             nativeNode, scrollBarWidth.ToString().c_str());
     }
+    GetArkUINodeModifiers()->getWaterFlowModifier()->setWaterFlowScrollBarWidthWithResource(
+        nativeNode, resObj.GetRawPtr());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1134,6 +1137,7 @@ ArkUINativeModuleValue WaterFlowBridge::ResetScrollBarWidth(ArkUIRuntimeCallInfo
     CHECK_NULL_RETURN(IsNativePointerArg(vm, argNode), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(argNode->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterFlowScrollBarWidth(nativeNode);
+    GetArkUINodeModifiers()->getWaterFlowModifier()->setWaterFlowScrollBarWidthWithResource(nativeNode, nullptr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1767,11 +1771,13 @@ ArkUINativeModuleValue WaterFlowBridge::SetJSScrollBarWidth(ArkUIRuntimeCallInfo
     CHECK_EQUAL_RETURN(GetNativeNode(nativeNode, nodeArg, vm), false, panda::JSValueRef::Undefined(vm));
 
     Local<JSValueRef> widthArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-
-    auto scrollBarWidth = ParseBarWidth(vm, widthArg);
+    RefPtr<ResourceObject> resObj;
+    auto scrollBarWidth = ParseBarWidth(vm, widthArg, resObj);
     if (!scrollBarWidth.empty()) {
         GetArkUINodeModifiers()->getWaterFlowModifier()->setWaterFlowScrollBarWidth(nativeNode, scrollBarWidth.c_str());
     }
+    GetArkUINodeModifiers()->getWaterFlowModifier()->setWaterFlowScrollBarWidthWithResource(
+        nativeNode, resObj.GetRawPtr());
     return panda::JSValueRef::Undefined(vm);
 }
 
