@@ -21,7 +21,6 @@
 #include "ui/properties/tabs_effect_node_option.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/decoration.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"

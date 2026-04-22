@@ -20,18 +20,19 @@
 
 #include "base/geometry/axis.h"
 #include "base/memory/ace_type.h"
-#include "core/animation/curve.h"
 #include "core/components/common/properties/scroll_bar.h"
 #include "core/components/refresh/render_refresh_target.h"
-#include "core/components/scroll/scroll_bar_controller.h"
 #include "core/components/scroll/scroll_component.h"
 #include "core/components/scroll/scroll_edge_effect.h"
 #include "core/components/scroll/scroll_position_controller.h"
+#include "core/components/scroll/scrollable.h"
 #include "core/gestures/raw_recognizer.h"
 #include "core/pipeline/base/render_node.h"
 #include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace {
+
+class Curve;
 
 enum class ScrollType {
     SCROLL_INDEX = 0,

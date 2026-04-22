@@ -13,17 +13,17 @@
 
 import("//build/config/components/ets_frontend/es2abc_config.gni")
 import("//build/ohos.gni")
+import("//build/templates/common/collect_target.gni")
+import("//build/templates/metadata/module_info.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/build/ace_ext.gni")
 import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
 
 base_output_path = get_label_info(":gen_abc_proxyclass", "target_out_dir")
 abcproxyclass_obj_path = base_output_path + "/abc_proxy_class.o"
-abcenumstyle_obj_path = base_output_path + "/abc_enum_style.o"
 abcuicontext_obj_path = base_output_path + "/abc_uicontext.o"
 abcpreload_obj_path = base_output_path + "/abc_preload.o"
 jsmocksystemplugin_obj_path = base_output_path + "/abc_js_mock_system_plugin.o"
-arkcomponent_obj_path = base_output_path + "/abc_ark_component.o"
 arkcommon_obj_path = base_output_path + "/abc_ark_common.o"
 arkdynamiccomponent_obj_path = base_output_path + "/abc_ark_dynamiccomponent.o"
 
@@ -42,7 +42,10 @@ es2abc_gen_abc("gen_stateMgmt_abc") {
 es2abc_gen_abc("gen_jsEnumStyle_abc") {
   extra_visibility = [
     ":*",
-    "//foundation/arkui/ace_engine/adapter/preview/sdk:*"
+    "//foundation/arkui/ace_engine/adapter/preview/sdk:*",
+    "//out/arkui-x/gen/build/ohos/sdk:arkui_x_windows",
+    "//out/arkui-x/gen/build/ohos/sdk:arkui_x_linux",
+    "//out/arkui-x/gen/build/ohos/sdk:arkui_x_darwin"
   ]
   src_js = rebase_path(
           "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/jsEnumStyle.js")
@@ -50,6 +53,17 @@ es2abc_gen_abc("gen_jsEnumStyle_abc") {
 
   in_puts = [ "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/jsEnumStyle.js" ]
   out_puts = [ base_output_path + "/jsEnumStyle.abc" ]
+}
+
+generate_module_info("jsEnumStyle_module_info") {
+  module_name = "gen_jsEnumStyle_abc"
+  module_type = "abc"
+  module_source_dir = base_output_path
+  module_install_name = "jsEnumStyle.abc"
+  module_install_images = [ "system" ]
+  module_install_dir = "etc/abc/framework"
+  install_enable = true
+  notice = "$target_out_dir/jsEnumStyle.notice.txt"
 }
 
 es2abc_gen_abc("gen_jsUIContext_abc") {
@@ -95,7 +109,10 @@ es2abc_gen_abc("gen_arkDynamicComponent_abc") {
 es2abc_gen_abc("gen_arkComponent_abc") {
   extra_visibility = [
     ":*",
-    "//foundation/arkui/ace_engine/adapter/preview/sdk:*"
+    "//foundation/arkui/ace_engine/adapter/preview/sdk:*",
+    "//out/arkui-x/gen/build/ohos/sdk:arkui_x_windows",
+    "//out/arkui-x/gen/build/ohos/sdk:arkui_x_linux",
+    "//out/arkui-x/gen/build/ohos/sdk:arkui_x_darwin"
   ]
   src_js = rebase_path(
           "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/arkComponent.js")
@@ -103,6 +120,17 @@ es2abc_gen_abc("gen_arkComponent_abc") {
 
   in_puts = [ "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/arkComponent.js" ]
   out_puts = [ base_output_path + "/arkComponent.abc" ]
+}
+
+generate_module_info("arkComponent_module_info") {
+  module_name = "gen_arkComponent_abc"
+  module_type = "abc"
+  module_source_dir = base_output_path
+  module_install_name = "arkComponent.abc"
+  module_install_images = [ "system" ]
+  module_install_dir = "etc/abc/framework"
+  install_enable = true
+  notice = "$target_out_dir/arkComponent.notice.txt"
 }
 
 if (!is_arkui_x && (use_mac || use_mingw_win || use_linux)) {
@@ -127,15 +155,6 @@ gen_obj("abc_proxyclass") {
   }
   output = abcproxyclass_obj_path
   snapshot_dep = [ ":gen_stateMgmt_abc" ]
-}
-
-gen_obj("abc_enum_style") {
-  input = base_output_path + "/jsEnumStyle.abc"
-  if (use_mac || use_mingw_win || use_linux || use_ios) {
-    abcenumstyle_obj_path = base_output_path + "/jsEnumStyle.c"
-  }
-  output = abcenumstyle_obj_path
-  snapshot_dep = [ ":gen_jsEnumStyle_abc" ]
 }
 
 gen_obj("abc_uicontext") {
@@ -172,15 +191,6 @@ gen_obj("abc_ark_dynamiccomponent") {
   }
   output = arkdynamiccomponent_obj_path
   snapshot_dep = [ ":gen_arkDynamicComponent_abc" ]
-}
-
-gen_obj("abc_ark_component") {
-  input = base_output_path + "/arkComponent.abc"
-  if (use_mac || use_mingw_win || use_ios || use_linux) {
-    arkcomponent_obj_path = base_output_path + "/arkComponent.c"
-  }
-  output = arkcomponent_obj_path
-  snapshot_dep = [ ":gen_arkComponent_abc" ]
 }
 
 if (!is_arkui_x && (use_mac || use_mingw_win || use_linux)) {
@@ -490,9 +500,9 @@ template("declarative_js_engine_ark") {
     deps += [
       ":gen_obj_src_abc_ark_common",
       ":gen_obj_src_abc_ark_dynamiccomponent",
-      ":gen_obj_src_abc_ark_component",
-      ":gen_obj_src_abc_enum_style",
       ":gen_obj_src_abc_proxyclass",
+      ":arkComponent_module_info",
+      ":jsEnumStyle_module_info",
     ]
 
     if (is_arkui_x) {

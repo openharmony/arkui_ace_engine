@@ -13,6 +13,45 @@
  * limitations under the License.
  */
 
+function __getSmartGestureControllerModule__() {
+    try {
+        return globalThis.requireNapi('arkui.smartGestureController');
+    } catch (error) {
+        return undefined;
+    }
+}
+
+function __getSmartGestureControllerExport__(module, exportName) {
+    if (module !== null && module !== undefined) {
+        return module[exportName];
+    }
+    return globalThis[exportName];
+}
+
+const __smartGestureControllerModule__ = __getSmartGestureControllerModule__();
+const SmartGestureAction =
+    __getSmartGestureControllerExport__(__smartGestureControllerModule__, 'SmartGestureAction');
+const OperateIntention =
+    __getSmartGestureControllerExport__(__smartGestureControllerModule__, 'OperateIntention');
+const BaseGestureHandlingProposal =
+    __getSmartGestureControllerExport__(__smartGestureControllerModule__, 'BaseGestureHandlingProposal');
+const TargetedGestureProposal =
+    __getSmartGestureControllerExport__(__smartGestureControllerModule__, 'TargetedGestureProposal');
+const ClickActionProposal =
+    __getSmartGestureControllerExport__(__smartGestureControllerModule__, 'ClickActionProposal');
+const SelectActionProposal =
+    __getSmartGestureControllerExport__(__smartGestureControllerModule__, 'SelectActionProposal');
+const NoneActionProposal =
+    __getSmartGestureControllerExport__(__smartGestureControllerModule__, 'NoneActionProposal');
+const BackPressActionProposal =
+    __getSmartGestureControllerExport__(__smartGestureControllerModule__, 'BackPressActionProposal');
+const PageSwitchActionProposal =
+    __getSmartGestureControllerExport__(__smartGestureControllerModule__, 'PageSwitchActionProposal');
+const ScrollActionProposal =
+    __getSmartGestureControllerExport__(__smartGestureControllerModule__, 'ScrollActionProposal');
+const GestureHandlingResolution =
+    __getSmartGestureControllerExport__(__smartGestureControllerModule__, 'GestureHandlingResolution');
+
 class Font {
     /**
      * Construct new instance of Font.
@@ -308,6 +347,67 @@ class MeasureUtils {
 }
 
 class FrameCallback {
+}
+
+class SmartGestureController {
+    constructor(instanceId) {
+        this.instanceId_ = instanceId;
+        this.ohos_smartGestureController = globalThis.requireNapi('arkui.smartGestureController');
+    }
+
+    enableSmartTapAndSlideGestures(enabled) {
+        if (this.ohos_smartGestureController === null || this.ohos_smartGestureController === undefined) {
+            return;
+        }
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_smartGestureController.enableSmartTapAndSlideGestures(enabled);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    registerMonitor(monitorCallback) {
+        if (this.ohos_smartGestureController === null || this.ohos_smartGestureController === undefined) {
+            return;
+        }
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_smartGestureController.registerMonitor(monitorCallback, this.instanceId_);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    unregisterMonitor(monitorCallback) {
+        if (this.ohos_smartGestureController === null || this.ohos_smartGestureController === undefined) {
+            return;
+        }
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_smartGestureController.unregisterMonitor(monitorCallback, this.instanceId_);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    clearMonitors() {
+        if (this.ohos_smartGestureController === null || this.ohos_smartGestureController === undefined) {
+            return;
+        }
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_smartGestureController.clearMonitors(this.instanceId_);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    requestSelected(id) {
+        if (this.ohos_smartGestureController === null || this.ohos_smartGestureController === undefined) {
+            return;
+        }
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_smartGestureController.requestSelected(id);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    clearSelected() {
+        if (this.ohos_smartGestureController === null || this.ohos_smartGestureController === undefined) {
+            return;
+        }
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_smartGestureController.clearSelected();
+        __JSScopeUtil__.restoreInstanceId();
+    }
 }
 
 class UIContext {
@@ -1002,6 +1102,13 @@ class UIContext {
         return withInstanceId(this.instanceId_, () => {
             return Context.isEasySplit();
         });
+    }
+
+    getSmartGestureController() {
+        if (this.smartGestureController_ == null) {
+            this.smartGestureController_ = new SmartGestureController(this.instanceId_);
+        }
+        return this.smartGestureController_;
     }
 }
 
@@ -1759,12 +1866,6 @@ class OverlayManager {
     hideAllComponentContents() {
         withInstanceId(this.instanceId_, () => {
             this.ohos_overlayManager.hideAllFrameNodes();
-        });
-    }
-
-    openOrderOverlay(content, options) {
-        return withInstanceId(this.instanceId_, () => {
-            return this.ohos_overlayManager.openOrderOverlay(content.getFrameNode(), options);
         });
     }
 }

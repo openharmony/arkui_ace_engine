@@ -24,6 +24,7 @@ namespace {
 const int32_t TWO = 2;
 const int32_t FIVE = 5;
 constexpr FrameNodeChangeInfoFlag AVOID_KEYBOARD_END_FALG = 1<<8;
+constexpr float MAGNIFIER_TEST_INITIAL_Y = 500.0f;
 } // namespace
 
 class TextFieldPatternFuncTest : public TextInputBases {
@@ -48,6 +49,40 @@ int32_t MyGetCaretIndex()
 NG::OffsetF MyGetCaretPosition()
 {
     return OffsetF(FIVE, FIVE);
+}
+
+/**
+ * @tc.name: MagnifierController_UpdateMagnifierEdgeY
+ * @tc.desc: Test MagnifierController UpdateMagnifierEdgeY when host is SEARCH_Field and parent is SEARCH
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, MagnifierController_UpdateMagnifierEdgeY, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+
+    auto rootUINode = pipeline->GetRootElement();
+    ASSERT_NE(rootUINode, nullptr);
+    auto searchNode = FrameNode::GetOrCreateFrameNode(V2::SEARCH_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::SEARCH_Field_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(searchNode, nullptr);
+    ASSERT_NE(textFieldNode, nullptr);
+    searchNode->MountToParent(rootUINode);
+    textFieldNode->MountToParent(searchNode);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->magnifierController_ = AceType::MakeRefPtr<MagnifierController>(pattern);
+    auto controller = pattern->magnifierController_;
+    ASSERT_NE(controller, nullptr);
+    float magnifierY = MAGNIFIER_TEST_INITIAL_Y;
+    float patternVisibleBottom = 0.0f;
+    float windowScale = 0.0f;
+    int32_t screenHeight = 0;
+    EXPECT_TRUE(
+        controller->UpdateMagnifierEdgeY(pipeline, magnifierY, patternVisibleBottom, windowScale, screenHeight));
+    rootUINode->RemoveChild(searchNode);
 }
 
 /**

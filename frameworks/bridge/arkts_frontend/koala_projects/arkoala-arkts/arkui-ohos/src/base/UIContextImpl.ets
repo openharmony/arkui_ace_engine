@@ -28,9 +28,9 @@ import { AnimatorResult , AnimatorOptions, Animator, SimpleAnimatorOptions } fro
 import { MarqueeDynamicSyncScene, MarqueeDynamicSyncSceneType } from '@ohos/arkui/UIContext';
 import { UIContext, MeasureUtils, TextMenuController, Font, FocusController, ContextMenuController, ComponentUtils,
     FrameCallback, UIInspector, UIObserver, OverlayManager, PromptAction, AtomicServiceBar, Router, CursorController,
-    MediaQuery, ComponentSnapshot, NodeIdentity, OverlayManagerOptions, OrderOverlayOptions, DragController, TargetInfo,
-    CustomBuilderWithId, KeyboardAvoidMode, DynamicSyncScene, SwiperDynamicSyncScene, SwiperDynamicSyncSceneType,
-    PageInfo, CustomKeyboardContinueFeature, Magnifier } from '@ohos/arkui/UIContext';
+    MediaQuery, ComponentSnapshot, NodeIdentity, OverlayManagerOptions, DragController, TargetInfo, CustomBuilderWithId,
+    KeyboardAvoidMode, DynamicSyncScene, SwiperDynamicSyncScene, SwiperDynamicSyncSceneType, PageInfo,
+    CustomKeyboardContinueFeature, Magnifier } from '@ohos/arkui/UIContext';
 import { ComputableState, GlobalStateManager, memoEntry, memoEntry1,
     IncrementalNode, GlobalUIStateManager } from '@koalaui/runtime';
 import { StateContext } from 'arkui.incremental.runtime.state';
@@ -950,22 +950,6 @@ export class OverlayManagerImpl extends OverlayManager {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         overlayManager.hideAllComponentContents();
         ArkUIAniModule._Common_Restore_InstanceId();
-    }
-
-    openOrderOverlay(content: ComponentContent<Object>, options?: OrderOverlayOptions): Promise<void> {
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        let ptr: KPointer = 0;
-        if (content.getNodePtr() !== undefined) {
-            ptr = content.getNodePtr() as (KPointer);
-        }
-        let optionsInternal: overlayManager.OrderOverlayOptionsInternal = {};
-        const levelOrder = options?.levelOrder?.getOrder?.();
-        if (levelOrder !== undefined) {
-            optionsInternal.levelOrder = levelOrder as number;
-        }
-        const retval = overlayManager.openOrderOverlay(ptr, options, optionsInternal);
-        ArkUIAniModule._Common_Restore_InstanceId();
-        return retval;
     }
 }
 

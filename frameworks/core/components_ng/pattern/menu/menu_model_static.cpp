@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/menu/menu_model_static.h"
+#include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/menu/menu_tag_constants.h"
 
 #include "core/components_ng/base/view_abstract.h"

@@ -28,7 +28,6 @@
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/bubble/bubble_layout_property.h"
 #include "core/components_ng/pattern/select/select_model.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #if defined(ENABLE_ROSEN_BACKEND)
 #include "render_service_client/core/ui_effect/property/include/rs_ui_shape_base.h"
 #endif

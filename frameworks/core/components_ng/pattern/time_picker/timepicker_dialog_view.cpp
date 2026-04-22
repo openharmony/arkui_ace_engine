@@ -315,9 +315,7 @@ RefPtr<FrameNode> TimePickerDialogView::CreateNextPrevButtonNode(std::function<v
         ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize(), 0.0_vp, false, true));
     textNextPrevLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
 
-    auto fontManager = pipeline->GetFontManager();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) && fontManager &&
-        fontManager->GetFallbackLineSpacingStyleOptimizeFlag()) {
+    if (IsEnableFallbackLineSpacingStyleOptimize()) {
         textNextPrevLayoutProperty->UpdateIncludeFontPadding(true);
         textNextPrevLayoutProperty->UpdateFallbackLineSpacing(true);
     }
@@ -823,12 +821,7 @@ void TimePickerDialogView::UpdateConfirmButtonTextLayoutProperty(
         ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize(), 0.0_vp, false, true));
     textLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
 
-    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto fontManager = pipeline->GetFontManager();
-    CHECK_NULL_VOID(fontManager);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
-        fontManager->GetFallbackLineSpacingStyleOptimizeFlag()) {
+    if (IsEnableFallbackLineSpacingStyleOptimize()) {
         textLayoutProperty->UpdateIncludeFontPadding(true);
         textLayoutProperty->UpdateFallbackLineSpacing(true);
     }
@@ -926,12 +919,7 @@ void TimePickerDialogView::UpdateCancelButtonTextLayoutProperty(
         ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize(), 0.0_vp, false, true));
     textCancelLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
 
-    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto fontManager = pipeline->GetFontManager();
-    CHECK_NULL_VOID(fontManager);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
-        fontManager->GetFallbackLineSpacingStyleOptimizeFlag()) {
+    if (IsEnableFallbackLineSpacingStyleOptimize()) {
         textCancelLayoutProperty->UpdateIncludeFontPadding(true);
         textCancelLayoutProperty->UpdateFallbackLineSpacing(true);
     }
@@ -1178,13 +1166,21 @@ bool TimePickerDialogView::GetIsUserSetTextProperties(const PickerTextProperties
     return false;
 }
 
-bool TimePickerDialogView::NeedAdaptForAging(bool skipOptimizeFlag)
+bool TimePickerDialogView::IsEnableFallbackLineSpacingStyleOptimize()
 {
     auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     auto fontManager = pipeline->GetFontManager();
-    if (!skipOptimizeFlag && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)
-        && fontManager && fontManager->GetFallbackLineSpacingStyleOptimizeFlag()) {
+    CHECK_NULL_RETURN(fontManager, false);
+    return Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
+        fontManager->GetFallbackLineSpacingStyleOptimizeFlag();
+}
+
+bool TimePickerDialogView::NeedAdaptForAging(bool skipOptimizeFlag)
+{
+    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, false);
+    if (!skipOptimizeFlag && IsEnableFallbackLineSpacingStyleOptimize()) {
         return false;
     }
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
@@ -1230,9 +1226,7 @@ const Dimension TimePickerDialogView::ConvertFontScaleValue(
         fontSizeScale = std::min(fontSizeScale, maxAppFontScale);
     }
 
-    auto fontManager = pipeline->GetFontManager();
-    if (!skipOptimizeFlag && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
-        fontManager && fontManager->GetFallbackLineSpacingStyleOptimizeFlag()) {
+    if (!skipOptimizeFlag && IsEnableFallbackLineSpacingStyleOptimize()) {
         if (NearZero(fontSizeScale) || (fontSizeValue.Unit() == DimensionUnit::VP)) {
             return fontSizeValue;
         }

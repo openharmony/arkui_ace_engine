@@ -26,18 +26,13 @@
 #include "interfaces/inner_api/ace_kit/include/ui/view/ai_caller_helper.h"
 
 #include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/vector.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
 #include "base/thread/cancelable_callback.h"
 #include "base/thread/task_executor.h"
-#include "base/utils/macros.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "base/view_data/ace_auto_fill_type.h"
-#include "core/common/resource/resource_configuration.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/base/geometry_node.h"
@@ -46,7 +41,6 @@
 #include "core/components_ng/event/gesture_event_hub_types.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -88,6 +82,8 @@ class InputEventHub;
 class TargetComponent;
 struct DragPreviewOption;
 struct OptionsAfterApplied;
+class SamplerManager;
+class SmartGestureProperty;
 class AccessibilityProperty;
 class SamplerManager;
 
@@ -358,6 +354,10 @@ public:
     template<typename T>
     ACE_FORCE_EXPORT
     RefPtr<T> GetAccessibilityProperty() const;
+
+    RefPtr<SmartGestureProperty> GetOrCreateSmartGestureProperty();
+
+    RefPtr<SmartGestureProperty> GetSmartGestureProperty() const;
 
     template<typename T>
     T* GetLayoutPropertyPtr() const
@@ -1529,6 +1529,7 @@ private:
 
     bool IsMeasureBoundary();
     bool IsRenderBoundary();
+    void UpdateSmartGestureSelectedState();
 
     bool OnRemoveFromParent(bool allowTransition) override;
     bool RemoveImmediately() const override;
@@ -1690,6 +1691,7 @@ private:
     std::function<void(int32_t)> ndkColorModeUpdateCallback_;
     std::function<void(float, float)> ndkFontUpdateCallback_;
     RefPtr<AccessibilityProperty> accessibilityProperty_;
+    RefPtr<SmartGestureProperty> smartGestureProperty_;
     bool hasAccessibilityVirtualNode_ = false;
     RefPtr<LayoutProperty> layoutProperty_;
     RefPtr<PaintProperty> paintProperty_;

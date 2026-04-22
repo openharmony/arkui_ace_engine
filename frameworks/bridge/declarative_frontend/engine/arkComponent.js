@@ -2670,6 +2670,19 @@ class AccessibilityActionOptionsModifier extends ModifierWithKey {
   }
 }
 AccessibilityActionOptionsModifier.identity = Symbol('accessibilityActionOptions');
+class SmartGestureShortcutModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetSmartGestureShortcut(node);
+    } else {
+      getUINativeModule().common.setSmartGestureShortcut(node, this.value);
+    }
+  }
+}
+SmartGestureShortcutModifier.identity = Symbol('smartGestureShortcut');
 class AccessibilityHoverTransparentModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -5513,6 +5526,11 @@ class ArkComponent {
 
   accessibilityActionOptions(value) {
     modifierWithKey(this._modifiersWithKeys, AccessibilityActionOptionsModifier.identity, AccessibilityActionOptionsModifier, value);
+    return this;
+  }
+
+  smartGestureShortcut(value) {
+    modifierWithKey(this._modifiersWithKeys, SmartGestureShortcutModifier.identity, SmartGestureShortcutModifier, value);
     return this;
   }
 

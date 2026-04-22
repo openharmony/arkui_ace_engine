@@ -56,6 +56,10 @@ void SetListItemGroupOptionsImpl(Ark_NativePointer node,
     ListItemGroupModelStatic::SetSpace(frameNode, space);
     auto style = Converter::OptConvert<V2::ListItemGroupStyle>(arkOptions.value().style);
     ListItemGroupModelStatic::SetStyle(frameNode, style);
+    auto headerStyle = Converter::OptConvert<V2::ListItemGroupHeaderFooterStyle>(arkOptions.value().headerStyle);
+    ListItemGroupModelStatic::SetHeaderStyle(frameNode, headerStyle);
+    auto footerStyle = Converter::OptConvert<V2::ListItemGroupHeaderFooterStyle>(arkOptions.value().footerStyle);
+    ListItemGroupModelStatic::SetFooterStyle(frameNode, footerStyle);
     auto header = Converter::OptConvert<CustomNodeBuilder>(arkOptions.value().header);
     if (header.has_value()) {
         CallbackHelper(header.value()).BuildAsync([weak = AceType::WeakClaim(frameNode)](const RefPtr<UINode>& uiNode) {

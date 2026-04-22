@@ -34,6 +34,7 @@
 #include "core/common/multi_thread_build_manager.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/shadow_config.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components/popup/popup_theme.h"
 #include "core/components/select/select_theme.h"

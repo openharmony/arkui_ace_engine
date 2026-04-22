@@ -480,14 +480,23 @@ public:
     {
         return true;
     }
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+    void ApplyListItemGroupDefaultAttributes(const RefPtr<FrameNode>& itemGroupNode);
+
+    bool GetIsCardStyleInitialized() const
+    {
+        return isCardStyleInitialized_;
+    }
+
+    void SetIsCardStyleInitialized(bool isCardStyleInitialized)
+    {
+        isCardStyleInitialized_ = isCardStyleInitialized;
+    }
 
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-    void OnAttachToFrameNode() override;
-    void OnAttachToFrameNodeMultiThread();
     void OnAttachToMainTree() override;
     void OnAttachToMainTreeMultiThread();
-    void SetListItemGroupDefaultAttributes(const RefPtr<FrameNode>& itemGroupNode);
     void OnColorConfigurationUpdate() override;
     void CheckListDirectionInCardStyle();
     float GetPaddingAndMargin() const;
@@ -524,6 +533,7 @@ private:
     RefPtr<ShallowBuilder> shallowBuilder_;
     RefPtr<ListPositionMap> posMap_;
     RefPtr<ListChildrenMainSize> childrenSize_;
+    bool isCardStyleInitialized_ = false;
     V2::ListItemGroupStyle listItemGroupStyle_ = V2::ListItemGroupStyle::NONE;
     V2::ListItemGroupHeaderFooterStyle headerStyle_ = V2::ListItemGroupHeaderFooterStyle::NONE;
     V2::ListItemGroupHeaderFooterStyle footerStyle_ = V2::ListItemGroupHeaderFooterStyle::NONE;

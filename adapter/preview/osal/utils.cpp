@@ -13,20 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_OVERLAY_OVERLAY_OPTIONS_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_OVERLAY_OVERLAY_OPTIONS_H
-
-#include <cstdint>
-#include <optional>
-
-#include "core/components_ng/pattern/overlay/level_mode.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
-struct OrderOverlayOptions {
-    std::optional<double> levelOrder;
-    LevelMode levelMode = LevelMode::OVERLAY;
-    int32_t levelUniqueId = -1;
-};
+
+std::string GetSystemPath(const std::string& fileName)
+{
+    return "./module/arkui/" + fileName;
 }
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_OVERLAY_OVERLAY_OPTIONS_H
+} // namespace OHOS::Ace::NG

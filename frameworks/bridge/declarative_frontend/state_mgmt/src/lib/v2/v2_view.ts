@@ -56,7 +56,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
     public defaultConsumerV2__?: Map<string, string>;
     public connectConsumerV2__?: Map<string, string>;
 
-    private myReusePool__ : __ReusePool  | undefined;
+    private myReusePool__ : __ReusePool_Internal__  | undefined;
     private recyclePoolV2_: RecyclePoolV2 | undefined = undefined;
 
     public hasBeenRecycled_: boolean = false;
@@ -956,7 +956,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
     // GLOBAL POOL PATH
     // Component may come from a different parent entirely,
     // so we need to re-parent and update its id_.
-    private reparentFromGlobalPool(recycledNode: ViewV2, elmtId: number, globalPool: __ReusePool): void {
+    private reparentFromGlobalPool(recycledNode: ViewV2, elmtId: number, globalPool: __ReusePool_Internal__): void {
         const oldParent = recycledNode.getParent?.();
         const oldElmtId = recycledNode.id__();
 
@@ -1013,7 +1013,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
     	// In aliasing cases, matching reuseId strings alone can cause duplicates,
     	// so we use the constructor reference to uniquely store/retrieve pool keys.
         if (globalPool && componentClass && (!reuseId || reuseId === componentClass.name)) {
-            __ReusePool.registerCtorName(componentClass, reuseId);
+            __ReusePool_Internal__.registerCtorName(componentClass, reuseId);
         }
 
         this.observeComponentCreation2((elmtId, isInitialRender) => {

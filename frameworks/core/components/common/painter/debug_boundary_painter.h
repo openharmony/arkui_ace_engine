@@ -27,7 +27,6 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components_ng/render/drawing_forward.h"
 

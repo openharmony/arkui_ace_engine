@@ -28,6 +28,11 @@ ohos_shared_library("ace_container_scope") {
   public_configs = [ ":container_scope_config" ]
 
   configs = [ "$ace_root:ace_config" ]
+  if (!build_ohos_sdk) {
+    defines = [
+      "NAPI_SCOPE_ERROR_HIVEW_REPORT"
+    ]
+  }
 
   sources = [ "$ace_root/frameworks/core/common/container_scope.cpp" ]
 

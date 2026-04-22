@@ -5,11 +5,7 @@
 !CommonMethodModifier.ets
 !FormLinkModifier.ets
 !ImageModifier.ets
-!MarqueeModifier.ets
 !RichEditorModifier.ets
-!SearchModifier.ets
 !SwiperModifier.ets
 !SymbolGlyphModifier.ets
-!TextAreaModifier.ets
-!TextInputModifier.ets
 !WebModifier.ets

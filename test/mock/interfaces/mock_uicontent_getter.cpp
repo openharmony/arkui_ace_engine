@@ -13,14 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_OVERLAY_LEVEL_MODE_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_OVERLAY_LEVEL_MODE_H
+#include "interfaces/inner_api/ace/ui_content.h"
 
 namespace OHOS::Ace {
-enum class LevelMode {
-    OVERLAY = 0,
-    EMBEDDED,
-};
-}
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_OVERLAY_LEVEL_MODE_H
+UIContent* UIContent::GetUIContent(int32_t /* instanceId */)
+{
+    return nullptr;
+}
+} // namespace OHOS::Ace

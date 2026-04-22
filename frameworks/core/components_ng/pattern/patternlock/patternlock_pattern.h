@@ -20,7 +20,6 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/patternlock/patternlock_challenge.h"
 #include "core/components_ng/pattern/patternlock/patternlock_event_hub.h"

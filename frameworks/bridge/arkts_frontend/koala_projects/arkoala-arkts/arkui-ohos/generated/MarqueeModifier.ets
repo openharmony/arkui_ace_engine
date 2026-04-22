@@ -28,16 +28,11 @@ import { ResourceColor, Resource as arkui_component_units_Resource, Length, Reso
 import { Color as arkui_component_enums_Color, FontWeight, MarqueeUpdateStrategy } from './component/enums'
 import { Resource as global_resource_Resource } from 'global.resource'
 export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttribute,AttributeModifier<MarqueeAttribute> {
-    _instanceId: number = -1;
-    _state: ModifierState = new ModifierState;
-    _addr: ArrayBuffer = new ArrayBuffer(4096);
-    private _flagArray: Uint8Array = new Uint8Array(this._addr);
+    private _Marquee_addr: ArrayBuffer = new ArrayBuffer(4096);
+    private _Marquee_flagArray: Uint8Array = new Uint8Array(this._Marquee_addr);
     constructor() {
         super();
-        this._flagArray.fill(0);
-    }
-    setInstanceId(instanceId: number): void {
-        this._instanceId = instanceId
+        this._Marquee_flagArray.fill(0);
     }
     isUpdater: () => boolean = () => false
     applyNormalAttribute(instance: MarqueeAttribute): void { }
@@ -45,28 +40,28 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
     applyFocusedAttribute(instance: MarqueeAttribute): void { }
     applyDisabledAttribute(instance: MarqueeAttribute): void { }
     applySelectedAttribute(instance: MarqueeAttribute): void { }
-    public _fontColor_0_0value?: ResourceColor | undefined
-    public _fontSize_0_0value?: Length | undefined
-    public _allowScale_0_0value?: boolean | undefined
-    public _fontWeight_0_0value?: int32 | FontWeight | ResourceStr | undefined
-    public _fontFamily_0_0value?: string | global_resource_Resource | undefined
-    public _marqueeUpdateStrategy_0_0value?: MarqueeUpdateStrategy | undefined
-    public _onStart_0_0value?: (() => void) | undefined
-    public _onBounce_0_0value?: (() => void) | undefined
-    public _onFinish_0_0value?: (() => void) | undefined
-    public _onStop_0_0value?: VoidCallback | undefined
+    public _Marquee_fontColor_0_0value?: ResourceColor | undefined
+    public _Marquee_fontSize_0_0value?: Length | undefined
+    public _Marquee_allowScale_0_0value?: boolean | undefined
+    public _Marquee_fontWeight_0_0value?: int32 | FontWeight | ResourceStr | undefined
+    public _Marquee_fontFamily_0_0value?: string | global_resource_Resource | undefined
+    public _Marquee_marqueeUpdateStrategy_0_0value?: MarqueeUpdateStrategy | undefined
+    public _Marquee_onStart_0_0value?: (() => void) | undefined
+    public _Marquee_onBounce_0_0value?: (() => void) | undefined
+    public _Marquee_onFinish_0_0value?: (() => void) | undefined
+    public _Marquee_onStop_0_0value?: VoidCallback | undefined
     applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
         this._state.addRef()
         const peer = node as ArkMarqueePeer;
-        const flagArray = this._flagArray;
+        const flagArray = this._Marquee_flagArray;
         this.applyModifierPatch0(peer, flagArray);
     }
     applyModifierPatch0(peer: ArkMarqueePeer, flagArray: Uint8Array): void {
         if (flagArray[0] != 0) {
             switch (flagArray[0]) {
                 case 1: {
-                    peer.setFontColorAttribute((this._fontColor_0_0value as ResourceColor | undefined));
+                    peer.setFontColorAttribute((this._Marquee_fontColor_0_0value as ResourceColor | undefined));
                     flagArray[0] = 2;
                     break;
                 }
@@ -83,7 +78,7 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
         if (flagArray[1] != 0) {
             switch (flagArray[1]) {
                 case 1: {
-                    peer.setFontSizeAttribute((this._fontSize_0_0value as Length | undefined));
+                    peer.setFontSizeAttribute((this._Marquee_fontSize_0_0value as Length | undefined));
                     flagArray[1] = 2;
                     break;
                 }
@@ -100,7 +95,7 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
         if (flagArray[2] != 0) {
             switch (flagArray[2]) {
                 case 1: {
-                    peer.setAllowScaleAttribute((this._allowScale_0_0value as boolean | undefined));
+                    peer.setAllowScaleAttribute((this._Marquee_allowScale_0_0value as boolean | undefined));
                     flagArray[2] = 2;
                     break;
                 }
@@ -117,7 +112,7 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
         if (flagArray[3] != 0) {
             switch (flagArray[3]) {
                 case 1: {
-                    peer.setFontWeightAttribute((this._fontWeight_0_0value as int32 | FontWeight | ResourceStr | undefined));
+                    peer.setFontWeightAttribute((this._Marquee_fontWeight_0_0value as int32 | FontWeight | ResourceStr | undefined));
                     flagArray[3] = 2;
                     break;
                 }
@@ -134,7 +129,7 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
         if (flagArray[4] != 0) {
             switch (flagArray[4]) {
                 case 1: {
-                    peer.setFontFamilyAttribute((this._fontFamily_0_0value as string | global_resource_Resource | undefined));
+                    peer.setFontFamilyAttribute((this._Marquee_fontFamily_0_0value as string | global_resource_Resource | undefined));
                     flagArray[4] = 2;
                     break;
                 }
@@ -151,7 +146,7 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
         if (flagArray[5] != 0) {
             switch (flagArray[5]) {
                 case 1: {
-                    peer.setMarqueeUpdateStrategyAttribute((this._marqueeUpdateStrategy_0_0value as MarqueeUpdateStrategy | undefined));
+                    peer.setMarqueeUpdateStrategyAttribute((this._Marquee_marqueeUpdateStrategy_0_0value as MarqueeUpdateStrategy | undefined));
                     flagArray[5] = 2;
                     break;
                 }
@@ -168,7 +163,7 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
         if (flagArray[6] != 0) {
             switch (flagArray[6]) {
                 case 1: {
-                    peer.setOnStartAttribute((this._onStart_0_0value as (() => void) | undefined));
+                    peer.setOnStartAttribute((this._Marquee_onStart_0_0value as (() => void) | undefined));
                     flagArray[6] = 2;
                     break;
                 }
@@ -185,7 +180,7 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
         if (flagArray[7] != 0) {
             switch (flagArray[7]) {
                 case 1: {
-                    peer.setOnBounceAttribute((this._onBounce_0_0value as (() => void) | undefined));
+                    peer.setOnBounceAttribute((this._Marquee_onBounce_0_0value as (() => void) | undefined));
                     flagArray[7] = 2;
                     break;
                 }
@@ -202,7 +197,7 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
         if (flagArray[8] != 0) {
             switch (flagArray[8]) {
                 case 1: {
-                    peer.setOnFinishAttribute((this._onFinish_0_0value as (() => void) | undefined));
+                    peer.setOnFinishAttribute((this._Marquee_onFinish_0_0value as (() => void) | undefined));
                     flagArray[8] = 2;
                     break;
                 }
@@ -219,7 +214,7 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
         if (flagArray[9] != 0) {
             switch (flagArray[9]) {
                 case 1: {
-                    peer.setOnStopAttribute((this._onStop_0_0value as VoidCallback | undefined));
+                    peer.setOnStopAttribute((this._Marquee_onStop_0_0value as VoidCallback | undefined));
                     flagArray[9] = 2;
                     break;
                 }
@@ -237,7 +232,7 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
     mergeModifier(modifier: MarqueeModifier): void {
         super.mergeModifier(modifier)
         this._state = modifier._state;
-        const flagArray = modifier._flagArray;
+        const flagArray = modifier._Marquee_flagArray;
         this.mergeModifier0(modifier, flagArray);
     }
     mergeModifier0(modifier: MarqueeModifier, flagArray: Uint8Array): void {
@@ -245,7 +240,7 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
             switch (flagArray[0]) {
                 case 1:
                 case 3: {
-                    this.fontColor((modifier._fontColor_0_0value as ResourceColor | undefined));
+                    this.fontColor((modifier._Marquee_fontColor_0_0value as ResourceColor | undefined));
                     break;
                 }
                 default: {
@@ -257,7 +252,7 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
             switch (flagArray[1]) {
                 case 1:
                 case 3: {
-                    this.fontSize((modifier._fontSize_0_0value as Length | undefined));
+                    this.fontSize((modifier._Marquee_fontSize_0_0value as Length | undefined));
                     break;
                 }
                 default: {
@@ -269,7 +264,7 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
             switch (flagArray[2]) {
                 case 1:
                 case 3: {
-                    this.allowScale((modifier._allowScale_0_0value as boolean | undefined));
+                    this.allowScale((modifier._Marquee_allowScale_0_0value as boolean | undefined));
                     break;
                 }
                 default: {
@@ -281,7 +276,7 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
             switch (flagArray[3]) {
                 case 1:
                 case 3: {
-                    this.fontWeight((modifier._fontWeight_0_0value as int32 | FontWeight | ResourceStr | undefined));
+                    this.fontWeight((modifier._Marquee_fontWeight_0_0value as int32 | FontWeight | ResourceStr | undefined));
                     break;
                 }
                 default: {
@@ -293,7 +288,7 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
             switch (flagArray[4]) {
                 case 1:
                 case 3: {
-                    this.fontFamily((modifier._fontFamily_0_0value as string | global_resource_Resource | undefined));
+                    this.fontFamily((modifier._Marquee_fontFamily_0_0value as string | global_resource_Resource | undefined));
                     break;
                 }
                 default: {
@@ -305,7 +300,7 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
             switch (flagArray[5]) {
                 case 1:
                 case 3: {
-                    this.marqueeUpdateStrategy((modifier._marqueeUpdateStrategy_0_0value as MarqueeUpdateStrategy | undefined));
+                    this.marqueeUpdateStrategy((modifier._Marquee_marqueeUpdateStrategy_0_0value as MarqueeUpdateStrategy | undefined));
                     break;
                 }
                 default: {
@@ -317,7 +312,7 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
             switch (flagArray[6]) {
                 case 1:
                 case 3: {
-                    this.onStart((modifier._onStart_0_0value as (() => void) | undefined));
+                    this.onStart((modifier._Marquee_onStart_0_0value as (() => void) | undefined));
                     break;
                 }
                 default: {
@@ -329,7 +324,7 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
             switch (flagArray[7]) {
                 case 1:
                 case 3: {
-                    this.onBounce((modifier._onBounce_0_0value as (() => void) | undefined));
+                    this.onBounce((modifier._Marquee_onBounce_0_0value as (() => void) | undefined));
                     break;
                 }
                 default: {
@@ -341,7 +336,7 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
             switch (flagArray[8]) {
                 case 1:
                 case 3: {
-                    this.onFinish((modifier._onFinish_0_0value as (() => void) | undefined));
+                    this.onFinish((modifier._Marquee_onFinish_0_0value as (() => void) | undefined));
                     break;
                 }
                 default: {
@@ -353,7 +348,7 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
             switch (flagArray[9]) {
                 case 1:
                 case 3: {
-                    this.onStop((modifier._onStop_0_0value as VoidCallback | undefined));
+                    this.onStop((modifier._Marquee_onStop_0_0value as VoidCallback | undefined));
                     break;
                 }
                 default: {
@@ -363,102 +358,102 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
         }
     }
     fontColor(value: ResourceColor | undefined): this {
-        if (((this._flagArray[0]) == (0)) || (true)) {
-            this._flagArray[0] = 1
-            this._fontColor_0_0value = value
+        if (((this._Marquee_flagArray[0]) == (0)) || (true)) {
+            this._Marquee_flagArray[0] = 1
+            this._Marquee_fontColor_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[0] = 3
+            this._Marquee_flagArray[0] = 3
         }
         return this
     }
     fontSize(value: Length | undefined): this {
-        if (((this._flagArray[1]) == (0)) || (true)) {
-            this._flagArray[1] = 1
-            this._fontSize_0_0value = value
+        if (((this._Marquee_flagArray[1]) == (0)) || (true)) {
+            this._Marquee_flagArray[1] = 1
+            this._Marquee_fontSize_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[1] = 3
+            this._Marquee_flagArray[1] = 3
         }
         return this
     }
     allowScale(value: boolean | undefined): this {
-        if (((this._flagArray[2]) == (0)) || ((this._allowScale_0_0value) !== (value))) {
-            this._flagArray[2] = 1
-            this._allowScale_0_0value = value
+        if (((this._Marquee_flagArray[2]) == (0)) || ((this._Marquee_allowScale_0_0value) !== (value))) {
+            this._Marquee_flagArray[2] = 1
+            this._Marquee_allowScale_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[2] = 3
+            this._Marquee_flagArray[2] = 3
         }
         return this
     }
     fontWeight(value: int32 | FontWeight | ResourceStr | undefined): this {
-        if (((this._flagArray[3]) == (0)) || (true)) {
-            this._flagArray[3] = 1
-            this._fontWeight_0_0value = value
+        if (((this._Marquee_flagArray[3]) == (0)) || (true)) {
+            this._Marquee_flagArray[3] = 1
+            this._Marquee_fontWeight_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[3] = 3
+            this._Marquee_flagArray[3] = 3
         }
         return this
     }
     fontFamily(value: string | global_resource_Resource | undefined): this {
-        if (((this._flagArray[4]) == (0)) || (true)) {
-            this._flagArray[4] = 1
-            this._fontFamily_0_0value = value
+        if (((this._Marquee_flagArray[4]) == (0)) || (true)) {
+            this._Marquee_flagArray[4] = 1
+            this._Marquee_fontFamily_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[4] = 3
+            this._Marquee_flagArray[4] = 3
         }
         return this
     }
     marqueeUpdateStrategy(value: MarqueeUpdateStrategy | undefined): this {
-        if (((this._flagArray[5]) == (0)) || (true)) {
-            this._flagArray[5] = 1
-            this._marqueeUpdateStrategy_0_0value = value
+        if (((this._Marquee_flagArray[5]) == (0)) || (true)) {
+            this._Marquee_flagArray[5] = 1
+            this._Marquee_marqueeUpdateStrategy_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[5] = 3
+            this._Marquee_flagArray[5] = 3
         }
         return this
     }
     onStart(value: (() => void) | undefined): this {
-        if (((this._flagArray[6]) == (0)) || (true)) {
-            this._flagArray[6] = 1
-            this._onStart_0_0value = value
+        if (((this._Marquee_flagArray[6]) == (0)) || (true)) {
+            this._Marquee_flagArray[6] = 1
+            this._Marquee_onStart_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[6] = 3
+            this._Marquee_flagArray[6] = 3
         }
         return this
     }
     onBounce(value: (() => void) | undefined): this {
-        if (((this._flagArray[7]) == (0)) || (true)) {
-            this._flagArray[7] = 1
-            this._onBounce_0_0value = value
+        if (((this._Marquee_flagArray[7]) == (0)) || (true)) {
+            this._Marquee_flagArray[7] = 1
+            this._Marquee_onBounce_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[7] = 3
+            this._Marquee_flagArray[7] = 3
         }
         return this
     }
     onFinish(value: (() => void) | undefined): this {
-        if (((this._flagArray[8]) == (0)) || (true)) {
-            this._flagArray[8] = 1
-            this._onFinish_0_0value = value
+        if (((this._Marquee_flagArray[8]) == (0)) || (true)) {
+            this._Marquee_flagArray[8] = 1
+            this._Marquee_onFinish_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[8] = 3
+            this._Marquee_flagArray[8] = 3
         }
         return this
     }
     onStop(value: VoidCallback | undefined): this {
-        if (((this._flagArray[9]) == (0)) || (true)) {
-            this._flagArray[9] = 1
-            this._onStop_0_0value = value
+        if (((this._Marquee_flagArray[9]) == (0)) || (true)) {
+            this._Marquee_flagArray[9] = 1
+            this._Marquee_onStop_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[9] = 3
+            this._Marquee_flagArray[9] = 3
         }
         return this
     }

@@ -12,15 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { OverlayManagerOptions, OrderOverlayOptions } from "@ohos.arkui.UIContext"
+import { OverlayManagerOptions } from "@ohos.arkui.UIContext"
 import { LevelOrder } from "@ohos.promptAction"
 
 export default namespace overlayManager {
     loadLibrary("overlayManager_ani");
-
-    export interface OrderOverlayOptionsInternal {
-        levelOrder?: number;
-    }
 
     export native function setOverlayManagerOptions(options: OverlayManagerOptions): boolean;
 
@@ -39,7 +35,4 @@ export default namespace overlayManager {
     export native function showAllComponentContents(): void;
 
     export native function hideAllComponentContents(): void;
-
-    export native function openOrderOverlay(contentNode: long, options?: OrderOverlayOptions,
-        optionsInternal?: OrderOverlayOptionsInternal): Promise<void>;
 }

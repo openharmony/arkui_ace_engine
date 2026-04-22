@@ -1,0 +1,50 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+ark_theme_files_to_watch = [
+  # Configuration file
+  "tsconfig.json",
+
+  # Source files
+  "src/import.ts",
+  "src/utility/ArkResourcesHelper.ts",
+  "src/utility/ArkThemeNativeHelper.ts",
+
+  # Theme base
+  "src/theme/ArkThemeBase.ts",
+  "src/theme/ArkThemeImpl.ts",
+  "src/theme/ArkThemeScope.ts",
+  "src/theme/ArkThemeScopeManager.ts",
+  "src/theme/ArkThemeCache.ts",
+  "src/theme/ArkThemeWhiteList.ts",
+
+  # Theme implementation
+  "src/theme/ArkColorsImpl.ts",
+  "src/theme/ArkShapesImpl.ts",
+  "src/theme/ArkTypographyImpl.ts",
+
+  # Bindings
+  "src/theme/with_theme/ArkWithThemeBindings.ts",
+  "src/theme/lazy_for_each/ArkLazyForEachBindings.ts",
+  "src/theme/list_item/ArkListItemBindings.ts",
+
+  # System theme
+  "src/theme/system/ArkSystemTheme.ts",
+  "src/theme/system/ArkSystemColors.ts",
+  "src/theme/system/ArkSystemShapes.ts",
+  "src/theme/system/ArkSystemTypography.ts",
+
+  # Type definition files
+  "types/common.d.ts",
+  "types/theme.d.ts",
+]

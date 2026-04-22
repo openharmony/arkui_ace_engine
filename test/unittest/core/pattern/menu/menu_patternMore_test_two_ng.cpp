@@ -62,6 +62,7 @@
 #include "core/event/touch_event.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components/theme/icon_theme.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -450,7 +451,6 @@ HWTEST_F(MenuPattern2TwoTestNg, ShowStackMainMenuDisappearAnimation001, TestSize
     ASSERT_NE(subMenuNode, nullptr);
     auto mainMenuPattern = mainMenuNode->GetPattern<MenuPattern>();
     ASSERT_NE(mainMenuPattern, nullptr);
-    mainMenuPattern->SetPreviewMode(MenuPreviewMode::IMAGE);
     mainMenuPattern->originMenuYForStack_ = 10.0f;
     mainMenuPattern->originPreviewYForStack_ = 10.0f;
 

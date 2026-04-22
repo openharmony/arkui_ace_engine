@@ -15,25 +15,13 @@
 
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 
-#include "base/log/dump_log.h"
-#include "base/utils/multi_thread.h"
-#include "core/components_ng/pattern/list/list_item_group_paint_method.h"
-#include "core/components_ng/pattern/list/list_pattern.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "core/components_ng/property/measure_utils.h"
-
 namespace OHOS::Ace::NG {
-
-void ListItemGroupPattern::OnAttachToFrameNodeMultiThread()
-{
-    // do nothing unsafe thread
-}
 void ListItemGroupPattern::OnAttachToMainTreeMultiThread()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (listItemGroupStyle_ == V2::ListItemGroupStyle::CARD) {
-        SetListItemGroupDefaultAttributes(host);
+        ApplyListItemGroupDefaultAttributes(host);
     }
 }
 } // namespace OHOS::Ace::NG

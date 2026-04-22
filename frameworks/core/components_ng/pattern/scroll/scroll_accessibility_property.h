@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_SCROLL_ACCESSIBILITY_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_SCROLL_ACCESSIBILITY_PROPERTY_H
 
-#include "base/utils/utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_accessibility_property.h"
 
 namespace OHOS::Ace::NG {

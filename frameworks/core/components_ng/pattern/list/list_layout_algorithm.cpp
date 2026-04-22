@@ -21,9 +21,7 @@
 #include "base/log/event_report.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/feature_param.h"
-#include "base/utils/time_util.h"
 #include "base/utils/utils.h"
-#include "core/components/common/layout/layout_param.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/lazy_layout/lazy_layout_pattern.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
@@ -38,8 +36,6 @@
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
-#include "core/components_ng/property/property.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/pattern/list/list_properties.h"
 #include "core/pipeline_ng/pipeline_context.h"
 

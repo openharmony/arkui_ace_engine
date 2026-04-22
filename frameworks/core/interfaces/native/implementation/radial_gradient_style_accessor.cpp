@@ -41,7 +41,7 @@ Ark_RadialGradientOptions GetOptionsImpl(Ark_RadialGradientStyle peer)
     if (!peer->gradientOptions.has_value()) {
         return {};
     }
-    return Converter::ArkValue<Ark_RadialGradientOptions>(peer->gradientOptions.value());
+    return Converter::ArkValue<Ark_RadialGradientOptions>(peer->gradientOptions.value(), Converter::FC);
 }
 void SetOptionsImpl(Ark_RadialGradientStyle peer,
                     const Ark_RadialGradientOptions* options)

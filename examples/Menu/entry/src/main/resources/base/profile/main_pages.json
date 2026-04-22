@@ -264,6 +264,11 @@
     "pages/MenuUX/SDFArrow/animationCase",
     "pages/MenuUX/SDFArrow/avoidKeyboardCase",
     "pages/MenuUX/SDFArrow/totalCase",
+    "pages/MenuUX/SDFArrow/boundaryCase",
+    "pages/MenuUX/SDFArrow/responsiveCase",
+    "pages/MenuUX/SDFArrow/multiMenuCase",
+    "pages/MenuUX/SDFArrow/interactionCase",
+    "pages/MenuUX/SDFArrow/themeCase",
 
     "pages/MenuPlacement/Index",
     "pages/MenuPlacement/RightClick/Index",

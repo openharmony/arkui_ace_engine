@@ -29,6 +29,10 @@ ace_unittest("smart_layout_test_ng") {
     "smart_layout_node_test.cpp",
     "smart_layout_test_core.cpp",
     "smart_layout_types_test.cpp",
+    "smart_layout_engine_loader_test.cpp",
+    "smart_layout_smt_file_test.cpp", 
+    "smart_layout_local_smt_test.cpp",
+    "smart_layout_algorithm_test.cpp",
   ]
 
   external_deps = [
