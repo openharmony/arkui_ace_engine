@@ -364,3 +364,36 @@ function __componentDisappear__Internal(target: PUV2ViewBase, propertyName: stri
   }
 }
 
+function __componentActive__Internal(target: PUV2ViewBase, propertyName: string, descriptor: PropertyDescriptor): void {
+  const hasActiveOrInactiveDecoratorsInternal: string = '__hasActiveOrInactiveDecorators__Internal';
+  const watchProp = Symbol.for('ACTIVE_INTERNAL_FUNCTION' + target.constructor.name);
+  const componentActiveFunction = descriptor.value;
+  if (componentActiveFunction && typeof componentActiveFunction === 'function') {
+    // Set flag to indicate @Active decorator is used
+    target[hasActiveOrInactiveDecoratorsInternal] = true;
+    if (!target[watchProp]) {
+      const componentActiveFunctionArray: Array<Function> = new Array<Function>();
+      componentActiveFunctionArray.push(componentActiveFunction as Function);
+      target[watchProp] = componentActiveFunctionArray;
+    } else {
+      target[watchProp].push(componentActiveFunction as Function);
+    }
+  }
+}
+
+function __componentInactive__Internal(target: PUV2ViewBase, propertyName: string, descriptor: PropertyDescriptor): void {
+  const hasActiveOrInactiveDecoratorsInternal: string = '__hasActiveOrInactiveDecorators__Internal';
+  const watchProp = Symbol.for('INACTIVE_INTERNAL_FUNCTION' + target.constructor.name);
+  const componentInactiveFunction = descriptor.value;
+  if (componentInactiveFunction && typeof componentInactiveFunction === 'function') {
+    // Set flag to indicate @Inactive decorator is used
+    target[hasActiveOrInactiveDecoratorsInternal] = true;
+    if (!target[watchProp]) {
+      const componentInactiveFunctionArray: Array<Function> = new Array<Function>();
+      componentInactiveFunctionArray.push(componentInactiveFunction as Function);
+      target[watchProp] = componentInactiveFunctionArray;
+    } else {
+      target[watchProp].push(componentInactiveFunction as Function);
+    }
+  }
+}
