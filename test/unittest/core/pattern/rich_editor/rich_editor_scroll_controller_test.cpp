@@ -596,10 +596,16 @@ HWTEST_F(RichEditorScrollControllerTest, AutoScrollByEdgeDetection004, TestSize.
  */
 HWTEST_F(RichEditorScrollControllerTest, GetOffset2d001, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. get richEditor pattern
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
+    /**
+     * @tc.steps: step2. get scroll controller and get offset
+     */
     auto& scrollController = richEditorPattern->scrollController_;
     scrollController->frameRect_ = RectF(0.0f, 0.0f, 100.0f, 100.0f);
     scrollController->contentRect_ = RectF(0.0f, 0.0f, 100.0f, 100.0f);

@@ -40,6 +40,7 @@ void RichEditorPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
         overlayMod->SetTextHeight(richEditorPattern->GetTextRect().Height());
         overlayMod->SetScrollOffset(richEditorPattern->GetScrollOffset());
         overlayMod->SetSingleLine(richEditorPattern->isSingleLineMode_);
+        overlayMod->SetHorizontalScrolling(richEditorPattern->isHorizontalScrolling_);
         overlayMod->ChangeOverlay();
         if (!richEditorPattern->HasFocus()) {
             overlayMod->UpdateScrollBar(paintWrapper);
@@ -68,16 +69,18 @@ void RichEditorPaintMethod::UpdateContentOverlayModifier(PaintWrapper* paintWrap
     overlayMod->SetTextHeight(richEditorPattern->GetTextRect().Height());
     overlayMod->SetScrollOffset(richEditorPattern->GetScrollOffset());
     overlayMod->SetSingleLine(richEditorPattern->isSingleLineMode_);
+    overlayMod->SetHorizontalScrolling(richEditorPattern->isHorizontalScrolling_);
     SetPreviewTextDecoration(paintWrapper);
+    auto contentWidth = richEditorPattern->isHorizontalScrolling_ ? richEditorPattern->GetTextRect().Width()
+        : richEditorPattern->GetTextContentRect().Width();
     if (!richEditorPattern->HasFocus()) {
         overlayMod->SetCaretVisible(false);
         overlayMod->SetFloatingCaretVisible(false);
         const auto& selection = richEditorPattern->GetTextSelector();
         std::vector<RectF> selectedRects;
         if (richEditorPattern->GetTextContentLength() > 0 && selection.GetTextStart() != selection.GetTextEnd()) {
-            auto contentRect = richEditorPattern->GetTextContentRect();
             auto rects = pManager_->GetRichEditorBoxesForSelect(selection.GetTextStart(), selection.GetTextEnd());
-            selectedRects = CalculateSelectedRect(rects, contentRect.Width());
+            selectedRects = CalculateSelectedRect(rects, contentWidth);
         }
         overlayMod->SetShowSelect(richEditorPattern->GetShowSelect());
         overlayMod->SetSelectedRects(selectedRects);
@@ -91,7 +94,7 @@ void RichEditorPaintMethod::UpdateContentOverlayModifier(PaintWrapper* paintWrap
     auto contentRect = richEditorPattern->GetTextContentRect();
     if (richEditorPattern->GetTextContentLength() > 0 && selection.GetTextStart() != selection.GetTextEnd()) {
         auto rects = pManager_->GetRichEditorBoxesForSelect(selection.GetTextStart(), selection.GetTextEnd());
-        selectedRects = CalculateSelectedRect(rects, contentRect.Width());
+        selectedRects = CalculateSelectedRect(rects, contentWidth);
     }
     overlayMod->SetContentRect(contentRect);
     overlayMod->SetSelectedRects(selectedRects);

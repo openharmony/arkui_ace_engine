@@ -25,7 +25,7 @@
 namespace OHOS::Ace::NG {
 
 // ExclusiveRecognizer identifies gesture exclusive.
-class ACE_EXPORT ExclusiveRecognizer : public RecognizerGroup {
+class ACE_FORCE_EXPORT ExclusiveRecognizer : public RecognizerGroup {
     DECLARE_ACE_TYPE(ExclusiveRecognizer, RecognizerGroup);
 
 public:

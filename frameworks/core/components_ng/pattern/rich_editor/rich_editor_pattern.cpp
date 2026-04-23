@@ -5579,10 +5579,7 @@ void RichEditorPattern::HandleAISpanHoverEvent(const MouseInfo& info)
     if (info.GetAction() != MouseAction::MOVE || !NeedShowAIDetect()) {
         return;
     }
-    auto scrollBar = GetScrollBar();
-    if (scrollBar && (scrollBar->IsHover() || scrollBar->IsPressed())) {
-        return;
-    }
+    CHECK_NULL_VOID(!IsMouseOverScrollBar(info));
     if (dataDetectorAdapter_->aiSpanRects_.empty()) {
         for (const auto& kv : dataDetectorAdapter_->aiSpanMap_) {
             auto& aiSpan = kv.second;
@@ -9043,8 +9040,7 @@ void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Close selectOverlay when handle is showing");
         CloseSelectOverlay();
     }
-    auto scrollBar = GetScrollBar();
-    if (scrollBar && (scrollBar->IsHover() || scrollBar->IsPressed())) {
+    if (IsMouseOverScrollBar(info)) {
         ChangeMouseStyle(MouseFormat::DEFAULT);
         HandleUrlSpanForegroundClear();
         return;
@@ -10458,6 +10454,9 @@ void RichEditorPattern::CreateRichEditorOverlayModifier()
         hostOverlayMod_ = AceType::MakeRefPtr<RichEditorOverlayModifier>(
             WeakClaim(this), GetScrollBarOverlayModifier(), GetScrollEdgeEffect());
     }
+    if (IsFreeScrollEnabled()) {
+        scrollController_->AttachModifier(hostOverlayMod_);
+    }
 }
 
 int32_t RichEditorPattern::GetHandleIndex(const Offset& offset) const
@@ -10603,13 +10602,18 @@ void RichEditorPattern::InitScrollablePattern()
     CHECK_NULL_VOID(layoutProperty);
     auto barState = layoutProperty->GetDisplayModeValue(DisplayMode::AUTO);
     bool singleLine = layoutProperty->GetSingleLineValue(false);
-    CHECK_NULL_VOID(!barDisplayMode_.has_value() || barDisplayMode_.value() != barState || singleLine != isSingleLineMode_);
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "setBarState=%{public}d", barState);
-    barDisplayMode_ = barState;
+    bool needInit =
+        !barDisplayMode_.has_value() || barDisplayMode_.value() != barState || singleLine != isSingleLineMode_;
+    if (needInit) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "setBarState=%{public}d", barState);
+        barDisplayMode_ = barState;
+        isSingleLineMode_ = singleLine;
+    }
+    CHECK_NULL_VOID(!HandleHorizontalScroll() && (needInit || needResetScrollBar_));
+    needResetScrollBar_ = false;
     if (!GetScrollableEvent()) {
         AddScrollEvent();
     }
-    isSingleLineMode_ = singleLine;
     SetAxis(isSingleLineMode_ ? Axis::HORIZONTAL : Axis::VERTICAL);
     if (barState != DisplayMode::AUTO) {
         barState = DisplayMode::ON;
@@ -10625,22 +10629,28 @@ void RichEditorPattern::InitScrollablePattern()
     if (overlayMod_) {
         UpdateScrollBarOffset();
     }
-    auto& paddingProperty = layoutProperty->GetPaddingProperty();
-    if (paddingProperty) {
-        auto offsetY = paddingProperty->top.has_value() ? paddingProperty->top->GetDimension().ConvertToPx() : 0.0f;
-        auto offsetX = paddingProperty->left.has_value() ? paddingProperty->left->GetDimension().ConvertToPx() : 0.0f;
-        richTextRect_.SetOffset(OffsetF(offsetX, offsetY));
-    }
+    UpdateRichTextRectOffsetWithPadding();
 }
 
-void RichEditorPattern::ProcessInnerPadding()
+void RichEditorPattern::UpdateRichTextRectOffsetWithPadding()
+{
+    auto layoutProperty = GetLayoutProperty<RichEditorLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto& paddingProperty = layoutProperty->GetPaddingProperty();
+    CHECK_NULL_VOID(paddingProperty);
+    auto offsetY = paddingProperty->top.has_value() ? paddingProperty->top->GetDimension().ConvertToPx() : 0.0f;
+    auto offsetX = paddingProperty->left.has_value() ? paddingProperty->left->GetDimension().ConvertToPx() : 0.0f;
+    richTextRect_.SetOffset(OffsetF(offsetX, offsetY));
+}
+
+std::optional<PaddingProperty> RichEditorPattern::GetInnerPadding()
 {
     auto theme = GetTheme<RichEditorTheme>();
-    CHECK_NULL_VOID(theme);
+    CHECK_NULL_RETURN(theme, std::nullopt);
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_RETURN(host, std::nullopt);
     auto layoutProperty = host->GetLayoutProperty<RichEditorLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_RETURN(layoutProperty, std::nullopt);
     auto themePadding = theme->GetPadding();
     auto& paddingProp = layoutProperty->GetPaddingProperty();
     auto left = !paddingProp ? CalcLength(themePadding.Left()).GetDimension()
@@ -10656,49 +10666,64 @@ void RichEditorPattern::ProcessInnerPadding()
     paddings.bottom = NG::CalcLength(bottom);
     paddings.left = NG::CalcLength(left);
     paddings.right = NG::CalcLength(right);
-    layoutProperty->UpdatePadding(paddings);
+    return paddings;
+}
+
+void RichEditorPattern::ProcessInnerPadding()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<RichEditorLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (auto paddings = GetInnerPadding(); paddings) {
+        layoutProperty->UpdatePadding(paddings.value());
+    }
 }
 
 void RichEditorPattern::UpdateScrollStateAfterLayout(bool shouldDisappear)
 {
     bool hasTextOffsetChanged = false;
-    if (GreatNotEqual(richTextRect_.GetY(), contentRect_.GetY())) {
-        auto offset = richTextRect_.GetOffset();
-        offset.AddY(contentRect_.GetY() - richTextRect_.GetY());
-        richTextRect_.SetOffset(offset);
-        hasTextOffsetChanged = true;
-    }
-    if (GreatNotEqual(richTextRect_.Height(), contentRect_.Height()) &&
-        LessNotEqual(richTextRect_.Bottom(), contentRect_.Bottom())) {
-        auto offset = richTextRect_.GetOffset();
-        offset.AddY(contentRect_.Bottom() - richTextRect_.Bottom());
-        richTextRect_.SetOffset(offset);
-        hasTextOffsetChanged = true;
-    }
-    if (LessOrEqual(richTextRect_.Height(), contentRect_.Height()) &&
-        LessNotEqual(richTextRect_.GetY(), contentRect_.GetY())) {
-        richTextRect_.SetOffset(contentRect_.GetOffset());
-        hasTextOffsetChanged = true;
-    }
+    hasTextOffsetChanged = scrollController_->UpdateScrollState();
     if (hasTextOffsetChanged) {
         UpdateChildrenOffset();
     }
-    StopScrollable();
+    StopScrolling();
     CheckScrollable();
     if (overlayMod_) {
         UpdateScrollBarOffset();
     }
-    auto scrollBar = GetScrollBar();
-    CHECK_NULL_VOID(scrollBar);
-
     if (isFirstCallOnReady_) {
         isFirstCallOnReady_ = false;
-        scrollBar->ScheduleDisappearDelayTask();
+        ScheduleDisappearDelayTask();
         return;
     }
     if (shouldDisappear) {
-        scrollBar->ScheduleDisappearDelayTask();
+        ScheduleDisappearDelayTask();
     }
+}
+
+void RichEditorPattern::StopScrolling()
+{
+    if (IsFreeScrollEnabled()) {
+        scrollController_->StopScrolling();
+    }
+    StopScrollable();
+}
+
+void RichEditorPattern::ClearAISpanRects()
+{
+    dataDetectorAdapter_->aiSpanRects_.clear();
+}
+
+void RichEditorPattern::HandleScrollStart()
+{
+    if (SelectOverlayIsOn()) {
+        selectOverlay_->HideMenu(true);
+    }
+    CloseAIMenu();
+    ScrollablePattern::RecordScrollEvent(Recorder::EventType::SCROLL_START);
+    UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
+        AceType::WeakClaim(this), ScrollEventType::SCROLL_START);
 }
 
 bool RichEditorPattern::OnScrollCallback(float offset, int32_t source)
@@ -10707,13 +10732,7 @@ bool RichEditorPattern::OnScrollCallback(float offset, int32_t source)
     auto scrollBar = GetScrollBar();
     if (source == SCROLL_FROM_START) {
         IF_PRESENT(scrollBar, PlayScrollBarAppearAnimation());
-        if (SelectOverlayIsOn()) {
-            selectOverlay_->HideMenu(true);
-        }
-        CloseAIMenu();
-        ScrollablePattern::RecordScrollEvent(Recorder::EventType::SCROLL_START);
-        UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
-            AceType::WeakClaim(this), ScrollEventType::SCROLL_START);
+        HandleScrollStart();
         return true;
     }
     if (scrollController_->IsReachAvoidBoundary(offset)) {
@@ -10725,7 +10744,7 @@ bool RichEditorPattern::OnScrollCallback(float offset, int32_t source)
     }
     auto newOffset = MoveTextRect(offset);
     scrollController_->MoveHandleOnScroll(newOffset);
-    dataDetectorAdapter_->aiSpanRects_.clear();
+    ClearAISpanRects();
     return true;
 }
 
@@ -10740,6 +10759,84 @@ void RichEditorPattern::SetHorizontalScrolling(bool isHorizontalScrolling)
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     paragraphCache_.Clear();
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetHorizontalScrolling: [%{public}d]", isHorizontalScrolling_);
+}
+
+bool RichEditorPattern::IsFreeScrollEnabled() const
+{
+    return isHorizontalScrolling_ && scrollController_->IsFreeScrollEnabled();
+}
+
+RefPtr<RichEditorScrollController> RichEditorPattern::GetScrollController() const
+{
+    return scrollController_;
+}
+
+bool RichEditorPattern::HandleHorizontalScroll()
+{
+    if (!isHorizontalScrolling_) {
+        if (scrollController_->IsFreeScrollEnabled() && scrollController_->IsAttachedModifier()) {
+            RemoveOverlayModifier();
+        }
+        scrollController_->ResetFreeScrollController();
+        return false;
+    }
+    auto barState = barDisplayMode_.value_or(DisplayMode::AUTO);
+    // Disable vertical scrollbar and setup horizontal scroll
+    SetAxis(Axis::NONE);
+    SetScrollBar(DisplayMode::OFF);
+    SetScrollEnabled(false);
+    // Remove existing scrollable event
+    if (auto scrollableEvent = GetScrollableEvent()) {
+        if (auto gestureHub = GetGestureHub()) {
+            gestureHub->RemoveScrollableEvent(scrollableEvent);
+        }
+    }
+    scrollController_->InitFreeScrollController();
+    scrollController_->SetScrollBar(barState);
+    UpdateScrollBarColor(GetScrollBarColor());
+    auto richEditorTheme = GetTheme<RichEditorTheme>();
+    CHECK_NULL_RETURN(richEditorTheme, false);
+    scrollController_->SetMinHeight(richEditorTheme->GetScrollbarMinHeight());
+    if (!scrollController_->IsAttachedModifier()) {
+        RemoveOverlayModifier();
+    }
+    if (overlayMod_) {
+        UpdateScrollBarOffset();
+    }
+    UpdateRichTextRectOffsetWithPadding();
+    return true;
+}
+
+void RichEditorPattern::RemoveOverlayModifier()
+{
+    CHECK_NULL_VOID(hostOverlayMod_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->RemoveOverlayModifier(hostOverlayMod_);
+    SetScrollBarOverlayModifier(nullptr);
+    hostOverlayMod_.Reset();
+}
+
+void RichEditorPattern::ScheduleDisappearDelayTask()
+{
+    if (IsFreeScrollEnabled()) {
+        scrollController_->ScheduleDisappearDelayTask();
+        return;
+    }
+    auto scrollBar = GetScrollBar();
+    IF_PRESENT(scrollBar, ScheduleDisappearDelayTask());
+}
+
+bool RichEditorPattern::IsMouseOverScrollBar(const MouseInfo& info)
+{
+    if (IsFreeScrollEnabled()) {
+        return scrollController_->IsMouseOverScrollBar(info);
+    }
+    auto scrollBar = GetScrollBar();
+    CHECK_NULL_RETURN(scrollBar, false);
+    return (scrollBar->IsHover() || scrollBar->IsPressed());
 }
 
 float RichEditorPattern::GetCrossOverHeight() const
@@ -10819,6 +10916,14 @@ void RichEditorPattern::MoveCaretToContentRectVertical(const OffsetF& caretOffse
 
 void RichEditorPattern::MoveCaretToContentRect(const OffsetF& caretOffset, float caretHeight)
 {
+    if (IsFreeScrollEnabled()) {
+        auto overlayModifier = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
+        CHECK_NULL_VOID(overlayModifier);
+        auto caretWidth = overlayModifier->GetCaretWidth();
+        auto caretRect = RectF(caretOffset, SizeF(caretWidth, caretHeight));
+        scrollController_->MoveCaretToContentRect(caretRect);
+        return;
+    }
     isSingleLineMode_ ? MoveCaretToContentRectHorizontal(caretOffset)
                       : MoveCaretToContentRectVertical(caretOffset, caretHeight);
 }
@@ -10845,6 +10950,10 @@ bool RichEditorPattern::IsCaretInContentArea()
 
 void RichEditorPattern::UpdateScrollBarOffset()
 {
+    if (IsFreeScrollEnabled()) {
+        scrollController_->UpdateScrollBarOffset();
+        return;
+    }
     if (!GetScrollBar() && !GetScrollBarProxy()) {
         return;
     }
@@ -10901,6 +11010,9 @@ void RichEditorPattern::CheckScrollable()
     CHECK_NULL_VOID(gestureHub);
     scrollable_ = GetTextContentLength() > 0 && scrollController_->NeedScroll();
     SetScrollEnabled(scrollable_);
+    if (IsFreeScrollEnabled()) {
+        scrollController_->CheckScrollEnabled();
+    }
 }
 
 void RichEditorPattern::UpdateChildrenOffset()
@@ -10953,6 +11065,10 @@ void RichEditorPattern::UpdateChildrenOffset()
 
 void RichEditorPattern::AutoScrollByEdgeDetection(AutoScrollParam param, OffsetF offset, EdgeDetectionStrategy strategy)
 {
+    if (IsFreeScrollEnabled()) {
+        scrollController_->HandleAutoScrollNearBoundary(param, offset);
+        return;
+    }
     scrollController_->AutoScrollByEdgeDetection(param, offset, strategy);
 }
 
@@ -13538,7 +13654,8 @@ void RichEditorPattern::HandlePageScroll(bool isPageUp)
         isPageUp, distance, height);
     CloseSelectOverlay();
     ResetSelection();
-    OnScrollCallback(distance, SCROLL_FROM_JUMP);
+    IsFreeScrollEnabled() ? scrollController_->OnScrollWithAxisCallback(distance, SCROLL_FROM_JUMP, Axis::VERTICAL)
+        : OnScrollCallback(distance, SCROLL_FROM_JUMP);
     auto paintOffset = selectOverlay_->GetPaintOffsetWithoutTransform();
     float offsetY = isPageUp ? visibleRect.Top() : visibleRect.Bottom();
     auto localOffset = Offset(curCaretRect.GetX(), offsetY - paintOffset.GetY());
@@ -13982,6 +14099,10 @@ void RichEditorPattern::UpdateScrollBarColor(std::optional<Color> color, bool is
 {
     auto property = GetLayoutProperty<RichEditorLayoutProperty>();
     IF_TRUE(isUpdateProperty && property, property->UpdateScrollBarColor(color));
+    if (IsFreeScrollEnabled()) {
+        scrollController_->UpdateScrollBarColor(color);
+        return;
+    }
     auto scrollBar = GetScrollBar();
     auto scrollbarTheme = GetTheme<ScrollBarTheme>();
     CHECK_NULL_VOID(scrollBar && scrollbarTheme);

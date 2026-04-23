@@ -177,6 +177,7 @@ struct AutoScrollParam {
     bool showScrollbar = false;
     Offset eventOffset;
     bool isFirstRun_ = true;
+    Axis axis = Axis::NONE;
 };
 enum class RecordType { DEL_FORWARD = 0, DEL_BACKWARD = 1, INSERT = 2, UNDO = 3, REDO = 4, DRAG = 5 };
 enum class SelectorAdjustPolicy { INCLUDE = 0, EXCLUDE };
@@ -732,6 +733,9 @@ public:
     const RectF& GetTextRect() const override;
     float GetScrollOffset() const;
     RefPtr<ScrollBar> GetScrollControllerBar();
+    void StopScrolling();
+    void ClearAISpanRects();
+    void HandleScrollStart();
     bool OnScrollCallback(float offset, int32_t source) override;
     void OnScrollEndCallback() override;
     bool IsScrollable() const override;
@@ -881,6 +885,12 @@ public:
     {
         return isHorizontalScrolling_;
     }
+    bool IsFreeScrollEnabled() const;
+    RefPtr<RichEditorScrollController> GetScrollController() const;
+    bool HandleHorizontalScroll();
+    void RemoveOverlayModifier();
+    void ScheduleDisappearDelayTask();
+    bool IsMouseOverScrollBar(const MouseInfo& info);
     bool IsShortCutBlocked() override;
     void UpdateScrollBarColor(std::optional<Color> color, bool isUpdateProperty = false);
     Color GetScrollBarColor() const;
@@ -1165,6 +1175,8 @@ private:
     void MoveCaretToContentRect(float offset, int32_t source);
     bool IsCaretInContentArea();
     bool IsTextArea() const override;
+    void UpdateRichTextRectOffsetWithPadding();
+    std::optional<PaddingProperty> GetInnerPadding();
     void ProcessInnerPadding();
 
     // ai analysis fun
