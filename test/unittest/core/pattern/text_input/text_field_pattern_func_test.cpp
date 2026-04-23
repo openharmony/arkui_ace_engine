@@ -1686,4 +1686,63 @@ HWTEST_F(TextFieldPatternFuncTest, UpdateMagnifierOffset, TestSize.Level1)
     rootUINode->RemoveChild(textFieldNode);
     rootUINode->renderContext_ = rootUINodeRenderContext;
 }
+
+/**
+ * @tc.name: TextFieldSelectOverlayOnHandleGlobalTouchEvent
+ * @tc.desc: Test TextFieldSelectOverlay OnHandleGlobalTouchEvent when GetClearPolicy is
+ * CLEAR_SELECTED_TEXT_ON_EXTERNAL_TOUCH and IsTouchUp is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, TextFieldSelectOverlayOnHandleGlobalTouchEvent, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern and initialize select overlay.
+     */
+    CreateTextField();
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(pattern_->selectOverlay_, nullptr);
+
+    /**
+     * @tc.steps: step2. Set clear policy to CLEAR_SELECTED_TEXT_ON_EXTERNAL_TOUCH.
+     * @tc.expected: When this policy is set, text selection should be cleared when user clicks outside the text field.
+     */
+    pattern_->selectOverlay_->SetTextSelectionClearPolicy(
+        TextSelectionClearPolicy::CLEAR_SELECTED_TEXT_ON_EXTERNAL_TOUCH);
+
+    /**
+     * @tc.steps: step3. Get select controller and set up initial selection.
+     */
+    auto selectController = pattern_->GetTextSelectController();
+    ASSERT_NE(selectController, nullptr);
+    
+    /**
+     * @tc.steps: step4. Test scenario 1: TOUCH source with UP type.
+     * @tc.desc: Set text selection range (2, 5) and trigger global touch event.
+     * This simulates user clicking outside the text field with touch input.
+     */
+    selectController->UpdateHandleIndex(2, 5);
+    pattern_->selectOverlay_->OnHandleGlobalTouchEvent(SourceType::TOUCH, TouchType::UP, true);
+
+    /**
+     * @tc.expected: Text selection should be cleared after the event.
+     * The condition in OnHandleGlobalTouchEvent is:
+     *   GetClearPolicy() == CLEAR_SELECTED_TEXT_ON_EXTERNAL_TOUCH && IsTouchUp() == true
+     * When both conditions are met, OnResetTextSelection() is called to clear selection.
+     */
+    EXPECT_FALSE(selectController->IsSelected());
+    
+    /**
+     * @tc.steps: step5. Test scenario 2: TOUCH_PAD source with UP type.
+     * @tc.desc: Set text selection range (3, 7) and trigger global touch event.
+     * This simulates user clicking outside the text field with touchpad input.
+     */
+    selectController->UpdateHandleIndex(3, 7);
+    pattern_->selectOverlay_->OnHandleGlobalTouchEvent(SourceType::TOUCH_PAD, TouchType::UP, true);
+    
+    /**
+     * @tc.expected: Text selection should be cleared after the event.
+     * Both TOUCH and TOUCH_PAD sources satisfy IsTouchUp() when TouchType is UP.
+     */
+    EXPECT_FALSE(selectController->IsSelected());
+}
 } // namespace OHOS::Ace::NG

@@ -332,6 +332,7 @@ public:
     {
         return isAutoFillPaste;
     }
+    TextSelectionClearPolicy GetClearPolicy() override;
 
 protected:
     RectF MergeSelectedBoxes(

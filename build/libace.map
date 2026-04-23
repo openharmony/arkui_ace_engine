@@ -911,6 +911,7 @@
       "OHOS::Ace::NG::BaseTextSelectOverlay::UpdateSecondHandleOffset()";
       "OHOS::Ace::NG::BaseTextSelectOverlay::UpdateTransformFlag()";
       "OHOS::Ace::NG::BaseTextSelectOverlay::UpdateViewPort()";
+      "OHOS::Ace::NG::BaseTextSelectOverlay::GetClearPolicy()";
       "OHOS::Ace::NG::BorderRadiusPropertyT<OHOS::Ace::Dimension> OHOS::Ace::NG::Converter::Convert<OHOS::Ace::NG::BorderRadiusPropertyT<OHOS::Ace::Dimension>, Ark_BorderRadiuses>(Ark_BorderRadiuses const&)";
       "OHOS::Ace::NG::BorderRadiusPropertyT<OHOS::Ace::Dimension>::operator==(OHOS::Ace::NG::BorderRadiusPropertyT<OHOS::Ace::Dimension> const&) const";
       "OHOS::Ace::NG::BorderRadiusPropertyT<OHOS::Ace::Dimension>::SetRadius(OHOS::Ace::Dimension const&)";
@@ -3159,6 +3160,7 @@
       non-virtual?thunk?to?OHOS::Ace::NG::BaseTextSelectOverlay::CheckTouchInHostNode*;
       non-virtual?thunk?to?OHOS::Ace::NG::BaseTextSelectOverlay::OnCloseOverlay*;
       non-virtual?thunk?to?OHOS::Ace::NG::BaseTextSelectOverlay::OnHandleGlobalTouchEvent*;
+      non-virtual?thunk?to?OHOS::Ace::NG::BaseTextSelectOverlay::GetClearPolicy*;
       non-virtual?thunk?to?OHOS::Ace::NG::FrameNode::*;
       non-virtual?thunk?to?OHOS::Ace::NG::FrameNode::~FrameNode*;
       non-virtual?thunk?to?OHOS::Ace::NG::FrameNode::CheckNeedForceMeasureAndLayout*;

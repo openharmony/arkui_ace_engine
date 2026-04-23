@@ -1209,4 +1209,67 @@ HWTEST_F(TextTwelveTestNg, OnWillCopy, TestSize.Level1)
     result = true;
     EXPECT_TRUE(eventHub->FireOnWillCopy(expected));
 }
+
+/**
+ * @tc.name: TextSelectOverlayOnHandleGlobalTouchEvent
+ * @tc.desc: Test TextSelectOverlay OnHandleGlobalTouchEvent when GetClearPolicy is
+ * CLEAR_SELECTED_TEXT_ON_EXTERNAL_TOUCH and IsTouchUp is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTwelveTestNg, TextSelectOverlayOnHandleGlobalTouchEvent, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPattern.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    ASSERT_NE(textPattern->selectOverlay_, nullptr);
+
+    /**
+     * @tc.steps: step2. Set clear policy to CLEAR_SELECTED_TEXT_ON_EXTERNAL_TOUCH.
+     * @tc.expected: When this policy is set, text selection should be cleared when user clicks outside of text.
+     */
+    textPattern->selectOverlay_->SetTextSelectionClearPolicy(
+        TextSelectionClearPolicy::CLEAR_SELECTED_TEXT_ON_EXTERNAL_TOUCH);
+
+    /**
+     * @tc.steps: step3. Test scenario 1: TOUCH source with UP type.
+     * @tc.desc: Set text selection range (2, 4) and trigger global touch event.
+     * This simulates user clicking outside of text field with touch input.
+     */
+    TextSelector textSelector(2, 4);
+    textPattern->textSelector_ = textSelector;
+    EXPECT_FALSE(textPattern->GetTextSelector().SelectNothing());
+
+    textPattern->selectOverlay_->OnHandleGlobalTouchEvent(SourceType::TOUCH, TouchType::UP, true);
+
+    /**
+     * @tc.expected: Text selection should be cleared after the event.
+     * The condition in OnHandleGlobalTouchEvent is:
+     *   GetClearPolicy() == CLEAR_SELECTED_TEXT_ON_EXTERNAL_TOUCH && IsTouchUp() == true
+     * When both conditions are met, ResetSelection() is called to clear selection.
+     * SelectNothing() returns true when textSelector_.baseOffset == textSelector_.destinationOffset
+     * After ResetSelection(), both baseOffset and destinationOffset are set to -1.
+     */
+    EXPECT_TRUE(textPattern->GetTextSelector().SelectNothing());
+
+    /**
+     * @tc.steps: step4. Test scenario 2: TOUCH_PAD source with UP type.
+     * @tc.desc: Set text selection range (3, 5) and trigger global touch event.
+     * This simulates user clicking outside of text field with touchpad input.
+     */
+    textSelector = TextSelector(3, 5);
+    textPattern->textSelector_ = textSelector;
+    EXPECT_FALSE(textPattern->GetTextSelector().SelectNothing());
+
+    textPattern->selectOverlay_->OnHandleGlobalTouchEvent(SourceType::TOUCH_PAD, TouchType::UP, true);
+
+    /**
+     * @tc.expected: Text selection should be cleared after the event.
+     * Both TOUCH and TOUCH_PAD sources satisfy IsTouchUp() when TouchType is UP.
+     */
+    EXPECT_TRUE(textPattern->GetTextSelector().SelectNothing());
+}
 } // namespace OHOS::Ace::NG
