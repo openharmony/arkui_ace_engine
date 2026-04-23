@@ -91,6 +91,7 @@
 #include "core/interfaces/native/implementation/tap_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/tap_recognizer_peer.h"
 #include "core/interfaces/native/implementation/text_field_modifier.h"
+#include "core/interfaces/native/implementation/search_modifier_impl.h"
 #include "core/interfaces/native/implementation/touch_event_peer.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "core/interfaces/native/node/menu_modifier.h"
@@ -2647,6 +2648,8 @@ void SetMarginImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
         TextFieldModifier::SetMarginImpl(node, value);
+    } else if (frameNode->GetTag() == V2::SEARCH_ETS_TAG) {
+        SearchModifier::SetMarginImpl(node, value);
     } else {
         ViewAbstractModelStatic::SetMargin(frameNode, Converter::OptConvertPtr<PaddingProperty>(value));
     }

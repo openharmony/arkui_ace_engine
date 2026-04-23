@@ -1635,6 +1635,12 @@ void ResetSearchMargin(ArkUINodeHandle node)
     SearchModelNG::SetUserMargin(frameNode);
 }
 
+void SetUserMargin(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetUserMargin(frameNode);
+}
+
 void SetSearchCustomKeyboard(ArkUINodeHandle node, ArkUINodeHandle contentNode, ArkUI_Bool supportAvoidance)
 {
     auto* frameNode = GetFrameNode(node);
@@ -2538,6 +2544,7 @@ const ArkUISearchCustomModifier* GetSearchCustomModifier()
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUISearchCustomModifier modifier = {
         .setKeyboardAppearanceConfig = SetKeyboardAppearanceConfig,
+        .setUserMargin = SetUserMargin,
         .setTextValue = SetTextValue,
         .setOnChangeEvent = SetOnChangeEvent,
         .createNormalSearch = CreateNormalSearch,

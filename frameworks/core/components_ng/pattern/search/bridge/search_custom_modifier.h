@@ -38,6 +38,7 @@ struct ArkUISearchCreateResourceParams {
 
 struct ArkUISearchCustomModifier {
     void (*setKeyboardAppearanceConfig)(NG::FrameNode* frameNode, NG::KeyboardAppearanceConfig config);
+    void (*setUserMargin)(NG::FrameNode* frameNode);
     void (*setTextValue)(NG::FrameNode* frameNode, const std::optional<std::string>& value);
     void (*setOnChangeEvent)(NG::FrameNode* frameNode, std::function<void(const std::u16string&)>&& onChangeEvent);
     void (*createNormalSearch)(std::optional<std::u16string>& stringValue, std::optional<std::u16string>& placeholder,
