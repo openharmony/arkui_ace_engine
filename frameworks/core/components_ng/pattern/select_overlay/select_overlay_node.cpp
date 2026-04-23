@@ -95,6 +95,9 @@ constexpr Dimension EXTENSION_MENU_ITEM_DEFAULT_WIDTH = 216.0_vp;
 constexpr Dimension MIN_HOTSPOT_WIDTH = 40.0_vp;
 constexpr float AGING_MIN_SCALE = 1.75f;
 constexpr Dimension MENU_BUTTON_SPACING = 4.0_vp;
+#ifdef OHOS_PLATFORM
+constexpr Dimension DEFAULT_ICON_SIZE = 24.0_vp;
+#endif
 
 std::unordered_map<TextDataDetectType, std::pair<std::string, std::function<bool()>>> AI_TYPE_ID_MAP = {
     { TextDataDetectType::PHONE_NUMBER, std::make_pair(OH_DEFAULT_AI_MENU_PHONE, &TextSystemMenu::IsShowAIPhone) },
@@ -1634,6 +1637,8 @@ void SetPasteNodeProperties(const RefPtr<FrameNode>& pasteNode, const RefPtr<Sel
         auto middleSpace = static_cast<float>(theme->GetIconContentPadding().ConvertToPx());
         pasteLayoutProperty->UpdateBackgroundRightPadding(Dimension(horInterval + middleSpace));
         pasteLayoutProperty->UpdateAlignment(Alignment::CENTER_LEFT);
+    } else {
+        pasteLayoutProperty->UpdateIconSize(DEFAULT_ICON_SIZE);
     }
     pasteLayoutProperty->UpdateTextIconSpace(Dimension(theme->GetIconContentPadding().ConvertToPx()));
     pasteButtonRenderContext->UpdateOpacity(1.0);
