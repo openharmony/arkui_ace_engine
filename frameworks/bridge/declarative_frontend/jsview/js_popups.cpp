@@ -662,6 +662,34 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
         }
     }
 
+    auto blurStyleOptionsValue = popupObj->GetProperty("backgroundBlurStyleOptions");
+    if (blurStyleOptionsValue->IsObject()) {
+        if (!popupParam->GetBlurStyleOption().has_value()) {
+            popupParam->SetBlurStyleOption(BlurStyleOption());
+        }
+        JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(blurStyleOptionsValue);
+        auto blurStyleOption = popupParam->GetBlurStyleOption();
+        if (blurStyleOption.has_value()) {
+            auto styleOption = blurStyleOption.value();
+            JSViewAbstract::ParseBlurStyleOption(jsOption, styleOption);
+            popupParam->SetBlurStyleOption(styleOption);
+        }
+    }
+
+    auto effectOptionValue = popupObj->GetProperty("backgroundEffect");
+    if (effectOptionValue->IsObject()) {
+        if (!popupParam->GetEffectOption().has_value()) {
+            popupParam->SetEffectOption(EffectOption());
+        }
+        JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(effectOptionValue);
+        auto effectOption = popupParam->GetEffectOption();
+        if (effectOption.has_value()) {
+            auto option = effectOption.value();
+            JSViewAbstract::ParseEffectOption(jsOption, option);
+            popupParam->SetEffectOption(option);
+        }
+    }
+
     auto popupTransition = popupObj->GetProperty("transition");
     if (popupTransition->IsObject()) {
         popupParam->SetHasTransition(true);
