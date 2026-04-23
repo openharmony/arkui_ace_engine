@@ -37,9 +37,6 @@
 #include "viewport_config.h"
 
 namespace OHOS {
-class IRemoteObject;
-class IRemoteObject;
-class IRemoteObject;
 
 namespace AbilityRuntime {
 class Context;
@@ -141,6 +138,9 @@ public:
     static bool SetXComponentCompensationAngle(const std::string& configStr);
     static const std::string& GetXComponentCompensationAngle();
     static const std::string& GetUICorrectionConfig();
+    static bool SetUICorrectionConfig(const std::string& configStr);
+    virtual ~UIContent() = default;
+    virtual OHOS::Rosen::Window* GetUIContentWindow() { return nullptr; };
 
     // UI content life-cycles
     virtual UIContentErrorCode Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) = 0;
@@ -153,12 +153,9 @@ public:
     }
     virtual UIContentErrorCode InitializeByName(OHOS::Rosen::Window *window, const std::string &name,
                                                 napi_value storage) = 0;
-    virtual void InitializeByName(
-        OHOS::Rosen::Window* window, const std::string& name, napi_value storage, uint32_t focusWindowId) {};
-    virtual void InitializeDynamic(
-        const DynamicInitialConfig& config, sptr<IRemoteObject> connectToRender = nullptr) {};
-        const DynamicInitialConfig& config, sptr<IRemoteObject> connectToRender = nullptr) {};
-        const DynamicInitialConfig& config, sptr<IRemoteObject> connectToRender = nullptr) {};
+    virtual void InitializeByName(OHOS::Rosen::Window *window,
+        const std::string &name, napi_value storage, uint32_t focusWindowId) {};
+    virtual void InitializeDynamic(const DynamicInitialConfig& config) {};
 
     // UIExtensionAbility initialize for focusWindow ID
     virtual void Initialize(
@@ -660,6 +657,21 @@ public:
     virtual const std::shared_ptr<const OHOS::MMI::PointerEvent> GetPointerEventFromAxisEvent(napi_value event)
     {
         return nullptr;
+    }
+    virtual const std::shared_ptr<const OHOS::MMI::PointerEvent> GetPointerEventFromTouchEvent(napi_value event)
+    {
+        return nullptr;
+    }
+
+    virtual void RegisterTouchTimingCallback(
+        const std::function<void(uint64_t sensorTime, uint64_t receiveTime, uint64_t dispatchTime,
+            int32_t eventType)>&& callback) {};
+    virtual void UnregisterTouchTimingCallback() {};
+
+private:
+    static std::atomic<bool> successFlag_;
+    static std::mutex mtx_;
+    static std::string angleConfigJson_;
     static std::atomic<bool> setUICorrectionConfigSuccessFlag_;
     static std::mutex setUICorrectionConfigMutex_;
     static std::string uiCorrectionConfigJson_;
