@@ -129,6 +129,9 @@ RefPtr<ImageObject> ImageProvider::QueryImageObjectFromCache(const ImageSourceIn
     if (!src.SupportObjCache()) {
         return nullptr;
     }
+    if (src.IsSkipCacheRead()) {
+        return nullptr;
+    }
     auto pipelineCtx = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineCtx, nullptr);
     auto imageCache = pipelineCtx->GetImageCache();
@@ -358,6 +361,9 @@ void ImageProvider::DownLoadOnProgressCallback(
 RefPtr<ImageData> ImageProvider::QueryDataFromCache(const ImageSourceInfo& src)
 {
     ACE_FUNCTION_TRACE();
+    if (src.IsSkipCacheRead()) {
+        return nullptr;
+    }
     std::string result;
     if (DownloadManager::GetInstance()->fetchCachedResult(src.GetSrc(), result)) {
         auto data = ImageData::MakeFromDataWithCopy(result.data(), result.size());

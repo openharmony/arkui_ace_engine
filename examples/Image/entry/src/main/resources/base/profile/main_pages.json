@@ -37,6 +37,9 @@
     "pages/SVG/svgExample008",
     "pages/SVG/svgExample017",
     "pages/ImageOrientation/Index",
-    "pages/ImageDfxExamples/ImageDfxExamples009"
+    "pages/ImageDfxExamples/ImageDfxExamples009",
+    "pages/example/ImageReloadKeyExample",
+    "pages/example/ImageReloadKeyScenarioExample",
+    "pages/testcase/ImageReloadKeyTestCase"
   ]
 }

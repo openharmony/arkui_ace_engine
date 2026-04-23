@@ -433,6 +433,18 @@ void JSImage::CreateImage(const JSCallbackInfo& info, bool isImageSpan)
     config.moduleName = moduleName;
     config.isUriPureNumber = (resId == -1);
     config.isImageSpan = isImageSpan;
+    // Parse reloadKey
+    // Overload: (src, reloadKey?) — reloadKey is the 2nd argument
+    // Overload: (src, imageAIOptions?, reloadKey?) — reloadKey is the 3rd argument
+    constexpr int32_t RELOAD_KEY_ARG_INDEX_FOR_SRC_ONLY = 1;
+    constexpr int32_t RELOAD_KEY_ARG_INDEX_FOR_SRC_WITH_AI_OPTIONS = 2;
+    if (info.Length() > RELOAD_KEY_ARG_INDEX_FOR_SRC_WITH_AI_OPTIONS &&
+        info[RELOAD_KEY_ARG_INDEX_FOR_SRC_WITH_AI_OPTIONS]->IsString()) {
+        config.reloadKey = info[RELOAD_KEY_ARG_INDEX_FOR_SRC_WITH_AI_OPTIONS]->ToString();
+    } else if (info.Length() > RELOAD_KEY_ARG_INDEX_FOR_SRC_ONLY &&
+               info[RELOAD_KEY_ARG_INDEX_FOR_SRC_ONLY]->IsString()) {
+        config.reloadKey = info[RELOAD_KEY_ARG_INDEX_FOR_SRC_ONLY]->ToString();
+    }
     ImageModel::GetInstance()->Create(config);
     ParseImageAIOptions(info);
     if (SystemProperties::ConfigChangePerform()) {

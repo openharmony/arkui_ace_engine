@@ -264,6 +264,21 @@ struct Index {
             router.pushUrl({ url: 'pages/example/ImageExample093' })
           })
 
+          Button('router ImageReloadKeyExample').onClick(() => {
+            console.log('router ImageReloadKeyExample');
+            router.pushUrl({ url: 'pages/example/ImageReloadKeyExample' })
+          })
+
+          Button('router ImageReloadKeyScenarioExample').onClick(() => {
+            console.log('router ImageReloadKeyScenarioExample');
+            router.pushUrl({ url: 'pages/example/ImageReloadKeyScenarioExample' })
+          })
+
+          Button('router ImageReloadKeyTestCase').onClick(() => {
+            console.log('router ImageReloadKeyTestCase');
+            router.pushUrl({ url: 'pages/testcase/ImageReloadKeyTestCase' })
+          })
+
         }
       }
     }
