@@ -23,7 +23,6 @@
 #include "frameworks/base/memory/referenced.h"
 #include "frameworks/base/utils/noncopyable.h"
 #include "frameworks/core/components_ng/base/frame_scene_status.h"
-#include "frameworks/core/components_ng/pattern/list/list_layout_property.h"
 #include "frameworks/core/components_ng/pattern/pattern.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_accessibility_property.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_animation_state.h"

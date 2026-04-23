@@ -21,7 +21,7 @@
 #include "core/components/hyperlink/hyperlink_resources.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
-#include "compatible/components/list_v2/list_component.h"
+#include "core/components_ng/pattern/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
 class DragDropProxy;

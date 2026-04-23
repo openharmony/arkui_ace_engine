@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#include "base/log/dump_log.h"
-
 #include "core/components_ng/pattern/list/list_layout_property.h"
 
 namespace OHOS::Ace::NG {
