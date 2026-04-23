@@ -1958,4 +1958,34 @@ void ViewAbstractModelNG::SetSafeAreaPaddings(const std::optional<CalcDimension>
     ViewAbstract::SetSafeAreaPadding(paddings);
 }
 
+void ViewAbstractModelNG::SetAccessibilityCustomActions(
+    FrameNode* frameNode, const std::vector<AccessibilityCustomAction>& actions)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityCustomActions(actions);
+}
+
+void ViewAbstractModelNG::ResetAccessibilityCustomActions(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->ResetAccessibilityCustomActions();
+}
+
+void ViewAbstractModelNG::SetAccessibilityCustomActions(const std::vector<AccessibilityCustomAction>& actions)
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetAccessibilityCustomActions(frameNode, actions);
+}
+
+void ViewAbstractModelNG::ResetAccessibilityCustomActions()
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ResetAccessibilityCustomActions(frameNode);
+}
 } // namespace OHOS::Ace::NG

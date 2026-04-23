@@ -29,6 +29,7 @@ enum class InjectActionType : uint32_t {
     UNDEFINED_ACTION = 0,
     NOTIFY_CHILD_ACTION = 1,
     SECURITY_CLICK_ACTION = 2,
+    CUSTOM_ACTION_TEST = 3,
 };
 
 enum class DumpMode {
@@ -45,6 +46,7 @@ enum class DumpMode {
     GET_CHECKLIST_TEST,
     EXECUTE_ACTION_TEST,
     WEB_ACC_DUMP,
+    CUSTOM_ACTION_TEST,
 };
 
 struct DumpInfoArgument {
@@ -78,6 +80,12 @@ public:
     static bool DumpProcessExecuteActionParameters(
         const std::vector<std::string>& params,
         ExecuteActionArgument& argument);
+
+    static bool DumpProcessCustomActionParameters(
+        const std::vector<std::string>& params,
+        int64_t& nodeId,
+        std::string& actionName,
+        bool& listActions);
 };
 } // OHOS::Ace
 

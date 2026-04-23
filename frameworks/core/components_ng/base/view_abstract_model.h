@@ -544,6 +544,8 @@ public:
     virtual void SetAccessibilityFocusDrawLevel(int32_t drawLevel) = 0;
     virtual void SetAccessibilityActionOptions(NG::AccessibilityActionOptions actionOptions) = 0;
     virtual void ResetAccessibilityActionOptions() = 0;
+    virtual void SetAccessibilityCustomActions(const std::vector<NG::AccessibilityCustomAction>& actions) = 0;
+    virtual void ResetAccessibilityCustomActions() = 0;
 
     // progress mask
     virtual void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) = 0;

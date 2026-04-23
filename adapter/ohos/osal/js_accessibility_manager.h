@@ -101,6 +101,7 @@ struct AccessibilityActionParam {
     TextMoveUnit moveUnit = TextMoveUnit::STEP_CHARACTER;
     AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_DEFAULT;
     int32_t spanId = -1;
+    std::string customActionName;
 };
 
 struct ActionParam {
@@ -753,6 +754,7 @@ private:
     void DumpSendEventTest(int64_t nodeId, int32_t eventId, const std::vector<std::string>& params);
     void DumpInjectActionTest(const std::vector<std::string>& params);
     void DumpExecuteActionTest(const std::vector<std::string>& params);
+    void DumpCustomActionTest(const std::vector<std::string>& params);
     void DumpEmbedSearchTest(const std::vector<std::string>& params);
     void DumpEmbedHoverTestNG(const std::vector<std::string>& params, uint32_t windowId);
     void DumpSetCheckListTest(const std::vector<std::string>& params);

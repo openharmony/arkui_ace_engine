@@ -5119,6 +5119,81 @@ ArkUINativeModuleValue CommonBridge::ResetSmartGestureShortcut(ArkUIRuntimeCallI
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue CommonBridge::SetAccessibilityCustomActions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    
+    if (runtimeCallInfo->GetArgsNumber() < 2) {
+        ViewAbstractModelNG::ResetAccessibilityCustomActions(frameNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    
+    auto argObj = runtimeCallInfo->GetCallArgRef(1);
+    if (!argObj->IsArray(vm)) {
+        ViewAbstractModelNG::ResetAccessibilityCustomActions(frameNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    
+    auto jsArray = panda::Local<panda::ArrayRef>(argObj->ToObject(vm));
+    auto arrayLength = jsArray->Length(vm);
+    std::vector<NG::AccessibilityCustomAction> actions;
+    
+    for (uint32_t i = 0; i < arrayLength; i++) {
+        auto item = jsArray->Get(vm, i);
+        if (!item->IsObject(vm)) {
+            continue;
+        }
+        
+        auto jsItem = panda::Local<panda::ObjectRef>(item->ToObject(vm));
+        auto actionNameVal = jsItem->Get(vm, panda::StringRef::NewFromUtf8(vm, "name"));
+        auto callbackVal = jsItem->Get(vm, panda::StringRef::NewFromUtf8(vm, "onAction"));
+        
+        NG::AccessibilityCustomAction action;
+        
+        if (!ArkTSUtils::ParseJsString(vm, actionNameVal, action.actionName)) {
+            action.actionName = "";
+        }
+        
+        if (callbackVal->IsFunction(vm)) {
+            auto obj = callbackVal->ToObject(vm);
+            auto containerId = Container::CurrentId();
+            panda::Local<panda::FunctionRef> func = obj;
+            auto flag = FrameNodeBridge::IsCustomFrameNode(frameNode);
+            action.customActionCallback = [vm, func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag),
+                node = AceType::WeakClaim(frameNode), containerId] () {
+                    panda::LocalScope pandaScope(vm);
+                    panda::TryCatch trycatch(vm);
+                    ContainerScope scope(containerId);
+                    auto function = func.Local();
+                    CHECK_NULL_VOID(!function.IsEmpty());
+                    CHECK_NULL_VOID(function->IsFunction(vm));
+                    PipelineContext::SetCallBackNode(node);
+                    function->Call(vm, function.ToLocal(), nullptr, 0);
+                };
+        }
+        
+        if (!action.actionName.empty() && action.customActionCallback) {
+            actions.push_back(action);
+        }
+    }
+    
+    ViewAbstractModelNG::SetAccessibilityCustomActions(frameNode, actions);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetAccessibilityCustomActions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    ViewAbstractModelNG::ResetAccessibilityCustomActions(frameNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue CommonBridge::SetAccessibilityHoverTransparent(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

@@ -1696,6 +1696,8 @@ public:
         NG::ActionAccessibilityActionIntercept&& onActionAccessibilityActionIntercept) override;
     void SetAccessibilityActionOptions(AccessibilityActionOptions actionOptions) override;
     void ResetAccessibilityActionOptions() override;
+    void SetAccessibilityCustomActions(const std::vector<AccessibilityCustomAction>& actions) override;
+    void ResetAccessibilityCustomActions() override;
     void SetOnAccessibilityHoverTransparent(TouchEventFunc&& touchEventFunc) override;
     void SetAccessibilityTextPreferred(bool accessibilityTextPreferred) override;
     void SetAccessibilityGroupOptions(AccessibilityGroupOptions groupOptions) override;
@@ -1943,6 +1945,9 @@ public:
     static void ResetAccessibilityActionOptions(FrameNode* frameNode);
     static void SetSmartGestureShortcut(FrameNode* frameNode, SmartGestureShortcutConfig config);
     static void ResetSmartGestureShortcut(FrameNode* frameNode);
+    static void SetAccessibilityCustomActions(
+        FrameNode* frameNode, const std::vector<AccessibilityCustomAction>& actions);
+    static void ResetAccessibilityCustomActions(FrameNode* frameNode);
     static void SetAccessibilityRole(FrameNode* frameNode, const std::string& role, bool resetValue);
     static void SetOnAccessibilityFocus(
         FrameNode* frameNode, NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl);

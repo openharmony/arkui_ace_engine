@@ -1769,4 +1769,10 @@ void ViewAbstractModelImpl::SetAccessibilityActionOptions(NG::AccessibilityActio
 
 void ViewAbstractModelImpl::ResetAccessibilityActionOptions()
 {}
+
+void ViewAbstractModelImpl::SetAccessibilityCustomActions(const std::vector<NG::AccessibilityCustomAction>& actions)
+{}
+
+void ViewAbstractModelImpl::ResetAccessibilityCustomActions()
+{}
 } // namespace OHOS::Ace::Framework
