@@ -549,7 +549,9 @@ bool PipelineBase::Dump(const std::vector<std::string>& params) const
     }
     // the first param is the key word of dump.
     if (params[0] == "-memory") {
+#ifdef ACE_DEBUG
         MemoryMonitor::GetInstance().Dump();
+#endif
         DumpUIExt();
         return true;
     }

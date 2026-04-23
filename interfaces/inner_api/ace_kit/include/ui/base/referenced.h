@@ -55,9 +55,11 @@ public:
                 rawPtr->OnDetectedClaimDeathObj(isNewOrRecycle);
             }
         }
+#ifdef ACE_DEBUG
         if (MemoryMonitor::IsEnable()) {
             MemoryMonitor::GetInstance().Update(rawPtr, static_cast<Referenced*>(rawPtr));
         }
+#endif
         return RefPtr<T>(rawPtr);
     }
     template<class T>
@@ -106,9 +108,11 @@ protected:
     explicit Referenced()
         : refCounter_(RefCounter::Create())
     {
+#ifdef ACE_DEBUG
         if (MemoryMonitor::IsEnable()) {
             MemoryMonitor::GetInstance().Add(this);
         }
+#endif
     }
 
     virtual ~Referenced()
@@ -116,14 +120,35 @@ protected:
         // Decrease weak reference count held by 'Referenced' itself.
         refCounter_->DecWeakRef();
         refCounter_ = nullptr;
+#ifdef ACE_DEBUG
         if (MemoryMonitor::IsEnable()) {
             MemoryMonitor::GetInstance().Remove(this);
         }
+#endif
     }
 
     virtual bool MaybeRelease()
     {
         return true;
+    }
+
+    template<class T, class O>
+    static RefPtr<T> Transfer(RefPtr<O>& ptr)
+    {
+        auto p = O::template DynamicCast<T>(ptr.rawPtr_);
+        if (p) {
+            ptr.rawPtr_ = nullptr;
+        }
+        return RefPtr<T>(p, false);
+    }
+
+    // ATTENTION: Use this only in performance-sensitive contexts
+    template<class T, class O>
+    static RefPtr<T> ForceTransfer(RefPtr<O>& ptr)
+    {
+        auto p = reinterpret_cast<T*>(ptr.rawPtr_);
+        ptr.rawPtr_ = nullptr;
+        return RefPtr<T>(p, false);
     }
 
 private:

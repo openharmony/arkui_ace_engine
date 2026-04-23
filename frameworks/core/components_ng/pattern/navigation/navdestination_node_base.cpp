@@ -342,6 +342,15 @@ OffsetF NavDestinationNodeBase::GetParentGlobalOffsetWithSafeArea(bool checkBoun
     return LayoutWrapper::GetParentGlobalOffsetWithSafeArea(checkBoundary, checkPosition);
 }
 
+OffsetF NavDestinationNodeBase::GetParentGlobalOffsetWithSafeAreaInner(RefPtr<FrameNode>& host,
+    RefPtr<FrameNode>& parentNode) const
+{
+    if (rotateAngle_.has_value()) {
+        return OffsetF(0.0f, 0.0f);
+    }
+    return LayoutWrapper::GetParentGlobalOffsetWithSafeAreaInner(host, parentNode);
+}
+
 TranslateOptions NavDestinationNodeBase::CalcContentTranslateForDialog(const SizeF& frameSize)
 {
     auto angle = rotateAngle_.has_value() ? rotateAngle_.value() : ROTATION_0;

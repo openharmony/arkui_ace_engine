@@ -654,16 +654,17 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest038, TestSize.Level0)
     // ExpandIntoKeyboard(): use page offset judge if expand intoKeyboard
     // no page node, return OffsetF(0, 0)
     safeAreaManager->UpdateKeyboardOffset(50.0f);
-    EXPECT_EQ(parent->ExpandIntoKeyboard(), OffsetF(0, 0));
+    auto parentParent = parent->GetAncestorNodeOfFrame(false);
+    EXPECT_EQ(parent->ExpandIntoKeyboard(parent, parentParent), OffsetF(0, 0));
 
     // parent already expanded
-    child->ExpandIntoKeyboard();
-    EXPECT_EQ(child->ExpandIntoKeyboard(), OffsetF(0, 0));
+    child->ExpandIntoKeyboard(child, parent);
+    EXPECT_EQ(child->ExpandIntoKeyboard(child, parent), OffsetF(0, 0));
 
     layoutWrapper->layoutProperty_->UpdateSafeAreaExpandOpts({ SAFE_AREA_TYPE_NONE, SAFE_AREA_EDGE_ALL });
-    child->ExpandIntoKeyboard();
+    child->ExpandIntoKeyboard(child, parent);
     // no page node, return OffsetF(0, 0)
-    EXPECT_EQ(child->ExpandIntoKeyboard(), OffsetF(0, 0));
+    EXPECT_EQ(child->ExpandIntoKeyboard(child, parent), OffsetF(0, 0));
 }
 
 /**
@@ -753,7 +754,7 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest041, TestSize.Level0)
     /**
      * @tc.steps: step3. Call AdjustChildren().
      */
-    layoutWrapper->AdjustChildren(OffsetF(0, 10), false);
+    layoutWrapper->AdjustChildren(rowFrameNode, OffsetF(0, 10), false);
     EXPECT_FALSE(rowFrameNode1->GetLayoutProperty()->GetSafeAreaExpandOpts());
 }
 

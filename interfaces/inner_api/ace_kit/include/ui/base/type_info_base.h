@@ -17,13 +17,18 @@
 #define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_BASE_TYPE_INFO_BASE_H
 
 #include <string>
+#include <type_traits>
 
 #include "ui/base/memory_monitor_def.h"
 
 // Generate 'TypeInfo' for each classes.
 // And using hash code of its name for 'TypeId'.
+namespace OHOS::Ace {
+class TypeInfoHelper;
+}
 #define DECLARE_CLASS_TYPE_INFO(classname)                                                  \
 public:                                                                                     \
+    friend class OHOS::Ace::TypeInfoHelper;                                                 \
     static const char* TypeName()                                                           \
     {                                                                                       \
         return #classname;                                                                  \
@@ -84,7 +89,9 @@ protected:
 
     virtual IdType GetTypeId() const = 0;
     virtual const char* GetTypeName() const = 0;
+#ifdef ACE_DEBUG
     virtual size_t GetTypeSize() const { return 0; }
+#endif
 };
 
 class TypeInfoHelper final {
@@ -94,44 +101,60 @@ public:
 
     // Convert pointer of instance inherited from 'TypeInfoBase'.
     // Notice: Result SHOULD BE checked with 'nullptr', because 'DynamicCast' might be failed.
-    template<class T>
-    static T* DynamicCast(TypeInfoBase* rawPtr)
+    template<class T, class O>
+    static T* DynamicCast(O* rawPtr)
     {
         VERIFY_DECLARED_CLASS(T);
-        return rawPtr != nullptr ? reinterpret_cast<T*>(rawPtr->SafeCastById(T::TypeId())) : nullptr;
+        if constexpr(std::is_base_of_v<T, O>) {
+            return rawPtr;
+        } else {
+            return rawPtr != nullptr ? reinterpret_cast<T*>(rawPtr->SafeCastById(T::TypeId())) : nullptr;
+        }
     }
-    template<class T>
-    static const T* DynamicCast(const TypeInfoBase* rawPtr)
+    template<class T, class O>
+    static const T* DynamicCast(const O* rawPtr)
     {
         VERIFY_DECLARED_CLASS(T);
-        return rawPtr != nullptr ? reinterpret_cast<const T*>(rawPtr->SafeCastById(T::TypeId())) : nullptr;
+        if constexpr(std::is_base_of_v<T, O>) {
+            return rawPtr;
+        } else {
+            return rawPtr != nullptr ? reinterpret_cast<const T*>(rawPtr->SafeCastById(T::TypeId())) : nullptr;
+        }
     }
 
     // Get type info by instance.
-    static TypeInfoBase::IdType TypeId(const TypeInfoBase* rawPtr)
+    template<class T>
+    static TypeInfoBase::IdType TypeId(const T* rawPtr)
     {
         return rawPtr != nullptr ? rawPtr->GetTypeId() : 0;
     }
-    static TypeInfoBase::IdType TypeId(const TypeInfoBase& instance)
+    template<class T, std::enable_if_t<!std::is_pointer_v<T>, bool> = true>
+    static TypeInfoBase::IdType TypeId(const T& instance)
     {
-        return TypeId(&instance);
+        return instance.GetTypeId();
     }
-    static const char* TypeName(const TypeInfoBase* rawPtr)
+    template<class T>
+    static const char* TypeName(const T* rawPtr)
     {
         return rawPtr != nullptr ? rawPtr->GetTypeName() : nullptr;
     }
-    static const char* TypeName(const TypeInfoBase& instance)
+    template<class T, std::enable_if_t<!std::is_pointer_v<T>, bool> = true>
+    static const char* TypeName(const T& instance)
     {
-        return TypeName(&instance);
+        return instance.GetTypeName();
     }
-    static size_t TypeSize(const TypeInfoBase* rawPtr)
+#ifdef ACE_DEBUG
+    template<class T>
+    static size_t TypeSize(const T* rawPtr)
     {
         return rawPtr != nullptr ? rawPtr->GetTypeSize() : 0;
     }
-    static size_t TypeSize(const TypeInfoBase& instance)
+    template<class T, std::enable_if_t<!std::is_pointer_v<T>, bool> = true>
+    static size_t TypeSize(const T& instance)
     {
-        return TypeSize(&instance);
+        return instance.GetTypeSize();
     }
+#endif
 
     // Get type info by type itself.
     template<class T>
@@ -146,15 +169,23 @@ public:
     }
 
     // Check whether instance is the specified type
-    template<class T>
-    static bool InstanceOf(const TypeInfoBase* rawPtr)
+    template<class T, class O>
+    static bool InstanceOf(const O* rawPtr)
     {
-        return DynamicCast<T>(rawPtr) != nullptr;
+        if constexpr(std::is_base_of_v<T, O>) {
+            return rawPtr != nullptr;
+        } else {
+            return DynamicCast<T>(rawPtr) != nullptr;
+        }
     }
-    template<class T>
-    static bool InstanceOf(const TypeInfoBase& instance)
+    template<class T, class O, std::enable_if_t<!std::is_pointer_v<O>, bool> = true>
+    static bool InstanceOf(const O& instance)
     {
-        return DynamicCast<T>(&instance) != nullptr;
+        if constexpr(std::is_base_of_v<T, O>) {
+            return true;
+        } else {
+            return reinterpret_cast<T*>(instance.SafeCastById(T::TypeId())) != nullptr;
+        }
     }
 };
 
