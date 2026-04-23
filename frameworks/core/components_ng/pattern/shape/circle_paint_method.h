@@ -100,11 +100,13 @@ private:
     void UpdateFillHDRColorHeadRoom(PaintWrapper* paintWrapper, const ShapePaintProperty& shapePaintProperty) const
     {
         CHECK_NULL_VOID(paintWrapper);
+        constexpr float DEFAULT_SDR_HEADROOM = 1.0f;
         auto renderContext = paintWrapper->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         auto fillColor = shapePaintProperty.HasFill() ? shapePaintProperty.GetFillValue() : Color::BLACK;
         auto headRoomColor = fillColor.GetHeadRoomColor();
-        renderContext->SetHDRColorHeadRoom(headRoomColor.has_value() ? headRoomColor.value().headRoom : 1.0f);
+        renderContext->SetHDRColorHeadRoom(
+            headRoomColor.has_value() ? headRoomColor.value().headRoom : DEFAULT_SDR_HEADROOM);
     }
 
     void UpdateStrokeHDRColorHeadRoom(PaintWrapper* paintWrapper, const ShapePaintProperty& shapePaintProperty) const

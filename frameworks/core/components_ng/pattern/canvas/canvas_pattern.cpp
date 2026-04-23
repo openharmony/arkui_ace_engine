@@ -28,6 +28,10 @@
 #include "core/components_ng/pattern/canvas/canvas_render_context_immediate.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr float DEFAULT_SDR_HEADROOM = 1.0f;
+}
+
 CanvasPattern::~CanvasPattern()
 {
     if (IsSupportImageAnalyzerFeature()) {
@@ -520,8 +524,20 @@ void CanvasPattern::UpdateStrokePattern(const std::shared_ptr<Ace::Pattern>& pat
     paintMethod_->PushTask(task);
 }
 
+void CanvasPattern::NotifyColorHDRColorHeadRoom(const Color& color)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto headRoomColor = color.GetHeadRoomColor();
+    renderContext->SetHDRColorHeadRoom(
+        headRoomColor.has_value() ? headRoomColor.value().headRoom : DEFAULT_SDR_HEADROOM);
+}
+
 void CanvasPattern::UpdateStrokeColor(const Color& color)
 {
+    NotifyColorHDRColorHeadRoom(color);
     auto task = [color](CanvasPaintMethod& paintMethod) { paintMethod.SetStrokeColor(color); };
     paintMethod_->PushTask(task);
 }
@@ -544,7 +560,9 @@ void CanvasPattern::NotifyGradientHDRColorHeadRoom(const std::shared_ptr<Ace::Gr
     }
     if (hasHdrColor) {
         renderContext->SetHDRColorHeadRoom(maxHeadRoom);
+        return;
     }
+    renderContext->SetHDRColorHeadRoom(DEFAULT_SDR_HEADROOM);
 }
 
 void CanvasPattern::SetStrokeGradient(const std::shared_ptr<Ace::Gradient>& gradient)
@@ -589,6 +607,7 @@ void CanvasPattern::UpdateLetterSpacing(const Dimension& letterSpacing)
 
 void CanvasPattern::UpdateFillColor(const Color& color)
 {
+    NotifyColorHDRColorHeadRoom(color);
     auto task = [color](CanvasPaintMethod& paintMethod) { paintMethod.SetFillColor(color); };
     paintMethod_->PushTask(task);
 }

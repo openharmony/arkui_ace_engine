@@ -112,6 +112,7 @@ ArkUINativeModuleValue CommonShapeBridge::SetStroke(ArkUIRuntimeCallInfo* runtim
         GetArkUINodeModifiers()->getCommonShapeModifier()->resetStroke(nativeNode);
     } else {
         auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+        CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
         auto payload = CreateShapeColorModifierPayload(frameNode, color, resObj);
         if (payload) {
             GetArkUINodeModifiers()->getCommonShapeModifier()->setStroke(
@@ -151,6 +152,7 @@ ArkUINativeModuleValue CommonShapeBridge::SetFill(ArkUIRuntimeCallInfo* runtimeC
         GetArkUINodeModifiers()->getCommonShapeModifier()->resetFill(nativeNode);
     } else {
         auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+        CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
         auto payload = CreateShapeColorModifierPayload(frameNode, color, resObj);
         if (payload) {
             GetArkUINodeModifiers()->getCommonShapeModifier()->setFill(

@@ -18,6 +18,7 @@
 #define protected public
 #define private public
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "core/components_ng/pattern/canvas/canvas_paint_method.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
 #undef private
@@ -92,7 +93,7 @@ HWTEST_F(CanvasHdrGradientTestNg, CanvasPatternNotifyGradientHDRColorHeadRoom001
 
 /**
  * @tc.name: CanvasPatternNotifyGradientHDRColorHeadRoom002
- * @tc.desc: Verify no call when gradient has no HDR stop.
+ * @tc.desc: Verify non-HDR gradient resets headroom to SDR default.
  * @tc.type: FUNC
  */
 HWTEST_F(CanvasHdrGradientTestNg, CanvasPatternNotifyGradientHDRColorHeadRoom002, TestSize.Level0)
@@ -110,7 +111,84 @@ HWTEST_F(CanvasHdrGradientTestNg, CanvasPatternNotifyGradientHDRColorHeadRoom002
     gradient->AddColor(normalStop);
 
     pattern->NotifyGradientHDRColorHeadRoom(gradient);
-    EXPECT_EQ(testRenderContext->hdrHeadRoomCallCount_, 0);
+    EXPECT_EQ(testRenderContext->hdrHeadRoomCallCount_, 1);
+    EXPECT_FLOAT_EQ(testRenderContext->lastHdrHeadRoom_, 1.0f);
+}
+
+/**
+ * @tc.name: CanvasPatternNotifyGradientHDRColorHeadRoom003
+ * @tc.desc: Verify headroom is reset to SDR default when switching from HDR to non-HDR gradient.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasHdrGradientTestNg, CanvasPatternNotifyGradientHDRColorHeadRoom003, TestSize.Level0)
+{
+    auto frameNode = CreateCanvasNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CanvasPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto testRenderContext = AceType::MakeRefPtr<CanvasHdrTestRenderContext>();
+    frameNode->renderContext_ = testRenderContext;
+
+    auto hdrGradient = std::make_shared<Gradient>();
+    GradientColor hdrStop;
+    hdrStop.SetColor(Color::FromFloat(1.0f, 1.0f, 0.0f, 1.0f, 3.0f));
+    hdrGradient->AddColor(hdrStop);
+    pattern->NotifyGradientHDRColorHeadRoom(hdrGradient);
+
+    auto sdrGradient = std::make_shared<Gradient>();
+    GradientColor normalStop;
+    normalStop.SetColor(Color::BLUE);
+    sdrGradient->AddColor(normalStop);
+    pattern->NotifyGradientHDRColorHeadRoom(sdrGradient);
+
+    EXPECT_EQ(testRenderContext->hdrHeadRoomCallCount_, 2);
+    EXPECT_FLOAT_EQ(testRenderContext->lastHdrHeadRoom_, 1.0f);
+}
+
+/**
+ * @tc.name: CanvasPatternUpdateFillColorHDRColorHeadRoom001
+ * @tc.desc: Verify fill color updates reset headroom to SDR default when switching from HDR to non-HDR.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasHdrGradientTestNg, CanvasPatternUpdateFillColorHDRColorHeadRoom001, TestSize.Level0)
+{
+    auto frameNode = CreateCanvasNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CanvasPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto testRenderContext = AceType::MakeRefPtr<CanvasHdrTestRenderContext>();
+    frameNode->renderContext_ = testRenderContext;
+    pattern->paintMethod_ = AceType::MakeRefPtr<CanvasPaintMethod>();
+
+    auto hdrColor = Color::FromFloat(1.0f, 0.5f, 0.0f, 1.0f, 2.8f);
+    pattern->UpdateFillColor(hdrColor);
+    pattern->UpdateFillColor(Color::WHITE);
+
+    EXPECT_EQ(testRenderContext->hdrHeadRoomCallCount_, 2);
+    EXPECT_FLOAT_EQ(testRenderContext->lastHdrHeadRoom_, 1.0f);
+}
+
+/**
+ * @tc.name: CanvasPatternUpdateStrokeColorHDRColorHeadRoom001
+ * @tc.desc: Verify stroke color updates reset headroom to SDR default when switching from HDR to non-HDR.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasHdrGradientTestNg, CanvasPatternUpdateStrokeColorHDRColorHeadRoom001, TestSize.Level0)
+{
+    auto frameNode = CreateCanvasNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CanvasPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto testRenderContext = AceType::MakeRefPtr<CanvasHdrTestRenderContext>();
+    frameNode->renderContext_ = testRenderContext;
+    pattern->paintMethod_ = AceType::MakeRefPtr<CanvasPaintMethod>();
+
+    auto hdrColor = Color::FromFloat(0.0f, 0.5f, 1.0f, 1.0f, 3.2f);
+    pattern->UpdateStrokeColor(hdrColor);
+    pattern->UpdateStrokeColor(Color::BLACK);
+
+    EXPECT_EQ(testRenderContext->hdrHeadRoomCallCount_, 2);
+    EXPECT_FLOAT_EQ(testRenderContext->lastHdrHeadRoom_, 1.0f);
 }
 
 /**
