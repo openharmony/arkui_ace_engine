@@ -861,6 +861,9 @@ HWTEST_F(NativeStyledStringTest, CreateParagraphStyle009, TestSize.Level1)
     EXPECT_EQ(getVerticalAlignment, verticalAlignment);
     EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR);
 
+    /**
+     * release paragraphStyle
+     */
     delete paragraphStyle;
     paragraphStyle = nullptr;
 }
@@ -893,6 +896,9 @@ HWTEST_F(NativeStyledStringTest, CreateParagraphStyle010, TestSize.Level1)
     EXPECT_EQ(getTextDirection, textDirection);
     EXPECT_EQ(errorCode, ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR);
 
+    /**
+     * release paragraphStyle
+     */
     delete paragraphStyle;
     paragraphStyle = nullptr;
 }

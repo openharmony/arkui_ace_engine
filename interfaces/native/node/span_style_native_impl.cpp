@@ -771,8 +771,6 @@ ArkUI_ErrorCode OH_ArkUI_SpanStyle_SetParagraphStyle(
     CHECK_NULL_RETURN(spanStyle && paragraphStyle, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     ClearSpanStyle(spanStyle);
     OH_ArkUI_ParagraphStyle style;
-    spanStyle->start = 0;
-    spanStyle->length = 0;
     spanStyle->styledKey = OH_ArkUI_StyledStringKey::OH_ARKUI_STYLEDSTRINGKEY_PARAGRAPH_STYLE;
     style.textAlign = paragraphStyle->textAlign;
     style.textIndent = paragraphStyle->textIndent;
