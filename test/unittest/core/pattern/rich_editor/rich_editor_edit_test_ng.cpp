@@ -76,7 +76,13 @@ void RichEditorEditTestNg::TearDownTestSuite()
 
 int32_t RichEditorEditTestNg::CheckMaxLines(int32_t maxLines)
 {
+    /**
+     * @tc.steps: step1. get richEditor pattern
+     */
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    /**
+     * @tc.steps: step2. SetMaxLines
+     */
     richEditorPattern->SetMaxLines(maxLines);
     return richEditorPattern->GetMaxLines();
 }
