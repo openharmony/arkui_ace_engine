@@ -220,6 +220,7 @@ ace_unittest("theme_manager_test_ng") {
     "$ace_root/frameworks/core/components/theme/theme_manager_impl.cpp",
     "$ace_root/frameworks/core/components/theme/theme_manager_multi_thread.cpp",
     "theme_manager_test_ng.cpp",
+    "theme_test.cpp",
   ]
 }
 
