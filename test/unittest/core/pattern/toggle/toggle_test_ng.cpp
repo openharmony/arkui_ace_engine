@@ -960,7 +960,7 @@ HWTEST_F(ToggleTestNg, TogglePaintTest002, TestSize.Level1)
     switchModifier->isDragEvent_ = true;
     switchModifier->SetDragOffsetX(0.0f);
     switchModifier->UpdateAnimatableProperty(switchFrameNode);
-    EXPECT_EQ(switchModifier->pointOffset_->Get(), 0.0f);
+    EXPECT_EQ(switchModifier->pointOffset_->Get(), SWITCH_HEIGHT / 2.0f);
 
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
@@ -1075,9 +1075,9 @@ HWTEST_F(ToggleTestNg, TogglePaintTest005, TestSize.Level1)
     switchModifier->UpdateAnimatableProperty(switchFrameNode);
     if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
         EXPECT_EQ(switchModifier->pointOffset_->Get(),
-            switchModifier->actualSize_.Width() - switchModifier->actualSize_.Height());
+            switchModifier->actualSize_.Width() - switchModifier->actualSize_.Height() / 2.0f);
     } else {
-        EXPECT_EQ(switchModifier->pointOffset_->Get(), 0.0f);
+        EXPECT_EQ(switchModifier->pointOffset_->Get(), switchModifier->actualSize_.Height() / 2.0f);
     }
     /**
      * @tc.steps: step2. direction is ltr
@@ -1087,7 +1087,7 @@ HWTEST_F(ToggleTestNg, TogglePaintTest005, TestSize.Level1)
     switchModifier->isFirstCreated_ = true;
     switchModifier->SetDragOffsetX(0.0f);
     switchModifier->UpdateAnimatableProperty(switchFrameNode);
-    EXPECT_EQ(switchModifier->pointOffset_->Get(), 0.0f);
+    EXPECT_EQ(switchModifier->pointOffset_->Get(), switchModifier->actualSize_.Height() / 2.0f);
     /**
      * @tc.steps: step3. direction is rtl
      */
@@ -1097,7 +1097,7 @@ HWTEST_F(ToggleTestNg, TogglePaintTest005, TestSize.Level1)
     switchModifier->SetDragOffsetX(0.0f);
     switchModifier->UpdateAnimatableProperty(switchFrameNode);
     EXPECT_EQ(switchModifier->pointOffset_->Get(),
-        switchModifier->actualSize_.Width() - switchModifier->actualSize_.Height());
+        switchModifier->actualSize_.Width() - switchModifier->actualSize_.Height() / 2.0f);
 }
 
 /**
