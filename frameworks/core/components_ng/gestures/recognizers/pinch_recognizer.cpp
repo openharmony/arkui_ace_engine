@@ -95,6 +95,8 @@ bool PinchRecognizer::IsCtrlBeingPressed(const AxisEvent& event)
 void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
     extraInfo_ = "";
+    lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::DOWN)
+        : static_cast<int32_t>(MouseAction::PRESS);
     if (touchPoints_.size() == 1 && refereeState_ == RefereeState::FAIL) {
         lastRefereeState_ = RefereeState::READY;
         refereeState_ = RefereeState::READY;
@@ -124,6 +126,7 @@ void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void PinchRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 {
+    lastAction_ = static_cast<int32_t>(AxisAction::BEGIN);
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
@@ -148,6 +151,8 @@ void PinchRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 
 void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
+    lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::UP)
+        : static_cast<int32_t>(MouseAction::RELEASE);
     if (fingersId_.find(event.id) != fingersId_.end()) {
         fingersId_.erase(event.id);
     }
@@ -201,6 +206,7 @@ void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
 void PinchRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 {
+    lastAction_ = static_cast<int32_t>(AxisAction::END);
     // if axisEvent received rotateEvent, no need to active Pinch recognizer.
     if (isPinchEnd_ || event.isRotationEvent) {
         return;
@@ -229,6 +235,8 @@ void PinchRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 
 void PinchRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
+    lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::MOVE)
+        : static_cast<int32_t>(MouseAction::MOVE);
     touchPoints_[event.id] = event;
     if (!IsActiveFinger(event.id)) {
         return;
@@ -286,6 +294,7 @@ void PinchRecognizer::OnFlushTouchEventsEnd()
 
 void PinchRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 {
+    lastAction_ = static_cast<int32_t>(AxisAction::UPDATE);
     if (event.isRotationEvent || isPinchEnd_) {
         return;
     }
@@ -325,6 +334,8 @@ void PinchRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 
 void PinchRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
+    lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::CANCEL)
+        : static_cast<int32_t>(MouseAction::CANCEL);
     extraInfo_ += "cancel received.";
     if (!IsActiveFinger(event.id)) {
         return;
@@ -347,6 +358,7 @@ void PinchRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 
 void PinchRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
 {
+    lastAction_ = static_cast<int32_t>(AxisAction::CANCEL);
     extraInfo_ += "cancel received.";
     UpdateTouchPointWithAxisEvent(event);
     lastAxisEvent_.isFalsifyCancel = event.isFalsifyCancel;
@@ -486,6 +498,9 @@ void PinchRecognizer::GetGestureEventInfo(GestureEvent& info)
         info.SetTargetDisplayId(lastTouchEvent_.targetDisplayId);
     }
     info.SetPointerEvent(lastPointEvent_);
+    if (!lastPointEvent_) {
+        info.SetLastAction(lastAction_);
+    }
     info.SetInputEventType(inputEventType_);
 }
 
