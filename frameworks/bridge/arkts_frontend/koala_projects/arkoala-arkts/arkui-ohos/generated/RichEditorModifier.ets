@@ -99,6 +99,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
     public _placeholder_0_0value?: ResourceStr | undefined
     public _placeholder_0_1value?: PlaceholderStyle | undefined
     public _orphanCharOptimization_0_0value?: boolean | undefined
+    public _horizontalScrolling_0_0value?: boolean | undefined
     applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
         this._state.addRef()
@@ -861,6 +862,23 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
             }
         }
+        if (flagArray[44] != 0) {
+            switch (flagArray[44]) {
+                case 1: {
+                    peer.setHorizontalScrollingAttribute((this._horizontalScrolling_0_0value as boolean | undefined));
+                    flagArray[44] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[44] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[44] = 0;
+                    peer.setHorizontalScrollingAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: RichEditorModifier): void {
         super.mergeModifier(modifier)
@@ -1403,6 +1421,18 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
             }
         }
+        if (flagArray[44] != 0) {
+            switch (flagArray[44]) {
+                case 1:
+                case 3: {
+                    this.horizontalScrolling((modifier._horizontalScrolling_0_0value as boolean | undefined));
+                    break;
+                }
+                default: {
+                    this.horizontalScrolling((undefined as boolean | undefined));
+                }
+            }
+        }
     }
     onReady(value: VoidCallback | undefined): this {
         if (((this._flagArray[0]) == (0)) || (true)) {
@@ -1846,6 +1876,16 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
             this._state.fireChange()
         } else {
             this._flagArray[43] = 3
+        }
+        return this
+    }
+    horizontalScrolling(value: boolean | undefined): this {
+        if (((this._flagArray[44]) == (0)) || ((this._horizontalScrolling_0_0value) !== (value))) {
+            this._flagArray[44] = 1
+            this._horizontalScrolling_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[44] = 3
         }
         return this
     }

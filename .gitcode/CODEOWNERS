@@ -565,6 +565,7 @@ frameworks/bridge/declarative_frontend/ark_component/components/arkmenuitem.js @
 frameworks/bridge/declarative_frontend/ark_component/components/arkmenuitemgroup.js @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/components/arksearch.js @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_component/components/arksymbolglyph.js @huawei_g_five
+frameworks/bridge/declarative_frontend/ark_component/components/arkricheditor.js @arkui_rich_editor
 frameworks/bridge/declarative_frontend/ark_component/src_dir/ @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/types/ @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/.gitignore @arkuieco3

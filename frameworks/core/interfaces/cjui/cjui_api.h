@@ -3426,6 +3426,9 @@ struct CJUIRichEditorModifier {
     void (*setRichEditorSingleLine)(ArkUINodeHandle node, ArkUI_Bool singleLine);
     void (*resetRichEditorSingleLine)(ArkUINodeHandle node);
     ArkUI_Bool (*getRichEditorSingleLine)(ArkUINodeHandle node);
+    void (*setRichEditorHorizontalScrolling)(ArkUINodeHandle node, ArkUI_Bool singleLine);
+    void (*resetRichEditorHorizontalScrolling)(ArkUINodeHandle node);
+    ArkUI_Bool (*getRichEditorHorizontalScrolling)(ArkUINodeHandle node);
 };
 
 struct CJUIRichEditorControllerModifier {

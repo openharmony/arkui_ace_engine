@@ -157,12 +157,18 @@ HWTEST_F(RichEditorScrollTestOneNg, OnScrollCallback002, TestSize.Level0)
  */
 HWTEST_F(RichEditorScrollTestOneNg, CheckScrollable, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. init richTextRect and contentRect
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->richTextRect_ = RectF(0, 0, 100, 140);
     richEditorPattern->contentRect_ = RectF(0, 0, 100, 100);
 
+    /**
+     * @tc.steps: step2. check scrollable
+     */
     richEditorPattern->CheckScrollable();
     EXPECT_FALSE(richEditorPattern->scrollable_);
 
