@@ -3012,7 +3012,6 @@ struct ArkUISelectOutlineArgs {
     const ArkUI_Uint32* color;
     ArkUI_Int32 colorSize;
     void** resObjs;
-    size_t unitSize;
 };
 
 struct ArkUISelectDividerStyleArgs {
