@@ -558,6 +558,21 @@ public:
         isScrollBarDragging_ = isScrollBarDragging;
     }
 
+    void SetIsSmartGestureFling(bool isSmartGestureFling)
+    {
+        isSmartGestureFling_ = isSmartGestureFling;
+    }
+
+    bool GetIsSmartGestureFling() const
+    {
+        return isSmartGestureFling_;
+    }
+
+    bool GetIsTouchStopAnimation()
+    {
+        return isTouchStopAnimation_;
+    }
+
     void SetDragFRCSceneCallback(DragFRCSceneCallback&& dragFRCSceneCallback)
     {
         dragFRCSceneCallback_ = std::move(dragFRCSceneCallback);
@@ -721,6 +736,7 @@ private:
     void StartVibrateFeedback();
 #endif
 
+    bool isSmartGestureFling_ = false;
     ScrollPositionCallback callback_;
     ScrollEventCallback scrollEndCallback_;
     ScrollOverCallback scrollOverCallback_;       // scroll motion controller when edge set to spring

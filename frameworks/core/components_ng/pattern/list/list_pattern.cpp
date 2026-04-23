@@ -1091,7 +1091,7 @@ void ListPattern::PerformScroll(const ScrollingConfig& config)
         return;
     }
     SetIsOverScroll(false);
-    AnimateTo(currentOffset_ - distance, -1, nullptr, true, false, false);
+    SmartGesturePerformScroll(currentOffset_ + distance);
 }
 
 void ListPattern::GetListItemGroupEdge(bool& groupAtStart, bool& groupAtEnd) const

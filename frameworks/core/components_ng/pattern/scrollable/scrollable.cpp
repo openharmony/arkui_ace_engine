@@ -499,7 +499,8 @@ void Scrollable::SetAxis(Axis axis)
 
 void Scrollable::HandleTouchDown(bool fromcrown)
 {
-    if ((state_ != AnimationState::TRANSITION && state_ != AnimationState::IDLE) || isScrollBarDragging_) {
+    if ((state_ != AnimationState::TRANSITION && state_ != AnimationState::IDLE) || isScrollBarDragging_ ||
+        isSmartGestureFling_) {
         isTouchStopAnimation_ = true;
     } else {
         isTouchStopAnimation_ = false;
@@ -519,7 +520,7 @@ void Scrollable::HandleTouchDown(bool fromcrown)
 
 void Scrollable::CheckStopFlingInTouchUp()
 {
-    if (!isDragging_ && !isScrollBarDragging_ && isTouchStopAnimation_) {
+    if (!isDragging_ && !isScrollBarDragging_ && !isSmartGestureFling_ && isTouchStopAnimation_) {
         isUserFling_ = false;
         if (onDidStopFlingCallback_) {
             onDidStopFlingCallback_();
