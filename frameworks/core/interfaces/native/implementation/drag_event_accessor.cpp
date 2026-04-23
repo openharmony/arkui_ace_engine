@@ -190,21 +190,6 @@ void ExecuteDropAnimationImpl(Ark_DragEvent peer,
     };
     info->SetDropAnimation(std::move(customDropAnimationCallback));
 }
-void ExecuteFollowHandMorphDropAnimationImpl(Ark_DragEvent peer,
-                                             const VoidCallback* onAnimationFinished,
-                                             const Opt_String* animationOption)
-{
-    CHECK_NULL_VOID(onAnimationFinished);
-    CHECK_NULL_VOID(peer);
-    auto info = peer->dragInfo;
-    CHECK_NULL_VOID(info);
-    auto onAnimationFinishedCallback = [callback = CallbackHelper(*onAnimationFinished)]() {
-        callback.InvokeSync();
-    };
-    auto convertedAnimationOption = OptConvertPtr<std::string>(animationOption).value_or("");
-    info->SetFollowHandMorphDropAnimation(std::move(onAnimationFinishedCallback));
-    info->SetFollowHandMorphAnimationOption(convertedAnimationOption);
-}
 Ark_Int32 GetDisplayIdImpl(Ark_DragEvent peer)
 {
     const auto errValue = Converter::ArkValue<Ark_Int32>(-1);
@@ -281,23 +266,6 @@ void SetUseCustomDropAnimationImpl(Ark_DragEvent peer,
     CHECK_NULL_VOID(peer->dragInfo);
     peer->dragInfo->UseCustomAnimation(Convert<bool>(useCustomDropAnimation));
 }
-Ark_DragAnimationType GetDragAnimationTypeImpl(Ark_DragEvent peer)
-{
-    auto invalid = ArkValue<Ark_DragAnimationType>(DragAnimationType::DEFAULT);
-    CHECK_NULL_RETURN(peer, invalid);
-    CHECK_NULL_RETURN(peer->dragInfo, invalid);
-    return ArkValue<Ark_DragAnimationType>(peer->dragInfo->GetDragAnimationType());
-}
-void SetDragAnimationTypeImpl(Ark_DragEvent peer,
-                              Ark_DragAnimationType dragAnimationType)
-{
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(peer->dragInfo);
-    auto convertedDragAnimationType = Converter::OptConvert<DragAnimationType>(dragAnimationType);
-    if (convertedDragAnimationType) {
-        peer->dragInfo->SetDragAnimationType(*convertedDragAnimationType);
-    }
-}
 Opt_Union_I32_Array_I32 GetAutoHideComponentUniqueIdsImpl(Ark_DragEvent peer)
 {
     auto invalid = ArkUnion<Opt_Union_I32_Array_I32>(Ark_Empty());
@@ -360,7 +328,6 @@ const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor()
         DragEventAccessor::GetVelocityYImpl,
         DragEventAccessor::GetVelocityImpl,
         DragEventAccessor::ExecuteDropAnimationImpl,
-        DragEventAccessor::ExecuteFollowHandMorphDropAnimationImpl,
         DragEventAccessor::GetDisplayIdImpl,
         DragEventAccessor::GetDragSourceImpl,
         DragEventAccessor::IsRemoteImpl,
@@ -372,8 +339,6 @@ const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor()
         DragEventAccessor::SetUseCustomDropAnimationImpl,
         DragEventAccessor::GetAutoHideComponentUniqueIdsImpl,
         DragEventAccessor::SetAutoHideComponentUniqueIdsImpl,
-        DragEventAccessor::GetDragAnimationTypeImpl,
-        DragEventAccessor::SetDragAnimationTypeImpl,
         DragEventAccessor::SetGetModifierKeyStateImpl,
     };
     return &DragEventAccessorImpl;

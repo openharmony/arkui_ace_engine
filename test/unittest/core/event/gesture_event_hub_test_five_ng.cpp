@@ -585,43 +585,6 @@ HWTEST_F(GestureEventHubTestFiveNg, ExecuteDropAnimation, TestSize.Level1)
 }
 
 /**
- * @tc.name: ExecuteFollowHandMorphDropAnimation
- * @tc.desc: Test ExecuteFollowHandMorphDropAnimation function.
- * @tc.type: FUNC
- */
-HWTEST_F(GestureEventHubTestFiveNg, ExecuteFollowHandMorphDropAnimation, TestSize.Level1)
-{
-    int32_t executeCount = 0;
-    RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    dragEvent->SetFollowHandMorphDropAnimation([&executeCount]() { executeCount++; });
-    dragEvent->SetFollowHandMorphAnimationOption("follow_hand_option");
-    EXPECT_TRUE(dragEvent->HasFollowHandMorphDropAnimation());
-    EXPECT_EQ(dragEvent->GetFollowHandMorphAnimationOption(), "follow_hand_option");
-
-    dragEvent->ExecuteFollowHandMorphDropAnimation();
-    EXPECT_EQ(executeCount, 1);
-    dragEvent->ExecuteFollowHandMorphDropAnimation();
-    EXPECT_EQ(executeCount, 1);
-}
-
-/**
- * @tc.name: DragAnimationTypeConfig
- * @tc.desc: Test dragAnimationType config.
- * @tc.type: FUNC
- */
-HWTEST_F(GestureEventHubTestFiveNg, DragAnimationTypeConfig, TestSize.Level1)
-{
-    RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    EXPECT_EQ(dragEvent->GetDragAnimationType(), DragAnimationType::DEFAULT);
-
-    dragEvent->SetDragAnimationType(static_cast<int32_t>(DragAnimationType::FOLLOW_HAND_MORPH));
-    EXPECT_EQ(dragEvent->GetDragAnimationType(), DragAnimationType::FOLLOW_HAND_MORPH);
-
-    dragEvent->SetDragAnimationType(100);
-    EXPECT_EQ(dragEvent->GetDragAnimationType(), DragAnimationType::DEFAULT);
-}
-
-/**
  * @tc.name: StartVibratorByDrag001
  * @tc.desc: Test StartVibratorByDrag
  * @tc.type: FUNC

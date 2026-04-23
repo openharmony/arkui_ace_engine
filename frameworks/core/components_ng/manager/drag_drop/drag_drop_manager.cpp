@@ -1256,6 +1256,7 @@ void DragDropManager::HandleOnDragEnd(const DragPointerEvent& pointerEvent, cons
     }
 
     RequestDragSummaryInfoAndPrivilege();
+    RequireDragAnimationType();
     std::string udKey;
     InteractionInterface::GetInstance()->GetUdKey(udKey);
     auto eventHub = dragFrameNode->GetEventHub<EventHub>();
