@@ -979,7 +979,13 @@ HWTEST_F(FlexNewTestNG, LayoutPolicyTest001, TestSize.Level0)
     ASSERT_NE(geometryNode1, nullptr);
     auto size1 = geometryNode1->GetFrameSize();
     auto offset1 = geometryNode1->GetFrameOffset();
+    /**
+     * @tc.expected: size1 == SizeF(500.0f, 300.0f)
+     */
     EXPECT_EQ(size1, SizeF(500.0f, 300.0f));
+    /**
+     * @tc.expected: size1 == OffsetF(0.0f, 0.0f)
+     */
     EXPECT_EQ(offset1, OffsetF(0.0f, 0.0f));
 }
 } // namespace OHOS::Ace::NG
