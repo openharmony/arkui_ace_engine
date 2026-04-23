@@ -416,7 +416,9 @@ RefPtr<ClickEvent> TextPickerColumnPattern::CreateItemClickEventListener(RefPtr<
     ACE_UINODE_TRACE(host);
     auto clickEventHandler = [param, weak = WeakClaim(this)](const GestureEvent& /* info */) {
         auto pattern = weak.Upgrade();
-        pattern->OnAroundButtonClick(param);
+        if (pattern) {
+            pattern->OnAroundButtonClick(param);
+        }
     };
 
     auto listener = AceType::MakeRefPtr<NG::ClickEvent>(clickEventHandler);
