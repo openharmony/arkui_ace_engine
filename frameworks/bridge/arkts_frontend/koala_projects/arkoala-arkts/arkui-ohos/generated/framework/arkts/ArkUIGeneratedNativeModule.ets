@@ -6040,6 +6040,12 @@ export class ArkUIGeneratedNativeModule {
     native static _RenderNodeExtender_clearChildren(peer: KPointer): void
     @ani.unsafe.Direct
     native static _RenderNodeExtender_invalidate(peer: KPointer): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_setBackgroundBlur(peer: KPointer, radius: KDouble, grayscale1: KInt, grayscale2: KInt): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_setContentBlur(peer: KPointer, radius: KDouble, grayscale1: KInt, grayscale2: KInt): void
+    @ani.unsafe.Direct
+    native static _RenderNodeExtender_setForegroundBlur(peer: KPointer, radius: KDouble): void
     @ani.unsafe.Quick
     native static _RenderServiceNode_getNodeId(nodeId: KStringPtr): KInt
     @ani.unsafe.Direct

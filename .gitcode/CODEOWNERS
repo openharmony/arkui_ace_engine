@@ -2574,7 +2574,7 @@ frameworks/core/components_ng/pattern/recycle_view/ @arkuieco3
 frameworks/core/components_ng/pattern/refresh/ @arkuiscroll
 frameworks/core/components_ng/pattern/relative_container/ @arkuilayout1
 frameworks/core/components_ng/pattern/remote_window/
-frameworks/core/components_ng/pattern/render_node/ @arkui_framework_xnode
+frameworks/core/components_ng/pattern/render_node/ @arkuieco3
 frameworks/core/components_ng/pattern/rich_editor/ @arkui_rich_editor
 frameworks/core/components_ng/pattern/rich_editor_drag/ @arkui_rich_editor
 frameworks/core/components_ng/pattern/root/ @ArkUI_Event
@@ -3711,7 +3711,7 @@ test/unittest/core/pattern/rating/ @arkuipopupwindow_all
 test/unittest/core/pattern/recycle_node/ @arkuieco3
 test/unittest/core/pattern/refresh/ @arkuiscroll
 test/unittest/core/pattern/relative_container/ @arkuilayout1
-test/unittest/core/pattern/render_node/ @arkui_framework_xnode
+test/unittest/core/pattern/render_node/ @arkuieco3
 test/unittest/core/pattern/rich_editor/ @arkui_rich_editor
 test/unittest/core/pattern/rich_editor_drag/ @arkui_rich_editor
 test/unittest/core/pattern/scroll/ @arkuiscroll

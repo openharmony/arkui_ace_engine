@@ -14,6 +14,7 @@
  */
 #include "core/interfaces/native/node/render_node_modifier.h"
 
+#include "core/components/common/properties/blur_style_option.h"
 #include "core/common/builder_util.h"
 #include "core/components_ng/pattern/render_node/render_node_pattern.h"
 
@@ -589,6 +590,47 @@ ArkUI_CharPtr GetNodeTypeInRenderNode(ArkUINodeHandle node)
     return nodeType.c_str();
 }
 
+void SetRenderNodeBackgroundBlur(ArkUINodeHandle node, ArkUI_Float32 radius,
+    ArkUI_Int32 grayscale1, ArkUI_Int32 grayscale2)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    auto renderContext = GetRenderContext(currentNode);
+    CHECK_NULL_VOID(renderContext);
+    if (renderContext->GetBackgroundEffect().has_value()) {
+        renderContext->UpdateBackgroundEffect(std::nullopt);
+    }
+    BlurOption blurOption;
+    blurOption.grayscale = { static_cast<float>(grayscale1), static_cast<float>(grayscale2) };
+    renderContext->UpdateBackBlur(Dimension(radius), blurOption);
+    if (renderContext->GetBackBlurStyle().has_value()) {
+        renderContext->UpdateBackBlurStyle(std::nullopt);
+    }
+    renderContext->RequestNextFrame();
+}
+
+void SetRenderNodeContentBlur(ArkUINodeHandle node, ArkUI_Float32 radius,
+    ArkUI_Int32 grayscale1, ArkUI_Int32 grayscale2)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    auto renderContext = GetRenderContext(currentNode);
+    CHECK_NULL_VOID(renderContext);
+    BlurOption blurOption;
+    blurOption.grayscale = { static_cast<float>(grayscale1), static_cast<float>(grayscale2) };
+    renderContext->UpdateFrontBlur(Dimension(radius), blurOption);
+    if (renderContext->GetFrontBlurStyle().has_value()) {
+        renderContext->UpdateFrontBlurStyle(std::nullopt);
+    }
+    renderContext->RequestNextFrame();
+}
+
+void SetRenderNodeForegroundBlur(ArkUINodeHandle node, ArkUI_Float32 radius)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    auto renderContext = GetRenderContext(currentNode);
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateForegroundEffect(radius);
+}
+
 namespace NodeModifier {
 const ArkUIRenderNodeModifier* GetRenderNodeModifier()
 {
@@ -635,6 +677,9 @@ const ArkUIRenderNodeModifier* GetRenderNodeModifier()
         .setMarkNodeGroup = SetMarkNodeGroup,
         .setTransformScale = SetTransformScale,
         .getNodeType = GetNodeTypeInRenderNode,
+        .setRenderNodeBackgroundBlur = SetRenderNodeBackgroundBlur,
+        .setRenderNodeContentBlur = SetRenderNodeContentBlur,
+        .setRenderNodeForegroundBlur = SetRenderNodeForegroundBlur,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

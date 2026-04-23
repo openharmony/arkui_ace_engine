@@ -8659,6 +8659,11 @@ struct ArkUIRenderNodeModifier {
     void (*setMarkNodeGroup)(ArkUINodeHandle node, ArkUI_Bool isNodeGroup);
     void (*setTransformScale)(ArkUINodeHandle node, ArkUI_Float32 xF, ArkUI_Float32 yF);
     ArkUI_CharPtr (*getNodeType)(ArkUINodeHandle node);
+    void (*setRenderNodeBackgroundBlur)(ArkUINodeHandle node, ArkUI_Float32 radius,
+        ArkUI_Int32 grayscale1, ArkUI_Int32 grayscale2);
+    void (*setRenderNodeContentBlur)(ArkUINodeHandle node, ArkUI_Float32 radius,
+        ArkUI_Int32 grayscale1, ArkUI_Int32 grayscale2);
+    void (*setRenderNodeForegroundBlur)(ArkUINodeHandle node, ArkUI_Float32 radius);
 };
 
 struct ArkUIFrameNodeModifier {
