@@ -48,6 +48,44 @@ namespace {
 const std::string CUSTOM_SYMBOL_SUFFIX = "_CustomSymbol";
 const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
 
+template<typename T>
+inline bool HasLpxUnit(const std::optional<T>& value)
+{
+    return value.has_value() && value.value().Unit() == DimensionUnit::LPX;
+}
+
+template<typename T>
+inline bool HasCalcLpxUnit(const std::optional<T>& value)
+{
+    return value.has_value() && value.value().GetDimension().Unit() == DimensionUnit::LPX;
+}
+
+inline bool HasPaddingLpxUnit(const std::optional<MarginProperty>& prop)
+{
+    CHECK_NULL_RETURN(prop.has_value(), false);
+    auto& p = prop.value();
+    return HasCalcLpxUnit(p.left) || HasCalcLpxUnit(p.right) ||
+           HasCalcLpxUnit(p.top) || HasCalcLpxUnit(p.bottom) ||
+           HasCalcLpxUnit(p.start) || HasCalcLpxUnit(p.end);
+}
+
+inline bool HasBorderRadiusLpxUnit(const std::optional<BorderRadiusProperty>& prop)
+{
+    CHECK_NULL_RETURN(prop.has_value(), false);
+    auto& r = prop.value();
+    return HasLpxUnit(r.radiusTopLeft) || HasLpxUnit(r.radiusTopRight) ||
+           HasLpxUnit(r.radiusBottomLeft) || HasLpxUnit(r.radiusBottomRight) ||
+           HasLpxUnit(r.radiusTopStart) || HasLpxUnit(r.radiusTopEnd) ||
+           HasLpxUnit(r.radiusBottomStart) || HasLpxUnit(r.radiusBottomEnd);
+}
+
+inline bool HasImageSpanSizeLpxUnit(const std::optional<ImageSpanSize>& size)
+{
+    CHECK_NULL_RETURN(size.has_value(), false);
+    auto& s = size.value();
+    return HasLpxUnit(s.width) || HasLpxUnit(s.height);
+}
+
 std::string GetDeclaration(const std::optional<Color>& color, const std::vector<TextDecoration>& textDecorations,
     const std::optional<TextDecorationStyle>& textDecorationStyle)
 {
@@ -270,14 +308,14 @@ void SpanNode::RequestTextFlushDirty(const RefPtr<UINode>& node, bool markModify
 void SpanNode::SetTextBackgroundStyle(const TextBackgroundStyle& style)
 {
     BaseSpan::SetTextBackgroundStyle(style);
-    spanItem_->backgroundStyle = GetTextBackgroundStyle();
+    spanItem_->SetBackgroundStyle(GetTextBackgroundStyle());
     spanItem_->MarkReLayoutParagraph();
 }
 
 void SpanNode::UpdateTextBackgroundFromParent(const std::optional<TextBackgroundStyle>& style)
 {
     BaseSpan::UpdateTextBackgroundFromParent(style);
-    spanItem_->backgroundStyle = GetTextBackgroundStyle();
+    spanItem_->SetBackgroundStyle(GetTextBackgroundStyle());
     spanItem_->MarkReLayoutParagraph();
 }
 
@@ -1332,6 +1370,7 @@ void SpanItem::CopyBaseSpanItem(RefPtr<SpanItem> sameSpan) const
     sameSpan->urlAddress = urlAddress;
     CopySpanItemEvents(sameSpan);
     sameSpan->resMap_ = resMap_;
+    sameSpan->lpxFlags_ = lpxFlags_;
 }
 
 #define WRITE_TLV_INHERIT(group, name, tag, type, inheritName)   \
@@ -1560,6 +1599,9 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
                 break;
         }
     }
+    if (sameSpan->backgroundStyle.has_value()) {
+        sameSpan->SetBackgroundStyle(sameSpan->backgroundStyle);
+    }
     if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_NINETEEN)) {
         sameSpan->textLineStyle->ResetParagraphSpacing();
         sameSpan->urlAddress = std::nullopt;
@@ -1712,17 +1754,49 @@ void ImageSpanItem::UpdatePlaceholderBackgroundStyle(const RefPtr<FrameNode>& im
     CHECK_NULL_VOID(imageNode);
     auto property = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(property);
-    backgroundStyle = property->GetPlaceHolderStyle();
+    SetBackgroundStyle(property->GetPlaceHolderStyle());
 }
 
 void ImageSpanItem::SetImageSpanOptions(const ImageSpanOptions& options)
 {
     this->options = options;
+    ClearLpxFlag(LPX_FLAG_IMAGE_MARGIN | LPX_FLAG_IMAGE_PADDING | LPX_FLAG_IMAGE_BORDER_RADIUS | LPX_FLAG_IMAGE_SIZE);
+    if (options.imageAttribute.has_value()) {
+        auto& attr = options.imageAttribute.value();
+        if (HasPaddingLpxUnit(attr.marginProp)) {
+            SetLpxFlag(LPX_FLAG_IMAGE_MARGIN);
+        }
+        if (HasPaddingLpxUnit(attr.paddingProp)) {
+            SetLpxFlag(LPX_FLAG_IMAGE_PADDING);
+        }
+        if (HasBorderRadiusLpxUnit(attr.borderRadius)) {
+            SetLpxFlag(LPX_FLAG_IMAGE_BORDER_RADIUS);
+        }
+        if (HasImageSpanSizeLpxUnit(attr.size)) {
+            SetLpxFlag(LPX_FLAG_IMAGE_SIZE);
+        }
+    }
 }
 
 void ImageSpanItem::ResetImageSpanOptions()
 {
     options.imageAttribute.reset();
+    ClearLpxFlag(LPX_FLAG_IMAGE_MARGIN | LPX_FLAG_IMAGE_PADDING | LPX_FLAG_IMAGE_BORDER_RADIUS | LPX_FLAG_IMAGE_SIZE);
+}
+
+void SpanItem::SetBackgroundStyle(const std::optional<TextBackgroundStyle>& style)
+{
+    backgroundStyle = style;
+    ClearLpxFlag(LPX_FLAG_BACKGROUND_RADIUS);
+    if (style.has_value() && HasBorderRadiusLpxUnit(style->backgroundRadius)) {
+        SetLpxFlag(LPX_FLAG_BACKGROUND_RADIUS);
+    }
+}
+
+void SpanItem::ResetBackgroundStyle()
+{
+    backgroundStyle.reset();
+    ClearLpxFlag(LPX_FLAG_BACKGROUND_RADIUS);
 }
 
 RefPtr<SpanItem> ImageSpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
@@ -1735,7 +1809,7 @@ RefPtr<SpanItem> ImageSpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
         sameSpan->onClick = onClick;
         sameSpan->onLongPress = onLongPress;
         if (backgroundStyle.has_value()) {
-            sameSpan->backgroundStyle = backgroundStyle;
+            sameSpan->SetBackgroundStyle(backgroundStyle);
         }
         if (textLineStyle && textLineStyle->HasTextDirection() && sameSpan->textLineStyle) {
             sameSpan->textLineStyle->UpdateTextDirection(textLineStyle->GetTextDirectionValue());
@@ -2001,7 +2075,7 @@ RefPtr<SpanItem> CustomSpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
         sameSpan->onClick = onClick;
         sameSpan->onLongPress = onLongPress;
         if (backgroundStyle.has_value()) {
-            sameSpan->backgroundStyle = backgroundStyle;
+            sameSpan->SetBackgroundStyle(backgroundStyle);
         }
         if (textLineStyle && textLineStyle->HasTextDirection() && sameSpan->textLineStyle) {
             sameSpan->textLineStyle->UpdateTextDirection(textLineStyle->GetTextDirectionValue());

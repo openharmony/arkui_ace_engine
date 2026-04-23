@@ -107,6 +107,7 @@ void FontSpan::AddSpanStyle(const RefPtr<NG::SpanItem>& spanItem) const
 
     if (font_.fontSize.has_value()) {
         spanItem->fontStyle->UpdateFontSize(font_.fontSize.value());
+        NG::UpdateSpanLpxFlag<Dimension>(spanItem, font_.fontSize.value(), NG::SpanItem::LPX_FLAG_FontSize);
     }
 
     if (font_.fontStyle.has_value()) {
@@ -119,6 +120,7 @@ void FontSpan::AddSpanStyle(const RefPtr<NG::SpanItem>& spanItem) const
 
     if (font_.strokeWidth.has_value()) {
         spanItem->fontStyle->UpdateStrokeWidth(font_.strokeWidth.value());
+        NG::UpdateSpanLpxFlag<Dimension>(spanItem, font_.strokeWidth.value(), NG::SpanItem::LPX_FLAG_StrokeWidth);
     }
 
     if (font_.superscript.has_value()) {
@@ -194,9 +196,11 @@ void FontSpan::RemoveSpanStyle(const RefPtr<NG::SpanItem>& spanItem)
     spanItem->fontStyle->ResetTextColor();
     spanItem->fontStyle->ResetFontFamily();
     spanItem->fontStyle->ResetFontSize();
+    NG::ResetSpanLpxFlag<Dimension>(spanItem, NG::SpanItem::LPX_FLAG_FontSize);
     spanItem->fontStyle->ResetItalicFontStyle();
     spanItem->fontStyle->ResetFontWeight();
     spanItem->fontStyle->ResetStrokeWidth();
+    NG::ResetSpanLpxFlag<Dimension>(spanItem, NG::SpanItem::LPX_FLAG_StrokeWidth);
     spanItem->fontStyle->ResetStrokeColor();
     spanItem->fontStyle->ResetSuperscript();
     spanItem->fontStyle->ResetFontVariations();
@@ -542,6 +546,7 @@ void BaselineOffsetSpan::AddBaselineOffsetStyle(const RefPtr<NG::SpanItem>& span
         spanItem->textLineStyle = std::make_unique<NG::TextLineStyle>();
     }
     spanItem->textLineStyle->UpdateBaselineOffset(baselineOffset_);
+    NG::UpdateSpanLpxFlag<Dimension>(spanItem, baselineOffset_, NG::SpanItem::LPX_FLAG_BaselineOffset);
 }
 
 void BaselineOffsetSpan::RemoveBaselineOffsetStyle(const RefPtr<NG::SpanItem>& spanItem)
@@ -551,6 +556,7 @@ void BaselineOffsetSpan::RemoveBaselineOffsetStyle(const RefPtr<NG::SpanItem>& s
         spanItem->textLineStyle = std::make_unique<NG::TextLineStyle>();
     }
     spanItem->textLineStyle->ResetBaselineOffset();
+    NG::ResetSpanLpxFlag<Dimension>(spanItem, NG::SpanItem::LPX_FLAG_BaselineOffset);
 }
 
 SpanType BaselineOffsetSpan::GetSpanType() const
@@ -613,11 +619,13 @@ RefPtr<SpanBase> LetterSpacingSpan::GetSubSpan(int32_t start, int32_t end)
 void LetterSpacingSpan::AddLetterSpacingStyle(const RefPtr<NG::SpanItem>& spanItem) const
 {
     spanItem->fontStyle->UpdateLetterSpacing(letterSpacing_);
+    NG::UpdateSpanLpxFlag<Dimension>(spanItem, letterSpacing_, NG::SpanItem::LPX_FLAG_LetterSpacing);
 }
 
 void LetterSpacingSpan::RemoveLetterSpacingStyle(const RefPtr<NG::SpanItem>& spanItem)
 {
     spanItem->fontStyle->ResetLetterSpacing();
+    NG::ResetSpanLpxFlag<Dimension>(spanItem, NG::SpanItem::LPX_FLAG_LetterSpacing);
 }
 
 SpanType LetterSpacingSpan::GetSpanType() const
@@ -1093,6 +1101,8 @@ void ParagraphStyleSpan::AddParagraphStyle(const RefPtr<NG::SpanItem>& spanItem)
 
     if (paragraphStyle_.leadingMargin.has_value()) {
         spanItem->textLineStyle->UpdateLeadingMargin(paragraphStyle_.leadingMargin.value());
+        NG::UpdateSpanLpxFlag<NG::LeadingMargin>(spanItem, paragraphStyle_.leadingMargin.value(),
+            NG::SpanItem::LPX_FLAG_LeadingMargin);
     }
 
     if (paragraphStyle_.drawableLeadingMargin.has_value()) {
@@ -1105,10 +1115,14 @@ void ParagraphStyleSpan::AddParagraphStyle(const RefPtr<NG::SpanItem>& spanItem)
 
     if (paragraphStyle_.textIndent.has_value()) {
         spanItem->textLineStyle->UpdateTextIndent(paragraphStyle_.textIndent.value());
+        NG::UpdateSpanLpxFlag<Dimension>(spanItem, paragraphStyle_.textIndent.value(),
+            NG::SpanItem::LPX_FLAG_TextIndent);
     }
 
     if (paragraphStyle_.paragraphSpacing.has_value()) {
         spanItem->textLineStyle->UpdateParagraphSpacing(paragraphStyle_.paragraphSpacing.value());
+        NG::UpdateSpanLpxFlag<Dimension>(spanItem, paragraphStyle_.paragraphSpacing.value(),
+            NG::SpanItem::LPX_FLAG_ParagraphSpacing);
     }
 
     if (paragraphStyle_.textDirection.has_value()) {
@@ -1123,10 +1137,13 @@ void ParagraphStyleSpan::RemoveParagraphStyle(const RefPtr<NG::SpanItem>& spanIt
     spanItem->textLineStyle->ResetMaxLines();
     spanItem->textLineStyle->ResetTextOverflow();
     spanItem->textLineStyle->ResetLeadingMargin();
+    NG::ResetSpanLpxFlag<NG::LeadingMargin>(spanItem, NG::SpanItem::LPX_FLAG_LeadingMargin);
     spanItem->textLineStyle->ResetDrawableLeadingMargin();
     spanItem->textLineStyle->ResetWordBreak();
     spanItem->textLineStyle->ResetTextIndent();
+    NG::ResetSpanLpxFlag<Dimension>(spanItem, NG::SpanItem::LPX_FLAG_TextIndent);
     spanItem->textLineStyle->ResetParagraphSpacing();
+    NG::ResetSpanLpxFlag<Dimension>(spanItem, NG::SpanItem::LPX_FLAG_ParagraphSpacing);
     spanItem->textLineStyle->ResetTextDirection();
 }
 
@@ -1240,6 +1257,7 @@ RefPtr<SpanBase> LineHeightSpan::GetSubSpan(int32_t start, int32_t end)
 void LineHeightSpan::AddLineHeightStyle(const RefPtr<NG::SpanItem>& spanItem) const
 {
     spanItem->textLineStyle->UpdateLineHeight(lineHeight_);
+    NG::UpdateSpanLpxFlag<Dimension>(spanItem, lineHeight_, NG::SpanItem::LPX_FLAG_LineHeight);
     if (lineHeightMultiple_.has_value()) {
         spanItem->textLineStyle->UpdateLineHeightMultiply(lineHeightMultiple_.value());
     }
@@ -1248,6 +1266,7 @@ void LineHeightSpan::AddLineHeightStyle(const RefPtr<NG::SpanItem>& spanItem) co
 void LineHeightSpan::RemoveLineHeightStyle(const RefPtr<NG::SpanItem>& spanItem) const
 {
     spanItem->textLineStyle->ResetLineHeight();
+    NG::ResetSpanLpxFlag<Dimension>(spanItem, NG::SpanItem::LPX_FLAG_LineHeight);
     spanItem->textLineStyle->ResetLineHeightMultiply();
 }
 
@@ -1520,7 +1539,7 @@ void BackgroundColorSpan::AddSpanStyle(const RefPtr<NG::SpanItem>& spanItem) con
         return;
     }
     TextBackgroundStyle tempVal = GetBackgroundColor();
-    spanItem->backgroundStyle = tempVal;
+    spanItem->SetBackgroundStyle(tempVal);
     if (!tempVal.HasKey("textBackgroundStyle.color")) {
         return;
     }
@@ -1546,7 +1565,7 @@ void BackgroundColorSpan::AddSpanStyle(const RefPtr<NG::SpanItem>& spanItem) con
         } else {
             styleValue.ReloadResourcesByKey("textBackgroundStyle.color");
         }
-        spanItem->backgroundStyle = styleValue;
+        spanItem->SetBackgroundStyle(styleValue);
     };
     resourceUpdater.updateFunc = updateFunc;
     spanItem->AddResourceObj("textbackgroundStyle", resourceUpdater);
@@ -1558,7 +1577,7 @@ void BackgroundColorSpan::RemoveSpanStyle(const RefPtr<NG::SpanItem>& spanItem)
         if (spanItem->backgroundStyle.value().HasKey("textBackgroundStyle.color")) {
             spanItem->RemoveResourceObj("textbackgroundStyle");
         }
-        spanItem->backgroundStyle.reset();
+        spanItem->ResetBackgroundStyle();
     }
 }
 

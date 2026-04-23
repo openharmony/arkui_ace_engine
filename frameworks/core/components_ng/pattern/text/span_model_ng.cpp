@@ -702,7 +702,7 @@ void SpanModelNG::ResetTextBackgroundStyleByBaseSpan(UINode* uiNode)
     CHECK_NULL_VOID(spanNode);
     auto spanItem = spanNode->GetSpanItem();
     CHECK_NULL_VOID(spanItem);
-    spanItem->backgroundStyle = std::nullopt;
+    spanItem->ResetBackgroundStyle();
     spanNode->RequestTextFlushDirty();
 }
 

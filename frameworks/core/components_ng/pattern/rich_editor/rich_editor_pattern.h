@@ -578,6 +578,8 @@ public:
     bool SymbolSpanUpdateStyle(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
     void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle);
     struct UpdateSpanStyle GetUpdateSpanStyle();
+    bool HasLpxUnitStyle() const;
+    void UpdateLpxUnitFlag();
     void UpdateParagraphStyle(int32_t start, int32_t end, const struct UpdateParagraphStyle& style);
     void UpdateParagraphStyle(RefPtr<SpanNode> spanNode, const struct UpdateParagraphStyle& style);
     std::vector<ParagraphInfo> GetParagraphInfo(int32_t start, int32_t end);
@@ -1377,6 +1379,8 @@ private:
     OffsetF movingHandleOffset_;
     std::vector<TimeStamp> clickInfo_;
     std::pair<int32_t, int32_t> initSelector_ = { 0, 0 };
+    bool hasLpxUnitStyle_ = false;
+    bool hasPlaceholderLpxUnitStyle_ = false;
     bool previewLongPress_ = false;
     bool editingLongPress_ = false;
     bool isTouchSelecting_ = false;
