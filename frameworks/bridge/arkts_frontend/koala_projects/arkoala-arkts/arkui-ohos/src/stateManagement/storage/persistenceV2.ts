@@ -64,7 +64,7 @@ const Unknown: string = 'unknown';
 
 type PersistenceErrorCallback = ((key: string, reason: string, message: string) => void) | undefined;
 
-const enum MapType {
+enum MapType {
     NOT_IN_MAP = -1,
     MODULE_MAP = 0,
     GLOBAL_MAP = 1

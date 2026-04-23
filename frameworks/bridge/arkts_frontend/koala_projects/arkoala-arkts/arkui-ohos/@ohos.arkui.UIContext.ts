@@ -70,12 +70,12 @@ import { GlobalScopeUicontextFontScale } from "#generated"
 import { deserializeAndCallCallback } from 'arkui/framework/peers/CallbackDeserializeCall';
 import { RawInputEventType } from 'arkui/component/enums';
 
-export const enum GestureActionPhase {
+export enum GestureActionPhase {
     WILL_START = 0,
     WILL_END = 1
 }
 
-export const enum  GestureListenerType {
+export enum GestureListenerType {
     TAP = 0,
     LONG_PRESS = 1,
     PAN = 2,
@@ -564,7 +564,7 @@ export class CursorController {
     }
 }
 
-export const enum KeyboardAvoidMode {
+export enum KeyboardAvoidMode {
     OFFSET = 0,
     RESIZE = 1,
     OFFSET_WITH_CARET = 2,
@@ -580,7 +580,7 @@ export class ResolvedUIContext extends UIContext {
     }
 }
 
-export const enum ResolveStrategy {
+export enum ResolveStrategy {
     CALLING_SCOPE = 0,
     LAST_FOCUS = 1,
     MAX_INSTANCE_ID = 2,
@@ -1820,7 +1820,7 @@ export class DynamicSyncScene {
     }
 }
 
-export const enum SwiperDynamicSyncSceneType {
+export enum SwiperDynamicSyncSceneType {
     GESTURE = 0,
     ANIMATION = 1,
 }
@@ -1840,7 +1840,7 @@ export class SwiperDynamicSyncScene extends DynamicSyncScene {
     }
 }
 
-export const enum MarqueeDynamicSyncSceneType {
+export enum MarqueeDynamicSyncSceneType {
   ANIMATION = 1
 }
 
@@ -1859,7 +1859,7 @@ export class MarqueeDynamicSyncScene extends DynamicSyncScene {
     }
 }
 
-export const enum CustomKeyboardContinueFeature {
+export enum CustomKeyboardContinueFeature {
     ENABLED = 0,
     DISABLED = 1,
 }
