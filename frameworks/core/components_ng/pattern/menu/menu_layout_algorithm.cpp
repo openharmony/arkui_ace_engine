@@ -633,10 +633,34 @@ void MenuLayoutAlgorithm::InitWrapperRect(
             LimitContainerModalMenuRect(width_, height_, menuPattern);
         }
     }
-    wrapperRect_.SetRect(left_, top_, width_ - left_ - right_, height_ - top_ - bottom_);
+    CalculateSafeAreaIntersection(safeAreaInsets);
     wrapperSize_ = SizeF(wrapperRect_.Width(), wrapperRect_.Height());
     dumpInfo_.wrapperRect = wrapperRect_;
     TAG_LOGI(AceLogTag::ACE_MENU, "InitWrapperRect with safeAreaInsets : %{public}s", wrapperRect_.ToString().c_str());
+}
+
+void MenuLayoutAlgorithm::CalculateSafeAreaIntersection(const SafeAreaInsets& safeAreaInsets)
+{
+    if (targetInUIExtension_) {
+        auto rectOffset = Offset(0.0, 0.0);
+        auto rectSize = Size(param_.menuWindowRect.Width(), param_.menuWindowRect.Height());
+        auto topSafeAreaRect = Rect(param_.menuWindowRect.Left(), safeAreaInsets.top_.start,
+            param_.menuWindowRect.Width(), safeAreaInsets.top_.Length());
+        auto topIntersectRect = topSafeAreaRect.IntersectRect(param_.menuWindowRect);
+        if (GreatNotEqual(topIntersectRect.Height(), 0.0)) {
+            rectOffset.SetY(topIntersectRect.Height());
+            rectSize.MinusHeight(topIntersectRect.Height());
+        }
+        auto bottomSafeAreaRect = Rect(param_.menuWindowRect.Left(), safeAreaInsets.bottom_.start,
+            param_.menuWindowRect.Width(), safeAreaInsets.bottom_.Length());
+        auto bottomIntersectRect = bottomSafeAreaRect.IntersectRect(param_.menuWindowRect);
+        if (GreatNotEqual(bottomIntersectRect.Height(), 0.0)) {
+            rectSize.MinusHeight(bottomIntersectRect.Height());
+        }
+        wrapperRect_.SetRect(rectOffset, rectSize);
+    } else {
+        wrapperRect_.SetRect(left_, top_, width_ - left_ - right_, height_ - top_ - bottom_);
+    }
 }
 
 void MenuLayoutAlgorithm::UpdateWrapperRectForHoverMode(const RefPtr<MenuLayoutProperty>& props,
@@ -3606,6 +3630,14 @@ void MenuLayoutAlgorithm::InitCanExpandCurrentWindow(bool isContextMenu,
     const RefPtr<MenuLayoutProperty>& menuLayoutProperty, const RefPtr<MenuPattern>& menuPattern)
 {
     CHECK_NULL_VOID(menuLayoutProperty && menuPattern);
+    auto containerId = Container::CurrentId();
+    auto container = AceEngine::Get().GetContainer(containerId);
+    if (containerId >= MIN_SUBCONTAINER_ID) {
+        auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
+        container = AceEngine::Get().GetContainer(parentContainerId);
+    }
+    CHECK_NULL_VOID(container);
+    targetInUIExtension_ = container->IsUIExtensionWindow();
     showInSubWindow_ = menuLayoutProperty->GetShowInSubWindowValue(false) || isContextMenu ||
         menuPattern->IsSelectOverlayShowInSubWindow();
     dumpInfo_.showInSubWindow = showInSubWindow_;
@@ -3616,15 +3648,8 @@ void MenuLayoutAlgorithm::InitCanExpandCurrentWindow(bool isContextMenu,
     // subwindow on phone has the same size as the main window
     // so menu showed in subwindow can not expand the current window on phone
     canExpandCurrentWindow_ = IsExpandDisplay();
-    auto containerId = Container::CurrentId();
-    auto container = AceEngine::Get().GetContainer(containerId);
     if (containerId >= MIN_SUBCONTAINER_ID) {
-        auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
-        container = AceEngine::Get().GetContainer(parentContainerId);
-    }
-    CHECK_NULL_VOID(container);
-    if (containerId >= MIN_SUBCONTAINER_ID) {
-        isUIExtensionSubWindow_ = container->IsUIExtensionWindow();
+        isUIExtensionSubWindow_ = targetInUIExtension_;
         if (isUIExtensionSubWindow_) {
             // menu can show expand the UIExtension window
             canExpandCurrentWindow_ = true;

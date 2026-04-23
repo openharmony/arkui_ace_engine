@@ -321,6 +321,7 @@ private:
     void BuildTopArrowPath(float arrowX, float arrowY, std::string& path);
     void BuildRightArrowPath(float arrowX, float arrowY, std::string& path);
     void BuildLeftArrowPath(float arrowX, float arrowY, std::string& path);
+    void CalculateSafeAreaIntersection(const SafeAreaInsets& safeAreaInsets);
 #if defined(ENABLE_ROSEN_BACKEND)
     std::shared_ptr<OHOS::Rosen::RSNGShapeBase> GetMenuSDFShape(bool didNeedArrow);
 
@@ -451,6 +452,7 @@ private:
     bool isExpandDisplay_ = false;
     bool isFreeMultiWindow_ = false;
     bool isUIExtensionSubWindow_ = false;
+    bool targetInUIExtension_ = false;
     RectF displayWindowRect_;
     RectF UIExtensionHostWindowRect_;
     bool isContainerModal_ = false;
