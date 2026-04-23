@@ -358,14 +358,14 @@ export struct IconGroupSuffix {
             SymbolGlyph()
               .fontColor([iconGroupSuffixTheme.fillColor])
               .fontSize(this.getIconSize())
-              .attributeModifier(suffixItem)
+              .attributeModifier(suffixItem as SymbolGlyphModifier)
               .focusable(true)
               .effectStrategy(SymbolEffectStrategy.NONE)
               .symbolEffect(this.symbolEffect, false)
               .symbolEffect(this.symbolEffect, Double.toInt(iconGroupSuffixTheme.defaultEffect))
-          } else if (this.isSymbolItem(suffixItem)) {
+          } else if (suffixItem instanceof SymbolItemOptions) {
             this.SymbolItemBuilder(suffixItem as SymbolItemOptions)
-          } else {
+          } else if (suffixItem instanceof IconItemOptions) {
             this.IconItemBuilder(suffixItem as IconItemOptions)
           }
         }
