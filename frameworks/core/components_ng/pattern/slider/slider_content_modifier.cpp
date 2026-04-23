@@ -203,22 +203,6 @@ RSUIColor GetHDRUIColorByHeadRoom(const ColorWithHeadRoom& colorWithHeadRoom)
             std::clamp(colorWithHeadRoom.alpha, 0.0f, COLOR_DEFAULT_MAX));
 }
 
-RSColor4f GetHDRColor4fByHeadRoom(const ColorWithHeadRoom& colorWithHeadRoom)
-{
-    auto hr = colorWithHeadRoom.headRoom;
-    return GreatNotEqual(hr, COLOR_HEAD_ROOM_DEFAULT_VALUE) ?
-        RSColor4f {
-            static_cast<float>(std::clamp(colorWithHeadRoom.red, 0.0f, COLOR_DEFAULT_MAX) * hr),
-            static_cast<float>(std::clamp(colorWithHeadRoom.green, 0.0f, COLOR_DEFAULT_MAX) * hr),
-            static_cast<float>(std::clamp(colorWithHeadRoom.blue, 0.0f, COLOR_DEFAULT_MAX) * hr),
-            static_cast<float>(std::clamp(colorWithHeadRoom.alpha, 0.0f, COLOR_DEFAULT_MAX)) } :
-        RSColor4f {
-            static_cast<float>(std::clamp(colorWithHeadRoom.red, 0.0f, COLOR_DEFAULT_MAX)),
-            static_cast<float>(std::clamp(colorWithHeadRoom.green, 0.0f, COLOR_DEFAULT_MAX)),
-            static_cast<float>(std::clamp(colorWithHeadRoom.blue, 0.0f, COLOR_DEFAULT_MAX)),
-            static_cast<float>(std::clamp(colorWithHeadRoom.alpha, 0.0f, COLOR_DEFAULT_MAX)) };
-}
-
 void GetRSColorSpaceByGradientColors(
     const std::vector<GradientColor>& gradientColors, std::shared_ptr<RSColorSpace>& rsColorSpace)
 {
@@ -240,19 +224,29 @@ void GetRSColorSpaceByGradientColors(
     rsColorSpace = RSColorSpace::CreateRGB(RSCMSTransferFuncType::SRGB, matrixType);
 }
 
-// return max hdr
-float GetColorsByGradientColors(
+float GetHDRMaxByGradientColors(const std::vector<GradientColor>& gradientColors)
+{
+    float hdrMax = COLOR_HEAD_ROOM_DEFAULT_VALUE;
+    for (size_t index = 0; index < gradientColors.size(); index++) {
+        Color color = gradientColors[index].GetColor();
+        if (color.GetHeadRoomColor().has_value()) {
+            auto colorWithHeadRoom = color.GetHeadRoomColor().value();
+            hdrMax = std::max(hdrMax, colorWithHeadRoom.headRoom);
+        }
+    }
+    return hdrMax;
+}
+
+void GetUIColorsByGradientColors(
     const std::vector<GradientColor>& gradientColors, std::vector<RSUIColor>& resultColors)
 {
     resultColors.clear();
-    float maxHdr = COLOR_HEAD_ROOM_DEFAULT_VALUE;
     for (size_t index = 0; index < gradientColors.size(); index++) {
         Color color = gradientColors[index].GetColor();
         RSUIColor rsUIColor;
         if (color.GetHeadRoomColor().has_value()) {
             auto colorWithHeadRoom = color.GetHeadRoomColor().value();
             rsUIColor = GetHDRUIColorByHeadRoom(colorWithHeadRoom);
-            maxHdr = std::max(maxHdr, colorWithHeadRoom.headRoom);
         } else {
             auto linearColor = gradientColors[index].GetLinearColor();
             rsUIColor = RSUIColor(
@@ -263,29 +257,17 @@ float GetColorsByGradientColors(
         }
         resultColors.emplace_back(rsUIColor);
     }
-    return maxHdr;
 }
 
-// return max hdr
-float GetColorsByGradientColors(
+void GetColor4fsByGradientColors(
     const std::vector<GradientColor>& gradientColors, std::vector<RSColor4f>& resultColors)
 {
     resultColors.clear();
-    float maxHdr = COLOR_HEAD_ROOM_DEFAULT_VALUE;
     for (size_t index = 0; index < gradientColors.size(); index++) {
-        RSColor4f rsColor4f;
-        Color color = gradientColors[index].GetColor();
-        if (color.GetHeadRoomColor().has_value()) {
-            auto colorWithHeadRoom = color.GetHeadRoomColor().value();
-            rsColor4f = GetHDRColor4fByHeadRoom(colorWithHeadRoom);
-            maxHdr = std::max(maxHdr, colorWithHeadRoom.headRoom);
-        } else {
-            uint32_t colorValue = gradientColors[index].GetLinearColor().GetValue();
-            rsColor4f = RSColor(colorValue).GetColor4f();
-        }
+        uint32_t colorValue = gradientColors[index].GetLinearColor().GetValue();
+        RSColor4f rsColor4f = RSColor(colorValue).GetColor4f();
         resultColors.emplace_back(rsColor4f);
     }
-    return maxHdr;
 }
 
 std::shared_ptr<RSShaderEffect> CreateLinearGradientShader(
@@ -354,16 +336,23 @@ void SliderContentModifier::DrawBackground(DrawingContext& context)
     brush.SetAntiAlias(true);
     std::shared_ptr<RSColorSpace> rsColorSpace = nullptr;
     GetRSColorSpaceByGradientColors(gradientColors, rsColorSpace);
-    std::vector<RSColor4f> rsColor4fs;
+    float hdrMax = GetHDRMaxByGradientColors(gradientColors);
+    if (GreatNotEqual(hdrMax, COLOR_HEAD_ROOM_DEFAULT_VALUE)) {
 #ifdef ENABLE_ROSEN_BACKEND
-    float hdrMax = GetColorsByGradientColors(gradientColors, rsColor4fs);
-    ApplyHDRHeadRoom(host_, hdrMax);
-#else
-    GetColorsByGradientColors(gradientColors, rsColor4fs);
+        ApplyHDRHeadRoom(host_, hdrMax);
 #endif
-    brush.SetShaderEffect(reverse_ ?
-        CreateLinearGradientShader(endPoint, startPoint, rsColor4fs, rsColorSpace, pos) :
-        CreateLinearGradientShader(startPoint, endPoint, rsColor4fs, rsColorSpace, pos));
+        std::vector<RSUIColor> rsUIColors;
+        GetUIColorsByGradientColors(gradientColors, rsUIColors);
+        brush.SetShaderEffect(reverse_ ?
+            CreateLinearGradientShader(endPoint, startPoint, rsUIColors, rsColorSpace, pos) :
+            CreateLinearGradientShader(startPoint, endPoint, rsUIColors, rsColorSpace, pos));
+    } else {
+        std::vector<RSColor4f> rsColor4fs;
+        GetColor4fsByGradientColors(gradientColors, rsColor4fs);
+        brush.SetShaderEffect(reverse_ ?
+            CreateLinearGradientShader(endPoint, startPoint, rsColor4fs, rsColorSpace, pos) :
+            CreateLinearGradientShader(startPoint, endPoint, rsColor4fs, rsColorSpace, pos));
+    }
     canvas.AttachBrush(brush);
     auto trackRadius = isEnlarge_ ? trackBorderRadius * scaleValue_ : trackBorderRadius;
     RSRoundRect roundRect(trackRect, trackRadius, trackRadius);
