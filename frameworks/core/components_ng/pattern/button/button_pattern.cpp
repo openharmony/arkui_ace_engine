@@ -909,7 +909,7 @@ void ButtonPattern::ReportButtonClickResult()
 
     auto manager = UiSessionManager::GetInstance();
     CHECK_NULL_VOID(manager);
-    manager->ReportComponentChangeEvent("buttonClick", json->ToString(), 0);
+    manager->ReportComponentChangeEvent("buttonClick", json->ToString(), ComponentEventType::COMPONENT_EVENT_SELECT);
 }
 
 void ButtonPattern::InitHoverEvent()
