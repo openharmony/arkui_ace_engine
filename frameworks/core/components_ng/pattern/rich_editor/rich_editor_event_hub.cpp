@@ -824,6 +824,11 @@ void RichEditorEventHub::FireOnWillAttachIME(IMEClient& info)
     }
 }
 
+RefPtr<GestureEventHub> RichEditorEventHub::CreateGestureEventHub()
+{
+    return MakeRefPtr<RichEditorGestureEventHub>(WeakClaim(this));
+}
+
 void RichEditorAbstractSpanResult::SetBorderRadius(const std::string& borderRadius)
 {
     borderRadius_ = borderRadius;

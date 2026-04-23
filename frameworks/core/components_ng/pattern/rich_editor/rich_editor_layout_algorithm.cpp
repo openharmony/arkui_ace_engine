@@ -33,6 +33,7 @@ RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(const RefPtr<RichEditorPatt
     paraMapPtr_(&pattern->paragraphCache_),
     styleManager_(pattern->styleManager_),
     needShowPlaceholder_(pattern->NeedShowPlaceholder()),
+    isHorizontalScrolling_(pattern->isHorizontalScrolling_),
     isSingleLineMode_(pattern->isSingleLineMode_)
 {
     ACE_SCOPED_TRACE("RichEditorLayoutAlgorithm::Constructor");
@@ -287,7 +288,7 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContentSize(
     pManager_->SetParagraphs(GetParagraphs());
     auto textWidth = pManager_->GetTextWidth();
     auto maxWidth = pManager_->GetMaxWidth();
-    return SizeF(isSingleLineMode_ ? std::max(textWidth, maxWidth) : maxWidth, pManager_->GetHeight());
+    return SizeF(IsContentWidthUnlimited() ? std::max(textWidth, maxWidth) : maxWidth, pManager_->GetHeight());
 }
 
 LayoutConstraintF RichEditorLayoutAlgorithm::ReMeasureContent(
@@ -367,7 +368,7 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
     UpdateRichTextRect(optionalTextSize.value(), layoutWrapper);
     auto maxHeight = newContentConstraint.selfIdealSize.Height().value_or(newContentConstraint.maxSize.Height());
     auto contentHeight = std::min(res.Height(), maxHeight);
-    auto contentWidth = isSingleLineMode_ ?
+    auto contentWidth = IsContentWidthUnlimited() ?
         MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(contentConstraint).Width() : res.Width();
     return SizeF(contentWidth, contentHeight);
 }
@@ -447,7 +448,7 @@ void RichEditorLayoutAlgorithm::UpdateMaxSizeByLayoutPolicy(const LayoutConstrai
 {
     auto parentIdealWidth = contentConstraint.parentIdealSize.Width();
     bool isNotSetComponentWidth = parentIdealWidth.has_value() && NearEqual(maxSize.Width(), parentIdealWidth.value());
-    CHECK_NULL_VOID(isSingleLineMode_ || (IsWidthFix(layoutWrapper) && isNotSetComponentWidth));
+    CHECK_NULL_VOID(IsContentWidthUnlimited() || (IsWidthFix(layoutWrapper) && isNotSetComponentWidth));
     maxSize.SetWidth(std::numeric_limits<float>::max());
 }
 
@@ -459,10 +460,15 @@ void RichEditorLayoutAlgorithm::ReLayoutParagraphByLayoutPolicy(LayoutWrapper* l
         auto maxParagraphWidth = paragraphManager_->GetLongestLineWithIndent();
         CHECK_NULL_VOID(GreatNotEqual(maxWidth, maxParagraphWidth));
         paragraphManager_->LayoutParagraphs(maxParagraphWidth);
-    } else if (isSingleLineMode_) {
+    } else if (IsContentWidthUnlimited()) {
         auto width = std::max(paragraphManager_->GetLongestLineWithIndent(), maxMeasureWidth);
         paragraphManager_->LayoutParagraphs(width);
     }
+}
+
+bool RichEditorLayoutAlgorithm::IsContentWidthUnlimited() const
+{
+    return isSingleLineMode_ || isHorizontalScrolling_;
 }
 
 bool RichEditorLayoutAlgorithm::IsWidthFix(LayoutWrapper* layoutWrapper) const
@@ -692,7 +698,7 @@ OffsetF RichEditorLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper
     bool isTextRectValid = (textRect != RectF(0, 0, 0, 0));
     // For the first frame, the component's content area is used directly as the layout content area.
     CHECK_NULL_RETURN(isTextRectValid, contentOffset);
-    auto offsetX = isSingleLineMode_ ? pattern->GetTextRect().GetX() : contentOffset.GetX();
+    auto offsetX = IsContentWidthUnlimited() ? pattern->GetTextRect().GetX() : contentOffset.GetX();
     auto offsetY = pattern->GetTextRect().GetY();
     richTextRect_->SetOffset({ offsetX, offsetY });
     return richTextRect_->GetOffset();

@@ -188,6 +188,7 @@ private:
     void UpdateMaxSizeByLayoutPolicy(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper,
         SizeF& maxSize) const;
     void ReLayoutParagraphByLayoutPolicy(LayoutWrapper* layoutWrapper, float maxWidth, float maxMeasureWidth);
+    bool IsContentWidthUnlimited() const;
     bool IsWidthAdaptive(LayoutWrapper* layoutWrapper) const;
     bool IsWidthFix(LayoutWrapper* layoutWrapper) const;
     void ReLayoutParagraphBySpan(LayoutWrapper* layoutWrapper, std::vector<TextStyle>& textStyles,
@@ -220,6 +221,7 @@ private:
     bool needShowPlaceholder_ = false;
     int32_t cacheHitCount_ = 0;
     std::unordered_set<uint64_t> paragraphKeySet_;
+    bool isHorizontalScrolling_ = false;
     bool isSingleLineMode_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorLayoutAlgorithm);
 };

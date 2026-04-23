@@ -58,6 +58,7 @@ public:
 
     void SetShowSelect(bool value);
     void SetSingleLine(bool value);
+    void SetHorizontalScrolling(bool value);
 
     std::vector<RectF> GetSelectedRects() const;
     void SetHighlightOpacity(float value)
@@ -95,6 +96,7 @@ private:
     RefPtr<PropertyInt> selectedUrlColor_;
     RefPtr<AnimatablePropertyFloat> highlightOpacityAnimation_;
     bool isSingleLineMode_ = false;
+    bool isHorizontalScrolling_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(TextOverlayModifier);
 };
 } // namespace OHOS::Ace::NG
