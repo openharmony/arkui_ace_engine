@@ -15,7 +15,7 @@
 
 import { SerializerBase, runtimeType, RuntimeType, pointer } from '@koalaui/interop';
 import { ArkUIGeneratedNativeModule } from '#components';
-import { ModifierKeyStateGetter, InteractionHand, SourceType, SourceTool, ArkSaveButtonComponent, ResourceStr, ArkSaveButtonPeer, SaveButtonCallback, ClickEvent, SaveButtonOnClickResult, EventTarget, Area, Position, Length } from '#generated';
+import { ModifierKeyStateGetter, InteractionHand, SourceType, SourceTool, ArkSaveButtonComponent, ResourceStr, ArkSaveButtonPeer, SaveButtonCallback, ClickEvent, SaveButtonOnClickResult, EventTarget, Area, Position, Length, Coordinate2D } from '#generated';
 import { int32, int64 } from '@koalaui/common';
 import { BusinessError } from '#external';
 import { ArkUIAniModule } from 'arkui.ani';
@@ -65,6 +65,9 @@ class ClickEventImpl implements ClickEvent {
     public deviceId?: int32;
     public targetDisplayId?: int32;
     constructor() { };
+    getCurrentLocalPosition(): Coordinate2D {
+        return { x: 0.0, y: 0.0 };
+    }
 }
 
 export class SaveButtonOpsHandWritten {

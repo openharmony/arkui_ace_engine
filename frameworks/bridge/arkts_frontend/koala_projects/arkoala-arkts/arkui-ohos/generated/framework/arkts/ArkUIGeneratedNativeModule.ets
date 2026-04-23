@@ -4537,6 +4537,44 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _EventEmulator_emitTextInputEvent(node: KPointer, text: KStringPtr): void
     @ani.unsafe.Direct
+    native static _EventLocationInfo_construct(): KPointer
+    @ani.unsafe.Direct
+    native static _EventLocationInfo_getFinalizer(): KPointer
+    @ani.unsafe.Quick
+    native static _EventLocationInfo_getCurrentLocalPosition(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _EventLocationInfo_getX(ptr: KPointer): KDouble
+    @ani.unsafe.Direct
+    native static _EventLocationInfo_setX(ptr: KPointer, x: KDouble): void
+    @ani.unsafe.Direct
+    native static _EventLocationInfo_getY(ptr: KPointer): KDouble
+    @ani.unsafe.Direct
+    native static _EventLocationInfo_setY(ptr: KPointer, y: KDouble): void
+    @ani.unsafe.Direct
+    native static _EventLocationInfo_getWindowX(ptr: KPointer): KDouble
+    @ani.unsafe.Direct
+    native static _EventLocationInfo_setWindowX(ptr: KPointer, windowX: KDouble): void
+    @ani.unsafe.Direct
+    native static _EventLocationInfo_getWindowY(ptr: KPointer): KDouble
+    @ani.unsafe.Direct
+    native static _EventLocationInfo_setWindowY(ptr: KPointer, windowY: KDouble): void
+    @ani.unsafe.Direct
+    native static _EventLocationInfo_getDisplayX(ptr: KPointer): KDouble
+    @ani.unsafe.Direct
+    native static _EventLocationInfo_setDisplayX(ptr: KPointer, displayX: KDouble): void
+    @ani.unsafe.Direct
+    native static _EventLocationInfo_getDisplayY(ptr: KPointer): KDouble
+    @ani.unsafe.Direct
+    native static _EventLocationInfo_setDisplayY(ptr: KPointer, displayY: KDouble): void
+    @ani.unsafe.Quick
+    native static _EventLocationInfo_getGlobalDisplayX(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _EventLocationInfo_setGlobalDisplayX(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Quick
+    native static _EventLocationInfo_getGlobalDisplayY(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _EventLocationInfo_setGlobalDisplayY(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _EventResult_construct(): KPointer
     @ani.unsafe.Direct
     native static _EventResult_getFinalizer(): KPointer
@@ -4584,6 +4622,52 @@ export class ArkUIGeneratedNativeModule {
     native static _FileSelectorResult_getFinalizer(): KPointer
     @ani.unsafe.Direct
     native static _FileSelectorResult_handleFileList(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _FingerInfo_construct(): KPointer
+    @ani.unsafe.Direct
+    native static _FingerInfo_getFinalizer(): KPointer
+    @ani.unsafe.Quick
+    native static _FingerInfo_getCurrentLocalPosition(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _FingerInfo_getId(ptr: KPointer): KInt
+    @ani.unsafe.Direct
+    native static _FingerInfo_setId(ptr: KPointer, id: KInt): void
+    @ani.unsafe.Quick
+    native static _FingerInfo_getGlobalDisplayX(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _FingerInfo_setGlobalDisplayX(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Quick
+    native static _FingerInfo_getGlobalDisplayY(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _FingerInfo_setGlobalDisplayY(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _FingerInfo_getGlobalX(ptr: KPointer): KDouble
+    @ani.unsafe.Direct
+    native static _FingerInfo_setGlobalX(ptr: KPointer, globalX: KDouble): void
+    @ani.unsafe.Direct
+    native static _FingerInfo_getGlobalY(ptr: KPointer): KDouble
+    @ani.unsafe.Direct
+    native static _FingerInfo_setGlobalY(ptr: KPointer, globalY: KDouble): void
+    @ani.unsafe.Direct
+    native static _FingerInfo_getLocalX(ptr: KPointer): KDouble
+    @ani.unsafe.Direct
+    native static _FingerInfo_setLocalX(ptr: KPointer, localX: KDouble): void
+    @ani.unsafe.Direct
+    native static _FingerInfo_getLocalY(ptr: KPointer): KDouble
+    @ani.unsafe.Direct
+    native static _FingerInfo_setLocalY(ptr: KPointer, localY: KDouble): void
+    @ani.unsafe.Direct
+    native static _FingerInfo_getDisplayX(ptr: KPointer): KDouble
+    @ani.unsafe.Direct
+    native static _FingerInfo_setDisplayX(ptr: KPointer, displayX: KDouble): void
+    @ani.unsafe.Direct
+    native static _FingerInfo_getDisplayY(ptr: KPointer): KDouble
+    @ani.unsafe.Direct
+    native static _FingerInfo_setDisplayY(ptr: KPointer, displayY: KDouble): void
+    @ani.unsafe.Quick
+    native static _FingerInfo_getHand(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _FingerInfo_setHand(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _FocusAxisEvent_construct(): KPointer
     @ani.unsafe.Direct
@@ -6723,6 +6807,72 @@ export class ArkUIGeneratedNativeModule {
     native static _TouchEventExtender_getHistoricalPoints(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _TouchEventExtender_preventDefault(ptr: KPointer): void
+    @ani.unsafe.Direct
+    native static _TouchObject_construct(): KPointer
+    @ani.unsafe.Direct
+    native static _TouchObject_getFinalizer(): KPointer
+    @ani.unsafe.Quick
+    native static _TouchObject_getCurrentLocalPosition(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _TouchObject_getType(ptr: KPointer): KInt
+    @ani.unsafe.Direct
+    native static _TouchObject_setType(ptr: KPointer, type: KInt): void
+    @ani.unsafe.Direct
+    native static _TouchObject_getId(ptr: KPointer): KInt
+    @ani.unsafe.Direct
+    native static _TouchObject_setId(ptr: KPointer, id: KInt): void
+    @ani.unsafe.Direct
+    native static _TouchObject_getDisplayX(ptr: KPointer): KDouble
+    @ani.unsafe.Direct
+    native static _TouchObject_setDisplayX(ptr: KPointer, displayX: KDouble): void
+    @ani.unsafe.Direct
+    native static _TouchObject_getDisplayY(ptr: KPointer): KDouble
+    @ani.unsafe.Direct
+    native static _TouchObject_setDisplayY(ptr: KPointer, displayY: KDouble): void
+    @ani.unsafe.Direct
+    native static _TouchObject_getWindowX(ptr: KPointer): KDouble
+    @ani.unsafe.Direct
+    native static _TouchObject_setWindowX(ptr: KPointer, windowX: KDouble): void
+    @ani.unsafe.Direct
+    native static _TouchObject_getWindowY(ptr: KPointer): KDouble
+    @ani.unsafe.Direct
+    native static _TouchObject_setWindowY(ptr: KPointer, windowY: KDouble): void
+    @ani.unsafe.Direct
+    native static _TouchObject_getX(ptr: KPointer): KDouble
+    @ani.unsafe.Direct
+    native static _TouchObject_setX(ptr: KPointer, x: KDouble): void
+    @ani.unsafe.Direct
+    native static _TouchObject_getY(ptr: KPointer): KDouble
+    @ani.unsafe.Direct
+    native static _TouchObject_setY(ptr: KPointer, y: KDouble): void
+    @ani.unsafe.Quick
+    native static _TouchObject_getHand(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _TouchObject_setHand(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Quick
+    native static _TouchObject_getPressedTime(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _TouchObject_setPressedTime(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Quick
+    native static _TouchObject_getPressure(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _TouchObject_setPressure(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Quick
+    native static _TouchObject_getWidth(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _TouchObject_setWidth(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Quick
+    native static _TouchObject_getHeight(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _TouchObject_setHeight(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Quick
+    native static _TouchObject_getGlobalDisplayX(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _TouchObject_setGlobalDisplayX(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Quick
+    native static _TouchObject_getGlobalDisplayY(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _TouchObject_setGlobalDisplayY(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _TouchRecognizer_construct(): KPointer
     @ani.unsafe.Direct

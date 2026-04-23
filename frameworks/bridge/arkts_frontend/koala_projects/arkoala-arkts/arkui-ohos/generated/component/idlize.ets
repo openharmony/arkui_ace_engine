@@ -10705,12 +10705,12 @@ export class TouchEventProxy_serializer {
         const typeTmpResult: TouchType = TouchType.fromValue(valueDeserializer.readInt32())
         const touchesTmpBufLength: int32 = valueDeserializer.readInt32()
         const touchesTmpBuf: Array<TouchObject> = new Array<TouchObject>(touchesTmpBufLength, (arg0: int32):TouchObject => {
-            return TouchObject_serializer.read(valueDeserializer);
+            return (TouchObject_serializer.read(valueDeserializer) as TouchObject);
         })
         const touchesTmpResult: Array<TouchObject> = touchesTmpBuf
         const changedTouchesTmpBufLength: int32 = valueDeserializer.readInt32()
         const changedTouchesTmpBuf: Array<TouchObject> = new Array<TouchObject>(changedTouchesTmpBufLength, (arg0: int32):TouchObject => {
-            return TouchObject_serializer.read(valueDeserializer);
+            return (TouchObject_serializer.read(valueDeserializer) as TouchObject);
         })
         const changedTouchesTmpResult: Array<TouchObject> = changedTouchesTmpBuf
         const ptrTmpResult: KPointer = valueDeserializer.readPointer()
