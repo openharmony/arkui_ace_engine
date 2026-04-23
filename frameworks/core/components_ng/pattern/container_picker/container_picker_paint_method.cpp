@@ -102,6 +102,10 @@ void ContainerPickerPaintMethod::PaintSelectionIndicatorBackground(PaintWrapper*
     SetDefaultIndicatorBackground(pickerNode, backgroundColor, borderRadius);
 
     float height = PICKER_ITEM_HEIGHT.ConvertToPx();
+    auto pickerPattern = pickerNode->GetPattern<ContainerPickerPattern>();
+    if (pickerPattern) {
+        height = pickerPattern->GetPickerItemHeight();
+    }
     PaddingPropertyF padding = layoutProperty->CreatePaddingAndBorder();
     RectF contentRect = { padding.left.value_or(0), padding.top.value_or(0), pickerRect.Width() - padding.Width(),
         pickerRect.Height() - padding.Height() };
@@ -152,8 +156,13 @@ void ContainerPickerPaintMethod::PaintSelectionIndicatorDivider(PaintWrapper* pa
     auto pickerGeometryNode = pickerNode->GetGeometryNode();
     CHECK_NULL_VOID(pickerGeometryNode);
     auto pickerRect = pickerGeometryNode->GetFrameRect();
+    float itemHeightPx = PICKER_ITEM_HEIGHT.ConvertToPx();
+    auto pickerPatternForItem = pickerNode->GetPattern<ContainerPickerPattern>();
+    if (pickerPatternForItem) {
+        itemHeightPx = pickerPatternForItem->GetPickerItemHeight();
+    }
     auto strokeWidth = layoutProperty->GetIndicatorDividerWidth().value_or(theme->GetStrokeWidth()).ConvertToPx();
-    if (GreatNotEqual(strokeWidth, PICKER_ITEM_HEIGHT.ConvertToPx() / HALF)) {
+    if (GreatNotEqual(strokeWidth, itemHeightPx / HALF)) {
         strokeWidth = theme->GetStrokeWidth().ConvertToPx();
     }
     auto dividerColor = layoutProperty->GetIndicatorDividerColor().value_or(theme->GetIndicatorDividerColor());
@@ -167,15 +176,13 @@ void ContainerPickerPaintMethod::PaintSelectionIndicatorDivider(PaintWrapper* pa
     auto dividerLength = contentRect.Width();
     ParseDividerMargin(paintWrapper, dividerLength, startMargin, endMargin);
 
-    if (GreatOrEqual(contentRect.Height(), PICKER_ITEM_HEIGHT.ConvertToPx()) && GreatNotEqual(strokeWidth, 0.0)) {
+    if (GreatOrEqual(contentRect.Height(), itemHeightPx) && GreatNotEqual(strokeWidth, 0.0)) {
         PickerDividerPaintInfo dividerInfo;
         dividerInfo.dividerColor = dividerColor;
         dividerInfo.dividerLength = dividerLength;
         dividerInfo.strokeWidth = strokeWidth;
-        double upperLine =
-            (contentRect.Height() - PICKER_ITEM_HEIGHT.ConvertToPx()) / 2 + contentRect.GetY() - strokeWidth / 2;
-        double downLine =
-            (contentRect.Height() + PICKER_ITEM_HEIGHT.ConvertToPx()) / 2 + contentRect.GetY() - strokeWidth / 2;
+        double upperLine = (contentRect.Height() - itemHeightPx) / 2 + contentRect.GetY() - strokeWidth / 2;
+        double downLine = (contentRect.Height() + itemHeightPx) / 2 + contentRect.GetY() - strokeWidth / 2;
 
         OffsetF upperOffset = OffsetF(contentRect.GetX() + startMargin, upperLine);
         PaintLine(upperOffset, dividerInfo, canvas);

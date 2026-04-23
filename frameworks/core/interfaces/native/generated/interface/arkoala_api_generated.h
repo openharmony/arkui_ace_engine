@@ -27630,6 +27630,10 @@ typedef struct GENERATED_ArkUIUIPickerComponentModifier {
                                     const Opt_Boolean* value);
     void (*setSelectionIndicator)(Ark_NativePointer node,
                                   const Opt_PickerIndicatorStyle* value);
+    void (*setItemHeight)(Ark_NativePointer node,
+                          const Opt_LengthMetrics* value);
+    void (*setDisplayedItemCount)(Ark_NativePointer node,
+                                  const Opt_Int32* value);
 } GENERATED_ArkUIUIPickerComponentModifier;
 
 typedef struct GENERATED_ArkUIUnionEffectContainerModifier {

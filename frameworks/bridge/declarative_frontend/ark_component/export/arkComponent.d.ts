@@ -1085,6 +1085,8 @@ declare class ArkContainerPicker extends ArkComponent implements UIPickerCompone
     canLoop(isLoop: Optional<boolean>): this;
     enableHapticFeedback(enable: Optional<boolean>): this;
     selectionIndicator(style: Optional<PickerIndicatorStyle>): this;
+    displayedItemCount(count: Optional<number>): this;
+    itemHeight(height: Optional<LengthMetrics>): this;
 }
 
 declare class ArkSliderComponent extends ArkComponent implements SliderAttribute {

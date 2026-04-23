@@ -18,7 +18,9 @@
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/container_picker/container_picker_event_hub.h"
+#include "core/components_ng/pattern/container_picker/container_picker_model.h"
 #include "core/components_ng/pattern/container_picker/container_picker_pattern.h"
+#include "base/log/log_wrapper.h"
 
 namespace OHOS::Ace::NG {
 
@@ -131,5 +133,15 @@ void ContainerPickerModelStatic::SetChangeEvent(FrameNode* frameNode, ContainerP
     auto eventHub = frameNode->GetEventHub<ContainerPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(onChange));
+}
+
+void ContainerPickerModelStatic::SetDisplayedItemCount(FrameNode* frameNode, std::optional<int32_t> count)
+{
+    ContainerPickerModel::SetDisplayedItemCount(frameNode, count);
+}
+
+void ContainerPickerModelStatic::SetItemHeight(FrameNode* frameNode, std::optional<Dimension> height)
+{
+    ContainerPickerModel::SetItemHeight(frameNode, height);
 }
 } // namespace OHOS::Ace::NG

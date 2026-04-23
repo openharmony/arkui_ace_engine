@@ -5313,10 +5313,16 @@ struct ArkUIContainerPickerModifier {
     void (*setContainerPickerIndicator)(
         ArkUINodeHandle node, const struct ArkUI_PickerIndicatorStyle* pickerIndicatorStyle);
     void (*resetContainerPickerIndicator)(ArkUINodeHandle node);
+    void (*setContainerPickerDisplayedItemCount)(ArkUINodeHandle node, ArkUI_Int32 count);
+    void (*resetContainerPickerDisplayedItemCount)(ArkUINodeHandle node);
+    void (*setContainerPickerItemHeight)(ArkUINodeHandle node, ArkUI_Float32 itemHeight);
+    void (*resetContainerPickerItemHeight)(ArkUINodeHandle node);
     int32_t (*getContainerPickerSelectedIndex)(ArkUINodeHandle node);
     ArkUI_Bool (*getContainerPickerEnableHapticFeedback)(ArkUINodeHandle node);
     ArkUI_Bool (*getContainerPickerCanLoop)(ArkUINodeHandle node);
     ArkUI_PickerIndicatorStyle (*getContainerPickerIndicator)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getContainerPickerDisplayedItemCount)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getContainerPickerItemHeight)(ArkUINodeHandle node);
 };
 
 struct ArkUIGesture;

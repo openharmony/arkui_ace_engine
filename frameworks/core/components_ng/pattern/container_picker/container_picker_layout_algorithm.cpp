@@ -29,6 +29,8 @@ namespace OHOS::Ace::NG {
 namespace {
 const float UNDEFINED_SIZE = -1.0f;
 const int32_t ITEM_COUNTS = 10;
+const float DEFAULT_DISPLAY_ITEM_COUNT = 7.0f;
+const float FIXED_HEIGHT_SCALE = (ITEM_COUNTS / HALF) / DEFAULT_DISPLAY_ITEM_COUNT;
 const float HORIZONTAL_ANGLE = 180.0f;
 const float VERTICAL_ANGLE = 90.0f;
 const int32_t DEFAULT_CACHE_COUNT = 10; // default cache count.
@@ -51,7 +53,8 @@ void ContainerPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     MeasureHeight(layoutWrapper, contentIdealSize);
 
     CalcMainAndMiddlePos();
-    auto childLayoutConstraint = ContainerPickerUtils::CreateChildConstraint(pickerLayoutProperty, contentIdealSize);
+    auto childLayoutConstraint =
+        ContainerPickerUtils::CreateChildConstraint(pickerLayoutProperty, contentIdealSize, pickerItemHeight_);
     childLayoutConstraint_ = childLayoutConstraint;
     if (totalItemCount_ > 0) {
         middleIndexInVisibleWindow_ = selectedIndex_;
@@ -198,7 +201,7 @@ void ContainerPickerLayoutAlgorithm::CalcMainAndMiddlePos()
 {
     middleItemStartPos_ = (height_ - pickerItemHeight_) / HALF;
     middleItemEndPos_ = (height_ + pickerItemHeight_) / HALF;
-    int32_t halfOfDisplayCount = static_cast<int32_t>(DISPLAY_COUNT / 2.0f);
+    int32_t halfOfDisplayCount = displayedItemCount_ / 2;
     startMainPos_ = middleItemStartPos_ - pickerItemHeight_ * (halfOfDisplayCount - 1);
     endMainPos_ = middleItemEndPos_ + pickerItemHeight_ * (halfOfDisplayCount - 1);
     if (Positive(currentDelta_)) {
@@ -329,16 +332,16 @@ void ContainerPickerLayoutAlgorithm::ResetOffscreenItemPosition(LayoutWrapper* l
 
 void ContainerPickerLayoutAlgorithm::RetainDisplayItems(bool atTop)
 {
-    if (itemPosition_.size() <= DISPLAY_COUNT + 1) {
+    if (itemPosition_.size() <= displayedItemCount_ + 1) {
         return;
     }
-    // Retain 8 items at most.
+    // Retain displayedItemCount_ + 1 items at most.
     auto it = itemPosition_.begin();
     if (atTop) {
-        std::advance(it, DISPLAY_COUNT + 1);
+        std::advance(it, displayedItemCount_ + 1);
         itemPosition_.erase(it, itemPosition_.end());
     } else {
-        std::advance(it, itemPosition_.size() - DISPLAY_COUNT - 1);
+        std::advance(it, itemPosition_.size() - displayedItemCount_ - 1);
         itemPosition_.erase(itemPosition_.begin(), it);
     }
 }
@@ -553,8 +556,9 @@ void ContainerPickerLayoutAlgorithm::TranslateAndRotate(RefPtr<FrameNode> node, 
     }
     float offsetY = offset.GetY() - middleItemStartPos_ - topPadding_;
     const float pi = 3.14159;
-    float radius = pickerItemHeight_ * ITEM_COUNTS / (HALF * pi);
-    float yScale = (pi * radius) / pickerHeightBeforeRotate_;
+    // Keep wheelHeight / totalHeight fixed to default geometry (5/7).
+    float radius = (FIXED_HEIGHT_SCALE * pickerHeightBeforeRotate_) / pi;
+    float yScale = FIXED_HEIGHT_SCALE;
     float radian = (offsetY * yScale) / radius;
     float angle = radian * (HORIZONTAL_ANGLE / pi);
     float correctFactor = angle > 0 ? 1.0 : -1.0;
