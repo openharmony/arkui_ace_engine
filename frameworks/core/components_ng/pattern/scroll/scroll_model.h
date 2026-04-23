@@ -80,6 +80,7 @@ public:
     virtual void SetOnDidZoom(std::function<void(float)>&& event) {};
     virtual void SetOnZoomStart(std::function<void(void)>&& event) {};
     virtual void SetOnZoomStop(std::function<void(void)>&& event) {};
+    virtual void CreateWithResourceObjScrollBarWidth(const RefPtr<ResourceObject>& resObj) {};
 
 private:
     static std::unique_ptr<ScrollModel> instance_;

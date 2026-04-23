@@ -7146,7 +7146,8 @@ int32_t SetScrollScrollBarWidth(ArkUI_NodeHandle node, const ArkUI_AttributeItem
     int32_t unit = GetDefaultUnit(node, UNIT_VP);
     if (node->type == ARKUI_NODE_LIST) {
         auto width = std::to_string(attrVal) + LENGTH_METRIC_UNIT[unit];
-        fullImpl->getNodeModifiers()->getListModifier()->setListScrollBarWidth(node->uiNodeHandle, width.c_str());
+        fullImpl->getNodeModifiers()->getListModifier()->setListScrollBarWidth(
+            node->uiNodeHandle, width.c_str(), nullptr);
     } else if (node->type == ARKUI_NODE_SCROLL) {
         fullImpl->getNodeModifiers()->getScrollModifier()->setScrollScrollBarWidth(node->uiNodeHandle, attrVal, unit);
     } else if (node->type == ARKUI_NODE_WATER_FLOW) {
@@ -8082,7 +8083,8 @@ int32_t SetListSpace(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     auto fullImpl = GetFullImpl();
 
-    fullImpl->getNodeModifiers()->getListModifier()->setListSpace(node->uiNodeHandle, item->value[NUM_0].f32);
+    fullImpl->getNodeModifiers()->getListModifier()->setListSpaceWidth(
+        node->uiNodeHandle, item->value[NUM_0].f32, UNIT_VP, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -17938,7 +17940,7 @@ int32_t SetRefreshMaxPullDownDistance(ArkUI_NodeHandle node, const ArkUI_Attribu
     CHECK_NULL_RETURN(nodeModifiers, ERROR_CODE_PARAM_INVALID);
     auto refreshModifier = nodeModifiers->getRefreshModifier();
     CHECK_NULL_RETURN(refreshModifier, ERROR_CODE_PARAM_INVALID);
-    refreshModifier->setMaxPullDownDistance(node->uiNodeHandle, distanceValue);
+    refreshModifier->setMaxPullDownDistance(node->uiNodeHandle, distanceValue, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -17951,7 +17953,7 @@ void ResetRefreshMaxPullDownDistance(ArkUI_NodeHandle node)
     CHECK_NULL_VOID(nodeModifiers);
     auto refreshModifier = nodeModifiers->getRefreshModifier();
     CHECK_NULL_VOID(refreshModifier);
-    refreshModifier->resetMaxPullDownDistance(node->uiNodeHandle);
+    refreshModifier->resetMaxPullDownDistance(node->uiNodeHandle, nullptr);
 }
 
 const ArkUI_AttributeItem* GetRefreshMaxPullDownDistance(ArkUI_NodeHandle node)
@@ -17979,7 +17981,8 @@ int32_t SetRefreshOffset(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
     int32_t unit = GetDefaultUnit(node, UNIT_VP);
-    fullImpl->getNodeModifiers()->getRefreshModifier()->setRefreshOffset(node->uiNodeHandle, item->value[0].f32, unit);
+    fullImpl->getNodeModifiers()->getRefreshModifier()->setRefreshOffset(
+        node->uiNodeHandle, item->value[0].f32, unit, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 

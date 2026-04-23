@@ -7281,7 +7281,7 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ScrollableCommonMethod_setScrollBarColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setScrollBarWidthAttribute(value: double | string | undefined): void {
+    setScrollBarWidth0Attribute(value: double | string | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -7298,7 +7298,19 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._ScrollableCommonMethod_setScrollBarWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_setScrollBarWidth0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setScrollBarWidth1Attribute(value: global_resource_Resource | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            global_resource_Resource_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_setScrollBarWidth1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setScrollBarMarginAttribute(value: ScrollBarMargin | undefined): void {
@@ -11444,6 +11456,9 @@ export interface ScrollableCommonMethod extends CommonMethod {
     scrollBarWidth(value: double | string | undefined): this {
         throw new Error('Unimplemented method scrollBarWidth')
     }
+    scrollBarWidth(value: global_resource_Resource | undefined): this {
+        throw new Error('Unimplemented method scrollBarWidth')
+    }
     scrollBarMargin(value: ScrollBarMargin | undefined): this {
         throw new Error('Unimplemented method scrollBarMargin')
     }
@@ -12894,7 +12909,12 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
     }
     public scrollBarWidth(value: double | string | undefined): this {
         const value_casted = value as (double | string | undefined)
-        this.getPeer()?.setScrollBarWidthAttribute(value_casted)
+        this.getPeer()?.setScrollBarWidth0Attribute(value_casted)
+        return this
+    }
+    public scrollBarWidth(value: global_resource_Resource | undefined): this {
+        const value_casted = value as (global_resource_Resource | undefined)
+        this.getPeer()?.setScrollBarWidth1Attribute(value_casted)
         return this
     }
     public scrollBarMargin(value: ScrollBarMargin | undefined): this {

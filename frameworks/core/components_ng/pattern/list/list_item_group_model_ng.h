@@ -32,6 +32,9 @@ class ACE_EXPORT ListItemGroupModelNG : public ListItemGroupModel {
 public:
     void Create(const V2::ListItemGroupOptions& options) override;
     void SetSpace(const Dimension& space) override;
+    void SetSpaceWidth(const Dimension& spaceWidth) override;
+    void ResetSpace() override;
+    void ResetSpaceWidth() override;
     void SetDivider(const V2::ItemDivider& divider) override;
     void SetHeader(std::function<void()>&& header) override;
     void SetFooter(std::function<void()>&& footer) override;
@@ -45,6 +48,7 @@ public:
     void ParseResObjDividerStartMargin(const RefPtr<ResourceObject>& resObj) override;
     void ParseResObjDividerEndMargin(const RefPtr<ResourceObject>& resObj) override;
     void SetDividerColorByUser(bool isByUser) override;
+    void CreateWithResourceObjSpace(const RefPtr<ResourceObject>& resObj) override;
 
     static void SetDivider(FrameNode* frameNode, const V2::ItemDivider& divider);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
@@ -55,6 +59,7 @@ public:
     static void ResetListChildrenMainSize(FrameNode* frameNode);
     static V2::ItemDivider GetDivider(FrameNode* frameNode);
     static void SetSpace(FrameNode* frameNode, const Dimension& space);
+    static void SetSpaceWidth(FrameNode* frameNode, const Dimension& spaceWidth);
     static void SetStyle(FrameNode* frameNode, V2::ListItemGroupStyle style);
     static void SetHeaderStyle(FrameNode* frameNode, V2::ListItemGroupHeaderFooterStyle style);
     static void SetFooterStyle(FrameNode* frameNode, V2::ListItemGroupHeaderFooterStyle style);
@@ -67,6 +72,7 @@ public:
     static void ParseResObjDividerStartMargin(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void ParseResObjDividerEndMargin(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void SetDividerColorByUser(FrameNode* frameNode, bool isByUser);
+    static void CreateWithResourceObjSpace(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
 };
 
 } // namespace OHOS::Ace::NG

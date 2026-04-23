@@ -38,6 +38,7 @@ public:
 
     virtual void Create(bool isCreateArc = false) = 0;
     virtual void SetSpace(const Dimension& space) = 0;
+    virtual void SetSpaceWidth(const Dimension& spaceWidth) {};
     virtual void SetInitialIndex(int32_t initialIndex) = 0;
     virtual RefPtr<ScrollControllerBase> CreateScrollController() = 0;
     virtual void SetScroller(RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy) = 0;
@@ -92,6 +93,8 @@ public:
     virtual void SetOnItemDrop(OnItemDropFunc&& onItemDrop) = 0;
     virtual void SetItemFillPolicy(PresetFillType fillType) = 0;
     virtual void ResetItemFillPolicy() = 0;
+    virtual void ResetListSpace() {};
+    virtual void ResetListSpaceWidth() {};
     virtual void SetScrollSnapAlign(ScrollSnapAlign scrollSnapAlign) {};
     virtual RefPtr<NG::ListChildrenMainSize> GetOrCreateListChildrenMainSize(NG::FrameNode* node = nullptr)
     {
@@ -116,6 +119,8 @@ public:
     virtual void SetScrollSnapAnimationSpeed(ScrollSnapAnimationSpeed speed) {}
     virtual void SetSupportEmptyBranchInLazyLoading(bool supportEmptyBranch) {}
     virtual void SetBackPressCloseSwipeAction(bool closeSwipeAction) {}
+    virtual void CreateWithResourceObjSpace(const RefPtr<ResourceObject>& resObj) {}
+    virtual void CreateWithResourceObjScrollBarWidth(const RefPtr<ResourceObject>& resObj) {}
 private:
     static std::unique_ptr<ListModel> instance_;
     static std::mutex mutex_;

@@ -4353,7 +4353,7 @@ struct ArkUIListModifier {
     void (*setListScrollBar)(ArkUINodeHandle node, ArkUI_Int32 barState);
     void (*resetListScrollBar)(ArkUINodeHandle node);
     ArkUI_Float32 (*getListScrollBarWidth)(ArkUINodeHandle node);
-    void (*setListScrollBarWidth)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*setListScrollBarWidth)(ArkUINodeHandle node, ArkUI_CharPtr value, ArkUI_VoidPtr resObjRawPtr);
     void (*resetListScrollBarWidth)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getListScrollBarColor)(ArkUINodeHandle node);
     void (*setListScrollBarColor)(ArkUINodeHandle node, ArkUI_CharPtr value);
@@ -4371,7 +4371,9 @@ struct ArkUIListModifier {
         ArkUINodeHandle node, const struct ArkUIChainAnimationOptionsType* chainAnimationOptions);
     void (*resetChainAnimationOptions)(ArkUINodeHandle node);
     ArkUI_Float32 (*getListSpace)(ArkUINodeHandle node);
+    void (*setListSpaceWidth)(ArkUINodeHandle node, ArkUI_Float32 space, ArkUI_Int32 unit, ArkUI_VoidPtr resObjRawPtr);
     void (*setListSpace)(ArkUINodeHandle node, ArkUI_Float32 space);
+    void (*resetListSpaceWidth)(ArkUINodeHandle node);
     void (*resetListSpace)(ArkUINodeHandle node);
     ArkUI_Int32 (*setNodeAdapter)(ArkUINodeHandle node, ArkUINodeAdapterHandle handle);
     void (*resetNodeAdapter)(ArkUINodeHandle node);
@@ -4472,7 +4474,8 @@ struct ArkUIListItemGroupModifier {
     void (*setListItemGroupChildrenMainSize)(ArkUINodeHandle node, ArkUIListChildrenMainSize option, ArkUI_Int32 unit);
     void (*resetListItemGroupChildrenMainSize)(ArkUINodeHandle node);
     void (*getlistItemGroupDivider)(ArkUINodeHandle node, ArkUIdividerOptions* option, ArkUI_Int32 unit);
-    void (*setListItemGroupSpace)(ArkUINodeHandle node, ArkUI_Float64 space);
+    void (*setListItemGroupSpace)(
+        ArkUINodeHandle node, ArkUI_Float64 space, ArkUI_Uint32 unit, ArkUI_VoidPtr resObjRawPtr);
     void (*resetListItemGroupSpace)(ArkUINodeHandle node);
     void (*setListItemGroupStyle)(ArkUINodeHandle node, ArkUI_Uint32 style);
     void (*resetListItemGroupStyle)(ArkUINodeHandle node);
@@ -4850,6 +4853,7 @@ struct ArkUIGridModifier {
     void (*setGridScrollBarWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetGridScrollBarWidth)(ArkUINodeHandle node);
     ArkUI_Float32 (*getGridScrollBarWidth)(ArkUINodeHandle node);
+    void (*setGridScrollBarWidthResObj)(ArkUINodeHandle node, ArkUI_VoidPtr resObjRawPtr);
     void (*setGridScrollBarColor)(ArkUINodeHandle node, ArkUI_Uint32 scrollBarColor);
     void (*setGridScrollBarColorPtr)(ArkUINodeHandle node, ArkUI_Int32 color, void* colorRawPtr);
     void (*resetGridScrollBarColor)(ArkUINodeHandle node);
@@ -5060,6 +5064,7 @@ struct ArkUIScrollModifier {
     void (*setScrollScrollBarWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetScrollScrollBarWidth)(ArkUINodeHandle node);
     ArkUI_Int32 (*getScrollEdgeEffect)(ArkUINodeHandle node, ArkUI_Int32 (*values)[3]);
+    void (*setScrollScrollBarWidthResObj)(ArkUINodeHandle node, ArkUI_VoidPtr resObjRawPtr);
     void (*setScrollEdgeEffect)(
         ArkUINodeHandle node, ArkUI_Int32 edgeEffect, ArkUI_Bool alwaysEnabled, ArkUI_Int32 effectEdge);
     void (*resetScrollEdgeEffect)(ArkUINodeHandle node);
@@ -6692,6 +6697,7 @@ struct ArkUIWaterFlowModifier {
     void (*setWaterFlowScrollBarWidth)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetWaterFlowScrollBarWidth)(ArkUINodeHandle node);
     ArkUI_Float32 (*getWaterFlowScrollBarWidth)(ArkUINodeHandle node);
+    void (*setWaterFlowScrollBarWidthWithResource)(ArkUINodeHandle node, ArkUI_VoidPtr resObjRawPtr);
     void (*setWaterFlowScrollBarColor)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetWaterFlowScrollBarColor)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getWaterFlowScrollBarColor)(ArkUINodeHandle node);
@@ -7016,7 +7022,7 @@ struct ArkUIBadgeModifier {
 struct ArkUIRefreshModifier {
     void (*setRefreshing)(ArkUINodeHandle node, ArkUI_Bool value);
     ArkUI_Bool (*getRefreshing)(ArkUINodeHandle node);
-    void (*setRefreshOffset)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*setRefreshOffset)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_VoidPtr resObjRawPtr);
     void (*resetRefreshOffset)(ArkUINodeHandle node);
     void (*setPullToRefresh)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetPullToRefresh)(ArkUINodeHandle node);
@@ -7035,8 +7041,8 @@ struct ArkUIRefreshModifier {
     void (*resetOnRefreshingCallback)(ArkUINodeHandle node);
     void (*setRefreshOnOffsetChangeCallback)(ArkUINodeHandle node, void* callback);
     void (*resetRefreshOnOffsetChangeCallback)(ArkUINodeHandle node);
-    void (*setMaxPullDownDistance)(ArkUINodeHandle node, ArkUI_Float32 distance);
-    void (*resetMaxPullDownDistance)(ArkUINodeHandle node);
+    void (*setMaxPullDownDistance)(ArkUINodeHandle node, ArkUI_Float32 distance, ArkUI_VoidPtr resObjRawPtr);
+    void (*resetMaxPullDownDistance)(ArkUINodeHandle node, ArkUI_VoidPtr resObjRawPtr);
     ArkUI_Float32 (*getMaxPullDownDistance)(ArkUINodeHandle node);
     void (*setOnStepOffsetChangeCallback)(ArkUINodeHandle node,
         void (*callback)(const ArkUI_Float32 offset, void* extraData, const bool isDrag), void* extraData);

@@ -183,6 +183,14 @@ ArkUI_Float32 GetGridScrollBarWidth(ArkUINodeHandle node)
     return GridModelNG::GetScrollBarWidth(frameNode);
 }
 
+void SetGridScrollBarWidthResObj(ArkUINodeHandle node, ArkUI_VoidPtr resObjRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridModelNG::CreateWithResourceObjScrollBarWidth(
+        frameNode, AceType::Claim(reinterpret_cast<ResourceObject*>(resObjRawPtr)));
+}
+
 void SetGridScrollBarColor(ArkUINodeHandle node, uint32_t scrollBarColor)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -800,6 +808,7 @@ const ArkUIGridModifier* GetGridModifier()
         .setGridScrollBarWidth = SetGridScrollBarWidth,
         .resetGridScrollBarWidth = ResetGridScrollBarWidth,
         .getGridScrollBarWidth = GetGridScrollBarWidth,
+        .setGridScrollBarWidthResObj = SetGridScrollBarWidthResObj,
         .setGridScrollBarColor = SetGridScrollBarColor,
         .setGridScrollBarColorPtr = SetGridScrollBarColorPtr,
         .resetGridScrollBarColor = ResetGridScrollBarColor,

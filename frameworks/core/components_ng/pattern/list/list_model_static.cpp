@@ -284,6 +284,15 @@ void ListModelStatic::SetListSpace(FrameNode* frameNode, const std::optional<Dim
     }
 }
 
+void ListModelStatic::SetListSpaceWidth(FrameNode* frameNode, const std::optional<Dimension>& spaceWidth)
+{
+    if (spaceWidth.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, SpaceWidth, spaceWidth.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(ListLayoutProperty, SpaceWidth, PROPERTY_UPDATE_MEASURE, frameNode);
+    }
+}
+
 void ListModelStatic::SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll)
 {
     CHECK_NULL_VOID(frameNode);

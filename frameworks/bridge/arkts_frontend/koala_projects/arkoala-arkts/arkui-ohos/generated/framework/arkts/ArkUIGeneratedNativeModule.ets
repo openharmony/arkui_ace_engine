@@ -649,7 +649,9 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _ScrollableCommonMethod_setScrollBarColor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
-    native static _ScrollableCommonMethod_setScrollBarWidth(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    native static _ScrollableCommonMethod_setScrollBarWidth0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _ScrollableCommonMethod_setScrollBarWidth1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _ScrollableCommonMethod_setScrollBarMargin(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
@@ -892,7 +894,9 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _GridAttribute_setRowsGap(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
-    native static _GridAttribute_setScrollBarWidth(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    native static _GridAttribute_setScrollBarWidth0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _GridAttribute_setScrollBarWidth1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _GridAttribute_setScrollBarColor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
@@ -1558,7 +1562,9 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _RefreshAttribute_setOnRefreshing(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
-    native static _RefreshAttribute_setRefreshOffset(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    native static _RefreshAttribute_setRefreshOffset0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _RefreshAttribute_setRefreshOffset1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _RefreshAttribute_setPullToRefresh(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
@@ -1568,7 +1574,9 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _RefreshAttribute_setPullDownRatio(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
-    native static _RefreshAttribute_setMaxPullDownDistance(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    native static _RefreshAttribute_setMaxPullDownDistance0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _RefreshAttribute_setMaxPullDownDistance1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _RelativeContainer_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
@@ -1768,7 +1776,9 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _ScrollAttribute_setScrollBarColor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
-    native static _ScrollAttribute_setScrollBarWidth(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    native static _ScrollAttribute_setScrollBarWidth0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _ScrollAttribute_setScrollBarWidth1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _ScrollAttribute_setOnScrollFrameBegin(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct

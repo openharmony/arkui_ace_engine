@@ -497,7 +497,7 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._ScrollAttribute_setScrollBarColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setScrollBarWidthAttribute(value: double | string | undefined): void {
+    setScrollBarWidth0Attribute(value: double | string | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -514,7 +514,19 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._ScrollAttribute_setScrollBarWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._ScrollAttribute_setScrollBarWidth0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setScrollBarWidth1Attribute(value: arkui_component_units_Resource | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            global_resource_Resource_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ScrollAttribute_setScrollBarWidth1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnScrollFrameBeginAttribute(value: OnScrollFrameBeginCallback | undefined): void {
@@ -723,6 +735,7 @@ export interface ScrollAttribute extends ScrollableCommonMethod {
     scrollBar(value: BarState | undefined): this
     scrollBarColor(value: arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined): this
     scrollBarWidth(value: double | string | undefined): this
+    scrollBarWidth(value: arkui_component_units_Resource | undefined): this
     onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
         throw new Error('Unimplemented method onScrollFrameBegin')
     }
@@ -836,7 +849,12 @@ export class ArkScrollComponent extends ArkScrollableCommonMethodComponent imple
     }
     public scrollBarWidth(value: double | string | undefined): this {
         const value_casted = value as (double | string | undefined)
-        this.getPeer()?.setScrollBarWidthAttribute(value_casted)
+        this.getPeer()?.setScrollBarWidth0Attribute(value_casted)
+        return this
+    }
+    public scrollBarWidth(value: arkui_component_units_Resource | undefined): this {
+        const value_casted = value as (arkui_component_units_Resource | undefined)
+        this.getPeer()?.setScrollBarWidth1Attribute(value_casted)
         return this
     }
     public onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {

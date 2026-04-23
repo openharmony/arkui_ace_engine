@@ -144,6 +144,7 @@ public:
     static void SetAutoAdjustScrollBarMargin(FrameNode* frameNode, std::optional<bool> autoAdjust);
     static void ResetAutoAdjustScrollBarMargin(FrameNode* frameNode);
     static bool GetAutoAdjustScrollBarMargin(FrameNode* frameNode);
+    static void CreateWithResourceObjScrollBarWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_MODEL_H

@@ -2461,12 +2461,8 @@ typedef struct Ark_LineSpacingOptions Ark_LineSpacingOptions;
 typedef struct Opt_LineSpacingOptions Opt_LineSpacingOptions;
 typedef struct Ark_ListBackPressBehavior Ark_ListBackPressBehavior;
 typedef struct Opt_ListBackPressBehavior Opt_ListBackPressBehavior;
-typedef struct Ark_ListItemGroupOptions Ark_ListItemGroupOptions;
-typedef struct Opt_ListItemGroupOptions Opt_ListItemGroupOptions;
 typedef struct Ark_ListItemOptions Ark_ListItemOptions;
 typedef struct Opt_ListItemOptions Opt_ListItemOptions;
-typedef struct Ark_ListOptions Ark_ListOptions;
-typedef struct Opt_ListOptions Opt_ListOptions;
 typedef struct Ark_LoadCommittedDetails Ark_LoadCommittedDetails;
 typedef struct Opt_LoadCommittedDetails Opt_LoadCommittedDetails;
 typedef struct Ark_LocalizedBarrierStyle Ark_LocalizedBarrierStyle;
@@ -3373,6 +3369,10 @@ typedef struct Ark_LineOptions Ark_LineOptions;
 typedef struct Opt_LineOptions Opt_LineOptions;
 typedef struct Ark_ListDividerOptions Ark_ListDividerOptions;
 typedef struct Opt_ListDividerOptions Opt_ListDividerOptions;
+typedef struct Ark_ListItemGroupOptions Ark_ListItemGroupOptions;
+typedef struct Opt_ListItemGroupOptions Opt_ListItemGroupOptions;
+typedef struct Ark_ListOptions Ark_ListOptions;
+typedef struct Opt_ListOptions Opt_ListOptions;
 typedef struct Ark_MarkStyle Ark_MarkStyle;
 typedef struct Opt_MarkStyle Opt_MarkStyle;
 typedef struct Ark_MoreButtonOptions Ark_MoreButtonOptions;
@@ -16596,21 +16596,6 @@ typedef struct Opt_ListBackPressBehavior {
     Ark_Tag tag;
     Ark_ListBackPressBehavior value;
 } Opt_ListBackPressBehavior;
-typedef struct Ark_ListItemGroupOptions {
-    /* kind: Interface */
-    Opt_CustomNodeBuilder header;
-    Opt_ComponentContentBase headerComponent;
-    Opt_CustomNodeBuilder footer;
-    Opt_ComponentContentBase footerComponent;
-    Opt_Union_F64_String space;
-    Opt_ListItemGroupStyle style;
-    Opt_ListItemGroupHeaderFooterStyle headerStyle;
-    Opt_ListItemGroupHeaderFooterStyle footerStyle;
-} Ark_ListItemGroupOptions;
-typedef struct Opt_ListItemGroupOptions {
-    Ark_Tag tag;
-    Ark_ListItemGroupOptions value;
-} Opt_ListItemGroupOptions;
 typedef struct Ark_ListItemOptions {
     /* kind: Interface */
     Opt_ListItemStyle style;
@@ -16619,16 +16604,6 @@ typedef struct Opt_ListItemOptions {
     Ark_Tag tag;
     Ark_ListItemOptions value;
 } Opt_ListItemOptions;
-typedef struct Ark_ListOptions {
-    /* kind: Interface */
-    Opt_Int32 initialIndex;
-    Opt_Union_F64_String space;
-    Opt_Scroller scroller;
-} Ark_ListOptions;
-typedef struct Opt_ListOptions {
-    Ark_Tag tag;
-    Ark_ListOptions value;
-} Opt_ListOptions;
 typedef struct Ark_LoadCommittedDetails {
     /* kind: Interface */
     Ark_Boolean isMainFrame;
@@ -21580,6 +21555,33 @@ typedef struct Opt_ListDividerOptions {
     Ark_Tag tag;
     Ark_ListDividerOptions value;
 } Opt_ListDividerOptions;
+typedef struct Ark_ListItemGroupOptions {
+    /* kind: Interface */
+    Opt_CustomNodeBuilder header;
+    Opt_ComponentContentBase headerComponent;
+    Opt_CustomNodeBuilder footer;
+    Opt_ComponentContentBase footerComponent;
+    Opt_Union_F64_String space;
+    Opt_Dimension spaceWidth;
+    Opt_ListItemGroupStyle style;
+    Opt_ListItemGroupHeaderFooterStyle headerStyle;
+    Opt_ListItemGroupHeaderFooterStyle footerStyle;
+} Ark_ListItemGroupOptions;
+typedef struct Opt_ListItemGroupOptions {
+    Ark_Tag tag;
+    Ark_ListItemGroupOptions value;
+} Opt_ListItemGroupOptions;
+typedef struct Ark_ListOptions {
+    /* kind: Interface */
+    Opt_Int32 initialIndex;
+    Opt_Union_F64_String space;
+    Opt_Dimension spaceWidth;
+    Opt_Scroller scroller;
+} Ark_ListOptions;
+typedef struct Opt_ListOptions {
+    Ark_Tag tag;
+    Ark_ListOptions value;
+} Opt_ListOptions;
 typedef struct Ark_MarkStyle {
     /* kind: Interface */
     Opt_ResourceColor strokeColor;
@@ -25168,8 +25170,10 @@ typedef struct GENERATED_ArkUIGridModifier {
                           const Opt_Length* value);
     void (*setRowsGap)(Ark_NativePointer node,
                        const Opt_Length* value);
-    void (*setScrollBarWidth)(Ark_NativePointer node,
-                              const Opt_Union_F64_String* value);
+    void (*setScrollBarWidth0)(Ark_NativePointer node,
+                               const Opt_Union_F64_String* value);
+    void (*setScrollBarWidth1)(Ark_NativePointer node,
+                               const Opt_Resource* value);
     void (*setScrollBarColor)(Ark_NativePointer node,
                               const Opt_Union_arkui_component_enums_Color_I32_String_Resource* value);
     void (*setScrollBar)(Ark_NativePointer node,
@@ -25975,8 +25979,10 @@ typedef struct GENERATED_ArkUIRefreshModifier {
                              const Opt_Callback_RefreshStatus_Void* value);
     void (*setOnRefreshing)(Ark_NativePointer node,
                             const Opt_synthetic_Callback_Void* value);
-    void (*setRefreshOffset)(Ark_NativePointer node,
-                             const Opt_Float64* value);
+    void (*setRefreshOffset0)(Ark_NativePointer node,
+                              const Opt_Float64* value);
+    void (*setRefreshOffset1)(Ark_NativePointer node,
+                              const Opt_Resource* value);
     void (*setPullToRefresh)(Ark_NativePointer node,
                              const Opt_Boolean* value);
     void (*setPullUpToCancelRefresh)(Ark_NativePointer node,
@@ -25985,8 +25991,10 @@ typedef struct GENERATED_ArkUIRefreshModifier {
                               const Opt_arkui_component_common_Callback_F64_Void* value);
     void (*setPullDownRatio)(Ark_NativePointer node,
                              const Opt_Float64* value);
-    void (*setMaxPullDownDistance)(Ark_NativePointer node,
-                                   const Opt_Float64* value);
+    void (*setMaxPullDownDistance0)(Ark_NativePointer node,
+                                    const Opt_Float64* value);
+    void (*setMaxPullDownDistance1)(Ark_NativePointer node,
+                                    const Opt_Resource* value);
 } GENERATED_ArkUIRefreshModifier;
 
 typedef struct GENERATED_ArkUIRelativeContainerModifier {
@@ -26223,8 +26231,10 @@ typedef struct GENERATED_ArkUIScrollModifier {
                          const Opt_BarState* value);
     void (*setScrollBarColor)(Ark_NativePointer node,
                               const Opt_Union_arkui_component_enums_Color_I32_String_Resource* value);
-    void (*setScrollBarWidth)(Ark_NativePointer node,
-                              const Opt_Union_F64_String* value);
+    void (*setScrollBarWidth0)(Ark_NativePointer node,
+                               const Opt_Union_F64_String* value);
+    void (*setScrollBarWidth1)(Ark_NativePointer node,
+                               const Opt_Resource* value);
     void (*setOnScrollFrameBegin)(Ark_NativePointer node,
                                   const Opt_OnScrollFrameBeginCallback* value);
     void (*setNestedScroll)(Ark_NativePointer node,
@@ -26251,8 +26261,10 @@ typedef struct GENERATED_ArkUIScrollableCommonMethodModifier {
                          const Opt_BarState* value);
     void (*setScrollBarColor)(Ark_NativePointer node,
                               const Opt_Union_arkui_component_enums_Color_I32_String_Resource* value);
-    void (*setScrollBarWidth)(Ark_NativePointer node,
-                              const Opt_Union_F64_String* value);
+    void (*setScrollBarWidth0)(Ark_NativePointer node,
+                               const Opt_Union_F64_String* value);
+    void (*setScrollBarWidth1)(Ark_NativePointer node,
+                               const Opt_Resource* value);
     void (*setScrollBarMargin)(Ark_NativePointer node,
                                const Opt_ScrollBarMargin* value);
     void (*setAutoAdjustScrollBarMargin)(Ark_NativePointer node,

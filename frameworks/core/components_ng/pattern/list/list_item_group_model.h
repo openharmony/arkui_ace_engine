@@ -37,6 +37,7 @@ public:
 
     virtual void Create(const V2::ListItemGroupOptions& options) = 0;
     virtual void SetSpace(const Dimension& space) = 0;
+    virtual void SetSpaceWidth(const Dimension& spaceWidth) {};
     virtual void SetDivider(const V2::ItemDivider& divider) = 0;
     virtual void SetHeader(std::function<void()>&& header) = 0;
     virtual void SetFooter(std::function<void()>&& footer) = 0;
@@ -67,6 +68,9 @@ public:
     virtual void ParseResObjDividerStartMargin(const RefPtr<ResourceObject>& resObj) {};
     virtual void ParseResObjDividerEndMargin(const RefPtr<ResourceObject>& resObj) {};
     virtual void SetDividerColorByUser(bool isByUser) = 0;
+    virtual void CreateWithResourceObjSpace(const RefPtr<ResourceObject>& resObj) {};
+    virtual void ResetSpace() {};
+    virtual void ResetSpaceWidth() {};
 
 private:
     static std::unique_ptr<ListItemGroupModel> instance_;

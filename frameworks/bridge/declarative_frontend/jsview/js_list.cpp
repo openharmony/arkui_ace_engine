@@ -199,10 +199,12 @@ void JSList::SetScrollBarColor(const JSCallbackInfo& info)
 
 void JSList::SetScrollBarWidth(const JSCallbackInfo& scrollWidth)
 {
-    auto scrollBarWidth = JSScrollable::ParseBarWidth(scrollWidth);
+    RefPtr<ResourceObject> resObj;
+    auto scrollBarWidth = JSScrollable::ParseBarWidth(scrollWidth, resObj);
     if (!scrollBarWidth.empty()) {
         ListModel::GetInstance()->SetScrollBarWidth(scrollBarWidth);
     }
+    ListModel::GetInstance()->CreateWithResourceObjScrollBarWidth(resObj);
 }
 
 void JSList::SetEdgeEffect(const JSCallbackInfo& info)
@@ -284,11 +286,24 @@ void JSList::Create(const JSCallbackInfo& args)
     if (arg0->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(arg0);
         JSRef<JSVal> spaceValue = obj->GetProperty("space");
-        if (!spaceValue->IsNull()) {
-            CalcDimension space;
+        JSRef<JSVal> spaceWidthValue = obj->GetProperty("spaceWidth");
+        CalcDimension space;
+        RefPtr<ResourceObject> resObj;
+        if (spaceValue->IsNull() || spaceValue->IsUndefined()) {
+            ListModel::GetInstance()->ResetListSpace();
+        }
+        if (spaceWidthValue->IsNull() || spaceWidthValue->IsUndefined()) {
+            ListModel::GetInstance()->ResetListSpaceWidth();
+        }
+        if (!spaceWidthValue->IsNull() && !spaceWidthValue->IsUndefined()) {
+            ConvertFromJSValue(spaceWidthValue, space, resObj);
+            ListModel::GetInstance()->SetSpaceWidth(space);
+        } else if (!spaceValue->IsNull()) {
+            ListModel::GetInstance()->ResetListSpaceWidth();
             ConvertFromJSValue(spaceValue, space);
             ListModel::GetInstance()->SetSpace(space);
         }
+        ListModel::GetInstance()->CreateWithResourceObjSpace(resObj);
         int32_t initialIndex = 0;
         if (ConvertFromJSValue(obj->GetProperty("initialIndex"), initialIndex) && initialIndex >= 0) {
             ListModel::GetInstance()->SetInitialIndex(initialIndex);

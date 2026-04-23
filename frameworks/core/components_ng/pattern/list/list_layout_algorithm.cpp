@@ -195,7 +195,8 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         stickyStyle_ = listLayoutProperty->GetStickyStyle().value_or(V2::StickyStyle::NONE);
         childLayoutConstraint_ = listLayoutProperty->CreateChildConstraint();
         auto mainPercentRefer = GetMainAxisSize(childLayoutConstraint_.percentReference, axis_);
-        auto space = listLayoutProperty->GetSpace().value_or(Dimension(0));
+        auto space =
+            listLayoutProperty->GetSpaceWidth().value_or(listLayoutProperty->GetSpace().value_or(Dimension(0)));
         spaceWidth_ = ConvertToPx(space, layoutConstraint.scaleProperty, mainPercentRefer).value_or(0);
         ReviseSpace(listLayoutProperty);
         CheckJumpToIndex();
