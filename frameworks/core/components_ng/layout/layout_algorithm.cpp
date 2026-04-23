@@ -19,6 +19,7 @@
 #include "base/utils/feature_param.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/layout/vertical_overflow_handler.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/smart_layout/smart_layout_algorithm.h"

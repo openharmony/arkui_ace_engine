@@ -15,6 +15,7 @@
 
 #include "core/components_ng/syntax/repeat_node.h"
 
+#include "base/log/dump_log.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #ifdef ENABLE_ROSEN_BACKEND
