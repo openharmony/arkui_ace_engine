@@ -421,7 +421,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest006, TestSize.Level0)
     pipeline->safeAreaManager_->SetIsFullScreen(true);
     pipeline->safeAreaManager_->SetIsAtomicService(true);
     EXPECT_EQ(layoutWrapper->GetPageCurrentOffset(host), 0.0f);
-    EXPECT_EQ(layoutWrapper1->GetPageCurrentOffset(host), 0.0f);
+    EXPECT_EQ(layoutWrapper1->GetPageCurrentOffset(pageNode), 0.0f);
     pipeline->safeAreaManager_->SetIsAtomicService(false);
     pipeline->safeAreaManager_->UpdateCutoutSafeArea(
         NG::SafeAreaInsets({10.0f, 40.0f}, {20.0f, 50.0f}, {680.0f, 710.0f}, {1230.0f, 1260.0f}));
@@ -430,7 +430,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest006, TestSize.Level0)
     pipeline->safeAreaManager_->UpdateNavSafeArea(
         NG::SafeAreaInsets({20.0f, 50.0f}, {40.0f, 70.0f}, {670.0f, 700.0f}, {1210.0f, 1240.0f}));
     EXPECT_EQ(layoutWrapper->GetPageCurrentOffset(host), -70.0f);
-    EXPECT_EQ(layoutWrapper1->GetPageCurrentOffset(host), -70.0f);
+    EXPECT_EQ(layoutWrapper1->GetPageCurrentOffset(pageNode), -70.0f);
 }
 
 /**
