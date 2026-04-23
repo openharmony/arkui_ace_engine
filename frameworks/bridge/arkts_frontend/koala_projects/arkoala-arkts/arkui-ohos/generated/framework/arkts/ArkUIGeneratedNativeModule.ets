@@ -882,7 +882,6 @@ export class ArkUIGeneratedNativeModule {
     native static _GaugeAttribute_setPrivacySensitive(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _Grid_construct(id: KInt, flags: KInt): KPointer
-    @ani.unsafe.Direct
     native static _GridInterface_setGridOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _GridAttribute_setColumnsTemplate(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void

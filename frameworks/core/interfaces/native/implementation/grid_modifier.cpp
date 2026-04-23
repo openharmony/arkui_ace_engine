@@ -121,7 +121,7 @@ void SetScroll(FrameNode* frameNode, const Opt_Scroller* scroller)
     peerImplPtr->SetController(positionController);
     peerImplPtr->SetScrollBarProxy(scrollBarProxy);
 }
-void SetGridOptionsImpl(Ark_NativePointer node,
+void SetGridOptionsImpl(Ark_VMContext vmContext, Ark_NativePointer node,
                         const Opt_Scroller* scroller,
                         const Opt_GridLayoutOptions* layoutOptions)
 {

@@ -25187,7 +25187,8 @@ typedef struct GENERATED_ArkUIGaugeModifier {
 typedef struct GENERATED_ArkUIGridModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
-    void (*setGridOptions)(Ark_NativePointer node,
+    void (*setGridOptions)(Ark_VMContext vmContext,
+                           Ark_NativePointer node,
                            const Opt_Scroller* scroller,
                            const Opt_GridLayoutOptions* layoutOptions);
     void (*setColumnsTemplate)(Ark_NativePointer node,
