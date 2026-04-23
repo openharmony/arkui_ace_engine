@@ -57,6 +57,8 @@ public:
             theme->springResponse_ = pattern->GetAttr<double>("scroll_able_spring_response", 0.417f);
             theme->touchPadVelocityScaleRate_ =
                 pattern->GetAttr<double>("scroll_able_touch_pad_velocity_scale_rate", 1.0f);
+            theme->defaultScrollingDistance_ =
+                pattern->GetAttr<double>("scroll_able_default_scrolling_distance", 1.0f / 3.0f);
         }
     };
 
@@ -92,6 +94,11 @@ public:
         return touchPadVelocityScaleRate_;
     }
 
+    float GetDefaultScrollingDistance() const
+    {
+        return defaultScrollingDistance_;
+    }
+
 protected:
     ScrollableTheme() = default;
 
@@ -102,6 +109,7 @@ private:
     float ratio_ = 5.0f;
     float springResponse_ = 0.416f;
     float touchPadVelocityScaleRate_ = 1.0f;
+    float defaultScrollingDistance_ = 1.0f / 3.0f;
 };
 } // namespace OHOS::Ace::NG
 

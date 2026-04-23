@@ -173,6 +173,38 @@ std::function<bool(int32_t)> ArcListPattern::GetScrollIndexAbility()
     };
 }
 
+std::optional<ScrollingConfig> ArcListPattern::GetDefaultScrollingConfig(SmartGestureDirection direction) const
+{
+    if (!IsScrollAble(direction)) {
+        return std::nullopt;
+    }
+    if (itemPosition_.empty() || maxListItemIndex_ < 0) {
+        return std::nullopt;
+    }
+    auto midIndex = GetMidIndex();
+    if (midIndex < 0) {
+        return std::nullopt;
+    }
+
+    int32_t targetIndex = midIndex;
+    if (direction == SmartGestureDirection::FORWARD) {
+        targetIndex = std::min(midIndex + 1, maxListItemIndex_);
+    } else if (direction == SmartGestureDirection::BACKWARD) {
+        targetIndex = std::max(midIndex - 1, 0);
+    } else {
+        return std::nullopt;
+    }
+    if (targetIndex == midIndex) {
+        return std::nullopt;
+    }
+
+    float targetPos = 0.0f;
+    if (!CalculateScrollingDistanceToIndex(targetIndex, ScrollAlign::CENTER, targetPos) || NearZero(targetPos)) {
+        return std::nullopt;
+    }
+    return CreateScrollingConfig(direction, std::abs(targetPos));
+}
+
 bool ArcListPattern::ScrollListForFocus(int32_t nextIndex, int32_t curIndex, int32_t nextIndexInGroup)
 {
     auto pipeline = GetContext();
@@ -349,7 +381,7 @@ bool ArcListPattern::GetOneItemSnapPosByFinalPos(float mainPos, float finalPos, 
     return true;
 }
 
-int32_t ArcListPattern::GetMidIndex()
+int32_t ArcListPattern::GetMidIndex() const
 {
     float midPos = contentMainSize_ / FLOAT_TWO;
     for (auto& pos : itemPosition_) {
