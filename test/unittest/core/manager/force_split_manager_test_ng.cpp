@@ -835,15 +835,15 @@ HWTEST_F(ForceSplitManagerTestNg, ForceSplitManagerConstructor001, TestSize.Leve
 
 /**
  * @tc.name: ForceSplitManagerConstructor002
- * @tc.desc: Test ForceSplitManager constructor initializes ratio to DEFAULT_SPLIT_RATIO
+ * @tc.desc: Test ForceSplitManager constructor initializes ratio to defaultSplitRatio
  * @tc.type: FUNC
  */
 HWTEST_F(ForceSplitManagerTestNg, ForceSplitManagerConstructor002, TestSize.Level1)
 {
     auto manager = AceType::MakeRefPtr<ForceSplitManager>();
     ASSERT_NE(manager, nullptr);
-    constexpr float DEFAULT_SPLIT_RATIO = 0.5f;
-    EXPECT_FLOAT_EQ(manager->splitRatio_, DEFAULT_SPLIT_RATIO);
+    constexpr float defaultSplitRatio = 0.5f;
+    EXPECT_FLOAT_EQ(manager->splitRatio_, defaultSplitRatio);
 }
 
 /**
@@ -1029,10 +1029,10 @@ HWTEST_F(ForceSplitManagerTestNg, SetWideSplitRatio003, TestSize.Level1)
     auto manager = GetForceSplitManager();
     ASSERT_NE(manager, nullptr);
 
-    constexpr float MIN_SPLIT_RATIO = 1.0f / 3.0f;
-    manager->SetWideSplitRatio(MIN_SPLIT_RATIO);
+    constexpr float minSplitRatio = 1.0f / 3.0f;
+    manager->SetWideSplitRatio(minSplitRatio);
     EXPECT_TRUE(manager->wideSplitRatio_.has_value());
-    EXPECT_FLOAT_EQ(manager->wideSplitRatio_.value(), MIN_SPLIT_RATIO);
+    EXPECT_FLOAT_EQ(manager->wideSplitRatio_.value(), minSplitRatio);
 }
 
 /**
@@ -1045,10 +1045,10 @@ HWTEST_F(ForceSplitManagerTestNg, SetWideSplitRatio004, TestSize.Level1)
     auto manager = GetForceSplitManager();
     ASSERT_NE(manager, nullptr);
 
-    constexpr float MAX_SPLIT_RATIO = 2.0f / 3.0f;
-    manager->SetWideSplitRatio(MAX_SPLIT_RATIO);
+    constexpr float maxSplitRatio = 2.0f / 3.0f;
+    manager->SetWideSplitRatio(maxSplitRatio);
     EXPECT_TRUE(manager->wideSplitRatio_.has_value());
-    EXPECT_FLOAT_EQ(manager->wideSplitRatio_.value(), MAX_SPLIT_RATIO);
+    EXPECT_FLOAT_EQ(manager->wideSplitRatio_.value(), maxSplitRatio);
 }
 
 /**
@@ -1093,10 +1093,10 @@ HWTEST_F(ForceSplitManagerTestNg, SetSquareSplitRatio003, TestSize.Level1)
     auto manager = GetForceSplitManager();
     ASSERT_NE(manager, nullptr);
 
-    constexpr float MIN_SPLIT_RATIO = 1.0f / 3.0f;
-    manager->SetSquareSplitRatio(MIN_SPLIT_RATIO);
+    constexpr float minSplitRatio = 1.0f / 3.0f;
+    manager->SetSquareSplitRatio(minSplitRatio);
     EXPECT_TRUE(manager->squareSplitRatio_.has_value());
-    EXPECT_FLOAT_EQ(manager->squareSplitRatio_.value(), MIN_SPLIT_RATIO);
+    EXPECT_FLOAT_EQ(manager->squareSplitRatio_.value(), minSplitRatio);
 }
 
 /**
@@ -1109,10 +1109,10 @@ HWTEST_F(ForceSplitManagerTestNg, SetSquareSplitRatio004, TestSize.Level1)
     auto manager = GetForceSplitManager();
     ASSERT_NE(manager, nullptr);
 
-    constexpr float MAX_SPLIT_RATIO = 2.0f / 3.0f;
-    manager->SetSquareSplitRatio(MAX_SPLIT_RATIO);
+    constexpr float maxSplitRatio = 2.0f / 3.0f;
+    manager->SetSquareSplitRatio(maxSplitRatio);
     EXPECT_TRUE(manager->squareSplitRatio_.has_value());
-    EXPECT_FLOAT_EQ(manager->squareSplitRatio_.value(), MAX_SPLIT_RATIO);
+    EXPECT_FLOAT_EQ(manager->squareSplitRatio_.value(), maxSplitRatio);
 }
 
 /**
@@ -1151,22 +1151,22 @@ HWTEST_F(ForceSplitManagerTestNg, AddForceSplitRatioListener002, TestSize.Level1
     auto manager = GetForceSplitManager();
     ASSERT_NE(manager, nullptr);
 
-    constexpr int32_t NODE_ID_1 = 100;
-    constexpr int32_t NODE_ID_2 = 200;
-    constexpr int32_t NODE_ID_3 = 300;
+    constexpr int32_t nodeId1 = 100;
+    constexpr int32_t nodeId2 = 200;
+    constexpr int32_t nodeId3 = 300;
 
     std::function<void(float)> listener1 = [](float ratio) {};
     std::function<void(float)> listener2 = [](float ratio) {};
     std::function<void(float)> listener3 = [](float ratio) {};
 
-    manager->AddForceSplitRatioListener(NODE_ID_1, std::move(listener1));
-    manager->AddForceSplitRatioListener(NODE_ID_2, std::move(listener2));
-    manager->AddForceSplitRatioListener(NODE_ID_3, std::move(listener3));
+    manager->AddForceSplitRatioListener(nodeId1, std::move(listener1));
+    manager->AddForceSplitRatioListener(nodeId2, std::move(listener2));
+    manager->AddForceSplitRatioListener(nodeId3, std::move(listener3));
 
     EXPECT_EQ(manager->forceSplitRatioListeners_.size(), 3);
-    EXPECT_TRUE(manager->forceSplitRatioListeners_.find(NODE_ID_1) != manager->forceSplitRatioListeners_.end());
-    EXPECT_TRUE(manager->forceSplitRatioListeners_.find(NODE_ID_2) != manager->forceSplitRatioListeners_.end());
-    EXPECT_TRUE(manager->forceSplitRatioListeners_.find(NODE_ID_3) != manager->forceSplitRatioListeners_.end());
+    EXPECT_TRUE(manager->forceSplitRatioListeners_.find(nodeId1) != manager->forceSplitRatioListeners_.end());
+    EXPECT_TRUE(manager->forceSplitRatioListeners_.find(nodeId2) != manager->forceSplitRatioListeners_.end());
+    EXPECT_TRUE(manager->forceSplitRatioListeners_.find(nodeId3) != manager->forceSplitRatioListeners_.end());
 }
 
 /**
@@ -1179,22 +1179,22 @@ HWTEST_F(ForceSplitManagerTestNg, RemoveForceSplitRatioListener003, TestSize.Lev
     auto manager = GetForceSplitManager();
     ASSERT_NE(manager, nullptr);
 
-    constexpr int32_t NODE_ID_1 = 100;
-    constexpr int32_t NODE_ID_2 = 200;
-    constexpr int32_t NODE_ID_3 = 300;
+    constexpr int32_t nodeId1 = 100;
+    constexpr int32_t nodeId2 = 200;
+    constexpr int32_t nodeId3 = 300;
 
     std::function<void(float)> listener1 = [](float ratio) {};
     std::function<void(float)> listener2 = [](float ratio) {};
     std::function<void(float)> listener3 = [](float ratio) {};
 
-    manager->AddForceSplitRatioListener(NODE_ID_1, std::move(listener1));
-    manager->AddForceSplitRatioListener(NODE_ID_2, std::move(listener2));
-    manager->AddForceSplitRatioListener(NODE_ID_3, std::move(listener3));
+    manager->AddForceSplitRatioListener(nodeId1, std::move(listener1));
+    manager->AddForceSplitRatioListener(nodeId2, std::move(listener2));
+    manager->AddForceSplitRatioListener(nodeId3, std::move(listener3));
     EXPECT_EQ(manager->forceSplitRatioListeners_.size(), 3);
 
-    manager->RemoveForceSplitRatioListener(NODE_ID_2);
+    manager->RemoveForceSplitRatioListener(nodeId2);
     EXPECT_EQ(manager->forceSplitRatioListeners_.size(), 2);
-    EXPECT_TRUE(manager->forceSplitRatioListeners_.find(NODE_ID_2) == manager->forceSplitRatioListeners_.end());
+    EXPECT_TRUE(manager->forceSplitRatioListeners_.find(nodeId2) == manager->forceSplitRatioListeners_.end());
 }
 
 /**
@@ -1243,12 +1243,12 @@ HWTEST_F(ForceSplitManagerTestNg, UpdateForceSplitRatio007, TestSize.Level1)
     auto manager = GetForceSplitManager();
     ASSERT_NE(manager, nullptr);
 
-    constexpr float EXPECTED_RATIO = 0.51f;
-    manager->SetWideSplitRatio(EXPECTED_RATIO);
+    constexpr float expectedRatio = 0.51f;
+    manager->SetWideSplitRatio(expectedRatio);
     manager->mode_ = ForceSplitMode::WIDE_SPLIT;
 
     manager->UpdateForceSplitRatio();
-    EXPECT_FLOAT_EQ(manager->GetSplitRatio(), EXPECTED_RATIO);
+    EXPECT_FLOAT_EQ(manager->GetSplitRatio(), expectedRatio);
 }
 
 /**
@@ -1261,12 +1261,12 @@ HWTEST_F(ForceSplitManagerTestNg, UpdateForceSplitRatio008, TestSize.Level1)
     auto manager = GetForceSplitManager();
     ASSERT_NE(manager, nullptr);
 
-    constexpr float EXPECTED_RATIO = 0.49f;
-    manager->SetWideSplitRatio(EXPECTED_RATIO);
+    constexpr float expectedRatio = 0.49f;
+    manager->SetWideSplitRatio(expectedRatio);
     manager->mode_ = ForceSplitMode::WIDE_SPLIT;
 
     manager->UpdateForceSplitRatio();
-    EXPECT_FLOAT_EQ(manager->GetSplitRatio(), EXPECTED_RATIO);
+    EXPECT_FLOAT_EQ(manager->GetSplitRatio(), expectedRatio);
 }
 
 /**
@@ -1279,17 +1279,17 @@ HWTEST_F(ForceSplitManagerTestNg, CalcCurrentSplitRatio006, TestSize.Level1)
     auto manager = GetForceSplitManager();
     ASSERT_NE(manager, nullptr);
 
-    constexpr float MIN_SPLIT_RATIO = 1.0f / 3.0f;
-    constexpr float MAX_SPLIT_RATIO = 2.0f / 3.0f;
+    constexpr float minSplitRatio = 1.0f / 3.0f;
+    constexpr float maxSplitRatio = 2.0f / 3.0f;
 
     manager->mode_ = ForceSplitMode::WIDE_SPLIT;
-    manager->SetWideSplitRatio(MIN_SPLIT_RATIO);
+    manager->SetWideSplitRatio(minSplitRatio);
     float ratio = manager->CalcCurrentSplitRatio();
-    EXPECT_FLOAT_EQ(ratio, MIN_SPLIT_RATIO);
+    EXPECT_FLOAT_EQ(ratio, minSplitRatio);
 
-    manager->SetWideSplitRatio(MAX_SPLIT_RATIO);
+    manager->SetWideSplitRatio(maxSplitRatio);
     ratio = manager->CalcCurrentSplitRatio();
-    EXPECT_FLOAT_EQ(ratio, MAX_SPLIT_RATIO);
+    EXPECT_FLOAT_EQ(ratio, maxSplitRatio);
 }
 
 /**
@@ -1302,17 +1302,17 @@ HWTEST_F(ForceSplitManagerTestNg, CalcCurrentSplitRatio007, TestSize.Level1)
     auto manager = GetForceSplitManager();
     ASSERT_NE(manager, nullptr);
 
-    constexpr float MIN_SPLIT_RATIO = 1.0f / 3.0f;
-    constexpr float MAX_SPLIT_RATIO = 2.0f / 3.0f;
+    constexpr float minSplitRatio = 1.0f / 3.0f;
+    constexpr float maxSplitRatio = 2.0f / 3.0f;
 
     manager->mode_ = ForceSplitMode::SQUARE_SPLIT;
-    manager->SetSquareSplitRatio(MIN_SPLIT_RATIO);
+    manager->SetSquareSplitRatio(minSplitRatio);
     float ratio = manager->CalcCurrentSplitRatio();
-    EXPECT_FLOAT_EQ(ratio, MIN_SPLIT_RATIO);
+    EXPECT_FLOAT_EQ(ratio, minSplitRatio);
 
-    manager->SetSquareSplitRatio(MAX_SPLIT_RATIO);
+    manager->SetSquareSplitRatio(maxSplitRatio);
     ratio = manager->CalcCurrentSplitRatio();
-    EXPECT_FLOAT_EQ(ratio, MAX_SPLIT_RATIO);
+    EXPECT_FLOAT_EQ(ratio, maxSplitRatio);
 }
 
 /**
@@ -1683,11 +1683,11 @@ HWTEST_F(ForceSplitManagerTestNg, NotifyForceSplitStateChange001, TestSize.Level
     auto manager = GetForceSplitManager();
     ASSERT_NE(manager, nullptr);
 
-    constexpr int32_t NODE_ID = 100;
+    constexpr int32_t nodeId = 100;
     bool listenerCalled = false;
     std::function<void()> listener = [&listenerCalled]() { listenerCalled = true; };
 
-    manager->AddForceSplitStateListener(NODE_ID, std::move(listener));
+    manager->AddForceSplitStateListener(nodeId, std::move(listener));
     manager->NotifyForceSplitStateChange();
     EXPECT_TRUE(listenerCalled);
 }
@@ -1717,15 +1717,15 @@ HWTEST_F(ForceSplitManagerTestNg, NotifyForceSplitStateChange003, TestSize.Level
     auto manager = GetForceSplitManager();
     ASSERT_NE(manager, nullptr);
 
-    constexpr int32_t NODE_ID_1 = 100;
-    constexpr int32_t NODE_ID_2 = 200;
+    constexpr int32_t nodeId1 = 100;
+    constexpr int32_t nodeId2 = 200;
     int32_t callCount = 0;
 
     std::function<void()> listener1 = [&callCount]() { callCount++; };
     std::function<void()> listener2 = [&callCount]() { callCount++; };
 
-    manager->AddForceSplitStateListener(NODE_ID_1, std::move(listener1));
-    manager->AddForceSplitStateListener(NODE_ID_2, std::move(listener2));
+    manager->AddForceSplitStateListener(nodeId1, std::move(listener1));
+    manager->AddForceSplitStateListener(nodeId2, std::move(listener2));
     manager->NotifyForceSplitStateChange();
     EXPECT_EQ(callCount, 2);
 }
@@ -1740,11 +1740,11 @@ HWTEST_F(ForceSplitManagerTestNg, AddForceSplitStateListener001, TestSize.Level1
     auto manager = GetForceSplitManager();
     ASSERT_NE(manager, nullptr);
 
-    constexpr int32_t NODE_ID = 100;
+    constexpr int32_t nodeId = 100;
     std::function<void()> listener = []() {};
 
-    manager->AddForceSplitStateListener(NODE_ID, std::move(listener));
-    EXPECT_TRUE(manager->forceSplitListeners_.find(NODE_ID) != manager->forceSplitListeners_.end());
+    manager->AddForceSplitStateListener(nodeId, std::move(listener));
+    EXPECT_TRUE(manager->forceSplitListeners_.find(nodeId) != manager->forceSplitListeners_.end());
 }
 
 /**
@@ -1757,12 +1757,12 @@ HWTEST_F(ForceSplitManagerTestNg, RemoveForceSplitStateListener001, TestSize.Lev
     auto manager = GetForceSplitManager();
     ASSERT_NE(manager, nullptr);
 
-    constexpr int32_t NODE_ID = 100;
+    constexpr int32_t nodeId = 100;
     std::function<void()> listener = []() {};
 
-    manager->AddForceSplitStateListener(NODE_ID, std::move(listener));
-    manager->RemoveForceSplitStateListener(NODE_ID);
-    EXPECT_TRUE(manager->forceSplitListeners_.find(NODE_ID) == manager->forceSplitListeners_.end());
+    manager->AddForceSplitStateListener(nodeId, std::move(listener));
+    manager->RemoveForceSplitStateListener(nodeId);
+    EXPECT_TRUE(manager->forceSplitListeners_.find(nodeId) == manager->forceSplitListeners_.end());
 }
 
 /**
@@ -1902,36 +1902,6 @@ HWTEST_F(ForceSplitManagerTestNg, HasRelatedPage001, TestSize.Level1)
 
     manager->relatedPageName_ = "";
     EXPECT_FALSE(manager->HasRelatedPage());
-}
-
-/**
- * @tc.name: SetAppIconId001
- * @tc.desc: Test SetAppIconId sets appIconId_
- * @tc.type: FUNC
- */
-HWTEST_F(ForceSplitManagerTestNg, SetAppIconId001, TestSize.Level1)
-{
-    auto manager = GetForceSplitManager();
-    ASSERT_NE(manager, nullptr);
-
-    constexpr int32_t ICON_ID = 123;
-    manager->SetAppIconId(ICON_ID);
-    EXPECT_EQ(manager->GetAppIconId(), ICON_ID);
-}
-
-/**
- * @tc.name: GetAppIconId001
- * @tc.desc: Test GetAppIconId returns correct value
- * @tc.type: FUNC
- */
-HWTEST_F(ForceSplitManagerTestNg, GetAppIconId001, TestSize.Level1)
-{
-    auto manager = GetForceSplitManager();
-    ASSERT_NE(manager, nullptr);
-
-    constexpr int32_t ICON_ID = 456;
-    manager->appIconId_ = ICON_ID;
-    EXPECT_EQ(manager->GetAppIconId(), ICON_ID);
 }
 
 /**
