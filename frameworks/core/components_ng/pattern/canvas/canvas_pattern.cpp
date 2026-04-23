@@ -526,9 +526,32 @@ void CanvasPattern::UpdateStrokeColor(const Color& color)
     paintMethod_->PushTask(task);
 }
 
+void CanvasPattern::NotifyGradientHDRColorHeadRoom(const std::shared_ptr<Ace::Gradient>& gradient)
+{
+    CHECK_NULL_VOID(gradient);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    float maxHeadRoom = 0.0f;
+    bool hasHdrColor = false;
+    for (const auto& gradientColor : gradient->GetColors()) {
+        auto headRoomColor = gradientColor.GetColor().GetHeadRoomColor();
+        if (headRoomColor.has_value()) {
+            hasHdrColor = true;
+            maxHeadRoom = std::max(maxHeadRoom, headRoomColor.value().headRoom);
+        }
+    }
+    if (hasHdrColor) {
+        renderContext->SetHDRColorHeadRoom(maxHeadRoom);
+    }
+}
+
 void CanvasPattern::SetStrokeGradient(const std::shared_ptr<Ace::Gradient>& gradient)
 {
     CHECK_NULL_VOID(gradient);
+    NotifyGradientHDRColorHeadRoom(gradient);
+    CHECK_NULL_VOID(paintMethod_);
     auto task = [gradientObj = *gradient](
                     CanvasPaintMethod& paintMethod) { paintMethod.SetStrokeGradient(gradientObj); };
     paintMethod_->PushTask(task);
@@ -573,6 +596,8 @@ void CanvasPattern::UpdateFillColor(const Color& color)
 void CanvasPattern::SetFillGradient(const std::shared_ptr<Ace::Gradient>& gradient)
 {
     CHECK_NULL_VOID(gradient);
+    NotifyGradientHDRColorHeadRoom(gradient);
+    CHECK_NULL_VOID(paintMethod_);
     auto task = [gradientObj = *gradient](CanvasPaintMethod& paintMethod) { paintMethod.SetFillGradient(gradientObj); };
     paintMethod_->PushTask(task);
 }

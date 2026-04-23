@@ -48,6 +48,7 @@ public:
         if (propertiesFromAncestor_) {
             if (!shapePaintProperty->HasFill() && propertiesFromAncestor_->HasFill()) {
                 auto renderContext = paintWrapper->GetRenderContext();
+                CHECK_NULL_RETURN(renderContext, nullptr);
                 renderContext->UpdateForegroundColor(propertiesFromAncestor_->GetFillValue());
                 renderContext->ResetForegroundColorStrategy();
             }
@@ -59,9 +60,11 @@ public:
             shapePaintProperty->UpdateFill(Color::FOREGROUND);
             shapePaintProperty->ResetFillOpacity();
         }
+        UpdateFillHDRColorHeadRoom(paintWrapper, *shapePaintProperty);
         float height = paintWrapper->GetContentSize().Height();
         float width = paintWrapper->GetContentSize().Width();
         float radius = (width > height ? height : width) * 0.5;
+        UpdateStrokeHDRColorHeadRoom(paintWrapper, *shapePaintProperty);
         return
             [radiusValue = radius, offsetValue = paintWrapper->GetContentOffset(), shapePaintProperty, paintWrapper](
                 RSCanvas& canvas) {
@@ -91,6 +94,32 @@ public:
             (height + strokeWidth * 2) };
         shapeOverlayModifier_->SetBoundsRect(boundsRect);
         return shapeOverlayModifier_;
+    }
+
+private:
+    void UpdateFillHDRColorHeadRoom(PaintWrapper* paintWrapper, const ShapePaintProperty& shapePaintProperty) const
+    {
+        CHECK_NULL_VOID(paintWrapper);
+        auto renderContext = paintWrapper->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        auto fillColor = shapePaintProperty.HasFill() ? shapePaintProperty.GetFillValue() : Color::BLACK;
+        auto headRoomColor = fillColor.GetHeadRoomColor();
+        renderContext->SetHDRColorHeadRoom(headRoomColor.has_value() ? headRoomColor.value().headRoom : 1.0f);
+    }
+
+    void UpdateStrokeHDRColorHeadRoom(PaintWrapper* paintWrapper, const ShapePaintProperty& shapePaintProperty) const
+    {
+        CHECK_NULL_VOID(paintWrapper);
+        if (!shapePaintProperty.HasStroke()) {
+            return;
+        }
+        auto headRoomColor = shapePaintProperty.GetStrokeValue().GetHeadRoomColor();
+        if (!headRoomColor.has_value()) {
+            return;
+        }
+        auto renderContext = paintWrapper->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->SetHDRColorHeadRoom(headRoomColor.value().headRoom);
     }
 
     ACE_DISALLOW_COPY_AND_MOVE(CirclePaintMethod);
