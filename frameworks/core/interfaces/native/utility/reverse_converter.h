@@ -83,6 +83,7 @@ enum class CommonSubType;
 enum class CrownAction;
 enum class DimensionUnit;
 enum class DisplayMode;
+enum class DragAnimationType;
 enum class DragBehavior;
 enum class EdgeEffect;
 enum class FoldStatus : uint32_t;
@@ -333,6 +334,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Dimension& dst, const int64_t& id);
     void AssignArkValue(Ark_Dimension& dst, const std::string& src, ConvContext *ctx);
     void AssignArkValue(Ark_DismissReason& dst, const BindSheetDismissReason& src);
+    void AssignArkValue(Ark_DragAnimationType& dst, const DragAnimationType& src);
     void AssignArkValue(Ark_DragBehavior& dst, const DragBehavior& src);
     void AssignArkValue(Ark_DragEvent& dragEvent, const RefPtr<OHOS::Ace::DragEvent>& info);
     void AssignArkValue(

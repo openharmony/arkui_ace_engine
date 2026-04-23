@@ -809,6 +809,7 @@ export interface DragEvent {
     dragBehavior: DragBehavior
     useCustomDropAnimation: boolean
     autoHideComponentUniqueIds?: int32 | Array<int32> | undefined
+    dragAnimationType: DragAnimationType
     getModifierKeyState?: ModifierKeyStateGetter | undefined
     getDisplayX(): double
     getDisplayY(): double
@@ -824,6 +825,7 @@ export interface DragEvent {
     getVelocityY(): double
     getVelocity(): double
     executeDropAnimation(customDropAnimation: VoidCallback): void
+    executeFollowHandMorphDropAnimation(onAnimationFinished: VoidCallback, animationOption: string | undefined): void
     startDataLoading(options: DataSyncOptions): string | undefined
     getDisplayId(): int32
     getDragSource(): string
@@ -856,6 +858,12 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
     }
     set autoHideComponentUniqueIds(autoHideComponentUniqueIds: int32 | Array<int32> | undefined) {
         this.setAutoHideComponentUniqueIds(autoHideComponentUniqueIds)
+    }
+    get dragAnimationType(): DragAnimationType {
+        return this.getDragAnimationType()
+    }
+    set dragAnimationType(dragAnimationType: DragAnimationType) {
+        this.setDragAnimationType(dragAnimationType)
     }
     get getModifierKeyState(): ModifierKeyStateGetter | undefined {
         return this.getGetModifierKeyState()
@@ -939,6 +947,12 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         this.executeDropAnimation_serialize(customDropAnimation_casted)
         return
     }
+    public executeFollowHandMorphDropAnimation(onAnimationFinished: VoidCallback, animationOption?: string): void {
+        const onAnimationFinished_casted = onAnimationFinished as (VoidCallback)
+        const animationOption_casted = animationOption as (string | undefined)
+        this.executeFollowHandMorphDropAnimation_serialize(onAnimationFinished_casted, animationOption_casted)
+        return
+    }
     public startDataLoading(options: DataSyncOptions): string | undefined {
         return hookDragEventStartDataLoading(this, options)
     }
@@ -985,6 +999,14 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
     private setAutoHideComponentUniqueIds(autoHideComponentUniqueIds: int32 | Array<int32> | undefined): void {
         const autoHideComponentUniqueIds_casted = autoHideComponentUniqueIds as (int32 | Array<int32> | undefined)
         this.setAutoHideComponentUniqueIds_serialize(autoHideComponentUniqueIds_casted)
+        return
+    }
+    private getDragAnimationType(): DragAnimationType {
+        return this.getDragAnimationType_serialize()
+    }
+    private setDragAnimationType(dragAnimationType: DragAnimationType): void {
+        const dragAnimationType_casted = dragAnimationType as (DragAnimationType)
+        this.setDragAnimationType_serialize(dragAnimationType_casted)
         return
     }
     private getGetModifierKeyState(): ModifierKeyStateGetter | undefined {
@@ -1056,6 +1078,19 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteCallback(customDropAnimation)
         ArkUIGeneratedNativeModule._DragEvent_executeDropAnimation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private executeFollowHandMorphDropAnimation_serialize(onAnimationFinished: VoidCallback, animationOption?: string): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(onAnimationFinished)
+        if (animationOption !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const animationOptionTmpValue = animationOption!
+            thisSerializer.writeString(animationOptionTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._DragEvent_executeFollowHandMorphDropAnimation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private getDisplayId_serialize(): int32 {
@@ -1150,6 +1185,26 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._DragEvent_setAutoHideComponentUniqueIds(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private getDragAnimationType_serialize(): DragAnimationType {
+        const retval = ArkUIGeneratedNativeModule._DragEvent_getDragAnimationType(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: DragAnimationType = DragAnimationType.DEFAULT
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = DragAnimationType.fromValue(retvalDeserializer.readInt32())
+        }
+        const returnResult: DragAnimationType = buffer
+        retvalDeserializer.dispose()
+        return returnResult
+    }
+    private setDragAnimationType_serialize(dragAnimationType: DragAnimationType): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        thisSerializer.writeInt8(RuntimeType.OBJECT)
+        const dragAnimationTypeTmpValue = (dragAnimationType as DragAnimationType)
+        thisSerializer.writeInt32(dragAnimationTypeTmpValue.valueOf())
+        ArkUIGeneratedNativeModule._DragEvent_setDragAnimationType(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private setGetModifierKeyState_serialize(getModifierKeyState: ModifierKeyStateGetter | undefined): void {
@@ -7766,6 +7821,10 @@ export type PixelMap = image.PixelMap;
 export enum DragBehavior {
     COPY = 0,
     MOVE = 1
+}
+export enum DragAnimationType {
+    DEFAULT = 0,
+    FOLLOW_HAND_MORPH = 1
 }
 export type UnifiedData = unifiedDataChannel.UnifiedData;
 export type Summary = unifiedDataChannel.Summary;

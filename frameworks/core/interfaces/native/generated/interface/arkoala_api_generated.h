@@ -4750,6 +4750,14 @@ typedef struct Opt_DpiFollowStrategy {
     Ark_Tag tag;
     Ark_DpiFollowStrategy value;
 } Opt_DpiFollowStrategy;
+typedef enum Ark_DragAnimationType {
+    ARK_DRAG_ANIMATION_TYPE_DEFAULT = 0,
+    ARK_DRAG_ANIMATION_TYPE_FOLLOW_HAND_MORPH = 1,
+} Ark_DragAnimationType;
+typedef struct Opt_DragAnimationType {
+    Ark_Tag tag;
+    Ark_DragAnimationType value;
+} Opt_DragAnimationType;
 typedef enum Ark_DragBehavior {
     ARK_DRAG_BEHAVIOR_COPY = 0,
     ARK_DRAG_BEHAVIOR_MOVE = 1,
@@ -29250,6 +29258,9 @@ typedef struct GENERATED_ArkUIDragEventAccessor {
     Ark_Float64 (*getVelocity)(Ark_DragEvent peer);
     void (*executeDropAnimation)(Ark_DragEvent peer,
                                  const VoidCallback* customDropAnimation);
+    void (*executeFollowHandMorphDropAnimation)(Ark_DragEvent peer,
+                                                const VoidCallback* onAnimationFinished,
+                                                const Opt_String* animationOption);
     Ark_Int32 (*getDisplayId)(Ark_DragEvent peer);
     Ark_String (*getDragSource)(Ark_DragEvent peer);
     Ark_Boolean (*isRemote)(Ark_DragEvent peer);
@@ -29264,6 +29275,9 @@ typedef struct GENERATED_ArkUIDragEventAccessor {
     Opt_Union_I32_Array_I32 (*getAutoHideComponentUniqueIds)(Ark_DragEvent peer);
     void (*setAutoHideComponentUniqueIds)(Ark_DragEvent peer,
                                           const Opt_Union_I32_Array_I32* autoHideComponentUniqueIds);
+    Opt_DragAnimationType (*getDragAnimationType)(Ark_DragEvent peer);
+    void (*setDragAnimationType)(Ark_DragEvent peer,
+                                 const Opt_DragAnimationType* dragAnimationType);
     void (*setGetModifierKeyState)(Ark_DragEvent peer,
                                    const Opt_ModifierKeyStateGetter* getModifierKeyState);
 } GENERATED_ArkUIDragEventAccessor;

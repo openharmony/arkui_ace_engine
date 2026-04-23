@@ -2148,6 +2148,18 @@ void AssignCast(std::optional<ResponseRegionSupportedTool>& dst, const Ark_Respo
 }
 
 template<>
+void AssignCast(std::optional<DragAnimationType>& dst, const Ark_DragAnimationType& src)
+{
+    switch (src) {
+        case ARK_DRAG_ANIMATION_TYPE_DEFAULT: dst = DragAnimationType::DEFAULT; break;
+        case ARK_DRAG_ANIMATION_TYPE_FOLLOW_HAND_MORPH: dst = DragAnimationType::FOLLOW_HAND_MORPH; break;
+        default: {
+            LOGE("Unexpected enum value in Ark_DragAnimationType: %{public}d", src);
+        }
+    }
+}
+
+template<>
 void AssignCast(std::optional<DragBehavior>& dst, const Ark_DragBehavior& src)
 {
     switch (src) {
