@@ -66,6 +66,7 @@ public:
         value->propControlButtonStyle_ = CloneControlButtonStyle();
         value->propDividerStyle_ = CloneDividerStyle();
         value->propMinContentWidth_ = CloneMinContentWidth();
+        value->propShowSideBarWithGesture_ = CloneShowSideBarWithGesture();
         return value;
     }
 
@@ -83,6 +84,7 @@ public:
         ResetControlButtonStyle();
         ResetDividerStyle();
         ResetMinContentWidth();
+        ResetShowSideBarWithGesture();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
@@ -136,6 +138,8 @@ public:
         json->PutExtAttr("sideBarPosition",
             sideBarPosition == SideBarPosition::START ? "SideBarPosition.Start" : "SideBarPosition.End", filter);
         json->PutExtAttr("minContentWidth", std::to_string(minContentWidth.Value()).c_str(), filter);
+        json->PutExtAttr("showSideBarWithGesture",
+            propShowSideBarWithGesture_.value_or(true) ? "true" : "false", filter);
 
         // divider
         Dimension strokeWidth = DEFAULT_DIVIDER_STROKE_WIDTH;
@@ -189,6 +193,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AutoHide, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SideBarPosition, SideBarPosition, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MinContentWidth, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowSideBarWithGesture, bool, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_GROUP(ControlButtonStyle, ControlButtonStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ControlButtonStyle, ControlButtonWidth, Dimension, PROPERTY_UPDATE_MEASURE);

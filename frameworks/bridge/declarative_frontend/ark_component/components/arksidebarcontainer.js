@@ -273,7 +273,29 @@ class ArkSideBarContainerComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, SideBarContainerShowControlButtonModifier.identity, SideBarContainerShowControlButtonModifier, value);
     return this;
   }
+  showSideBarWithGesture(value) {
+    modifierWithKey(this._modifiersWithKeys, SideBarContainerShowSideBarWithGestureModifier.identity, SideBarContainerShowSideBarWithGestureModifier, value);
+    return this;
+  }
 }
+
+class SideBarContainerShowSideBarWithGestureModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().sideBarContainer.resetShowSideBarWithGesture(node);
+    }
+    else {
+      getUINativeModule().sideBarContainer.setShowSideBarWithGesture(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue === this.value;
+  }
+}
+SideBarContainerShowSideBarWithGestureModifier.identity = Symbol('sideBarContainerShowSideBarWithGesture');
 
 class JSSideBarContainer extends JSViewAbstract {
     static create(params) {
@@ -316,6 +338,9 @@ class JSSideBarContainer extends JSViewAbstract {
     }
     static showControlButton(value) {
         getUINativeModule().sideBarContainer.setShowControlButton(true, value);
+    }
+    static showSideBarWithGesture(value, fuc) {
+        getUINativeModule().sideBarContainer.setShowSideBarWithGesture(true, value);
     }
     static sideBarPosition(value) {
         getUINativeModule().sideBarContainer.setSideBarPosition(true, value);

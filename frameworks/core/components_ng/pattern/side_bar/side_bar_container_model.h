@@ -81,6 +81,7 @@ public:
     virtual void SetMinContentWidth(const Dimension& minContentWidth);
     virtual void SetMinContentWidth(const RefPtr<ResourceObject>& resObj) {};
     virtual void ResetControlButton();
+    virtual void SetShowSideBarWithGesture(bool showSideBarWithGesture) {};
 
 private:
     static std::unique_ptr<SideBarContainerModel> instance_;

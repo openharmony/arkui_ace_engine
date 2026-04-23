@@ -2734,6 +2734,8 @@ struct CJUISideBarContainerModifier {
         ArkUI_Int32 length, ArkUI_Uint32 color, void* strokeWidthPtr, void* startMarginPtr, void* endMarginPtr,
         void* colorPtr);
     void (*resetSideBarContainerDivider)(ArkUINodeHandle node);
+    void (*setShowSideBarWithGesture)(ArkUINodeHandle node, ArkUI_Bool isShow);
+    void (*resetShowSideBarWithGesture)(ArkUINodeHandle node);
 };
 
 struct CJUICalendarPickerModifier {
