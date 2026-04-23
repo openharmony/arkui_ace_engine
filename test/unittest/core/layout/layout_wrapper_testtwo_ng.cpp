@@ -806,9 +806,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest019, TestSize.Level0)
 HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest020, TestSize.Level0)
 {
     auto [parent0, layoutWrapper0] = CreateNodeAndWrapper(V2::JS_VIEW_ETS_TAG, NODE_ID_0);
-    layoutWrapper0->hostNode_ = nullptr;
-    auto host = layoutWrapper0->GetHostNode();
-    layoutWrapper0->AdjustChildren(host, OffsetF(), false);
+    layoutWrapper0->AdjustChildren(parent0, OffsetF(), false);
 
     auto [parent1, layoutWrapper1] = CreateNodeAndWrapper(V2::JS_VIEW_ETS_TAG, NODE_ID_0);
     for (const auto& childUI : parent1->GetChildren()) {
