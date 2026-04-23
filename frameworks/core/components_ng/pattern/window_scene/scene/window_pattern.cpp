@@ -22,7 +22,6 @@
 #include "session_manager/include/scene_session_manager.h"
 #include "start_window_option.h"
 #include "ui/rs_surface_node.h"
-#include "window_pattern.h"
 
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
