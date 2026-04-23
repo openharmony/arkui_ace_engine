@@ -1857,6 +1857,11 @@ HWTEST_F(DatePickerTestFour, DatePickerPatternValidateDateParametersTest002, Tes
     bool result = pattern->ValidateDateParameters(json, year, month, day);
 
     EXPECT_FALSE(result);
+
+    json = JsonUtil::ParseJsonString(R"({"year":0,"month":6,"day":15})");
+    ASSERT_NE(json, nullptr);
+    result = pattern->ValidateDateParameters(json, year, month, day);
+    EXPECT_FALSE(result);
 }
 
 /**
@@ -1884,6 +1889,11 @@ HWTEST_F(DatePickerTestFour, DatePickerPatternValidateDateParametersTest003, Tes
     bool result = pattern->ValidateDateParameters(json, year, month, day);
 
     EXPECT_FALSE(result);
+
+    json = JsonUtil::ParseJsonString(R"({"year":2024,"month":0,"day":15})");
+    ASSERT_NE(json, nullptr);
+    result = pattern->ValidateDateParameters(json, year, month, day);
+    EXPECT_FALSE(result);
 }
 
 /**
@@ -1910,6 +1920,11 @@ HWTEST_F(DatePickerTestFour, DatePickerPatternValidateDateParametersTest004, Tes
     int32_t day = 0;
     bool result = pattern->ValidateDateParameters(json, year, month, day);
 
+    EXPECT_FALSE(result);
+
+    json = JsonUtil::ParseJsonString(R"({"year":2024,"month":6,"day":0})");
+    ASSERT_NE(json, nullptr);
+    result = pattern->ValidateDateParameters(json, year, month, day);
     EXPECT_FALSE(result);
 }
 
