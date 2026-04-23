@@ -135,6 +135,7 @@ void RosenRenderContext::SetPositionToRSNodeMultiThread()
     }
     frameNode->PostAfterAttachMainTreeTask([weak = WeakPtr<FrameNode>(frameNode), rect]() {
         auto host = weak.Upgrade();
+        CHECK_NULL_VOID(host);
         host->OnSyncGeometryFrameFinish(rect);
         ElementRegister::GetInstance()->ReSyncGeometryTransition(host);
     });
