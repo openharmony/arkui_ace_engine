@@ -419,6 +419,7 @@ public:
     virtual void SetOvalMask(const RectF& rect, const ShapeMaskProperty& property) {}
     virtual void SetCommandPathMask(const std::string& commands, const ShapeMaskProperty& property) {}
     virtual void SetMarkNodeGroup(bool isNodeGroup) {}
+    virtual void SetLayerMark(bool isLayer) {}
 
     virtual RectF GetPaintRectWithTransform()
     {
