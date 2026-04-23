@@ -96,6 +96,7 @@ public:
     void OnNotifyMemoryLevel(int32_t level) override;
     void OnWindowHide() override;
     void OnVisibleChange(bool isVisible) override;
+    void SetIsBackground(bool isBackground);
     void OnRecycle() override;
     void OnReuse() override;
 

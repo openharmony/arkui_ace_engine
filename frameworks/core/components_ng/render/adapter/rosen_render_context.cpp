@@ -30,6 +30,7 @@
 #include "render_service_client/core/ui_effect/property/include/rs_ui_shape_base.h"
 #include "render_service_client/core/ui/rs_node.h"
 #include "render_service_base/include/common/rs_color.h"
+#include "render_service_client/core/ui/rs_depth_node.h"
 #include "render_service_client/core/ui/rs_root_node.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
 #include "render_service_client/core/ui/rs_ui_context.h"
@@ -669,6 +670,10 @@ void RosenRenderContext::CreateNodeByType(
         }
         case ContextType::UNION: {
             rsNode_ = Rosen::RSUnionNode::Create(false, isTextureExportNode, rsContext);
+            break;
+        }
+        case ContextType::DEPTH: {
+            rsNode_ = Rosen::RSDepthNode::Create(false, isTextureExportNode, rsContext);
             break;
         }
         case ContextType::EXTERNAL:
@@ -6330,6 +6335,13 @@ void RosenRenderContext::SetSecurityLayer(bool isSecure)
     auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
     CHECK_NULL_VOID(rsSurfaceNode);
     rsSurfaceNode->SetSecurityLayer(isSecure);
+}
+
+void RosenRenderContext::SetIsBackground(bool isBackground)
+{
+    FREE_RS_CONTEXT_CHECK(SetIsBackground, isBackground);
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetIsDepthBackground(isBackground);
 }
 
 void RosenRenderContext::SetHDRBrightness(float hdrBrightness)

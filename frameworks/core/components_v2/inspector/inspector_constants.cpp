@@ -681,6 +681,9 @@ const char LAZY_V_GRID_LAYOUT_ETS_TAG[] = "LazyVGridLayout";
 // UIPickerComponent
 const char CONTAINER_PICKER_ETS_TAG[] = "UIPickerComponent";
 
+// DepthComponent
+const char DEPTH_COMPONENT_ETS_TAG[] = "DepthComponent";
+
 // UndefinedNode
 const char UNDEFINED_NODE_ETS_TAG[] = "";
 
