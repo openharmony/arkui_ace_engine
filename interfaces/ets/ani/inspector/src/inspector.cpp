@@ -509,10 +509,6 @@ static ani_string AniGetInspectorByKey(ani_env *env, ani_string key)
     }
     ContainerScope scope{Container::CurrentIdSafelyWithCheck()};
     std::string resultStr = NG::Inspector::GetInspectorNodeByKey(keyStr);
-    if (resultStr.empty()) {
-        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani node %{public}s is empty.", keyStr.c_str());
-        return nullptr;
-    }
     ani_string ani_str;
     ani_status status = env->String_NewUTF8(resultStr.c_str(), resultStr.size(), &ani_str);
     if (ANI_OK != status) {
