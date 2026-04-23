@@ -22,7 +22,7 @@
 
 #include "base/error/error_code.h"
 #include "core/components_ng/base/frame_node.h"
-#include "error_message_macros.h"
+#include "interfaces/native/native_error_message_macros.h"
 
 extern "C" {
 void GetStringFromNapiValue(napi_env env, napi_value value, std::string& result)
@@ -543,14 +543,12 @@ int32_t OH_ArkUI_PostFrameCallback(ArkUI_ContextHandle uiContext, void* userData
         basicAPI, ARKUI_ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Basic API is not initialized");
     auto* context = reinterpret_cast<ArkUI_Context*>(uiContext);
     auto id = context->id;
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{ARKUI_ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
-    auto ret = basicAPI->postFrameCallback(id, userData, callback, reinterpret_cast<void*>(&errorInfoPtr));
+    auto ret = basicAPI->postFrameCallback(id, userData, callback);
     if (ret == OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NOT_MAIN_THREAD) {
         LOGF_ABORT("OH_ArkUI_PostFrameCallback doesn't run on UI thread!");
     }
     if (ret != ARKUI_ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return static_cast<ArkUI_ErrorCode>(ret);
 }
@@ -570,14 +568,12 @@ int32_t OH_ArkUI_PostIdleCallback(ArkUI_ContextHandle uiContext, void* userData,
         basicAPI, ARKUI_ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Basic API is not initialized");
     auto* context = reinterpret_cast<ArkUI_Context*>(uiContext);
     auto id = context->id;
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{ARKUI_ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
-    auto ret = basicAPI->postIdleCallback(id, userData, callback, reinterpret_cast<void*>(&errorInfoPtr));
+    auto ret = basicAPI->postIdleCallback(id, userData, callback);
     if (ret == OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NOT_MAIN_THREAD) {
         LOGF_ABORT("OH_ArkUI_PostIdleCallback doesn't run on UI thread!");
     }
     if (ret != ARKUI_ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return static_cast<ArkUI_ErrorCode>(ret);
 }

@@ -14,7 +14,7 @@
  */
 
 #include "interfaces/native/event/ui_input_event_impl.h"
-#include "interfaces/native/error_message_macros.h"
+#include "interfaces/native/native_error_message_macros.h"
 
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"

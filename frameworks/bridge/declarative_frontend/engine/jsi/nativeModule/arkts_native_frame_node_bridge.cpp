@@ -578,7 +578,7 @@ ArkUINativeModuleValue FrameNodeBridge::AdoptChild(ArkUIRuntimeCallInfo* runtime
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     CHECK_NULL_RETURN(!secondArg.IsNull(), defaultReturnValue);
     auto childNode = nodePtr(secondArg->ToNativePointer(vm)->Value());
-    auto result = GetArkUINodeModifiers()->getNDKRenderNodeModifier()->adoptChild(parentNode, childNode, nullptr);
+    auto result = GetArkUINodeModifiers()->getNDKRenderNodeModifier()->adoptChild(parentNode, childNode);
     return panda::NumberRef::New(vm, result);
 }
 
@@ -594,7 +594,7 @@ ArkUINativeModuleValue FrameNodeBridge::RemoveAdoptedChild(ArkUIRuntimeCallInfo*
     CHECK_NULL_RETURN(!secondArg.IsNull(), defaultReturnValue);
     auto childNode = nodePtr(secondArg->ToNativePointer(vm)->Value());
     auto result =
-        GetArkUINodeModifiers()->getNDKRenderNodeModifier()->removeAdoptedChild(parentNode, childNode, nullptr);
+        GetArkUINodeModifiers()->getNDKRenderNodeModifier()->removeAdoptedChild(parentNode, childNode);
     return panda::NumberRef::New(vm, result);
 }
 
@@ -669,7 +669,7 @@ ArkUINativeModuleValue FrameNodeBridge::ConvertPositionToWindow(ArkUIRuntimeCall
 
     ArkUI_Float32 targetNodePositionOffset[2];
     auto result = GetArkUINodeModifiers()->getFrameNodeModifier()->convertPositionToWindow(
-        nativeNode, &position, &targetNodePositionOffset, true, nullptr);
+        nativeNode, &position, &targetNodePositionOffset, true);
     if (result != ERROR_CODE_NO_ERROR) {
         Framework::ArrayRef::SetValueAt(vm, valueArray, 0, panda::NumberRef::New(vm, 0));
         return valueArray;
@@ -781,7 +781,7 @@ ArkUINativeModuleValue FrameNodeBridge::ConvertPositionFromWindow(ArkUIRuntimeCa
 
     ArkUI_Float32 targetNodePositionOffset[2];
     auto result = GetArkUINodeModifiers()->getFrameNodeModifier()->convertPositionFromWindow(
-        nativeNode, &position, &targetNodePositionOffset, true, nullptr);
+        nativeNode, &position, &targetNodePositionOffset, true);
     if (result != ERROR_CODE_NO_ERROR) {
         Framework::ArrayRef::SetValueAt(vm, valueArray, 0, panda::NumberRef::New(vm, 0));
         return valueArray;
@@ -962,7 +962,7 @@ ArkUINativeModuleValue FrameNodeBridge::GetFirstChildIndexWithoutExpand(ArkUIRun
     CHECK_NULL_RETURN(!firstArg.IsNull(), panda::NumberRef::New(vm, -1));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     uint32_t index = -1;
-    GetArkUINodeModifiers()->getFrameNodeModifier()->getFirstChildIndexWithoutExpand(nativeNode, &index, nullptr);
+    GetArkUINodeModifiers()->getFrameNodeModifier()->getFirstChildIndexWithoutExpand(nativeNode, &index);
     return panda::NumberRef::New(vm, index);
 }
 
@@ -973,7 +973,7 @@ ArkUINativeModuleValue FrameNodeBridge::GetLastChildIndexWithoutExpand(ArkUIRunt
     CHECK_NULL_RETURN(!firstArg.IsNull(), panda::NumberRef::New(vm, -1));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     uint32_t index = -1;
-    GetArkUINodeModifiers()->getFrameNodeModifier()->getLastChildIndexWithoutExpand(nativeNode, &index, nullptr);
+    GetArkUINodeModifiers()->getFrameNodeModifier()->getLastChildIndexWithoutExpand(nativeNode, &index);
     return panda::NumberRef::New(vm, index);
 }
 
@@ -1038,7 +1038,7 @@ ArkUINativeModuleValue FrameNodeBridge::MoveTo(ArkUIRuntimeCallInfo* runtimeCall
     auto targetNativeNode = nodePtr(secondArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(2); // 2 : index of child node position
     int index = thirdArg->ToNumber(vm)->Value();
-    GetArkUINodeModifiers()->getFrameNodeModifier()->moveNodeTo(nativeNode, targetNativeNode, index, nullptr);
+    GetArkUINodeModifiers()->getFrameNodeModifier()->moveNodeTo(nativeNode, targetNativeNode, index);
     return panda::NumberRef::New(vm, ERROR_CODE_NO_ERROR);
 }
 ArkUINativeModuleValue FrameNodeBridge::GetIdByNodePtr(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -2596,7 +2596,7 @@ ArkUINativeModuleValue FrameNodeBridge::AddFrameNodeToNodeContent(ArkUIRuntimeCa
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeContent = reinterpret_cast<ArkUINodeContentHandle>(secondArg->ToNativePointer(vm)->Value());
-    auto result = GetArkUINodeModifiers()->getNodeContentModifier()->addChild(nativeContent, nativeNode, nullptr);
+    auto result = GetArkUINodeModifiers()->getNodeContentModifier()->addChild(nativeContent, nativeNode);
     GetArkUIFullNodeAPI()->getBasicAPI()->markDirty(nativeNode, ARKUI_DIRTY_FLAG_MEASURE_SELF_AND_PARENT);
     if (result != ERROR_CODE_NO_ERROR) {
         LOGW("AddFrameNodeToNodeContent failed error:%{public}d", result);
@@ -2613,7 +2613,7 @@ ArkUINativeModuleValue FrameNodeBridge::RemoveFrameNodeFromNodeContent(ArkUIRunt
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeContent = reinterpret_cast<ArkUINodeContentHandle>(secondArg->ToNativePointer(vm)->Value());
     GetArkUIFullNodeAPI()->getBasicAPI()->markDirty(nativeNode, ARKUI_DIRTY_FLAG_MEASURE_SELF_AND_PARENT);
-    auto result = GetArkUINodeModifiers()->getNodeContentModifier()->removeChild(nativeContent, nativeNode, nullptr);
+    auto result = GetArkUINodeModifiers()->getNodeContentModifier()->removeChild(nativeContent, nativeNode);
     if (result != ERROR_CODE_NO_ERROR) {
         LOGW("RemoveFrameNodeFromNodeContent failed error:%{public}d", result);
     }

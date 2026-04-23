@@ -20,7 +20,7 @@
 #include "styled_string.h"
 
 #include "base/utils/utils.h"
-#include "error_message_macros.h"
+#include "interfaces/native/native_error_message_macros.h"
 
 #ifdef __cplusplus
 extern "C" {

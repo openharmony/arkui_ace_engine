@@ -23,7 +23,7 @@
 #include "base/utils/utils.h"
 #include "core/common/container_consts.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "error_message_macros.h"
+#include "interfaces/native/native_error_message_macros.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -343,12 +343,10 @@ int32_t OH_ArkUI_NodeUtils_GetWindowInfo(ArkUI_NodeHandle node, ArkUI_HostWindow
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Native module not initialized");
     char* name = nullptr;
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{ARKUI_ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     int32_t error = impl->getNodeModifiers()->getFrameNodeModifier()->getWindowInfoByNode(
-        node->uiNodeHandle, &name, reinterpret_cast<void*>(&errorInfoPtr));
+        node->uiNodeHandle, &name);
     if (error != ARKUI_ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     *info = new ArkUI_HostWindowInfo({ .name = name });
     return error;
@@ -479,12 +477,10 @@ int32_t OH_ArkUI_NativeModule_AdoptChild(ArkUI_NodeHandle node, ArkUI_NodeHandle
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR,
         __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{ARKUI_ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->adoptChild(
-        node->uiNodeHandle, child->uiNodeHandle, reinterpret_cast<void*>(&errorInfoPtr));
+        node->uiNodeHandle, child->uiNodeHandle);
     if (result != ARKUI_ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -506,12 +502,10 @@ int32_t OH_ArkUI_NativeModule_RemoveAdoptedChild(ArkUI_NodeHandle node, ArkUI_No
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR,
         __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->removeAdoptedChild(
-        node->uiNodeHandle, child->uiNodeHandle, reinterpret_cast<void*>(&errorInfoPtr));
+        node->uiNodeHandle, child->uiNodeHandle);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -543,12 +537,10 @@ int32_t OH_ArkUI_NodeUtils_MoveTo(ArkUI_NodeHandle node, ArkUI_NodeHandle target
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{ARKUI_ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     int32_t errorCode = impl->getNodeModifiers()->getFrameNodeModifier()->moveNodeTo(
-        node->uiNodeHandle, target_parent->uiNodeHandle, index, reinterpret_cast<void*>(&errorInfoPtr));
+        node->uiNodeHandle, target_parent->uiNodeHandle, index);
     if (errorCode != ARKUI_ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return errorCode;
 }
@@ -571,12 +563,10 @@ int32_t OH_ArkUI_NodeUtils_SetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_C
     arkUIOption.attributeSetting = option->attributeSetting;
     arkUIOption.treeOperatingStatus = static_cast<ArkUITreeOperatingStatus>(
         static_cast<int32_t>(option->treeOperatingStatus));
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{ARKUI_ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto errorCode = impl->getNodeModifiers()->getFrameNodeModifier()->setCrossLanguageOptionsFull(
         node->uiNodeHandle, &arkUIOption);
     if (errorCode != ARKUI_ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return errorCode;
 }
@@ -678,12 +668,10 @@ int32_t OH_ArkUI_NodeUtils_GetFirstChildIndexWithoutExpand(ArkUI_NodeHandle node
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_PARAM_INVALID,
         __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{ARKUI_ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     int32_t errorCode = impl->getNodeModifiers()->getFrameNodeModifier()->getFirstChildIndexWithoutExpand(
-        node->uiNodeHandle, index, reinterpret_cast<void*>(&errorInfoPtr));
+        node->uiNodeHandle, index);
     if (errorCode != ARKUI_ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return errorCode;
 }
@@ -695,12 +683,10 @@ int32_t OH_ArkUI_NodeUtils_GetLastChildIndexWithoutExpand(ArkUI_NodeHandle node,
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_PARAM_INVALID,
         __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{ARKUI_ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     int32_t errorCode = impl->getNodeModifiers()->getFrameNodeModifier()->getLastChildIndexWithoutExpand(
-        node->uiNodeHandle, index, reinterpret_cast<void*>(&errorInfoPtr));
+        node->uiNodeHandle, index);
     if (errorCode != ARKUI_ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return errorCode;
 }
@@ -993,12 +979,10 @@ int32_t OH_ArkUI_NativeModule_ConvertPositionToWindow(
         __FUNCTION__, "Native module not initialized");
     ArkUI_Float32 tempOffset[2] = { position.x, position.y };
     ArkUI_Float32 tempPosition[2];
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{ARKUI_ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getFrameNodeModifier()->convertPositionToWindow(
-        targetNode->uiNodeHandle, &tempOffset, &tempPosition, false, reinterpret_cast<void*>(&errorInfoPtr));
+        targetNode->uiNodeHandle, &tempOffset, &tempPosition, false);
     if (result != ARKUI_ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     windowPosition->x = tempPosition[0];
     windowPosition->y = tempPosition[1];
@@ -1017,12 +1001,10 @@ int32_t OH_ArkUI_NativeModule_ConvertPositionFromWindow(
         __FUNCTION__, "Native module not initialized");
     ArkUI_Float32 tempOffset[2] = { windowPosition.x, windowPosition.y };
     ArkUI_Float32 tempPosition[2];
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{ARKUI_ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getFrameNodeModifier()->convertPositionFromWindow(
-        targetNode->uiNodeHandle, &tempOffset, &tempPosition, false, reinterpret_cast<void*>(&errorInfoPtr));
+        targetNode->uiNodeHandle, &tempOffset, &tempPosition, false);
     if (result != ARKUI_ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     position->x = tempPosition[0];
     position->y = tempPosition[1];
@@ -1064,7 +1046,8 @@ int32_t OH_ArkUI_NativeModule_GetPageRootNodeHandleByContext(ArkUI_ContextHandle
 
 const char* OH_ArkUI_NativeModule_GetErrorMessage()
 {
-    return OHOS::Ace::ErrorMessageManager::GetInstance().GetLastError();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImplForErrorMessage();
+    return impl != nullptr ? impl->getBasicAPI()->getErrorMessage() : "";
 }
 #ifdef __cplusplus
 };
