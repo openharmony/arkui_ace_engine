@@ -36,6 +36,11 @@ enum class DragBehavior {
     MOVE = 1,
 };
 
+enum class DragAnimationType : int32_t {
+    DEFAULT = 0,
+    FOLLOW_HAND_MORPH = 1,
+};
+
 // Drag drop initiating status
 enum class DragDropInitiatingStatus : int32_t {
     IDLE = 0,

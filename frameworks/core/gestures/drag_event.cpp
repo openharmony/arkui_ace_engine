@@ -184,6 +184,54 @@ bool DragEvent::IsUseCustomAnimation()
     return useCustomAnimation_;
 }
 
+void DragEvent::SetDragAnimationType(DragAnimationType dragAnimationType)
+{
+    dragAnimationType_ = dragAnimationType;
+}
+
+void DragEvent::SetDragAnimationType(int32_t dragAnimationType)
+{
+    dragAnimationType_ = static_cast<DragAnimationType>(dragAnimationType);
+}
+
+DragAnimationType DragEvent::GetDragAnimationType() const
+{
+    return dragAnimationType_;
+}
+
+int32_t DragEvent::GetDragAnimationTypeValue() const
+{
+    return static_cast<int32_t>(dragAnimationType_);
+}
+
+void DragEvent::SetFollowHandMorphDropAnimation(std::function<void()>&& onAnimationFinished)
+{
+    executeFollowHandMorphDropAnimation_ = std::move(onAnimationFinished);
+}
+
+bool DragEvent::HasFollowHandMorphDropAnimation() const
+{
+    return (executeFollowHandMorphDropAnimation_ != nullptr);
+}
+
+void DragEvent::ExecuteFollowHandMorphDropAnimation()
+{
+    if (executeFollowHandMorphDropAnimation_) {
+        auto executeFollowHandMorphDropAnimation = executeFollowHandMorphDropAnimation_;
+        executeFollowHandMorphDropAnimation();
+    }
+}
+
+void DragEvent::SetFollowHandMorphAnimationOption(const std::string& animationOption)
+{
+    followHandMorphAnimationOption_ = animationOption;
+}
+
+const std::string& DragEvent::GetFollowHandMorphAnimationOption() const
+{
+    return followHandMorphAnimationOption_;
+}
+
 void DragEvent::SetCopy(bool copy)
 {
     copy_ = copy;

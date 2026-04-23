@@ -559,6 +559,13 @@ export class DragControllerImpl extends DragController {
         ArkUIAniModule._DragController_enableDropDisallowedBadge(enabled);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
+
+    public interruptFollowHandMorphDropAnimation(): boolean {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let interrupted = ArkUIAniModule._DragController_interruptFollowHandMorphDropAnimation();
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return interrupted;
+    }
 }
 
 export class RouterImpl extends Router {

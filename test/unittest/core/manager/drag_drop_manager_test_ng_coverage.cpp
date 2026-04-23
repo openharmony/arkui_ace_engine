@@ -1822,6 +1822,196 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage065, TestSi
 }
 
 /**
+ * @tc.name: DragDropManagerTestNgCoverage065A
+ * @tc.desc: Test FollowHandMorph drop animation callback executes once and animationOption is passed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage065A, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+
+    int32_t callbackCount = 0;
+    dragDropManager->SetDragAnimationType(DragAnimationType::FOLLOW_HAND_MORPH);
+    dragEvent->SetDragAnimationType(DragAnimationType::DEFAULT);
+    dragEvent->SetFollowHandMorphDropAnimation([&callbackCount]() { callbackCount++; });
+    dragEvent->SetFollowHandMorphAnimationOption("follow_hand_option");
+
+    DragDropRet dragDropRet;
+    std::function<void()> stopDragCallback;
+    EXPECT_CALL(*(AceType::DynamicCast<MockInteractionInterface>(MockInteractionInterface::GetInstance())),
+        StopDrag(_, _))
+        .WillOnce(DoAll(SaveArg<0>(&dragDropRet), SaveArg<1>(&stopDragCallback), Return(0)));
+
+    DragPointerEvent point;
+    dragDropManager->ExecuteStopDrag(dragEvent, DragRet::DRAG_SUCCESS, false, WINDOW_ID, DragBehavior::MOVE, point);
+    EXPECT_TRUE(DragDropGlobalController::GetInstance().IsWaitingFollowHandMorphDropAnimation());
+    EXPECT_EQ(dragDropRet.animationOption, "follow_hand_option");
+    EXPECT_EQ(callbackCount, 0);
+
+    ASSERT_TRUE(static_cast<bool>(stopDragCallback));
+    stopDragCallback();
+    EXPECT_EQ(callbackCount, 1);
+    EXPECT_FALSE(DragDropGlobalController::GetInstance().IsWaitingFollowHandMorphDropAnimation());
+
+    stopDragCallback();
+    EXPECT_EQ(callbackCount, 1);
+}
+
+/**
+ * @tc.name: DragDropManagerTestNgCoverage065B
+ * @tc.desc: Test interrupt follow-hand morph drop animation and ignore delayed callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage065B, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+
+    int32_t callbackCount = 0;
+    dragDropManager->SetDragAnimationType(DragAnimationType::FOLLOW_HAND_MORPH);
+    dragEvent->SetDragAnimationType(DragAnimationType::FOLLOW_HAND_MORPH);
+    dragEvent->SetFollowHandMorphDropAnimation([&callbackCount]() { callbackCount++; });
+    dragEvent->SetFollowHandMorphAnimationOption("follow_hand_option");
+
+    std::function<void()> stopDragCallback;
+    EXPECT_CALL(*(AceType::DynamicCast<MockInteractionInterface>(MockInteractionInterface::GetInstance())),
+        StopDrag(_, _))
+        .WillOnce(DoAll(SaveArg<1>(&stopDragCallback), Return(0)));
+
+    DragPointerEvent point;
+    dragDropManager->ExecuteStopDrag(dragEvent, DragRet::DRAG_SUCCESS, false, WINDOW_ID, DragBehavior::MOVE, point);
+    EXPECT_TRUE(DragDropGlobalController::GetInstance().IsWaitingFollowHandMorphDropAnimation());
+
+    EXPECT_TRUE(dragDropManager->InterruptFollowHandMorphDropAnimation());
+    EXPECT_EQ(callbackCount, 1);
+    EXPECT_FALSE(DragDropGlobalController::GetInstance().IsWaitingFollowHandMorphDropAnimation());
+    EXPECT_FALSE(dragDropManager->InterruptFollowHandMorphDropAnimation());
+
+    ASSERT_TRUE(static_cast<bool>(stopDragCallback));
+    stopDragCallback();
+    EXPECT_EQ(callbackCount, 1);
+}
+
+/**
+ * @tc.name: DragDropManagerTestNgCoverage065C
+ * @tc.desc: Test follow-hand morph flow is gated by dragAnimationType.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage065C, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+
+    int32_t callbackCount = 0;
+    dragDropManager->SetDragAnimationType(DragAnimationType::DEFAULT);
+    dragEvent->SetDragAnimationType(DragAnimationType::FOLLOW_HAND_MORPH);
+    dragEvent->SetFollowHandMorphDropAnimation([&callbackCount]() { callbackCount++; });
+    dragEvent->SetFollowHandMorphAnimationOption("follow_hand_option");
+
+    DragPointerEvent point;
+    dragDropManager->ExecuteStopDrag(dragEvent, DragRet::DRAG_SUCCESS, false, WINDOW_ID, DragBehavior::MOVE, point);
+    EXPECT_EQ(callbackCount, 0);
+    EXPECT_FALSE(DragDropGlobalController::GetInstance().IsWaitingFollowHandMorphDropAnimation());
+}
+
+/**
+ * @tc.name: DragDropManagerTestNgCoverage065D
+ * @tc.desc: Test follow-hand morph pending state is centrally controlled by DragDropGlobalController.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage065D, TestSize.Level1)
+{
+    auto& globalController = DragDropGlobalController::GetInstance();
+
+    int32_t callbackCount = 0;
+    auto callback = [&callbackCount]() { callbackCount++; };
+
+    globalController.SavePendingFollowHandMorphDropAnimation(callback);
+    EXPECT_TRUE(globalController.IsWaitingFollowHandMorphDropAnimation());
+
+    EXPECT_TRUE(globalController.ConsumeAndExecutePendingFollowHandMorphDropAnimation());
+    EXPECT_EQ(callbackCount, 1);
+    EXPECT_FALSE(globalController.IsWaitingFollowHandMorphDropAnimation());
+
+    EXPECT_FALSE(globalController.ConsumeAndExecutePendingFollowHandMorphDropAnimation());
+
+    globalController.SavePendingFollowHandMorphDropAnimation(callback);
+    EXPECT_TRUE(globalController.InterruptPendingFollowHandMorphDropAnimation());
+    EXPECT_EQ(callbackCount, 2);
+    EXPECT_FALSE(globalController.IsWaitingFollowHandMorphDropAnimation());
+}
+
+/**
+ * @tc.name: DragDropManagerTestNgCoverage065E
+ * @tc.desc: Test onDrag move/enter/leave gets dragAnimationType queried from interaction layer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage065E, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetOnDrop([](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraInfo) {});
+
+    DragAnimationType dragMoveType = DragAnimationType::DEFAULT;
+    DragAnimationType dragEnterType = DragAnimationType::DEFAULT;
+    DragAnimationType dragLeaveType = DragAnimationType::DEFAULT;
+    eventHub->SetOnDragMove([&dragMoveType](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraInfo) {
+        dragMoveType = event->GetDragAnimationType();
+    });
+    eventHub->SetOnDragEnter(
+        [&dragEnterType](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraInfo) {
+            dragEnterType = event->GetDragAnimationType();
+        });
+    eventHub->SetOnDragLeave(
+        [&dragLeaveType](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraInfo) {
+            dragLeaveType = event->GetDragAnimationType();
+        });
+
+    auto mock = AceType::DynamicCast<MockInteractionInterface>(MockInteractionInterface::GetInstance());
+    ASSERT_NE(mock, nullptr);
+    mock->SetDragAnimationTypeForTest(static_cast<int32_t>(DragAnimationType::FOLLOW_HAND_MORPH), 0);
+    dragDropManager->RequireDragAnimationType();
+
+    DragPointerEvent pointerEvent;
+    pointerEvent.x = 1;
+    pointerEvent.y = 1;
+    dragDropManager->FireOnDragEvent(frameNode, pointerEvent, DragEventType::MOVE, EXTRA_INFO);
+    dragDropManager->FireOnDragEvent(frameNode, pointerEvent, DragEventType::ENTER, EXTRA_INFO);
+    dragDropManager->FireOnDragEvent(frameNode, pointerEvent, DragEventType::LEAVE, EXTRA_INFO);
+
+    EXPECT_EQ(dragMoveType, DragAnimationType::FOLLOW_HAND_MORPH);
+    EXPECT_EQ(dragEnterType, DragAnimationType::FOLLOW_HAND_MORPH);
+    EXPECT_EQ(dragLeaveType, DragAnimationType::FOLLOW_HAND_MORPH);
+
+    mock->SetDragAnimationTypeForTest(static_cast<int32_t>(DragAnimationType::FOLLOW_HAND_MORPH), -1);
+    dragDropManager->RequireDragAnimationType();
+    EXPECT_EQ(dragDropManager->GetDragAnimationType(), DragAnimationType::DEFAULT);
+
+    mock->SetDragAnimationTypeForTest(static_cast<int32_t>(DragAnimationType::DEFAULT), -1);
+}
+
+/**
  * @tc.name: DragDropManagerTestNgCoverage066
  * @tc.desc: Test HandleOnDragEnd
  * @tc.type: FUNC

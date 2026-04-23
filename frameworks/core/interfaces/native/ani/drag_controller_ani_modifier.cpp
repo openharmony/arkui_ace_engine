@@ -25,6 +25,7 @@
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_controller_func_wrapper.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
@@ -1175,6 +1176,21 @@ void ANIDragActionEnableDropDisallowedBadge(bool enabled)
     ViewAbstractModel::GetInstance()->EnableDropDisallowedBadge(enabled);
 }
 
+bool ANIDragActionInterruptFollowHandMorphDropAnimation()
+{
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_RETURN(container, false);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, false);
+    bool interrupted = false;
+    taskExecutor->PostSyncTask(
+        [&interrupted]() {
+            interrupted = DragDropGlobalController::GetInstance().InterruptPendingFollowHandMorphDropAnimation();
+        },
+        TaskExecutor::TaskType::UI, "ArkUIANIInterruptFollowHandMorphDropAnimation");
+    return interrupted;
+}
+
 int32_t ANISpringLoadingContextGetState(ani_long ptr)
 {
     CHECK_NULL_RETURN(ptr, 0);
@@ -1272,6 +1288,8 @@ const ArkUIAniDragControllerModifier* GetDragControllerAniModifier()
         .aniDragActionCancelDataLoading = NG::ANIDragActionCancelDataLoading,
         .aniDragActionNotifyDragStartReques = NG::ANIDragActionNotifyDragStartReques,
         .aniDragActionEnableDropDisallowedBadge = NG::ANIDragActionEnableDropDisallowedBadge,
+        .aniDragActionInterruptFollowHandMorphDropAnimation =
+            NG::ANIDragActionInterruptFollowHandMorphDropAnimation,
         .aniSpringLoadingContextGetState = NG::ANISpringLoadingContextGetState,
         .aniSpringLoadingContextGetCurrentNotifySequence = NG::ANISpringLoadingContextGetCurrentNotifySequence,
         .aniSpringLoadingContextGetDragInfos = NG::ANISpringLoadingContextGetDragInfos,

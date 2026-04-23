@@ -46,6 +46,7 @@
 #include "core/common/udmf/udmf_client.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_controller_func_wrapper.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/event/ace_events.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
@@ -2182,6 +2183,24 @@ static napi_value JSGetDragPreview(napi_env env, napi_callback_info info)
     }
     return result;
 }
+
+static napi_value JSInterruptFollowHandMorphDropAnimation(napi_env env, napi_callback_info info)
+{
+    napi_value result = nullptr;
+    napi_get_boolean(env, false, &result);
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_RETURN(container, result);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, result);
+    bool interrupted = false;
+    taskExecutor->PostSyncTask(
+        [&interrupted]() {
+            interrupted = NG::DragDropGlobalController::GetInstance().InterruptPendingFollowHandMorphDropAnimation();
+        },
+        TaskExecutor::TaskType::UI, "ArkUIInterruptFollowHandMorphDropAnimation");
+    napi_get_boolean(env, interrupted, &result);
+    return result;
+}
 #else
 
 static napi_value JSGetDragPreview(napi_env env, napi_callback_info info)
@@ -2212,6 +2231,13 @@ static napi_value JSCreateDragAction(napi_env env, napi_callback_info info)
         ERROR_CODE_INTERNAL_ERROR);
     napi_close_escapable_handle_scope(env, scope);
     return nullptr;
+}
+
+static napi_value JSInterruptFollowHandMorphDropAnimation(napi_env env, napi_callback_info info)
+{
+    napi_value result = nullptr;
+    napi_get_boolean(env, false, &result);
+    return result;
 }
 #endif
 
@@ -2260,6 +2286,7 @@ static napi_value DragControllerExport(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("executeDrag", JSExecuteDrag),
         DECLARE_NAPI_FUNCTION("getDragPreview", JSGetDragPreview),
         DECLARE_NAPI_FUNCTION("createDragAction", JSCreateDragAction),
+        DECLARE_NAPI_FUNCTION("interruptFollowHandMorphDropAnimation", JSInterruptFollowHandMorphDropAnimation),
         DECLARE_NAPI_PROPERTY("DragStatus", dragStatus),
         DECLARE_NAPI_PROPERTY("DragPreview", classDragPreview),
     };

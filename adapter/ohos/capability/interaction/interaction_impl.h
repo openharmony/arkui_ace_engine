@@ -44,7 +44,8 @@ public:
     int32_t UpdatePreviewStyleWithAnimation(const PreviewStyle& previewStyle,
                                 const PreviewAnimation& animation) override;
 
-    int32_t StopDrag(DragDropRet result) override;
+    int32_t StopDrag(DragDropRet result,
+        std::function<void()> callback = nullptr) override;
 
     int32_t GetUdKey(std::string& udKey) override;
 
@@ -55,6 +56,8 @@ public:
         int32_t& version, int64_t& totalSize, std::string& tag) override;
 
     int32_t GetDragExtraInfo(std::string& extraInfo) override;
+
+    int32_t GetDragAnimationType(int32_t& dragAnimationType) override;
 
     int32_t GetDragState(DragState& dragState) const override;
 

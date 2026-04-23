@@ -83,6 +83,10 @@ public:
     void ResetPrePendingStatus();
     void SavePendingRequestIdentify(int32_t requestId);
     void NotifyPendingFailed(int32_t requestId);
+    void SavePendingFollowHandMorphDropAnimation(std::function<void()> callback);
+    bool ConsumeAndExecutePendingFollowHandMorphDropAnimation();
+    bool InterruptPendingFollowHandMorphDropAnimation();
+    bool IsWaitingFollowHandMorphDropAnimation() const;
 
 private:
     DragDropGlobalController() = default;
@@ -118,6 +122,9 @@ private:
     bool enableDropDisallowedBadge_ = false;
     uint64_t startDragVsyncTime_ = 0;
     bool prePendingDone_ = false;
+    // Protect follow-hand morph drop animation completion/interrupt race across threads.
+    std::function<void()> pendingFollowHandMorphDropAnimationCallback_;
+    bool isWaitingFollowHandMorphDropAnimation_ = false;
 };
 
 } // namespace OHOS::Ace::NG

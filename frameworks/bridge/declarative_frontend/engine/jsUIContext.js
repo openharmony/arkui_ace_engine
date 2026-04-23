@@ -246,6 +246,12 @@ class DragController {
             JSViewAbstract.enableDropDisallowedBadge(enable);
         });
     }
+
+    interruptFollowHandMorphDropAnimation() {
+        return withInstanceId(this.instanceId_, () => {
+            return this.ohos_dragController.interruptFollowHandMorphDropAnimation();
+        });
+    }
 }
 
 class UIObserver {

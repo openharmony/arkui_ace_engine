@@ -1066,6 +1066,16 @@ void ANIDragActionEnableDropDisallowedBadge(
     modifier->getDragControllerAniModifier()->aniDragActionEnableDropDisallowedBadge(enabled);
 }
 
+ani_boolean ANIDragActionInterruptFollowHandMorphDropAnimation(
+    [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getDragControllerAniModifier()) {
+        return false;
+    }
+    return modifier->getDragControllerAniModifier()->aniDragActionInterruptFollowHandMorphDropAnimation();
+}
+
 void ANICleanDragAction([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long dragActionPtr)
 {
     if (dragActionPtr == 0) {

@@ -157,9 +157,13 @@ public:
         const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams);
     void HandleStopDrag(const RefPtr<FrameNode>& dragFrameNode, const DragPointerEvent& pointerEvent,
         const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams);
+    void ExecuteFollowHandMorphStopDrag(const RefPtr<OHOS::Ace::DragEvent>& event,
+        DragRet dragResult, int32_t windowId, DragBehavior dragBehavior);
     void ExecuteStopDrag(const RefPtr<OHOS::Ace::DragEvent>& event, DragRet dragResult, bool useCustomAnimation,
         int32_t windowId, DragBehavior dragBehavior, const OHOS::Ace::DragPointerEvent& pointerEvent);
     void ExecuteCustomDropAnimation(const RefPtr<OHOS::Ace::DragEvent>& dragEvent, DragDropRet dragDropRet);
+    void ExecuteFollowHandMorphDropAnimation(const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
+    bool InterruptFollowHandMorphDropAnimation();
     void ResetDragDropStatus(const Point& point, const DragDropRet& dragDropRet, int32_t windowId);
     bool CheckRemoteData(
         const RefPtr<FrameNode>& dragFrameNode, const DragPointerEvent& pointerEvent, const std::string& udKey);
@@ -227,6 +231,16 @@ public:
     void SetIsWindowConsumed(bool consumed)
     {
         isWindowConsumed_ = consumed;
+    }
+
+    void SetDragAnimationType(DragAnimationType dragAnimationType)
+    {
+        dragAnimationType_ = dragAnimationType;
+    }
+
+    DragAnimationType GetDragAnimationType() const
+    {
+        return dragAnimationType_;
     }
 
     bool IsDragged() const
@@ -390,7 +404,7 @@ public:
         bool isMenuShow = false;
         NG::DraggingSizeChangeEffect sizeChangeEffect = DraggingSizeChangeEffect::DEFAULT;
         bool isDragController = false;
-        bool isSceneBoardTouchDrag = false;
+        bool disableArkuiAnimation = false;
     } DragPreviewInfo;
     bool IsNeedScaleDragPreview();
     void DoDragMoveAnimate(const DragPointerEvent& pointerEvent);
@@ -407,6 +421,7 @@ public:
     void HandleStartDragAnimationFinish(int32_t containerId);
     void SetDragResult(const DragNotifyMsgCore& notifyMessage, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
     void SetDragBehavior(const DragNotifyMsgCore& notifyMessage, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
+    void SetDragAnimationType(const DragNotifyMsgCore& notifyMessage, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
     void ResetDragPreviewInfo()
     {
         info_ = DragPreviewInfo();
@@ -776,6 +791,7 @@ private:
         const RefPtr<NG::PipelineContext>& pipeline);
     void ReportOnItemDropEvent(
         DragType dragType, const RefPtr<FrameNode>& dragFrameNode, double dropPositionX, double dropPositionY);
+    void RequireDragAnimationType();
 
     std::map<int32_t, WeakPtr<FrameNode>> gridDragFrameNodes_;
     std::map<int32_t, WeakPtr<FrameNode>> listDragFrameNodes_;
@@ -861,6 +877,7 @@ private:
     bool isPullThrow_ = false;
     int32_t BundlecurrentPullId_ = -1;
     DragBundleInfo dragBundleInfo_;
+    DragAnimationType dragAnimationType_ = DragAnimationType::DEFAULT;
 #ifdef ENABLE_ROSEN_BACKEND
     OHOS::Rosen::RSSyncTransactionController* transactionController_ = nullptr;
     std::shared_ptr<Rosen::RSSyncTransactionHandler> transactionHandler_ = nullptr;

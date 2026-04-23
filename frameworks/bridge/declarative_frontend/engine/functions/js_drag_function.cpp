@@ -170,6 +170,8 @@ void JsDragEvent::JSBind(BindingTarget globalObj)
     JSClass<JsDragEvent>::CustomMethod("getPreviewRect", &JsDragEvent::GetPreviewRect);
     JSClass<JsDragEvent>::CustomProperty(
         "useCustomDropAnimation", &JsDragEvent::GetUseCustomDropAnimation, &JsDragEvent::SetUseCustomDropAnimation);
+    JSClass<JsDragEvent>::CustomProperty(
+        "dragAnimationType", &JsDragEvent::GetDragAnimationType, &JsDragEvent::SetDragAnimationType);
     JSClass<JsDragEvent>::CustomMethod("setDragInfo", &JsDragEvent::SetDragInfo);
     JSClass<JsDragEvent>::CustomMethod("getDragInfo", &JsDragEvent::GetDragInfo);
     JSClass<JsDragEvent>::CustomProperty("dragBehavior", &JsDragEvent::GetDragBehavior, &JsDragEvent::SetDragBehavior);
@@ -180,6 +182,8 @@ void JsDragEvent::JSBind(BindingTarget globalObj)
     JSClass<JsDragEvent>::CustomMethod("getVelocity", &JsDragEvent::GetVelocity);
     JSClass<JsDragEvent>::CustomMethod("getModifierKeyState", &JsDragEvent::GetModifierKeyState);
     JSClass<JsDragEvent>::CustomMethod("executeDropAnimation", &JsDragEvent::ExecuteDropAnimation);
+    JSClass<JsDragEvent>::CustomMethod(
+        "executeFollowHandMorphDropAnimation", &JsDragEvent::ExecuteFollowHandMorphDropAnimation);
     JSClass<JsDragEvent>::CustomMethod("startDataLoading", &JsDragEvent::StartDataLoading);
     JSClass<JsDragEvent>::CustomMethod("getDisplayId", &JsDragEvent::GetDisplayId);
     JSClass<JsDragEvent>::CustomMethod("enableInternalDropAnimation", &JsDragEvent::EnableInternalDropAnimation);
@@ -473,6 +477,20 @@ void JsDragEvent::GetUseCustomDropAnimation(const JSCallbackInfo& args)
     args.SetReturnValue(useCustomAnimationRef);
 }
 
+void JsDragEvent::SetDragAnimationType(const JSCallbackInfo& args)
+{
+    if (args[0]->IsNumber()) {
+        dragEvent_->SetDragAnimationType(args[0]->ToNumber<int32_t>());
+    }
+}
+
+void JsDragEvent::GetDragAnimationType(const JSCallbackInfo& args)
+{
+    auto dragAnimationType = JSVal(ToJSValue(dragEvent_->GetDragAnimationTypeValue()));
+    auto dragAnimationTypeRef = JSRef<JSVal>::Make(dragAnimationType);
+    args.SetReturnValue(dragAnimationTypeRef);
+}
+
 void JsDragEvent::SetDragInfo(const JSCallbackInfo& args)
 {
     if (!args[0]->IsObject()) {
@@ -595,6 +613,29 @@ void JsDragEvent::ExecuteDropAnimation(const JSCallbackInfo& args)
         func->Execute();
     };
     dragEvent_->SetDropAnimation(std::move(executeDropAnimation));
+}
+
+void JsDragEvent::ExecuteFollowHandMorphDropAnimation(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsFunction()) {
+        return;
+    }
+    std::string animationOption;
+    if (args.Length() > 1 && args[1]->IsString()) {
+        animationOption = args[1]->ToString();
+    }
+    RefPtr<JsFunction> jsExecuteFollowHandMorphDropAnimation =
+        AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto executeFollowHandMorphDropAnimation = [execCtx = args.GetExecutionContext(),
+                                                   func = std::move(jsExecuteFollowHandMorphDropAnimation),
+                                                   node = frameNode]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        PipelineContext::SetCallBackNode(node);
+        func->Execute();
+    };
+    dragEvent_->SetFollowHandMorphDropAnimation(std::move(executeFollowHandMorphDropAnimation));
+    dragEvent_->SetFollowHandMorphAnimationOption(animationOption);
 }
 
 void JsDragEvent::Constructor(const JSCallbackInfo& args)
