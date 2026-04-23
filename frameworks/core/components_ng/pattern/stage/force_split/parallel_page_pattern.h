@@ -129,6 +129,7 @@ private:
     void BeforeCreateLayoutWrapper() override;
     void OnAttachToMainTree() override;
     void OnDetachFromMainTree() override;
+    bool IsPageInStack();
 
     RouterPageType type_ = RouterPageType::DETAIL_PAGE;
     ForceSplitPageColumnType columnType_ = ForceSplitPageColumnType::NONE;

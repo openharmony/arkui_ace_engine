@@ -144,6 +144,17 @@ void ParallelPagePattern::OnSplitTransitionEnd(PageTransitionType type)
     HandleSplitTransitionStage(type, false);
 }
 
+bool ParallelPagePattern::IsPageInStack()
+{
+    auto host = AceType::DynamicCast<FrameNode>(GetHost());
+    CHECK_NULL_RETURN(host, false);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto stageManager = context->GetStageManager();
+    CHECK_NULL_RETURN(stageManager, false);
+    return stageManager->IsPageInStack(host);
+}
+
 bool ParallelPagePattern::OnSplitTransitionFinish(int32_t animationId, PageTransitionType type)
 {
     auto host = AceType::DynamicCast<FrameNode>(GetHost());
@@ -164,7 +175,7 @@ bool ParallelPagePattern::OnSplitTransitionFinish(int32_t animationId, PageTrans
     splitTransitionPhase_ = SplitTransitionPhase::NONE;
     hasSplitTransitionVisualOffset_ = false;
     if (IsSplitExitTransition(type)) {
-        if (type == PageTransitionType::EXIT_POP) {
+        if (type == PageTransitionType::EXIT_POP && !IsPageInStack()) {
             host->SetChildrenInDestroying();
             auto parent = host->GetParent();
             CHECK_NULL_RETURN(parent, false);

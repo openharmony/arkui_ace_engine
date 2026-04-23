@@ -1420,6 +1420,13 @@ std::string DeclarativeFrontend::GetPagePathByUrl(const std::string& url) const
     return delegate_->GetPagePathByUrl(url);
 }
 
+bool DeclarativeFrontend::IsPageInStack(const RefPtr<NG::FrameNode>& page) const
+{
+    CHECK_NULL_RETURN(page, false);
+    CHECK_NULL_RETURN(delegate_, false);
+    return delegate_->IsPageInStack(page);
+}
+
 void* DeclarativeFrontend::CreateDynamicPage(
     int32_t pageId, const std::string& url, const std::string& params, bool recoverable)
 {

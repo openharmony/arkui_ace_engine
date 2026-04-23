@@ -1312,11 +1312,11 @@ void NavDestinationGroupNode::SplitTransitionPushStart(ForceSplitTransitionType 
     } else if (type == ForceSplitTransitionType::TRANSITION_MOVE) {
         auto navNode = AceType::DynamicCast<NavigationGroupNode>(GetNavigationNode());
         CHECK_NULL_VOID(navNode);
-        float offsetX = navNode->GetDividerWidth();
+        float offsetX = 0.0f;
         if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-            offsetX += navNode->GetSecondaryPartitionWidth();
+            offsetX -= navNode->GetSecondaryPartitionWidth() + navNode->GetDividerWidth();
         } else {
-            offsetX += navNode->GetPrimaryPartitionWidth();
+            offsetX += navNode->GetPrimaryPartitionWidth() + navNode->GetDividerWidth();
         }
         renderContext->UpdateTranslateInXY(OffsetF(offsetX, 0.0f));
     } else if (type == ForceSplitTransitionType::TRANSITION_IN) {
@@ -1324,8 +1324,8 @@ void NavDestinationGroupNode::SplitTransitionPushStart(ForceSplitTransitionType 
         CHECK_NULL_VOID(geometryNode);
         auto frameSizeWithSafeArea = geometryNode->GetFrameSize(true);
         float width = frameSizeWithSafeArea.Width();
-        float isRTL = GetLanguageDirection();
-        renderContext->UpdateTranslateInXY(OffsetF(width * isRTL, 0.0f));
+        float offsetX = AceApplicationInfo::GetInstance().IsRightToLeft() ? -width : width;
+        renderContext->UpdateTranslateInXY(OffsetF(offsetX, 0.0f));
     }
 }
 
@@ -1338,8 +1338,8 @@ void NavDestinationGroupNode::SplitTransitionPushEnd(ForceSplitTransitionType ty
         CHECK_NULL_VOID(geometryNode);
         auto frameSizeWithSafeArea = geometryNode->GetFrameSize(true);
         float width = frameSizeWithSafeArea.Width();
-        float isRTL = GetLanguageDirection();
-        renderContext->UpdateTranslateInXY(OffsetF(-width * isRTL, 0.0f));
+        float offsetX = AceApplicationInfo::GetInstance().IsRightToLeft() ? width : -width;
+        renderContext->UpdateTranslateInXY(OffsetF(offsetX, 0.0f));
     } else if (type == ForceSplitTransitionType::TRANSITION_IN || type == ForceSplitTransitionType::TRANSITION_MOVE) {
         renderContext->UpdateTranslateInXY(OffsetF(0.0f, 0.0f));
     }
@@ -1401,8 +1401,8 @@ void NavDestinationGroupNode::SplitTransitionPopStart(ForceSplitTransitionType t
         CHECK_NULL_VOID(geometryNode);
         auto frameSizeWithSafeArea = geometryNode->GetFrameSize(true);
         float width = frameSizeWithSafeArea.Width();
-        float isRTL = GetLanguageDirection();
-        renderContext->UpdateTranslateInXY(OffsetF(-width * isRTL, 0.0f));
+        float offsetX = AceApplicationInfo::GetInstance().IsRightToLeft() ? width : -width;
+        renderContext->UpdateTranslateInXY(OffsetF(offsetX, 0.0f));
     } else if (type == ForceSplitTransitionType::TRANSITION_OUT) {
         auto eventHub = GetEventHub<EventHub>();
         if (eventHub) {
@@ -1432,8 +1432,8 @@ void NavDestinationGroupNode::SplitTransitionPopEnd(ForceSplitTransitionType typ
         CHECK_NULL_VOID(geometryNode);
         auto frameSizeWithSafeArea = geometryNode->GetFrameSize(true);
         float width = frameSizeWithSafeArea.Width();
-        float isRTL = GetLanguageDirection();
-        renderContext->UpdateTranslateInXY(OffsetF(width * isRTL, 0.0f));
+        float offsetX = AceApplicationInfo::GetInstance().IsRightToLeft() ? -width : width;
+        renderContext->UpdateTranslateInXY(OffsetF(offsetX, 0.0f));
     } else if (type == ForceSplitTransitionType::TRANSITION_IN || type == ForceSplitTransitionType::TRANSITION_MOVE) {
         renderContext->UpdateTranslateInXY(OffsetF(0.0f, 0.0f));
     }

@@ -2811,4 +2811,11 @@ void PageRouterManager::NotifyPageTransitionEnd(const RefPtr<PipelineContext>& c
     CHECK_NULL_VOID(mgr);
     mgr->OnPageTransitionEnd(page);
 }
+
+bool PageRouterManager::IsPageInStack(const RefPtr<NG::FrameNode>& page) const
+{
+    return std::find_if(pageRouterStack_.begin(), pageRouterStack_.end(), [&page](const WeakPtr<FrameNode>& node) {
+        return node.Upgrade() == page;
+    }) != pageRouterStack_.end();
+}
 } // namespace OHOS::Ace::NG

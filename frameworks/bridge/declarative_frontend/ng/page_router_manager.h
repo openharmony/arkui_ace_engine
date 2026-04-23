@@ -274,6 +274,8 @@ public:
     void FireNavigateChangeCallback(const std::string& to);
     void NotifyPageTransitionEnd(const RefPtr<PipelineContext>& context, const RefPtr<FrameNode>& page);
 
+    bool IsPageInStack(const RefPtr<NG::FrameNode>& page) const;
+
 protected:
     class RouterOptScope {
     public:

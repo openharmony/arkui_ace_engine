@@ -272,6 +272,8 @@ public:
 
     std::string GetPagePathByUrl(const std::string& url) const override;
 
+    bool IsPageInStack(const RefPtr<NG::FrameNode>& page) const override;
+
 protected:
     bool isFormRender_ = false;
     RefPtr<Framework::FrontendDelegateDeclarative> delegate_;

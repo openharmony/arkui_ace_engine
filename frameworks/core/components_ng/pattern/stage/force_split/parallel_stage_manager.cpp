@@ -2056,9 +2056,8 @@ bool ParallelStageManager::MovePageToFrontInVirtualStackBasedSplit(
         pipeline->FlushPipelineImmediately();
     }
     auto preVisiblePages = GetRouterVisiblePages();
-    auto relatedOrPhPage = GetRelatedOrPlaceHolderPage();
     if (needPushPageToPrimaryStateHandling) {
-        if (ShouldMovePageToPrimaryForTransition(currentTopPage, node)) {
+        if (IsSecondaryPushToPrimaryScene(preVisiblePages.primary, currentTopPage, node)) {
             SetPageColumnType(currentTopPage, ForceSplitPageColumnType::PRIMARY);
         }
         SetPageColumnType(node, ForceSplitPageColumnType::SECONDARY);
@@ -2066,7 +2065,13 @@ bool ParallelStageManager::MovePageToFrontInVirtualStackBasedSplit(
 
     // MovePosition itself does not trigger page lifecycle. We reorder first, then rebuild column caches,
     // and only after that decide hide/show from the actual resulting visible pages.
-    node->MovePosition(static_cast<int32_t>(stageNode_->GetChildren().size()) - 1);
+    auto relatedOrPhPage = GetRelatedOrPlaceHolderPage();
+    auto relatedOrPhPageIndex = stageNode_->GetChildIndex(relatedOrPhPage);
+    if (relatedOrPhPage && relatedOrPhPageIndex > 0) {
+        node->MovePosition(relatedOrPhPageIndex - 1);
+    } else {
+        node->MovePosition(static_cast<int32_t>(stageNode_->GetChildren().size()) - 1);
+    }
     InvalidateRouterColumnNodes();
     if (needPushPageToPrimaryStateHandling) {
         NormalizeRouterColumnsAfterStackChange();
@@ -2101,6 +2106,10 @@ bool ParallelStageManager::MovePageToFrontInVirtualStackBasedSplit(
         FireRouterHideByVisibleDiff(preVisiblePages, newVisiblePages, hideTransitionType);
     }
     FireRouterShowByVisibleDiff(preVisiblePages, newVisiblePages, showTransitionType);
+    if (relatedOrPhPage && relatedOrPhPage != newVisiblePages.detail &&
+        stageNode_->GetChildIndex(relatedOrPhPage) >= 0) {
+        stageNode_->RemoveChild(relatedOrPhPage);
+    }
     bool animated = false;
     if (!needPushPageToPrimaryStateHandling) {
         EnsureSplitSecondaryPageIfNeeded();
@@ -2446,6 +2455,38 @@ int32_t ParallelStageManager::GetPrimaryNodeCount() const
         }
     }
     return count;
+}
+
+bool ParallelStageManager::IsSecondaryPushToPrimaryScene(const RefPtr<FrameNode>& prePrimaryTopPage,
+    const RefPtr<FrameNode>& fromPage, const RefPtr<FrameNode>& toPage) const
+{
+    CHECK_NULL_RETURN(prePrimaryTopPage, false);
+    CHECK_NULL_RETURN(fromPage, false);
+    CHECK_NULL_RETURN(toPage, false);
+    if (fromPage == toPage || prePrimaryTopPage == toPage) {
+        return false;
+    }
+    auto homePage = GetHomePage();
+    if (!homePage) {
+        return false;
+    }
+    if (fromPage == homePage || toPage == homePage) {
+        return false;
+    }
+    CHECK_NULL_RETURN(stageNode_, false);
+    auto pipeline = stageNode_->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto forceSplitMgr = pipeline->GetForceSplitManager();
+    CHECK_NULL_RETURN(forceSplitMgr, false);
+    auto fromPattern = fromPage->GetPattern<ParallelPagePattern>();
+    auto toPattern = toPage->GetPattern<ParallelPagePattern>();
+    CHECK_NULL_RETURN(fromPattern, false);
+    CHECK_NULL_RETURN(toPattern, false);
+    auto fromInfo = fromPattern->GetPageInfo();
+    auto toInfo = toPattern->GetPageInfo();
+    CHECK_NULL_RETURN(fromInfo, false);
+    CHECK_NULL_RETURN(toInfo, false);
+    return forceSplitMgr->IsTransitionShouldMovePageToPrimary(fromInfo->GetPageUrl(), toInfo->GetPageUrl());
 }
 
 bool ParallelStageManager::ShouldMovePageToPrimaryForTransition(
