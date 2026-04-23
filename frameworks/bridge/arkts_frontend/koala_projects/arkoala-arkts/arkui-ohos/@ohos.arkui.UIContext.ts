@@ -1864,7 +1864,7 @@ export enum CustomKeyboardContinueFeature {
     DISABLED = 1,
 }
 
-export const enum TextSelectionClearPolicy {
+export enum TextSelectionClearPolicy {
     KEEP_SELECTED_TEXT_ON_EXTERNAL_TOUCH = 0,
     CLEAR_SELECTED_TEXT_ON_EXTERNAL_TOUCH = 1,
 }
