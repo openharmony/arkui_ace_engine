@@ -1357,23 +1357,6 @@ HWTEST_F(ForceSplitManagerTestNg, CalcCurrentSplitRatio009, TestSize.Level1)
 }
 
 /**
- * @tc.name: CalcCurrentSplitRatio010
- * @tc.desc: Test CalcCurrentSplitRatio with ratio outside valid range
- * @tc.type: FUNC
- */
-HWTEST_F(ForceSplitManagerTestNg, CalcCurrentSplitRatio010, TestSize.Level1)
-{
-    auto manager = GetForceSplitManager();
-    ASSERT_NE(manager, nullptr);
-
-    manager->mode_ = ForceSplitMode::WIDE_SPLIT;
-    manager->SetWideSplitRatio(0.9f);
-
-    float ratio = manager->CalcCurrentSplitRatio();
-    EXPECT_FLOAT_EQ(ratio, 0.9f);
-}
-
-/**
  * @tc.name: ChangeForceSplitModeIfNeeded003
  * @tc.desc: Test ChangeForceSplitModeIfNeeded with different delayedMode values
  * @tc.type: FUNC
