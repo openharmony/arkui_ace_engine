@@ -270,6 +270,7 @@ public:
         std::function<void(const std::u16string&, NG::TextCommonEvent&)>&& func);
     static void SetCleanNodeStyle(FrameNode* frameNode, CleanNodeStyle cleanNodeStyle);
     static void SetIsShowCancelButton(FrameNode* frameNode, bool isShowCancelButton);
+    static void SetIsShowVoiceButton(FrameNode* frameNode, bool isShowButton);
     static void SetCancelIconSize(FrameNode* frameNode, const CalcDimension& iconSize);
     static void SetCanacelIconSrc(FrameNode* frameNode, const std::string& iconSrc);
     static void SetCancelIconColor(FrameNode* frameNode, const Color& iconColor);

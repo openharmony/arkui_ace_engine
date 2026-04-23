@@ -1187,6 +1187,18 @@ HWTEST_F(TextFieldUXTest, testMaxLines001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetIsShowVoiceButton001
+ * @tc.desc: Verify SetIsShowVoiceButton updates layout property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, SetIsShowVoiceButton001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT);
+    TextFieldModelNG::SetIsShowVoiceButton(AceType::RawPtr(frameNode_), true);
+    EXPECT_TRUE(layoutProperty_->GetIsShowVoiceButton().value_or(false));
+}
+
+/**
  * @tc.name: testBarState001
  * @tc.desc: test testInput barState
  * @tc.type: FUNC
