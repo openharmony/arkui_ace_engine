@@ -55,6 +55,9 @@
             "@ohos/arkui/UIContext": [
                 "@ohos.arkui.UIContext.ets"
             ],
+            "@ohos/arkui/smartGestureController": [
+                "@ohos.arkui.smartGestureController.ets"
+            ],
             "@ohos/measure": [
                 "@ohos.measure.ets"
             ],

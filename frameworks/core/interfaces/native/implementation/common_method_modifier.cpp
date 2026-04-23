@@ -55,6 +55,7 @@
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
 #include "core/components_ng/property/accessibility_property.h"
+#include "core/components_ng/property/smart_gesture_property.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/implementation/draw_modifier_peer_impl.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
@@ -2219,6 +2220,26 @@ NG::AccessibilityGroupOptions Convert(const Ark_AccessibilityOptions& src)
     };
 
     return groupOptions;
+}
+
+template<>
+NG::SmartGestureShortcutConfig Convert(const Ark_SmartGestureShortcutOptions& src)
+{
+    NG::SmartGestureShortcutConfig config;
+    config.action = NG::SmartGestureShortcutAction::PRIMARY;
+    config.enabled = Converter::OptConvert<bool>(src.enabled).value_or(false);
+    config.selectable = Converter::OptConvert<bool>(src.selectable).value_or(false);
+    auto arkAction = Converter::OptConvert<Ark_GestureShortcut>(src.action);
+    if (arkAction.has_value()) {
+        switch (arkAction.value()) {
+            case ARK_GESTURE_SHORTCUT_PRIMARY:
+                config.action = NG::SmartGestureShortcutAction::PRIMARY;
+                break;
+            default:
+                break;
+        }
+    }
+    return config;
 }
 
 void AssignArkValue(Ark_TouchTestInfo& dst, const TouchTestInfo& src, ConvContext *ctx)
@@ -5536,6 +5557,15 @@ void SetAccessibilityActionOptionsImpl(Ark_NativePointer node,
     }
     ViewAbstractModelNG::SetAccessibilityActionOptions(frameNode, actions);
 }
+void SetSmartGestureShortcutImpl(Ark_NativePointer node,
+                                 const Ark_SmartGestureShortcutOptions* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    NG::SmartGestureShortcutConfig config = Converter::Convert<NG::SmartGestureShortcutConfig>(*value);
+    ViewAbstractModelNG::SetSmartGestureShortcut(frameNode, config);
+}
 void SetOnNeedSoftkeyboardImpl(Ark_NativePointer node,
                                const Opt_OnNeedSoftkeyboardCallback* value)
 {
@@ -7066,6 +7096,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetOnNeedSoftkeyboardImpl,
         CommonMethodModifier::SetAccessibilityStateDescriptionImpl,
         CommonMethodModifier::SetAccessibilityActionOptionsImpl,
+        CommonMethodModifier::SetSmartGestureShortcutImpl,
         CommonMethodModifier::SetExpandSafeAreaImpl,
         CommonMethodModifier::SetIgnoreLayoutSafeAreaImpl,
         CommonMethodModifier::SetBackgroundImpl,

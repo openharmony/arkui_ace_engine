@@ -27,7 +27,7 @@ import { UIAbilityContext, ExtensionContext } from "#external"
 import { UIObserverGestureEventOps, DetachedRootEntryManager, FocusControllerImpl, ComponentUtilsImpl,
     ComponentSnapshotImpl, DragControllerImpl, AtomicServiceBarInternal, UIInspectorImpl, ContextMenuControllerImpl,
     CursorControllerImpl, OverlayManagerImpl, PromptActionImpl, FontImpl, MeasureUtilsImpl, MagnifierImpl,
-    TextMenuControllerImpl, RouterImpl, MediaQueryImpl } from "arkui/base/UIContextImpl"
+    TextMenuControllerImpl, RouterImpl, MediaQueryImpl, SmartGestureControllerImpl } from "arkui/base/UIContextImpl"
 import { componentUtils } from '@ohos/arkui/componentUtils';
 import { componentSnapshot, NodeIdentity } from '@ohos/arkui/componentSnapshot';
 import { dragController } from '@ohos/arkui/dragController';
@@ -68,7 +68,7 @@ import { BusinessError } from "@ohos.base"
 import { ArkUIGeneratedNativeModule } from '#components';
 import { GlobalScopeUicontextFontScale } from "#generated"
 import { deserializeAndCallCallback } from 'arkui/framework/peers/CallbackDeserializeCall';
-import { RawInputEventType } from 'arkui/component/enums';
+import { RawInputEventType, SmartGestureAction, OperateIntention } from 'arkui/component/enums';
 
 export enum GestureActionPhase {
     WILL_START = 0,
@@ -564,6 +564,137 @@ export class CursorController {
     }
 }
 
+const smartGestureProposalKindStore = new WeakMap<BaseGestureHandlingProposal, SmartGestureAction>();
+
+function brandProposal(proposal: BaseGestureHandlingProposal, kind: SmartGestureAction): BaseGestureHandlingProposal {
+    smartGestureProposalKindStore.set(proposal, kind);
+    return proposal;
+}
+
+export function getProposalKind(proposal: BaseGestureHandlingProposal): SmartGestureAction | undefined {
+    return smartGestureProposalKindStore.get(proposal);
+}
+
+export function hasOwnProperty(value: object, key: string): boolean {
+    return (value as Object).hasOwnProperty(key);
+}
+
+function validateIsConsumed(isConsumed: boolean): void {
+    if (typeof isConsumed !== 'boolean') {
+        throw new TypeError('The type of isConsumed is not boolean.');
+    }
+}
+
+export abstract class BaseGestureHandlingProposal {
+    public readonly action: SmartGestureAction;
+    public operateIntention: OperateIntention;
+
+    protected constructor(action: SmartGestureAction, operateIntention: OperateIntention) {
+        this.action = action;
+        this.operateIntention = operateIntention;
+    }
+}
+
+export abstract class TargetedGestureProposal extends BaseGestureHandlingProposal {
+    public readonly node: FrameNode;
+
+    protected constructor(action: SmartGestureAction, operateIntention: OperateIntention, node: FrameNode) {
+        super(action, operateIntention);
+        this.node = node;
+    }
+}
+
+export class ClickActionProposal extends TargetedGestureProposal {
+    constructor(node: FrameNode) {
+        super(SmartGestureAction.CLICK, OperateIntention.TAP, node);
+        brandProposal(this, SmartGestureAction.CLICK);
+    }
+}
+
+export class SelectActionProposal extends TargetedGestureProposal {
+    constructor(node: FrameNode) {
+        super(SmartGestureAction.SELECT, OperateIntention.TAP, node);
+        brandProposal(this, SmartGestureAction.SELECT);
+    }
+}
+
+export class NoneActionProposal extends BaseGestureHandlingProposal {
+    constructor() {
+        super(SmartGestureAction.NONE, OperateIntention.TAP);
+        brandProposal(this, SmartGestureAction.NONE);
+    }
+}
+
+export class BackPressActionProposal extends BaseGestureHandlingProposal {
+    constructor() {
+        super(SmartGestureAction.BACK_PRESS, OperateIntention.BACK_PRESS);
+        brandProposal(this, SmartGestureAction.BACK_PRESS);
+    }
+}
+
+export class PageSwitchActionProposal extends TargetedGestureProposal {
+    public pageCount: int;
+
+    constructor(node: FrameNode, pageCount: int) {
+        super(SmartGestureAction.PAGE_FORWARD, OperateIntention.SLIDE_FORWARD, node);
+        this.pageCount = pageCount;
+        brandProposal(this, SmartGestureAction.PAGE_FORWARD);
+    }
+}
+
+export class ScrollActionProposal extends TargetedGestureProposal {
+    public distance: number;
+    public pageCount?: int;
+
+    constructor(node: FrameNode, distance: number, pageCount?: int) {
+        super(SmartGestureAction.SCROLL_FORWARD, OperateIntention.SLIDE_FORWARD, node);
+        this.distance = distance;
+        if (pageCount !== undefined) {
+            this.pageCount = pageCount;
+        }
+        brandProposal(this, SmartGestureAction.SCROLL_FORWARD);
+    }
+}
+
+export class GestureHandlingResolution {
+    public isConsumed: boolean;
+    public selectedProposal?: BaseGestureHandlingProposal;
+
+    constructor(isConsumed: boolean) {
+        validateIsConsumed(isConsumed);
+        this.isConsumed = isConsumed;
+    }
+}
+
+export declare type SmartGestureMonitorCallback =
+    (proposal: BaseGestureHandlingProposal) => GestureHandlingResolution;
+
+export class SmartGestureController {
+    public enableSmartTapAndSlideGestures(enabled: boolean): void {
+        throw Error('enableSmartTapAndSlideGestures not implemented in SmartGestureController!');
+    }
+
+    public registerMonitor(monitorCallback: SmartGestureMonitorCallback): void {
+        throw Error('registerMonitor not implemented in SmartGestureController!');
+    }
+
+    public unregisterMonitor(monitorCallback: SmartGestureMonitorCallback): void {
+        throw Error('unregisterMonitor not implemented in SmartGestureController!');
+    }
+
+    public clearMonitors(): void {
+        throw Error('clearMonitors not implemented in SmartGestureController!');
+    }
+
+    public requestSelected(id: string): void {
+        throw Error('requestSelected not implemented in SmartGestureController!');
+    }
+
+    public clearSelected(): void {
+        throw Error('clearSelected not implemented in SmartGestureController!');
+    }
+}
+
 export enum KeyboardAvoidMode {
     OFFSET = 0,
     RESIZE = 1,
@@ -600,6 +731,7 @@ export class UIContext {
     atomicServiceBar_: AtomicServiceBarInternal;
     uiInspector_: UIInspectorImpl | null = null;
     contextMenuController_: ContextMenuControllerImpl;
+    smartGestureController_: SmartGestureControllerImpl | null = null;
     overlayManager_: OverlayManagerImpl | null = null;
     promptAction_: PromptActionImpl | null = null;
     keyboardAvoidMode_: KeyboardAvoidMode = KeyboardAvoidMode.OFFSET;
@@ -878,6 +1010,13 @@ export class UIContext {
 
     public getContextMenuController(): ContextMenuController {
         return this.contextMenuController_;
+    }
+
+    public getSmartGestureController(): SmartGestureController {
+        if (!this.smartGestureController_) {
+            this.smartGestureController_ = new SmartGestureControllerImpl(this.instanceId_);
+        }
+        return this.smartGestureController_ as SmartGestureController;
     }
 
     public getComponentUtils(): ComponentUtils {
