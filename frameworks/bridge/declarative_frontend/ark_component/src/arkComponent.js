@@ -21343,6 +21343,16 @@ class ArkSelectComponent extends ArkComponent {
       this._modifiersWithKeys, MenuSystemMaterialModifier.identity, MenuSystemMaterialModifier, menuSystemMaterial);
     return this;
   }
+  menuBackgroundBlurStyleOptions(menuBackgroundBlurStyleOptions) {
+    modifierWithKey(
+      this._modifiersWithKeys, MenuBackgroundBlurStyleOptionsModifier.identity, MenuBackgroundBlurStyleOptionsModifier, menuBackgroundBlurStyleOptions);
+    return this;
+  }
+  menuBackgroundEffect(menuBackgroundEffect) {
+    modifierWithKey(
+      this._modifiersWithKeys, MenuBackgroundEffectModifier.identity, MenuBackgroundEffectModifier, menuBackgroundEffect);
+    return this;
+  }
 }
 
 class SelectOptionsModifier extends ModifierWithKey {
@@ -21982,6 +21992,40 @@ class MenuSystemMaterialModifier extends ModifierWithKey {
   }
 }
 MenuSystemMaterialModifier.identity = Symbol('menuSystemMaterial');
+class MenuBackgroundBlurStyleOptionsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset || !this.value) {
+      getUINativeModule().select.resetMenuBackgroundBlurStyleOptions(node);
+    } else {
+      getUINativeModule().select.setMenuBackgroundBlurStyleOptions(node, this.value);
+    }
+  }
+
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+MenuBackgroundBlurStyleOptionsModifier.identity = Symbol('menuBackgroundBlurStyleOptions');
+class MenuBackgroundEffectModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset || !this.value) {
+      getUINativeModule().select.resetMenuBackgroundEffect(node);
+    } else {
+      getUINativeModule().select.setMenuBackgroundEffect(node, this.value);
+    }
+  }
+
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+MenuBackgroundEffectModifier.identity = Symbol('menuBackgroundEffect');
 class SelectOnSelectModifier extends ModifierWithKey {
   constructor(value) {
     super(value);

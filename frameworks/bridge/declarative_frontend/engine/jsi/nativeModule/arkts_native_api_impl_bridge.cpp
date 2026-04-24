@@ -1888,6 +1888,14 @@ void ArkUINativeModule::RegisterSelectAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectBridge::SetMenuSystemMaterial));
     select->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMenuSystemMaterial"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectBridge::ResetMenuSystemMaterial));
+    select->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMenuBackgroundBlurStyleOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectBridge::SetMenuBackgroundBlurStyleOptions));
+    select->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMenuBackgroundBlurStyleOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectBridge::ResetMenuBackgroundBlurStyleOptions));
+    select->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMenuBackgroundEffect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectBridge::SetMenuBackgroundEffect));
+    select->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMenuBackgroundEffect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectBridge::ResetMenuBackgroundEffect));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "select"), select);
 }
 
