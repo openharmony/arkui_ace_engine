@@ -147,6 +147,8 @@ constexpr int32_t KEYEVENT_MAX_NUM = 1000;
 constexpr int32_t MAXIMUM_ROTATION_DELAY_TIME = 800;
 constexpr int32_t RESERVED_DEVICEID1 = 0xAAAAAAFF;
 constexpr int32_t RESERVED_DEVICEID2 = 0xAAAAAAFE;
+constexpr int32_t LONG_PRESS_DURATION_MS = 650;
+constexpr int32_t LONG_PRESS_DURATION_STEP_UNIT = 8;
 const LinearEnumMapNode<OHOS::NWeb::CursorType, MouseFormat> g_cursorTypeMap[] = {
     { OHOS::NWeb::CursorType::CT_CROSS, MouseFormat::CROSS },
     { OHOS::NWeb::CursorType::CT_HAND, MouseFormat::HAND_POINTING },
@@ -9779,6 +9781,11 @@ int WebPattern::SendCommandToNWeb(std::unique_ptr<JsonValue> comJson)
         case WebCommandEventType::CLICK:
         case WebCommandEventType::SCROLL:
             return ExecuteClickScrollCommand(comJson, eventTypeStr);
+        case WebCommandEventType::EVENT_TYPE_TAP_GESTURE:
+        case WebCommandEventType::EVENT_TYPE_SCROLL_GESTURE:
+        case WebCommandEventType::EVENT_TYPE_PINCH_GESTURE:
+        case WebCommandEventType::EVENT_TYPE_LONG_PRESS:
+            return ExecuteGestureCommand(comJson, eventTypeStr);
         default:
             TAG_LOGE(AceLogTag::ACE_WEB, "[WebCommandAction] CommandError: unknown event_type=%{public}s",
                 eventTypeStr.c_str());
@@ -9822,6 +9829,226 @@ int WebPattern::ExecuteSelectCommand(const std::unique_ptr<JsonValue>& comJson, 
         return result;
     }
     return manager->HandleSelectCommand(actionInfo);
+}
+
+int WebPattern::ExecuteGestureCommand(const std::unique_ptr<JsonValue>& comJson, const std::string& eventTypeStr)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "[WebCommandAction] ExecuteGestureCommand start, eventTypeStr=%{public}s",
+        eventTypeStr.c_str());
+    if (!delegate_) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "[WebCommandAction] ExecuteGestureCommand: delegate_ is nullptr");
+        return static_cast<int>(WebCommandResult::DELEGATE_NULL);
+    }
+    auto manager = delegate_->GetNWebCommandActionManager();
+    if (!manager) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "[WebCommandAction] ExecuteGestureCommand: CommandActionManager is nullptr");
+        return static_cast<int>(WebCommandResult::FAILED);
+    }
+    std::shared_ptr<OHOS::NWeb::NWebCommandActionInfo> actionInfo;
+    int result = WebCommandWrapper::BuildGestureActionInfo(comJson, eventTypeStr, actionInfo);
+    if (result != WEB_COMMAND_BUILD_SUCCESS) {
+        TAG_LOGE(AceLogTag::ACE_WEB,
+            "[WebCommandAction] ExecuteGestureCommand: BuildGestureActionInfo failed, result=%{public}d", result);
+        return result;
+    }
+
+    result = CheckGestureCoordinatesInWebBounds(actionInfo->GetX(), actionInfo->GetY());
+    if (result != WEB_COMMAND_BUILD_SUCCESS) {
+        TAG_LOGE(AceLogTag::ACE_WEB,
+            "[WebCommandAction] ExecuteGestureCommand: CheckGestureCoordinatesInWebBounds failed, result=%{public}d",
+            result);
+        return result;
+    }
+
+    auto eventType = WebCommandWrapper::ParseEventType(eventTypeStr);
+    if (eventType == WebCommandEventType::EVENT_TYPE_LONG_PRESS) {
+        return HandleLongPressCommand(actionInfo->GetX(), actionInfo->GetY());
+    } else if (eventType == WebCommandEventType::EVENT_TYPE_TAP_GESTURE) {
+        return HandleTapCommand(
+            actionInfo->GetX(), actionInfo->GetY(), actionInfo->GetDuration(), actionInfo->GetTapCount());
+    } else if (eventType == WebCommandEventType::EVENT_TYPE_SCROLL_GESTURE) {
+        return HandleScrollGestureCommand(actionInfo->GetX(), actionInfo->GetY(), actionInfo->GetDistanceX(),
+            actionInfo->GetDistanceY(), actionInfo->GetSpeed());
+    } else if (eventType == WebCommandEventType::EVENT_TYPE_PINCH_GESTURE) {
+        return HandlePinchGestureCommand(
+            actionInfo->GetX(), actionInfo->GetY(), actionInfo->GetScale(), actionInfo->GetSpeed());
+    }
+    return static_cast<int>(WebCommandResult::JSON_INVALID_EVENT_TYPE);
+}
+
+int WebPattern::CheckGestureCoordinatesInWebBounds(double screenX, double screenY)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, static_cast<int>(WebCommandResult::FAILED));
+    auto componentOffset = host->GetTransformRelativeOffset();
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, static_cast<int>(WebCommandResult::FAILED));
+    auto windowRect = context->GetDisplayWindowRectInfo();
+    double windowOffsetX = windowRect.GetOffset().GetX();
+    double windowOffsetY = windowRect.GetOffset().GetY();
+
+    double webLeft = windowOffsetX + componentOffset.GetX();
+    double webTop = windowOffsetY + componentOffset.GetY();
+    auto drawSize = GetDrawSize();
+    double webRight = webLeft + drawSize.Width();
+    double webBottom = webTop + drawSize.Height();
+
+    if (screenX < webLeft || screenX > webRight || screenY < webTop || screenY > webBottom) {
+        TAG_LOGE(AceLogTag::ACE_WEB,
+            "[WebCommandAction] CheckGestureCoordinatesInWebBounds: coordinates out of web component bounds, "
+            "screenX=%{public}f, screenY=%{public}f, webLeft=%{public}f, webTop=%{public}f, "
+            "webRight=%{public}f, webBottom=%{public}f",
+            screenX, screenY, webLeft, webTop, webRight, webBottom);
+        return static_cast<int>(WebCommandResult::JSON_INVALID_GESTURE_COORDINATES);
+    }
+    return WEB_COMMAND_BUILD_SUCCESS;
+}
+
+bool WebPattern::ConvertScreenToWebCoordinates(double screenX, double screenY, double& outWebX, double& outWebY)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto componentOffset = host->GetTransformRelativeOffset();
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, false);
+    auto windowRect = context->GetDisplayWindowRectInfo();
+    double windowOffsetX = windowRect.GetOffset().GetX();
+    double windowOffsetY = windowRect.GetOffset().GetY();
+
+    outWebX = screenX - windowOffsetX - componentOffset.GetX();
+    outWebY = screenY - windowOffsetY - componentOffset.GetY();
+
+    if (outWebX < 0 || outWebY < 0) {
+        TAG_LOGE(AceLogTag::ACE_WEB,
+            "ConvertScreenToWebCoordinates: invalid coordinates, "
+            "screenX=%{public}f, screenY=%{public}f, "
+            "windowOffsetX=%{public}f, windowOffsetY=%{public}f, "
+            "componentOffsetX=%{public}f, componentOffsetY=%{public}f, "
+            "outWebX=%{public}f, outWebY=%{public}f",
+            screenX, screenY, windowOffsetX, windowOffsetY, componentOffset.GetX(), componentOffset.GetY(), outWebX,
+            outWebY);
+        return false;
+    }
+    return true;
+}
+
+int WebPattern::HandleTapCommand(double screenX, double screenY, int32_t duration, int32_t tapCount)
+{
+    double webX, webY;
+    if (!ConvertScreenToWebCoordinates(screenX, screenY, webX, webY)) {
+        return static_cast<int>(WebCommandResult::JSON_INVALID_GESTURE_COORDINATES);
+    }
+
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "HandleTapCommand: screenX=%{public}f, screenY=%{public}f, "
+        "webX=%{public}f, webY=%{public}f, duration=%{public}d, tapCount=%{public}d",
+        screenX, screenY, webX, webY, duration, tapCount);
+
+    CHECK_NULL_RETURN(delegate_, static_cast<int>(WebCommandResult::DELEGATE_NULL));
+    auto commandActionManager = delegate_->GetNWebCommandActionManager();
+    CHECK_NULL_RETURN(commandActionManager, static_cast<int>(WebCommandResult::FAILED));
+    std::shared_ptr<NWebCommandActionInfoImpl> action =
+        NWebCommandActionInfoImpl::CreateGestureInfo("tap", webX, webY, 0, 0, 1.0f, duration, tapCount, 0);
+    return commandActionManager->HandleGestureCommand(action);
+}
+
+int WebPattern::HandleScrollGestureCommand(
+    double screenX, double screenY, double xDistance, double yDistance, int32_t speed)
+{
+    double webX, webY;
+    if (!ConvertScreenToWebCoordinates(screenX, screenY, webX, webY)) {
+        return static_cast<int>(WebCommandResult::JSON_INVALID_GESTURE_COORDINATES);
+    }
+
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "HandleScrollGestureCommand: screenX=%{public}f, screenY=%{public}f, "
+        "webX=%{public}f, webY=%{public}f, xDistance=%{public}f, yDistance=%{public}f, speed=%{public}d",
+        screenX, screenY, webX, webY, xDistance, yDistance, speed);
+
+    CHECK_NULL_RETURN(delegate_, static_cast<int>(WebCommandResult::DELEGATE_NULL));
+    auto commandActionManager = delegate_->GetNWebCommandActionManager();
+    CHECK_NULL_RETURN(commandActionManager, static_cast<int>(WebCommandResult::FAILED));
+    std::shared_ptr<NWebCommandActionInfoImpl> action = NWebCommandActionInfoImpl::CreateGestureInfo(
+        "scrollGesture", webX, webY, xDistance, yDistance, 1.0f, 0, 1, speed);
+    return commandActionManager->HandleGestureCommand(action);
+}
+
+int WebPattern::HandlePinchGestureCommand(double screenX, double screenY, double scaleFactor, int32_t speed)
+{
+    double webX, webY;
+    if (!ConvertScreenToWebCoordinates(screenX, screenY, webX, webY)) {
+        return static_cast<int>(WebCommandResult::JSON_INVALID_GESTURE_COORDINATES);
+    }
+
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "HandlePinchGestureCommand: screenX=%{public}f, screenY=%{public}f, "
+        "webX=%{public}f, webY=%{public}f, scaleFactor=%{public}f, speed=%{public}d",
+        screenX, screenY, webX, webY, scaleFactor, speed);
+
+    CHECK_NULL_RETURN(delegate_, static_cast<int>(WebCommandResult::DELEGATE_NULL));
+    auto commandActionManager = delegate_->GetNWebCommandActionManager();
+    CHECK_NULL_RETURN(commandActionManager, static_cast<int>(WebCommandResult::FAILED));
+    std::shared_ptr<NWebCommandActionInfoImpl> action =
+        NWebCommandActionInfoImpl::CreateGestureInfo("pinch", webX, webY, 0, 0, scaleFactor, 0, 1, speed);
+    return commandActionManager->HandleGestureCommand(action);
+}
+
+int WebPattern::HandleLongPressCommand(double screenX, double screenY)
+{
+    double webX, webY;
+    if (!ConvertScreenToWebCoordinates(screenX, screenY, webX, webY)) {
+        return static_cast<int>(WebCommandResult::JSON_INVALID_GESTURE_COORDINATES);
+    }
+
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "HandleLongPressCommand: screenX=%{public}f, screenY=%{public}f, "
+        "webX=%{public}f, webY=%{public}f, duration=%{public}d",
+        screenX, screenY, webX, webY, LONG_PRESS_DURATION_MS);
+
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, static_cast<int>(WebCommandResult::FAILED));
+
+    int32_t totalSteps = LONG_PRESS_DURATION_MS / LONG_PRESS_DURATION_STEP_UNIT;
+
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, static_cast<int>(WebCommandResult::FAILED));
+
+    for (int32_t step = 0; step <= totalSteps; ++step) {
+        int32_t delayMs = step * LONG_PRESS_DURATION_STEP_UNIT;
+        auto touchType = (step == 0) ? TouchType::DOWN : ((step >= totalSteps) ? TouchType::UP : TouchType::MOVE);
+        taskExecutor->PostDelayedTask(
+            [weak = AceType::WeakClaim(this), webX, webY, screenX, screenY, touchType, step, totalSteps]() {
+                if (touchType == TouchType::DOWN || touchType == TouchType::UP) {
+                    TAG_LOGI(AceLogTag::ACE_WEB,
+                        "HandleLongPressCommand: step=%{public}d/%{public}d, touchType=%{public}d", step, totalSteps,
+                        static_cast<int>(touchType));
+                }
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+
+                TouchLocationInfo changedInfo(0);
+                changedInfo.SetLocalLocation(Offset(webX, webY));
+                changedInfo.SetGlobalLocation(Offset(screenX, screenY));
+                changedInfo.SetScreenLocation(Offset(screenX, screenY));
+                changedInfo.SetTouchType(touchType);
+
+                TouchLocationInfo changedTouchInfo(0);
+                changedTouchInfo.SetLocalLocation(Offset(webX, webY));
+                changedTouchInfo.SetGlobalLocation(Offset(screenX, screenY));
+                changedTouchInfo.SetScreenLocation(Offset(screenX, screenY));
+                changedTouchInfo.SetTouchType(touchType);
+
+                TouchEventInfo eventInfo("touchEvent");
+                eventInfo.AddTouchLocationInfo(std::move(changedInfo));
+                eventInfo.AddChangedTouchLocationInfo(std::move(changedTouchInfo));
+                eventInfo.SetSourceDevice(SourceType::TOUCH);
+                eventInfo.SetSourceTool(SourceTool::FINGER);
+                pattern->HandleTouchEvent(eventInfo);
+            },
+            TaskExecutor::TaskType::UI, delayMs, "WebLongPress");
+    }
+
+    return static_cast<int>(WebCommandResult::SUCCESS);
 }
 
 int WebPattern::ExecuteClickScrollCommand(const std::unique_ptr<JsonValue>& comJson, const std::string& eventTypeStr)

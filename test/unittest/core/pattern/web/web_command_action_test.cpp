@@ -90,6 +90,10 @@ HWTEST_F(WebCommandActionTest, ParseEventType_ValidTypes_0100, TestSize.Level1)
     EXPECT_EQ(WebCommandWrapper::ParseEventType("input-time"), WebCommandEventType::INPUT_TIME);
     EXPECT_EQ(WebCommandWrapper::ParseEventType("input-week"), WebCommandEventType::INPUT_WEEK);
     EXPECT_EQ(WebCommandWrapper::ParseEventType("select"), WebCommandEventType::SELECT);
+    EXPECT_EQ(WebCommandWrapper::ParseEventType("tap"), WebCommandEventType::EVENT_TYPE_TAP_GESTURE);
+    EXPECT_EQ(WebCommandWrapper::ParseEventType("scrollGesture"), WebCommandEventType::EVENT_TYPE_SCROLL_GESTURE);
+    EXPECT_EQ(WebCommandWrapper::ParseEventType("pinch"), WebCommandEventType::EVENT_TYPE_PINCH_GESTURE);
+    EXPECT_EQ(WebCommandWrapper::ParseEventType("longPress"), WebCommandEventType::EVENT_TYPE_LONG_PRESS);
 }
 
 /**
@@ -605,4 +609,396 @@ HWTEST_F(WebCommandActionTest, OnInjectionEvent_Select_EmptyOptions_0100, TestSi
 #endif
 }
 
+// ===== Gesture Command Tests =====
+
+/**
+ * @tc.name: ParseEventType_GestureTypes_0100
+ * @tc.desc: Test ParseEventType with gesture event types.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, ParseEventType_GestureTypes_0100, TestSize.Level1)
+{
+    EXPECT_EQ(WebCommandWrapper::ParseEventType("tap"), WebCommandEventType::EVENT_TYPE_TAP_GESTURE);
+    EXPECT_EQ(WebCommandWrapper::ParseEventType("scrollGesture"), WebCommandEventType::EVENT_TYPE_SCROLL_GESTURE);
+    EXPECT_EQ(WebCommandWrapper::ParseEventType("pinch"), WebCommandEventType::EVENT_TYPE_PINCH_GESTURE);
+    EXPECT_EQ(WebCommandWrapper::ParseEventType("longPress"), WebCommandEventType::EVENT_TYPE_LONG_PRESS);
+}
+
+/**
+ * @tc.name: ValidateTapParameters_Success_0100
+ * @tc.desc: Test ValidateTapParameters with valid parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, ValidateTapParameters_Success_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "x": 100.5,
+        "y": 200.5,
+        "duration": 100,
+        "tapCount": 2
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    double outX, outY;
+    int32_t outDuration, outTapCount;
+    int result = WebCommandWrapper::ValidateTapParameters(comJson, outX, outY, outDuration, outTapCount);
+    EXPECT_EQ(result, WEB_COMMAND_BUILD_SUCCESS);
+    EXPECT_EQ(outX, 100.5);
+    EXPECT_EQ(outY, 200.5);
+    EXPECT_EQ(outDuration, 100);
+    EXPECT_EQ(outTapCount, 2);
+#endif
+}
+
+/**
+ * @tc.name: ValidateTapParameters_MissingX_0100
+ * @tc.desc: Test ValidateTapParameters with missing x parameter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, ValidateTapParameters_MissingX_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "y": 200.5
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    double outX, outY;
+    int32_t outDuration, outTapCount;
+    int result = WebCommandWrapper::ValidateTapParameters(comJson, outX, outY, outDuration, outTapCount);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_GESTURE_X));
+#endif
+}
+
+/**
+ * @tc.name: ValidateTapParameters_MissingY_0100
+ * @tc.desc: Test ValidateTapParameters with missing y parameter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, ValidateTapParameters_MissingY_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "x": 100.5
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    double outX, outY;
+    int32_t outDuration, outTapCount;
+    int result = WebCommandWrapper::ValidateTapParameters(comJson, outX, outY, outDuration, outTapCount);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_GESTURE_Y));
+#endif
+}
+
+/**
+ * @tc.name: ValidateScrollGestureParameters_Success_0100
+ * @tc.desc: Test ValidateScrollGestureParameters with valid parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, ValidateScrollGestureParameters_Success_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "x": 100.5,
+        "y": 200.5,
+        "xDistance": 50.0,
+        "yDistance": -100.0,
+        "speed": 800
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    double outX, outY, outXDistance, outYDistance;
+    int32_t outSpeed;
+    int result = WebCommandWrapper::ValidateScrollGestureParameters(
+        comJson, outX, outY, outXDistance, outYDistance, outSpeed);
+    EXPECT_EQ(result, WEB_COMMAND_BUILD_SUCCESS);
+    EXPECT_EQ(outX, 100.5);
+    EXPECT_EQ(outY, 200.5);
+    EXPECT_EQ(outXDistance, 50.0);
+    EXPECT_EQ(outYDistance, -100.0);
+    EXPECT_EQ(outSpeed, 800);
+#endif
+}
+
+/**
+ * @tc.name: ValidateScrollGestureParameters_MissingXDistance_0100
+ * @tc.desc: Test ValidateScrollGestureParameters with missing xDistance.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, ValidateScrollGestureParameters_MissingXDistance_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "x": 100.5,
+        "y": 200.5,
+        "yDistance": -100.0
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    double outX, outY, outXDistance, outYDistance;
+    int32_t outSpeed;
+    int result = WebCommandWrapper::ValidateScrollGestureParameters(
+        comJson, outX, outY, outXDistance, outYDistance, outSpeed);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_GESTURE_DISTANCE));
+#endif
+}
+
+/**
+ * @tc.name: ValidatePinchParameters_Success_0100
+ * @tc.desc: Test ValidatePinchParameters with valid parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, ValidatePinchParameters_Success_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "x": 100.5,
+        "y": 200.5,
+        "scale": 1.5,
+        "speed": 800
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    double outX, outY, outScaleFactor;
+    int32_t outSpeed;
+    int result = WebCommandWrapper::ValidatePinchParameters(comJson, outX, outY, outScaleFactor, outSpeed);
+    EXPECT_EQ(result, WEB_COMMAND_BUILD_SUCCESS);
+    EXPECT_EQ(outX, 100.5);
+    EXPECT_EQ(outY, 200.5);
+    EXPECT_EQ(outScaleFactor, 1.5);
+    EXPECT_EQ(outSpeed, 800);
+#endif
+}
+
+/**
+ * @tc.name: ValidatePinchParameters_InvalidScale_0100
+ * @tc.desc: Test ValidatePinchParameters with invalid scale (zero or negative).
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, ValidatePinchParameters_InvalidScale_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "x": 100.5,
+        "y": 200.5,
+        "scale": 0,
+        "speed": 800
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    double outX, outY, outScaleFactor;
+    int32_t outSpeed;
+    int result = WebCommandWrapper::ValidatePinchParameters(comJson, outX, outY, outScaleFactor, outSpeed);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_GESTURE_SCALE));
+#endif
+}
+
+/**
+ * @tc.name: ValidatePinchParameters_MissingScale_0100
+ * @tc.desc: Test ValidatePinchParameters with missing scale.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, ValidatePinchParameters_MissingScale_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "x": 100.5,
+        "y": 200.5,
+        "speed": 800
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    double outX, outY, outScaleFactor;
+    int32_t outSpeed;
+    int result = WebCommandWrapper::ValidatePinchParameters(comJson, outX, outY, outScaleFactor, outSpeed);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_GESTURE_SCALE));
+#endif
+}
+
+/**
+ * @tc.name: ValidateLongPressParameters_Success_0100
+ * @tc.desc: Test ValidateLongPressParameters with valid parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, ValidateLongPressParameters_Success_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "x": 100.5,
+        "y": 200.5
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    double outX, outY;
+    int result = WebCommandWrapper::ValidateLongPressParameters(comJson, outX, outY);
+    EXPECT_EQ(result, WEB_COMMAND_BUILD_SUCCESS);
+    EXPECT_EQ(outX, 100.5);
+    EXPECT_EQ(outY, 200.5);
+#endif
+}
+
+/**
+ * @tc.name: ValidateLongPressParameters_MissingX_0100
+ * @tc.desc: Test ValidateLongPressParameters with missing x parameter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, ValidateLongPressParameters_MissingX_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "y": 200.5
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    double outX, outY;
+    int result = WebCommandWrapper::ValidateLongPressParameters(comJson, outX, outY);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_GESTURE_X));
+#endif
+}
+
+/**
+ * @tc.name: ValidateLongPressParameters_MissingY_0100
+ * @tc.desc: Test ValidateLongPressParameters with missing y parameter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, ValidateLongPressParameters_MissingY_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "x": 100.5
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    double outX, outY;
+    int result = WebCommandWrapper::ValidateLongPressParameters(comJson, outX, outY);
+    EXPECT_EQ(result, static_cast<int>(WebCommandResult::JSON_INVALID_GESTURE_Y));
+#endif
+}
+
+/**
+ * @tc.name: BuildGestureActionInfo_Tap_Success_0100
+ * @tc.desc: Test BuildGestureActionInfo with tap event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildGestureActionInfo_Tap_Success_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "x": 100.5,
+        "y": 200.5,
+        "duration": 100,
+        "tapCount": 2
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<OHOS::NWeb::NWebCommandActionInfo> outActionInfo;
+    int result = WebCommandWrapper::BuildGestureActionInfo(comJson, "tap", outActionInfo);
+    EXPECT_EQ(result, WEB_COMMAND_BUILD_SUCCESS);
+    EXPECT_NE(outActionInfo, nullptr);
+    EXPECT_EQ(outActionInfo->GetEventType(), "tap");
+    EXPECT_EQ(outActionInfo->GetX(), 100.5);
+    EXPECT_EQ(outActionInfo->GetY(), 200.5);
+    EXPECT_EQ(outActionInfo->GetDuration(), 100);
+    EXPECT_EQ(outActionInfo->GetTapCount(), 2);
+#endif
+}
+
+/**
+ * @tc.name: BuildGestureActionInfo_ScrollGesture_Success_0100
+ * @tc.desc: Test BuildGestureActionInfo with scrollGesture event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildGestureActionInfo_ScrollGesture_Success_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "x": 100.5,
+        "y": 200.5,
+        "xDistance": 50.0,
+        "yDistance": -100.0,
+        "speed": 800
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<OHOS::NWeb::NWebCommandActionInfo> outActionInfo;
+    int result = WebCommandWrapper::BuildGestureActionInfo(comJson, "scrollGesture", outActionInfo);
+    EXPECT_EQ(result, WEB_COMMAND_BUILD_SUCCESS);
+    EXPECT_NE(outActionInfo, nullptr);
+    EXPECT_EQ(outActionInfo->GetEventType(), "scrollGesture");
+    EXPECT_EQ(outActionInfo->GetX(), 100.5);
+    EXPECT_EQ(outActionInfo->GetY(), 200.5);
+    EXPECT_EQ(outActionInfo->GetDistanceX(), 50.0);
+    EXPECT_EQ(outActionInfo->GetDistanceY(), -100.0);
+    EXPECT_EQ(outActionInfo->GetSpeed(), 800);
+#endif
+}
+
+/**
+ * @tc.name: BuildGestureActionInfo_Pinch_Success_0100
+ * @tc.desc: Test BuildGestureActionInfo with pinch event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildGestureActionInfo_Pinch_Success_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "x": 100.5,
+        "y": 200.5,
+        "scale": 1.5,
+        "speed": 800
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<OHOS::NWeb::NWebCommandActionInfo> outActionInfo;
+    int result = WebCommandWrapper::BuildGestureActionInfo(comJson, "pinch", outActionInfo);
+    EXPECT_EQ(result, WEB_COMMAND_BUILD_SUCCESS);
+    EXPECT_NE(outActionInfo, nullptr);
+    EXPECT_EQ(outActionInfo->GetEventType(), "pinch");
+    EXPECT_EQ(outActionInfo->GetX(), 100.5);
+    EXPECT_EQ(outActionInfo->GetY(), 200.5);
+    EXPECT_EQ(outActionInfo->GetScale(), 1.5f);
+    EXPECT_EQ(outActionInfo->GetSpeed(), 800);
+#endif
+}
+
+/**
+ * @tc.name: BuildGestureActionInfo_LongPress_Success_0100
+ * @tc.desc: Test BuildGestureActionInfo with longPress event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, BuildGestureActionInfo_LongPress_Success_0100, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string jsonStr = R"({
+        "x": 100.5,
+        "y": 200.5
+    })";
+    auto comJson = JsonUtil::ParseJsonString(jsonStr);
+    ASSERT_NE(comJson, nullptr);
+    std::shared_ptr<OHOS::NWeb::NWebCommandActionInfo> outActionInfo;
+    int result = WebCommandWrapper::BuildGestureActionInfo(comJson, "longPress", outActionInfo);
+    EXPECT_EQ(result, WEB_COMMAND_BUILD_SUCCESS);
+    EXPECT_NE(outActionInfo, nullptr);
+    EXPECT_EQ(outActionInfo->GetEventType(), "longPress");
+    EXPECT_EQ(outActionInfo->GetX(), 100.5);
+    EXPECT_EQ(outActionInfo->GetY(), 200.5);
+    EXPECT_EQ(outActionInfo->GetDuration(), 0);
+#endif
+}
+
+/**
+ * @tc.name: IsGestureCommandType_GestureTypes_0100
+ * @tc.desc: Test IsGestureCommandType with gesture event types.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebCommandActionTest, IsGestureCommandType_GestureTypes_0100, TestSize.Level1)
+{
+    EXPECT_TRUE(WebCommandWrapper::IsGestureCommandType(WebCommandEventType::EVENT_TYPE_TAP_GESTURE));
+    EXPECT_TRUE(WebCommandWrapper::IsGestureCommandType(WebCommandEventType::EVENT_TYPE_SCROLL_GESTURE));
+    EXPECT_TRUE(WebCommandWrapper::IsGestureCommandType(WebCommandEventType::EVENT_TYPE_PINCH_GESTURE));
+    EXPECT_TRUE(WebCommandWrapper::IsGestureCommandType(WebCommandEventType::EVENT_TYPE_LONG_PRESS));
+    EXPECT_FALSE(WebCommandWrapper::IsGestureCommandType(WebCommandEventType::CLICK));
+    EXPECT_FALSE(WebCommandWrapper::IsGestureCommandType(WebCommandEventType::SCROLL));
+}
 } // namespace OHOS::Ace::NG
