@@ -3083,6 +3083,9 @@ void ScrollablePattern::OnStatusBarClick()
 
     isBackToTopRunning_ = true; // set stop animation flag when click status bar.
     AnimateTo(0 - GetContentStartOffset(), -1, nullptr, true);
+    auto nodeStr = host->GetTag() + std::to_string(static_cast<uint64_t>(host->GetId()));
+    TAG_LOGI(AceLogTag::ACE_SCROLLABLE,
+        "backToTop start:%{public}s, distance:%{public}f", nodeStr.c_str(), -GetContentStartOffset());
 }
 
 void ScrollablePattern::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)

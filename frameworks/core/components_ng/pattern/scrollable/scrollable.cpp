@@ -835,7 +835,19 @@ void Scrollable::LayoutDirectionEst(double gestureVelocity, double velocityScale
     velocityScale = !NearZero(ret) ? ret : defaultVelocityScale;
     velocityScale = isScrollFromTouchPad ? velocityScale * touchPadVelocityScaleRate_ : velocityScale;
     double gain = GetGain(GetDragOffset());
-    if (isReverseCallback_ && isReverseCallback_()) {
+    bool isReverse = isReverseCallback_ && isReverseCallback_();
+    if (GreatNotEqualCustomPrecision(gain, 1.0f, 0.01f)) {
+        if ((isReverse && gestureVelocity > 0) || (!isReverse && gestureVelocity < 0)) {
+            auto node = weakHost_.Upgrade();
+            if (node) {
+                auto nodeStr = node->GetTag() + std::to_string(static_cast<uint64_t>(node->GetId()));
+                TAG_LOGI(AceLogTag::ACE_SCROLLABLE,
+                    "LayoutDirectionEst %{public}s, gain: %{public}f, velocity: %{public}f, reverse: %{public}d",
+                    nodeStr.c_str(), gain, gestureVelocity, isReverse);
+            }
+        }
+    }
+    if (isReverse) {
         currentVelocity_ = -gestureVelocity * velocityScale * gain;
     } else {
         currentVelocity_ = gestureVelocity * velocityScale * gain;
