@@ -4203,6 +4203,12 @@ export class NavExtender {
         NavExtender.setSplitPlaceholder_serialize(navigation_casted, placeholderNode_casted)
         return
     }
+    public static setPushDestinationInnerCallback(peer: NavPathStack, callback: NavExtender_PushDestinationInner): void {
+        const peer_casted = peer as (NavPathStack)
+        const callback_casted = callback as (NavExtender_PushDestinationInner)
+        NavExtender.setPushDestinationInnerCallback_serialize(peer_casted, callback_casted)
+        return
+    }
     private static setNavigationOptions_serialize(ptr: KPointer, pathStack: NavPathStack): void {
         ArkUIGeneratedNativeModule._NavExtender_setNavigationOptions(ptr, toPeerPtr(pathStack))
     }
@@ -4302,6 +4308,12 @@ export class NavExtender {
     }
     private static setSplitPlaceholder_serialize(navigation: KPointer, placeholderNode: KPointer): void {
         ArkUIGeneratedNativeModule._NavExtender_setSplitPlaceholder(navigation, placeholderNode)
+    }
+    private static setPushDestinationInnerCallback_serialize(peer: NavPathStack, callback: NavExtender_PushDestinationInner): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback)
+        ArkUIGeneratedNativeModule._NavExtender_setPushDestinationInnerCallback(toPeerPtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
 }
 export class NodeContainerOps {
@@ -7076,6 +7088,7 @@ export interface SizeTLengthMetrics {
 }
 export type NavExtender_OnUpdateStack = () => void;
 export type NavExtender_PageMapNodeBuilder = (url: string, params?: Object) => KPointer;
+export type NavExtender_PushDestinationInner = (pathStack: KPointer, name: string, params: string, needTransition: boolean) => void;
 export interface SizeNumberInner {
     width: number;
     height: number;
