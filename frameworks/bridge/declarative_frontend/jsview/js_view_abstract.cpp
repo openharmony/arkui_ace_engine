@@ -12263,15 +12263,18 @@ void JSViewAbstract::JSUseUnion(const JSCallbackInfo& info)
         useUnion = argUnion->ToBoolean();
     }
     JSRef<JSVal> jsVal = info[1];
+    NG::CenterGravityOptions param {
+        .gravityCenter = false,
+        .gravityIntensity = 0.0f
+    };
+    auto intensity = 0.0;
     if (jsVal->IsObject()) {
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsVal);
-        NG::CenterGravityOptions param;
-        auto intensity = 0.0;
         ParseJsBool(jsObj->GetProperty("gravityCenter"), param.gravityCenter);
         ParseJsDouble(jsObj->GetProperty("gravityIntensity"), intensity);
         param.gravityIntensity = intensity;
-        ViewAbstractModel::GetInstance()->SetCenterGravityOptions(param);
     }
+    ViewAbstractModel::GetInstance()->SetCenterGravityOptions(param);
     ViewAbstractModel::GetInstance()->SetUseUnion(useUnion);
 }
 

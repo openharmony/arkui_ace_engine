@@ -44,7 +44,6 @@
 #include "core/components_ng/property/sidebar_content_mask_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/property/transition_property.h"
-#include "core/components_ng/property/edgelight_property.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/property/union_effect_container_options.h"
 #include "core/components_ng/render/drawing_forward.h"
@@ -772,6 +771,16 @@ public:
     ACE_DEFINE_PROPERTY_GROUP(Motion, MotionPathProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Motion, MotionPath, MotionPathOption)
 
+    // UnionEffect
+    ACE_DEFINE_PROPERTY_GROUP(UnionEffect, UnionEffectProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(UnionEffect, UseUnionEffect, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(UnionEffect, UnionMode, UnionMode);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(UnionEffect, CenterGravityOptions, CenterGravityOptions);
+
+    // EdgeLight
+    ACE_DEFINE_PROPERTY_GROUP(EdgeLight, EdgeLightProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(EdgeLight, EdgeLightParam, EdgeLightParam);
+
     // accessibility
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP_FOR_VIRTUAL_NODE(AccessibilityFocus, bool);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AccessibilityFocusRect, RectT<int32_t>);
@@ -779,11 +788,6 @@ public:
     // useEffect
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseEffect, bool);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseEffectType, EffectType);
-
-    // useUnionEffect
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseUnionEffect, bool);
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UnionMode, UnionMode);
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(CenterGravityOptions, CenterGravityOptions);
 
     // useShadowBatching
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseShadowBatching, bool);
@@ -802,9 +806,6 @@ public:
 
     // AttractionEffect
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AttractionEffect, AttractionEffect);
-
-    // EdgeLight
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(EdgeLightParam, NG::EdgeLightParam);
 
     virtual void SetUsingContentRectForRenderFrame(bool value, bool adjustRSFrameByContentRect = false) {}
     virtual void SetFrameGravity(OHOS::Rosen::Gravity gravity) {}
