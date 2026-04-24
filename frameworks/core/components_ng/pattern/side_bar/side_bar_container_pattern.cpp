@@ -88,6 +88,9 @@ constexpr static int32_t DEFAULT_SIDE_BAR_ZINDEX_OVERLAY = 2;
 constexpr static int32_t DEFAULT_DIVIDER_ZINDEX_OVERLAY = 1;
 constexpr static int32_t DEFAULT_CONTENT_ZINDEX_OVERLAY = 0;
 constexpr static int32_t DEFAULT_DOUBLE_DRAG_REGION = 2;
+constexpr Dimension CLOSE_SIDEBAR_PAN_DISTANCE = 100.0_vp;
+const RefPtr<InterpolatingSpring> INTERPOLATING_SPRING_CURVE =
+    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 228.0f, 24.0f);
 } // namespace
 
 void SideBarContainerPattern::OnAttachToFrameNode()
@@ -459,6 +462,9 @@ void SideBarContainerPattern::OnModifyDone()
     }
     SideBarModifyDoneToolBarManager();
     UpdateSideBarColorToToolbarManager();
+    
+    bool showSideBarWithGesture = layoutProperty->GetShowSideBarWithGesture().value_or(false);
+    InitShowAndCloseSidebarPanEvent(showSideBarWithGesture);
 }
 
 void SideBarContainerPattern::OnHostChildUpdateDone()
@@ -490,6 +496,9 @@ void SideBarContainerPattern::OnHostChildUpdateDone()
     }
 
     UpdateSideBarColorToToolbarManager();
+
+    bool showSideBarWithGesture = layoutProperty->GetShowSideBarWithGesture().value_or(false);
+    InitShowAndCloseSidebarPanEvent(showSideBarWithGesture);
 }
 
 void SideBarContainerPattern::CreateAndMountNodes()
@@ -732,7 +741,8 @@ void SideBarContainerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->HandleDragStart();
+        AnimationUtils::StopAnimation(pattern->interpolatingSpringAnimation_);
+        pattern->HandleDragStart(true);
     };
 
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
@@ -797,6 +807,89 @@ void SideBarContainerPattern::SetClickEvent(bool showSideBar)
     } else {
         gesture->RemoveClickEvent(contentClickEvent_);
     }
+}
+
+GestureEventFunc SideBarContainerPattern::GetShowAndCloseSidebarPanEventUpdateTask()
+{
+    return [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        pattern->sideBarInDragGesture_ = true;
+        float offsetX = static_cast<float>(info.GetOffsetX());
+        auto layoutProperty = pattern->GetLayoutProperty<SideBarContainerLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        auto sideBarPosition = pattern->GetSideBarPositionWithRtl(layoutProperty);
+        float realSideBarWidthPx = pattern->DimensionConvertToPx(pattern->realSideBarWidth_).value_or(0.0);
+
+        if (pattern->sideBarStatus_ == SideBarStatus::HIDDEN &&
+            ((offsetX <= 0 && sideBarPosition == SideBarPosition::START) ||
+            (offsetX >= 0 && sideBarPosition == SideBarPosition::END))) {
+            return;
+        }
+        if (pattern->sideBarStatus_ == SideBarStatus::SHOW &&
+            ((offsetX >= 0 && sideBarPosition == SideBarPosition::START) ||
+            (offsetX <= 0 && sideBarPosition == SideBarPosition::END))) {
+            return;
+        }
+        if (std::abs(offsetX) > realSideBarWidthPx) {
+            return;
+        }
+        pattern->currentContentDragOffset_ = offsetX;
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    };
+}
+
+void SideBarContainerPattern::InitShowAndCloseSidebarPanEvent(bool showSideBarWithGesture)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hostGestureHub = host->GetOrCreateGestureEventHub();
+
+    CHECK_NULL_VOID(hostGestureHub);
+    if (!showSideBarWithGesture) {
+        hostGestureHub->RemovePanEvent(dragEventForCloseSideBar_);
+        return;
+    }
+    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        AnimationUtils::StopAnimation(pattern->interpolatingSpringAnimation_);
+        pattern->HandleDragStart(false);
+    };
+    auto actionUpdateTask = GetShowAndCloseSidebarPanEventUpdateTask();
+    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto layoutProperty = pattern->GetLayoutProperty<SideBarContainerLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        auto sideBarPosition = pattern->GetSideBarPositionWithRtl(layoutProperty);
+        pattern->HandleDragEndForContent(static_cast<float>(info.GetOffsetX()), sideBarPosition);
+        pattern->sideBarInDragGesture_ = false;
+    };
+    auto actionCancelTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto layoutProperty = pattern->GetLayoutProperty<SideBarContainerLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        auto sideBarPosition = pattern->GetSideBarPositionWithRtl(layoutProperty);
+        pattern->HandleDragEndForContent(0.0f, sideBarPosition);
+        pattern->sideBarInDragGesture_ = false;
+    };
+    if (dragEventForCloseSideBar_) {
+        hostGestureHub->RemovePanEvent(dragEventForCloseSideBar_);
+    }
+    dragEventForCloseSideBar_ = MakeRefPtr<PanEvent>(std::move(actionStartTask),
+        std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
+    PanDirection panDirection = { .type = PanDirection::HORIZONTAL };
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    hostGestureHub->AddPanEvent(dragEventForCloseSideBar_, panDirection, DEFAULT_PAN_FINGER, distanceMap);
 }
 
 void SideBarContainerPattern::CreateAnimation()
@@ -874,8 +967,86 @@ void SideBarContainerPattern::UpdateAnimDir()
     }
 }
 
+PropertyCallback SideBarContainerPattern::GetSpringAnimationPropertyCallback()
+{
+    return [weak = AceType::WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto layoutProperty = pattern->GetLayoutProperty<SideBarContainerLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        auto sideBarPosition = pattern->GetSideBarPositionWithRtl(layoutProperty);
+        auto realSideBarWidthPx = pattern->DimensionConvertToPx(pattern->realSideBarWidth_).value_or(0.0);
+        if (sideBarPosition == SideBarPosition::START) {
+            if (pattern->animDir_ == SideBarAnimationDirection::LTR) {
+                pattern->currentOffset_ = 0.0f;
+            } else {
+                pattern->currentOffset_ = -realSideBarWidthPx - pattern->realDividerWidth_;
+            }
+        } else {
+            if (pattern->animDir_ == SideBarAnimationDirection::LTR) {
+                pattern->currentOffset_ = 0.0f + pattern->realDividerWidth_;
+            } else {
+                pattern->currentOffset_ = -realSideBarWidthPx;
+            }
+        }
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        auto pipeline = PipelineContext::GetCurrentContext();
+        if (pipeline) {
+            pipeline->FlushUITasks();
+        }
+    };
+}
+
+void SideBarContainerPattern::DoSpringAnimation()
+{
+    currentContentDragOffset_ = 0.0f;
+    sideBarInDragGesture_ = false;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    SetSideBarActive(true, false);
+    UpdateAnimDir();
+
+    auto sideBarStatus = sideBarStatus_;
+    sideBarStatus_ = SideBarStatus::CHANGING;
+    UpdateControlButtonIcon();
+    FireChangeEvent(sideBarStatus == SideBarStatus::HIDDEN);
+
+    auto weak = AceType::WeakClaim(this);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    inAnimation_ = true;
+
+    auto propertyCallback = GetSpringAnimationPropertyCallback();
+    auto finishCallback = [weak, sideBarStatus]() {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            if (sideBarStatus == SideBarStatus::HIDDEN) {
+                pattern->SetSideBarStatus(SideBarStatus::SHOW);
+                pattern->UpdateControlButtonIcon();
+            } else {
+                pattern->SetSideBarStatus(SideBarStatus::HIDDEN);
+                pattern->UpdateControlButtonIcon();
+                pattern->SetSideBarActive(false, false);
+            }
+            pattern->inAnimation_ = false;
+            pattern->CleanInterpolatingSpringAnimation();
+        }
+    };
+
+    AnimationOption option = AnimationOption();
+    option.SetCurve(INTERPOLATING_SPRING_CURVE);
+
+    interpolatingSpringAnimation_ = AnimationUtils::StartAnimation(
+        option, propertyCallback, finishCallback, nullptr, host->GetContextRefPtr());
+}
+
 void SideBarContainerPattern::DoAnimation()
 {
+    currentContentDragOffset_ = 0.0f;
+    sideBarInDragGesture_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
@@ -1201,12 +1372,14 @@ void SideBarContainerPattern::AddDividerHotZoneRect(const RefPtr<SideBarContaine
     dividerGestureHub->SetResponseRegion(responseRegion);
 }
 
-void SideBarContainerPattern::HandleDragStart()
+void SideBarContainerPattern::HandleDragStart(bool isDragInDivider)
 {
     if (!isDividerDraggable_ || sideBarStatus_ != SideBarStatus::SHOW) {
         return;
     }
-    isInDividerDrag_ = true;
+    if (isDragInDivider) {
+        isInDividerDrag_ = true;
+    }
     SetMouseStyle(MouseFormat::RESIZE_LEFT_RIGHT);
     preSidebarWidth_ = realSideBarWidth_;
 }
@@ -1286,6 +1459,59 @@ void SideBarContainerPattern::HandleDragEnd()
         return;
     }
     preSidebarWidth_ = realSideBarWidth_;
+}
+
+void SideBarContainerPattern::HandleDragEndForContent(float xOffset, SideBarPosition position)
+{
+    SetMouseStyle(MouseFormat::DEFAULT);
+    if ((position == SideBarPosition::START && xOffset < -CLOSE_SIDEBAR_PAN_DISTANCE.ConvertToPx()) ||
+        (position == SideBarPosition::END && xOffset > CLOSE_SIDEBAR_PAN_DISTANCE.ConvertToPx())) {
+        if (sideBarStatus_ == SideBarStatus::SHOW) {
+            DoSpringAnimation();
+            return;
+        }
+    }
+    if ((position == SideBarPosition::END && xOffset < -CLOSE_SIDEBAR_PAN_DISTANCE.ConvertToPx()) ||
+        (position == SideBarPosition::START && xOffset > CLOSE_SIDEBAR_PAN_DISTANCE.ConvertToPx())) {
+        if (sideBarStatus_ == SideBarStatus::HIDDEN) {
+            DoSpringAnimation();
+            return;
+        }
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto weak = AceType::WeakClaim(this);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    inAnimation_ = true;
+
+    auto propertyCallback = [weak]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->currentContentDragOffset_ = 0.0f;
+        pattern->sideBarInDragGesture_ = false;
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        auto pipeline = PipelineContext::GetCurrentContext();
+        if (pipeline) {
+            pipeline->FlushUITasks();
+        }
+    };
+
+    auto finishCallback = [weak]() {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->inAnimation_ = false;
+            pattern->CleanInterpolatingSpringAnimation();
+        }
+    };
+    AnimationOption option = AnimationOption();
+    option.SetCurve(INTERPOLATING_SPRING_CURVE);
+
+    interpolatingSpringAnimation_ = AnimationUtils::StartAnimation(
+        option, propertyCallback, finishCallback, nullptr, host->GetContextRefPtr());
 }
 
 void SideBarContainerPattern::FireSideBarWidthChangeEvent()

@@ -7261,6 +7261,8 @@ struct ArkUISideBarContainerModifier {
     void (*resetControlButtonIconInfo)();
     void (*resetControlButtonIconRes)();
     void (*setSideBarContainerMinContentWidthJs)(ArkUI_Float32 value, ArkUI_Int32 unit, void* minContentWidthPtr);
+    void (*setShowSideBarWithGesture)(ArkUINodeHandle node, ArkUI_Bool isShow);
+    void (*resetShowSideBarWithGesture)(ArkUINodeHandle node);
 };
 
 struct ArkUICalendarPickerModifier {
