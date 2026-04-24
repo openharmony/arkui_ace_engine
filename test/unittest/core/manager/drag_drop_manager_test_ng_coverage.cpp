@@ -1842,11 +1842,13 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage065A, TestS
     dragEvent->SetFollowHandMorphDropAnimation([&callbackCount]() { callbackCount++; });
     dragEvent->SetFollowHandMorphAnimationOption("follow_hand_option");
 
+    auto mock = AceType::DynamicCast<MockInteractionInterface>(MockInteractionInterface::GetInstance());
+    ASSERT_NE(mock, nullptr);
     DragDropRet dragDropRet;
     std::function<void()> stopDragCallback;
-    EXPECT_CALL(*(AceType::DynamicCast<MockInteractionInterface>(MockInteractionInterface::GetInstance())),
-        StopDrag(_, _))
-        .WillOnce(DoAll(SaveArg<0>(&dragDropRet), SaveArg<1>(&stopDragCallback), Return(0)));
+    EXPECT_CALL(*mock, StopDrag(_, _))
+        .WillOnce(DoAll(SaveArg<0>(&dragDropRet), SaveArg<1>(&stopDragCallback), Return(0)))
+        .RetiresOnSaturation();
 
     DragPointerEvent point;
     dragDropManager->ExecuteStopDrag(dragEvent, DragRet::DRAG_SUCCESS, false, WINDOW_ID, DragBehavior::MOVE, point);
@@ -1861,6 +1863,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage065A, TestS
 
     stopDragCallback();
     EXPECT_EQ(callbackCount, 1);
+    testing::Mock::VerifyAndClearExpectations(mock);
 }
 
 /**
@@ -1884,10 +1887,12 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage065B, TestS
     dragEvent->SetFollowHandMorphDropAnimation([&callbackCount]() { callbackCount++; });
     dragEvent->SetFollowHandMorphAnimationOption("follow_hand_option");
 
+    auto mock = AceType::DynamicCast<MockInteractionInterface>(MockInteractionInterface::GetInstance());
+    ASSERT_NE(mock, nullptr);
     std::function<void()> stopDragCallback;
-    EXPECT_CALL(*(AceType::DynamicCast<MockInteractionInterface>(MockInteractionInterface::GetInstance())),
-        StopDrag(_, _))
-        .WillOnce(DoAll(SaveArg<1>(&stopDragCallback), Return(0)));
+    EXPECT_CALL(*mock, StopDrag(_, _))
+        .WillOnce(DoAll(SaveArg<1>(&stopDragCallback), Return(0)))
+        .RetiresOnSaturation();
 
     DragPointerEvent point;
     dragDropManager->ExecuteStopDrag(dragEvent, DragRet::DRAG_SUCCESS, false, WINDOW_ID, DragBehavior::MOVE, point);
@@ -1901,6 +1906,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage065B, TestS
     ASSERT_TRUE(static_cast<bool>(stopDragCallback));
     stopDragCallback();
     EXPECT_EQ(callbackCount, 1);
+    testing::Mock::VerifyAndClearExpectations(mock);
 }
 
 /**
@@ -1927,6 +1933,9 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage065C, TestS
     DragPointerEvent point;
     dragDropManager->ExecuteStopDrag(dragEvent, DragRet::DRAG_SUCCESS, false, WINDOW_ID, DragBehavior::MOVE, point);
     EXPECT_EQ(callbackCount, 0);
+    if (DragDropGlobalController::GetInstance().IsWaitingFollowHandMorphDropAnimation()) {
+        EXPECT_TRUE(dragDropManager->InterruptFollowHandMorphDropAnimation());
+    }
     EXPECT_FALSE(DragDropGlobalController::GetInstance().IsWaitingFollowHandMorphDropAnimation());
 }
 
