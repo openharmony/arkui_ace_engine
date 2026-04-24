@@ -133,8 +133,12 @@ public:
 private:
     static void InvertColorWithResource(const RefPtr<ResourceObject>& resObj, Color& result,
         const ColorMode& colorMode);
+    static bool ParseColorWithColorMode(const RefPtr<ResourceObject>& resObj, Color& result,
+        const ColorMode& colorMode);
     static bool ParseResColorWithName(const RefPtr<ResourceObject>& resObj, Color& result,
         RefPtr<ResourceWrapper>& resourceWrapper, const ColorMode& colorMode);
+    static bool ParseResColorWithId(const RefPtr<ResourceObject>& resObj, Color& result,
+        RefPtr<ResourceWrapper>& resourceWrapper, const ColorMode& colorMode, bool adaptMaterial = false);
     static bool ParseResStringObj(const std::vector<ResourceObjectParams>& params,
         RefPtr<ResourceWrapper>& resourceWrapper, std::string& result, int32_t type);
     // check whether color resource need execute invert color function

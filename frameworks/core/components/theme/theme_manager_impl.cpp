@@ -15,6 +15,8 @@
 
 #include "core/components/theme/theme_manager_impl.h"
 
+#include <optional>
+
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/components/badge/badge_theme.h"
@@ -123,6 +125,35 @@
 #include "core/components_ng/pattern/tabs/tab_theme_wrapper.h"
 
 namespace OHOS::Ace {
+class ThemeManagerImpl::ScopedThemeResourceAdapterOverride {
+public:
+    ScopedThemeResourceAdapterOverride(const RefPtr<ThemeManagerImpl>& manager, ColorMode resourceColorMode)
+        : manager_(manager)
+    {
+        CHECK_NULL_VOID(manager_);
+        originalAdapter_ = manager_->themeConstants_->GetResourceAdapter();
+        CHECK_NULL_VOID(originalAdapter_);
+        ResourceConfiguration config;
+        config.SetColorMode(resourceColorMode);
+        ConfigurationChange configChange { .colorModeUpdate = true };
+        auto overrideAdapter = originalAdapter_->GetOverrideResourceAdapter(config, configChange);
+        CHECK_NULL_VOID(overrideAdapter);
+        manager_->themeConstants_->UpdateResourceAdapter(overrideAdapter);
+    }
+
+    ~ScopedThemeResourceAdapterOverride()
+    {
+        if (!manager_ || !originalAdapter_) {
+            return;
+        }
+        manager_->themeConstants_->UpdateResourceAdapter(originalAdapter_);
+    }
+
+private:
+    RefPtr<ThemeManagerImpl> manager_;
+    RefPtr<ResourceAdapter> originalAdapter_;
+};
+
 namespace {
 template<class T>
 RefPtr<Theme> ThemeBuildFunc(const RefPtr<ThemeConstants>& themeConstants)
@@ -306,7 +337,7 @@ RefPtr<Theme> ThemeManagerImpl::GetThemeOrigin(ThemeType type)
     if (builderIter == THEME_BUILDERS.end()) {
         return nullptr;
     }
-  
+
     auto theme = builderIter->second(themeConstants_);
     themes_.emplace(type, theme);
     return theme;
@@ -323,18 +354,17 @@ RefPtr<Theme> ThemeManagerImpl::GetThemeKit(ThemeType type)
         ColorMode localMode = pipeline->GetLocalColorMode();
         ColorMode systemMode = pipeline->GetColorMode();
         bool needRestore = false;
+        std::optional<ScopedThemeResourceAdapterOverride> scopedAdapter;
         if (localMode != ColorMode::COLOR_MODE_UNDEFINED && localMode != systemMode) {
             // Ordinary themes should work in system color mode. Only theme wrappers support local color mode.
-            ResourceManager::GetInstance().UpdateColorMode(
-                pipeline->GetBundleName(), pipeline->GetModuleName(), pipeline->GetInstanceId(), systemMode);
+            scopedAdapter.emplace(AceType::Claim(this), systemMode);
             pipeline->SetLocalColorMode(ColorMode::COLOR_MODE_UNDEFINED);
             needRestore = true;
         }
         auto theme = builderIterKit->second();
         if (needRestore) {
             pipeline->SetLocalColorMode(localMode);
-            ResourceManager::GetInstance().UpdateColorMode(
-                pipeline->GetBundleName(), pipeline->GetModuleName(), pipeline->GetInstanceId(), localMode);
+            scopedAdapter.reset();
         }
         themes_.emplace(type, theme);
         return theme;
@@ -396,11 +426,11 @@ RefPtr<Theme> ThemeManagerImpl::GetThemeOrigin(ThemeType type, int32_t themeScop
     }
 
     bool needRestore = false;
+    std::optional<ScopedThemeResourceAdapterOverride> scopedAdapter;
     if (themeMode != ColorMode::COLOR_MODE_UNDEFINED && themeMode != currentMode) {
         // Local color mode of the current theme does not match actual color scheme.
         // Current color mode is system. Need to switch to local color mode temporarily.
-        ResourceManager::GetInstance().UpdateColorMode(
-            pipeline->GetBundleName(), pipeline->GetModuleName(), pipeline->GetInstanceId(), themeMode);
+        scopedAdapter.emplace(AceType::Claim(this), themeMode);
         pipeline->SetLocalColorMode(themeMode);
         needRestore = true;
     }
@@ -408,8 +438,7 @@ RefPtr<Theme> ThemeManagerImpl::GetThemeOrigin(ThemeType type, int32_t themeScop
     if (needRestore) {
         // Switching resource manager back into system color mode
         pipeline->SetLocalColorMode(ColorMode::COLOR_MODE_UNDEFINED);
-        ResourceManager::GetInstance().UpdateColorMode(
-            pipeline->GetBundleName(), pipeline->GetModuleName(), pipeline->GetInstanceId(), currentMode);
+        scopedAdapter.reset();
     }
     wrapper->ApplyTokenTheme(*tokenTheme);
     themeWrappers.emplace(type, wrapper);
@@ -441,11 +470,11 @@ RefPtr<Theme> ThemeManagerImpl::GetThemeKit(ThemeType type, int32_t themeScopeId
     }
 
     bool needRestore = false;
+    std::optional<ScopedThemeResourceAdapterOverride> scopedAdapter;
     if (themeMode != ColorMode::COLOR_MODE_UNDEFINED && themeMode != currentMode) {
         // Local color mode of the current theme does not match actual color scheme.
         // Current color mode is system. Need to switch to local color mode temporarily.
-        ResourceManager::GetInstance().UpdateColorMode(
-            pipeline->GetBundleName(), pipeline->GetModuleName(), pipeline->GetInstanceId(), themeMode);
+        scopedAdapter.emplace(AceType::Claim(this), themeMode);
         pipeline->SetLocalColorMode(themeMode);
         needRestore = true;
     }
@@ -453,8 +482,7 @@ RefPtr<Theme> ThemeManagerImpl::GetThemeKit(ThemeType type, int32_t themeScopeId
     if (needRestore) {
         // Switching resource manager back into system color mode
         pipeline->SetLocalColorMode(ColorMode::COLOR_MODE_UNDEFINED);
-        ResourceManager::GetInstance().UpdateColorMode(
-            pipeline->GetBundleName(), pipeline->GetModuleName(), pipeline->GetInstanceId(), currentMode);
+        scopedAdapter.reset();
     }
     wrapper->ApplyTokenTheme(*tokenTheme);
     themeWrappers.emplace(type, wrapper);
