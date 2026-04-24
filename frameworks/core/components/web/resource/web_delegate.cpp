@@ -4996,6 +4996,15 @@ int WebDelegate::SendCommandActionToNWeb(const std::shared_ptr<OHOS::NWeb::NWebC
     return static_cast<int>(WebCommandResult::WEB_EXECUTE_TIMEOUT);
 }
 
+std::shared_ptr<OHOS::NWeb::NWebCommandActionManager>
+WebDelegate::GetNWebCommandActionManager()
+{
+    if (!nweb_) {
+        return nullptr;
+    }
+    return nweb_->GetCommandActionManager();
+}
+
 void WebDelegate::OnInactive()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnInactive, webId:%{public}d", GetWebId());

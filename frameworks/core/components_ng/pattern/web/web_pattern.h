@@ -1050,6 +1050,9 @@ public:
 
     bool CheckCreateImageFrameNode(const std::string& snapshotPath, uint32_t width, uint32_t height);
     int SendCommandToNWeb(std::unique_ptr<JsonValue> comJson);
+    int ExecuteInputCommand(const std::unique_ptr<JsonValue>& comJson, const std::string& eventTypeStr);
+    int ExecuteSelectCommand(const std::unique_ptr<JsonValue>& comJson, const std::string& eventTypeStr);
+    int ExecuteClickScrollCommand(const std::unique_ptr<JsonValue>& comJson, const std::string& eventTypeStr);
     int ExecuteCommand(const std::string& eventTypeStr, const std::string& xpathStr, int32_t durationInt,
                         const std::string& alignStr, int32_t offsetInt);
     void CreateSnapshotImageFrameNode(const std::string& snapshotPath, uint32_t width, uint32_t height);

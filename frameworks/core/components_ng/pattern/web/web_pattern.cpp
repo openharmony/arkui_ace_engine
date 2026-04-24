@@ -9755,37 +9755,101 @@ int32_t WebPattern::OnInjectionEvent(const std::string &command)
 int WebPattern::SendCommandToNWeb(std::unique_ptr<JsonValue> comJson)
 {
     if (WebUtil::HasJSONDuplicateKeys(comJson->ToString())) {
-        TAG_LOGI(AceLogTag::ACE_WEB, "The command json is invalid.");
+        TAG_LOGI(AceLogTag::ACE_WEB, "[WebCommandAction] The command json is invalid.");
         return static_cast<int>(WebCommandResult::JSON_IS_INVALID);
     }
 
-    // Use WebCommandWrapper to build the command action from JSON
-    std::shared_ptr<NWebCommandActionImpl> commandAction;
-    int buildResult = WebCommandWrapper::BuildCommandFromJson(comJson, commandAction);
-    if (buildResult != WEB_COMMAND_BUILD_SUCCESS) {
-        return buildResult;
+    auto eventTypeValue = comJson->GetValue("event_type");
+    if (!eventTypeValue || !eventTypeValue->IsString()) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "[WebCommandAction] CommandError: event_type is missing or not string type");
+        return static_cast<int>(
+            !eventTypeValue ? WebCommandResult::JSON_MISSING_EVENT_TYPE : WebCommandResult::JSON_INVALID_EVENT_TYPE);
     }
+    std::string eventTypeStr = eventTypeValue->GetString();
 
-    // Execute the command via delegate
-    if (delegate_) {
-        int result = delegate_->SendCommandActionToNWeb(std::move(commandAction));
-        if (result == static_cast<int>(WebCommandResult::ELEMENT_NOT_FOUND)) {
-            auto xpathValue = comJson->GetValue("XPath");
-            std::string xpathStr = xpathValue ? xpathValue->GetString() : "";
-            NWeb::EventReport::ReportMSDPError(INJECTION_SEND_COMMAND_ERROR, INJECTION_TYPE_TARGET_NODE_NOT_FOUND,
-                std::to_string(static_cast<int32_t>(WebCommandResult::ELEMENT_NOT_FOUND)), xpathStr.c_str());
-        } else if (result > RET_SUCCESS) {
-            NWeb::EventReport::ReportMSDPError(
-                INJECTION_SEND_COMMAND_ERROR, INJECTION_TYPE_SEND_COMMAND_ERROR, std::to_string(result));
-        }
+    switch (WebCommandWrapper::ParseEventType(eventTypeStr)) {
+        case WebCommandEventType::INPUT_DATE:
+        case WebCommandEventType::INPUT_DATETIME_LOCAL:
+        case WebCommandEventType::INPUT_MONTH:
+        case WebCommandEventType::INPUT_TIME:
+        case WebCommandEventType::INPUT_WEEK:
+            return ExecuteInputCommand(comJson, eventTypeStr);
+        case WebCommandEventType::SELECT:
+            return ExecuteSelectCommand(comJson, eventTypeStr);
+        case WebCommandEventType::CLICK:
+        case WebCommandEventType::SCROLL:
+            return ExecuteClickScrollCommand(comJson, eventTypeStr);
+        default:
+            TAG_LOGE(AceLogTag::ACE_WEB, "[WebCommandAction] CommandError: unknown event_type=%{public}s",
+                eventTypeStr.c_str());
+            return static_cast<int>(WebCommandResult::JSON_INVALID_EVENT_TYPE);
+    }
+}
+
+int WebPattern::ExecuteInputCommand(const std::unique_ptr<JsonValue>& comJson, const std::string& eventTypeStr)
+{
+    if (!delegate_) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "[WebCommandAction] ExecuteInputCommand: delegate_ is nullptr");
+        return static_cast<int>(WebCommandResult::DELEGATE_NULL);
+    }
+    auto manager = delegate_->GetNWebCommandActionManager();
+    if (!manager) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "[WebCommandAction] ExecuteInputCommand: CommandActionManager is nullptr");
+        return static_cast<int>(WebCommandResult::FAILED);
+    }
+    std::shared_ptr<OHOS::NWeb::NWebCommandActionInfo> actionInfo;
+    int result = WebCommandWrapper::BuildInputActionInfo(comJson, eventTypeStr, actionInfo);
+    if (result != WEB_COMMAND_BUILD_SUCCESS) {
         return result;
     }
-
-    TAG_LOGE(AceLogTag::ACE_WEB, "CommandError: delegate_ is nullptr");
-    NWeb::EventReport::ReportMSDPError(INJECTION_SEND_COMMAND_ERROR, INJECTION_TYPE_SEND_COMMAND_ERROR,
-        std::to_string(static_cast<int32_t>(WebCommandResult::DELEGATE_NULL)));
-    return static_cast<int>(WebCommandResult::DELEGATE_NULL);
+    return manager->HandleInputCommand(actionInfo);
 }
+
+int WebPattern::ExecuteSelectCommand(const std::unique_ptr<JsonValue>& comJson, const std::string& eventTypeStr)
+{
+    if (!delegate_) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "[WebCommandAction] ExecuteSelectCommand: delegate_ is nullptr");
+        return static_cast<int>(WebCommandResult::DELEGATE_NULL);
+    }
+    auto manager = delegate_->GetNWebCommandActionManager();
+    if (!manager) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "[WebCommandAction] ExecuteSelectCommand: CommandActionManager is nullptr");
+        return static_cast<int>(WebCommandResult::FAILED);
+    }
+    std::shared_ptr<OHOS::NWeb::NWebCommandActionInfo> actionInfo;
+    int result = WebCommandWrapper::BuildSelectActionInfo(comJson, eventTypeStr, actionInfo);
+    if (result != WEB_COMMAND_BUILD_SUCCESS) {
+        return result;
+    }
+    return manager->HandleSelectCommand(actionInfo);
+}
+
+int WebPattern::ExecuteClickScrollCommand(const std::unique_ptr<JsonValue>& comJson, const std::string& eventTypeStr)
+{
+    std::shared_ptr<NWebCommandActionImpl> commandAction;
+    int result = WebCommandWrapper::BuildClickScrollAction(comJson, eventTypeStr, commandAction);
+    if (result != WEB_COMMAND_BUILD_SUCCESS) {
+        return result;
+    }
+    if (!delegate_) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "[WebCommandAction] ExecuteClickScrollCommand: delegate_ is nullptr");
+        NWeb::EventReport::ReportMSDPError(INJECTION_SEND_COMMAND_ERROR, INJECTION_TYPE_SEND_COMMAND_ERROR,
+            std::to_string(static_cast<int32_t>(WebCommandResult::DELEGATE_NULL)));
+        return static_cast<int>(WebCommandResult::DELEGATE_NULL);
+    }
+    result = delegate_->SendCommandActionToNWeb(std::move(commandAction));
+    if (result == static_cast<int>(WebCommandResult::ELEMENT_NOT_FOUND)) {
+        auto xpathValue = comJson->GetValue("XPath");
+        std::string xpathStr = xpathValue ? xpathValue->GetString() : "";
+        NWeb::EventReport::ReportMSDPError(INJECTION_SEND_COMMAND_ERROR, INJECTION_TYPE_TARGET_NODE_NOT_FOUND,
+            std::to_string(static_cast<int32_t>(WebCommandResult::ELEMENT_NOT_FOUND)), xpathStr.c_str());
+    } else if (result > RET_SUCCESS) {
+        NWeb::EventReport::ReportMSDPError(
+            INJECTION_SEND_COMMAND_ERROR, INJECTION_TYPE_SEND_COMMAND_ERROR, std::to_string(result));
+    }
+    return result;
+}
+
 void WebPattern::OnOptimizeParserBudgetEnabledUpdate(bool value)
 {
     if (delegate_) {
