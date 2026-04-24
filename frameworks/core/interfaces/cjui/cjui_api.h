@@ -3041,7 +3041,14 @@ struct CJUISymbolGlyphModifier {
     void (*resetFontSize)(ArkUINodeHandle node);
     void (*setFontWeightStr)(ArkUINodeHandle node, ArkUI_CharPtr weight);
     void (*setFontWeight)(ArkUINodeHandle node, ArkUI_Int32 weight);
+    void (*setFontWeightEnum)(ArkUINodeHandle node, ArkUI_Int32 fontWeightEnum);
     void (*resetFontWeight)(ArkUINodeHandle node);
+    void (*setVariableFontWeight)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetVariableFontWeight)(ArkUINodeHandle node);
+    void (*setEnableVariableFontWeight)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetEnableVariableFontWeight)(ArkUINodeHandle node);
+    void (*setEnableDeviceFontWeightCategory)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetEnableDeviceFontWeightCategory)(ArkUINodeHandle node);
     void (*setRenderingStrategy)(ArkUINodeHandle node, ArkUI_Uint32 renderingStrategy);
     void (*resetRenderingStrategy)(ArkUINodeHandle node);
     void (*setEffectStrategy)(ArkUINodeHandle node, ArkUI_Uint32 effectStrategy);
@@ -3063,6 +3070,12 @@ struct CJUISymbolSpanModifier {
     void (*setSymbolSpanFontWeightStr)(ArkUINodeHandle node, ArkUI_CharPtr weight);
     void (*setSymbolSpanFontWeight)(ArkUINodeHandle node, ArkUI_Int32 weight);
     void (*resetSymbolSpanFontWeight)(ArkUINodeHandle node);
+    void (*setSymbolSpanVariableFontWeight)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetSymbolSpanVariableFontWeight)(ArkUINodeHandle node);
+    void (*setSymbolSpanEnableVariableFontWeight)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetSymbolSpanEnableVariableFontWeight)(ArkUINodeHandle node);
+    void (*setSymbolSpanEnableDeviceFontWeightCategory)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetSymbolSpanEnableDeviceFontWeightCategory)(ArkUINodeHandle node);
     void (*setSymbolSpanRenderingStrategy)(ArkUINodeHandle node, ArkUI_Uint32 renderingStrategy);
     void (*resetSymbolSpanRenderingStrategy)(ArkUINodeHandle node);
     void (*setSymbolSpanEffectStrategy)(ArkUINodeHandle node, ArkUI_Uint32 effectStrategy);

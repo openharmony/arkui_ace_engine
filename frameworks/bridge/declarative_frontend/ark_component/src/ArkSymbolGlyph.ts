@@ -42,8 +42,8 @@ class SymbolFontColorModifier extends ModifierWithKey<object> {
     }
   }
     
-  class SymbolFontWeightModifier extends ModifierWithKey<number | FontWeight | string> {
-    constructor(value: number | FontWeight | string) {
+  class SymbolFontWeightModifier extends ModifierWithKey<ArkFontWeight> {
+    constructor(value: ArkFontWeight) {
       super(value);
     }
     static identity: Symbol = Symbol('symbolGlyphFontWeight');
@@ -51,7 +51,9 @@ class SymbolFontColorModifier extends ModifierWithKey<object> {
       if (reset) {
         getUINativeModule().symbolGlyph.resetFontWeight(node);
       } else {
-        getUINativeModule().symbolGlyph.setFontWeight(node, this.value);
+        getUINativeModule().symbolGlyph.setFontWeight(node, this.value.value,
+          this.value?.enableVariableFontWeight,
+          this.value?.enableDeviceFontWeightCategory);
       }
     }
   }
@@ -188,14 +190,14 @@ class SymbolFontColorModifier extends ModifierWithKey<object> {
       modifierWithKey(this._modifiersWithKeys, SymbolFontSizeModifier.identity, SymbolFontSizeModifier, value);
       return this;
     }
-    fontWeight(value: number | FontWeight | string): SymbolGlyphAttribute {
-      let fontWeightStr: string = '400';
-      if (isNumber(value)) {
-        fontWeightStr = value.toString();
-      } else if (isString(value)) {
-        fontWeightStr = String(value);
+    fontWeight(value: number | FontWeight | string, fontWeightConfigs?: FontWeightConfigs): SymbolGlyphAttribute {
+      let arkFontWeight = new ArkFontWeight();
+      arkFontWeight.value = value;
+      if (fontWeightConfigs !== null && fontWeightConfigs !== undefined && typeof fontWeightConfigs === 'object') {
+        arkFontWeight.enableVariableFontWeight = fontWeightConfigs.enableVariableFontWeight ?? false;
+        arkFontWeight.enableDeviceFontWeightCategory = fontWeightConfigs.enableDeviceFontWeightCategory ?? true;
       }
-      modifierWithKey(this._modifiersWithKeys, SymbolFontWeightModifier.identity, SymbolFontWeightModifier, fontWeightStr);
+      modifierWithKey(this._modifiersWithKeys, SymbolFontWeightModifier.identity, SymbolFontWeightModifier, arkFontWeight);
       return this;
     }
     renderingStrategy(value: SymbolRenderingStrategy): SymbolGlyphAttribute {

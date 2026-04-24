@@ -56,12 +56,18 @@ function loadComponent() {
         );
         return this;
       }
-      fontWeight(value) {
+      fontWeight(value, fontWeightConfigs) {
+        let arkFontWeight = new ArkFontWeight();
+        arkFontWeight.value = value;
+        if (fontWeightConfigs !== null && fontWeightConfigs !== undefined && typeof fontWeightConfigs === 'object') {
+          arkFontWeight.enableVariableFontWeight = fontWeightConfigs.enableVariableFontWeight ?? false;
+          arkFontWeight.enableDeviceFontWeightCategory = fontWeightConfigs.enableDeviceFontWeightCategory ?? true;
+        }
         modifierWithKey(
           this._modifiersWithKeys,
           SymbolFontWeightModifier.identity,
           SymbolFontWeightModifier,
-          value
+          arkFontWeight
         );
         return this;
       }
@@ -167,6 +173,21 @@ function loadComponent() {
     }
     SymbolFontSizeModifier.identity = Symbol("symbolGlyphFontSize");
     
+    class ArkFontWeight {
+      constructor() {
+        this.value = undefined;
+        this.enableVariableFontWeight = undefined;
+        this.enableDeviceFontWeightCategory = undefined;
+      }
+      isEqual(another) {
+        return (
+          this.value === another.value &&
+          this.enableVariableFontWeight === another.enableVariableFontWeight &&
+          this.enableDeviceFontWeightCategory === another.enableDeviceFontWeightCategory
+        );
+      }
+    }
+
     class SymbolFontWeightModifier extends ModifierWithKey {
       constructor(value) {
         super(value);
@@ -175,7 +196,9 @@ function loadComponent() {
         if (reset) {
           getUINativeModule().symbolGlyph.resetFontWeight(node);
         } else {
-          getUINativeModule().symbolGlyph.setFontWeight(node, this.value);
+          getUINativeModule().symbolGlyph.setFontWeight(node, this.value.value,
+            this.value?.enableVariableFontWeight,
+            this.value?.enableDeviceFontWeightCategory);
         }
       }
     }
@@ -319,8 +342,14 @@ class JSSymbolGlyph extends JSViewAbstract {
   static fontSize(value) {
     getUINativeModule().symbolGlyph.setFontSize(true, value);
   }
-  static fontWeight(value) {
-    getUINativeModule().symbolGlyph.setFontWeight(true, value);
+  static fontWeight(value, fontWeightConfigs) {
+    let enableVariableFontWeight = undefined;
+    let enableDeviceFontWeightCategory = undefined;
+    if (fontWeightConfigs !== null && fontWeightConfigs !== undefined && typeof fontWeightConfigs === 'object') {
+      enableVariableFontWeight = fontWeightConfigs.enableVariableFontWeight ?? false;
+      enableDeviceFontWeightCategory = fontWeightConfigs.enableDeviceFontWeightCategory ?? true;
+    }
+    getUINativeModule().symbolGlyph.setFontWeight(true, value, enableVariableFontWeight, enableDeviceFontWeightCategory);
   }
   static renderingStrategy(value) {
     getUINativeModule().symbolGlyph.setRenderingStrategy(true, value);
