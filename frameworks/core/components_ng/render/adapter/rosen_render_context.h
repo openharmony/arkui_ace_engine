@@ -848,8 +848,8 @@ protected:
     std::shared_ptr<Rosen::RSNode> CreateHardwareSurface(const std::optional<ContextParam>& param,
         bool isTextureExportNode, std::shared_ptr<Rosen::RSUIContext>& rsUIContext);
 #ifdef RENDER_EXTRACT_SUPPORTED
-    std::shared_ptr<Rosen::RSNode> CreateHardwareTexture(
-        const std::optional<ContextParam>& param, bool isTextureExportNode);
+    std::shared_ptr<Rosen::RSNode> CreateHardwareTexture(const std::optional<ContextParam>& param,
+        bool isTextureExportNode, std::shared_ptr<Rosen::RSUIContext>& rsUIContext);
 #endif
     void DetachModifiers();
     void MarkNeedDrawNode(bool condition);

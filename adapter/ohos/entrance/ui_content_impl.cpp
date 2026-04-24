@@ -1175,14 +1175,15 @@ void UIContentImpl::UnSubscribeEventsPassThroughMode()
         TaskExecutor::TaskType::BACKGROUND, "ArkUIUnSubscribeEventsPassThroughAsync");
 }
 
-void UIContentImpl::PreInitializeForm(OHOS::Rosen::Window* window, const std::string& url, napi_value storage)
+void UIContentImpl::PreInitializeForm(
+    OHOS::Rosen::Window* window, const std::string& url, napi_value storage, sptr<IRemoteObject> connectToRender)
 {
     StorageWrapper storageWrapper { .napiStorage_ = storage };
     // ArkTSCard need no window
     if (isFormRender_ && !window) {
         LOGI("[%{public}s][%{public}s][%{public}d]: InitializeForm: %{public}s", bundleName_.c_str(),
             moduleName_.c_str(), instanceId_, url.c_str());
-        CommonInitializeForm(window, url, storageWrapper);
+        CommonInitializeForm(window, url, storageWrapper, connectToRender);
         AddWatchSystemParameter();
     }
 }
@@ -1266,7 +1267,7 @@ UIContentErrorCode UIContentImpl::InitializeByName(
     return errorCode;
 }
 
-void UIContentImpl::InitializeDynamic(const DynamicInitialConfig& config)
+void UIContentImpl::InitializeDynamic(const DynamicInitialConfig& config, sptr<IRemoteObject> connectToRender)
 {
     isDynamicRender_ = true;
     hapPath_ = config.hapPath;
@@ -1279,7 +1280,7 @@ void UIContentImpl::InitializeDynamic(const DynamicInitialConfig& config)
     taskWrapper_ = std::make_shared<NG::UVTaskWrapperImpl>(env);
 
     StorageWrapper storageWrapper { .napiStorage_ = nullptr };
-    CommonInitializeForm(nullptr, config.abcPath, storageWrapper);
+    CommonInitializeForm(nullptr, config.abcPath, storageWrapper, connectToRender);
     AddWatchSystemParameter();
 
     LOGI("[%{public}s][%{public}s][%{public}d]: InitializeDynamic, startUrl"
@@ -1455,8 +1456,8 @@ std::string UIContentImpl::GetContentInfo(ContentInfoType type) const
 }
 
 // ArkTSCard start
-UIContentErrorCode UIContentImpl::CommonInitializeForm(
-    OHOS::Rosen::Window* window, const std::string& contentInfo, StorageWrapper storageWrapper)
+UIContentErrorCode UIContentImpl::CommonInitializeForm(OHOS::Rosen::Window* window, const std::string& contentInfo,
+    StorageWrapper storageWrapper, sptr<IRemoteObject> connectToRender)
 {
     ACE_FUNCTION_TRACE();
     window_ = window;
@@ -1815,7 +1816,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
 
     if (isFormRender_) {
         errorCode = Platform::AceContainer::SetViewNew(aceView, density, round(formWidth_),
-            round(formHeight_), window_);
+            round(formHeight_), window_, connectToRender);
         CHECK_ERROR_CODE_RETURN(errorCode);
         auto frontend = AceType::DynamicCast<FormFrontendDeclarative>(container->GetFrontend());
         CHECK_NULL_RETURN(frontend, UIContentErrorCode::NULL_POINTER);

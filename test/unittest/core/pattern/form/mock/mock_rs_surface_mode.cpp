@@ -21,13 +21,15 @@ namespace Rosen {
 RSSurfaceNode::SharedPtr RSSurfaceNode::Create(
     const RSSurfaceNodeConfig& surfaceNodeConfig, bool isWindow, std::shared_ptr<RSUIContext> rsUIContext)
 {
-    return nullptr;
+    SharedPtr node(new RSSurfaceNode(surfaceNodeConfig, isWindow, rsUIContext));
+    return node;
 }
 
 RSSurfaceNode::SharedPtr RSSurfaceNode::Create(const RSSurfaceNodeConfig& surfaceNodeConfig, RSSurfaceNodeType type,
     bool isWindow, bool unobscured, std::shared_ptr<RSUIContext> rsUIContext)
 {
-    return nullptr;
+    SharedPtr node(new RSSurfaceNode(surfaceNodeConfig, isWindow, rsUIContext));
+    return node;
 }
 
 void RSSurfaceNode::CreateNodeInRenderThread() {}

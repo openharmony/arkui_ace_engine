@@ -560,9 +560,6 @@ void RosenRenderContext::SetHostNode(const WeakPtr<FrameNode>& host)
 
 std::shared_ptr<Rosen::RSUIContext> RosenRenderContext::GetRSUIContext(PipelineContext* pipeline)
 {
-    if (!SystemProperties::GetMultiInstanceEnabled()) {
-        return nullptr;
-    }
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto window = pipeline->GetWindow();
     CHECK_NULL_RETURN(window, nullptr);
@@ -597,12 +594,6 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
     if (SystemProperties::GetMultiInstanceEnabled()) {
         auto pipeline = GetPipelineContext();
         rsContext = GetRSUIContext(pipeline);
-        if (!rsContext) {
-            TAG_LOGI(AceLogTag::ACE_DEFAULT_DOMAIN, "rsnode create before rosenwindow");
-            rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create();
-            rsUIDirector_->Init(true, true);
-            rsContext = rsUIDirector_->GetRSUIContext();
-        }
     }
 
     auto isTextureExportNode = ViewStackProcessor::GetInstance()->IsExportTexture();
@@ -645,7 +636,7 @@ void RosenRenderContext::CreateNodeByType(
         }
 #ifdef RENDER_EXTRACT_SUPPORTED
         case ContextType::HARDWARE_TEXTURE: {
-            rsNode_ = CreateHardwareTexture(param, isTextureExportNode);
+            rsNode_ = CreateHardwareTexture(param, isTextureExportNode, rsContext);
             break;
         }
 #endif
@@ -691,12 +682,6 @@ void RosenRenderContext::SetEffectLayer(const ContextParam& param)
     if (SystemProperties::GetMultiInstanceEnabled()) {
         auto pipeline = GetPipelineContext();
         rsContext = GetRSUIContext(pipeline);
-        if (!rsContext) {
-            TAG_LOGI(AceLogTag::ACE_DEFAULT_DOMAIN, "rsnode create before rosenwindow");
-            rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create();
-            rsUIDirector_->Init(true, true);
-            rsContext = rsUIDirector_->GetRSUIContext();
-        }
     }
     Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param.surfaceName.value_or("") };
     rsNode_ = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true, rsContext);
@@ -741,13 +726,14 @@ std::shared_ptr<Rosen::RSNode> RosenRenderContext::CreateHardwareSurface(const s
 }
 
 #ifdef RENDER_EXTRACT_SUPPORTED
-std::shared_ptr<Rosen::RSNode> RosenRenderContext::CreateHardwareTexture(
-    const std::optional<ContextParam>& param, bool isTextureExportNode)
+std::shared_ptr<Rosen::RSNode> RosenRenderContext::CreateHardwareTexture(const std::optional<ContextParam>& param,
+    bool isTextureExportNode, std::shared_ptr<Rosen::RSUIContext>& rsUIContext)
 {
     Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
         .isTextureExportNode = isTextureExportNode,
         .isSkipCheckInMultiInstance = true };
-    auto surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::SURFACE_TEXTURE_NODE, false);
+    auto surfaceNode = Rosen::RSSurfaceNode::Create(
+        surfaceNodeConfig, RSSurfaceNodeType::SURFACE_TEXTURE_NODE, false, false, rsUIContext);
     return surfaceNode;
 }
 
@@ -2331,7 +2317,12 @@ RefPtr<PixelMap> RosenRenderContext::GetThumbnailPixelMap(bool needScale, bool i
         UpdateThumbnailPixelMapScale(scaleX, scaleY);
     }
     AddRsNodeForCapture();
-    auto ret = RSInterfaces::GetInstance().TakeSurfaceCaptureForUI(rsNode_, drawDragThumbnailCallback, scaleX, scaleY,
+    if (rsNode_ == nullptr || rsNode_->GetRSUIContext() == nullptr) {
+        LOGE("rsNode or rsUIContext is nullptr");
+        return nullptr;
+    }
+    auto rsRenderInterface = rsNode_->GetRSUIContext()->GetRSRenderInterface();
+    auto ret = rsRenderInterface->TakeSurfaceCaptureForUI(rsNode_, drawDragThumbnailCallback, scaleX, scaleY,
         isOffline);
     if (!ret) {
         LOGE("TakeSurfaceCaptureForUI failed!");
@@ -2358,7 +2349,12 @@ bool RosenRenderContext::CreateThumbnailPixelMapAsyncTask(
         UpdateThumbnailPixelMapScale(scaleX, scaleY);
     }
     AddRsNodeForCapture();
-    return RSInterfaces::GetInstance().TakeSurfaceCaptureForUI(rsNode_, thumbnailCallback, scaleX, scaleY, true);
+    if (rsNode_ == nullptr || rsNode_->GetRSUIContext() == nullptr) {
+        LOGE("rsNode or rsUIContext is nullptr");
+        return false;
+    }
+    auto rsRenderInterface = rsNode_->GetRSUIContext()->GetRSRenderInterface();
+    return rsRenderInterface->TakeSurfaceCaptureForUI(rsNode_, thumbnailCallback, scaleX, scaleY, true);
 }
 
 void RosenRenderContext::UpdateThumbnailPixelMapScale(float& scaleX, float& scaleY)

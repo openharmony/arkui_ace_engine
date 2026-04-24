@@ -40,6 +40,9 @@
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #include "core/pipeline_ng/pipeline_context.h"
+
+#include "render_service_client/core/ui/rs_ui_director.h"
+#include "render_service_client/core/ui/rs_ui_context.h"
  
 namespace OHOS::Ace::NG {
 namespace {
@@ -356,6 +359,7 @@ void PreviewSessionWrapperImpl::CreateSession(const AAFwk::Want& want, const Ses
     extensionSessionInfo.parentWindowType_ = parentWindowType;
     extensionSessionInfo.uiExtensionUsage_ = static_cast<uint32_t>(config.uiExtensionUsage);
     extensionSessionInfo.isAsyncModalBinding_ = config.isAsyncModalBinding;
+    SetConnectTORenderInner(container, extensionSessionInfo);
     session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
     CHECK_NULL_VOID(session_);
     lifecycleListener_ = std::make_shared<PreviewUIExtensionLifecycleListener>(
@@ -364,7 +368,21 @@ void PreviewSessionWrapperImpl::CreateSession(const AAFwk::Want& want, const Ses
     InitAllCallback();
     RegisterDataConsumer();
 }
- 
+
+void PreviewSessionWrapperImpl::SetConnectTORenderInner(
+    RefPtr<Platform::AceContainer> container, Rosen::SessionInfo& extensionSessionInfo)
+{
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    auto window = pipeline->GetWindow();
+    CHECK_NULL_VOID(window);
+    auto rsUIDirector = window->GetRSUIDirector();
+    CHECK_NULL_VOID(rsUIDirector);
+    auto rsUIContext = rsUIDirector->GetRSUIContext();
+    CHECK_NULL_VOID(rsUIContext);
+    extensionSessionInfo.connectToRenderToken_ = rsUIContext->GetConnectToRender();
+}
+
 void PreviewSessionWrapperImpl::DestroySession()
 {
     CHECK_NULL_VOID(session_);

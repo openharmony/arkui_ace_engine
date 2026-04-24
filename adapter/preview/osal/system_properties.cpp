@@ -507,7 +507,7 @@ bool SystemProperties::IsFormSkeletonBlurEnabled()
 
 bool SystemProperties::GetMultiInstanceEnabled()
 {
-    return false;
+    return true;
 }
 
 int32_t SystemProperties::getFormSharedImageCacheThreshold()

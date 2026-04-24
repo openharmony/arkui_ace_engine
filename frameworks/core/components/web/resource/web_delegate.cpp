@@ -1120,7 +1120,15 @@ WebDelegate::~WebDelegate()
     OnNativeEmbedAllDestory();
     ReleasePlatformResource();
     if (IsDeviceTabletOr2in1() && GetWebOptimizationValue()) {
-        OHOS::Rosen::RSInterfaces::GetInstance().UnRegisterSurfaceOcclusionChangeCallback(surfaceNodeId_);
+        if (surfaceRsNode_ != nullptr && surfaceRsNode_->GetRSUIContext() != nullptr) {
+            surfaceRsNode_->GetRSUIContext()->GetRSRenderInterface()->UnRegisterSurfaceOcclusionChangeCallback(
+                surfaceNodeId_);
+        } else {
+            TAG_LOGE(AceLogTag::ACE_WEB,
+                "WebDelegate surfaceRsNode_ is nullptr:%{public}d"
+                "RSUIContex is nullptr %{public}d",
+                surfaceRsNode_ == nullptr, ((surfaceRsNode_ == nullptr) ? true : false));
+        }
     }
     UnRegisterDisplayInfoChange();
     if (nweb_) {
@@ -3461,22 +3469,32 @@ void WebDelegate::RegisterSurfaceOcclusionChangeFun()
     std::vector<float> partitionPoints;
     TAG_LOGI(AceLogTag::ACE_WEB, "max visible rate to lower frame rate:%{public}f", lowerFrameRateVisibleRatio_);
     SetPartitionPoints(partitionPoints);
-    auto ret = OHOS::Rosen::RSInterfaces::GetInstance().RegisterSurfaceOcclusionChangeCallback(
-        surfaceNodeId_,
-        [weak = WeakClaim(this)](float visibleRatio) {
-            auto delegate = weak.Upgrade();
-            CHECK_NULL_VOID(delegate);
-            auto context = delegate->context_.Upgrade();
-            CHECK_NULL_VOID(context);
-            context->GetTaskExecutor()->PostTask(
-                [weakDelegate = weak, webVisibleRatio = visibleRatio]() {
-                    auto delegate = weakDelegate.Upgrade();
-                    CHECK_NULL_VOID(delegate);
-                    delegate->SurfaceOcclusionCallback(webVisibleRatio);
-                },
-                TaskExecutor::TaskType::UI, "ArkUIWebOcclusionChange");
-        },
-        partitionPoints);
+     int32_t ret = Rosen::StatusCode::IPC_ERROR;
+     if (surfaceRsNode_ != nullptr && surfaceRsNode_->GetRSUIContext() != nullptr) {
+         ret = surfaceRsNode_->GetRSUIContext()->GetRSRenderInterface()->RegisterSurfaceOcclusionChangeCallback(
+             surfaceNodeId_,
+             [weak = WeakClaim(this)](float visibleRatio) {
+                 auto delegate = weak.Upgrade();
+                 CHECK_NULL_VOID(delegate);
+                 auto context = delegate->context_.Upgrade();
+                 CHECK_NULL_VOID(context);
+                 context->GetTaskExecutor()->PostTask(
+                     [weakDelegate = weak, webVisibleRatio = visibleRatio]() {
+                         auto delegate = weakDelegate.Upgrade();
+                         CHECK_NULL_VOID(delegate);
+                         delegate->SurfaceOcclusionCallback(webVisibleRatio);
+                     },
+                     TaskExecutor::TaskType::UI, "ArkUIWebOcclusionChange");
+             },
+             partitionPoints);
+     } else {
+         TAG_LOGE(AceLogTag::ACE_WEB,
+             "RegisterSurfaceOcclusionChangeFun surfaceRsNode_ is nullptr:%{public}d"
+             "RSUIContex is nullptr %{public}d",
+             surfaceRsNode_ == nullptr, ((surfaceRsNode_ == nullptr) ? true : false));
+         return;
+     }
+
     if (ret != Rosen::StatusCode::SUCCESS) {
         TAG_LOGW(AceLogTag::ACE_WEB,
             "RegisterSurfaceOcclusionChangeCallback failed, surfacenode id:%{public}" PRIu64 ""

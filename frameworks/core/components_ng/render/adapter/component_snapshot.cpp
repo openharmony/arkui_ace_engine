@@ -314,10 +314,15 @@ void HandleCreateSyncNode(const RefPtr<FrameNode>& node, const RefPtr<PipelineCo
 
 SnapshotSizeLimitation ComponentSnapshot::GetSizeLimitation()
 {
-    auto& rsInterface = Rosen::RSInterfaces::GetInstance();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto rsUIContext = GetRSUIContext(pipeline);
+    if (!rsUIContext) {
+        return { -1, -1 };
+    }
+    auto rsRenderInterface = rsUIContext->GetRSRenderInterface();
     uint32_t width = 0;
     uint32_t height = 0;
-    rsInterface.GetMaxGpuBufferSize(width, height);
+    rsRenderInterface->GetMaxGpuBufferSize(width, height);
 
     SnapshotSizeLimitation limitation;
     limitation.maxWidth = static_cast<int32_t>(width);
@@ -340,11 +345,16 @@ std::shared_ptr<Rosen::RSNode> ComponentSnapshot::GetRsNode(const RefPtr<FrameNo
 void TakeCaptureWithCallback(const RefPtr<FrameNode>& node, std::shared_ptr<Rosen::RSNode> rsNode,
     const SnapshotOptions& options, ComponentSnapshot::JsCallback& callback)
 {
-    auto& rsInterface = Rosen::RSInterfaces::GetInstance();
+    if (rsNode == nullptr || rsNode->GetRSUIContext() == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_COMPONENT_SNAPSHOT, "rsNode or rsUIContext is nullptr");
+        callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
+        return;
+    }
+    auto rsRenderInterface = rsNode->GetRSUIContext()->GetRSRenderInterface();
     if (options.regionMode == NG::SnapshotRegionMode::NO_REGION) {
         Rosen::RSSurfaceCaptureConfig rsConfig;
         ConvertSnapshotOptionsToRSConfig(options, rsConfig);
-        rsInterface.TakeSurfaceCaptureForUIWithConfig(
+        rsRenderInterface->TakeSurfaceCaptureForUIWithConfig(
             rsNode, std::make_shared<CustomizedCallback>(std::move(callback), nullptr), rsConfig);
         return;
     }
@@ -358,7 +368,7 @@ void TakeCaptureWithCallback(const RefPtr<FrameNode>& node, std::shared_ptr<Rose
     Rosen::RSSurfaceCaptureConfig rsConfig;
     rsConfig.specifiedAreaRect = specifiedAreaRect;
     ConvertSnapshotOptionsToRSConfig(options, rsConfig);
-    rsInterface.TakeSurfaceCaptureForUIWithConfig(
+    rsRenderInterface->TakeSurfaceCaptureForUIWithConfig(
         rsNode, std::make_shared<CustomizedCallback>(std::move(callback), nullptr), rsConfig);
 }
 
@@ -513,8 +523,13 @@ void ComponentSnapshot::Create(
 void ComponentSnapshot::GetNormalCapture(const RefPtr<FrameNode>& frameNode, NormalCallback&& callback)
 {
     auto rsNode = GetRsNode(frameNode);
-    auto& rsInterface = Rosen::RSInterfaces::GetInstance();
-    rsInterface.TakeSurfaceCaptureForUI(rsNode, std::make_shared<NormalCaptureCallback>(std::move(callback)));
+    if (rsNode == nullptr || rsNode->GetRSUIContext() == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_COMPONENT_SNAPSHOT, "rsNode or rsUIContext is nullptr");
+        callback(nullptr);
+        return;
+    }
+    auto rsRenderInterface = rsNode->GetRSUIContext()->GetRSRenderInterface();
+    rsRenderInterface->TakeSurfaceCaptureForUI(rsNode, std::make_shared<NormalCaptureCallback>(std::move(callback)));
 }
 
 void ComponentSnapshot::PostDelayedTaskOfBuiler(const RefPtr<TaskExecutor>& executor, JsCallback&& callback,
@@ -550,7 +565,12 @@ void ComponentSnapshot::BuilerTask(JsCallback&& callback, const RefPtr<FrameNode
         pipeline->FlushMessages();
     }
     auto rsNode = GetRsNode(node);
-    auto& rsInterface = Rosen::RSInterfaces::GetInstance();
+    if (rsNode == nullptr || rsNode->GetRSUIContext() == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_COMPONENT_SNAPSHOT, "rsNode or rsUIContext is nullptr");
+        callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
+        return;
+    }
+    auto rsRenderInterface = rsNode->GetRSUIContext()->GetRSRenderInterface();
     TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
         "Begin to take surfaceCapture for ui, rootId=" SEC_PLD(%{public}d) " depth=%{public}d param=%{public}s "
         "imageCount=%{public}d size=%{public}s, regionMode=%{public}d",
@@ -559,7 +579,7 @@ void ComponentSnapshot::BuilerTask(JsCallback&& callback, const RefPtr<FrameNode
     if (param.options.regionMode == NG::SnapshotRegionMode::NO_REGION) {
         Rosen::RSSurfaceCaptureConfig rsConfig; 
         ConvertSnapshotOptionsToRSConfig(param.options, rsConfig);
-        rsInterface.TakeSurfaceCaptureForUIWithConfig(rsNode,
+        rsRenderInterface->TakeSurfaceCaptureForUIWithConfig(rsNode,
             std::make_shared<CustomizedCallback>(std::move(callback), enableInspector ? node : nullptr), rsConfig);
         return;
     }
@@ -572,7 +592,7 @@ void ComponentSnapshot::BuilerTask(JsCallback&& callback, const RefPtr<FrameNode
     Rosen::RSSurfaceCaptureConfig rsConfig;
     rsConfig.specifiedAreaRect = specifiedAreaRect;
     ConvertSnapshotOptionsToRSConfig(param.options, rsConfig);
-    rsInterface.TakeSurfaceCaptureForUIWithConfig(rsNode,
+    rsRenderInterface->TakeSurfaceCaptureForUIWithConfig(rsNode,
         std::make_shared<CustomizedCallback>(std::move(callback), enableInspector ? node : nullptr), rsConfig);
 }
 
@@ -598,7 +618,7 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> ComponentSnapshot::GetSync(
         rsNode = GetRsNode(children.front());
     }
 
-    if (!rsNode) {
+    if (!rsNode || !rsNode->GetRSUIContext()) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
             "RsNode is null from FrameNode(Id=" SEC_PLD(%{public}d) ",Depth=%{public}d,Tag=%{public}s)",
             SEC_PARAM(node->GetId()), node->GetDepth(), node->GetTag().c_str());
@@ -609,7 +629,7 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> ComponentSnapshot::GetSync(
         "RsNodeId=%{public}" PRIu64 "",
         options.ToString().c_str(), SEC_PARAM(node->GetId()), node->GetDepth(), node->GetTag().c_str(),
         rsNode->GetId());
-    auto& rsInterface = Rosen::RSInterfaces::GetInstance();
+    auto rsRenderInterface = rsNode->GetRSUIContext()->GetRSRenderInterface();
     auto syncCallback = std::make_shared<SyncCustomizedCallback>();
     {
         ACE_SCOPED_TRACE("ComponentSnapshot::GetSync_TakeSurfaceCaptureForUI_%s_%d_%" PRIu64 "",
@@ -618,7 +638,7 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> ComponentSnapshot::GetSync(
     if (options.regionMode == NG::SnapshotRegionMode::NO_REGION) {
         Rosen::RSSurfaceCaptureConfig rsConfig;
         ConvertSnapshotOptionsToRSConfig(options, rsConfig);
-        rsInterface.TakeSurfaceCaptureForUIWithConfig(rsNode, syncCallback, rsConfig);
+        rsRenderInterface->TakeSurfaceCaptureForUIWithConfig(rsNode, syncCallback, rsConfig);
         return syncCallback->GetPixelMap(SNAPSHOT_TIMEOUT_DURATION);
     }
     Rosen::Drawing::Rect specifiedAreaRect = {};
@@ -629,14 +649,18 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> ComponentSnapshot::GetSync(
     Rosen::RSSurfaceCaptureConfig rsConfig;
     rsConfig.specifiedAreaRect = specifiedAreaRect;
     ConvertSnapshotOptionsToRSConfig(options, rsConfig);
-    rsInterface.TakeSurfaceCaptureForUIWithConfig(rsNode, syncCallback, rsConfig);
+    rsRenderInterface->TakeSurfaceCaptureForUIWithConfig(rsNode, syncCallback, rsConfig);
     return syncCallback->GetPixelMap(SNAPSHOT_TIMEOUT_DURATION);
 }
 
 std::pair<int32_t, std::shared_ptr<Media::PixelMap>> TakeCaptureBySync(const RefPtr<FrameNode>& node,
     std::shared_ptr<Rosen::RSNode> rsNode, const SnapshotOptions& options)
 {
-    auto& rsInterface = Rosen::RSInterfaces::GetInstance();
+    if (rsNode == nullptr || rsNode->GetRSUIContext() == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_COMPONENT_SNAPSHOT, "rsNode or rsUIContext is nullptr");
+        return { ERROR_CODE_INTERNAL_ERROR, nullptr };
+    }
+    auto rsRenderInterface = rsNode->GetRSUIContext()->GetRSRenderInterface();
     auto syncCallback = std::make_shared<SyncCustomizedCallback>();
     {
         ACE_SCOPED_TRACE("ComponentSnapshot::GetSyncByUniqueId_TakeSurfaceCaptureForUI_%d_%" PRIu64 "",
@@ -645,7 +669,7 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> TakeCaptureBySync(const Ref
     if (options.regionMode == NG::SnapshotRegionMode::NO_REGION) {
         Rosen::RSSurfaceCaptureConfig rsConfig;
         ConvertSnapshotOptionsToRSConfig(options, rsConfig);
-        rsInterface.TakeSurfaceCaptureForUIWithConfig(rsNode, syncCallback, rsConfig);
+        rsRenderInterface->TakeSurfaceCaptureForUIWithConfig(rsNode, syncCallback, rsConfig);
         return syncCallback->GetPixelMap(SNAPSHOT_TIMEOUT_DURATION);
     }
     Rosen::Drawing::Rect specifiedAreaRect = {};
@@ -656,7 +680,7 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> TakeCaptureBySync(const Ref
     Rosen::RSSurfaceCaptureConfig rsConfig;
     rsConfig.specifiedAreaRect = specifiedAreaRect;
     ConvertSnapshotOptionsToRSConfig(options, rsConfig);
-    rsInterface.TakeSurfaceCaptureForUIWithConfig(rsNode, syncCallback, rsConfig);
+    rsRenderInterface->TakeSurfaceCaptureForUIWithConfig(rsNode, syncCallback, rsConfig);
     return syncCallback->GetPixelMap(SNAPSHOT_TIMEOUT_DURATION);
 }
 
@@ -788,20 +812,20 @@ std::shared_ptr<Media::PixelMap> ComponentSnapshot::CreateSync(
         return nullptr;
     }
     auto rsNode = GetRsNode(node);
-    if (!rsNode) {
+    if (!rsNode || !rsNode->GetRSUIContext()) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
             "Can't get RsNode! rootId=" SEC_PLD(%{public}d) " depth=%{public}d rootNode=%{public}s",
             SEC_PARAM(node->GetId()), node->GetDepth(), node->GetTag().c_str());
         return nullptr;
     }
-    auto& rsInterface = Rosen::RSInterfaces::GetInstance();
+    auto rsRenderInterface = rsNode->GetRSUIContext()->GetRSRenderInterface();
     auto syncCallback = std::make_shared<SyncCustomizedCallback>();
     SnapshotOptions options = param.options;
     Rosen::RSSurfaceCaptureConfig rsConfig;
     options.scale = 1.f;
     options.waitUntilRenderFinished = true;
     ConvertSnapshotOptionsToRSConfig(options, rsConfig);
-    rsInterface.TakeSurfaceCaptureForUIWithConfig(rsNode, syncCallback, rsConfig);
+    rsRenderInterface->TakeSurfaceCaptureForUIWithConfig(rsNode, syncCallback, rsConfig);
     auto pair = syncCallback->GetPixelMap(CREATE_SNAPSHOT_TIMEOUT_DURATION);
     TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
         "CreateSync, root size=%{public}s Id=" SEC_PLD(%{public}d) " depth=%{public}d Tag=%{public}s code:%{public}d "
@@ -861,7 +885,7 @@ void ComponentSnapshot::GetWithRange(const NodeIdentity& startID, const NodeIden
     }
     auto rsStartNode = GetRsNode(startNode);
     auto rsEndNode = GetRsNode(endNode);
-    if (!rsStartNode || !rsEndNode) {
+    if (!rsStartNode || !rsEndNode || !rsStartNode->GetRSUIContext()) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
             "Can't find a component that startId or endId are " SEC_PLD(%{public}s) " and " SEC_PLD(%{public}s)
             ", please check your parameters are correct",
@@ -874,10 +898,10 @@ void ComponentSnapshot::GetWithRange(const NodeIdentity& startID, const NodeIden
         std::to_string(rsStartNode->GetId()).c_str(), GetRangeIDStr(endID).c_str(), endNode->GetId(),
         std::to_string(rsEndNode->GetId()).c_str());
 
-    auto& rsInterface = Rosen::RSInterfaces::GetInstance();
     Rosen::RSSurfaceCaptureConfig rsConfig;
     ConvertSnapshotOptionsToRSConfig(options, rsConfig);
-    auto isSystem = rsInterface.TakeUICaptureInRangeWithConfig(rsStartNode, rsEndNode, isStartRect,
+    auto rsRenderInterface = rsStartNode->GetRSUIContext()->GetRSRenderInterface();
+    auto isSystem = rsRenderInterface->TakeUICaptureInRangeWithConfig(rsStartNode, rsEndNode, isStartRect,
         std::make_shared<CustomizedCallback>(std::move(callback), nullptr), rsConfig);
     if (!isSystem) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
@@ -897,18 +921,18 @@ std::vector<std::pair<uint64_t, std::shared_ptr<Media::PixelMap>>> ComponentSnap
         return results;
     }
     auto rsNode = GetRsNode(node);
-    if (!rsNode) {
+    if (!rsNode || !rsNode->GetRSUIContext()) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
             "Can't get RsNode! rootId=" SEC_PLD(%{public}d) " depth=%{public}d rootNode=%{public}s",
             SEC_PARAM(node->GetId()), node->GetDepth(), node->GetTag().c_str());
         return results;
     }
     ACE_SCOPED_TRACE("ComponentSnapshot::GetSoloNode_Id=%d_RsId=%" PRIu64 "", node->GetId(), rsNode->GetId());
-    auto& rsInterface = Rosen::RSInterfaces::GetInstance();
     TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
         "Begin to get solo node snapshot, rootId=" SEC_PLD(%{public}d) " depth=%{public}d size=%{public}s",
         SEC_PARAM(node->GetId()), node->GetDepth(), node->GetGeometryNode()->GetFrameSize().ToString().c_str());
-    auto pixelMaps = rsInterface.TakeSurfaceCaptureSoloNodeList(rsNode);
+    auto rsRenderInterface = rsNode->GetRSUIContext()->GetRSRenderInterface();
+    auto pixelMaps = rsRenderInterface->TakeSurfaceCaptureSoloNodeList(rsNode);
     return pixelMaps;
 }
 } // namespace OHOS::Ace::NG
