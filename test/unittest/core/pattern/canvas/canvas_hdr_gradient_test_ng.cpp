@@ -78,11 +78,11 @@ HWTEST_F(CanvasHdrGradientTestNg, CanvasPatternNotifyGradientHDRColorHeadRoom001
     auto testRenderContext = AceType::MakeRefPtr<CanvasHdrTestRenderContext>();
     frameNode->renderContext_ = testRenderContext;
 
-    auto gradient = std::make_shared<Gradient>();
-    GradientColor stop1;
+    auto gradient = std::make_shared<Ace::Gradient>();
+    Ace::GradientColor stop1;
     stop1.SetColor(Color::FromFloat(1.0f, 0.0f, 0.0f, 1.0f, 2.0f));
     gradient->AddColor(stop1);
-    GradientColor stop2;
+    Ace::GradientColor stop2;
     stop2.SetColor(Color::FromFloat(0.0f, 1.0f, 0.0f, 1.0f, 3.5f));
     gradient->AddColor(stop2);
 
@@ -105,8 +105,8 @@ HWTEST_F(CanvasHdrGradientTestNg, CanvasPatternNotifyGradientHDRColorHeadRoom002
     auto testRenderContext = AceType::MakeRefPtr<CanvasHdrTestRenderContext>();
     frameNode->renderContext_ = testRenderContext;
 
-    auto gradient = std::make_shared<Gradient>();
-    GradientColor normalStop;
+    auto gradient = std::make_shared<Ace::Gradient>();
+    Ace::GradientColor normalStop;
     normalStop.SetColor(Color::RED);
     gradient->AddColor(normalStop);
 
@@ -129,14 +129,14 @@ HWTEST_F(CanvasHdrGradientTestNg, CanvasPatternNotifyGradientHDRColorHeadRoom003
     auto testRenderContext = AceType::MakeRefPtr<CanvasHdrTestRenderContext>();
     frameNode->renderContext_ = testRenderContext;
 
-    auto hdrGradient = std::make_shared<Gradient>();
-    GradientColor hdrStop;
+    auto hdrGradient = std::make_shared<Ace::Gradient>();
+    Ace::GradientColor hdrStop;
     hdrStop.SetColor(Color::FromFloat(1.0f, 1.0f, 0.0f, 1.0f, 3.0f));
     hdrGradient->AddColor(hdrStop);
     pattern->NotifyGradientHDRColorHeadRoom(hdrGradient);
 
-    auto sdrGradient = std::make_shared<Gradient>();
-    GradientColor normalStop;
+    auto sdrGradient = std::make_shared<Ace::Gradient>();
+    Ace::GradientColor normalStop;
     normalStop.SetColor(Color::BLUE);
     sdrGradient->AddColor(normalStop);
     pattern->NotifyGradientHDRColorHeadRoom(sdrGradient);
@@ -205,8 +205,8 @@ HWTEST_F(CanvasHdrGradientTestNg, CanvasPatternSetGradientHDRColorHeadRoom001, T
     auto testRenderContext = AceType::MakeRefPtr<CanvasHdrTestRenderContext>();
     frameNode->renderContext_ = testRenderContext;
 
-    auto gradient = std::make_shared<Gradient>();
-    GradientColor hdrStop;
+    auto gradient = std::make_shared<Ace::Gradient>();
+    Ace::GradientColor hdrStop;
     hdrStop.SetColor(Color::FromFloat(1.0f, 1.0f, 1.0f, 1.0f, 2.2f));
     gradient->AddColor(hdrStop);
 
@@ -231,7 +231,7 @@ HWTEST_F(CanvasHdrGradientTestNg, CanvasPatternSetGradientHDRColorHeadRoom002, T
     auto testRenderContext = AceType::MakeRefPtr<CanvasHdrTestRenderContext>();
     frameNode->renderContext_ = testRenderContext;
 
-    std::shared_ptr<Gradient> emptyGradient;
+    std::shared_ptr<Ace::Gradient> emptyGradient;
     pattern->SetFillGradient(emptyGradient);
     pattern->SetStrokeGradient(emptyGradient);
     pattern->NotifyGradientHDRColorHeadRoom(emptyGradient);

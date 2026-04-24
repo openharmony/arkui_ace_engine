@@ -30,7 +30,7 @@ using namespace testing::ext;
 
 namespace OHOS::Ace {
 namespace {
-constexpr float RADIUS = 8.0f;
+constexpr float TEST_RADIUS = 8.0f;
 const NG::OffsetF DRAW_OFFSET { 1.0f, 2.0f };
 } // namespace
 
@@ -46,7 +46,7 @@ public:
             EXPECT_CALL(canvas, AttachPen(_)).Times(0);
         }
         EXPECT_CALL(canvas, DetachPen()).WillOnce(ReturnRef(canvas));
-        EXPECT_CALL(canvas, DrawCircle(_, RADIUS)).WillOnce(Return());
+        EXPECT_CALL(canvas, DrawCircle(_, TEST_RADIUS)).WillOnce(Return());
     }
 };
 
@@ -63,7 +63,7 @@ HWTEST_F(CirclePainterHdrRuntimeTestNg, CirclePainterDrawCircleHDR001, TestSize.
         paintProperty.UpdateFill(Color::FromFloat(0.8f, 0.6f, 0.4f, 1.0f, 2.0f));
         paintProperty.UpdateFillOpacity(0.5f);
         ExpectCanvasCalls(canvas);
-        NG::CirclePainter::DrawCircle(canvas, RADIUS, DRAW_OFFSET, paintProperty);
+        NG::CirclePainter::DrawCircle(canvas, TEST_RADIUS, DRAW_OFFSET, paintProperty);
     }
 
     {
@@ -73,7 +73,7 @@ HWTEST_F(CirclePainterHdrRuntimeTestNg, CirclePainterDrawCircleHDR001, TestSize.
         bt2020Color.SetColorSpace(ColorSpace::BT2020);
         paintProperty.UpdateFill(bt2020Color);
         ExpectCanvasCalls(canvas);
-        NG::CirclePainter::DrawCircle(canvas, RADIUS, DRAW_OFFSET, paintProperty);
+        NG::CirclePainter::DrawCircle(canvas, TEST_RADIUS, DRAW_OFFSET, paintProperty);
     }
 }
 
@@ -89,7 +89,7 @@ HWTEST_F(CirclePainterHdrRuntimeTestNg, CirclePainterDrawCircleHDR002, TestSize.
         NG::ShapePaintProperty paintProperty;
         paintProperty.UpdateStroke(Color::FromFloat(1.0f, 0.0f, 0.0f, 1.0f, 2.2f));
         ExpectCanvasCalls(canvas);
-        NG::CirclePainter::DrawCircle(canvas, RADIUS, DRAW_OFFSET, paintProperty);
+        NG::CirclePainter::DrawCircle(canvas, TEST_RADIUS, DRAW_OFFSET, paintProperty);
     }
 
     {
@@ -99,7 +99,7 @@ HWTEST_F(CirclePainterHdrRuntimeTestNg, CirclePainterDrawCircleHDR002, TestSize.
         bt2020Color.SetColorSpace(ColorSpace::BT2020);
         paintProperty.UpdateStroke(bt2020Color);
         ExpectCanvasCalls(canvas);
-        NG::CirclePainter::DrawCircle(canvas, RADIUS, DRAW_OFFSET, paintProperty);
+        NG::CirclePainter::DrawCircle(canvas, TEST_RADIUS, DRAW_OFFSET, paintProperty);
     }
 
     {
@@ -109,7 +109,7 @@ HWTEST_F(CirclePainterHdrRuntimeTestNg, CirclePainterDrawCircleHDR002, TestSize.
         displayP3Color.SetColorSpace(ColorSpace::DISPLAY_P3);
         paintProperty.UpdateStroke(displayP3Color);
         ExpectCanvasCalls(canvas);
-        NG::CirclePainter::DrawCircle(canvas, RADIUS, DRAW_OFFSET, paintProperty);
+        NG::CirclePainter::DrawCircle(canvas, TEST_RADIUS, DRAW_OFFSET, paintProperty);
     }
 }
 
@@ -124,6 +124,6 @@ HWTEST_F(CirclePainterHdrRuntimeTestNg, CirclePainterDrawCircleHDR003, TestSize.
     NG::ShapePaintProperty paintProperty;
     paintProperty.UpdateStrokeWidth(Dimension(0.0f, DimensionUnit::PX));
     ExpectCanvasCalls(canvas, false);
-    NG::CirclePainter::DrawCircle(canvas, RADIUS, DRAW_OFFSET, paintProperty);
+    NG::CirclePainter::DrawCircle(canvas, TEST_RADIUS, DRAW_OFFSET, paintProperty);
 }
 } // namespace OHOS::Ace
