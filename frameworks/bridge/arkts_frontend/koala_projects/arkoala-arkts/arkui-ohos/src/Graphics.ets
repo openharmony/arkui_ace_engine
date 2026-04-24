@@ -356,11 +356,11 @@ export class ColorMetrics {
         colorMetrics.redValue_ = red * linearExposure;
         colorMetrics.greenValue_ = green * linearExposure;
         colorMetrics.blueValue_ = blue * linearExposure;
-        colorMetrics.red_ = ColorMetrics.clamp(Math.round(colorMetrics.redValue_ * MAX_CHANNEL_VALUE)) as int32;
-        colorMetrics.green_ = ColorMetrics.clamp(Math.round(colorMetrics.greenValue_ * MAX_CHANNEL_VALUE)) as int32;
-        colorMetrics.blue_ = ColorMetrics.clamp(Math.round(colorMetrics.blueValue_ * MAX_CHANNEL_VALUE)) as int32;
+        colorMetrics.red_ = ColorMetrics.clamp(Math.round(colorMetrics.redValue_ * MAX_CHANNEL_VALUE)).toInt();
+        colorMetrics.green_ = ColorMetrics.clamp(Math.round(colorMetrics.greenValue_ * MAX_CHANNEL_VALUE)).toInt();
+        colorMetrics.blue_ = ColorMetrics.clamp(Math.round(colorMetrics.blueValue_ * MAX_CHANNEL_VALUE)).toInt();
         if (alpha !== undefined && alpha !== null) {
-            colorMetrics.alpha_ = ColorMetrics.clamp(Math.round(alpha * MAX_CHANNEL_VALUE)) as int32;
+            colorMetrics.alpha_ = ColorMetrics.clamp(Math.round(alpha * MAX_CHANNEL_VALUE)).toInt();
         } else {
             colorMetrics.alpha_ = MAX_CHANNEL_VALUE;
         }
@@ -374,11 +374,11 @@ export class ColorMetrics {
         colorMetrics.redValue_ = red * linearExposure;
         colorMetrics.greenValue_ = green * linearExposure;
         colorMetrics.blueValue_ = blue * linearExposure;
-        colorMetrics.red_ = ColorMetrics.clamp(Math.round(colorMetrics.redValue_ * MAX_CHANNEL_VALUE)) as int32;
-        colorMetrics.green_ = ColorMetrics.clamp(Math.round(colorMetrics.greenValue_ * MAX_CHANNEL_VALUE)) as int32;
-        colorMetrics.blue_ = ColorMetrics.clamp(Math.round(colorMetrics.blueValue_ * MAX_CHANNEL_VALUE)) as int32;
+        colorMetrics.red_ = ColorMetrics.clamp(Math.round(colorMetrics.redValue_ * MAX_CHANNEL_VALUE)).toInt();
+        colorMetrics.green_ = ColorMetrics.clamp(Math.round(colorMetrics.greenValue_ * MAX_CHANNEL_VALUE)).toInt();
+        colorMetrics.blue_ = ColorMetrics.clamp(Math.round(colorMetrics.blueValue_ * MAX_CHANNEL_VALUE)).toInt();
         if (alpha !== undefined && alpha !== null) {
-            colorMetrics.alpha_ = ColorMetrics.clamp(Math.round(alpha * MAX_CHANNEL_VALUE)) as int32;
+            colorMetrics.alpha_ = ColorMetrics.clamp(Math.round(alpha * MAX_CHANNEL_VALUE)).toInt();
         } else {
             colorMetrics.alpha_ = MAX_CHANNEL_VALUE;
         }
@@ -391,11 +391,11 @@ export class ColorMetrics {
         colorMetrics.redValue_ = red;
         colorMetrics.greenValue_ = green;
         colorMetrics.blueValue_ = blue;
-        colorMetrics.red_ = ColorMetrics.clamp(Math.round(red * MAX_CHANNEL_VALUE)) as int32;
-        colorMetrics.green_ = ColorMetrics.clamp(Math.round(green * MAX_CHANNEL_VALUE)) as int32;
-        colorMetrics.blue_ = ColorMetrics.clamp(Math.round(blue * MAX_CHANNEL_VALUE)) as int32;
+        colorMetrics.red_ = ColorMetrics.clamp(Math.round(red * MAX_CHANNEL_VALUE)).toInt();
+        colorMetrics.green_ = ColorMetrics.clamp(Math.round(green * MAX_CHANNEL_VALUE)).toInt();
+        colorMetrics.blue_ = ColorMetrics.clamp(Math.round(blue * MAX_CHANNEL_VALUE)).toInt();
         if (alpha !== undefined && alpha !== null) {
-            colorMetrics.alpha_ = ColorMetrics.clamp(Math.round(alpha * MAX_CHANNEL_VALUE)) as int32;
+            colorMetrics.alpha_ = ColorMetrics.clamp(Math.round(alpha * MAX_CHANNEL_VALUE)).toInt();
         } else {
             colorMetrics.alpha_ = MAX_CHANNEL_VALUE;
         }

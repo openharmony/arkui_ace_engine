@@ -1817,6 +1817,14 @@ HWTEST_F(ButtonFunctionTestNg, ButtonOnInjectionEventTest004, TestSize.Level1)
     std::string wrongCmd = R"({"cmd":"wrong"})";
     EXPECT_EQ(buttonPattern1->OnInjectionEvent(wrongCmd), RET_FAILED);
     EXPECT_EQ(buttonPattern2->OnInjectionEvent(wrongCmd), RET_FAILED);
+
+    /**
+     * @tc.steps: step7. test null command on both buttons
+     * @tc.expected: step7. both return RET_FAILED
+     */
+    std::string nullCmd = "";
+    EXPECT_EQ(buttonPattern1->OnInjectionEvent(nullCmd), RET_FAILED);
+    EXPECT_EQ(buttonPattern2->OnInjectionEvent(nullCmd), RET_FAILED);
 }
 
 /**

@@ -20183,9 +20183,6 @@ class ScrollScrollBarWidthModifier extends ModifierWithKey {
       getUINativeModule().scroll.setScrollBarWidth(node, this.value);
     }
   }
-  checkObjectDiff() {
-    return this.stageValue !== this.value;
-  }
 }
 ScrollScrollBarWidthModifier.identity = Symbol('scrollBarWidth');
 class ScrollScrollBarColorModifier extends ModifierWithKey {
@@ -29253,6 +29250,21 @@ class ListSpaceModifier extends ModifierWithKey {
 }
 ListSpaceModifier.identity = Symbol('listSpace');
 
+class ListSpaceWidthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().list.resetSpace(node);
+    }
+    else {
+      getUINativeModule().list.setSpaceWidth(node, this.value);
+    }
+  }
+}
+ListSpaceWidthModifier.identity = Symbol('listSpaceWidth');
+
 class ListInitialIndexModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -29323,7 +29335,9 @@ class ArkListComponent extends ArkScrollable {
       if (value[0].initialIndex !== undefined) {
         modifierWithKey(this._modifiersWithKeys, ListInitialIndexModifier.identity, ListInitialIndexModifier, value[0].initialIndex);
       }
-      if (value[0].space !== undefined) {
+      if (value[0].spaceWidth !== undefined) {
+        modifierWithKey(this._modifiersWithKeys, ListSpaceWidthModifier.identity, ListSpaceWidthModifier, value[0].spaceWidth);
+      } else if (value[0].space !== undefined) {
         modifierWithKey(this._modifiersWithKeys, ListSpaceModifier.identity, ListSpaceModifier, value[0].space);
       }
       if (value[0].scroller !== undefined) {
@@ -29715,7 +29729,8 @@ class ListItemGroupInitializeModifier extends ModifierWithKey {
       getUINativeModule().listItemGroup.resetListItemGroupInitialize(node);
     } else {
       getUINativeModule().listItemGroup.setListItemGroupInitialize(node, this.value?.space, this.value?.style,
-        this.value?.headerComponent, this.value?.footerComponent, this.value?.headerStyle, this.value?.footerStyle);
+        this.value?.headerComponent, this.value?.footerComponent, this.value?.headerStyle, this.value?.footerStyle,
+        this.value?.spaceWidth);
     }
   }
 }

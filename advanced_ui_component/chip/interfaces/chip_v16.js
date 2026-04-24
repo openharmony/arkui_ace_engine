@@ -21,7 +21,6 @@ const LengthUnit = requireNapi('arkui.node').LengthUnit;
 const KeyCode = requireNapi('multimodalInput.keyCode').KeyCode;
 const mediaquery = requireNapi('mediaquery');
 const deviceInfo = requireNapi('deviceInfo');
-
 export var ChipSize;
 (function (ChipSize) {
   ChipSize['NORMAL'] = 'NORMAL';
@@ -123,7 +122,7 @@ export function Chip(options, parent = null) {
             undefined,
             elmtId,
             () => {},
-            { page: 'components/src/main/ets/components/Chip.ets', line: 283, col: 3 }
+            { page: 'components/src/main/ets/components/Chip.ets', line: 284, col: 3 }
           );
           ViewPU.create(componentCall);
           let paramsLambda = () => {
@@ -1253,7 +1252,6 @@ export class ChipComponent extends ViewPU {
       Button.direction(this.chipDirection);
       Button.backgroundColor(this.getChipBackgroundColor());
       Button.systemMaterial(this.getBackgroundSystemMaterial());
-      Button.useEffect(this.inGroup ? true : undefined);
       Button.borderWidth(this.getChipNodeBorderWidth());
       Button.borderColor(this.getChipNodeBorderColor());
       Button.borderRadius(this.getChipBorderRadius());
@@ -2039,7 +2037,7 @@ export class ChipComponent extends ViewPU {
       : this.getColor(this.chipNodeBackgroundColor, this.theme.chipNode.backgroundColor);
   }
   getBackgroundSystemMaterial() {
-    if (deviceInfo.sdkApiVersion < 26 || this.inGroup) {
+    if (deviceInfo.sdkApiVersion < 26) {
       return undefined;
     }
     if (this.isChipActivated()) {

@@ -630,7 +630,7 @@ export struct GridObjectSortComponent {
   // calculated altitude
   getGridHeight(data: GridObjectSortComponentItem[], state?: string): number {
     let height: number = 0;
-    let selectLen: number = data.length;
+    let selectLen: number = data.length.toDouble();
     data.forEach(item => {
       if (item.visibility === Visibility.Hidden) {
         selectLen = selectLen - 1;

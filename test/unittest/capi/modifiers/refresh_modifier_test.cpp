@@ -164,7 +164,7 @@ HWTEST_F(RefreshModifierTest, setRefreshOffsetTestValidValues, TestSize.Level1)
     for (auto&& value: refreshOffsetRefreshOffsetValidValues) {
         inputValueRefreshOffset = std::get<1>(value);
         auto optInputValueRefreshOffset = Converter::ArkValue<Opt_Float64>(inputValueRefreshOffset);
-        modifier_->setRefreshOffset(node_, &optInputValueRefreshOffset);
+        modifier_->setRefreshOffset0(node_, &optInputValueRefreshOffset);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_REFRESH_OFFSET_NAME);
         expectedStr = std::get<2>(value);

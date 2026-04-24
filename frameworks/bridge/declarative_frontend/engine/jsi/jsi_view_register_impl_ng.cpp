@@ -47,6 +47,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_common_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_picker.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_span.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_depth_component.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_color_metrics_linear_gradient.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_datepicker.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_divider.h"
@@ -455,6 +456,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSTextPicker::JSBind(globalObj);
     JSDatePicker::JSBind(globalObj);
     JSContainerPicker::JSBind(globalObj);
+    JSDepthComponent::JSBind(globalObj);
     JSPageTransition::JSBind(globalObj);
 #ifndef ARKUI_WEARABLE
     JSTextPickerDialog::JSBind(globalObj);

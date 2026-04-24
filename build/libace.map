@@ -814,6 +814,7 @@
       "OHOS::Ace::NG::ArkTSUtils::ParseJsColorAlphaForMaterial(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::Color&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&, OHOS::Ace::NG::NodeInfo const&)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsColorFromResource(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::Color&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsDimension(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::CalcDimension&, OHOS::Ace::DimensionUnit, bool, bool)";
+      "OHOS::Ace::NG::ArkTSUtils::ParseJsDimension(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::CalcDimension&, OHOS::Ace::DimensionUnit, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&, bool, bool)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsDimensionFp(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::CalcDimension&, bool, bool)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsDimensionFp(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::CalcDimension&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&, bool, bool)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsDimensionFpNG(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::CalcDimension&, bool)";
@@ -911,8 +912,10 @@
       "OHOS::Ace::NG::BaseTextSelectOverlay::UpdateSecondHandleOffset()";
       "OHOS::Ace::NG::BaseTextSelectOverlay::UpdateTransformFlag()";
       "OHOS::Ace::NG::BaseTextSelectOverlay::UpdateViewPort()";
+      "OHOS::Ace::NG::BaseTextSelectOverlay::GetClearPolicy()";
       "OHOS::Ace::NG::BorderRadiusPropertyT<OHOS::Ace::Dimension> OHOS::Ace::NG::Converter::Convert<OHOS::Ace::NG::BorderRadiusPropertyT<OHOS::Ace::Dimension>, Ark_BorderRadiuses>(Ark_BorderRadiuses const&)";
       "OHOS::Ace::NG::BorderRadiusPropertyT<OHOS::Ace::Dimension>::operator==(OHOS::Ace::NG::BorderRadiusPropertyT<OHOS::Ace::Dimension> const&) const";
+      "OHOS::Ace::NG::BorderRadiusPropertyT<OHOS::Ace::Dimension>::operator!=(OHOS::Ace::NG::BorderRadiusPropertyT<OHOS::Ace::Dimension> const&) const";
       "OHOS::Ace::NG::BorderRadiusPropertyT<OHOS::Ace::Dimension>::SetRadius(OHOS::Ace::Dimension const&)";
       "OHOS::Ace::NG::BorderRadiusPropertyT<OHOS::Ace::Dimension>::ToJsonValue(std::__h::unique_ptr<OHOS::Ace::JsonValue, std::__h::default_delete<OHOS::Ace::JsonValue>>&, std::__h::unique_ptr<OHOS::Ace::JsonValue, std::__h::default_delete<OHOS::Ace::JsonValue>>&, OHOS::Ace::NG::InspectorFilter const&, bool) const";
       "OHOS::Ace::NG::BorderStyleProperty::operator==(OHOS::Ace::NG::BorderStyleProperty const&) const";
@@ -1360,6 +1363,7 @@
       "OHOS::Ace::NG::LayoutProperty::CreatePaddingAndBorder(bool, bool)";
       "OHOS::Ace::NG::LayoutProperty::CreatePaddingAndBorderWithDefault(float, float, float, float)";
       "OHOS::Ace::NG::LayoutProperty::CreatePaddingWithoutBorder(bool, bool)";
+      "OHOS::Ace::NG::LayoutProperty::ExpandConstraintWithSafeArea(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>&)";
       "OHOS::Ace::NG::LayoutProperty::ExpandConstraintWithSafeArea()";
       "OHOS::Ace::NG::LayoutProperty::FromJson(std::__h::unique_ptr<OHOS::Ace::JsonValue, std::__h::default_delete<OHOS::Ace::JsonValue>> const&)";
       "OHOS::Ace::NG::LayoutProperty::GenIgnoreOpts() const";
@@ -1398,6 +1402,7 @@
       "OHOS::Ace::NG::LayoutWrapper::GetAccumulatedSafeAreaExpand(bool, OHOS::Ace::NG::IgnoreLayoutSafeAreaOpts, OHOS::Ace::NG::IgnoreStrategy)";
       "OHOS::Ace::NG::LayoutWrapper::GetHostNode() const";
       "OHOS::Ace::NG::LayoutWrapper::GetParentGlobalOffsetWithSafeArea(bool, bool) const";
+      "OHOS::Ace::NG::LayoutWrapper::GetParentGlobalOffsetWithSafeAreaInner(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>&, OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>&) const";
       "OHOS::Ace::NG::LayoutWrapper::IsIgnoreOptsValid()";
       "OHOS::Ace::NG::LayoutWrapper::ResetSafeAreaPadding()";
       "OHOS::Ace::NG::LayoutWrapper::SkipMeasureContent() const";
@@ -1778,6 +1783,7 @@
       "OHOS::Ace::NG::ScrollablePattern::ToJsonValue(std::__h::unique_ptr<OHOS::Ace::JsonValue, std::__h::default_delete<OHOS::Ace::JsonValue>>&, OHOS::Ace::NG::InspectorFilter const&) const";
       "OHOS::Ace::NG::ScrollablePattern::UpdateFadingEdge(OHOS::Ace::RefPtr<OHOS::Ace::NG::ScrollablePaintMethod> const&)";
       "OHOS::Ace::NG::ScrollablePattern::UpdateScrollBarRegion(float, float, OHOS::Ace::Size, OHOS::Ace::Offset)";
+      "OHOS::Ace::NG::ScrollablePattern::GetGestureHub()";
       "OHOS::Ace::NG::ScrollableUtils::CheckHeightExpansion(OHOS::Ace::RefPtr<OHOS::Ace::NG::LayoutProperty> const&, OHOS::Ace::Axis)";
       "OHOS::Ace::NG::ScrollAdjustmanager::AdjustCachedCount(int)";
       "OHOS::Ace::NG::ScrollAdjustmanager::AdjustEndIndex(int)";
@@ -1786,6 +1792,9 @@
       "OHOS::Ace::NG::ScrollBar::NeedPaint() const";
       "OHOS::Ace::NG::ScrollBar::PlayScrollBarAppearAnimation()";
       "OHOS::Ace::NG::ScrollBar::ScheduleDisappearDelayTask()";
+      "OHOS::Ace::NG::ScrollBar::SetDisplayMode(OHOS::Ace::DisplayMode)";
+      "OHOS::Ace::NG::ScrollBar::SetPositionMode(OHOS::Ace::PositionMode)";
+      "OHOS::Ace::NG::ScrollBar::SetScrollable(bool)";
       "OHOS::Ace::NG::ScrollBarOverlayModifier::ScrollBarOverlayModifier(OHOS::Ace::NG::OffsetT<float> const&, OHOS::Ace::NG::SizeT<float> const&)";
       "OHOS::Ace::NG::ScrollBarOverlayModifier::SetBarColor(OHOS::Ace::Color)";
       "OHOS::Ace::NG::ScrollBarOverlayModifier::SetRect(OHOS::Ace::Rect const&)";
@@ -1927,6 +1936,15 @@
       "OHOS::Ace::NG::TextFieldPattern::ToJsonValueSelectOverlay(std::__h::unique_ptr<OHOS::Ace::JsonValue, std::__h::default_delete<OHOS::Ace::JsonValue>>&, OHOS::Ace::NG::InspectorFilter const&) const";
       "OHOS::Ace::NG::TextInputBridge::ParseAndCreateIMEAttachCallback(panda::ecmascript::EcmaVM*, panda::Local<panda::JSValueRef>, OHOS::Ace::NG::FrameNode*, bool)";
       "OHOS::Ace::NG::TextInputBridge::ParseLayoutPolicy(panda::ecmascript::EcmaVM*, panda::Local<panda::JSValueRef>, bool)";
+      "OHOS::Ace::NG::TextFreeScrollController::TextFreeScrollController(OHOS::Ace::WeakPtr<OHOS::Ace::NG::ScrollablePattern> const&)";
+      "OHOS::Ace::NG::TextFreeScrollController::StopAllScrollAnimation()";
+      "OHOS::Ace::NG::TextFreeScrollController::StopScrollAnimation(bool)";
+      "OHOS::Ace::NG::TextScrollBar2D::TextScrollBar2D(OHOS::Ace::WeakPtr<OHOS::Ace::NG::ScrollablePattern> const&)";
+      "OHOS::Ace::NG::TextScrollBar2D::AddScrollableEvent()";
+      "OHOS::Ace::NG::TextScrollBar2D::OnDraw(OHOS::Ace::NG::DrawingContext&) const";
+      "OHOS::Ace::NG::TextScrollBar2D::UpdateBorderRadius(bool)";
+      "OHOS::Ace::NG::TextScrollBar2D::UpdateVerticalBar(float, float, OHOS::Ace::Size const&, OHOS::Ace::Offset)";
+      "OHOS::Ace::NG::TextScrollBar2D::UpdateHorizontalBar(float, float, OHOS::Ace::Size const&, OHOS::Ace::Offset)";
       "OHOS::Ace::NG::TextLayoutadapter::IsLeftToRight(int)";
       "OHOS::Ace::NG::TextLayoutadapter::IsRightToLeft(int)";
       "OHOS::Ace::NG::TextLayoutadapter::IsRightTOLeftArabic(int)";
@@ -1944,6 +1962,7 @@
       "OHOS::Ace::NG::TextOverlayModifier::SetSelectedRects(std::__h::vector<OHOS::Ace::NG::RectT<float>, std::__h::allocator<OHOS::Ace::NG::RectT<float>>> const&)";
       "OHOS::Ace::NG::TextOverlayModifier::SetShowSelect(bool)";
       "OHOS::Ace::NG::TextOverlayModifier::SetSingleLine(bool)";
+      "OHOS::Ace::NG::TextOverlayModifier::SetHorizontalScrolling(bool)";
       "OHOS::Ace::NG::TextOverlayModifier::TextOverlayModifier(OHOS::Ace::WeakPtr<OHOS::Ace::NG::Pattern> const&)";
       "OHOS::Ace::NG::TextPaintMethod::GetContentModifier(OHOS::Ace::NG::PaintWrapper*)";
       "OHOS::Ace::NG::TextPaintMethod::GetOverlayModifier(OHOS::Ace::NG::PaintWrapper*)";
@@ -3159,6 +3178,7 @@
       non-virtual?thunk?to?OHOS::Ace::NG::BaseTextSelectOverlay::CheckTouchInHostNode*;
       non-virtual?thunk?to?OHOS::Ace::NG::BaseTextSelectOverlay::OnCloseOverlay*;
       non-virtual?thunk?to?OHOS::Ace::NG::BaseTextSelectOverlay::OnHandleGlobalTouchEvent*;
+      non-virtual?thunk?to?OHOS::Ace::NG::BaseTextSelectOverlay::GetClearPolicy*;
       non-virtual?thunk?to?OHOS::Ace::NG::FrameNode::*;
       non-virtual?thunk?to?OHOS::Ace::NG::FrameNode::~FrameNode*;
       non-virtual?thunk?to?OHOS::Ace::NG::FrameNode::CheckNeedForceMeasureAndLayout*;
@@ -3913,6 +3933,7 @@
       vtable?for?OHOS::Ace::NG::LocationButtonModelNG;
       vtable?for?OHOS::Ace::NG::LongPressGesture;
       vtable?for?OHOS::Ace::NG::LongPressRecognizer;
+      vtable?for?OHOS::Ace::NG::ExclusiveRecognizer;
       vtable?for?OHOS::Ace::NG::MenuWrapperPattern;
       vtable?for?OHOS::Ace::NG::MovingPhotoEventHub;
       vtable?for?OHOS::Ace::NG::MovingPhotoLayoutProperty;
@@ -4052,6 +4073,7 @@
       VTT?for?OHOS::Ace::NG::LoadingProgressPattern;
       VTT?for?OHOS::Ace::NG::LongPressGesture;
       VTT?for?OHOS::Ace::NG::LongPressRecognizer;
+      VTT?for?OHOS::Ace::NG::ExclusiveRecognizer;
       VTT?for?OHOS::Ace::NG::MenuWrapperPattern;
       VTT?for?OHOS::Ace::NG::NavigationStack;
       VTT?for?OHOS::Ace::NG::OffscreenCanvasPattern;

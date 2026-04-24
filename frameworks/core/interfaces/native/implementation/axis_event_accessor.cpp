@@ -85,7 +85,14 @@ Ark_Boolean HasAxisImpl(Ark_AxisEvent peer,
 }
 Ark_Coordinate2D GetCurrentLocalPositionImpl(Ark_AxisEvent peer)
 {
-    return {};
+    const auto errValue = Converter::ArkValue<Ark_Coordinate2D>(Offset{});
+    CHECK_NULL_RETURN(peer, errValue);
+    const auto* info = peer->GetEventInfo();
+    CHECK_NULL_RETURN(info, errValue);
+    const auto& localLocation = info->GetCurrentLocalLocation();
+    const auto x = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX());
+    const auto y = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY());
+    return Converter::ArkValue<Ark_Coordinate2D>(Offset{x, y});
 }
 Ark_AxisAction GetActionImpl(Ark_AxisEvent peer)
 {

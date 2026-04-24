@@ -19,7 +19,7 @@ import { Theme } from '@ohos.arkui.theme';
 import { LengthMetrics } from '@ohos.arkui.node';
 import { SymbolGlyphModifier, Configuration } from '@kit.ArkUI';
 import { systemDateTime } from '@kit.BasicServicesKit';
-import { TextModifier, ImageModifier, ButtonModifier } from '@ohos.arkui.modifier';
+import { TextModifier, ImageModifier } from '@ohos.arkui.modifier';
 
 const RESOURCE_TYPE_STRING = 10003;
 const RESOURCE_TYPE_FLOAT = 10002;
@@ -50,6 +50,7 @@ interface ButtonTheme {
   fontWeight: FontWeight;
   hoverColor: ResourceColor;
   backgroundColor: ResourceColor;
+  responseRegion: Length;
 }
 
 interface MessageTheme {
@@ -69,13 +70,14 @@ interface CloseButtonTheme {
   symbolStyle: SymbolGlyphModifier;
   symbolSize: string;
   accessibilityMessage: Resource;
+  responseRegion: Length;
 }
 
 interface WindowsTheme {
   padding: LocalizedPadding;
 }
 
-interface PopupV2Theme {
+interface PopupTheme {
   icon: IconTheme;
   title: TitleTheme;
   button: ButtonTheme;
@@ -84,7 +86,7 @@ interface PopupV2Theme {
   closeButton: CloseButtonTheme;
 }
 
-export const defaultTheme: PopupV2Theme = {
+export const defaultTheme: PopupTheme = {
   icon: {
     size: { width: 32, height: 32 },
     margin: {
@@ -95,6 +97,7 @@ export const defaultTheme: PopupV2Theme = {
     },
     fillColor: '',
     borderRadius: $r('sys.float.ohos_id_corner_radius_default_s')
+
   },
   title: {
     margin: { bottom: LengthMetrics.vp(2) },
@@ -127,7 +130,8 @@ export const defaultTheme: PopupV2Theme = {
     minFontSize: 9,
     fontWeight: FontWeight.Medium,
     hoverColor: $r('sys.color.ohos_id_color_hover'),
-    backgroundColor: $r('sys.color.ohos_id_color_background_transparent')
+    backgroundColor: $r('sys.color.ohos_id_color_background_transparent'),
+    responseRegion: $r('sys.float.popup_button_response_region')
   },
   message: {
     fontSize: $r('sys.float.ohos_id_text_size_body2'),
@@ -141,7 +145,7 @@ export const defaultTheme: PopupV2Theme = {
       bottom: LengthMetrics.vp(12),
       start: LengthMetrics.vp(12),
       end: LengthMetrics.vp(12)
-    }
+    },
   },
   closeButton: {
     size: { width: 22, height: 22 },
@@ -162,19 +166,16 @@ export const defaultTheme: PopupV2Theme = {
     hoverColor: $r('sys.color.ohos_id_color_hover'),
     backgroundColor: $r('sys.color.ohos_id_color_background_transparent'),
     symbolSize: '18vp',
-    accessibilityMessage: $r('sys.string.off_used_for_accessibility_text')
-  }
+    accessibilityMessage: $r('sys.string.off_used_for_accessibility_text'),
+    responseRegion: $r('sys.float.popup_close_button_response_region')
+  },
 };
-
-
 
 export interface PopupV2Button {
   text: ResourceStr;
-  buttonModifier?: ButtonModifier;
+  buttonTextModifier?: TextModifier;
   action?: () => void;
 }
-
-
 
 export interface PopupV2InitInfo {
   icon?: ResourceStr;
@@ -253,20 +254,20 @@ function isValidResource(context: Context | undefined, value: Resource) {
 @ComponentV2
 export struct PopupV2ComponentV2 {
   @Param onClose: () => void = noop;
-  @Param theme: PopupV2Theme = defaultTheme;
+  @Param theme: PopupTheme = defaultTheme;
   private applycontentKey: string = 'applyContent' + systemDateTime.getTime(false);
   @Param icon: ResourceStr = '';
+  @Require @Param maxWidth?: Dimension;
+  @Local messageMaxWidth?: number = 0;
+  @Param title: ResourceStr = '' ;
+  @Param message: ResourceStr = '' ;
   @Require @Param iconModifier?: ImageModifier;
   @Require @Param titleModifier?: TextModifier;
   @Require @Param messageModifier?: TextModifier;
-  @Param @Require maxWidth?: Dimension;
-  @Local messageMaxWidth?: number = 0;
-  @Param title: ResourceStr = '';
-  @Param message: ResourceStr = '';
   @Param popupDirection: Direction = Direction.Auto;
   @Param showClose: boolean | Resource = true;
   @Param buttons: [PopupV2Button?, PopupV2Button?] = [{ text: '' }, { text: '' }];
-  @Local textHeight: number = 0;
+  textHeight: number = 0;
   @Local titleHeight: number = 0;
   @Local applyHeight: number = 0;
   @Local buttonHeight: number = 0;
@@ -279,28 +280,25 @@ export struct PopupV2ComponentV2 {
   @Local secondButtonBackgroundColor: ResourceColor = $r('sys.color.ohos_id_color_background_transparent');
   @Local closeButtonFillColorWithTheme: ResourceColor = $r('sys.color.icon_secondary');
   @Local scrollMaxHeight: number | undefined = undefined;
+  @Local firstButtonHeight: number = 0;
+  @Local secondButtonHeight: number = 0;
   private listener = mediaquery.matchMediaSync('(orientation: landscape)')
-
 
   private getIconWidth(): Dimension {
     return this.theme.icon.size.width as number
   }
 
-
   private getIconHeight(): Dimension {
     return this.theme.icon.size.height as number
   }
-
 
   private getIconFillColor(): ResourceColor {
     return this.theme.icon.fillColor
   }
 
-
   private getIconBorderRadius(): Length | BorderRadiuses {
     return this.theme.icon.borderRadius
   }
-
 
   private getIconMargin(): LocalizedMargin {
     return {
@@ -310,16 +308,13 @@ export struct PopupV2ComponentV2 {
     }
   }
 
-
   private getIconImage(): ResourceStr | undefined {
     return this.icon
   }
 
-
   private getTitleText(): ResourceStr | undefined {
     return this.title
   }
-
 
   private getTitlePadding(): LocalizedPadding {
     return {
@@ -328,77 +323,61 @@ export struct PopupV2ComponentV2 {
     }
   }
 
-
   private getTitleMargin(): LocalizedMargin {
     return this.theme.title.margin
   }
-
 
   private getTitleMinFontSize(): number | string | Resource {
     return this.theme.title.minFontSize
   }
 
-
   private getTitleFontWeight(): number | FontWeight | string {
     return this.theme.title.fontWeight
   }
-
 
   private getTitleFontSize(): number | string | Resource {
     return this.theme.title.fontSize
   }
 
-
   private getTitleFontColor(): ResourceColor {
     return this.theme.title.fontColor
   }
-
 
   private getCloseButtonWidth(): Length | undefined {
     return this.theme.closeButton.size.width
   }
 
-
   private getCloseButtonHeight(): Length | undefined {
     return this.theme.closeButton.size.height
   }
-
 
   private getCloseButtonFillColor(): ResourceColor {
     return this.closeButtonFillColorWithTheme;
   }
 
-
   private getCloseButtonHoverColor(): ResourceColor {
     return this.theme.closeButton.hoverColor
   }
-
 
   private getCloseButtonBackgroundColor(): ResourceColor {
     return this.theme.closeButton.backgroundColor
   }
 
-
   private getCloseButtonPadding(): LocalizedPadding {
     return this.theme.closeButton.padding
   }
-
 
   private getCloseButtonSymbolSize(): string | undefined {
     return this.theme.closeButton.symbolSize
   }
 
-
   private getMessageText(): string | Resource {
-    // return this.message.text
-    return this.message || ''
+    return this.message
   }
-
 
   private getMessageFontSize(): number | string | Resource {
     return this.theme.message.fontSize
   }
-
 
   private getMessageFontColor(): ResourceColor {
     let fontColor: ResourceColor
@@ -410,7 +389,6 @@ export struct PopupV2ComponentV2 {
     return fontColor
   }
 
-
   private getMessagePadding(): LocalizedPadding {
     let padding: LocalizedPadding
     padding = {
@@ -419,7 +397,6 @@ export struct PopupV2ComponentV2 {
     }
     return padding
   }
-
 
   private getMessageMaxWeight(): number | undefined {
     let textMaxWeight: number | undefined = undefined;
@@ -454,11 +431,9 @@ export struct PopupV2ComponentV2 {
     return textMaxWeight
   }
 
-
   private getMessageFontWeight(): number | FontWeight | string {
     return this.theme.message.fontWeight
   }
-
 
   private getButtonMargin(): LocalizedMargin {
     return {
@@ -469,64 +444,88 @@ export struct PopupV2ComponentV2 {
     }
   }
 
-
   private getButtonTextMargin(): LocalizedMargin {
     return { top: LengthMetrics.vp(this.theme.button.textMargin.bottom!.value) }
   }
-
 
   private getButtonTextPadding(): LocalizedPadding {
     return this.theme.button.padding
   }
 
-
   private getButtonHoverColor(): ResourceColor {
     return this.theme.button.hoverColor
   }
-
 
   private getButtonBackgroundColor(): ResourceColor {
     return this.theme.button.backgroundColor
   }
 
-
   private getFirstButtonText(): string | Resource | undefined {
     return this.buttons?.[0]?.text
   }
-
 
   private getSecondButtonText(): string | Resource | undefined {
     return this.buttons?.[1]?.text
   }
 
-
   private getFirstButtonFontSize(): number | string | Resource {
     return this.theme.button.fontSize
   }
-
 
   private getSecondButtonFontSize(): number | string | Resource {
     return this.theme.button.fontSize
   }
 
-
   private getFirstButtonFontColor(): ResourceColor {
     return this.theme.button.fontColor
   }
-
 
   private getSecondButtonFontColor(): ResourceColor {
     return this.theme.button.fontColor
   }
 
-
   private getButtonMinFontSize(): Dimension {
     return this.theme.button.minFontSize
   }
 
-
   private getButtonFontWeight(): number | FontWeight | string {
     return this.theme.button.fontWeight
+  }
+
+  private getBtnResponseRegion(actualWidth: number, actualHeight: number, minSizeVp: number): Rectangle | undefined {
+    if (actualWidth === 0 || actualHeight === 0 || minSizeVp <= 0) {
+      return undefined;
+    }
+
+    let needExpandWidth = actualWidth === -1 ? false : (actualWidth < minSizeVp);
+    let needExpandHeight = actualHeight < minSizeVp;
+
+    if (!needExpandWidth && !needExpandHeight) {
+      return undefined;
+    }
+
+    let regionWidth = needExpandWidth ? minSizeVp : '100%';
+    let regionHeight = needExpandHeight ? minSizeVp : '100%';
+    let offsetX = needExpandWidth ? (minSizeVp - actualWidth) / 2 : 0;
+    let offsetY = needExpandHeight ? (minSizeVp - actualHeight) / 2 : 0;
+
+    return {
+      x: -offsetX,
+      y: -offsetY,
+      width: regionWidth,
+      height: regionHeight
+    };
+  }
+
+  private getCloseBtnResponseRegion(): Rectangle | undefined {
+    let responseRegionValue = this.toVp(this.theme.closeButton.responseRegion);
+    return this.getBtnResponseRegion(this.theme.closeButton.size.width as number,
+      this.theme.closeButton.size.height as number, responseRegionValue)
+  }
+
+  private getNormalBtnResponseRegion(height: number): Rectangle | undefined {
+    let responseRegionValue = this.toVp(this.theme.button.responseRegion);
+    return this.getBtnResponseRegion(-1, height, responseRegionValue)
   }
 
 
@@ -596,7 +595,6 @@ export struct PopupV2ComponentV2 {
       this.scrollMaxHeight = undefined;
     }
   }
-
 
   private getLayoutWeight(): number {
     let layoutWeight: number
@@ -682,7 +680,6 @@ export struct PopupV2ComponentV2 {
     }
   }
 
-
   private getApplyMaxSize(): ConstraintSizeOptions {
     let applyMaxWidth: number | undefined = undefined;
     let applyMaxHeight: number | undefined = undefined;
@@ -725,7 +722,6 @@ export struct PopupV2ComponentV2 {
     this.messageMaxWeight = this.getMessageMaxWeight()
     return applyMaxSize
   }
-
 
   private getTitleTextAlign(): TextAlign {
     let titleAlign = TextAlign.Start;
@@ -783,6 +779,7 @@ export struct PopupV2ComponentV2 {
               .backgroundColor(this.closeButtonBackgroundColor)
               .flexShrink(0)
               .accessibilityText(this.theme.closeButton.accessibilityMessage)
+              .responseRegion(this.getCloseBtnResponseRegion())
               .onHover((isHover: boolean) => {
                 if (isHover) {
                   this.closeButtonBackgroundColor = this.getCloseButtonHoverColor()
@@ -830,70 +827,76 @@ export struct PopupV2ComponentV2 {
 
           Flex({ wrap: FlexWrap.Wrap }) {
             if (this.buttons?.[0]?.text !== '' && this.buttons?.[0]?.text !== void (0)) {
-              Button(this.getFirstButtonText())
-                .labelStyle({
-                  maxLines: 2,
-                  minFontSize: this.getButtonMinFontSize(),
-                  overflow: TextOverflow.Ellipsis
-                })
-                .fontSize(this.getFirstButtonFontSize())
-                .fontColor(this.getFirstButtonFontColor())
-                .fontWeight(this.getButtonFontWeight())
-                .focusable(true)
-                .buttonStyle(ButtonStyleMode.TEXTUAL)
-                .controlSize(ControlSize.SMALL)
-                .type(ButtonType.Normal)
-                .borderRadius($r('sys.float.popup_button_border_radius'))
-                .direction(this.popupDirection)
-                .margin(this.getButtonMargin())
-                .padding(this.getButtonTextPadding())
-                .backgroundColor(this.firstButtonBackgroundColor)
-                .attributeModifier(this.buttons?.[0]?.buttonModifier)
-                .onHover((isHover: boolean) => {
-                  if (isHover) {
-                    this.firstButtonBackgroundColor = this.getButtonHoverColor()
-                  } else {
-                    this.firstButtonBackgroundColor = this.getButtonBackgroundColor()
-                  }
-                })
-                .onClick(() => {
-                  if (this.buttons?.[0]?.action) {
-                    this.buttons?.[0]?.action();
-                  }
-                })
+              Button() {
+                Text(this.getFirstButtonText())
+                  .direction(this.popupDirection)
+                  .maxLines(2)
+                  .focusable(true)
+                  .fontSize(this.getFirstButtonFontSize())
+                  .fontColor(this.getFirstButtonFontColor())
+                  .fontWeight(this.getButtonFontWeight())
+                  .minFontSize(this.getButtonMinFontSize())
+                  .textOverflow({ overflow: TextOverflow.Ellipsis })
+                  .attributeModifier(this.buttons?.[0]?.buttonTextModifier)
+              }
+              .type(ButtonType.Normal)
+              .borderRadius($r('sys.float.popup_button_border_radius'))
+              .direction(this.popupDirection)
+              .margin(this.getButtonMargin())
+              .padding(this.getButtonTextPadding())
+              .backgroundColor(this.firstButtonBackgroundColor)
+              .onHover((isHover: boolean) => {
+                if (isHover) {
+                  this.firstButtonBackgroundColor = this.getButtonHoverColor()
+                } else {
+                  this.firstButtonBackgroundColor = this.getButtonBackgroundColor()
+                }
+              })
+              .onClick(() => {
+                if (this.buttons?.[0]?.action) {
+                  this.buttons?.[0]?.action();
+                }
+              })
+              .onAreaChange((_, rect) => {
+                this.firstButtonHeight = rect.height as number;
+              })
+              .responseRegion(this.getNormalBtnResponseRegion(this.firstButtonHeight))
             }
             if (this.buttons?.[1]?.text !== '' && this.buttons?.[1]?.text !== void (0)) {
-              Button(this.getSecondButtonText())
-                .labelStyle({
-                  maxLines: 2,
-                  minFontSize: this.getButtonMinFontSize(),
-                  overflow: TextOverflow.Ellipsis
-                })
-                .fontSize(this.getSecondButtonFontSize())
-                .fontColor(this.getSecondButtonFontColor())
-                .fontWeight(this.getButtonFontWeight())
-                .focusable(true)
-                .buttonStyle(ButtonStyleMode.TEXTUAL)
-                .controlSize(ControlSize.SMALL)
-                .type(ButtonType.Normal)
-                .borderRadius($r('sys.float.popup_button_border_radius'))
-                .direction(this.popupDirection)
-                .margin(this.getButtonMargin())
-                .padding(this.getButtonTextPadding())
-                .backgroundColor(this.secondButtonBackgroundColor)
-                .attributeModifier(this.buttons?.[1]?.buttonModifier)
-                .onHover((isHover: boolean) => {
-                  if (isHover) {
-                    this.secondButtonBackgroundColor = this.getButtonHoverColor()
-                  } else {
-                    this.secondButtonBackgroundColor = this.getButtonBackgroundColor()
-                  }
-                })
-                .onClick(() => {
-                  if (this.buttons?.[1]?.action) {
-                    this.buttons?.[1]?.action();
-                  }
-                })
+              Button() {
+                Text(this.getSecondButtonText())
+                  .direction(this.popupDirection)
+                  .maxLines(2)
+                  .focusable(true)
+                  .fontSize(this.getSecondButtonFontSize())
+                  .fontColor(this.getSecondButtonFontColor())
+                  .fontWeight(this.getButtonFontWeight())
+                  .minFontSize(this.getButtonMinFontSize())
+                  .textOverflow({ overflow: TextOverflow.Ellipsis })
+                  .attributeModifier(this.buttons?.[1]?.buttonTextModifier)
+              }
+              .type(ButtonType.Normal)
+              .borderRadius($r('sys.float.popup_button_border_radius'))
+              .direction(this.popupDirection)
+              .margin(this.getButtonMargin())
+              .padding(this.getButtonTextPadding())
+              .backgroundColor(this.secondButtonBackgroundColor)
+              .onHover((isHover: boolean) => {
+                if (isHover) {
+                  this.secondButtonBackgroundColor = this.getButtonHoverColor()
+                } else {
+                  this.secondButtonBackgroundColor = this.getButtonBackgroundColor()
+                }
+              })
+              .onClick(() => {
+                if (this.buttons?.[1]?.action) {
+                  this.buttons?.[1]?.action();
+                }
+              })
+              .onAreaChange((_, rect) => {
+                this.secondButtonHeight = rect.height as number;
+              })
+              .responseRegion(this.getNormalBtnResponseRegion(this.secondButtonHeight))
             }
           }
           .direction(this.popupDirection)
@@ -958,6 +961,7 @@ export struct PopupV2ComponentV2 {
               .backgroundColor(this.closeButtonBackgroundColor)
               .flexShrink(0)
               .accessibilityText(this.theme.closeButton.accessibilityMessage)
+              .responseRegion(this.getCloseBtnResponseRegion())
               .onHover((isHover: boolean) => {
                 if (isHover) {
                   this.closeButtonBackgroundColor = this.getCloseButtonHoverColor()
@@ -977,70 +981,76 @@ export struct PopupV2ComponentV2 {
 
           Flex({ wrap: FlexWrap.Wrap }) {
             if (this.buttons?.[0]?.text !== '' && this.buttons?.[0]?.text !== void (0)) {
-              Button(this.getFirstButtonText())
-                .labelStyle({
-                  maxLines: 2,
-                  minFontSize: this.getButtonMinFontSize(),
-                  overflow: TextOverflow.Ellipsis
-                })
-                .fontSize(this.getFirstButtonFontSize())
-                .fontColor(this.getFirstButtonFontColor())
-                .fontWeight(this.getButtonFontWeight())
-                .focusable(true)
-                .buttonStyle(ButtonStyleMode.TEXTUAL)
-                .controlSize(ControlSize.SMALL)
-                .type(ButtonType.Normal)
-                .borderRadius($r('sys.float.popup_button_border_radius'))
-                .direction(this.popupDirection)
-                .margin(this.getButtonMargin())
-                .padding(this.getButtonTextPadding())
-                .backgroundColor(this.firstButtonBackgroundColor)
-                .attributeModifier(this.buttons?.[0]?.buttonModifier)
-                .onHover((isHover: boolean) => {
-                  if (isHover) {
-                    this.firstButtonBackgroundColor = this.getButtonHoverColor()
-                  } else {
-                    this.firstButtonBackgroundColor = this.getButtonBackgroundColor()
-                  }
-                })
-                .onClick(() => {
-                  if (this.buttons?.[0]?.action) {
-                    this.buttons?.[0]?.action();
-                  }
-                })
+              Button() {
+                Text(this.getFirstButtonText())
+                  .direction(this.popupDirection)
+                  .maxLines(2)
+                  .focusable(true)
+                  .fontSize(this.getFirstButtonFontSize())
+                  .fontColor(this.getFirstButtonFontColor())
+                  .fontWeight(this.getButtonFontWeight())
+                  .minFontSize(this.getButtonMinFontSize())
+                  .textOverflow({ overflow: TextOverflow.Ellipsis })
+                  .attributeModifier(this.buttons?.[0]?.buttonTextModifier)
+              }
+              .type(ButtonType.Normal)
+              .borderRadius($r('sys.float.popup_button_border_radius'))
+              .direction(this.popupDirection)
+              .margin(this.getButtonMargin())
+              .padding(this.getButtonTextPadding())
+              .backgroundColor(this.firstButtonBackgroundColor)
+              .onHover((isHover: boolean) => {
+                if (isHover) {
+                  this.firstButtonBackgroundColor = this.getButtonHoverColor()
+                } else {
+                  this.firstButtonBackgroundColor = this.getButtonBackgroundColor()
+                }
+              })
+              .onClick(() => {
+                if (this.buttons?.[0]?.action) {
+                  this.buttons?.[0]?.action();
+                }
+              })
+              .onAreaChange((_, rect) => {
+                this.firstButtonHeight = Number(rect.height) as number;
+              })
+              .responseRegion(this.getNormalBtnResponseRegion(this.firstButtonHeight))
             }
             if (this.buttons?.[1]?.text !== '' && this.buttons?.[1]?.text !== void (0)) {
-              Button(this.getSecondButtonText())
-                .labelStyle({
-                  maxLines: 2,
-                  minFontSize: this.getButtonMinFontSize(),
-                  overflow: TextOverflow.Ellipsis
-                })
-                .fontSize(this.getSecondButtonFontSize())
-                .fontColor(this.getSecondButtonFontColor())
-                .fontWeight(this.getButtonFontWeight())
-                .focusable(true)
-                .buttonStyle(ButtonStyleMode.TEXTUAL)
-                .controlSize(ControlSize.SMALL)
-                .type(ButtonType.Normal)
-                .borderRadius($r('sys.float.popup_button_border_radius'))
-                .direction(this.popupDirection)
-                .margin(this.getButtonMargin())
-                .padding(this.getButtonTextPadding())
-                .backgroundColor(this.secondButtonBackgroundColor)
-                .attributeModifier(this.buttons?.[1]?.buttonModifier)
-                .onHover((isHover: boolean) => {
-                  if (isHover) {
-                    this.secondButtonBackgroundColor = this.getButtonHoverColor()
-                  } else {
-                    this.secondButtonBackgroundColor = this.getButtonBackgroundColor()
-                  }
-                })
-                .onClick(() => {
-                  if (this.buttons?.[1]?.action) {
-                    this.buttons?.[1]?.action();
-                  }
-                })
+              Button() {
+                Text(this.getSecondButtonText())
+                  .direction(this.popupDirection)
+                  .maxLines(2)
+                  .focusable(true)
+                  .fontSize(this.getSecondButtonFontSize())
+                  .fontColor(this.getSecondButtonFontColor())
+                  .fontWeight(this.getButtonFontWeight())
+                  .minFontSize(this.getButtonMinFontSize())
+                  .textOverflow({ overflow: TextOverflow.Ellipsis })
+                  .attributeModifier(this.buttons?.[1]?.buttonTextModifier)
+              }
+              .type(ButtonType.Normal)
+              .borderRadius($r('sys.float.popup_button_border_radius'))
+              .direction(this.popupDirection)
+              .margin(this.getButtonMargin())
+              .padding(this.getButtonTextPadding())
+              .backgroundColor(this.secondButtonBackgroundColor)
+              .onHover((isHover: boolean) => {
+                if (isHover) {
+                  this.secondButtonBackgroundColor = this.getButtonHoverColor()
+                } else {
+                  this.secondButtonBackgroundColor = this.getButtonBackgroundColor()
+                }
+              })
+              .onClick(() => {
+                if (this.buttons?.[1]?.action) {
+                  this.buttons?.[1]?.action();
+                }
+              })
+              .onAreaChange((_, rect) => {
+                this.secondButtonHeight = rect.height as number;
+              })
+              .responseRegion(this.getNormalBtnResponseRegion(this.secondButtonHeight))
             }
           }
           .direction(this.popupDirection)

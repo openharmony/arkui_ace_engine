@@ -73,8 +73,10 @@ public:
     bool operator==(const Matrix4& matrix) const;
     bool operator==(const double (&matrix)[4][4]) const;
     Matrix4 operator*(double num);
+    Matrix4& operator*=(double num);
     Matrix4 operator*(const Matrix4& matrix);
-
+    Matrix4& operator*=(const Matrix4& matrix);
+    Matrix4& MatrixMultiply(const Matrix4& matrix);
     Matrix4N operator*(const Matrix4N& matrix) const;
 
     // Transform point by the matrix

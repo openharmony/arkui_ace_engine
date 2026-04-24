@@ -86,6 +86,13 @@ const segmentButtonTheme = {
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
+  ADAPTIVE_ITEM_FONT_SIZE: {
+    id: -1,
+    type: 10002,
+    params: ['sys.float.Caption_M'],
+    bundleName: '__harDefaultBundleName__',
+    moduleName: '__harDefaultModuleName__',
+  },
   BACKGROUND_COLOR: {
     id: -1,
     type: 10001,

@@ -27,6 +27,7 @@ import { default as drawing } from "@ohos.graphics.drawing";
 import { default as uiEffect } from "@ohos.graphics.uiEffect";
 import { default as unifiedDataChannel } from "@ohos.data.unifiedDataChannel";
 import { default as webview } from "@ohos.web.webview";
+import { RecordData } from "@ohos.base";
 import { default as Want } from "@ohos.app.ability.Want";
 import { Configuration } from "@ohos.app.ability.Configuration";
 import { default as window } from "@ohos.window";
@@ -828,5 +829,11 @@ export namespace extractors {
         throw new Error("Invalid managed object type in CustomSpanWrapper");
       }
       return value.managed as CustomSpan
+  }
+  export function transform_Ark_RecordData_to_Opt_Object(value: RecordData): Object | undefined {
+      return value as Object
+  }
+  export function transform_Opt_Object_to_Ark_RecordData(value: Object | undefined): RecordData {
+      return value as RecordData
   }
 }

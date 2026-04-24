@@ -451,6 +451,8 @@ public:
     virtual void ResetSingleLine() {};
     virtual void SetSelectedDragPreviewStyle(const Color& value) {};
     virtual void ResetSelectedDragPreviewStyle() {};
+    virtual void SetHorizontalScrolling(bool enabled) {};
+    virtual void ResetHorizontalScrolling() {};
 
 private:
     static std::unique_ptr<RichEditorModel> instance_;

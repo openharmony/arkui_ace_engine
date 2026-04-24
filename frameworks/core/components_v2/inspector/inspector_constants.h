@@ -690,6 +690,9 @@ ACE_EXPORT extern const char LAZY_V_GRID_LAYOUT_ETS_TAG[];
 // Picker
 ACE_EXPORT extern const char CONTAINER_PICKER_ETS_TAG[];
 
+// DepthComponent
+ACE_EXPORT extern const char DEPTH_COMPONENT_ETS_TAG[];
+
 // UndefinedNode
 ACE_EXPORT extern const char UNDEFINED_NODE_ETS_TAG[];
 

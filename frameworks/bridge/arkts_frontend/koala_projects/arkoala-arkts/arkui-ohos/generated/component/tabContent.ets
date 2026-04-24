@@ -486,7 +486,7 @@ export class TabBarSymbol implements MaterializedBase {
         }
         const returnResult: SymbolGlyphModifier | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as SymbolGlyphModifier | undefined)
     }
     private setSelected_serialize(selected: SymbolGlyphModifier | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()

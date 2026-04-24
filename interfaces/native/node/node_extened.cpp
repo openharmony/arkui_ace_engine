@@ -19,7 +19,7 @@
 #include "base/error/error_code.h"
 #include "base/log/log_wrapper.h"
 #include "core/components_ng/base/ui_node.h"
-#include "error_message_macros.h"
+#include "interfaces/native/native_error_message_macros.h"
 
 namespace OHOS::Ace::NodeModel {
 

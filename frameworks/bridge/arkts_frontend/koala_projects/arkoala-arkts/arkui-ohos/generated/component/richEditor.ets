@@ -22,6 +22,7 @@ import { ArkUIGeneratedNativeModule } from '#components'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { SelectionOptions_serializer, RectResult_serializer, SelectionOptions, RectResult, ArkCommonMethodPeer, CommonMethod, Callback as arkui_component_common_Callback, ShadowOptions, PixelMap, ClickEvent, HoverEvent, HapticFeedbackMode, ArkCommonMethodComponent, ClickEvent_serializer, ShadowOptions_serializer, HoverEvent_serializer } from './common'
 import { LayoutManager_serializer, PreviewText_serializer, TextEditControllerEx, TextEditControllerExInternal, LayoutManager, LayoutManagerInternal, PreviewText, TextDataDetectorConfig_serializer, EditMenuOptions_serializer, SelectedDragPreviewStyle_serializer, TextRange, TextDataDetectorConfig, OnDidChangeCallback, IMEClient, EditMenuOptions, KeyboardAppearance, SelectedDragPreviewStyle, MenuType, TextVerticalAlign, TextDirection, DecorationStyleResult, AccessibilitySpanOptions, TextChangeReason, TextRange_serializer, AccessibilitySpanOptions_serializer, DecorationStyleResult_serializer, StyledStringChangedListener_serializer, StyledStringController, StyledStringControllerInternal, StyledStringChangedListener } from './textCommon'
+import { StyledString, StyledStringInternal, DecorationStyleInterface, DecorationStyleInterface_serializer, StyledString_serializer, MutableStyledString_serializer, MutableStyledString, MutableStyledStringInternal } from './styledString'
 import { ArkThemeScopeManager } from '#arktheme'
 import { global_resource_Resource_serializer } from './../framework/resource'
 import { ColorMetricsExt, ColorMetricsExt_serializer, CustomNodeBuilder } from './idlize'
@@ -40,7 +41,6 @@ import { Content } from 'arkui.Content'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
 import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
-import { DecorationStyleInterface, DecorationStyleInterface_serializer, StyledString_serializer, StyledString, StyledStringInternal, MutableStyledString_serializer, MutableStyledString, MutableStyledStringInternal } from './styledString'
 import { TextBackgroundStyle, TextBackgroundStyle_serializer } from './span'
 import { default as image } from '@ohos.multimedia.image'
 import { SymbolEffectStrategy, SymbolRenderingStrategy } from './symbolglyph'
@@ -220,6 +220,11 @@ export class RichEditorBaseController implements MaterializedBase {
         this.deleteBackward_serialize()
         return
     }
+    public setStyledPlaceholder(styledString: StyledString): void {
+        const styledString_casted = styledString as (StyledString)
+        this.setStyledPlaceholder_serialize(styledString_casted)
+        return
+    }
     private getCaretOffset_serialize(): int32 | undefined {
         const retval = ArkUIGeneratedNativeModule._RichEditorBaseController_getCaretOffset(this.peer!.ptr)
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
@@ -230,7 +235,7 @@ export class RichEditorBaseController implements MaterializedBase {
         }
         const returnResult: int32 | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as int32 | undefined)
     }
     private setCaretOffset_serialize(offset: int32): boolean | undefined {
         const retval = ArkUIGeneratedNativeModule._RichEditorBaseController_setCaretOffset(this.peer!.ptr, offset)
@@ -242,7 +247,7 @@ export class RichEditorBaseController implements MaterializedBase {
         }
         const returnResult: boolean | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as boolean | undefined)
     }
     private closeSelectionMenu_serialize(): void {
         ArkUIGeneratedNativeModule._RichEditorBaseController_closeSelectionMenu(this.peer!.ptr)
@@ -257,7 +262,7 @@ export class RichEditorBaseController implements MaterializedBase {
         }
         const returnResult: RichEditorTextStyle | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as RichEditorTextStyle | undefined)
     }
     private setTypingStyle_serialize(value: RichEditorTextStyle): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -299,7 +304,7 @@ export class RichEditorBaseController implements MaterializedBase {
         }
         const returnResult: boolean | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as boolean | undefined)
     }
     private stopEditing_serialize(): void {
         ArkUIGeneratedNativeModule._RichEditorBaseController_stopEditing(this.peer!.ptr)
@@ -314,7 +319,7 @@ export class RichEditorBaseController implements MaterializedBase {
         }
         const returnResult: LayoutManager | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as LayoutManager | undefined)
     }
     private getPreviewText_serialize(): PreviewText | undefined {
         const retval = ArkUIGeneratedNativeModule._RichEditorBaseController_getPreviewText(this.peer!.ptr)
@@ -326,7 +331,7 @@ export class RichEditorBaseController implements MaterializedBase {
         }
         const returnResult: PreviewText | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as PreviewText | undefined)
     }
     private getCaretRect_serialize(): RectResult | undefined {
         const retval = ArkUIGeneratedNativeModule._RichEditorBaseController_getCaretRect(this.peer!.ptr)
@@ -338,10 +343,13 @@ export class RichEditorBaseController implements MaterializedBase {
         }
         const returnResult: RectResult | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as RectResult | undefined)
     }
     private deleteBackward_serialize(): void {
         ArkUIGeneratedNativeModule._RichEditorBaseController_deleteBackward(this.peer!.ptr)
+    }
+    private setStyledPlaceholder_serialize(styledString: StyledString): void {
+        ArkUIGeneratedNativeModule._RichEditorBaseController_setStyledPlaceholder(this.peer!.ptr, toPeerPtr(styledString))
     }
 }
 export class ArkRichEditorPeer extends ArkCommonMethodPeer {
@@ -884,6 +892,30 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._RichEditorAttribute_setSelectedDragPreviewStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOrphanCharOptimizationAttribute(value: boolean | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_setOrphanCharOptimization(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setHorizontalScrollingAttribute(value: boolean | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_setHorizontalScrolling(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setBindSelectionMenuAttribute(spanType: RichEditorSpanType | undefined, content: CustomBuilder | undefined, responseType: ResponseType | RichEditorResponseType | undefined, options?: SelectionMenuOptions): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (spanType !== undefined) {
@@ -977,18 +1009,6 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._RichEditorAttribute_setPlaceholder(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setOrphanCharOptimizationAttribute(value: boolean | undefined): void {
-        const thisSerializer: SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue = value!
-            thisSerializer.writeBoolean(valueTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._RichEditorAttribute_setOrphanCharOptimization(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -1342,6 +1362,12 @@ export interface RichEditorAttribute extends CommonMethod {
     selectedDragPreviewStyle(value: SelectedDragPreviewStyle | undefined): this {
         throw new Error('Unimplemented method selectedDragPreviewStyle')
     }
+    orphanCharOptimization(value: boolean | undefined): this {
+        throw new Error('Unimplemented method orphanCharOptimization')
+    }
+    horizontalScrolling(value: boolean | undefined): this {
+        throw new Error('Unimplemented method horizontalScrolling')
+    }
     bindSelectionMenu(spanType: RichEditorSpanType | undefined, content: CustomBuilder | undefined, responseType: ResponseType | RichEditorResponseType | undefined, options?: SelectionMenuOptions): this {
         throw new Error('Unimplemented method bindSelectionMenu')
     }
@@ -1350,9 +1376,6 @@ export interface RichEditorAttribute extends CommonMethod {
     }
     placeholder(value: ResourceStr | undefined, style?: PlaceholderStyle): this {
         throw new Error('Unimplemented method placeholder')
-    }
-    orphanCharOptimization(value: boolean | undefined): this {
-        throw new Error('Unimplemented method orphanCharOptimization')
     }
     attributeModifier(value: AttributeModifier<RichEditorAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error('Unimplemented method attributeModifier')
@@ -1577,6 +1600,16 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         this.getPeer()?.setSelectedDragPreviewStyleAttribute(value_casted)
         return this
     }
+    public orphanCharOptimization(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined)
+        this.getPeer()?.setOrphanCharOptimizationAttribute(value_casted)
+        return this
+    }
+    public horizontalScrolling(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined)
+        this.getPeer()?.setHorizontalScrollingAttribute(value_casted)
+        return this
+    }
     public bindSelectionMenu(spanType: RichEditorSpanType | undefined, content: CustomBuilder | undefined, responseType: ResponseType | RichEditorResponseType | undefined, options?: SelectionMenuOptions): this {
         const spanType_casted = spanType as (RichEditorSpanType | undefined)
         const content_casted = content as (CustomBuilder | undefined)
@@ -1595,11 +1628,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         const value_casted = value as (ResourceStr | undefined)
         const style_casted = style as (PlaceholderStyle | undefined)
         this.getPeer()?.setPlaceholderAttribute(value_casted, style_casted)
-        return this
-    }
-    public orphanCharOptimization(value: boolean | undefined): this {
-        const value_casted = value as (boolean | undefined)
-        this.getPeer()?.setOrphanCharOptimizationAttribute(value_casted)
         return this
     }
     public attributeModifier(value: AttributeModifier<RichEditorAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -4373,7 +4401,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
         }
         const returnResult: int32 | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as int32 | undefined)
     }
     private addImageSpan_serialize(value: PixelMap | ResourceStr, options?: RichEditorImageSpanOptions): int32 | undefined {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -4411,7 +4439,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
         }
         const returnResult: int32 | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as int32 | undefined)
     }
     private addBuilderSpan_serialize(value: CustomBuilder, options?: RichEditorBuilderSpanOptions): int32 | undefined {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -4433,7 +4461,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
         }
         const returnResult: int32 | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as int32 | undefined)
     }
     private addSymbolSpan_serialize(value: global_resource_Resource, options?: RichEditorSymbolSpanOptions): int32 | undefined {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -4455,7 +4483,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
         }
         const returnResult: int32 | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as int32 | undefined)
     }
     private updateSpanStyle_serialize(value: RichEditorUpdateTextSpanStyleOptions | RichEditorUpdateImageSpanStyleOptions | RichEditorUpdateSymbolSpanStyleOptions): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -4525,7 +4553,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
         }
         const returnResult: Array<RichEditorImageSpanResult | RichEditorTextSpanResult> | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as Array<RichEditorImageSpanResult | RichEditorTextSpanResult> | undefined)
     }
     private getParagraphs_serialize(value?: RichEditorRange): Array<RichEditorParagraphResult> | undefined {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -4550,7 +4578,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
         }
         const returnResult: Array<RichEditorParagraphResult> | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as Array<RichEditorParagraphResult> | undefined)
     }
     private getSelection_serialize(): RichEditorSelection | undefined {
         const retval = ArkUIGeneratedNativeModule._RichEditorController_getSelection(this.peer!.ptr)
@@ -4562,7 +4590,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
         }
         const returnResult: RichEditorSelection | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as RichEditorSelection | undefined)
     }
     private fromStyledString_serialize(value: StyledString): Array<RichEditorSpan> | undefined {
         const retval = ArkUIGeneratedNativeModule._RichEditorController_fromStyledString(this.peer!.ptr, toPeerPtr(value))
@@ -4587,7 +4615,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
         }
         const returnResult: Array<RichEditorSpan> | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as Array<RichEditorSpan> | undefined)
     }
     private toStyledString_serialize(value: RichEditorRange): StyledString | undefined {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -4602,7 +4630,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
         }
         const returnResult: StyledString | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as StyledString | undefined)
     }
 }
 export class RichEditorStyledStringControllerInternal {
@@ -4653,7 +4681,7 @@ export class RichEditorStyledStringController extends RichEditorBaseController i
         }
         const returnResult: MutableStyledString | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as MutableStyledString | undefined)
     }
     private getSelection_serialize(): RichEditorRange | undefined {
         const retval = ArkUIGeneratedNativeModule._RichEditorStyledStringController_getSelection(this.peer!.ptr)
@@ -4665,7 +4693,7 @@ export class RichEditorStyledStringController extends RichEditorBaseController i
         }
         const returnResult: RichEditorRange | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as RichEditorRange | undefined)
     }
     private onContentChanged_serialize(listener: StyledStringChangedListener): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()

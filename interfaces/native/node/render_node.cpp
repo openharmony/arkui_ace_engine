@@ -15,12 +15,11 @@
 
 #include "render_node.h"
 
-#include <memory>
 #include "node_model.h"
 
 #include "base/error/error_code.h"
 #include "base/utils/utils.h"
-#include "error_message_macros.h"
+#include "interfaces/native/native_error_message_macros.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,12 +42,10 @@ int32_t OH_ArkUI_RenderNodeUtils_AddRenderNode(ArkUI_NodeHandle node, ArkUI_Rend
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->addRenderNode(
-        node->uiNodeHandle, child->renderNodeHandle, reinterpret_cast<void*>(&errorInfoPtr));
+        node->uiNodeHandle, child->renderNodeHandle);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -66,12 +63,10 @@ int32_t OH_ArkUI_RenderNodeUtils_RemoveRenderNode(ArkUI_NodeHandle node, ArkUI_R
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->removeRenderNode(
-        node->uiNodeHandle, child->renderNodeHandle, reinterpret_cast<void*>(&errorInfoPtr));
+        node->uiNodeHandle, child->renderNodeHandle);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -87,12 +82,10 @@ int32_t OH_ArkUI_RenderNodeUtils_ClearRenderNodeChildren(ArkUI_NodeHandle node)
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->clearRenderNodeChildren(
-        node->uiNodeHandle, reinterpret_cast<void*>(&errorInfoPtr));
+        node->uiNodeHandle);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -159,12 +152,10 @@ int32_t OH_ArkUI_RenderNodeUtils_AddChild(ArkUI_RenderNodeHandle node, ArkUI_Ren
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->addChild(
-        node->renderNodeHandle, child->renderNodeHandle, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, child->renderNodeHandle);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -179,13 +170,10 @@ int32_t OH_ArkUI_RenderNodeUtils_InsertChildAfter(
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->insertChildAfter(
-        node->renderNodeHandle, child->renderNodeHandle, sibling->renderNodeHandle,
-        reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, child->renderNodeHandle, sibling->renderNodeHandle);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -199,12 +187,10 @@ int32_t OH_ArkUI_RenderNodeUtils_RemoveChild(ArkUI_RenderNodeHandle node, ArkUI_
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->removeChild(
-        node->renderNodeHandle, child->renderNodeHandle, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, child->renderNodeHandle);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -216,12 +202,10 @@ int32_t OH_ArkUI_RenderNodeUtils_ClearChildren(ArkUI_RenderNodeHandle node)
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->clearChildren(
-        node->renderNodeHandle, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -240,12 +224,10 @@ int32_t OH_ArkUI_RenderNodeUtils_GetChild(ArkUI_RenderNodeHandle node, int32_t i
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
     ArkUIRenderNodeHandle renderNode;
     int32_t nodeId = 0;
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getChild(
-        node->renderNodeHandle, index, &renderNode, &nodeId, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, index, &renderNode, &nodeId);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     if (result == OHOS::Ace::ERROR_CODE_NO_ERROR) {
         // Find in map first, try return same handle.
@@ -270,12 +252,10 @@ int32_t OH_ArkUI_RenderNodeUtils_GetFirstChild(ArkUI_RenderNodeHandle node, ArkU
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
     ArkUIRenderNodeHandle renderNode;
     int32_t nodeId = 0;
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getFirstChild(
-        node->renderNodeHandle, &renderNode, &nodeId, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, &renderNode, &nodeId);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     if (result == OHOS::Ace::ERROR_CODE_NO_ERROR) {
         // Find in map first, try return same handle.
@@ -300,12 +280,10 @@ int32_t OH_ArkUI_RenderNodeUtils_GetNextSibling(ArkUI_RenderNodeHandle node, Ark
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
     ArkUIRenderNodeHandle renderNode;
     int32_t nodeId = 0;
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getNextSibling(
-        node->renderNodeHandle, &renderNode, &nodeId, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, &renderNode, &nodeId);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     if (result == OHOS::Ace::ERROR_CODE_NO_ERROR) {
         // Find in map first, try return same handle.
@@ -330,12 +308,10 @@ int32_t OH_ArkUI_RenderNodeUtils_GetPreviousSibling(ArkUI_RenderNodeHandle node,
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
     ArkUIRenderNodeHandle renderNode;
     int32_t nodeId = 0;
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getPreviousSibling(
-        node->renderNodeHandle, &renderNode, &nodeId, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, &renderNode, &nodeId);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     if (result == OHOS::Ace::ERROR_CODE_NO_ERROR) {
         // Find in map first, try return same handle.
@@ -362,12 +338,10 @@ int32_t OH_ArkUI_RenderNodeUtils_GetChildren(
     ArkUIRenderNodeHandle* renderNode;
     uint32_t* nodeId;
     int32_t nodeCount = 0;
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getChildren(
-        node->renderNodeHandle, &renderNode, &nodeId, &nodeCount, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, &renderNode, &nodeId, &nodeCount);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     *count = nodeCount;
     if (nodeCount > 0 && result == OHOS::Ace::ERROR_CODE_NO_ERROR) {
@@ -389,12 +363,10 @@ int32_t OH_ArkUI_RenderNodeUtils_GetChildrenCount(ArkUI_RenderNodeHandle node, i
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
     int32_t childCount;
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getChildrenCount(
-        node->renderNodeHandle, &childCount, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, &childCount);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     if (result == OHOS::Ace::ERROR_CODE_NO_ERROR) {
         *count = childCount;
@@ -409,12 +381,10 @@ int32_t OH_ArkUI_RenderNodeUtils_SetBackgroundColor(ArkUI_RenderNodeHandle node,
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setBackgroundColor(
-        node->renderNodeHandle, color, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, color);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -426,12 +396,10 @@ int32_t OH_ArkUI_RenderNodeUtils_GetBackgroundColor(ArkUI_RenderNodeHandle node,
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getBackgroundColor(
-        node->renderNodeHandle, color, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, color);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -448,12 +416,10 @@ int32_t OH_ArkUI_RenderNodeUtils_SetOpacity(ArkUI_RenderNodeHandle node, float o
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setOpacity(
-        node->renderNodeHandle, opacity, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, opacity);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -465,12 +431,10 @@ int32_t OH_ArkUI_RenderNodeUtils_GetOpacity(ArkUI_RenderNodeHandle node, float* 
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getOpacity(
-        node->renderNodeHandle, opacity, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, opacity);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -487,12 +451,10 @@ int32_t OH_ArkUI_RenderNodeUtils_SetSize(ArkUI_RenderNodeHandle node, int32_t wi
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setSize(
-        node->renderNodeHandle, width, height, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, width, height);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -504,12 +466,10 @@ int32_t OH_ArkUI_RenderNodeUtils_GetSize(ArkUI_RenderNodeHandle node, int32_t* w
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getSize(
-        node->renderNodeHandle, width, height, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, width, height);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -521,12 +481,10 @@ int32_t OH_ArkUI_RenderNodeUtils_SetPosition(ArkUI_RenderNodeHandle node, int32_
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setPosition(
-        node->renderNodeHandle, x, y, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, x, y);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -538,12 +496,10 @@ int32_t OH_ArkUI_RenderNodeUtils_GetPosition(ArkUI_RenderNodeHandle node, int32_
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getPosition(
-        node->renderNodeHandle, x, y, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, x, y);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -555,12 +511,10 @@ int32_t OH_ArkUI_RenderNodeUtils_SetPivot(ArkUI_RenderNodeHandle node, float x, 
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setPivot(
-        node->renderNodeHandle, x, y, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, x, y);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -572,12 +526,10 @@ int32_t OH_ArkUI_RenderNodeUtils_GetPivot(ArkUI_RenderNodeHandle node, float* x,
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getPivot(
-        node->renderNodeHandle, x, y, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, x, y);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -589,12 +541,10 @@ int32_t OH_ArkUI_RenderNodeUtils_SetScale(ArkUI_RenderNodeHandle node, float x, 
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setScale(
-        node->renderNodeHandle, x, y, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, x, y);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -606,12 +556,10 @@ int32_t OH_ArkUI_RenderNodeUtils_GetScale(ArkUI_RenderNodeHandle node, float* x,
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getScale(
-        node->renderNodeHandle, x, y, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, x, y);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -623,12 +571,10 @@ int32_t OH_ArkUI_RenderNodeUtils_SetTranslation(ArkUI_RenderNodeHandle node, flo
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setTranslation(
-        node->renderNodeHandle, x, y, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, x, y);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -640,12 +586,10 @@ int32_t OH_ArkUI_RenderNodeUtils_GetTranslation(ArkUI_RenderNodeHandle node, flo
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getTranslation(
-        node->renderNodeHandle, x, y, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, x, y);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -657,12 +601,10 @@ int32_t OH_ArkUI_RenderNodeUtils_SetRotation(ArkUI_RenderNodeHandle node, float 
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setRotation(
-        node->renderNodeHandle, x, y, z, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, x, y, z);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -674,12 +616,10 @@ int32_t OH_ArkUI_RenderNodeUtils_GetRotation(ArkUI_RenderNodeHandle node, float*
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getRotation(
-        node->renderNodeHandle, x, y, z, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, x, y, z);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -691,12 +631,10 @@ int32_t OH_ArkUI_RenderNodeUtils_SetTransform(ArkUI_RenderNodeHandle node, float
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setTransform(
-        node->renderNodeHandle, matrix, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, matrix);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -708,12 +646,10 @@ int32_t OH_ArkUI_RenderNodeUtils_SetShadowColor(ArkUI_RenderNodeHandle node, uin
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setShadowColor(
-        node->renderNodeHandle, color, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, color);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -725,12 +661,10 @@ int32_t OH_ArkUI_RenderNodeUtils_GetShadowColor(ArkUI_RenderNodeHandle node, uin
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getShadowColor(
-        node->renderNodeHandle, color, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, color);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -742,12 +676,10 @@ int32_t OH_ArkUI_RenderNodeUtils_SetShadowOffset(ArkUI_RenderNodeHandle node, in
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setShadowOffset(
-        node->renderNodeHandle, x, y, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, x, y);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -759,12 +691,10 @@ int32_t OH_ArkUI_RenderNodeUtils_GetShadowOffset(ArkUI_RenderNodeHandle node, in
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getShadowOffset(
-        node->renderNodeHandle, x, y, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, x, y);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -780,12 +710,10 @@ int32_t OH_ArkUI_RenderNodeUtils_SetShadowAlpha(ArkUI_RenderNodeHandle node, flo
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setShadowAlpha(
-        node->renderNodeHandle, alpha, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, alpha);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -797,12 +725,10 @@ int32_t OH_ArkUI_RenderNodeUtils_GetShadowAlpha(ArkUI_RenderNodeHandle node, flo
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getShadowAlpha(
-        node->renderNodeHandle, alpha, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, alpha);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -818,12 +744,10 @@ int32_t OH_ArkUI_RenderNodeUtils_SetShadowElevation(ArkUI_RenderNodeHandle node,
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setShadowElevation(
-        node->renderNodeHandle, elevation, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, elevation);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -835,12 +759,10 @@ int32_t OH_ArkUI_RenderNodeUtils_GetShadowElevation(ArkUI_RenderNodeHandle node,
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getShadowElevation(
-        node->renderNodeHandle, radius, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, radius);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -852,12 +774,10 @@ int32_t OH_ArkUI_RenderNodeUtils_GetShadowRadius(ArkUI_RenderNodeHandle node, fl
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getShadowRadius(
-        node->renderNodeHandle, radius, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, radius);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -873,12 +793,10 @@ int32_t OH_ArkUI_RenderNodeUtils_SetShadowRadius(ArkUI_RenderNodeHandle node, fl
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setShadowRadius(
-        node->renderNodeHandle, radius, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, radius);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -893,13 +811,10 @@ int32_t OH_ArkUI_RenderNodeUtils_SetBorderStyle(ArkUI_RenderNodeHandle node, Ark
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setBorderStyle(node->renderNodeHandle,
-        borderStyle->leftStyle, borderStyle->topStyle, borderStyle->rightStyle, borderStyle->bottomStyle,
-        reinterpret_cast<void*>(&errorInfoPtr));
+        borderStyle->leftStyle, borderStyle->topStyle, borderStyle->rightStyle, borderStyle->bottomStyle);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -912,15 +827,13 @@ int32_t OH_ArkUI_RenderNodeUtils_GetBorderStyle(ArkUI_RenderNodeHandle node, Ark
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto code = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getBorderStyle(node->renderNodeHandle,
         reinterpret_cast<uint32_t*>(&((*borderStyle)->leftStyle)),
         reinterpret_cast<uint32_t*>(&((*borderStyle)->topStyle)),
         reinterpret_cast<uint32_t*>(&((*borderStyle)->rightStyle)),
-        reinterpret_cast<uint32_t*>(&((*borderStyle)->leftStyle)), reinterpret_cast<void*>(&errorInfoPtr));
+        reinterpret_cast<uint32_t*>(&((*borderStyle)->leftStyle)));
     if (code != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return code;
 }
@@ -935,13 +848,10 @@ int32_t OH_ArkUI_RenderNodeUtils_SetBorderWidth(ArkUI_RenderNodeHandle node, Ark
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setBorderWidth(node->renderNodeHandle,
-        borderWidth->leftWidth, borderWidth->topWidth, borderWidth->rightWidth, borderWidth->bottomWidth,
-        reinterpret_cast<void*>(&errorInfoPtr));
+        borderWidth->leftWidth, borderWidth->topWidth, borderWidth->rightWidth, borderWidth->bottomWidth);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -951,14 +861,12 @@ int32_t OH_ArkUI_RenderNodeUtils_GetBorderWidth(ArkUI_RenderNodeHandle node, Ark
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto code = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getBorderWidth(node->renderNodeHandle,
         reinterpret_cast<float*>(&((*borderWidth)->leftWidth)), reinterpret_cast<float*>(&((*borderWidth)->topWidth)),
         reinterpret_cast<float*>(&((*borderWidth)->rightWidth)),
-        reinterpret_cast<float*>(&((*borderWidth)->leftWidth)), reinterpret_cast<void*>(&errorInfoPtr));
+        reinterpret_cast<float*>(&((*borderWidth)->leftWidth)));
     if (code != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
 
     return code;
@@ -974,13 +882,10 @@ int32_t OH_ArkUI_RenderNodeUtils_SetBorderColor(ArkUI_RenderNodeHandle node, Ark
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setBorderColor(node->renderNodeHandle,
-        borderColor->leftColor, borderColor->topColor, borderColor->rightColor, borderColor->bottomColor,
-        reinterpret_cast<void*>(&errorInfoPtr));
+        borderColor->leftColor, borderColor->topColor, borderColor->rightColor, borderColor->bottomColor);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -990,15 +895,13 @@ int32_t OH_ArkUI_RenderNodeUtils_GetBorderColor(ArkUI_RenderNodeHandle node, Ark
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Render node is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto code = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getBorderColor(node->renderNodeHandle,
         reinterpret_cast<uint32_t*>(&((*borderColor)->leftColor)),
         reinterpret_cast<uint32_t*>(&((*borderColor)->topColor)),
         reinterpret_cast<uint32_t*>(&((*borderColor)->rightColor)),
-        reinterpret_cast<uint32_t*>(&((*borderColor)->leftColor)), reinterpret_cast<void*>(&errorInfoPtr));
+        reinterpret_cast<uint32_t*>(&((*borderColor)->leftColor)));
     if (code != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return code;
 }
@@ -1014,13 +917,11 @@ int32_t OH_ArkUI_RenderNodeUtils_SetBorderRadius(ArkUI_RenderNodeHandle node,
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setBorderRadius(node->renderNodeHandle,
         borderRadius->topLeftRadius, borderRadius->topRightRadius,
-        borderRadius->bottomLeftRadius, borderRadius->bottomRightRadius, reinterpret_cast<void*>(&errorInfoPtr));
+        borderRadius->bottomLeftRadius, borderRadius->bottomRightRadius);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -1033,15 +934,13 @@ int32_t OH_ArkUI_RenderNodeUtils_GetBorderRadius(ArkUI_RenderNodeHandle node,
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto code = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getBorderRadius(node->renderNodeHandle,
         reinterpret_cast<float*>(&((*borderRadius)->topLeftRadius)),
         reinterpret_cast<float*>(&((*borderRadius)->topRightRadius)),
         reinterpret_cast<float*>(&((*borderRadius)->bottomLeftRadius)),
-        reinterpret_cast<float*>(&((*borderRadius)->bottomRightRadius)), reinterpret_cast<void*>(&errorInfoPtr));
+        reinterpret_cast<float*>(&((*borderRadius)->bottomRightRadius)));
     if (code != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return code;
 }
@@ -1053,12 +952,10 @@ int32_t OH_ArkUI_RenderNodeUtils_SetMarkNodeGroup(ArkUI_RenderNodeHandle node, b
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setMarkNodeGroup(node->renderNodeHandle,
-        static_cast<int32_t>(markNodeGroup), reinterpret_cast<void*>(&errorInfoPtr));
+        static_cast<int32_t>(markNodeGroup));
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -1075,13 +972,11 @@ int32_t OH_ArkUI_RenderNodeUtils_SetBounds(ArkUI_RenderNodeHandle node,
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setBounds(node->renderNodeHandle,
         static_cast<uint32_t>(x), static_cast<uint32_t>(y),
-        static_cast<uint32_t>(width), static_cast<uint32_t>(height), reinterpret_cast<void*>(&errorInfoPtr));
+        static_cast<uint32_t>(width), static_cast<uint32_t>(height));
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -1094,14 +989,11 @@ int32_t OH_ArkUI_RenderNodeUtils_GetBounds(ArkUI_RenderNodeHandle node, int32_t*
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getBounds(node->renderNodeHandle,
         reinterpret_cast<uint32_t*>(x), reinterpret_cast<uint32_t*>(y),
-        reinterpret_cast<uint32_t*>(width), reinterpret_cast<uint32_t*>(height),
-        reinterpret_cast<void*>(&errorInfoPtr));
+        reinterpret_cast<uint32_t*>(width), reinterpret_cast<uint32_t*>(height));
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -1113,12 +1005,10 @@ int32_t OH_ArkUI_RenderNodeUtils_SetDrawRegion(ArkUI_RenderNodeHandle node, floa
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setDrawRegion(
-        node->renderNodeHandle, x, y, w, h, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, x, y, w, h);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -1134,12 +1024,10 @@ int32_t OH_ArkUI_RenderNodeUtils_SetClipToFrame(ArkUI_RenderNodeHandle node, int
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setClipToFrame(
-        node->renderNodeHandle, clipToFrame, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, clipToFrame);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -1151,12 +1039,10 @@ int32_t OH_ArkUI_RenderNodeUtils_GetClipToFrame(ArkUI_RenderNodeHandle node, int
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getClipToFrame(
-        node->renderNodeHandle, clipToFrame, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, clipToFrame);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -1172,12 +1058,10 @@ int32_t OH_ArkUI_RenderNodeUtils_SetClipToBounds(ArkUI_RenderNodeHandle node, in
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setClipToBounds(
-        node->renderNodeHandle, clipToBounds, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, clipToBounds);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -1189,12 +1073,10 @@ int32_t OH_ArkUI_RenderNodeUtils_GetClipToBounds(ArkUI_RenderNodeHandle node, in
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getClipToBounds(
-        node->renderNodeHandle, clipToBounds, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, clipToBounds);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -1209,12 +1091,10 @@ int32_t OH_ArkUI_RenderNodeUtils_AttachContentModifier(
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->attachModifier(
-        node->renderNodeHandle, modifier->RenderModifierHandle, reinterpret_cast<void*>(&errorInfoPtr));
+        node->renderNodeHandle, modifier->RenderModifierHandle);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -1254,12 +1134,10 @@ int32_t OH_ArkUI_RenderNodeUtils_AttachFloatProperty(
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->attachProperty(
-        modifier->RenderModifierHandle, property->rsPropertyHandle, reinterpret_cast<void*>(&errorInfoPtr));
+        modifier->RenderModifierHandle, property->rsPropertyHandle);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -1275,12 +1153,10 @@ int32_t OH_ArkUI_RenderNodeUtils_AttachVector2Property(
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->attachProperty(
-        modifier->RenderModifierHandle, property->rsPropertyHandle, reinterpret_cast<void*>(&errorInfoPtr));
+        modifier->RenderModifierHandle, property->rsPropertyHandle);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -1296,12 +1172,10 @@ int32_t OH_ArkUI_RenderNodeUtils_AttachColorProperty(
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->attachProperty(
-        modifier->RenderModifierHandle, property->rsPropertyHandle, reinterpret_cast<void*>(&errorInfoPtr));
+        modifier->RenderModifierHandle, property->rsPropertyHandle);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -1317,12 +1191,10 @@ int32_t OH_ArkUI_RenderNodeUtils_AttachFloatAnimatableProperty(
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->attachProperty(
-        modifier->RenderModifierHandle, property->rsPropertyHandle, reinterpret_cast<void*>(&errorInfoPtr));
+        modifier->RenderModifierHandle, property->rsPropertyHandle);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -1338,12 +1210,10 @@ int32_t OH_ArkUI_RenderNodeUtils_AttachVector2AnimatableProperty(
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->attachProperty(
-        modifier->RenderModifierHandle, property->rsPropertyHandle, reinterpret_cast<void*>(&errorInfoPtr));
+        modifier->RenderModifierHandle, property->rsPropertyHandle);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -1359,12 +1229,10 @@ int32_t OH_ArkUI_RenderNodeUtils_AttachColorAnimatableProperty(
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->attachProperty(
-        modifier->RenderModifierHandle, property->rsPropertyHandle, reinterpret_cast<void*>(&errorInfoPtr));
+        modifier->RenderModifierHandle, property->rsPropertyHandle);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -1389,12 +1257,10 @@ int32_t OH_ArkUI_RenderNodeUtils_SetFloatPropertyValue(ArkUI_FloatPropertyHandle
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setFloatProperty(
-        property->rsPropertyHandle, value, reinterpret_cast<void*>(&errorInfoPtr));
+        property->rsPropertyHandle, value);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -1406,12 +1272,10 @@ int32_t OH_ArkUI_RenderNodeUtils_GetFloatPropertyValue(ArkUI_FloatPropertyHandle
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getFloatProperty(
-        property->rsPropertyHandle, value, reinterpret_cast<void*>(&errorInfoPtr));
+        property->rsPropertyHandle, value);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -1447,12 +1311,10 @@ int32_t OH_ArkUI_RenderNodeUtils_SetVector2PropertyValue(ArkUI_Vector2PropertyHa
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setVector2Property(
-        property->rsPropertyHandle, x, y, reinterpret_cast<void*>(&errorInfoPtr));
+        property->rsPropertyHandle, x, y);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -1464,12 +1326,10 @@ int32_t OH_ArkUI_RenderNodeUtils_GetVector2PropertyValue(ArkUI_Vector2PropertyHa
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getVector2Property(
-        property->rsPropertyHandle, x, y, reinterpret_cast<void*>(&errorInfoPtr));
+        property->rsPropertyHandle, x, y);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -1505,12 +1365,10 @@ int32_t OH_ArkUI_RenderNodeUtils_SetColorPropertyValue(ArkUI_ColorPropertyHandle
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setColorProperty(
-        property->rsPropertyHandle, value, reinterpret_cast<void*>(&errorInfoPtr));
+        property->rsPropertyHandle, value);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -1522,12 +1380,10 @@ int32_t OH_ArkUI_RenderNodeUtils_GetColorPropertyValue(ArkUI_ColorPropertyHandle
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getColorProperty(
-        property->rsPropertyHandle, value, reinterpret_cast<void*>(&errorInfoPtr));
+        property->rsPropertyHandle, value);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -1564,12 +1420,10 @@ int32_t OH_ArkUI_RenderNodeUtils_SetFloatAnimatablePropertyValue(
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setFloatAnimatableProperty(
-        property->rsPropertyHandle, value, reinterpret_cast<void*>(&errorInfoPtr));
+        property->rsPropertyHandle, value);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -1582,12 +1436,10 @@ int32_t OH_ArkUI_RenderNodeUtils_GetFloatAnimatablePropertyValue(
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getFloatAnimatableProperty(
-        property->rsPropertyHandle, value, reinterpret_cast<void*>(&errorInfoPtr));
+        property->rsPropertyHandle, value);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -1624,12 +1476,10 @@ int32_t OH_ArkUI_RenderNodeUtils_SetVector2AnimatablePropertyValue(
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setVector2AnimatableProperty(
-        property->rsPropertyHandle, x, y, reinterpret_cast<void*>(&errorInfoPtr));
+        property->rsPropertyHandle, x, y);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -1642,12 +1492,10 @@ int32_t OH_ArkUI_RenderNodeUtils_GetVector2AnimatablePropertyValue(
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getVector2AnimatableProperty(
-        property->rsPropertyHandle, x, y, reinterpret_cast<void*>(&errorInfoPtr));
+        property->rsPropertyHandle, x, y);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -1684,12 +1532,10 @@ int32_t OH_ArkUI_RenderNodeUtils_SetColorAnimatablePropertyValue(
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setColorAnimatableProperty(
-        property->rsPropertyHandle, value, reinterpret_cast<void*>(&errorInfoPtr));
+        property->rsPropertyHandle, value);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -1702,12 +1548,10 @@ int32_t OH_ArkUI_RenderNodeUtils_GetColorAnimatablePropertyValue(
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getColorAnimatableProperty(
-        property->rsPropertyHandle, value, reinterpret_cast<void*>(&errorInfoPtr));
+        property->rsPropertyHandle, value);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -1731,13 +1575,10 @@ int32_t OH_ArkUI_RenderNodeUtils_SetContentModifierOnDraw(ArkUI_RenderContentMod
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setModifierOnDraw(
-        modifier->RenderModifierHandle, userData,
-        reinterpret_cast<void (*)(ArkUIDrawingContext*, void*)>(callback), reinterpret_cast<void*>(&errorInfoPtr));
+        modifier->RenderModifierHandle, userData, reinterpret_cast<void (*)(ArkUIDrawingContext*, void*)>(callback));
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -2111,9 +1952,6 @@ int32_t OH_ArkUI_RenderNodeUtils_SetMask(ArkUI_RenderNodeHandle node, ArkUI_Rend
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{
-        OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Mask shape type is invalid"
-    });
     auto result = OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     auto type = option->type;
     ArkUIMaskFill fillColor;
@@ -2122,22 +1960,22 @@ int32_t OH_ArkUI_RenderNodeUtils_SetMask(ArkUI_RenderNodeHandle node, ArkUI_Rend
     fillColor.strokeWidth = option->strokeWidth;
     if (type == RECT_SHAPE) {
         result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setRectMask(
-            node->renderNodeHandle, option->rect, fillColor, reinterpret_cast<void*>(&errorInfoPtr));
+            node->renderNodeHandle, option->rect, fillColor);
     } else if (type == CIRCLE_SHAPE) {
         result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setCircleMask(
-            node->renderNodeHandle, option->circle, fillColor, reinterpret_cast<void*>(&errorInfoPtr));
+            node->renderNodeHandle, option->circle, fillColor);
     } else if (type == ROUND_RECT_SHAPE) {
         result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setRoundRectMask(
-            node->renderNodeHandle, option->roundRect, fillColor, reinterpret_cast<void*>(&errorInfoPtr));
+            node->renderNodeHandle, option->roundRect, fillColor);
     } else if (type == OVAL_SHAPE) {
         result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setOvalMask(
-            node->renderNodeHandle, option->oval, fillColor, reinterpret_cast<void*>(&errorInfoPtr));
+            node->renderNodeHandle, option->oval, fillColor);
     } else if (type == COMMANDS) {
         result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setCommandPathMask(
-            node->renderNodeHandle, option->commands, fillColor, reinterpret_cast<void*>(&errorInfoPtr));
+            node->renderNodeHandle, option->commands, fillColor);
     }
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -2151,29 +1989,26 @@ int32_t OH_ArkUI_RenderNodeUtils_SetClip(ArkUI_RenderNodeHandle node, ArkUI_Rend
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{
-        OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized"
-    });
     auto result = OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR;
     auto type = option->type;
     if (type == RECT_SHAPE) {
         result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setRectClip(
-            node->renderNodeHandle, option->rect, reinterpret_cast<void*>(&errorInfoPtr));
+            node->renderNodeHandle, option->rect);
     } else if (type == CIRCLE_SHAPE) {
         result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setCircleClip(
-            node->renderNodeHandle, option->circle, reinterpret_cast<void*>(&errorInfoPtr));
+            node->renderNodeHandle, option->circle);
     } else if (type == ROUND_RECT_SHAPE) {
         result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setRoundRectClip(
-            node->renderNodeHandle, option->roundRect, reinterpret_cast<void*>(&errorInfoPtr));
+            node->renderNodeHandle, option->roundRect);
     } else if (type == OVAL_SHAPE) {
         result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setOvalClip(
-            node->renderNodeHandle, option->oval, reinterpret_cast<void*>(&errorInfoPtr));
+            node->renderNodeHandle, option->oval);
     } else if (type == COMMANDS) {
         result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->setCommandPathClip(
-            node->renderNodeHandle, option->commands, reinterpret_cast<void*>(&errorInfoPtr));
+            node->renderNodeHandle, option->commands);
     }
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     return result;
 }
@@ -2358,12 +2193,10 @@ int32_t OH_ArkUI_RenderNodeUtils_GetRenderNode(ArkUI_NodeHandle node, ArkUI_Rend
         impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR, __FUNCTION__, "Native module not initialized");
     ArkUIRenderNodeHandle renderNodeHandle;
     int renderNodeId = 0;
-    auto errorInfoPtr = std::make_shared<ArkUIErrorInfo>(ArkUIErrorInfo{OHOS::Ace::ERROR_CODE_NO_ERROR,
-        __FUNCTION__, ""});
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getRenderNode(
-        node->uiNodeHandle, &renderNodeHandle, &renderNodeId, reinterpret_cast<void*>(&errorInfoPtr));
+        node->uiNodeHandle, &renderNodeHandle, &renderNodeId);
     if (result != OHOS::Ace::ERROR_CODE_NO_ERROR) {
-        SET_ERROR_MESSAGE(errorInfoPtr->errorCode, errorInfoPtr->functionName, errorInfoPtr->errorMessage);
+        SET_ERROR_FUNCTION_NAME(__FUNCTION__);
     }
     if (result == OHOS::Ace::ERROR_CODE_NO_ERROR) {
         auto iter = g_renderNodeMap.find(renderNodeId);

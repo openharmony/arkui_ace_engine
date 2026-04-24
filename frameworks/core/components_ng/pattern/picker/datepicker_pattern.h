@@ -42,6 +42,7 @@ using OHOS::Ace::PickerTheme;
 using OHOS::Ace::DialogTheme;
 
 class InspectorFilter;
+constexpr int32_t COLUMNS_SIZE = 3;
 namespace {
 const Dimension FOCUS_PAINT_WIDTH = 2.0_vp;
 constexpr Dimension PICKER_DIALOG_MARGIN_FORM_EDGE = 24.0_vp;
@@ -143,7 +144,7 @@ public:
 
     void HandleColumnChange(const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, bool needNotify);
 
-    void InitColumnsOrder(RefPtr<FrameNode>* columns) const;
+    void InitColumnsOrder(RefPtr<FrameNode> (*columns)[COLUMNS_SIZE]) const;
 
     void SolarColumnsBuilding(const PickerDate& current);
 

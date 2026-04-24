@@ -74,7 +74,7 @@ import { StyledString, StyledStringInternal } from './styledString'
 import { default as text } from '@ohos.graphics.text'
 import { TabsController, TabsControllerInternal } from './tabs'
 import { Scroller, ScrollerInternal, UIScrollEvent, UIScrollEventInternal } from './scroll'
-import { CustomKeyboardContinueFeature, TargetInfo, GestureListenerType, GestureActionPhase } from '@ohos.arkui.UIContext'
+import { CustomKeyboardContinueFeature, TextSelectionClearPolicy, TargetInfo, GestureListenerType, GestureActionPhase } from '@ohos.arkui.UIContext'
 import { LazyForEachOptions_serializer, LazyForEachOptions } from './lazyForEach'
 import { NavigationOptions_serializer, NavPathStack, NavPathStackInternal, NavPathInfo, NavPathInfoInternal, NavigationOptions } from './navigation'
 import { TargetInfo_serializer } from './../framework/ohos.arkui.UIContext'
@@ -3808,6 +3808,11 @@ export class IUIContext {
         IUIContext.setCustomCursor_serialize(value_casted, focusX_casted, focusY_casted)
         return
     }
+    public static setTextSelectionClearPolicy(policy: TextSelectionClearPolicy): void {
+        const policy_casted = policy as (TextSelectionClearPolicy)
+        IUIContext.setTextSelectionClearPolicy_serialize(policy_casted)
+        return
+    }
     private static freezeUINode0_serialize(id: string, isFrozen: boolean): void {
         ArkUIGeneratedNativeModule._IUIContext_freezeUINode0(id, isFrozen ? true : false)
     }
@@ -3932,6 +3937,9 @@ export class IUIContext {
         }
         ArkUIGeneratedNativeModule._IUIContext_setCustomCursor(extractors.toImagePixelMapPtr(value), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
+    }
+    private static setTextSelectionClearPolicy_serialize(policy: TextSelectionClearPolicy): void {
+        ArkUIGeneratedNativeModule._IUIContext_setTextSelectionClearPolicy(policy.valueOf())
     }
 }
 export class LazyBuild {
@@ -10718,12 +10726,12 @@ export class TouchEventProxy_serializer {
         const typeTmpResult: TouchType = TouchType.fromValue(valueDeserializer.readInt32())
         const touchesTmpBufLength: int32 = valueDeserializer.readInt32()
         const touchesTmpBuf: Array<TouchObject> = new Array<TouchObject>(touchesTmpBufLength, (arg0: int32):TouchObject => {
-            return TouchObject_serializer.read(valueDeserializer);
+            return (TouchObject_serializer.read(valueDeserializer) as TouchObject);
         })
         const touchesTmpResult: Array<TouchObject> = touchesTmpBuf
         const changedTouchesTmpBufLength: int32 = valueDeserializer.readInt32()
         const changedTouchesTmpBuf: Array<TouchObject> = new Array<TouchObject>(changedTouchesTmpBufLength, (arg0: int32):TouchObject => {
-            return TouchObject_serializer.read(valueDeserializer);
+            return (TouchObject_serializer.read(valueDeserializer) as TouchObject);
         })
         const changedTouchesTmpResult: Array<TouchObject> = changedTouchesTmpBuf
         const ptrTmpResult: KPointer = valueDeserializer.readPointer()

@@ -118,7 +118,18 @@ void ListItemGroupModelStatic::SetSpace(FrameNode* frameNode, const std::optiona
     if (space.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Space, space.value(), frameNode);
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Space, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+            ListItemGroupLayoutProperty, Space, PROPERTY_UPDATE_MEASURE, frameNode);
+    }
+}
+
+void ListItemGroupModelStatic::SetSpaceWidth(FrameNode* frameNode, const std::optional<Dimension>& spaceWidth)
+{
+    if (spaceWidth.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, SpaceWidth, spaceWidth.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+            ListItemGroupLayoutProperty, SpaceWidth, PROPERTY_UPDATE_MEASURE, frameNode);
     }
 }
 

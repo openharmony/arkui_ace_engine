@@ -129,6 +129,24 @@ void TextFieldPaintMethod::SetShowUnderlineWidth()
     }
 }
 
+void TextFieldPaintMethod::UpdatePreviewTextDecorationColor(RefPtr<TextFieldPaintProperty> paintProperty)
+{
+    CHECK_NULL_VOID(paintProperty);
+    CHECK_NULL_VOID(textFieldOverlayModifier_);
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    auto frameNode = textFieldPattern->GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto previewDecorationColor = paintProperty->GetCursorColorValue(textFieldPattern->GetPreviewDecorationColor());
+    auto textfieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(textfieldPaintProperty);
+    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
+        !textfieldPaintProperty->HasCaretColorFlagByUser()) {
+        previewDecorationColor = textFieldPattern->GetPreviewDecorationColor();
+    }
+    textFieldOverlayModifier_->SetPreviewTextDecorationColor(previewDecorationColor);
+}
+
 void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(paintWrapper);
@@ -183,8 +201,7 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     textFieldOverlayModifier_->SetTextRect(textFieldPattern->GetTextRect());
     textFieldOverlayModifier_->SetShowPreviewTextDecoration(textFieldPattern->GetIsPreviewText());
     textFieldOverlayModifier_->SetPreviewTextRects(textFieldPattern->NeedDrawPreviewText());
-    auto previewDecorationColor = paintProperty->GetCursorColorValue(textFieldPattern->GetPreviewDecorationColor());
-    textFieldOverlayModifier_->SetPreviewTextDecorationColor(previewDecorationColor);
+    UpdatePreviewTextDecorationColor(paintProperty);
     textFieldOverlayModifier_->SetPreviewTextStyle(textFieldPattern->GetPreviewTextStyle());
     UpdateScrollBar();
 }

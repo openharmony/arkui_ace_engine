@@ -198,6 +198,7 @@ public:
         HARDWARE_SURFACE,
         COMPOSITE_COMPONENT,
         UNION,
+        DEPTH,
 #ifdef RENDER_EXTRACT_SUPPORTED
         HARDWARE_TEXTURE,
 #endif
@@ -319,6 +320,7 @@ public:
     virtual void SetBounds(float positionX, float positionY, float width, float height) {}
     virtual void SetContentRectToFrame(RectF rect) {}
     virtual void SetSecurityLayer(bool isSecure) {}
+    virtual void SetIsBackground(bool isBackground) {}
     virtual void SetHDRBrightness(float hdrBrightness) {}
     virtual void SetHDRBrightness(float hdrBrightness, uint32_t type) {}
     virtual void SetImageHDRBrightness(float hdrBrightness) {}

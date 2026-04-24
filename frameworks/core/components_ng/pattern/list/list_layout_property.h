@@ -25,7 +25,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_layout_property.h"
 #include "core/components_ng/property/property.h"
-#include "compatible/components/list_v2/list_component.h"
+#include "core/components_ng/pattern/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
@@ -97,6 +97,7 @@ public:
     void ScrollSnapPropToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void SetListItemFillPolicy(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Space, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SpaceWidth, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(InitialIndex, int32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ListDirection, Axis, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Divider, V2::ItemDivider, PROPERTY_UPDATE_MEASURE);

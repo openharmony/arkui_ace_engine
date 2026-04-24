@@ -33,7 +33,7 @@
 #include "bridge/common/utils/utils.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
-#include "interfaces/native/error_message_macros.h"
+#include "interfaces/native/native_error_message_macros.h"
 
 namespace OHOS::Ace::NodeModel {
 namespace {
@@ -5541,6 +5541,28 @@ void ResetRichEditorSingleLine(ArkUI_NodeHandle node)
     GetFullImpl()->getNodeModifiers()->getRichEditorModifier()->resetRichEditorSingleLine(node->uiNodeHandle);
 }
 
+int32_t SetRichEditorHorizontalScrolling(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item) {
+    auto fullImpl = GetFullImpl();
+    if (item->size == 0 || !CheckAttributeIsBool(item->value[0].i32)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    fullImpl->getNodeModifiers()->getRichEditorModifier()->setRichEditorHorizontalScrolling(node->uiNodeHandle,
+        item->value[0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetRichEditorHorizontalScrolling(ArkUI_NodeHandle node)
+{
+    g_numberValues[0].i32 = GetFullImpl()->getNodeModifiers()->getRichEditorModifier()
+        ->getRichEditorHorizontalScrolling(node->uiNodeHandle);
+    return &g_attributeItem;
+}
+
+void ResetRichEditorHorizontalScrolling(ArkUI_NodeHandle node)
+{
+    GetFullImpl()->getNodeModifiers()->getRichEditorModifier()->resetRichEditorHorizontalScrolling(node->uiNodeHandle);
+}
+
 int32_t SetRichEditorBindSelectionMenu(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
@@ -7124,7 +7146,8 @@ int32_t SetScrollScrollBarWidth(ArkUI_NodeHandle node, const ArkUI_AttributeItem
     int32_t unit = GetDefaultUnit(node, UNIT_VP);
     if (node->type == ARKUI_NODE_LIST) {
         auto width = std::to_string(attrVal) + LENGTH_METRIC_UNIT[unit];
-        fullImpl->getNodeModifiers()->getListModifier()->setListScrollBarWidth(node->uiNodeHandle, width.c_str());
+        fullImpl->getNodeModifiers()->getListModifier()->setListScrollBarWidth(
+            node->uiNodeHandle, width.c_str(), nullptr);
     } else if (node->type == ARKUI_NODE_SCROLL) {
         fullImpl->getNodeModifiers()->getScrollModifier()->setScrollScrollBarWidth(node->uiNodeHandle, attrVal, unit);
     } else if (node->type == ARKUI_NODE_WATER_FLOW) {
@@ -8060,7 +8083,8 @@ int32_t SetListSpace(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     auto fullImpl = GetFullImpl();
 
-    fullImpl->getNodeModifiers()->getListModifier()->setListSpace(node->uiNodeHandle, item->value[NUM_0].f32);
+    fullImpl->getNodeModifiers()->getListModifier()->setListSpaceWidth(
+        node->uiNodeHandle, item->value[NUM_0].f32, UNIT_VP, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -17916,7 +17940,7 @@ int32_t SetRefreshMaxPullDownDistance(ArkUI_NodeHandle node, const ArkUI_Attribu
     CHECK_NULL_RETURN(nodeModifiers, ERROR_CODE_PARAM_INVALID);
     auto refreshModifier = nodeModifiers->getRefreshModifier();
     CHECK_NULL_RETURN(refreshModifier, ERROR_CODE_PARAM_INVALID);
-    refreshModifier->setMaxPullDownDistance(node->uiNodeHandle, distanceValue);
+    refreshModifier->setMaxPullDownDistance(node->uiNodeHandle, distanceValue, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -17929,7 +17953,7 @@ void ResetRefreshMaxPullDownDistance(ArkUI_NodeHandle node)
     CHECK_NULL_VOID(nodeModifiers);
     auto refreshModifier = nodeModifiers->getRefreshModifier();
     CHECK_NULL_VOID(refreshModifier);
-    refreshModifier->resetMaxPullDownDistance(node->uiNodeHandle);
+    refreshModifier->resetMaxPullDownDistance(node->uiNodeHandle, nullptr);
 }
 
 const ArkUI_AttributeItem* GetRefreshMaxPullDownDistance(ArkUI_NodeHandle node)
@@ -17957,7 +17981,8 @@ int32_t SetRefreshOffset(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
     int32_t unit = GetDefaultUnit(node, UNIT_VP);
-    fullImpl->getNodeModifiers()->getRefreshModifier()->setRefreshOffset(node->uiNodeHandle, item->value[0].f32, unit);
+    fullImpl->getNodeModifiers()->getRefreshModifier()->setRefreshOffset(
+        node->uiNodeHandle, item->value[0].f32, unit, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -22117,8 +22142,7 @@ void ResetCheckboxGroupAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
     return resetters[subTypeId](node);
 }
 
-int32_t SetNodeAttribute(
-    ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, const ArkUI_AttributeItem* item, void* errorInfoPtr)
+int32_t SetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, const ArkUI_AttributeItem* item)
 {
     using AttributeSetterClass = int32_t(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item);
     static AttributeSetterClass* setterClasses[] = { SetCommonAttribute, SetTextAttribute, SetSpanAttribute,
@@ -22137,19 +22161,16 @@ int32_t SetNodeAttribute(
         subTypeClass < MAX_NODE_SCOPE_NUM ? subTypeClass : (subTypeClass - MAX_NODE_SCOPE_NUM + BASIC_COMPONENT_NUM);
     if ((static_cast<uint32_t>(nodeSubTypeClass) >= sizeof(setterClasses) / sizeof(AttributeSetterClass*)) ||
         !CheckIfAttributeLegal(node, type) || !CheckIsCNodeOrCrossLanguage(node)) {
-        SetErrorInfoFromErrorInfoPtr(
-            ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED, errorInfoPtr, "Node attribute is not supported");
+        SET_ERROR_CODE_AND_MESSAGE(ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED, "Node attribute is not supported");
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
     }
     if (!setterClasses[nodeSubTypeClass]) {
-        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Node attribute setter is invalid");
+        SET_ERROR_CODE_AND_MESSAGE(ERROR_CODE_PARAM_INVALID, "Node attribute setter is invalid");
         return ERROR_CODE_PARAM_INVALID;
     }
     auto result = setterClasses[nodeSubTypeClass](node, subTypeId, item);
     if (result == ERROR_CODE_NO_ERROR) {
         GetFullImpl()->getBasicAPI()->markDirty(node->uiNodeHandle, ARKUI_DIRTY_FLAG_ATTRIBUTE_DIFF);
-    } else {
-        SetErrorInfoFromErrorInfoPtr(result, errorInfoPtr, "Failed to set node attribute");
     }
     return result;
 }
@@ -22182,7 +22203,7 @@ const ArkUI_AttributeItem* GetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAtt
     return getterClasses[nodeSubTypeClass](node, subTypeId);
 }
 
-int32_t ResetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, void* errorInfoPtr)
+int32_t ResetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type)
 {
     using AttributeResetterClass = void(ArkUI_NodeHandle node, int32_t subTypeId);
     static AttributeResetterClass* resetterClasses[] = { ResetCommonAttribute, ResetTextAttribute, ResetSpanAttribute,
@@ -22202,12 +22223,11 @@ int32_t ResetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, 
     if ((static_cast<uint32_t>(nodeSubTypeClass) >= sizeof(resetterClasses) / sizeof(AttributeResetterClass*)) ||
         !CheckIfAttributeLegal(node, type) || !CheckIsCNodeOrCrossLanguage(node)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "node attribute: %{public}d NOT IMPLEMENT", type);
-        SetErrorInfoFromErrorInfoPtr(
-            ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED, errorInfoPtr, "Node attribute is not supported");
+        SET_ERROR_CODE_AND_MESSAGE(ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED, "Node attribute is not supported");
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
     }
     if (!resetterClasses[nodeSubTypeClass]) {
-        SetErrorInfoFromErrorInfoPtr(ERROR_CODE_PARAM_INVALID, errorInfoPtr, "Node attribute resetter is invalid");
+        SET_ERROR_CODE_AND_MESSAGE(ERROR_CODE_PARAM_INVALID, "Node attribute resetter is invalid");
         return ERROR_CODE_PARAM_INVALID;
     }
     resetterClasses[nodeSubTypeClass](node, subTypeId);

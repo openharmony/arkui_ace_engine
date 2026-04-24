@@ -40,12 +40,12 @@ GeometryTransition::GeometryTransition(
 
 bool GeometryTransition::IsInAndOutEmpty() const
 {
-    return !inNode_.Upgrade() && !outNode_.Upgrade();
+    return inNode_.Invalid() && outNode_.Invalid();
 }
 
 bool GeometryTransition::IsInAndOutValid() const
 {
-    return inNode_.Upgrade() && outNode_.Upgrade();
+    return !inNode_.Invalid() && !outNode_.Invalid();
 }
 
 bool GeometryTransition::IsRunning(const WeakPtr<FrameNode>& frameNode) const
@@ -590,14 +590,22 @@ void GeometryTransition::AnimateWithSandBox(const OffsetF& inNodeParentPos, bool
 // match tightly.
 void GeometryTransition::OnReSync(const WeakPtr<FrameNode>& trigger, const AnimationOption& option)
 {
+    CHECK_NULL_VOID(isSynced_ && outNodeTargetAbsRect_ && outNodeTargetAbsRect_->IsValid());
+    OnReSyncInner(trigger, option);
+}
+
+__attribute__((noinline)) void GeometryTransition::OnReSyncInner(const WeakPtr<FrameNode>& trigger,
+    const AnimationOption& option)
+{
     auto inNode = inNode_.Upgrade();
+    CHECK_NULL_VOID(inNode && inNode->IsOnMainTree());
     auto outNode = outNode_.Upgrade();
-    CHECK_NULL_VOID(isSynced_ && outNode && outNode->IsRemoving() && outNodeTargetAbsRect_ &&
-        outNodeTargetAbsRect_->IsValid() && inNode && inNode->IsOnMainTree());
-    auto inRenderContext = inNode->GetRenderContext();
-    auto outRenderContext = outNode->GetRenderContext();
+    CHECK_NULL_VOID(outNode && outNode->IsRemoving());
+
+    auto& inRenderContext = inNode->GetRenderContext();
+    auto& outRenderContext = outNode->GetRenderContext();
     CHECK_NULL_VOID(inRenderContext && outRenderContext);
-    if (trigger.Upgrade()) {
+    if (!trigger.Invalid()) {
         RecordAnimationOption(trigger, option);
         return;
     }

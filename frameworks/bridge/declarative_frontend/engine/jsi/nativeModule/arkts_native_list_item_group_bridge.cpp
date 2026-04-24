@@ -160,14 +160,29 @@ ArkUINativeModuleValue ListItemGroupBridge::SetListItemGroupInitialize(ArkUIRunt
     Local<JSValueRef> styleArg = runtimeCallInfo->GetCallArgRef(2); // 2 is index of style
     Local<JSValueRef> headerStyleArg = runtimeCallInfo->GetCallArgRef(5); // 5 is index of headerStyle
     Local<JSValueRef> footerStyleArg = runtimeCallInfo->GetCallArgRef(6); // 6 is index of footerStyle
+    Local<JSValueRef> spaceWidthArg = runtimeCallInfo->GetCallArgRef(7); // 7 is index of spaceWidth
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
     double space = 0.0;
-    if (spaceArg->IsObject(vm) || !ArkTSUtils::ParseJsDouble(vm, spaceArg, space) || LessNotEqual(space, 0.0)) {
+    CalcDimension calc;
+    bool hasSpaceWidth = !spaceWidthArg->IsUndefined();
+    if (hasSpaceWidth) {
+        RefPtr<ResourceObject> resObj;
+        if (!ArkTSUtils::ParseJsDimension(vm, spaceWidthArg, calc, DimensionUnit::VP, resObj) ||
+            LessNotEqual(calc.Value(), 0.0)) {
+            calc.SetValue(.0f);
+            calc.SetUnit(DimensionUnit::VP);
+        }
+        GetArkUINodeModifiers()->getListItemGroupModifier()->setListItemGroupSpace(
+            nativeNode, calc.Value(), static_cast<uint32_t>(calc.Unit()), resObj.GetRawPtr());
+    } else if (!ArkTSUtils::ParseJsDouble(vm, spaceArg, space) || LessNotEqual(space, 0.0)) {
         space = 0.0;
     }
-    GetArkUINodeModifiers()->getListItemGroupModifier()->setListItemGroupSpace(nativeNode, space);
+    if (!hasSpaceWidth) {
+        GetArkUINodeModifiers()->getListItemGroupModifier()->setListItemGroupSpace(
+            nativeNode, space, static_cast<uint32_t>(DimensionUnit::VP), nullptr);
+    }
 
     if (styleArg->IsUndefined() || styleArg->IsNull() || !styleArg->IsNumber()) {
         GetArkUINodeModifiers()->getListItemGroupModifier()->resetListItemGroupStyle(nativeNode);

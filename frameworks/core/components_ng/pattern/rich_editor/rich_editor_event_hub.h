@@ -18,6 +18,7 @@
 
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_gesture_event_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/common/ime/text_range.h"
 
@@ -304,6 +305,7 @@ public:
     void FireOnSubmit(int32_t value, NG::TextFieldCommonEvent& event);
     void SetOnWillAttachIME(IMEAttachCallback&& func);
     void FireOnWillAttachIME(IMEClient& info);
+    RefPtr<GestureEventHub> CreateGestureEventHub() override;
     void SetOnWillChange(std::function<bool(const RichEditorChangeValue&)>&& func);
     bool FireOnWillChange(const RichEditorChangeValue& info);
     bool HasOnWillChange() const;

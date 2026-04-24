@@ -55,6 +55,12 @@ public:
             digitalIndicatorTextStyle_.SetTextColor(colors->FontPrimary());
             hoverArrowBackgroundColor_ = colors->InteractiveHover();
             clickArrowBackgroundColor_ = colors->InteractiveClick();
+
+            selectedColor_ = colors->CompBackgroundEmphasize();
+            color_ = colors->CompBackgroundSecondary();
+            smallArrowColor_ = colors->IconPrimary();
+            bigArrowColor_ = colors->IconPrimary();
+            bigArrowBackgroundColor_ = colors->CompBackgroundSecondary();
         }
     }
 

@@ -43,9 +43,8 @@ public:
         LayoutProperty::Reset();
     }
     
-    void ExpandConstraintWithSafeArea() override
+    void ExpandConstraintWithSafeArea(RefPtr<FrameNode>& host) override
     {
-        auto host = GetHost();
         CHECK_NULL_VOID(host);
         if (!IsExpandConstraintDependencySatisfied()) {
             return;

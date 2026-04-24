@@ -96,14 +96,12 @@ void DepthComponentPattern::OnAttachToFrameNode()
         pattern->rotation_ = rotation;
     });
     UpdateTransformHintChangedCallbackId(callbackId);
-    InitGltfAdapter();
 #endif
 }
 
 void DepthComponentPattern::OnDetachFromFrameNode(FrameNode* node)
 {
 #if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
-    CleanupGltfResources(false);
     if (node) {
         auto pipeline = node->GetContextRefPtr();
         if (pipeline) {
@@ -131,19 +129,21 @@ void DepthComponentPattern::OnModifyDone()
 #if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
         InitGltfAdapter();
         if (!gltfWindowsInitialized_) {
-            CreateCustomNativeWindows(0, 0);
+            CreateCustomNativeWindows(width3d_, height3d_);
         }
         UpdateGltfScene();
-        UpdateGltfCamera();
         Update3DScale();
         UpdateWindowChangeSize(true);
+        CHECK_NULL_VOID(mrtDepthAdapter_);
+        mrtDepthAdapter_->OnWindowChange(windowChangeInfos_);
+        UpdateGltfCamera();
         MarkRender3D();
 #endif
     } else {
-        SetupBackgroundImageNode();
 #if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
         CleanupGltfResources(false);
 #endif
+        SetupBackgroundImageNode();
     }
 
 #ifdef ENABLE_ROSEN_BACKEND
@@ -159,7 +159,13 @@ bool DepthComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>
     if (config.skipMeasure && config.skipLayout) {
         return false;
     }
+    CHECK_NULL_RETURN(dirty, false);
 #if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
+    auto geometryNode = dirty->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, !(config.skipMeasure || dirty->SkipMeasureContent()));
+    auto frameRect = geometryNode->GetFrameRect();
+    width3d_ = frameRect.Width();
+    height3d_ = frameRect.Height();
     if (IsGltfBackground()) {
         UpdateGltfWindowChange(dirty, config);
         auto host = GetHost();
@@ -215,6 +221,7 @@ void DepthComponentPattern::SetupBackgroundImageNode()
         auto backgroundImageNode = FrameNode::GetOrCreateFrameNode(
             V2::IMAGE_ETS_TAG, backgroundImageId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
         CHECK_NULL_VOID(backgroundImageNode);
+        backgroundImageNode->SetHitTestMode(HitTestMode::HTMNONE);
         host->AddChild(backgroundImageNode, 0);
     }
 
@@ -295,6 +302,8 @@ void DepthComponentPattern::RemoveBackgroundImageNode()
     if (index >= 0) {
         host->RemoveChildAtIndex(index);
     }
+
+    backgroundImageId_.reset();
 }
 
 void DepthComponentPattern::OnPaint3D()
@@ -449,10 +458,21 @@ void DepthComponentPattern::InitGltfAdapter()
 {
     ACE_SCOPED_TRACE("DepthComponent::InitGltfAdapter gltf=%d adapter=%d", IsGltfBackground(),
         mrtDepthAdapter_ != nullptr);
-    if (!IsGltfBackground() || mrtDepthAdapter_) {
+    if (!IsGltfBackground()) {
         return;
     }
-    mrtDepthAdapter_ = Render3D::GetMrtDepthAdapterInstance();
+
+    auto backgroundSource = GetBackgroundSource();
+    if (gltfSceneLoaded_ && mrtDepthAdapter_ && lastLoadedGltfPath_ != backgroundSource.resolvedPath) {
+        mrtDepthAdapter_.reset();
+        mrtDepthAdapter_ = Render3D::GetMrtDepthAdapterInstance();
+        gltfSceneLoaded_ = false;
+        return;
+    }
+
+    if (!mrtDepthAdapter_) {
+        mrtDepthAdapter_ = Render3D::GetMrtDepthAdapterInstance();
+    }
 }
 
 void DepthComponentPattern::UpdateGltfScene()
@@ -463,7 +483,7 @@ void DepthComponentPattern::UpdateGltfScene()
     if (!backgroundSource.IsGltf()) {
         return;
     }
-    InitGltfAdapter();
+
     CHECK_NULL_VOID(mrtDepthAdapter_);
     if (!gltfWindowsInitialized_) {
         return;
@@ -471,6 +491,7 @@ void DepthComponentPattern::UpdateGltfScene()
     if (lastLoadedGltfPath_ == backgroundSource.resolvedPath && gltfSceneLoaded_) {
         return;
     }
+
     lastLoadedGltfPath_ = backgroundSource.resolvedPath;
     mrtDepthAdapter_->CreateSceneByGltfUri(lastLoadedGltfPath_);
     gltfSceneLoaded_ = true;
@@ -500,20 +521,12 @@ void DepthComponentPattern::UpdateGltfWindowChange(const RefPtr<LayoutWrapper>& 
 {
     ACE_SCOPED_TRACE("DepthComponent::UpdateGltfWindowChange sizeChange=%d windowsReady=%d",
         config.contentSizeChange, gltfWindowsInitialized_);
-    CHECK_NULL_VOID(dirty);
-    auto geometryNode = dirty->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto frameRect = geometryNode->GetFrameRect();
-    width3d_ = frameRect.Width();
-    height3d_ = frameRect.Height();
     if (NearZero(width3d_) || NearZero(height3d_)) {
         return;
     }
     UpdateWindowChangeSize(true);
-    InitGltfAdapter();
     CHECK_NULL_VOID(mrtDepthAdapter_);
     mrtDepthAdapter_->OnWindowChange(windowChangeInfos_);
-    UpdateGltfScene();
     UpdateGltfCamera();
     MarkRender3D();
 }
@@ -522,6 +535,14 @@ void DepthComponentPattern::CleanupGltfResources(bool clearAdapter)
 {
     ACE_SCOPED_TRACE("DepthComponent::CleanupGltfResources clearAdapter=%d windows=%zu surfaces=%zu", clearAdapter,
         nativeWindows_.size(), nativeSurfaces_.size());
+    
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    for (size_t i = 0; i < surfaceRenderContext_.size(); ++i) {
+        renderContext->RemoveChild(surfaceRenderContext_[i]);
+    }
     windowChangeInfos_.clear();
     nativeWindows_.clear();
     nativeSurfaceNodes_.clear();
@@ -607,8 +628,6 @@ void DepthComponentPattern::UpdateWindowChangeSize(bool recreateWindow)
         "DepthComponent::UpdateWindowChangeSize width=%.1f height=%.1f", width3d_, height3d_);
     for (size_t index = 0; index < windowChangeInfos_.size(); ++index) {
         auto& info = windowChangeInfos_[index];
-        info.offsetX = 0.0;
-        info.offsetY = 0.0;
         info.width = width3d_;
         info.height = height3d_;
         info.scale = DEFAULT_SCALE;

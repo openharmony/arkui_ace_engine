@@ -57,6 +57,7 @@ ace_unittest("content_slot_syntax_test_ng") {
   type = "new"
   sources = [
     "$ace_root/frameworks/core/interfaces/native/node/node_content_modifier.cpp",
+    "$ace_root/test/mock/frameworks/core/interfaces/native/utility/mock_error_message_manager.cpp",
     "content_slot_syntax_test_ng.cpp",
   ]
 }

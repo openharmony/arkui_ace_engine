@@ -6571,6 +6571,20 @@ typedef enum {
     NODE_TEXT_EDITOR_ORPHAN_CHAR_OPTIMIZATION,
 
     /**
+     * @brief Whether to enable horizontal scrolling when text is wider than the view.
+     * The default value is false, and text will be wrapped by the view.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: The horizontally scrolling state.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: The horizontally scrolling state.\n
+     *
+     * @since 26.0.0
+     */
+    NODE_TEXT_EDITOR_HORIZONTAL_SCROLLING,
+
+    /**
      * @brief Defines the alignment mode of the child components in the container. This attribute can be set, reset,
      * and obtained as required through APIs.
      *

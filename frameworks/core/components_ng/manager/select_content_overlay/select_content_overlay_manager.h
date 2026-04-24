@@ -112,6 +112,11 @@ public:
     int32_t GetTextSelectionHolderId();
     void SetTextSelectionHolderId(int32_t id);
     void RemoveTextSelectionHolderId(int32_t id);
+    void SetTextSelectionClearPolicy(TextSelectionClearPolicy policy);
+    std::optional<TextSelectionClearPolicy> GetTextSelectionClearPolicy() const
+    {
+        return textSelectionClearPolicy_;
+    }
 
 private:
     void SetHolder(const RefPtr<SelectOverlayHolder>& holder);
@@ -167,6 +172,7 @@ private:
     int32_t containerId_ = -1;
 
     int32_t textSelectHolderId_ = -1;
+    std::optional<TextSelectionClearPolicy> textSelectionClearPolicy_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectContentOverlayManager);
 };

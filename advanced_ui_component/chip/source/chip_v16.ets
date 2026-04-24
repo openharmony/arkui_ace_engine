@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,7 @@ import mediaquery from '@ohos.mediaquery';
 import EnvironmentCallback from '@ohos.app.ability.EnvironmentCallback';
 import common from '@ohos.app.ability.common';
 import deviceInfo from '@ohos.deviceInfo';
-import { uiMaterial } from '@kit.ArkUI';
+import uiMaterial from '@ohos.arkui.uiMaterial';
 
 export enum ChipSize {
   NORMAL = 'NORMAL',
@@ -561,7 +561,7 @@ export struct ChipComponent {
     }
     try {
       return ColorMetrics.resourceColor(this.chipNodeActivatedBackgroundColor).color !==
-      ColorMetrics.resourceColor(this.theme.chipNode.activatedBackgroundColor).color;
+        ColorMetrics.resourceColor(this.theme.chipNode.activatedBackgroundColor).color;
     } catch (error) {
       console.error(`[Chip] failed to get ColorMetrics.resourceColor`);
       return false;
@@ -574,7 +574,7 @@ export struct ChipComponent {
     }
     try {
       return ColorMetrics.resourceColor(this.chipNodeBackgroundColor).color !==
-      ColorMetrics.resourceColor(this.theme.chipNode.backgroundColor).color;
+        ColorMetrics.resourceColor(this.theme.chipNode.backgroundColor).color;
     } catch (error) {
       console.error(`[Chip] failed to get resourceColor`);
       return false;
@@ -724,7 +724,6 @@ export struct ChipComponent {
     .direction(this.chipDirection)
     .backgroundColor(this.getChipBackgroundColor())
     .systemMaterial(this.getBackgroundSystemMaterial())
-    .useEffect(this.inGroup ? true : undefined)
     .borderWidth(this.getChipNodeBorderWidth())
     .borderColor(this.getChipNodeBorderColor())
     .borderRadius(this.getChipBorderRadius())
@@ -1044,14 +1043,16 @@ export struct ChipComponent {
   }
 
   private getChipResponseRegion(): Rectangle | undefined {
-    const chipHeight = this.getChipHeight();
-    if (chipHeight < HOT_SPOT_MIN_HEIGHT) {
-      return {
-        x: 0,
-        y: (chipHeight - HOT_SPOT_MIN_HEIGHT) / 2,
-        width: '100%',
-        height: HOT_SPOT_MIN_HEIGHT
-      };
+    if (deviceInfo.sdkApiVersion >= 26) {
+      const chipHeight = this.getChipHeight();
+      if (chipHeight < HOT_SPOT_MIN_HEIGHT) {
+        return {
+          x: 0,
+          y: (chipHeight - HOT_SPOT_MIN_HEIGHT) / 2,
+          width: '100%',
+          height: HOT_SPOT_MIN_HEIGHT
+        };
+      }
     }
     return undefined;
   }
@@ -1341,7 +1342,7 @@ export struct ChipComponent {
   }
 
   getBackgroundSystemMaterial(): uiMaterial.Material | undefined {
-    if (deviceInfo.sdkApiVersion < 26 || this.inGroup) {
+    if (deviceInfo.sdkApiVersion < 26) {
       return undefined;
     }
     if (this.isChipActivated()) {

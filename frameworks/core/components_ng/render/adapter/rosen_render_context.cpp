@@ -30,6 +30,7 @@
 #include "render_service_client/core/ui_effect/property/include/rs_ui_shape_base.h"
 #include "render_service_client/core/ui/rs_node.h"
 #include "render_service_base/include/common/rs_color.h"
+#include "render_service_client/core/ui/rs_depth_node.h"
 #include "render_service_client/core/ui/rs_root_node.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
 #include "render_service_client/core/ui/rs_ui_context.h"
@@ -669,6 +670,10 @@ void RosenRenderContext::CreateNodeByType(
         }
         case ContextType::UNION: {
             rsNode_ = Rosen::RSUnionNode::Create(false, isTextureExportNode, rsContext);
+            break;
+        }
+        case ContextType::DEPTH: {
+            rsNode_ = Rosen::RSDepthNode::Create(false, isTextureExportNode, rsContext);
             break;
         }
         case ContextType::EXTERNAL:
@@ -2849,20 +2854,14 @@ Matrix4 RosenRenderContext::GetRevertMatrix()
     auto centOffset = OffsetF(center[0] * rect.Width(), center[1] * rect.Height());
     auto centerPos = rect.GetOffset() + centOffset;
 
-    auto perspectiveMat = Matrix4::CreateTranslate(centerPos.GetX(), centerPos.GetY(), 0) *
-                          Matrix4::CreateFactorPerspective(perspective[0], perspective[1]) *
-                          Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
-    auto translateMat = Matrix4::CreateTranslate(translate[0], translate[1], 0);
-    auto rotationMat = Matrix4::CreateTranslate(centerPos.GetX(), centerPos.GetY(), 0) * rotateMat *
-                       Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
-    auto skewMat = Matrix4::CreateTranslate(centerPos.GetX(), centerPos.GetY(), 0) *
-                   Matrix4::CreateFactorSkew(skew[0], skew[1]) *
-                   Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
-    auto scaleMat = Matrix4::CreateTranslate(centerPos.GetX(), centerPos.GetY(), 0) *
-                    Matrix4::CreateScale(scale[0], scale[1], 1) *
-                    Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
-
-    return Matrix4::Invert(perspectiveMat * translateMat * rotationMat * skewMat * scaleMat);
+    return Matrix4::Invert(
+        Matrix4::CreateTranslate(centerPos.GetX(), centerPos.GetY(), 0).
+        MatrixMultiply(Matrix4::CreateFactorPerspective(perspective[0], perspective[1])).
+        MatrixMultiply(Matrix4::CreateTranslate(translate[0], translate[1], 0)).
+        MatrixMultiply(rotateMat).
+        MatrixMultiply(Matrix4::CreateFactorSkew(skew[0], skew[1])).
+        MatrixMultiply(Matrix4::CreateScale(scale[0], scale[1], 1)).
+        MatrixMultiply(Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0)));
 }
 
 Matrix4 RosenRenderContext::GetMatrix()
@@ -2871,6 +2870,11 @@ Matrix4 RosenRenderContext::GetMatrix()
     if (ShouldSkipAffineTransformation(rsNode_)) {
         return Matrix4();
     }
+    return GetMatrixInner();
+}
+
+__attribute__((noinline)) Matrix4 RosenRenderContext::GetMatrixInner()
+{
     auto center = rsNode_->GetStagingProperties().GetPivot();
     int32_t degree = rsNode_->GetStagingProperties().GetRotation();
     if (rsNode_->GetType() == RSUINodeType::DISPLAY_NODE && degree != 0) {
@@ -2886,18 +2890,12 @@ Matrix4 RosenRenderContext::GetMatrix()
     auto centOffset = OffsetF(center[0] * rect.Width(), center[1] * rect.Height());
     auto centerPos = rect.GetOffset() + centOffset;
 
-    auto translateMat = Matrix4::CreateTranslate(translate[0], translate[1], 0);
-    auto rotationMat = Matrix4::CreateTranslate(centerPos.GetX(), centerPos.GetY(), 0) *
-                       Matrix4::CreateRotate(degree, 0, 0, 1) *
-                       Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
-    auto skewMat = Matrix4::CreateTranslate(centerPos.GetX(), centerPos.GetY(), 0) *
-                   Matrix4::CreateFactorSkew(skew[0], skew[1]) *
-                   Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
-    auto scaleMat = Matrix4::CreateTranslate(centerPos.GetX(), centerPos.GetY(), 0) *
-                    Matrix4::CreateScale(scale[0], scale[1], 1) *
-                    Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
-
-    return translateMat * rotationMat * skewMat * scaleMat;
+    return Matrix4::CreateTranslate(translate[0], translate[1], 0).
+        MatrixMultiply(Matrix4::CreateTranslate(centerPos.GetX(), centerPos.GetY(), 0)).
+        MatrixMultiply(Matrix4::CreateRotate(degree, 0, 0, 1)).
+        MatrixMultiply(Matrix4::CreateFactorSkew(skew[0], skew[1])).
+        MatrixMultiply(Matrix4::CreateScale(scale[0], scale[1], 1)).
+        MatrixMultiply(Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0));
 }
 
 // only for GetPositionToXXXWithTransform in FrameNode.
@@ -2908,6 +2906,11 @@ Matrix4 RosenRenderContext::GetMatrixWithTransformRotate()
     if (ShouldSkipAffineTransformation(rsNode_)) {
         return Matrix4();
     }
+    return GetMatrixWithTransformRotateInner();
+}
+
+__attribute__((noinline)) Matrix4 RosenRenderContext::GetMatrixWithTransformRotateInner()
+{
     auto center = rsNode_->GetStagingProperties().GetPivot();
     Matrix4 rotateMat;
 
@@ -2934,27 +2937,20 @@ Matrix4 RosenRenderContext::GetMatrixWithTransformRotate()
     auto centOffset = OffsetF(center[0] * rect.Width(), center[1] * rect.Height());
     auto centerPos = rect.GetOffset() + centOffset;
 
-    auto perspectiveMat = Matrix4::CreateTranslate(centerPos.GetX(), centerPos.GetY(), 0) *
-                          Matrix4::CreateFactorPerspective(perspective[0], perspective[1]) *
-                          Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
-    auto translateMat = Matrix4::CreateTranslate(translate[0], translate[1], 0);
-    auto rotationMat = Matrix4::CreateTranslate(centerPos.GetX(), centerPos.GetY(), 0) * rotateMat *
-                       Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
-    auto skewMat = Matrix4::CreateTranslate(centerPos.GetX(), centerPos.GetY(), 0) *
-                   Matrix4::CreateFactorSkew(skew[0], skew[1]) *
-                   Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
-    auto scaleMat = Matrix4::CreateTranslate(centerPos.GetX(), centerPos.GetY(), 0) *
-                    Matrix4::CreateScale(scale[0], scale[1], 1) *
-                    Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
-
-    return perspectiveMat * translateMat * rotationMat * skewMat * scaleMat;
+    return Matrix4::CreateTranslate(centerPos.GetX(), centerPos.GetY(), 0).
+        MatrixMultiply(Matrix4::CreateFactorPerspective(perspective[0], perspective[1])).
+        MatrixMultiply(Matrix4::CreateTranslate(translate[0], translate[1], 0)).
+        MatrixMultiply(rotateMat).
+        MatrixMultiply(Matrix4::CreateFactorSkew(skew[0], skew[1])).
+        MatrixMultiply(Matrix4::CreateScale(scale[0], scale[1], 1)).
+        MatrixMultiply(Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0));
 }
 
 Matrix4 RosenRenderContext::GetLocalTransformMatrix()
 {
-    auto invertMat = GetRevertMatrix();
     RectF rect = GetPaintRectWithoutTransform();
-    auto transformMat = Matrix4::CreateTranslate(-rect.GetOffset().GetX(), -rect.GetOffset().GetY(), 0) * invertMat;
+    auto transformMat = Matrix4::CreateTranslate(-rect.GetOffset().GetX(), -rect.GetOffset().GetY(), 0);
+    transformMat *= GetRevertMatrix();
     return transformMat;
 }
 
@@ -2992,6 +2988,11 @@ void RosenRenderContext::GetPointWithTransform(PointF& point)
     if (ShouldSkipAffineTransformation(rsNode_)) {
         return;
     }
+    GetPointWithTransformInner(point);
+}
+
+__attribute__((noinline)) void RosenRenderContext::GetPointWithTransformInner(PointF& point)
+{
     auto skew = rsNode_->GetStagingProperties().GetSkew();
     auto scale = rsNode_->GetStagingProperties().GetScale();
     point = PointF(point.GetX() / scale[0], point.GetY() / scale[1]);
@@ -3934,8 +3935,13 @@ RectF RosenRenderContext::GetPropertyOfPosition()
 
 RectF RosenRenderContext::AdjustPaintRect()
 {
-    RectF rect;
     auto frameNode = GetHost();
+    return AdjustPaintRectInner(frameNode);
+}
+
+RectF RosenRenderContext::AdjustPaintRectInner(RefPtr<FrameNode>& frameNode)
+{
+    RectF rect;
     CHECK_NULL_RETURN(frameNode, rect);
     CHECK_NULL_RETURN(rsNode_, rect);
     const auto& geometryNode = frameNode->GetGeometryNode();
@@ -4194,9 +4200,8 @@ float RosenRenderContext::OnePixelValueRounding(float value, bool isRound, bool 
     return value;
 }
 
-void RosenRenderContext::RoundToPixelGrid()
+void RosenRenderContext::RoundToPixelGrid(RefPtr<FrameNode>& frameNode)
 {
-    auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     auto geometryNode = frameNode->GetGeometryNode();
     float relativeLeft = geometryNode->GetPixelGridRoundOffset().GetX();
@@ -4234,10 +4239,9 @@ void RosenRenderContext::RoundToPixelGrid()
     }
 }
 
-void RosenRenderContext::RoundToPixelGrid(bool isRound, uint16_t flag)
+void RosenRenderContext::RoundToPixelGrid(RefPtr<FrameNode>& frameNode, bool isRound, uint16_t flag)
 {
     CHECK_NULL_VOID(rsNode_);
-    auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     auto geometryNode = frameNode->GetGeometryNode();
     float relativeLeft = geometryNode->GetPixelGridRoundOffset().GetX();
@@ -4285,9 +4289,8 @@ void RosenRenderContext::RoundToPixelGrid(bool isRound, uint16_t flag)
     }
 }
 
-void RosenRenderContext::OnePixelRounding(uint16_t flag)
+void RosenRenderContext::OnePixelRounding(RefPtr<FrameNode>& frameNode, uint16_t flag)
 {
-    auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     auto geometryNode = frameNode->GetGeometryNode();
     float relativeLeft = geometryNode->GetPixelGridRoundOffset().GetX();
@@ -6334,6 +6337,13 @@ void RosenRenderContext::SetSecurityLayer(bool isSecure)
     rsSurfaceNode->SetSecurityLayer(isSecure);
 }
 
+void RosenRenderContext::SetIsBackground(bool isBackground)
+{
+    FREE_RS_CONTEXT_CHECK(SetIsBackground, isBackground);
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetIsDepthBackground(isBackground);
+}
+
 void RosenRenderContext::SetHDRBrightness(float hdrBrightness)
 {
     FREE_RS_CONTEXT_CHECK(SetHDRBrightness, hdrBrightness);
@@ -7845,7 +7855,7 @@ void RosenRenderContext::SavePaintRect(bool isRound, uint16_t flag)
     CHECK_NULL_VOID(host);
     const auto& geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    AdjustPaintRect();
+    AdjustPaintRectInner(host);
     if (!SystemProperties::GetPixelRoundEnabled()) {
         // isRound is the switch of pixelRound of lower version
         isRound = false;
@@ -7853,12 +7863,12 @@ void RosenRenderContext::SavePaintRect(bool isRound, uint16_t flag)
         flag = NO_FORCE_ROUND;
     }
     if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        OnePixelRounding(flag);
+        OnePixelRounding(host, flag);
     } else {
         if (isRound && flag == 0) {
-            RoundToPixelGrid(); // call RoundToPixelGrid without param to improve performance
+            RoundToPixelGrid(host); // call RoundToPixelGrid without param to improve performance
         } else {
-            RoundToPixelGrid(isRound, flag);
+            RoundToPixelGrid(host, isRound, flag);
         }
     }
     paintRect_ = RectF(geometryNode->GetPixelGridRoundOffset(), geometryNode->GetPixelGridRoundSize());
@@ -8644,7 +8654,7 @@ void RosenRenderContext::MarkNeedDrawNode(bool condition)
     }
 }
 
-bool RosenRenderContext::ShouldSkipAffineTransformation(std::shared_ptr<RSNode> rsNode)
+bool RosenRenderContext::ShouldSkipAffineTransformation(std::shared_ptr<RSNode>& rsNode)
 {
     if (SystemProperties::GetContainerDeleteFlag() &&
         rsNode->GetDrawNodeType() != Rosen::DrawNodeType::GeometryPropertyType) {

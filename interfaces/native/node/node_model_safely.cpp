@@ -18,7 +18,7 @@
 #include "node_extened.h"
 #include "node_model.h"
 
-#include "error_message_macros.h"
+#include "interfaces/native/native_error_message_macros.h"
 #include "base/error/error_code.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"

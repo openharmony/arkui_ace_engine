@@ -43,6 +43,8 @@
 #include "core/interfaces/native/implementation/circle_shape_peer.h"
 #include "core/interfaces/native/implementation/color_metrics_peer.h"
 #include "core/interfaces/native/implementation/ellipse_shape_peer.h"
+#include "core/interfaces/native/implementation/event_location_info_peer.h"
+#include "core/interfaces/native/implementation/finger_info_peer.h"
 #include "core/interfaces/native/implementation/i_curve_peer_impl.h"
 #include "core/interfaces/native/implementation/length_metrics_peer.h"
 #include "core/interfaces/native/implementation/level_order_peer.h"
@@ -53,6 +55,7 @@
 #include "core/interfaces/native/implementation/symbol_glyph_modifier_peer.h"
 #include "core/interfaces/native/implementation/text_menu_item_id_peer.h"
 #include "core/interfaces/native/implementation/text_modifier_peer.h"
+#include "core/interfaces/native/implementation/touch_object_peer.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -2754,19 +2757,31 @@ template<>
 FingerInfo Convert(const Ark_FingerInfo& src)
 {
     FingerInfo dst;
-    dst.fingerId_ = Converter::Convert<int32_t>(src.id);
-    dst.globalLocation_.SetX(Converter::Convert<float>(src.globalX));
-    dst.globalLocation_.SetY(Converter::Convert<float>(src.globalY));
-    dst.localLocation_.SetX(Converter::Convert<float>(src.localX));
-    dst.localLocation_.SetY(Converter::Convert<float>(src.localY));
-    dst.screenLocation_.SetX(Converter::Convert<float>(src.displayX));
-    dst.screenLocation_.SetY(Converter::Convert<float>(src.displayY));
-    // Handle globalDisplayX/Y
-    auto globalDisplayXOpt = Converter::OptConvert<float>(src.globalDisplayX);
-    auto globalDisplayYOpt = Converter::OptConvert<float>(src.globalDisplayY);
-    if (globalDisplayXOpt.has_value() && globalDisplayYOpt.has_value()) {
-        dst.globalDisplayLocation_.SetX(globalDisplayXOpt.value());
-        dst.globalDisplayLocation_.SetY(globalDisplayYOpt.value());
+    CHECK_NULL_RETURN(src, dst);
+    auto rawInfo = src->GetEventInfo();
+    CHECK_NULL_RETURN(rawInfo, dst);
+    dst.fingerId_ = rawInfo->fingerId_;
+    dst.operatingHand_ = rawInfo->operatingHand_;
+    dst.sourceType_ = rawInfo->sourceType_;
+    dst.sourceTool_ = rawInfo->sourceTool_;
+    dst.globalLocation_.SetX(rawInfo->globalLocation_.GetX());
+    dst.globalLocation_.SetY(rawInfo->globalLocation_.GetY());
+    dst.localLocation_.SetX(rawInfo->localLocation_.GetX());
+    dst.localLocation_.SetY(rawInfo->localLocation_.GetY());
+    dst.screenLocation_.SetX(rawInfo->screenLocation_.GetX());
+    dst.screenLocation_.SetY(rawInfo->screenLocation_.GetY());
+    dst.globalDisplayLocation_.SetX(rawInfo->globalDisplayLocation_.GetX());
+    dst.globalDisplayLocation_.SetY(rawInfo->globalDisplayLocation_.GetY());
+    if (rawInfo->currentLocalLocation_) {
+        const auto currentLocalLocation = rawInfo->currentLocalLocation_();
+        dst.currentLocalLocation_ = [currentLocalLocation]() {
+            return currentLocalLocation;
+        };
+    } else {
+        const auto localLocation = dst.localLocation_;
+        dst.currentLocalLocation_ = [localLocation]() {
+            return localLocation;
+        };
     }
     return dst;
 }
@@ -2775,14 +2790,17 @@ template<>
 EventLocationInfo Convert(const Ark_EventLocationInfo& src)
 {
     EventLocationInfo dst;
-    dst.localLocation_.SetX(Converter::Convert<double>(src.x));
-    dst.localLocation_.SetY(Converter::Convert<double>(src.y));
-    dst.windowLocation_.SetX(Converter::Convert<double>(src.windowX));
-    dst.windowLocation_.SetY(Converter::Convert<double>(src.windowY));
-    dst.displayLocation_.SetX(Converter::Convert<double>(src.displayX));
-    dst.displayLocation_.SetY(Converter::Convert<double>(src.displayY));
-    dst.globalDisplayLocation_.SetX(Converter::OptConvert<double>(src.globalDisplayX).value_or(0.0));
-    dst.globalDisplayLocation_.SetY(Converter::OptConvert<double>(src.globalDisplayY).value_or(0.0));
+    CHECK_NULL_RETURN(src, dst);
+    const auto* rawInfo = src->GetEventInfo();
+    CHECK_NULL_RETURN(rawInfo, dst);
+    dst.localLocation_.SetX(rawInfo->localLocation_.GetX());
+    dst.localLocation_.SetY(rawInfo->localLocation_.GetY());
+    dst.windowLocation_.SetX(rawInfo->globalLocation_.GetX());
+    dst.windowLocation_.SetY(rawInfo->globalLocation_.GetY());
+    dst.displayLocation_.SetX(rawInfo->screenLocation_.GetX());
+    dst.displayLocation_.SetY(rawInfo->screenLocation_.GetY());
+    dst.globalDisplayLocation_.SetX(rawInfo->globalDisplayLocation_.GetX());
+    dst.globalDisplayLocation_.SetY(rawInfo->globalDisplayLocation_.GetY());
     return dst;
 }
 
@@ -3921,38 +3939,26 @@ OHOS::Ace::TextMetrics Convert(const Ark_TextMetrics& src)
 template<>
 TouchLocationInfo Convert(const Ark_TouchObject& src)
 {
-    TouchLocationInfo dst(src.id);
-    double windowX = Converter::Convert<double>(src.windowX);
-    double windowY = Converter::Convert<double>(src.windowY);
-    double x = Converter::Convert<double>(src.x);
-    double y = Converter::Convert<double>(src.y);
-    double displayX = Converter::Convert<double>(src.displayX);
-    double displayY = Converter::Convert<double>(src.displayY);
-
-    dst.SetGlobalLocation(Offset(PipelineBase::Vp2PxWithCurrentDensity(windowX),
-        PipelineBase::Vp2PxWithCurrentDensity(windowY)));
-    dst.SetLocalLocation(Offset(PipelineBase::Vp2PxWithCurrentDensity(x),
-        PipelineBase::Vp2PxWithCurrentDensity(y)));
-    dst.SetScreenLocation(Offset(PipelineBase::Vp2PxWithCurrentDensity(displayX),
-        PipelineBase::Vp2PxWithCurrentDensity(displayY)));
-    // Handle globalDisplayX/Y
-    auto globalDisplayXOpt = Converter::OptConvert<double>(src.globalDisplayX);
-    auto globalDisplayYOpt = Converter::OptConvert<double>(src.globalDisplayY);
-    if (globalDisplayXOpt.has_value() && globalDisplayYOpt.has_value()) {
-        dst.SetGlobalDisplayLocation(Offset(
-            PipelineBase::Vp2PxWithCurrentDensity(globalDisplayXOpt.value()),
-            PipelineBase::Vp2PxWithCurrentDensity(globalDisplayYOpt.value())
-        ));
-    }
-    auto pressedTimeOpt = Converter::OptConvert<int64_t>(src.pressedTime);
-    std::chrono::nanoseconds nanoseconds(pressedTimeOpt.value_or(0));
+    CHECK_NULL_RETURN(src, TouchLocationInfo(-1));
+    auto* rawInfo = src->GetEventInfo();
+    CHECK_NULL_RETURN(rawInfo, TouchLocationInfo(-1));
+    TouchLocationInfo dst(rawInfo->GetFingerId());
+    auto globalLoc = rawInfo->GetGlobalLocation();
+    auto localLoc = rawInfo->GetLocalLocation();
+    auto screenLoc = rawInfo->GetScreenLocation();
+    dst.SetGlobalLocation(Offset(globalLoc.GetX(), globalLoc.GetY()));
+    dst.SetLocalLocation(Offset(localLoc.GetX(), localLoc.GetY()));
+    dst.SetScreenLocation(Offset(screenLoc.GetX(), screenLoc.GetY()));
+    auto globalDisplayLoc = rawInfo->GetGlobalDisplayLocation();
+    dst.SetGlobalDisplayLocation(Offset(globalDisplayLoc.GetX(), globalDisplayLoc.GetY()));
+    std::chrono::nanoseconds nanoseconds(static_cast<int64_t>(rawInfo->GetPressedTime().time_since_epoch().count()));
     TimeStamp time(nanoseconds);
     dst.SetPressedTime(time);
-    dst.SetForce(Converter::OptConvert<float>(src.pressure).value_or(0.0f));
-    dst.SetWidth(Converter::OptConvert<int32_t>(src.width).value_or(0));
-    dst.SetHeight(Converter::OptConvert<int32_t>(src.height).value_or(0));
-    dst.SetOperatingHand(static_cast<int32_t>(src.hand.value));
-    dst.SetTouchType(Converter::Convert<std::optional<TouchType>>(src.type).value_or(TouchType::UNKNOWN));
+    dst.SetForce(rawInfo->GetForce());
+    dst.SetWidth(rawInfo->GetWidth());
+    dst.SetHeight(rawInfo->GetHeight());
+    dst.SetOperatingHand(rawInfo->GetOperatingHand());
+    dst.SetTouchType(rawInfo->GetTouchType());
     return dst;
 }
 

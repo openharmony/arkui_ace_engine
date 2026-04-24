@@ -272,7 +272,7 @@ struct ListFilterRow {
             .id(`filterListFilterRow_${this.filterId}_${this.rowIndex}`)
             .height(PERCENT_100)
             .onClick((event?: ClickEvent) => {
-              this.onItemClick(colIndex as number)
+              this.onItemClick(colIndex.toDouble())
               this.sendAccessibility(option, true);
             })
             .focusable(true)
@@ -752,7 +752,7 @@ struct MultiFilterRow {
                   .backgroundColor(this.isBackgroundHoverRow[colIndex.toInt()] ?
                     this.backgroundColorRow[colIndex.toInt()] : TRANS_COLOR)
                   .onClick((event?: ClickEvent) => {
-                    this.onItemClick(colIndex as number)
+                    this.onItemClick(colIndex.toDouble())
                     this.sendAccessibility(option, true);
                   })
                   .onHover((isHover: boolean, event: HoverEvent) => {
@@ -937,7 +937,7 @@ export struct Filter {
 
   textColor(rowIndex: number, colIndex: number) {
     if (this.selectedFilters && (this.selectedFilters as Array<FilterResult>).length > rowIndex &&
-      ((this.selectedFilters as Array<FilterResult>)[rowIndex.toInt()].index as number) === colIndex) {
+      ((this.selectedFilters as Array<FilterResult>)[rowIndex.toInt()].index.toDouble()) === colIndex) {
       return $r('sys.color.ohos_id_color_text_primary_activated');
     }
     return $r('sys.color.ohos_id_color_text_primary');
@@ -1291,9 +1291,9 @@ export struct Filter {
             (this.isSelectedArr as Array<BooleanArray>)[rowIndex.toInt()] : this.isSelectedArrNew,
           filterRow: filter,
           onItemClick: (colIndex: number) => {
-            this.filterItemClick(rowIndex as number, colIndex);
+            this.filterItemClick(rowIndex.toDouble(), colIndex);
           },
-          rowIndex: rowIndex as number,
+          rowIndex: rowIndex.toDouble(),
           filterAccessibilityText: this.filterAccessibilityText
         })
       },(filter: FilterParams)=>{return filter.name.toString()})
@@ -1338,9 +1338,9 @@ export struct Filter {
             (this.isArrowIconDownArr as Array<ObservedBoolean>)[rowIndex.toInt()] : this.isArrowIconDownArrNew,
           filterRow: filterItem,
           onItemClick: (colIndex: number) => {
-            this.filterItemClick(rowIndex as number, colIndex);
+            this.filterItemClick(rowIndex.toDouble(), colIndex);
           },
-          rowIndex: rowIndex as number,
+          rowIndex: rowIndex.toDouble(),
           fontSizeScale: this.fontSizeScale,
           filterId: this.filterId,
           filterAccessibilityText: this.filterAccessibilityText
@@ -1534,8 +1534,8 @@ export struct Filter {
                 }
               })
               .onClick((event?: ClickEvent) => {
-                this.additionItemClick(index as number)
-                this.sendAccessibility(option, this.getSelected(index as number));
+                this.additionItemClick(index.toDouble())
+                this.sendAccessibility(option, this.getSelected(index.toDouble()));
               })
               .tabIndex(index === 0 ? 1 : -1)
             })

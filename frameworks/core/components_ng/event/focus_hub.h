@@ -480,8 +480,11 @@ public:
     bool IsSelfFocusableWholePath();
 
     bool IsFocusable();
+    bool IsChildFocusable();
     bool IsFocusableNode();
+    bool IsChildFocusableNode();
     bool IsFocusableScope();
+    bool IsChildFocusableScope();
 
     bool IsSyncRequestFocusable();
     bool IsSyncRequestFocusableNode();

@@ -91,7 +91,7 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                                         (axis_ == Axis::HORIZONTAL && layoutPolicy.value().IsHeightFix()));
 
     auto mainPercentRefer = GetMainAxisSize(contentConstraint.percentReference, axis_);
-    auto space = layoutProperty->GetSpace().value_or(Dimension(0));
+    auto space = layoutProperty->GetSpaceWidth().value_or(layoutProperty->GetSpace().value_or(Dimension(0)));
 
     const auto& layoutConstraintOps = layoutProperty->GetLayoutConstraint();
     CHECK_NULL_VOID(layoutConstraintOps);

@@ -13,14 +13,9 @@
  * limitations under the License.
  */
 
-#include "interfaces/native/error_message_manager.h"
+#include "core/interfaces/native/utility/error_message_manager.h"
 
 namespace OHOS::Ace {
-
-std::string ErrorInfoToString(ArkUIErrorInfo& errorInfo)
-{
-    return "";
-}
 
 ErrorMessageManager& ErrorMessageManager::GetInstance()
 {
@@ -28,12 +23,20 @@ ErrorMessageManager& ErrorMessageManager::GetInstance()
     return instance;
 }
 
-void ErrorMessageManager::SetLastError(ArkUIErrorInfo lastError)
+void ErrorMessageManager::SetErrorCodeAndMessage(ArkUI_Int32 errorCode, const char* errorMessage)
 {
+    (void)errorCode;
+    (void)errorMessage;
     return;
 }
 
-const char* ErrorMessageManager::GetLastError() const
+void ErrorMessageManager::SetFunctionName(const char* functionName)
+{
+    (void)functionName;
+    return;
+}
+
+const char* ErrorMessageManager::GetErrorMessage() const
 {
     return "";
 }

@@ -121,7 +121,7 @@ void SetScroll(FrameNode* frameNode, const Opt_Scroller* scroller)
     peerImplPtr->SetController(positionController);
     peerImplPtr->SetScrollBarProxy(scrollBarProxy);
 }
-void SetGridOptionsImpl(Ark_NativePointer node,
+void SetGridOptionsImpl(Ark_VMContext vmContext, Ark_NativePointer node,
                         const Opt_Scroller* scroller,
                         const Opt_GridLayoutOptions* layoutOptions)
 {
@@ -226,8 +226,16 @@ void SetRowsGapImpl(Ark_NativePointer node,
     }
     GridModelStatic::SetRowsGap(frameNode, convValue);
 }
-void SetScrollBarWidthImpl(Ark_NativePointer node,
-                           const Opt_Union_F64_String* value)
+void SetScrollBarWidth0Impl(Ark_NativePointer node, const Opt_Union_F64_String* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<Dimension>(value);
+    Validator::ValidateNonNegative(convValue);
+    Validator::ValidateNonPercent(convValue);
+    ScrollableModelStatic::SetScrollBarWidth(frameNode, convValue);
+}
+void SetScrollBarWidth1Impl(Ark_NativePointer node, const Opt_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -691,7 +699,8 @@ const GENERATED_ArkUIGridModifier* GetGridModifier()
         GridAttributeModifier::SetRowsTemplateImpl,
         GridAttributeModifier::SetColumnsGapImpl,
         GridAttributeModifier::SetRowsGapImpl,
-        GridAttributeModifier::SetScrollBarWidthImpl,
+        GridAttributeModifier::SetScrollBarWidth0Impl,
+        GridAttributeModifier::SetScrollBarWidth1Impl,
         GridAttributeModifier::SetScrollBarColorImpl,
         GridAttributeModifier::SetScrollBarImpl,
         GridAttributeModifier::SetOnScrollBarUpdateImpl,

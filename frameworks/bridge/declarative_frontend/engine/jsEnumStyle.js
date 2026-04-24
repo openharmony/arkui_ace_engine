@@ -4786,6 +4786,12 @@ let GridItemAlignment;
   GridItemAlignment[GridItemAlignment.STRETCH = 1] = 'STRETCH';
 })(GridItemAlignment || (GridItemAlignment = {}));
 
+let DepthSpaceType;
+(function (DepthSpaceType) {
+  DepthSpaceType[DepthSpaceType.INSTANCE = 0] = 'INSTANCE';
+  DepthSpaceType[DepthSpaceType.GLOBAL = 1] = 'GLOBAL';
+})(DepthSpaceType || (DepthSpaceType = {}));
+
 let ContentClipMode;
 (function (ContentClipMode) {
   ContentClipMode[ContentClipMode.CONTENT_ONLY = 0] = 'CONTENT_ONLY';
@@ -5061,6 +5067,12 @@ let TextMenuShowMode;
   TextMenuShowMode[TextMenuShowMode.DEFAULT = 0] = 'DEFAULT';
   TextMenuShowMode[TextMenuShowMode.PREFER_WINDOW = 1] = 'PREFER_WINDOW';
 })(TextMenuShowMode || (TextMenuShowMode = {}));
+
+let TextSelectionClearPolicy;
+(function (TextSelectionClearPolicy) {
+  TextSelectionClearPolicy[TextSelectionClearPolicy.KEEP_SELECTED_TEXT_ON_EXTERNAL_TOUCH = 0] = 'KEEP_SELECTED_TEXT_ON_EXTERNAL_TOUCH';
+  TextSelectionClearPolicy[TextSelectionClearPolicy.CLEAR_SELECTED_TEXT_ON_EXTERNAL_TOUCH = 1] = 'CLEAR_SELECTED_TEXT_ON_EXTERNAL_TOUCH';
+})(TextSelectionClearPolicy || (TextSelectionClearPolicy = {}));
 
 let KeyProcessingMode;
 (function (KeyProcessingMode) {

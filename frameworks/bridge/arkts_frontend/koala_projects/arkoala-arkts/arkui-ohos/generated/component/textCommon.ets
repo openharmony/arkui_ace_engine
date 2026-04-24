@@ -67,25 +67,17 @@ export class IMEClientInternal implements MaterializedBase,IMEClient {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    // instructive change begin
     get nodeId(): int64 {
         return this.getNodeId()
     }
     set nodeId(nodeId: int64) {
         this.setNodeId(nodeId)
     }
-    // instructive change end
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, IMEClientInternal.getFinalizer())
-        // instructive change begin
-        // this.nodeId = this.getNodeId()
-        // instructive change end
     }
     constructor() {
         this(MaterializedBaseTag.NOP, IMEClientInternal.construct())
-        // instructive change begin
-        // this.nodeId = this.getNodeId()
-        // instructive change end
     }
     static construct(): KPointer {
         const retval = ArkUIGeneratedNativeModule._IMEClient_construct()
@@ -192,7 +184,7 @@ export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
         }
         const returnResult: int32 | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as int32 | undefined)
     }
     private getGlyphPositionAtCoordinate_serialize(x: double, y: double): PositionWithAffinity | undefined {
         const retval = ArkUIGeneratedNativeModule._LayoutManager_getGlyphPositionAtCoordinate(this.peer!.ptr, x, y)
@@ -204,7 +196,7 @@ export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
         }
         const returnResult: PositionWithAffinity | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as PositionWithAffinity | undefined)
     }
     private getCharacterPositionAtCoordinate_serialize(x: double, y: double): PositionWithAffinity | undefined {
         const retval = ArkUIGeneratedNativeModule._LayoutManager_getCharacterPositionAtCoordinate(this.peer!.ptr, x, y)
@@ -216,7 +208,7 @@ export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
         }
         const returnResult: PositionWithAffinity | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as PositionWithAffinity | undefined)
     }
     private getGlyphRangeForCharacterRange_serialize(charRange: TextRange): Array<TextRange> | undefined {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -235,7 +227,7 @@ export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
         }
         const returnResult: Array<TextRange> | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as Array<TextRange> | undefined)
     }
     private getCharacterRangeForGlyphRange_serialize(glyphRange: TextRange): Array<TextRange> | undefined {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -254,7 +246,7 @@ export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
         }
         const returnResult: Array<TextRange> | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as Array<TextRange> | undefined)
     }
     private getLineMetrics_serialize(lineNumber: int32): LineMetrics | undefined {
         const retval = ArkUIGeneratedNativeModule._LayoutManager_getLineMetrics(this.peer!.ptr, lineNumber)
@@ -266,7 +258,7 @@ export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
         }
         const returnResult: LineMetrics | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as LineMetrics | undefined)
     }
     private getRectsForRange_serialize(range: TextRange, widthStyle: RectWidthStyle, heightStyle: RectHeightStyle): Array<TextBox> | undefined {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -285,7 +277,7 @@ export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
         }
         const returnResult: Array<TextBox> | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as Array<TextBox> | undefined)
     }
 }
 export class ShaderStyleInternal {
@@ -358,7 +350,7 @@ export class StyledStringControllerInternal implements MaterializedBase,StyledSt
         }
         const returnResult: MutableStyledString | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as MutableStyledString | undefined)
     }
 }
 export interface TextBaseController {
@@ -426,7 +418,7 @@ export class TextBaseControllerInternal implements MaterializedBase,TextBaseCont
         }
         const returnResult: LayoutManager | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as LayoutManager | undefined)
     }
 }
 export class TextMenuItemIdInternal {
@@ -597,7 +589,7 @@ export enum TextDataDetectorType {
     DATE_TIME = 4
 }
 export interface TextDataDetectorConfig {
-    types: Array<TextDataDetectorType> | null | undefined;
+    types?: Array<TextDataDetectorType> | null | undefined;
     onDetectResultUpdate?: arkui_component_common_Callback<string, void>;
     color?: ResourceColor;
     decoration?: DecorationStyleInterface;
@@ -670,8 +662,8 @@ export type OnCreateMenuCallback = (menuItems: Array<TextMenuItem>) => Array<Tex
 export type OnMenuItemClickCallback = (menuItem: TextMenuItem, range: TextRange) => boolean;
 export type OnPrepareMenuCallback = (menuItems: Array<TextMenuItem>) => Array<TextMenuItem>;
 export interface EditMenuOptions {
-    onCreateMenu: OnCreateMenuCallback | undefined;
-    onMenuItemClick: OnMenuItemClickCallback | undefined;
+    onCreateMenu?: OnCreateMenuCallback | undefined;
+    onMenuItemClick?: OnMenuItemClickCallback | undefined;
     onPrepareMenu?: OnPrepareMenuCallback;
 }
 export interface DecorationStyleResult {
@@ -2154,7 +2146,7 @@ export class ColorShaderStyle extends ShaderStyle implements MaterializedBase {
         }
         const returnResult: ResourceColor = (buffer as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as ResourceColor)
     }
     private setColor_serialize(color: ResourceColor): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -2217,7 +2209,7 @@ export class LinearGradientStyle extends ShaderStyle implements MaterializedBase
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: LinearGradientOptions = LinearGradientOptions_serializer.read(retvalDeserializer)
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as LinearGradientOptions)
     }
     private setOptions_serialize(options: LinearGradientOptions): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -2286,7 +2278,7 @@ export class NumericTextTransition extends ContentTransition implements Material
         }
         const returnResult: FlipDirection | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as FlipDirection | undefined)
     }
     private setFlipDirection_serialize(flipDirection: FlipDirection | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -2310,7 +2302,7 @@ export class NumericTextTransition extends ContentTransition implements Material
         }
         const returnResult: boolean | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as boolean | undefined)
     }
     private setEnableBlur_serialize(enableBlur: boolean | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -2363,7 +2355,7 @@ export class RadialGradientStyle extends ShaderStyle implements MaterializedBase
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: RadialGradientOptions = RadialGradientOptions_serializer.read(retvalDeserializer)
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as RadialGradientOptions)
     }
     private setOptions_serialize(options: RadialGradientOptions): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -2423,7 +2415,7 @@ export class TextEditControllerExInternal extends TextBaseControllerInternal imp
         }
         const returnResult: boolean | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as boolean | undefined)
     }
     private stopEditing_serialize(): void {
         ArkUIGeneratedNativeModule._TextEditControllerEx_stopEditing(this.peer!.ptr)
@@ -2438,7 +2430,7 @@ export class TextEditControllerExInternal extends TextBaseControllerInternal imp
         }
         const returnResult: boolean | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as boolean | undefined)
     }
     private getCaretOffset_serialize(): int32 | undefined {
         const retval = ArkUIGeneratedNativeModule._TextEditControllerEx_getCaretOffset(this.peer!.ptr)
@@ -2450,7 +2442,7 @@ export class TextEditControllerExInternal extends TextBaseControllerInternal imp
         }
         const returnResult: int32 | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as int32 | undefined)
     }
     private getPreviewText_serialize(): PreviewText | undefined {
         const retval = ArkUIGeneratedNativeModule._TextEditControllerEx_getPreviewText(this.peer!.ptr)
@@ -2462,6 +2454,6 @@ export class TextEditControllerExInternal extends TextBaseControllerInternal imp
         }
         const returnResult: PreviewText | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as PreviewText | undefined)
     }
 }

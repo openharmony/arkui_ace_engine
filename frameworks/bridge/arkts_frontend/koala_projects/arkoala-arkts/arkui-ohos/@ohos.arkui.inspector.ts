@@ -1,4 +1,6 @@
-import { VoidCallback, ArrayIntCallback } from 'arkui/component/units';
+import { VoidCallback } from 'arkui/component/units';
+
+export type ArrayIntCallback = (arr: int[]) => void;
 declare namespace inspector {
     export class ComponentObserver {
         on(type: 'layout' | 'draw' | 'drawChildren', callback: VoidCallback): void;

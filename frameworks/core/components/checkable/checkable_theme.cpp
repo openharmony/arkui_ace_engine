@@ -15,7 +15,34 @@
 
 #include "core/components/checkable/checkable_theme.h"
 
+#include "base/log/log.h"
+#include "core/common/container.h"
+#include "core/components/theme/theme_constants.h"
+
 namespace OHOS::Ace {
+RefPtr<CheckboxTheme> CheckboxTheme::Builder::Build(const RefPtr<ThemeConstants>& themeConstants) const
+{
+    RefPtr<CheckboxTheme> theme = AceType::MakeRefPtr<CheckboxTheme>();
+    if (!themeConstants) {
+        LOGI("Build AppTheme error, themeConstants is null!");
+        return theme;
+    }
+    ParsePattern(themeConstants, theme);
+    return theme;
+}
+
+RefPtr<SwitchTheme> SwitchTheme::Builder::Build(const RefPtr<ThemeConstants>& themeConstants) const
+{
+    RefPtr<SwitchTheme> theme = AceType::MakeRefPtr<SwitchTheme>();
+    if (!themeConstants) {
+        LOGE("Build AppTheme error, themeConstants is null!");
+        return theme;
+    }
+    ParsePattern(themeConstants, theme);
+    ParseSubStylePattern(themeConstants, theme);
+    return theme;
+}
+
 void CheckboxTheme::Builder::SetCheckboxFocus(const RefPtr<ThemeConstants>& themeConstants,
     const RefPtr<CheckboxTheme>& theme) const
 {
@@ -162,6 +189,98 @@ void CheckboxTheme::Builder::SetCheckboxSize(const RefPtr<ThemeConstants>& theme
     theme->hotZoneHorizontalPadding_ =
         checkboxPattern->GetAttr<Dimension>("hotzone_padding_horizontal", 11.0_vp);
     theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
+}
+
+RefPtr<RadioTheme> RadioTheme::Builder::Build(const RefPtr<ThemeConstants>& themeConstants) const
+{
+    RefPtr<RadioTheme> theme = AceType::MakeRefPtr<RadioTheme>();
+    if (!themeConstants) {
+        return theme;
+    }
+    ParsePattern(themeConstants, theme);
+    ParseNewPattern(themeConstants, theme);
+    return theme;
+}
+
+void RadioTheme::Builder::ParseUncheckBorderColor(
+    const RefPtr<ThemeConstants>& themeConstants, const RefPtr<RadioTheme>& theme) const
+{
+    RefPtr<ThemeStyle> radioPattern = themeConstants->GetPatternByName(THEME_PATTERN_RADIO);
+    if (!radioPattern) {
+        LOGW("find pattern of radio fail");
+        return;
+    }
+
+    theme->uncheckBorderColor_ =
+        radioPattern->GetAttr<Color>("radio_uncheck_border_color", DEFAULT_UNCHECK_BORDER_COLOR);
+}
+
+void RadioTheme::Builder::ParsePattern(
+    const RefPtr<ThemeConstants>& themeConstants, const RefPtr<RadioTheme>& theme) const
+{
+    RefPtr<ThemeStyle> radioPattern = themeConstants->GetPatternByName(THEME_PATTERN_RADIO);
+    if (!radioPattern) {
+        LOGW("find pattern of radio fail");
+        return;
+    }
+    ParseUncheckBorderColor(themeConstants, theme);
+    theme->width_ = radioPattern->GetAttr<Dimension>("radio_size", 0.0_vp);
+    theme->height_ = theme->width_;
+    theme->hotZoneHorizontalPadding_ = radioPattern->GetAttr<Dimension>("radio_hotzone_padding", 0.0_vp);
+    theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
+    theme->defaultWidth_ = radioPattern->GetAttr<Dimension>("radio_default_size", 0.0_vp);
+    theme->defaultHeight_ = theme->defaultWidth_;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        theme->width_ = radioPattern->GetAttr<Dimension>("radio_size_api_twelve", 24.0_vp);
+        theme->height_ = theme->width_;
+        theme->defaultPaddingSize_ = radioPattern->GetAttr<Dimension>("radio_default_padding_size", 2.0_vp);
+        theme->sizeHoverBg_ = radioPattern->GetAttr<Dimension>("radio_hover_bg_size", 2.0_vp);
+        theme->defaultWidth_ = radioPattern->GetAttr<Dimension>("radio_default_size_api_twelve", 24.0_vp);
+        theme->defaultHeight_ = theme->defaultWidth_;
+        theme->showCircleDial_ = static_cast<bool>(radioPattern->GetAttr<double>("radio_circle_dial", 0.0));
+    }
+    theme->radioInnerSizeRatio_ = radioPattern->GetAttr<double>("radio_inner_size_ratio", 0.0);
+    theme->needFocus_ = static_cast<bool>(radioPattern->GetAttr<double>("radio_need_focus", 0.0));
+    theme->backgroundSolid_ =
+        static_cast<bool>(radioPattern->GetAttr<double>("radio_inactive_background_solid", 0.0));
+    theme->borderWidth_ = radioPattern->GetAttr<Dimension>("radio_border_width", 0.0_vp);
+    theme->shadowColor_ = radioPattern->GetAttr<Color>("radio_shadow_color", Color());
+    theme->shadowWidth_ = radioPattern->GetAttr<Dimension>("radio_shadow_width", 0.0_vp);
+    theme->pointColor_ = radioPattern->GetAttr<Color>("fg_color_checked", Color::RED);
+    theme->activeColor_ = radioPattern->GetAttr<Color>("bg_color_checked", Color::RED);
+    theme->inactiveColor_ = radioPattern->GetAttr<Color>("bg_color_unchecked", Color::RED);
+    theme->inactivePointColor_ = radioPattern->GetAttr<Color>("fg_color_unchecked", Color::RED);
+    theme->focusColor_ = radioPattern->GetAttr<Color>("bg_focus_outline_color", Color::RED);
+    theme->hoverColor_ = radioPattern->GetAttr<Color>("hover_border_color", Color::RED);
+    theme->clickEffectColor_ = radioPattern->GetAttr<Color>("click_effect_color", Color::RED);
+    theme->focusPaintPadding_ = radioPattern->GetAttr<Dimension>("focus_paint_padding", 0.0_vp);
+    theme->hoverDuration_ = radioPattern->GetAttr<double>("hover_animation_duration", 0.0);
+    theme->hoverToTouchDuration_ = radioPattern->GetAttr<double>("hover_to_press_animation_duration", 0.0);
+    theme->touchDuration_ = radioPattern->GetAttr<double>("touch_animation_duration", 0.0);
+}
+
+void RadioTheme::Builder::SetRadioSize(
+    const RefPtr<ThemeConstants>& themeConstants, const RefPtr<RadioTheme>& theme) const
+{
+    RefPtr<ThemeStyle> radioPattern = themeConstants->GetPatternByName(THEME_PATTERN_RADIO);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        theme->width_ = radioPattern->GetAttr<Dimension>("radio_size_api_twelve", 24.0_vp);
+        theme->height_ = theme->width_;
+    }
+}
+
+void RadioTheme::Builder::ParseNewPattern(
+    const RefPtr<ThemeConstants>& themeConstants, const RefPtr<RadioTheme>& theme) const
+{
+    RefPtr<ThemeStyle> radioPattern = themeConstants->GetPatternByName(THEME_PATTERN_RADIO);
+    if (!radioPattern) {
+        LOGW("find pattern of radio fail");
+        return;
+    }
+    theme->focusedRingUnchecked_ = radioPattern->GetAttr<Color>("focused_ring_unchecked", Color::TRANSPARENT);
+    theme->focusedBgUnchecked_ = radioPattern->GetAttr<Color>("focused_bg_unchecked", Color::TRANSPARENT);
+    theme->focusedBgColor_ = radioPattern->GetAttr<Color>("color_focused_bg", Color::RED);
+    theme->sizeFocusBg_ = radioPattern->GetAttr<Dimension>("size_focused_bg", 0.0_vp);
 }
 
 } // namespace OHOS::Ace

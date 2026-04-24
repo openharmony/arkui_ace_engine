@@ -354,4 +354,63 @@ void RefreshModelNG::SetStepOffsetChange(FrameNode* frameNode, OffsetStepChangeE
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnStepOffsetChange(std::move(changeEvent));
 }
+
+void RefreshModelNG::CreateWithResourceObjRefreshOffset(const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_EQUAL_VOID(SystemProperties::ConfigChangePerform(), false);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CreateWithResourceObjRefreshOffset(frameNode, resObj);
+}
+
+void RefreshModelNG::CreateWithResourceObjRefreshOffset(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_EQUAL_VOID(SystemProperties::ConfigChangePerform(), false);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RefreshPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("refresh.refreshOffset");
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        CalcDimension result(.0f);
+        if (!ResourceParseUtils::ParseResDimensionVpNG(resObj, result)) {
+            result.SetValue(.0f);
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, RefreshOffset, result, node);
+        node->MarkModifyDone();
+    };
+    pattern->AddResObj("refresh.refreshOffset", resObj, std::move(updateFunc));
+}
+
+void RefreshModelNG::CreateWithResourceObjMaxPullDownDistance(const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_EQUAL_VOID(SystemProperties::ConfigChangePerform(), false);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CreateWithResourceObjMaxPullDownDistance(frameNode, resObj);
+}
+
+void RefreshModelNG::CreateWithResourceObjMaxPullDownDistance(
+    FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_EQUAL_VOID(SystemProperties::ConfigChangePerform(), false);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RefreshPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("refresh.maxPullDownDistance");
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        double maxPullDownDistance = 0.0f;
+        bool parseResult = ResourceParseUtils::ParseResDouble(resObj, maxPullDownDistance);
+        RefreshModelNG::SetMaxPullDownDistance(
+            node.GetRawPtr(), parseResult ? std::make_optional(maxPullDownDistance) : std::make_optional(0.0));
+        node->MarkModifyDone();
+    };
+
+    pattern->AddResObj("refresh.maxPullDownDistance", resObj, std::move(updateFunc));
+}
 } // namespace OHOS::Ace::NG

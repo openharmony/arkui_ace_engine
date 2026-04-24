@@ -16,16 +16,16 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { AccessibilityActionInterceptCallback, AccessibilityCallback, AccessibilityHoverEvent_serializer, AccessibilityFocusCallback, AccessibilityTransparentCallback, AreaChangeCallback, Callback as arkui_component_common_Callback, GestureCollectInterceptCallback, TouchTestInfo_serializer, TouchResult_serializer, AxisEvent_serializer, HoverEvent_serializer, ClickEvent_serializer, CrownEvent_serializer, DismissContentCoverAction_serializer, DismissPopupAction_serializer, DismissSheetAction_serializer, DragEvent_serializer, FocusAxisEvent_serializer, InputEventInterceptResult_serializer, ItemDragInfo_serializer, KeyEvent_serializer, MouseEvent_serializer, GeometryInfo_serializer, Measurable_serializer, SizeResult_serializer, Layoutable_serializer, ScrollResult_serializer, SheetDismiss_serializer, SpringBackAction_serializer, TerminationInfo_serializer, DragItemInfo_serializer, GestureRecognizerJudgeBeginCallback, HoverCallback, InputEventListener, RawInputEventWrapper_serializer, ModifierKeyStateGetter, OnDidStopDraggingCallback, OnDragEventCallback, OnGetPreviewBadgeCallback, OnItemDragStartCallback, OnMoveHandler, OnNeedSoftkeyboardCallback, OnScrollCallback, OnVisibleIndexesChangeCallback, OnWillScrollCallback, OnWillStopDraggingCallback, PopupStateChangeCallback, PopupStateChangeParam_serializer, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TouchTestDoneCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityAction, AccessibilityActionInterceptResult, AccessibilityHoverEvent, TouchEvent, TouchTestInfo, TouchResult, AxisEvent, HoverEvent, ClickEvent, CrownEvent, DismissContentCoverAction, DismissPopupAction, DismissSheetAction, SpringLoadingContext, DragEvent, DrawContext as arkui_component_common_DrawContext, FocusAxisEvent, InputEventInterceptResult, ItemDragInfo, KeyEvent, MouseEvent, GeometryInfo, Measurable, SizeResult, Layoutable, ScrollResult, PreDragStatus, SheetDismiss, SheetType, SpringBackAction, TerminationInfo, DragItemInfo, RawInputEventWrapper, PopupStateChangeParam } from './../../component/common'
+import { AccessibilityActionInterceptCallback, AccessibilityCallback, AccessibilityHoverEvent_serializer, AccessibilityFocusCallback, AccessibilityTransparentCallback, AreaChangeCallback, Callback as arkui_component_common_Callback, TouchTestInfo_serializer, TouchResult_serializer, AxisEvent_serializer, HoverEvent_serializer, ClickEvent_serializer, CrownEvent_serializer, DismissContentCoverAction_serializer, DismissPopupAction_serializer, DismissSheetAction_serializer, DragEvent_serializer, FocusAxisEvent_serializer, InputEventInterceptResult_serializer, ItemDragInfo_serializer, KeyEvent_serializer, MouseEvent_serializer, GeometryInfo_serializer, Measurable_serializer, SizeResult_serializer, Layoutable_serializer, ScrollResult_serializer, SheetDismiss_serializer, SpringBackAction_serializer, TerminationInfo_serializer, DragItemInfo_serializer, GestureCollectInterceptCallback, GestureRecognizerJudgeBeginCallback, HoverCallback, InputEventListener, RawInputEventWrapper_serializer, ModifierKeyStateGetter, OnDidStopDraggingCallback, OnDragEventCallback, OnGetPreviewBadgeCallback, OnItemDragStartCallback, OnMoveHandler, OnNeedSoftkeyboardCallback, OnScrollCallback, OnVisibleIndexesChangeCallback, OnWillScrollCallback, OnWillStopDraggingCallback, PopupStateChangeCallback, PopupStateChangeParam_serializer, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TouchTestDoneCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityAction, AccessibilityActionInterceptResult, AccessibilityHoverEvent, TouchTestInfo, TouchResult, AxisEvent, HoverEvent, ClickEvent, CrownEvent, DismissContentCoverAction, DismissPopupAction, DismissSheetAction, SpringLoadingContext, DragEvent, DrawContext as arkui_component_common_DrawContext, FocusAxisEvent, InputEventInterceptResult, ItemDragInfo, KeyEvent, MouseEvent, GeometryInfo, Measurable, SizeResult, Layoutable, ScrollResult, PreDragStatus, SheetDismiss, SheetType, SpringBackAction, TerminationInfo, DragItemInfo, RawInputEventWrapper, PopupStateChangeParam } from './../../component/common'
 import { resourceFinalizerRegister, registerApiEventHandler, ResourceHolder, KInt, KStringPtr, wrapSystemCallback, DeserializerBase, SerializerBase, CallbackResource, InteropNativeModule, KPointer, RuntimeType, KSerializerBuffer, NativeBuffer } from '@koalaui/interop'
 import { TouchEventProxy, TouchEventProxy_serializer, AnimationEndHandler, AnimationStartHandler, Callback_CreateItem, CustomSpanMeasureInfoProxy, CustomSpanMeasureInfoProxy_serializer, Callback_Extender_OnFinish, Callback_Extender_OnProgress, Callback_Long_Void, Callback_OnDestory_Void, Callback_onMeasureSize_SizeResult, Callback_OnMoveFromTo, Callback_onPlaceChildren_Void, Callback_RangeUpdate, Callback_Size_Void, Callback_StateStylesChange, CustomNodeBuilder, CustomNodeBuilderT, BusinessErrorInterface, BusinessErrorInterface_Void_serializer, GestureEventHandler, GestureSwipeHandler, NavExtender_OnUpdateStack, NavExtender_PageMapNodeBuilder, NavExtender_PushDestinationInner, PageMapNodeBuilder, RestrictedWorker_onerror_Callback, ErrorEvent_serializer, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents_serializer, Router_BusinessError_Void, RouterFinishCallback, InnerGestureTriggerInfo_serializer, WorkerEventListener, Event_serializer, ErrorEvent, MessageEvents, InnerGestureTriggerInfo, Event } from './../../component/idlize'
-import { extractors } from '#handwritten'
+import { extractors, TouchEvent } from '#handwritten'
 import { SwiperAnimationEvent_serializer, SwiperContentTransitionProxy_serializer, ContentDidScrollCallback, ContentWillScrollCallback, SwiperContentWillScrollResult_serializer, OnSwiperAnimationEndCallback, OnSwiperAnimationStartCallback, OnSwiperGestureSwipeCallback, SwiperAnimationEvent, SwiperContentTransitionProxy, SwiperContentWillScrollResult } from './../../component/swiper'
 import { ArcScrollIndexHandler } from '@ohos.arkui.ArcList'
-import { ButtonConfiguration_serializer, ButtonTriggerClickCallback, ButtonConfiguration } from './../../component/button'
-import { ArcSwiperContentTransitionProxy_serializer } from './../ohos.arkui.ArcSwiper'
-import { ArcSwiperContentTransitionProxy } from '@ohos.arkui.ArcSwiper'
 import { Area_serializer, ConstraintSizeOptions_serializer, SizeOptions_serializer, VoidCallback, Area, ResourceStr, Resource as arkui_component_units_Resource, Length, LengthMetrics as arkui_component_units_LengthMetrics, ConstraintSizeOptions, SizeOptions } from './../../component/units'
+import { ButtonConfiguration_serializer, ButtonTriggerClickCallback, ButtonConfiguration } from './../../component/button'
+import { Callback as ohos_base_Callback, ErrorCallback, RecordData, BusinessError } from '@ohos.base'
+import { ArcSwiperContentTransitionProxy_serializer } from './../ohos.arkui.ArcSwiper'
 import { global_resource_Resource_serializer } from './../resource'
 import { TextMenuItem_serializer, DeleteValue_serializer, EditableTextChangeValue_serializer, IMEClient_serializer, InsertValue_serializer, StyledStringChangeValue_serializer, TextRange_serializer, EditableTextOnChangeCallback, PreviewText_serializer, TextChangeOptions_serializer, OnCreateMenuCallback, OnDidChangeCallback, OnMenuItemClickCallback, OnPrepareMenuCallback, TextMenuItem, DeleteValue, EditableTextChangeValue, IMEClient, InsertValue, StyledStringChangeValue, TextRange, PreviewText, TextChangeOptions } from './../../component/textCommon'
 import { ComputedBarAttribute_serializer, StartLineInfo_serializer, OnGetStartIndexByIndexCallback, OnGetStartIndexByOffsetCallback, OnGridScrollIndexCallback, ComputedBarAttribute, StartLineInfo } from './../../component/grid'
@@ -37,8 +37,7 @@ import { arkui_Graphics_DrawContext_serializer, arkui_Graphics_LengthMetrics_ser
 import { ErrorInformation_serializer, FormCallbackInfo_serializer, RouterCallbackInfo_serializer, ErrorInformation, FormCallbackInfo, RouterCallbackInfo } from './../../component/formComponent'
 import { FullscreenInfo_serializer, PlaybackInfo_serializer, PreparedInfo_serializer, FullscreenInfo, PlaybackInfo, PreparedInfo } from './../../component/video'
 import { GestureEvent_serializer, GestureInfo_serializer, BaseGestureEvent_serializer, GestureRecognizer_serializer, TouchRecognizer_serializer, GestureEvent, GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, TouchRecognizer } from './../../component/gesture'
-import { Callback as ohos_base_Callback, ErrorCallback, RecordData, BusinessError } from '@ohos.base'
-import { NativeEmbedDataInfo_serializer, NativeEmbedTouchInfo_serializer, OnAlertEvent_serializer, OnAudioStateChangedEvent_serializer, OnBeforeUnloadEvent_serializer, OnClientAuthenticationEvent_serializer, OnConfirmEvent_serializer, OnConsoleEvent_serializer, OnContextMenuShowEvent_serializer, OnDataResubmittedEvent_serializer, OnDownloadStartEvent_serializer, OnErrorReceiveEvent_serializer, OnFaviconReceivedEvent_serializer, OnFirstContentfulPaintEvent_serializer, OnGeolocationShowEvent_serializer, OnHttpAuthRequestEvent_serializer, OnHttpErrorReceiveEvent_serializer, OnInterceptRequestEvent_serializer, WebResourceResponse_serializer, OnLoadFinishedEvent_serializer, OnLoadInterceptEvent_serializer, OnLoadStartedEvent_serializer, OnOverScrollEvent_serializer, OnPageBeginEvent_serializer, OnPageEndEvent_serializer, OnPageVisibleEvent_serializer, OnPdfLoadEvent_serializer, OnPdfScrollEvent_serializer, OnPermissionRequestEvent_serializer, OnProgressChangeEvent_serializer, OnPromptEvent_serializer, OnRefreshAccessedHistoryEvent_serializer, OnRenderExitedEvent_serializer, OnResourceLoadEvent_serializer, OnScaleChangeEvent_serializer, OnScreenCaptureRequestEvent_serializer, OnScrollEvent_serializer, OnSearchResultReceiveEvent_serializer, OnShowFileSelectorEvent_serializer, OnSslErrorEventReceiveEvent_serializer, OnTitleReceiveEvent_serializer, OnTouchIconUrlReceivedEvent_serializer, OnWindowNewEvent_serializer, OnWindowNewExtEvent_serializer, WebKeyboardOptions_serializer, MouseInfoCallback, NativeEmbedMouseInfo_serializer, OnAdsBlockedCallback, AdsBlockedDetails_serializer, OnAISessionCallback, OnCameraCaptureStateChangeCallback, CameraCaptureStateChangeInfo_serializer, OnContextMenuHideCallback, OnCreateAISession, OnDestroyAISession, OnDetectBlankScreenCallback, BlankScreenDetectionEventInfo_serializer, OnExecuteAIAction, OnFirstMeaningfulPaintCallback, FirstMeaningfulPaint_serializer, OnFirstScreenPaintCallback, FirstScreenPaint_serializer, OnFullScreenEnterCallback, FullScreenEnterEvent_serializer, OnIntelligentTrackingPreventionCallback, IntelligentTrackingPreventionDetails_serializer, OnLargestContentfulPaintCallback, LargestContentfulPaint_serializer, OnMicrophoneCaptureStateChangeCallback, MicrophoneCaptureStateChangeInfo_serializer, OnNativeEmbedObjectParamChangeCallback, NativeEmbedParamDataInfo_serializer, OnNativeEmbedVisibilityChangeCallback, NativeEmbedVisibilityInfo_serializer, OnNavigationEntryCommittedCallback, LoadCommittedDetails_serializer, OnOverrideErrorPageCallback, OnOverrideUrlLoadingCallback, WebResourceRequest_serializer, OnRenderProcessNotRespondingCallback, RenderProcessNotRespondingData_serializer, OnRenderProcessRespondingCallback, OnSafeBrowsingCheckResultCallback, OnSslErrorEventCallback, SslErrorEvent_serializer, OnVerifyPinCallback, VerifyPinEvent_serializer, OnViewportFitChangedCallback, TextSelectionChangeCallback, WebKeyboardCallback, WebKeyboardCallbackInfo_serializer, NativeEmbedDataInfo, NativeEmbedTouchInfo, OnAlertEvent, OnAudioStateChangedEvent, OnBeforeUnloadEvent, OnClientAuthenticationEvent, OnConfirmEvent, OnConsoleEvent, OnContextMenuShowEvent, OnDataResubmittedEvent, OnDownloadStartEvent, OnErrorReceiveEvent, OnFaviconReceivedEvent, OnFirstContentfulPaintEvent, OnGeolocationShowEvent, OnHttpAuthRequestEvent, OnHttpErrorReceiveEvent, OnInterceptRequestEvent, WebResourceResponse, OnLoadFinishedEvent, OnLoadInterceptEvent, OnLoadStartedEvent, OnOverScrollEvent, OnPageBeginEvent, OnPageEndEvent, OnPageVisibleEvent, OnPdfLoadEvent, OnPdfScrollEvent, OnPermissionRequestEvent, OnProgressChangeEvent, OnPromptEvent, OnRefreshAccessedHistoryEvent, OnRenderExitedEvent, OnResourceLoadEvent, OnScaleChangeEvent, OnScreenCaptureRequestEvent, OnScrollEvent, OnSearchResultReceiveEvent, OnShowFileSelectorEvent, OnSslErrorEventReceiveEvent, OnTitleReceiveEvent, OnTouchIconUrlReceivedEvent, OnWindowNewEvent, OnWindowNewExtEvent, WebKeyboardOptions, NativeEmbedMouseInfo, AdsBlockedDetails, AISessionResultType, CameraCaptureStateChangeInfo, BlankScreenDetectionEventInfo, FirstMeaningfulPaint, FirstScreenPaint, FullScreenEnterEvent, IntelligentTrackingPreventionDetails, LargestContentfulPaint, MicrophoneCaptureStateChangeInfo, NativeEmbedParamDataInfo, NativeEmbedVisibilityInfo, LoadCommittedDetails, WebResourceRequest, RenderProcessNotRespondingData, ThreatType, SslErrorEvent, VerifyPinEvent, ViewportFit, WebKeyboardCallbackInfo, OnInputmethodAttachedCallback } from './../../component/web'
+import { NativeEmbedDataInfo_serializer, NativeEmbedTouchInfo_serializer, OnAlertEvent_serializer, OnAudioStateChangedEvent_serializer, OnBeforeUnloadEvent_serializer, OnClientAuthenticationEvent_serializer, OnConfirmEvent_serializer, OnConsoleEvent_serializer, OnContextMenuShowEvent_serializer, OnDataResubmittedEvent_serializer, OnDownloadStartEvent_serializer, OnErrorReceiveEvent_serializer, OnFaviconReceivedEvent_serializer, OnFirstContentfulPaintEvent_serializer, OnGeolocationShowEvent_serializer, OnHttpAuthRequestEvent_serializer, OnHttpErrorReceiveEvent_serializer, OnInterceptRequestEvent_serializer, WebResourceResponse_serializer, OnLoadFinishedEvent_serializer, OnLoadInterceptEvent_serializer, OnLoadStartedEvent_serializer, OnOverScrollEvent_serializer, OnPageBeginEvent_serializer, OnPageEndEvent_serializer, OnPageVisibleEvent_serializer, OnPdfLoadEvent_serializer, OnPdfScrollEvent_serializer, OnPermissionRequestEvent_serializer, OnProgressChangeEvent_serializer, OnPromptEvent_serializer, OnRefreshAccessedHistoryEvent_serializer, OnRenderExitedEvent_serializer, OnResourceLoadEvent_serializer, OnScaleChangeEvent_serializer, OnScreenCaptureRequestEvent_serializer, OnScrollEvent_serializer, OnSearchResultReceiveEvent_serializer, OnShowFileSelectorEvent_serializer, OnSslErrorEventReceiveEvent_serializer, OnTitleReceiveEvent_serializer, OnTouchIconUrlReceivedEvent_serializer, OnWindowNewEvent_serializer, OnWindowNewExtEvent_serializer, WebKeyboardOptions_serializer, MouseInfoCallback, NativeEmbedMouseInfo_serializer, OnAdsBlockedCallback, AdsBlockedDetails_serializer, OnAISessionCallback, OnCameraCaptureStateChangeCallback, CameraCaptureStateChangeInfo_serializer, OnContextMenuHideCallback, OnCreateAISession, OnDestroyAISession, OnDetectBlankScreenCallback, BlankScreenDetectionEventInfo_serializer, OnExecuteAIAction, OnFirstMeaningfulPaintCallback, FirstMeaningfulPaint_serializer, OnFirstScreenPaintCallback, FirstScreenPaint_serializer, OnFullScreenEnterCallback, FullScreenEnterEvent_serializer, OnInputmethodAttachedCallback, OnIntelligentTrackingPreventionCallback, IntelligentTrackingPreventionDetails_serializer, OnLargestContentfulPaintCallback, LargestContentfulPaint_serializer, OnMicrophoneCaptureStateChangeCallback, MicrophoneCaptureStateChangeInfo_serializer, OnNativeEmbedObjectParamChangeCallback, NativeEmbedParamDataInfo_serializer, OnNativeEmbedVisibilityChangeCallback, NativeEmbedVisibilityInfo_serializer, OnNavigationEntryCommittedCallback, LoadCommittedDetails_serializer, OnOverrideErrorPageCallback, OnOverrideUrlLoadingCallback, WebResourceRequest_serializer, OnRenderProcessNotRespondingCallback, RenderProcessNotRespondingData_serializer, OnRenderProcessRespondingCallback, OnSafeBrowsingCheckResultCallback, OnSslErrorEventCallback, SslErrorEvent_serializer, OnVerifyPinCallback, VerifyPinEvent_serializer, OnViewportFitChangedCallback, TextSelectionChangeCallback, WebKeyboardCallback, WebKeyboardCallbackInfo_serializer, NativeEmbedDataInfo, NativeEmbedTouchInfo, OnAlertEvent, OnAudioStateChangedEvent, OnBeforeUnloadEvent, OnClientAuthenticationEvent, OnConfirmEvent, OnConsoleEvent, OnContextMenuShowEvent, OnDataResubmittedEvent, OnDownloadStartEvent, OnErrorReceiveEvent, OnFaviconReceivedEvent, OnFirstContentfulPaintEvent, OnGeolocationShowEvent, OnHttpAuthRequestEvent, OnHttpErrorReceiveEvent, OnInterceptRequestEvent, WebResourceResponse, OnLoadFinishedEvent, OnLoadInterceptEvent, OnLoadStartedEvent, OnOverScrollEvent, OnPageBeginEvent, OnPageEndEvent, OnPageVisibleEvent, OnPdfLoadEvent, OnPdfScrollEvent, OnPermissionRequestEvent, OnProgressChangeEvent, OnPromptEvent, OnRefreshAccessedHistoryEvent, OnRenderExitedEvent, OnResourceLoadEvent, OnScaleChangeEvent, OnScreenCaptureRequestEvent, OnScrollEvent, OnSearchResultReceiveEvent, OnShowFileSelectorEvent, OnSslErrorEventReceiveEvent, OnTitleReceiveEvent, OnTouchIconUrlReceivedEvent, OnWindowNewEvent, OnWindowNewExtEvent, WebKeyboardOptions, NativeEmbedMouseInfo, AdsBlockedDetails, AISessionResultType, CameraCaptureStateChangeInfo, BlankScreenDetectionEventInfo, FirstMeaningfulPaint, FirstScreenPaint, FullScreenEnterEvent, IntelligentTrackingPreventionDetails, LargestContentfulPaint, MicrophoneCaptureStateChangeInfo, NativeEmbedParamDataInfo, NativeEmbedVisibilityInfo, LoadCommittedDetails, WebResourceRequest, RenderProcessNotRespondingData, ThreatType, SslErrorEvent, VerifyPinEvent, ViewportFit, WebKeyboardCallbackInfo } from './../../component/web'
 import { NavDestinationContext_serializer, NavDestinationTransition_serializer, NavDestinationTransitionDelegate, NavDestinationActiveReason, NavDestinationContext, NavDestinationTransition, VisibilityChangeReason } from './../../component/navDestination'
 import { NavigationTransitionProxy_serializer, NavigationAnimatedTransition_serializer, PopInfo_serializer, InterceptionCallback, NavPathInfo_serializer, NavPathStack_serializer, InterceptionModeCallback, InterceptionShowCallback, NavContentInfo_serializer, UpdateTransitionCallback, NavigationMode, NavigationTitleMode, NavigationTransitionProxy, NavigationAnimatedTransition, PopInfo, NavPathInfo, NavBar, NavPathStack, NavigationOperation, NavContentInfo } from './../../component/navigation'
 import { OnScrollFrameBeginHandlerResult_serializer, OffsetResult_serializer, OnScrollEdgeCallback, OnScrollFrameBeginCallback, ScrollOnDidZoomCallback, ScrollOnScrollCallback, ScrollOnWillScrollCallback, OnScrollFrameBeginHandlerResult, OffsetResult } from './../../component/scroll'
@@ -83,6 +82,7 @@ import { FrameNode_serializer } from './../FrameNode'
 import { UIStatesChangeHandler, FrameNode } from 'arkui.FrameNode'
 import { int32, float32, int64 } from '@koalaui/common'
 import { CallbackTransformer } from './../../CallbackTransformer'
+import { ArcSwiperContentTransitionProxy } from '@ohos.arkui.ArcSwiper'
 import { Resource as global_resource_Resource } from 'global.resource'
 import { default as dragController } from '@ohos.arkui.dragController'
 import { DrawContext as arkui_Graphics_DrawContext, LengthMetrics as arkui_Graphics_LengthMetrics, Size } from 'arkui.Graphics'
@@ -160,8 +160,7 @@ export function deserializeAndCallArcScrollIndexHandler(thisDeserializer: Deseri
 }
 export function deserializeAndCallAreaChangeCallback(thisDeserializer: DeserializerBase): void {
     const resourceId: int32 = thisDeserializer.readInt32()
-    const callbackObj = ResourceHolder.instance().get(resourceId)
-    const call = (callbackObj as AreaChangeCallback)
+    const call = (ResourceHolder.instance().get(resourceId) as AreaChangeCallback)
     let oldValue: Area = Area_serializer.read(thisDeserializer)
     let newValue: Area = Area_serializer.read(thisDeserializer)
     call(oldValue, newValue)
@@ -942,12 +941,13 @@ export function deserializeAndCallCallback_Map_String_Opt_Object(thisDeserialize
     // TODO: TS map resize
     for (let dataTmpBufIVar = 0; dataTmpBufIVar < dataTmpBufSizeVar; dataTmpBufIVar++) {
         const dataTmpBufKeyVar: string = (thisDeserializer.readString() as string)
-        const dataTmpBufValueVarTempBuf_runtimeType = thisDeserializer.readInt8()!.toInt()
-        let dataTmpBufValueVarTempBuf: Object | null | undefined = undefined
-        if ((dataTmpBufValueVarTempBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            dataTmpBufValueVarTempBuf = (thisDeserializer.readObject() as object)
+        const dataTmpBufValueVarTempBufD_runtimeType = thisDeserializer.readInt8()!.toInt()
+        let dataTmpBufValueVarTempBufD: Object | undefined = undefined
+        if ((dataTmpBufValueVarTempBufD_runtimeType) != (RuntimeType.UNDEFINED)) {
+            dataTmpBufValueVarTempBufD = (thisDeserializer.readObject() as object)
         }
-        const dataTmpBufValueVar: RecordData = dataTmpBufValueVarTempBuf
+        const dataTmpBufValueVarTempBufDeserialized: Object | undefined = dataTmpBufValueVarTempBufD
+        const dataTmpBufValueVar: RecordData = extractors.transform_Opt_Object_to_Ark_RecordData(dataTmpBufValueVarTempBufDeserialized)
         dataTmpBuf.set(dataTmpBufKeyVar, dataTmpBufValueVar)
     }
     let data: Record<string, RecordData> = dataTmpBuf
@@ -1206,7 +1206,7 @@ export function deserializeAndCallCallback_OnInterceptRequestEvent_Opt_WebResour
     const continuationBufferBufResource: CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall: KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync: KPointer = thisDeserializer.readPointer()
-    const continuationBufferClosure = (value?: WebResourceResponse | null):void => {
+    const continuationBufferClosure = (value: WebResourceResponse | null):void => {
         const continuationBufferBufArgsSerializer: SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -1621,13 +1621,13 @@ export function deserializeAndCallCallback_Opt_TabContentAnimatedTransition_Void
 }
 export function deserializeAndCallCallback_Opt_unifiedDataChannel_UnifiedData_Opt_Array_String_Void(thisDeserializer: DeserializerBase): void {
     const resourceId: int32 = thisDeserializer.readInt32()
-    const call = (ResourceHolder.instance().get(resourceId) as ((value?: unifiedDataChannel.UnifiedData | null,error?: Array<string> | undefined) => void))
+    const call = (ResourceHolder.instance().get(resourceId) as ((value?: unifiedDataChannel.UnifiedData | null | undefined,error?: Array<string> | undefined) => void))
     const valueTmpBuf_runtimeType = thisDeserializer.readInt8()!.toInt()
-    let valueTmpBuf: unifiedDataChannel.UnifiedData | null = null
+    let valueTmpBuf: unifiedDataChannel.UnifiedData | null | undefined = undefined
     if ((valueTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
         valueTmpBuf = (unifiedDataChannel_UnifiedData_serializer.read(thisDeserializer) as unifiedDataChannel.UnifiedData)
     }
-    let value: unifiedDataChannel.UnifiedData | null = valueTmpBuf
+    let value: unifiedDataChannel.UnifiedData | null | undefined = valueTmpBuf
     const errorTmpBuf_runtimeType = thisDeserializer.readInt8()!.toInt()
     let errorTmpBuf: Array<string> | undefined = undefined
     if ((errorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -2241,7 +2241,7 @@ export function deserializeAndCallDataLoadHandler(thisDeserializer: Deserializer
     const continuationBufferBufResource: CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall: KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync: KPointer = thisDeserializer.readPointer()
-    const continuationBufferClosure = (value?: unifiedDataChannel.UnifiedData | null):void => {
+    const continuationBufferClosure = (value: unifiedDataChannel.UnifiedData | null):void => {
         const continuationBufferBufArgsSerializer: SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
@@ -2309,12 +2309,12 @@ export function deserializeAndCallDelayedDataLoadHandler(thisDeserializer: Deser
     const continuationBufferBufResource: CallbackResource = thisDeserializer.readCallbackResource()
     const continuationBufferBufCall: KPointer = thisDeserializer.readPointer()
     const continuationBufferBufCallSync: KPointer = thisDeserializer.readPointer()
-    const continuationBufferClosure = (value?: unifiedDataChannel.UnifiedData | null, error?: Array<string> | undefined):void => {
+    const continuationBufferClosure = (value?: unifiedDataChannel.UnifiedData | null | undefined, error?: Array<string> | undefined):void => {
         const continuationBufferBufArgsSerializer: SerializerBase = SerializerBase.hold();
         continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
         continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
-        if (value !== null) {
+        if (value !== undefined && value !== null) {
             continuationBufferBufArgsSerializer.writeInt8(RuntimeType.OBJECT);
             const valueTmpValue = value!;
             unifiedDataChannel_UnifiedData_serializer.write(continuationBufferBufArgsSerializer, valueTmpValue);
@@ -2337,11 +2337,11 @@ export function deserializeAndCallDelayedDataLoadHandler(thisDeserializer: Deser
         return;
     }
     resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
-    let continuationResult: ((value?: unifiedDataChannel.UnifiedData | null,error?: Array<string> | undefined) => void) = continuationBufferClosure
+    let continuationResult: ((value?: unifiedDataChannel.UnifiedData | null | undefined,error?: Array<string> | undefined) => void) = continuationBufferClosure
     const callResult = call(acceptableInfo)
-    // instructive change start
-    // continuationResult(callResult)
-    // instructive change end
+    callResult.then((result: unifiedDataChannel.UnifiedData | null):void => {
+        continuationResult(result);
+    })
 }
 export function deserializeAndCallEditableTextOnChangeCallback(thisDeserializer: DeserializerBase): void {
     const resourceId: int32 = thisDeserializer.readInt32()
@@ -4434,6 +4434,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.KIND_ANIMATIONENDHANDLER: return deserializeAndCallAnimationEndHandler(thisDeserializer);
         case CallbackKind.KIND_ANIMATIONSTARTHANDLER: return deserializeAndCallAnimationStartHandler(thisDeserializer);
         case CallbackKind.KIND_ARCSCROLLINDEXHANDLER: return deserializeAndCallArcScrollIndexHandler(thisDeserializer);
+        case CallbackKind.KIND_AREACHANGECALLBACK: return deserializeAndCallAreaChangeCallback(thisDeserializer);
         case CallbackKind.KIND_BUTTONMODIFIERBUILDER: return deserializeAndCallButtonModifierBuilder(thisDeserializer);
         case CallbackKind.KIND_BUTTONTRIGGERCLICKCALLBACK: return deserializeAndCallButtonTriggerClickCallback(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_ACCESSIBILITYACTIONINTERCEPTRESULT_VOID: return deserializeAndCallCallback_AccessibilityActionInterceptResult_Void(thisDeserializer);
@@ -4731,8 +4732,8 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.KIND_ONTIMEPICKERCHANGECALLBACK: return deserializeAndCallOnTimePickerChangeCallback(thisDeserializer);
         case CallbackKind.KIND_ONUIPICKERCOMPONENTCALLBACK: return deserializeAndCallOnUIPickerComponentCallback(thisDeserializer);
         case CallbackKind.KIND_ONVERIFYPINCALLBACK: return deserializeAndCallOnVerifyPinCallback(thisDeserializer);
-        case CallbackKind.KIND_ONVISIBLEINDEXESCHANGECALLBACK: return deserializeAndCallOnVisibleIndexesChangeCallback(thisDeserializer);
         case CallbackKind.KIND_ONVIEWPORTFITCHANGEDCALLBACK: return deserializeAndCallOnViewportFitChangedCallback(thisDeserializer);
+        case CallbackKind.KIND_ONVISIBLEINDEXESCHANGECALLBACK: return deserializeAndCallOnVisibleIndexesChangeCallback(thisDeserializer);
         case CallbackKind.KIND_ONWATERFLOWSCROLLINDEXCALLBACK: return deserializeAndCallOnWaterFlowScrollIndexCallback(thisDeserializer);
         case CallbackKind.KIND_ONWILLSCROLLCALLBACK: return deserializeAndCallOnWillScrollCallback(thisDeserializer);
         case CallbackKind.KIND_ONWILLSTOPDRAGGINGCALLBACK: return deserializeAndCallOnWillStopDraggingCallback(thisDeserializer);
@@ -4793,7 +4794,6 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.KIND_UIOBSERVER_PANLISTENERCALLBACK: return deserializeAndCallUIObserver_PanListenerCallback(thisDeserializer);
         case CallbackKind.KIND_UISTATESCHANGEHANDLER: return deserializeAndCallUIStatesChangeHandler(thisDeserializer);
         case CallbackKind.KIND_UPDATETRANSITIONCALLBACK: return deserializeAndCallUpdateTransitionCallback(thisDeserializer);
-        case CallbackKind.KIND_AREACHANGECALLBACK: return deserializeAndCallAreaChangeCallback(thisDeserializer);
         case CallbackKind.KIND_VISIBLEAREACHANGECALLBACK: return deserializeAndCallVisibleAreaChangeCallback(thisDeserializer);
         case CallbackKind.KIND_VOIDCALLBACK: return deserializeAndCallVoidCallback(thisDeserializer);
         case CallbackKind.KIND_WEBKEYBOARDCALLBACK: return deserializeAndCallWebKeyboardCallback(thisDeserializer);
@@ -4802,7 +4802,5 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
     throw new Error('Unknown callback kind')
 }
 export function registerArkuiApiHandler(): void {
-    // instructive change start
     registerApiEventHandler(10, deserializeAndCallCallback)
-    // instructive change end
 }

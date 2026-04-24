@@ -1606,6 +1606,15 @@ void ImagePattern::OnNotifyMemoryLevel(int32_t level)
     return;
 }
 
+void ImagePattern::SetIsBackground(bool isBackground)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto rsRenderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(rsRenderContext);
+    rsRenderContext->SetIsBackground(isBackground);
+}
+
 // when recycle image component, release the pixelmap resource
 void ImagePattern::OnRecycle()
 {

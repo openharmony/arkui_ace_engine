@@ -28,7 +28,7 @@ public:
     static EffectEdge ParseEffectEdge(const JSRef<JSVal>& jsValue);
     static DisplayMode ParseDisplayMode(const JSCallbackInfo& info, DisplayMode defaultValue);
     static std::string ParseBarColor(const JSCallbackInfo& info, RefPtr<ResourceObject>& resObj);
-    static std::string ParseBarWidth(const JSCallbackInfo& info);
+    static std::string ParseBarWidth(const JSCallbackInfo& info, RefPtr<ResourceObject>& resObj);
     static void JsClip(const JSCallbackInfo& info);
     static std::optional<PresetFillType> ParsePresetFillType(const JSRef<JSVal>& jsValue);
     static void ParseEditModeOptions(const JSCallbackInfo& info, NG::EditModeOptions& options);

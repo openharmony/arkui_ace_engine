@@ -1376,7 +1376,6 @@ ArkUINativeModuleValue SelectBridge::SetMenuOutline(ArkUIRuntimeCallInfo* runtim
     outlineArgs.color = color.data();
     outlineArgs.colorSize = static_cast<ArkUI_Int32>(color.size());
     outlineArgs.resObjs = outlineResObjs.data();
-    outlineArgs.unitSize = static_cast<ArkUI_Int32>(outlineResObjs.size());
     GetArkUINodeModifiers()->getSelectModifier()->setMenuOutline(nativeNode, &outlineArgs);
     return panda::JSValueRef::Undefined(vm);
 }

@@ -565,6 +565,14 @@ void RichEditorSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, To
     } else {
         HideMenu();
     }
+    if (!IsSingleHandle() && IsTouchUp(sourceType, touchType) &&
+        GetClearPolicy() == TextSelectionClearPolicy::CLEAR_SELECTED_TEXT_ON_EXTERNAL_TOUCH) {
+        auto pattern = GetPattern<RichEditorPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->ResetSelection();
+        CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
+        ResumeTwinkling();
+    }
 }
 
 void RichEditorSelectOverlay::OnHandleLevelModeChanged(HandleLevelMode mode)

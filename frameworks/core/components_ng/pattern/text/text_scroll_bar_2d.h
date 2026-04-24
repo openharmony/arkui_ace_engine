@@ -32,7 +32,7 @@ struct UpdateScrollBarData {
 using ScrollBarScrollCallback = std::function<void(float offset, int32_t source, bool isVertical)>;
 using ScrollBarEndScrollCallback = std::function<void(bool isVertical)>;
 
-class TextScrollBar2D final : public AceType {
+class ACE_FORCE_EXPORT TextScrollBar2D final : public AceType {
     DECLARE_ACE_TYPE(TextScrollBar2D, AceType);
     ACE_DISALLOW_COPY_AND_MOVE(TextScrollBar2D);
 
@@ -64,6 +64,7 @@ public:
         if (horizontalBar_) {
             horizontalBar_->SetDisplayMode(mode);
         }
+        displayMode_ = mode;
     }
 
     DisplayMode GetDisplayMode() const
@@ -145,9 +146,41 @@ public:
         return horizontalModifier_;
     }
 
+    void SetScrollbarEnabled(bool enabled)
+    {
+        if (scrollableEvent_) {
+            scrollableEvent_->SetEnabled(enabled);
+        }
+    }
+
+    void SetVerticalScrollable(bool scrollable)
+    {
+        if (verticalBar_) {
+            verticalBar_->SetScrollable(scrollable);
+        }
+    }
+
+    bool IsVerticalScrollable()
+    {
+        return verticalBar_ && verticalBar_->IsScrollable();
+    }
+
+    void SetHorizontalScrollable(bool scrollable)
+    {
+        if (horizontalBar_) {
+            horizontalBar_->SetScrollable(scrollable);
+        }
+    }
+
+    bool IsHorizontalScrollable()
+    {
+        return horizontalBar_ && horizontalBar_->IsScrollable();
+    }
+
+    void AddScrollableEvent();
+
 private:
     void InitNGScrollBar(NG::ScrollBar& bar, bool isVertical);
-    void AddScrollableEvent();
     void SetInBarRegionCallback(const RefPtr<ScrollableEvent>& event);
     void SetInBarRectRegionCallback(const RefPtr<ScrollableEvent>& event);
     void SetBarCollectTouchTargetCallback(const RefPtr<ScrollableEvent>& event);

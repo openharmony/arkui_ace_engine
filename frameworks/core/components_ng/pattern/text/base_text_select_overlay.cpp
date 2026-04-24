@@ -1695,4 +1695,16 @@ void BaseTextSelectOverlay::FlushAfterOverlayShowTask()
         }
     }
 }
+
+TextSelectionClearPolicy BaseTextSelectOverlay::GetClearPolicy()
+{
+    if (clearPolicy_) {
+        return clearPolicy_.value();
+    }
+    auto overlayManager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_RETURN(overlayManager, SelectOverlayCallback::GetClearPolicy());
+    auto policy = overlayManager->GetTextSelectionClearPolicy();
+    clearPolicy_ = policy ? policy.value() : SelectOverlayCallback::GetClearPolicy();
+    return clearPolicy_.value();
+}
 } // namespace OHOS::Ace::NG
