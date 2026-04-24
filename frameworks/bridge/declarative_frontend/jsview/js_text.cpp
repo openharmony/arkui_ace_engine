@@ -21,7 +21,6 @@
 #include <vector>
 #include "core/components/common/layout/common_text_constants.h"
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 
@@ -50,6 +49,7 @@
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_v2/inspector/inspector_composed_component.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
@@ -604,7 +604,7 @@ void JSText::SetTextContentAlign(const JSCallbackInfo& info)
         return;
     }
     int32_t index = args->ToNumber<int32_t>();
-    auto isNormalValue = index >= 0 && index < TEXT_CONTENT_ALIGNS.size();
+    auto isNormalValue = index >= 0 && static_cast<size_t>(index) < TEXT_CONTENT_ALIGNS.size();
     if (!isNormalValue) {
         TextModel::GetInstance()->ReSetTextContentAlign();
         return;

@@ -26,6 +26,7 @@
 #include "core/components/button/button_component.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/common_text_constants.h"
+#include "core/components/text/text_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_button_theme.h"

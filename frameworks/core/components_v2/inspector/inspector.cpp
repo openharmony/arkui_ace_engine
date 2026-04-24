@@ -16,9 +16,10 @@
 #include "inspector.h"
 
 #include "shape_composed_element.h"
-
+#include "core/accessibility/accessibility_utils.h"
 #include "core/components/page/page_element.h"
 #include "core/components/root/root_element.h"
+#include "core/event/key_event.h"
 
 namespace OHOS::Ace::V2 {
 namespace {

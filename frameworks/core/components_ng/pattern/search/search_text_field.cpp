@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/search/search_text_field.h"
 
+#include "core/common/container.h"
 #include "core/components/search/search_theme.h"
 #include "core/components_ng/pattern/search/search_event_hub.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"

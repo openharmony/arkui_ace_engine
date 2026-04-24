@@ -20,6 +20,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/indicator_model_ng.h"
 #include "core/pipeline/base/element_register.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t INDICATOR_TYPE_INDEX = 0;

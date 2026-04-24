@@ -16,6 +16,10 @@
 #include "bridge/declarative_frontend/jsview/models/select_model_impl.h"
 
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/blur_style_option.h"
+#include "core/components/common/properties/text_enums.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components/select/select_component.h"
 #include "core/components/select/select_theme.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"

@@ -21,11 +21,14 @@
 
 #include "base/utils/macros.h"
 #include "core/common/resource/resource_object.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/blur_style_option.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/text_enums.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/base/symbol_modifier.h"
 #include "core/components_ng/pattern/select/select_event_hub.h"
 #include "core/components_ng/pattern/select/select_properties.h"
-#include "core/components_ng/pattern/text/text_styles.h"
 
 namespace OHOS::Ace {
 namespace NG {

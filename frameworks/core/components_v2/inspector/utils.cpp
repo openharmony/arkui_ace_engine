@@ -13,7 +13,10 @@
  * limitations under the License.
  */
 
+#include <unordered_map>
+
 #include "core/components_v2/inspector/utils.h"
+#include "core/components/common/properties/text_style.h"
 
 namespace OHOS::Ace::V2 {
 

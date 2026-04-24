@@ -17,6 +17,7 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_THEME_JS_DATA_PANEL_THEME_H
 
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme_utils.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/data_panel/data_panel_model.h"
 #include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"

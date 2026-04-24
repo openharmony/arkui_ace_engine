@@ -67,6 +67,7 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
+#include "base/view_data/ace_auto_fill_type.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/common/event_manager.h"
@@ -3401,6 +3402,12 @@ void FrameNode::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap, RefP
     if (pattern_) {
         pattern_->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, autoFillType, triggerType);
     }
+}
+
+void FrameNode::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap, RefPtr<PageNodeInfoWrap> nodeWrap,
+    AceAutoFillType autoFillType)
+{
+    NotifyFillRequestSuccess(viewDataWrap, nodeWrap, autoFillType, AceAutoFillTriggerType::AUTO_REQUEST);
 }
 
 void FrameNode::NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent, bool isPopup)

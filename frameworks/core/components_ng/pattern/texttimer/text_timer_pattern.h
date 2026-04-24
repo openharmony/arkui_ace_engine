@@ -23,11 +23,15 @@
 #include "base/utils/noncopyable.h"
 #include "core/components/texttimer/texttimer_controller.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/pattern/texttimer/text_timer_accessibility_property.h"
-#include "core/components_ng/pattern/texttimer/text_timer_event_hub.h"
 #include "core/components_ng/pattern/texttimer/text_timer_layout_algorithm.h"
-#include "core/components_ng/pattern/texttimer/text_timer_layout_property.h"
+
+namespace OHOS::Ace::NG {
+class TextLayoutProperty;
+class TextTimerLayoutProperty;
+class TextTimerEventHub;
+class TextTimerAccessibilityProperty;
+}
+
 #include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
 #include "core/components_ng/property/property.h"
 
@@ -41,25 +45,10 @@ public:
     TextTimerPattern();
     ~TextTimerPattern() override = default;
 
-    RefPtr<LayoutProperty> CreateLayoutProperty() override
-    {
-        return MakeRefPtr<TextTimerLayoutProperty>();
-    }
-
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
-    {
-        return MakeRefPtr<TextTimerLayoutAlgorithm>();
-    }
-
-    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
-    {
-        return MakeRefPtr<TextTimerAccessibilityProperty>();
-    }
-
-    RefPtr<EventHub> CreateEventHub() override
-    {
-        return MakeRefPtr<TextTimerEventHub>();
-    }
+    RefPtr<LayoutProperty> CreateLayoutProperty() override;
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override;
+    RefPtr<EventHub> CreateEventHub() override;
 
     RefPtr<TextTimerController> GetTextTimerController() const
     {

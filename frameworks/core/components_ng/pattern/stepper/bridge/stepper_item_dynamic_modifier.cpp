@@ -14,6 +14,7 @@
  */
 
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/stepper/stepper_item_model_ng.h"
 #include "core/interfaces/native/node/stepper_item_modifier.h"

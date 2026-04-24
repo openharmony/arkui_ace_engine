@@ -36,6 +36,8 @@
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/picker/picker_data.h"
 #include "core/pipeline/pipeline_context.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 using namespace OHOS::Ace::NG::CalendarPickerConstants;
 

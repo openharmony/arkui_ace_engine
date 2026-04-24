@@ -18,6 +18,8 @@
 #include "base/utils/multi_thread.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components_ng/pattern/texttimer/text_timer_event_hub.h"
+#include "core/components_ng/pattern/texttimer/text_timer_layout_property.h"
 #include "core/components/common/properties/text_enums.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text/text_pattern.h"

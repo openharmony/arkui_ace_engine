@@ -13,11 +13,10 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/search/search_model_ng.h"
-
 #include "base/utils/multi_thread.h"
 #include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/search/search_theme.h"
@@ -28,6 +27,7 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/search/search_layout_property.h"
+#include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/components_ng/pattern/search/search_pattern.h"
 #include "core/components_ng/pattern/search/search_text_field.h"
 #include "core/components_ng/pattern/text/text_pattern.h"

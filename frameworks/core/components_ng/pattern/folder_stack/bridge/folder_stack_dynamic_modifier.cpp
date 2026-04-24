@@ -14,6 +14,7 @@
  */
 #include "core/interfaces/native/node/node_folder_stack_modifier.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/folder_stack/folder_stack_model_ng.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/cjui/cjui_api.h"

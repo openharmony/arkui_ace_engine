@@ -19,6 +19,7 @@
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_model_ng.h"
 #include "core/interfaces/native/node/node_loading_progress_modifier_multi_thread.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 void ResetLoadingProgressColorMultiThread(ArkUINodeHandle node)

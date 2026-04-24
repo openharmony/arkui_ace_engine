@@ -24,7 +24,6 @@
 
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/image_provider/image_utils.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/image/image_cache.h"

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 #include "core/interfaces/native/node/menu_item_modifier.h"
 #include "frameworks/bridge/common/utils/utils.h"

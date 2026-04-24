@@ -29,7 +29,6 @@
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
-#include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components/popup/popup_theme.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 

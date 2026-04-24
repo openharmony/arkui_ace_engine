@@ -23,6 +23,7 @@
 #include "core/components/padding/padding_component.h"
 #include "core/components/tween/tween_component.h"
 #include "core/components_v2/inspector/inspector_composed_component.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/gestures/pan_gesture.h"
 
 namespace OHOS::Ace {

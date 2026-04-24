@@ -24,8 +24,12 @@
 #include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
 #include "core/components_ng/pattern/tabs/tab_content_model.h"
 #include "core/components_ng/pattern/tabs/tab_content_node.h"
-#include "core/components_ng/pattern/tabs/tabs_node.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
+
+namespace OHOS::Ace::NG {
+class TextLayoutProperty;
+class TabsNode;
+}
 
 namespace OHOS::Ace::NG {
 

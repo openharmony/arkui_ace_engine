@@ -19,6 +19,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/base/view_abstract_model.h"
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace {

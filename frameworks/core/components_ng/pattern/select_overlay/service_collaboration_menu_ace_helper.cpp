@@ -46,7 +46,6 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/text/text_styles.h"
 #include "core/pipeline/pipeline_base.h"
 #include "frameworks/core/pipeline/base/element_register.h"
 #include "frameworks/base/thread/cancelable_callback.h"

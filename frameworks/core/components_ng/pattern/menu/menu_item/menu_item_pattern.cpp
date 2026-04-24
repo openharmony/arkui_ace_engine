@@ -52,6 +52,10 @@
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
+
+MenuItemPattern::MenuItemPattern(bool isOptionPattern, int index) : index_(index), isOptionPattern_(isOptionPattern) {}
+
+MenuItemPattern::~MenuItemPattern() = default;
 namespace {
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 // default clicked & hover color for background blend when theme is null(value from SelectTheme)
