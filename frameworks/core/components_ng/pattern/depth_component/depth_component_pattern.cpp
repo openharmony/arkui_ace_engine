@@ -134,14 +134,12 @@ void DepthComponentPattern::OnModifyDone()
         UpdateGltfScene();
         Update3DScale();
         UpdateWindowChangeSize(true);
-        CHECK_NULL_VOID(mrtDepthAdapter_);
-        mrtDepthAdapter_->OnWindowChange(windowChangeInfos_);
-        UpdateGltfCamera();
+        UpdateWindowInfo();
         MarkRender3D();
 #endif
     } else {
 #if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
-        CleanupGltfResources(false);
+        CleanupGltfResources(true);
 #endif
         SetupBackgroundImageNode();
     }
@@ -467,6 +465,7 @@ void DepthComponentPattern::InitGltfAdapter()
         mrtDepthAdapter_.reset();
         mrtDepthAdapter_ = Render3D::GetMrtDepthAdapterInstance();
         gltfSceneLoaded_ = false;
+        nativeWindowSetUp_ = false;
         return;
     }
 
@@ -525,9 +524,7 @@ void DepthComponentPattern::UpdateGltfWindowChange(const RefPtr<LayoutWrapper>& 
         return;
     }
     UpdateWindowChangeSize(true);
-    CHECK_NULL_VOID(mrtDepthAdapter_);
-    mrtDepthAdapter_->OnWindowChange(windowChangeInfos_);
-    UpdateGltfCamera();
+    UpdateWindowInfo();
     MarkRender3D();
 }
 
@@ -550,6 +547,7 @@ void DepthComponentPattern::CleanupGltfResources(bool clearAdapter)
     surfaceRenderContext_.clear();
     gltfWindowsInitialized_ = false;
     gltfSceneLoaded_ = false;
+    nativeWindowSetUp_ = false;
     lastLoadedGltfPath_.clear();
     if (clearAdapter) {
         mrtDepthAdapter_.reset();
@@ -691,6 +689,24 @@ void DepthComponentPattern::Update3DScale()
     for (size_t index = 0; index < surfaceRenderContext_.size(); ++index) {
         surfaceRenderContext_[index]->UpdateTransformScale(bgScale.value());
     }
+}
+
+bool DepthComponentPattern::NeedUpdateWindowInfo()
+{
+    return !(nativeWindowSetUp_ && NearEqual(lastWidth3d_, width3d_) && NearEqual(lastHeight3d_, height3d_));
+}
+
+void DepthComponentPattern::UpdateWindowInfo()
+{
+    CHECK_NULL_VOID(mrtDepthAdapter_);
+    if (!NeedUpdateWindowInfo()) {
+        return;
+    }
+
+    mrtDepthAdapter_->OnWindowChange(windowChangeInfos_);
+    nativeWindowSetUp_ = true;
+    lastWidth3d_ = width3d_;
+    lastHeight3d_ = height3d_;
 }
 
 void DepthComponentPattern::MarkRender3D()
