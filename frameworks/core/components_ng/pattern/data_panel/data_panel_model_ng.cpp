@@ -335,9 +335,7 @@ void DataPanelModelNG::CreateDataPanelModelNG(const std::vector<double>& values,
 
 void DataPanelModelNG::SetTrackBackgroundSetByUser(bool value)
 {
-    if (SystemProperties::ConfigChangePerform()) {
-        ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackgroundSetByUser, value);
-    }
+    ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackgroundSetByUser, value);
 }
 
 void DataPanelModelNG::SetStrokeWidthSetByUser(bool value)
@@ -356,9 +354,7 @@ void DataPanelModelNG::SetValueColorsSetByUser(FrameNode* frameNode, bool value)
 
 void DataPanelModelNG::SetTrackBackgroundSetByUser(FrameNode* frameNode, bool value)
 {
-    if (SystemProperties::ConfigChangePerform()) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackgroundSetByUser, value, frameNode);
-    }
+    ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackgroundSetByUser, value, frameNode);
 }
 
 void DataPanelModelNG::SetStrokeWidthSetByUser(FrameNode* frameNode, bool value)

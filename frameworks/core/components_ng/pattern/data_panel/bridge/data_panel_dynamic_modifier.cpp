@@ -464,6 +464,7 @@ void SetDataPanelTrackBackgroundColorNew(
     FrameNode* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     DataPanelModelNG::SetTrackBackground(frameNode, Color(value));
+    DataPanelModelNG::SetTrackBackgroundSetByUser(frameNode, isSetByUser);
 
     if (SystemProperties::ConfigChangePerform()) {
         auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
@@ -474,7 +475,6 @@ void SetDataPanelTrackBackgroundColorNew(
         } else {
             DataPanelModelNG::CreateWithResourceObj(frameNode, DataPanelResourceType::TRACK_BACKGROUND_COLOR, nullptr);
         }
-        DataPanelModelNG::SetTrackBackgroundSetByUser(frameNode, isSetByUser);
     }
 }
 
