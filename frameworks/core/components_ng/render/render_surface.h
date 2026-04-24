@@ -162,6 +162,8 @@ public:
     virtual void SetPatternType(int type) {}
 
     virtual void AddInitTypeCallBack(int32_t& type) {}
+
+    virtual std::shared_ptr<Media::PixelMap> SurfaceCapture() { return nullptr; }
 #endif
 protected:
     ACE_DISALLOW_COPY_AND_MOVE(RenderSurface);
