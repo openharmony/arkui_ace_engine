@@ -14,6 +14,9 @@
  */
 #include "accessibility_frame_node_utils.h"
 #include "base/log/log_wrapper.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable_utils.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "frameworks/core/accessibility/accessibility_manager.h"
 #include "frameworks/core/components_ng/property/accessibility_property.h"
 #include "frameworks/core/pipeline_ng/pipeline_context.h"
@@ -210,6 +213,59 @@ bool GetTransformRectRelativeToParent(
         parent = parent->GetAncestorNodeOfFrame(true);
     }
     return find;
+}
+
+bool ScrollByOffsetToParent(const RefPtr<NG::FrameNode>& curFrameNode, const RefPtr<NG::FrameNode>& parentFrameNode)
+{
+    CHECK_NULL_RETURN(curFrameNode, false);
+    CHECK_NULL_RETURN(parentFrameNode, false);
+    auto parentPattern = parentFrameNode->GetPattern<NG::ScrollablePattern>();
+    CHECK_NULL_RETURN(parentPattern, false);
+
+    auto scrollAbility = parentPattern->GetScrollOffsetAbility();
+    auto scrollFunc = scrollAbility.scrollFunc;
+    auto scrollAxis = scrollAbility.axis;
+    if (!scrollFunc || scrollAxis == Axis::NONE) {
+        return false;
+    }
+
+    NG::MoveOffsetParam param {
+        scrollAxis == Axis::VERTICAL,
+        scrollAbility.contentStartOffset,
+        scrollAbility.contentEndOffset,
+        true
+    };
+    auto moveOffset = NG::ScrollableUtils::GetMoveOffset(parentFrameNode, curFrameNode, param);
+    if (!NearZero(moveOffset)) {
+        TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "Scroll offset: %{public}f on %{public}s/%{public}d, axis: %{public}d",
+            moveOffset, parentFrameNode->GetTag().c_str(), parentFrameNode->GetId(), scrollAxis);
+        auto ret = scrollFunc(parentPattern->IsReverse() ? -moveOffset : moveOffset);
+        auto pipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
+        if (pipeline) {
+            pipeline->FlushUITasks();
+        }
+        return ret;
+    }
+    return false;
+}
+
+bool ScrollByOffset(const RefPtr<NG::FrameNode>& curFrameNode)
+{
+    CHECK_NULL_RETURN(curFrameNode, false);
+    bool ret = false;
+    auto parentFrameNode = curFrameNode->GetParentFrameNode();
+
+    while (parentFrameNode) {
+        auto accessibilityProperty = parentFrameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        if (accessibilityProperty && !accessibilityProperty->IsUserScrollTriggerable()) {
+            return false;
+        }
+        if (ScrollByOffsetToParent(curFrameNode, parentFrameNode)) {
+            ret = true;
+        }
+        parentFrameNode = parentFrameNode->GetParentFrameNode();
+    }
+    return ret;
 }
 } // namespace
 
@@ -477,5 +533,22 @@ bool AccessibilityFrameNodeUtils::IsNodeEnabled(const RefPtr<FrameNode>& node)
         enable = !accessibilityProperty->IsUserDisabled();
     }
     return enable;
+}
+
+void AccessibilityFrameNodeUtils::ProcessFocusScroll(const RefPtr<FrameNode>& curFrameNode,
+    RefPtr<PipelineContext>& context)
+{
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [node = AceType::WeakClaim(AceType::RawPtr(curFrameNode))] {
+            auto focusNode = node.Upgrade();
+            CHECK_NULL_VOID(focusNode);
+            auto accessibilityProperty = focusNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+            CHECK_NULL_VOID(accessibilityProperty);
+            if (accessibilityProperty->GetAccessibilityFocusState()) {
+                ScrollByOffset(focusNode);
+            }
+        },
+        TaskExecutor::TaskType::UI, "ArkUIAccessibilityProcessFocusScroll");
 }
 } // namespace OHOS::Ace::NG

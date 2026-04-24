@@ -135,4 +135,137 @@ HWTEST_F(AccessibilityHidumperTest, AccessibilityDfxTest006, TestSize.Level1)
 
     EXPECT_FALSE(ret);
 }
+
+/**
+ * @tc.name: DumpProcessExecuteActionParameters001
+ * @tc.desc: Test DumpProcessExecuteActionParameters with valid params and no key-value pairs
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityHidumperTest, DumpProcessExecuteActionParameters001, TestSize.Level1)
+{
+    std::vector<std::string> params = {"-inspector", "--execute-action", "100", "16"};
+    ExecuteActionArgument argument;
+
+    bool ret = AccessibilityHidumper::DumpProcessExecuteActionParameters(params, argument);
+
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(argument.elementId, 100);
+    EXPECT_EQ(argument.actionType, 16);
+    EXPECT_TRUE(argument.actionArguments.empty());
+}
+
+/**
+ * @tc.name: DumpProcessExecuteActionParameters002
+ * @tc.desc: Test DumpProcessExecuteActionParameters with valid params and key-value pairs
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityHidumperTest, DumpProcessExecuteActionParameters002, TestSize.Level1)
+{
+    std::vector<std::string> params =
+        {"-inspector", "--execute-action", "200", "32", "key0", "value0", "key1", "value1"};
+    ExecuteActionArgument argument;
+
+    bool ret = AccessibilityHidumper::DumpProcessExecuteActionParameters(params, argument);
+
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(argument.elementId, 200);
+    EXPECT_EQ(argument.actionType, 32);
+    EXPECT_EQ(argument.actionArguments.size(), 2u);
+    EXPECT_EQ(argument.actionArguments["key0"], "value0");
+    EXPECT_EQ(argument.actionArguments["key1"], "value1");
+}
+
+/**
+ * @tc.name: DumpProcessExecuteActionParameters003
+ * @tc.desc: Test DumpProcessExecuteActionParameters with missing actionType
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityHidumperTest, DumpProcessExecuteActionParameters003, TestSize.Level1)
+{
+    std::vector<std::string> params = {"-inspector", "--execute-action", "100"};
+    ExecuteActionArgument argument;
+
+    bool ret = AccessibilityHidumper::DumpProcessExecuteActionParameters(params, argument);
+
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: DumpProcessExecuteActionParameters004
+ * @tc.desc: Test DumpProcessExecuteActionParameters with only --execute-action
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityHidumperTest, DumpProcessExecuteActionParameters004, TestSize.Level1)
+{
+    std::vector<std::string> params = {"-inspector", "--execute-action"};
+    ExecuteActionArgument argument;
+
+    bool ret = AccessibilityHidumper::DumpProcessExecuteActionParameters(params, argument);
+
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: DumpProcessExecuteActionParameters005
+ * @tc.desc: Test DumpProcessExecuteActionParameters with no --execute-action flag
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityHidumperTest, DumpProcessExecuteActionParameters005, TestSize.Level1)
+{
+    std::vector<std::string> params = {"-inspector", "100", "16"};
+    ExecuteActionArgument argument;
+
+    bool ret = AccessibilityHidumper::DumpProcessExecuteActionParameters(params, argument);
+
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: DumpProcessExecuteActionParameters006
+ * @tc.desc: Test DumpProcessExecuteActionParameters with empty params
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityHidumperTest, DumpProcessExecuteActionParameters006, TestSize.Level1)
+{
+    std::vector<std::string> params = {};
+    ExecuteActionArgument argument;
+
+    bool ret = AccessibilityHidumper::DumpProcessExecuteActionParameters(params, argument);
+
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: DumpProcessExecuteActionParameters007
+ * @tc.desc: Test DumpProcessExecuteActionParameters with key but missing value
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityHidumperTest, DumpProcessExecuteActionParameters007, TestSize.Level1)
+{
+    std::vector<std::string> params = {"-inspector", "--execute-action", "100", "16", "key0"};
+    ExecuteActionArgument argument;
+
+    bool ret = AccessibilityHidumper::DumpProcessExecuteActionParameters(params, argument);
+
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: DumpProcessExecuteActionParameters008
+ * @tc.desc: Test DumpProcessExecuteActionParameters with single key-value pair
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityHidumperTest, DumpProcessExecuteActionParameters008, TestSize.Level1)
+{
+    std::vector<std::string> params = {"-inspector", "--execute-action", "300", "64", "testKey", "testValue"};
+    ExecuteActionArgument argument;
+
+    bool ret = AccessibilityHidumper::DumpProcessExecuteActionParameters(params, argument);
+
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(argument.elementId, 300);
+    EXPECT_EQ(argument.actionType, 64);
+    EXPECT_EQ(argument.actionArguments.size(), 1u);
+    EXPECT_EQ(argument.actionArguments["testKey"], "testValue");
+}
 } // namespace OHOS::Ace::NG

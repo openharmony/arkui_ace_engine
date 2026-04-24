@@ -23,6 +23,7 @@
 
 namespace OHOS::Ace::NG {
 using FindCondition = std::function<bool(const RefPtr<NG::FrameNode>&)>;
+class PipelineContext;
 
 struct FrameNodeHandleParam {
     std::vector<WeakPtr<NG::FrameNode>> pageNodes;
@@ -50,6 +51,7 @@ public:
         const RefPtr<NG::FrameNode>& frameNode,
         bool& nodeAccessibilityVisible);
     static bool IsNodeEnabled(const RefPtr<FrameNode>& node);
+    static void ProcessFocusScroll(const RefPtr<FrameNode>& curFrameNode, RefPtr<PipelineContext>& context);
 };
 } // namespace OHOS::Ace::NG
 
