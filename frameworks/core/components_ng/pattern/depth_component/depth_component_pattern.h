@@ -228,6 +228,8 @@ private:
     void UpdateWindowChangeSize(bool recreateWindow);
     void Update3DOffset();
     void Update3DScale();
+    bool NeedUpdateWindowInfo();
+    void UpdateWindowInfo();
     void MarkRender3D();
 #endif
 
@@ -247,10 +249,13 @@ private:
     std::string lastLoadedGltfPath_;
     uint32_t rotation_ = 0;
     std::optional<int32_t> transformHintChangedCallbackId_;
+    bool nativeWindowSetUp_ = false;
     float offsetX_ = 0.0;
     float offsetY_ = 0.0;
     float width3d_ = 0.0;
     float height3d_ = 0.0;
+    float lastWidth3d_ = 0.0;
+    float lastHeight3d_ = 0.0;
 #endif
 
     RefPtr<ImageLoadingContext> depthMapLoadingCtx_;
