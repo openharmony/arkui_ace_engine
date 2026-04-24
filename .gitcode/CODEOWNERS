@@ -4184,8 +4184,8 @@ frameworks/core/common/ai/data_url_analyzer_default.h @arkui_rich_editor
 frameworks/core/common/ai/data_url_analyzer_loader.h @arkui_rich_editor
 frameworks/core/common/ai/data_url_analyzer_mgr.h @arkui_rich_editor
 frameworks/core/common/backend.h @harylee
-frameworks/core/common/builder_util.cpp @arkui_framework_xnode
-frameworks/core/common/builder_util.h @arkui_framework_xnode
+frameworks/core/common/builder_util.cpp @arkuieco3
+frameworks/core/common/builder_util.h @arkuieco3
 frameworks/core/common/color_inverter.cpp @arkuicodepulse
 frameworks/core/common/color_inverter.h @arkuicodepulse
 frameworks/core/common/container_handler.h @ArkUI_ability_group
@@ -4336,7 +4336,7 @@ frameworks/core/interfaces/native/implementation/bind_sheet_utils.h @arkuicodepu
 frameworks/core/interfaces/native/implementation/blank_modifier.cpp @arkuilayout1
 frameworks/core/interfaces/native/implementation/bottom_tab_bar_style_accessor.cpp @arkuicodepulse
 frameworks/core/interfaces/native/implementation/bottom_tab_bar_style_peer.h @arkuicodepulse
-frameworks/core/interfaces/native/implementation/builder_node_ops_accessor.cpp @arkui_framework_xnode
+frameworks/core/interfaces/native/implementation/builder_node_ops_accessor.cpp @arkuieco3
 frameworks/core/interfaces/native/implementation/calendar_picker_dialog_accessor.cpp @arkui001
 frameworks/core/interfaces/native/implementation/calendar_picker_modifier.cpp @arkui001
 frameworks/core/interfaces/native/implementation/canvas_rendering_context2d_extender_accessor.cpp @arkuilayout1

@@ -34,6 +34,16 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace {
 const std::unordered_set<std::string> EXPORT_TEXTURE_SUPPORT_TYPES = { V2::JS_VIEW_ETS_TAG, V2::COMMON_VIEW_ETS_TAG };
+
+bool IsSupportExportTexture(const RefPtr<FrameNode>& node, NodeRenderType renderType)
+{
+    if (renderType != OHOS::Ace::NodeRenderType::RENDER_TYPE_TEXTURE) {
+        return false;
+    }
+    auto firstChild = node ? node->GetFirstChild() : nullptr;
+    auto contentNode = firstChild ? firstChild->GetFirstChild() : nullptr;
+    return contentNode ? EXPORT_TEXTURE_SUPPORT_TYPES.count(contentNode->GetTag()) > 0 : false;
+}
 }
 namespace BuilderNodeOpsAccessor {
 void DestroyPeerImpl(Ark_BuilderNodeOps peer)
@@ -78,7 +88,7 @@ void CreateImpl(Ark_VMContext vmContext,
             parent->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
         }
     }
-    auto isSupportExportTexture = newNode ? EXPORT_TEXTURE_SUPPORT_TYPES.count(newNode->GetTag()) > 0 : false;
+    auto isSupportExportTexture = IsSupportExportTexture(newNode, peer->renderType_);
     if (newNode) {
         newNode->SetBuilderFunc(std::move(lazyBuilderFunc));
         newNode->SetIsRootBuilderNode(true);
