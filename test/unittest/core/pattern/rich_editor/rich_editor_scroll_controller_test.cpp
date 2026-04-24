@@ -357,10 +357,16 @@ HWTEST_F(RichEditorScrollControllerTest, StopAutoScroll001, TestSize.Level0)
  */
 HWTEST_F(RichEditorScrollControllerTest, GetAutoScrollOffsetDiff001, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. get RichEditorPattern
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
+    /**
+     * @tc.steps: step2. GetAutoScrollOffsetDiff
+     */
     auto& scrollController = richEditorPattern->scrollController_;
     scrollController->prevAutoScrollOffset_ = OffsetF(1.0f, 0.0f);
     scrollController->isSingleLineMode_ = true;
