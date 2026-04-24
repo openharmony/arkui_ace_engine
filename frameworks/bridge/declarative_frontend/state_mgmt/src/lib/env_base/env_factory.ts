@@ -30,7 +30,7 @@ interface EnvTypeMap {
   'system.window.avoidarea.px': WindowAvoidAreaPxEnv;
   'system.window.focused': WindowFocusedEnv;
   'system.window.highlighted': WindowHighlightedEnv;
-  'system.window.systemdensity': SystemDensityEnv;
+  'system.window.density.system': SystemDensityEnv;
   'system.window.displayid': DisplayIdEnv;
 }
 
@@ -114,7 +114,7 @@ const envFactoryMap: {
     stateMgmtConsole.debug(`create WindowHighlightedEnv.`);
     return new WindowHighlightedEnv(context);
   },
-  'system.window.systemdensity': (context: UIContext) => {
+  'system.window.density.system': (context: UIContext) => {
     const SystemDensityEnv = requireNapi('window.systemdensityenv').SystemDensityEnv;
     if (typeof SystemDensityEnv !== 'function') {
       // internal error
@@ -148,7 +148,7 @@ type SimpleEnvMeta = Partial<{
 
 // add env key and property name and type here
 const simpleEnvMetaMap = {
-  'system.window.systemdensity': {
+  'system.window.density.system': {
     prop: 'systemDensity',
     type: 'number',
   },
