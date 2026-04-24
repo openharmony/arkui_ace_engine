@@ -626,14 +626,14 @@ export function hookUIPickerComponentAttributeModifier(component: ArkUIPickerCom
     }
     let attributeSet = (): UIPickerComponentModifier => {
         let isUIPickerComponentModifier: boolean = modifier instanceof UIPickerComponentModifier;
-        let initModifier = component.getPeer().uiPickerComponentAttributeSet ? component.getPeer().uiPickerComponentAttributeSet! : new UIPickerComponentModifier();
+        let initModifier = component.getPeer().uIPickerComponentAttributeSet ? component.getPeer().uIPickerComponentAttributeSet! : new UIPickerComponentModifier();
         if (isUIPickerComponentModifier) {
             let uiPickerComponentModifier = modifier as object as UIPickerComponentModifier;
             initModifier.mergeModifier(uiPickerComponentModifier);
-            component.getPeer().uiPickerComponentAttributeSet = initModifier;
+            component.getPeer().uIPickerComponentAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().uiPickerComponentAttributeSet = initModifier;
+            component.getPeer().uIPickerComponentAttributeSet = initModifier;
             return initModifier;
         }
     }
@@ -1155,14 +1155,14 @@ export function hookQRCodeAttributeModifier(component: ArkQRCodeComponent, modif
     }
     let attributeSet = (): QRCodeModifier => {
         let isQRCodeModifier: boolean = modifier instanceof QRCodeModifier;
-        let initModifier = component.getPeer().qrCodeAttributeSet ? component.getPeer().qrCodeAttributeSet! : new QRCodeModifier();
+        let initModifier = component.getPeer().qRCodeAttributeSet ? component.getPeer().qRCodeAttributeSet! : new QRCodeModifier();
         if (isQRCodeModifier) {
             let imageModifier = modifier as object as QRCodeModifier;
             initModifier.mergeModifier(imageModifier);
-            component.getPeer().qrCodeAttributeSet = initModifier;
+            component.getPeer().qRCodeAttributeSet = initModifier;
             return initModifier;
         } else {
-            component.getPeer().qrCodeAttributeSet = initModifier;
+            component.getPeer().qRCodeAttributeSet = initModifier;
             return initModifier;
         }
     }

@@ -369,7 +369,7 @@ export class DrawingRenderingContext implements MaterializedBase {
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: Size = Size_serializer.read(retvalDeserializer)
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as Size)
     }
     private getCanvas_serialize(): DrawingCanvas | undefined {
         const retval = ArkUIGeneratedNativeModule._DrawingRenderingContext_getCanvas(this.peer!.ptr)
@@ -381,7 +381,7 @@ export class DrawingRenderingContext implements MaterializedBase {
         }
         const returnResult: DrawingCanvas | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as DrawingCanvas | undefined)
     }
 }
 export class ImageBitmapInternal {
@@ -536,7 +536,7 @@ export class OffscreenCanvas implements MaterializedBase {
         }
         const returnResult: ImageBitmap | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as ImageBitmap | undefined)
     }
     private getContext2d_serialize(options?: RenderingContextSettings): OffscreenCanvasRenderingContext2D {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -623,7 +623,7 @@ export class RenderingContextSettings implements MaterializedBase {
         }
         const returnResult: boolean | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as boolean | undefined)
     }
     private setAntialias_serialize(antialias: boolean | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -1742,7 +1742,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         }
         const returnResult: CanvasPattern | null = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as CanvasPattern | null)
     }
     private createRadialGradient_serialize(x0: double, y0: double, r0: double, x1: double, y1: double, r1: double): CanvasGradient {
         const retval = ArkUIGeneratedNativeModule._CanvasRenderer_createRadialGradient(this.peer!.ptr, x0, y0, r0, x1, y1, r1)
@@ -1764,7 +1764,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         }
         const returnResult: PixelMap | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as PixelMap | undefined)
     }
     private getLineDash_serialize(): Array<double> {
         const retval = ArkUIGeneratedNativeModule._CanvasRenderer_getLineDash(this.peer!.ptr)
@@ -1775,7 +1775,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         })
         const returnResult: Array<double> = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as Array<double>)
     }
     private setLineDash_serialize(segments: Array<double>): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -1819,7 +1819,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: TextMetrics = TextMetrics_serializer.read(retvalDeserializer)
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as TextMetrics)
     }
     private strokeText_serialize(text: string, x: double, y: double, maxWidth?: double): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -1906,7 +1906,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         }
         const returnResult: arkui_component_units_LengthMetrics | string = (buffer as arkui_component_units_LengthMetrics | string)
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as arkui_component_units_LengthMetrics | string)
     }
     private setLetterSpacing_serialize(letterSpacing: arkui_component_units_LengthMetrics | string): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -1934,7 +1934,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as string)
     }
     private setGlobalCompositeOperation_serialize(globalCompositeOperation: string): void {
         ArkUIGeneratedNativeModule._CanvasRenderer_setGlobalCompositeOperation(this.peer!.ptr, globalCompositeOperation)
@@ -1959,7 +1959,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         }
         const returnResult: string | arkui_component_enums_Color | int32 | CanvasGradient | CanvasPattern = (buffer as string | arkui_component_enums_Color | int32 | CanvasGradient | CanvasPattern)
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as string | arkui_component_enums_Color | int32 | CanvasGradient | CanvasPattern)
     }
     private setFillStyle_serialize(fillStyle: string | arkui_component_enums_Color | int32 | CanvasGradient | CanvasPattern): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -2007,7 +2007,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         }
         const returnResult: string | arkui_component_enums_Color | int32 | CanvasGradient | CanvasPattern = (buffer as string | arkui_component_enums_Color | int32 | CanvasGradient | CanvasPattern)
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as string | arkui_component_enums_Color | int32 | CanvasGradient | CanvasPattern)
     }
     private setStrokeStyle_serialize(strokeStyle: string | arkui_component_enums_Color | int32 | CanvasGradient | CanvasPattern): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -2040,7 +2040,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as string)
     }
     private setFilter_serialize(filter: string): void {
         ArkUIGeneratedNativeModule._CanvasRenderer_setFilter(this.peer!.ptr, filter)
@@ -2057,7 +2057,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: ImageSmoothingQuality = (retvalDeserializer.readString() as string)
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as ImageSmoothingQuality)
     }
     private setImageSmoothingQuality_serialize(imageSmoothingQuality: ImageSmoothingQuality): void {
         ArkUIGeneratedNativeModule._CanvasRenderer_setImageSmoothingQuality(this.peer!.ptr, imageSmoothingQuality)
@@ -2067,7 +2067,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: CanvasLineCap = (retvalDeserializer.readString() as string)
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as CanvasLineCap)
     }
     private setLineCap_serialize(lineCap: CanvasLineCap): void {
         ArkUIGeneratedNativeModule._CanvasRenderer_setLineCap(this.peer!.ptr, lineCap)
@@ -2084,7 +2084,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: CanvasLineJoin = (retvalDeserializer.readString() as string)
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as CanvasLineJoin)
     }
     private setLineJoin_serialize(lineJoin: CanvasLineJoin): void {
         ArkUIGeneratedNativeModule._CanvasRenderer_setLineJoin(this.peer!.ptr, lineJoin)
@@ -2115,7 +2115,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as string)
     }
     private setShadowColor_serialize(shadowColor: string): void {
         ArkUIGeneratedNativeModule._CanvasRenderer_setShadowColor(this.peer!.ptr, shadowColor)
@@ -2139,7 +2139,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: CanvasDirection = (retvalDeserializer.readString() as string)
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as CanvasDirection)
     }
     private setDirection_serialize(direction: CanvasDirection): void {
         ArkUIGeneratedNativeModule._CanvasRenderer_setDirection(this.peer!.ptr, direction)
@@ -2149,7 +2149,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as string)
     }
     private setFont_serialize(font: string): void {
         ArkUIGeneratedNativeModule._CanvasRenderer_setFont(this.peer!.ptr, font)
@@ -2159,7 +2159,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: CanvasTextAlign = (retvalDeserializer.readString() as string)
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as CanvasTextAlign)
     }
     private setTextAlign_serialize(textAlign: CanvasTextAlign): void {
         ArkUIGeneratedNativeModule._CanvasRenderer_setTextAlign(this.peer!.ptr, textAlign)
@@ -2169,28 +2169,28 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: CanvasTextBaseline = (retvalDeserializer.readString() as string)
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as CanvasTextBaseline)
     }
     private setTextBaseline_serialize(textBaseline: CanvasTextBaseline): void {
         ArkUIGeneratedNativeModule._CanvasRenderer_setTextBaseline(this.peer!.ptr, textBaseline)
     }
     private getAntialias_serialize(): boolean | undefined {
-        const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_getAntialias(this.peer!.ptr)
-        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : boolean | undefined = undefined
+        const retval = ArkUIGeneratedNativeModule._CanvasRenderer_getAntialias(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: boolean | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = retvalDeserializer.readBoolean()
         }
-        const returnResult : boolean | undefined = buffer
+        const returnResult: boolean | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as boolean | undefined)
     }
     private setAntialias_serialize(antialias: boolean | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (antialias !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const antialiasTmpValue  = antialias!
+            const antialiasTmpValue = antialias!
             thisSerializer.writeBoolean(antialiasTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -2403,7 +2403,7 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as string)
     }
     private startImageAnalyzer_serialize(config: ImageAnalyzerConfig): Promise<void> {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -2525,7 +2525,7 @@ export class OffscreenCanvasRenderingContext2D extends CanvasRenderer implements
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: string = (retvalDeserializer.readString() as string)
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as string)
     }
     private transferToImageBitmap_serialize(): ImageBitmap | undefined {
         const retval = ArkUIGeneratedNativeModule._OffscreenCanvasRenderingContext2D_transferToImageBitmap(this.peer!.ptr)
@@ -2537,6 +2537,6 @@ export class OffscreenCanvasRenderingContext2D extends CanvasRenderer implements
         }
         const returnResult: ImageBitmap | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as ImageBitmap | undefined)
     }
 }

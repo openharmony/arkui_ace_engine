@@ -101,7 +101,7 @@ export class TextController implements MaterializedBase {
         }
         const returnResult: LayoutManager | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as LayoutManager | undefined)
     }
     private setTextSelection_serialize(selectionStart: int32 | undefined, selectionEnd: int32 | undefined, options?: SelectionOptions): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -999,10 +999,10 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     setOrphanCharOptimizationAttribute(value: boolean | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
+        const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
+            const valueTmpValue = value!
             thisSerializer.writeBoolean(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -1157,7 +1157,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
     }
 }
 export interface TextOverflowOptions {
-    overflow: TextOverflow | undefined;
+    overflow?: TextOverflow | undefined;
 }
 export interface TextAttribute extends CommonMethod {
     setTextOptions(content?: string | arkui_component_units_Resource, value?: TextOptions): this {
@@ -1327,7 +1327,7 @@ export interface TextAttribute extends CommonMethod {
         throw new Error('Unimplemented method textDirection')
     }
     orphanCharOptimization(value: boolean | undefined): this {
-        throw new Error("Unimplemented method orphanCharOptimization")
+        throw new Error('Unimplemented method orphanCharOptimization')
     }
     fontVariations(value: Array<FontVariation> | undefined): this {
         throw new Error('Unimplemented method fontVariations')

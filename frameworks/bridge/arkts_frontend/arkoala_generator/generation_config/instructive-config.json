@@ -1,16 +1,39 @@
 {
     "managed": {
-        "include": [
-            "framework/arkts/ArkUIGeneratedNativeModule.ets"
-        ],
         "ignore": [
             "CommonMethodModifier.ets",
+            "FormLinkModifier.ets",
             "ImageModifier.ets",
+            "RichEditorModifier.ets",
             "SwiperModifier.ets",
             "SymbolGlyphModifier.ets",
             "WebModifier.ets",
-            "RichEditorModifier.ets",
-            "FormLinkModifier.ets"
+            "component/actionSheet.ets",
+            "component/checkboxgroup.ets",
+            "component/common.ets",
+            "component/containerSpan.ets",
+            "component/contentSlot.ets",
+            "component/gesture.ets",
+            "component/idlize.ets",
+            "component/lazyGridLayout.ets",
+            "component/navDestination.ets",
+            "component/navigation.ets",
+            "component/pluginComponent.ets",
+            "component/select.ets",
+            "component/styledString.ets",
+            "component/swiper.ets",
+            "component/tabs.ets",
+            "component/textInput.ets",
+            "component/uiExtensionComponent.ets",
+            "component/video.ets",
+            "component/waterFlow.ets",
+            "component/withTheme.ets",
+            "component/xcomponent.ets",
+            "component/depthComponent.ets",
+            "framework/ohos.arkui.theme.ets",
+            "framework/stdlib.ets",
+            "framework/index.ets",
+            "#handwritten.ets"
         ]
     },
     "native": [

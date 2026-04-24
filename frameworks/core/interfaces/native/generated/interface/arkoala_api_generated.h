@@ -4041,8 +4041,8 @@ typedef enum Ark_AttributeModifierState {
     ARK_ATTRIBUTE_MODIFIER_STATE_NORMAL = 0,
     ARK_ATTRIBUTE_MODIFIER_STATE_PRESSED = 1,
     ARK_ATTRIBUTE_MODIFIER_STATE_FOCUSED = 2,
-    ARK_ATTRIBUTE_MODIFIER_STATE_DISABLED = 3,
-    ARK_ATTRIBUTE_MODIFIER_STATE_SELECTED = 4,
+    ARK_ATTRIBUTE_MODIFIER_STATE_DISABLED = 4,
+    ARK_ATTRIBUTE_MODIFIER_STATE_SELECTED = 8,
 } Ark_AttributeModifierState;
 typedef struct Opt_AttributeModifierState {
     Ark_Tag tag;
@@ -4507,8 +4507,8 @@ typedef enum Ark_ContextMenuEditStateFlags {
     ARK_CONTEXT_MENU_EDIT_STATE_FLAGS_NONE = 0,
     ARK_CONTEXT_MENU_EDIT_STATE_FLAGS_CAN_CUT = 1,
     ARK_CONTEXT_MENU_EDIT_STATE_FLAGS_CAN_COPY = 2,
-    ARK_CONTEXT_MENU_EDIT_STATE_FLAGS_CAN_PASTE = 3,
-    ARK_CONTEXT_MENU_EDIT_STATE_FLAGS_CAN_SELECT_ALL = 4,
+    ARK_CONTEXT_MENU_EDIT_STATE_FLAGS_CAN_PASTE = 4,
+    ARK_CONTEXT_MENU_EDIT_STATE_FLAGS_CAN_SELECT_ALL = 8,
 } Ark_ContextMenuEditStateFlags;
 typedef struct Opt_ContextMenuEditStateFlags {
     Ark_Tag tag;
@@ -5471,19 +5471,19 @@ typedef struct Opt_InputEventInterceptAction {
     Ark_InputEventInterceptAction value;
 } Opt_InputEventInterceptAction;
 typedef enum Ark_InputEventSubTypeMask {
-    ARK_INPUT_EVENT_SUB_TYPE_MASK_LEFT_MOUSE_DOWN = 0,
-    ARK_INPUT_EVENT_SUB_TYPE_MASK_LEFT_MOUSE_UP = 1,
-    ARK_INPUT_EVENT_SUB_TYPE_MASK_RIGHT_MOUSE_DOWN = 2,
-    ARK_INPUT_EVENT_SUB_TYPE_MASK_RIGHT_MOUSE_UP = 3,
-    ARK_INPUT_EVENT_SUB_TYPE_MASK_MIDDLE_MOUSE_DOWN = 4,
-    ARK_INPUT_EVENT_SUB_TYPE_MASK_MIDDLE_MOUSE_UP = 5,
-    ARK_INPUT_EVENT_SUB_TYPE_MASK_LEFT_MOUSE_DRAGGING = 6,
-    ARK_INPUT_EVENT_SUB_TYPE_MASK_RIGHT_MOUSE_DRAGGING = 7,
-    ARK_INPUT_EVENT_SUB_TYPE_MASK_MIDDLE_MOUSE_DRAGGING = 8,
-    ARK_INPUT_EVENT_SUB_TYPE_MASK_TOUCH_DOWN = 9,
-    ARK_INPUT_EVENT_SUB_TYPE_MASK_TOUCH_UP = 10,
-    ARK_INPUT_EVENT_SUB_TYPE_MASK_KEY_DOWN = 11,
-    ARK_INPUT_EVENT_SUB_TYPE_MASK_KEY_UP = 12,
+    ARK_INPUT_EVENT_SUB_TYPE_MASK_LEFT_MOUSE_DOWN = 1,
+    ARK_INPUT_EVENT_SUB_TYPE_MASK_LEFT_MOUSE_UP = 2,
+    ARK_INPUT_EVENT_SUB_TYPE_MASK_RIGHT_MOUSE_DOWN = 4,
+    ARK_INPUT_EVENT_SUB_TYPE_MASK_RIGHT_MOUSE_UP = 8,
+    ARK_INPUT_EVENT_SUB_TYPE_MASK_MIDDLE_MOUSE_DOWN = 16,
+    ARK_INPUT_EVENT_SUB_TYPE_MASK_MIDDLE_MOUSE_UP = 32,
+    ARK_INPUT_EVENT_SUB_TYPE_MASK_LEFT_MOUSE_DRAGGING = 64,
+    ARK_INPUT_EVENT_SUB_TYPE_MASK_RIGHT_MOUSE_DRAGGING = 128,
+    ARK_INPUT_EVENT_SUB_TYPE_MASK_MIDDLE_MOUSE_DRAGGING = 256,
+    ARK_INPUT_EVENT_SUB_TYPE_MASK_TOUCH_DOWN = 512,
+    ARK_INPUT_EVENT_SUB_TYPE_MASK_TOUCH_UP = 1024,
+    ARK_INPUT_EVENT_SUB_TYPE_MASK_KEY_DOWN = 2048,
+    ARK_INPUT_EVENT_SUB_TYPE_MASK_KEY_UP = 4096,
 } Ark_InputEventSubTypeMask;
 typedef struct Opt_InputEventSubTypeMask {
     Ark_Tag tag;
@@ -6900,6 +6900,7 @@ typedef enum Ark_SideBarContainerType {
     ARK_SIDE_BAR_CONTAINER_TYPE_EMBED = 0,
     ARK_SIDE_BAR_CONTAINER_TYPE_OVERLAY = 1,
     ARK_SIDE_BAR_CONTAINER_TYPE_AUTO = 2,
+    ARK_SIDE_BAR_CONTAINER_TYPE_DISPLACE = 3,
 } Ark_SideBarContainerType;
 typedef struct Opt_SideBarContainerType {
     Ark_Tag tag;
@@ -7118,6 +7119,8 @@ typedef enum Ark_SystemProperties {
     ARK_SYSTEM_PROPERTIES_WINDOW_AVOID_AREA_PX,
     ARK_SYSTEM_PROPERTIES_WINDOW_SIZE,
     ARK_SYSTEM_PROPERTIES_WINDOW_SIZE_PX,
+    ARK_SYSTEM_PROPERTIES_WINDOW_IS_FOCUSED,
+    ARK_SYSTEM_PROPERTIES_WINDOW_IS_HIGHLIGHTED,
 } Ark_SystemProperties;
 typedef struct Opt_SystemProperties {
     Ark_Tag tag;
@@ -26102,7 +26105,7 @@ typedef struct GENERATED_ArkUIRichEditorModifier {
     void (*setOrphanCharOptimization)(Ark_NativePointer node,
                                       const Opt_Boolean* value);
     void (*setHorizontalScrolling)(Ark_NativePointer node,
-                                 const Opt_Boolean* value);
+                                   const Opt_Boolean* value);
     void (*setBindSelectionMenu)(Ark_NativePointer node,
                                  const Opt_RichEditorSpanType* spanType,
                                  const Opt_CustomNodeBuilder* content,

@@ -242,7 +242,7 @@ export class Matrix2D implements MaterializedBase {
         }
         const returnResult: double | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as double | undefined)
     }
     private setScaleX_serialize(scaleX: double | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -266,7 +266,7 @@ export class Matrix2D implements MaterializedBase {
         }
         const returnResult: double | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as double | undefined)
     }
     private setScaleY_serialize(scaleY: double | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -290,7 +290,7 @@ export class Matrix2D implements MaterializedBase {
         }
         const returnResult: double | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as double | undefined)
     }
     private setRotateX_serialize(rotateX: double | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -314,7 +314,7 @@ export class Matrix2D implements MaterializedBase {
         }
         const returnResult: double | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as double | undefined)
     }
     private setRotateY_serialize(rotateY: double | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -338,7 +338,7 @@ export class Matrix2D implements MaterializedBase {
         }
         const returnResult: double | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as double | undefined)
     }
     private setTranslateX_serialize(translateX: double | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -362,7 +362,7 @@ export class Matrix2D implements MaterializedBase {
         }
         const returnResult: double | undefined = buffer
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as double | undefined)
     }
     private setTranslateY_serialize(translateY: double | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()

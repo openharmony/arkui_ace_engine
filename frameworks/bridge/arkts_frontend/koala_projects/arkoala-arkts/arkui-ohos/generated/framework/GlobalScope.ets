@@ -16,10 +16,11 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { ComponentInfo_serializer, ComponentInfo } from './../component/idlize'
 import { SerializerBase, DeserializerBase, NativeBuffer, Finalizable, RuntimeType, MaterializedBase, KPointer, toPeerPtr } from '@koalaui/interop'
+import { extractors, CustomStyles } from '#handwritten'
 import { global_resource_Resource_serializer } from './resource'
 import { AnimateParam_serializer, AnimateParam, CommonMethod, PointerStyle as arkui_component_common_PointerStyle } from './../component/common'
+import { ComponentInfo_serializer, ComponentInfo } from './../component/idlize'
 import { int32, int64, float32, unsafeCast } from '@koalaui/common'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { CallbackKind } from './peers/CallbackKind'
@@ -27,20 +28,8 @@ import { ArkUIGeneratedNativeModule } from '#components'
 import { RecordData, Callback as ohos_base_Callback } from '@ohos.base'
 import { Resource as global_resource_Resource } from 'global.resource'
 import { VoidCallback } from './../component/units'
-import { CustomStyles } from '#handwritten'
 import { default as pointer } from '@ohos.multimodalInput.pointer'
 export class GlobalScope {
-    public static getRectangleById(id: string): ComponentInfo {
-        const id_casted = id as (string)
-        return GlobalScope.getRectangleById_serialize(id_casted)
-    }
-    static getRectangleById_serialize(id: string): ComponentInfo {
-        const retval = ArkUIGeneratedNativeModule._GlobalScope_getRectangleById(id)
-        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult: ComponentInfo = ComponentInfo_serializer.read(retvalDeserializer)
-        retvalDeserializer.dispose()
-        return returnResult
-    }
     public static $r(value: string, params: Array<RecordData>): global_resource_Resource {
         const value_casted = value as (string)
         const params_casted = params as (Array<RecordData>)
@@ -51,10 +40,11 @@ export class GlobalScope {
         thisSerializer.writeInt32((params.length).toInt())
         for (let paramsCounterI = 0; paramsCounterI < params.length; paramsCounterI++) {
             const paramsTmpElement: RecordData = params[paramsCounterI]
-            if (paramsTmpElement !== undefined && paramsTmpElement !== null) {
+            const paramsTmpElementTransformed: Object | undefined = extractors.transform_Ark_RecordData_to_Opt_Object(paramsTmpElement)
+            if (paramsTmpElementTransformed !== undefined) {
                 thisSerializer.writeInt8(RuntimeType.OBJECT)
-                const paramsTmpElementTmpValue = paramsTmpElement!
-                thisSerializer.holdAndWriteObject(paramsTmpElementTmpValue)
+                const paramsTmpElementTransformedTmpValue = paramsTmpElementTransformed!
+                thisSerializer.holdAndWriteObject(paramsTmpElementTransformedTmpValue)
             } else {
                 thisSerializer.writeInt8(RuntimeType.UNDEFINED)
             }
@@ -64,7 +54,7 @@ export class GlobalScope {
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: global_resource_Resource = global_resource_Resource_serializer.read(retvalDeserializer)
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as global_resource_Resource)
     }
     public static $rawfile(value: string): global_resource_Resource {
         const value_casted = value as (string)
@@ -75,7 +65,7 @@ export class GlobalScope {
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: global_resource_Resource = global_resource_Resource_serializer.read(retvalDeserializer)
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as global_resource_Resource)
     }
     public static animateToImmediately(value: AnimateParam, processor: VoidCallback): void {
         const value_casted = value as (AnimateParam)
@@ -97,6 +87,17 @@ export class GlobalScope {
     }
     static setAppBgColor_serialize(value: string): void {
         ArkUIGeneratedNativeModule._GlobalScope_setAppBgColor(value)
+    }
+    public static getRectangleById(id: string): ComponentInfo {
+        const id_casted = id as (string)
+        return GlobalScope.getRectangleById_serialize(id_casted)
+    }
+    static getRectangleById_serialize(id: string): ComponentInfo {
+        const retval = ArkUIGeneratedNativeModule._GlobalScope_getRectangleById(id)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult: ComponentInfo = ComponentInfo_serializer.read(retvalDeserializer)
+        retvalDeserializer.dispose()
+        return (returnResult as ComponentInfo)
     }
     public static Profiler_registerVsyncCallback(callback_: ohos_base_Callback<string>): void {
         const callback__casted = callback_ as (ohos_base_Callback<string>)

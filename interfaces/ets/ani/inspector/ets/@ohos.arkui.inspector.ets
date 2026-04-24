@@ -13,11 +13,12 @@
  * limitations under the License.
  */
  import { Callback, RecordData } from '@ohos.base';
- import { VoidCallback, ArrayIntCallback } from './arkui.component.units';
+ import { VoidCallback } from './arkui.component.units';
  import hilog from '@ohos.hilog';
  
  const DOMAIN_ID = 0x0000;
  const TAG = 'InspectorTreeSerializeTool';
+ export type ArrayIntCallback = (arr: int[]) => void;
  
  export default namespace inspector {
     loadLibrary("inspector_ani");

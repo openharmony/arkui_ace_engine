@@ -24,7 +24,7 @@ import { ComponentBase } from './../ComponentBase'
 import { PeerNode } from './../PeerNode'
 import { ArkUIGeneratedNativeModule } from '#components'
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent } from './common'
-import { ChildrenMainSize, AttributeModifier, hookListItemGroupChildrenMainSizeImpl, extractors, hookListItemGroupAttributeModifier, AttributeUpdater } from '#handwritten'
+import { ChildrenMainSize, AttributeModifier, hookListItemGroupChildrenMainSizeImpl, hookListItemGroupOptionsImpl, extractors, hookListItemGroupAttributeModifier, AttributeUpdater } from '#handwritten'
 import { CustomBuilder } from './builder'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { CallbackTransformer } from './../CallbackTransformer'
@@ -115,9 +115,7 @@ export class ArkListItemGroupComponent extends ArkCommonMethodComponent implemen
         return (this.peer as ArkListItemGroupPeer)
     }
     public setListItemGroupOptions(options?: ListItemGroupOptions): this {
-        const options_casted = options as (ListItemGroupOptions | undefined)
-        this.getPeer()?.setListItemGroupOptionsAttribute(options_casted)
-        this.applyOptionsFinish('ListItemGroupAttribute');
+        hookListItemGroupOptionsImpl(this, options)
         return this
     }
     public divider(value: ListDividerOptions | null | undefined): this {
@@ -358,12 +356,7 @@ export class ListItemGroupOptions_serializer {
             footerStyleTmpBuf = ListItemGroupHeaderFooterStyle.fromValue(valueDeserializer.readInt32())
         }
         const footerStyleTmpResult: ListItemGroupHeaderFooterStyle | undefined = footerStyleTmpBuf
-        let value: ListItemGroupOptions = ({header: headerTmpResult, headerComponent: headerComponentTmpResult,
-                                            footer: footerTmpResult, footerComponent: footerComponentTmpResult,
-                                            space: spaceTmpResult, spaceWidth: spaceWidthTmpResult,
-                                            style: styleTmpResult,
-                                            headerStyle: headerStyleTmpResult, footerStyle: footerStyleTmpResult}
-                                            as ListItemGroupOptions)
+        let value: ListItemGroupOptions = ({header: headerTmpResult, headerComponent: headerComponentTmpResult, footer: footerTmpResult, footerComponent: footerComponentTmpResult, space: spaceTmpResult, spaceWidth: spaceWidthTmpResult, style: styleTmpResult, headerStyle: headerStyleTmpResult, footerStyle: footerStyleTmpResult} as ListItemGroupOptions)
         return value
     }
 }

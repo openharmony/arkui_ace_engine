@@ -1446,7 +1446,7 @@ export class ListScroller extends Scroller implements MaterializedBase {
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: RectResult = RectResult_serializer.read(retvalDeserializer)
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as RectResult)
     }
     private scrollToItemInGroup_serialize(index: int32, indexInGroup: int32, smooth?: boolean, align?: ScrollAlign): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -1484,7 +1484,7 @@ export class ListScroller extends Scroller implements MaterializedBase {
         let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult: VisibleListContentInfo = VisibleListContentInfo_serializer.read(retvalDeserializer)
         retvalDeserializer.dispose()
-        return returnResult
+        return (returnResult as VisibleListContentInfo)
     }
 }
 export interface UIListEvent extends UIScrollableCommonEvent {
