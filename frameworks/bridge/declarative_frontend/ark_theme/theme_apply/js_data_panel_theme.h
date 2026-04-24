@@ -19,6 +19,7 @@
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme_utils.h"
 #include "core/components_ng/pattern/data_panel/data_panel_model.h"
 #include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
+#include "core/components_ng/pattern/data_panel/data_panel_paint_property.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
@@ -36,6 +37,8 @@ public:
         CHECK_NULL_VOID(stack);
         auto frameNode = AceType::DynamicCast<NG::FrameNode>(stack->GetMainFrameNode());
         CHECK_NULL_VOID(frameNode);
+        auto paintProperty = frameNode->GetPaintProperty<NG::DataPanelPaintProperty>();
+        bool trackBackgroundSetByUser = paintProperty && paintProperty->GetTrackBackgroundSetByUser().value_or(false);
         std::vector<OHOS::Ace::NG::Gradient> valueColors;
         OHOS::Ace::NG::Gradient gradient;
         OHOS::Ace::NG::GradientColor gradientColorStart;
@@ -48,7 +51,10 @@ public:
         gradient.AddColor(gradientColorEnd);
         valueColors.emplace_back(gradient);
         NG::DataPanelModelNG::SetValueColors(frameNode, valueColors);
-        NG::DataPanelModelNG::SetTrackBackground(frameNode, themeColors->CompBackgroundTertiary());
+        if (!trackBackgroundSetByUser) {
+            NG::DataPanelModelNG::SetTrackBackground(frameNode, themeColors->CompBackgroundTertiary());
+            NG::DataPanelModelNG::SetTrackBackgroundSetByUser(frameNode, false);
+        }
     }
 };
 } // namespace OHOS::Ace::Framework
