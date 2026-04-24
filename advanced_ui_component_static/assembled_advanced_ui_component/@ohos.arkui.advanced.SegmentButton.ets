@@ -614,7 +614,7 @@ export class SegmentButtonOptions {
     } else {
       this.showText = true;
     }
-    let themePadding: number = LengthMetrics.resource($r('sys.float.padding_level2')).value;
+    let themePadding: number = LengthMetrics.resource($r('sys.float.padding_level1')).value;
     this.componentPadding = this.multiply ? 0.0 : themePadding;
     this.backgroundSystemMaterial = options.backgroundSystemMaterial;
     if (options instanceof TabSegmentButtonOptions) {

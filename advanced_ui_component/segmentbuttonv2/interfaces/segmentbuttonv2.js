@@ -75,7 +75,7 @@ const tabSimpleTheme = {
   buttonPadding: {
     id: -1,
     type: 10002,
-    params: ['sys.float.padding_level2'],
+    params: ['sys.float.padding_level1'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
@@ -237,7 +237,7 @@ const capsuleSimpleTheme = {
   buttonPadding: {
     id: -1,
     type: 10002,
-    params: ['sys.float.padding_level2'],
+    params: ['sys.float.padding_level1'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },

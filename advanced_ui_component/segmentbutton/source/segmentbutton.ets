@@ -418,7 +418,7 @@ export class SegmentButtonOptions {
     } else {
       this.showText = true
     }
-    let themePadding = LengthMetrics.resource($r('sys.float.padding_level2')).value;
+    let themePadding = LengthMetrics.resource($r('sys.float.padding_level1')).value;
     this.componentPadding = this.multiply ? 0 : themePadding;
     let info = uiMaterial.getMaterialInfo();
     if (info.state === uiMaterial.MaterialState.ENABLE && !options.backgroundSystemMaterial) {
