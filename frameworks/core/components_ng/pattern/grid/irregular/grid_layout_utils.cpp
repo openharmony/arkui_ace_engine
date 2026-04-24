@@ -23,13 +23,14 @@ GridItemSize GridLayoutUtils::GetItemSize(const GridLayoutInfo* info, const Layo
     GridItemSize size { 1, 1 };
     auto props = AceType::DynamicCast<GridLayoutProperty>(wrapper->GetLayoutProperty());
     const auto& opts = *props->GetLayoutOptions();
-    if (opts.irregularIndexes.find(idx) != opts.irregularIndexes.end()) {
+    int32_t lookupIdx = info->GetOriginalIndex(idx);
+    if (opts.irregularIndexes.find(lookupIdx) != opts.irregularIndexes.end()) {
         if (!opts.getSizeByIndex) {
             // default irregular size = [1, full cross length]
             size.rows = 1;
             size.columns = info->crossCount_;
         } else {
-            size = opts.getSizeByIndex(idx);
+            size = opts.getSizeByIndex(lookupIdx);
             // assume [row] represents mainLength and [column] represents crossLength in this class, so flip sides if
             // horizontal
             if (info->axis_ == Axis::HORIZONTAL) {
