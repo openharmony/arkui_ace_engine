@@ -14,7 +14,7 @@
  */
 
 import { UIContext } from "@ohos/arkui/UIContext"
-import { UIEventHelper } from 'arkui/component/idlize';
+import { UIEventHelper, FrameNodeCreateInfo } from 'arkui/component/idlize';
 import { NodePosition, NodeEdges, Size, LengthMetrics, SizeT } from "./Graphics"
 import { Finalizable, toPeerPtr, KPointer, MaterializedBase, nullptr, pointer, NativeThunk,
     InteropNativeModule, SerializerBase } from "@koalaui/interop"
@@ -665,24 +665,23 @@ export class FrameNode implements MaterializedBase {
         FrameNodeExtender.disposeTree(this);
     };
     public static createFrameNodes(uiContext: UIContext, count: int32): Array<FrameNode> {
-        const frameNodes: FrameNode[] = [];
+
         if (count <= 0) {
-            return frameNodes;
+            return [];
         }
+        const frameNodes: Array<FrameNode> = new Array<FrameNode>(count);
         ArkUIAniModule._Common_Sync_InstanceId(uiContext.instanceId_);
-        const ptrs = FrameNodeExtender.createFrameNodes(count);
-        ptrs.forEach((ptr: KPointer) => {
-            const frameNode = new FrameNode(uiContext, undefined, 'InternalBatchFrameNode', ptr);
-            frameNodes.push(frameNode);
-        })
-        ArkUIAniModule._SetCustomCallbackWithCheckForFrameNodes(ptrs, frameNodes);
-        const renderNodePtrs = FrameNodeExtender.getRenderNodesByFrameNodes(ptrs);
-        const ids = FrameNodeExtender.getIdsByFrameNodes(ptrs);
-        for (let i = 0; i < frameNodes.length; i++) {
-            frameNodes[i].renderNode_!.peer = new Finalizable(renderNodePtrs[i], RenderNode.getFinalizer());
-            frameNodes[i]._nodeId = ids[i];
-            FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(frameNodes[i]._nodeId, frameNodes[i]);
+        const frameNodeCreateInfoArray = FrameNodeExtender.getFrameNodeCreateInfoArray(count);
+        const frameNodePtrs: Array<KPointer> = new Array<KPointer>(frameNodeCreateInfoArray.length);
+        for (let i = 0; i < frameNodeCreateInfoArray.length; i++) {
+            const frameNode = new FrameNode(uiContext, undefined, 'InternalBatchFrameNode', frameNodeCreateInfoArray[i].frameNodePeer);
+            frameNode.renderNode_!.peer = new Finalizable(frameNodeCreateInfoArray[i].renderNodePeer, RenderNode.getFinalizer());
+            frameNode._nodeId = frameNodeCreateInfoArray[i].id;
+            FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(frameNode._nodeId, frameNode);
+            frameNodes[i] = frameNode;
+            frameNodePtrs[i] = frameNodeCreateInfoArray[i].frameNodePeer;
         }
+        ArkUIAniModule._SetCustomCallbackWithCheckForFrameNodes(frameNodePtrs, frameNodes);
         ArkUIAniModule._Common_Restore_InstanceId();
         return frameNodes;
     }

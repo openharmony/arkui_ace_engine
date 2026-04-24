@@ -4849,15 +4849,11 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _FrameNodeExtender_applyAttributesFinish(peer: KPointer): void
     @ani.unsafe.Quick
-    native static _FrameNodeExtender_createFrameNodes(count: KInt): KInteropReturnBuffer
-    @ani.unsafe.Quick
-    native static _FrameNodeExtender_getRenderNodeByFrameNodes(thisArray: KSerializerBuffer, thisLength: KInt): KInteropReturnBuffer
-    @ani.unsafe.Quick
-    native static _FrameNodeExtender_getIdByFrameNodes(thisArray: KSerializerBuffer, thisLength: KInt): KInteropReturnBuffer
-    @ani.unsafe.Quick
     native static _FrameNodeExtender_getFrameNodeById1(peer: KPointer, id: KStringPtr): KPointer
     @ani.unsafe.Direct
     native static _FrameNodeExtender_getFrameNodeByUniqueId1(peer: KPointer, id: KInt): KPointer
+    @ani.unsafe.Quick
+    native static _FrameNodeExtender_getFrameNodeCreateInfoArray(count: KInt): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _FullScreenExitHandler_construct(): KPointer
     @ani.unsafe.Direct
