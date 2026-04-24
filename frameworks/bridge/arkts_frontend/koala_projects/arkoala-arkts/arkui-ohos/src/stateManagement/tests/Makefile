@@ -23,8 +23,16 @@ SRC_PATH_PRODUCTION = ""
 SRCSTS = \
 	tests/uiplugin_custom_arrays.ts \
 	tests/uipluginAddMonitorWildcards.ts \
-	tests/uipluginSyncMonitor.ts \
-	tests/uipluginMonitor.ts \
+	tests/uipluginAddMonitorAsyncSyncDate.ts \
+	tests/uipluginMonitorAsyncSyncBasics.ts \
+	tests/uipluginMonitorAsyncSyncDate.ts \
+	tests/uipluginMonitorAsyncSyncMap.ts \
+	tests/uipluginMonitorAsyncSyncSet.ts \
+	tests/uipluginMonitorAsyncSyncClassMapSet.ts \
+	tests/uipluginMonitorAsyncSyncArray.ts \
+	tests/uipluginMonitorAsyncSyncComputed.ts \
+	tests/uipluginMonitorAsyncSyncEdgeLambda.ts \
+	tests/uipluginMonitorAsyncSyncEdgeAPI.ts \
 	tests/uipluginMonitorWithWildcard.ts \
 	tests/uipluginMonitorObject.ts \
 	tests/uipluginComputed.ts \
@@ -36,12 +44,13 @@ SRCSTS = \
 	tests/uipluginAppStorageV2simple.ts \
 	tests/uipluginPersistentStorageV2.ts \
 	tests/uipluginPersistentStorageV2simple.ts \
-	tests/uipluginUiUtils.ts \
+	tests/uipluginUiUtils.ts  \
+	tests/main.ts \
+	tests/test.ts \
+	tests/commonClasses.ts \
 	\
 	decorator.ts \
 	utils.ts \
-	tests/main.ts \
-	tests/test.ts \
 	tests/lib/testFramework.ts  \
 	tests/lib/testAddRefFireChange.ts \
 	tests/lib/stateTracker.ts \

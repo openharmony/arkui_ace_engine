@@ -216,17 +216,16 @@ export function run_state() : Boolean {
     tcase('Test 5: @State AddRef test ', () => {
         StateTracker.reset();
         compA.stateA.propA;
-        // Apr 17, returns 1 here
-        // verify that the value is correct, changed 3 => 2
-        // test("Assign to: AddRef, expect 3", eq(StateTracker.getRefCnt(), 2));
+        // NOTE: re-enabled; test is expected to fail (Apr 17 returned 1, expected 2)
+        test('Assign to: AddRef, expect 3', eq(StateTracker.getRefCnt(), 2));
     })
 
-    // There is no dependencies and fireChange is called but does nothing
-    // Disabling checks
     tcase('Test 6: @State FireChange test ', () => {
         StateTracker.reset();
         compA.stateA.propA = 'newName';
-        //test("Assign to: FireChange, expect 2", eq(StateTracker.getFireChangeCnt(), 2));
+        // NOTE: re-enabled; test is expected to fail because no dependencies are
+        // registered so fireChange runs but increments nothing.
+        test('Assign to: FireChange, expect 2', eq(StateTracker.getFireChangeCnt(), 2));
     })
 
     tcase('Test 7: @State @Watch test ', () => {
