@@ -22929,7 +22929,6 @@ typedef struct Ark_ContextMenuOptions {
     Opt_uiMaterial_Material systemMaterial;
     Opt_BarState scrollBar;
     Opt_LengthMetrics maxHeight;
-    Opt_UIMaterialAnimationMode uiMaterialAnimationMode;
 } Ark_ContextMenuOptions;
 typedef struct Opt_ContextMenuOptions {
     Ark_Tag tag;
@@ -23161,7 +23160,6 @@ typedef struct Ark_MenuOptions {
     Opt_uiMaterial_Material systemMaterial;
     Opt_BarState scrollBar;
     Opt_LengthMetrics maxHeight;
-    Opt_UIMaterialAnimationMode uiMaterialAnimationMode;
     Opt_ResourceStr title;
     Opt_Boolean showInSubWindow;
 } Ark_MenuOptions;
