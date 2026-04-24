@@ -21,6 +21,7 @@
 #include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/common/event_manager.h"
+#include "core/common/container.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_advanced_register.h"
@@ -736,7 +737,14 @@ bool PageRouterManager::LoadPageExtender(
     RegisterPageCallback(pageNode, jsNode);
 
     pageRouterStack_.emplace_back(pageNode);
-    if (!OnPageReady(pageNode, needHideLast, needTransition)) {
+    if (intentInfo_.has_value()) {
+        if (!OnPageReadyAndHandleIntentExtender(pageNode, needHideLast)) {
+            intentInfo_.reset();
+            pageRouterStack_.pop_back();
+            TAG_LOGW(AceLogTag::ACE_ROUTER, "OnPageReadyAndHandleIntentExtender Failed");
+            return false;
+        }
+    } else if (!OnPageReady(pageNode, needHideLast, needTransition)) {
         pageRouterStack_.pop_back();
         TAG_LOGW(AceLogTag::ACE_ROUTER, "LoadPage OnPageReady Failed");
         return false;
@@ -1016,5 +1024,65 @@ void PageRouterManager::EnableAlertBeforeBackPageExtender(
 
     pageInfo->SetDialogProperties(dialogProperties);
     pageInfo->SetAlertCallback(std::move(callback));
+}
+
+bool PageRouterManager::OnPageReadyAndHandleIntentExtender(
+    const RefPtr<FrameNode>& pageNode, bool needHideLast)
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto context = DynamicCast<NG::PipelineContext>(pipeline);
+    CHECK_NULL_RETURN(context, false);
+    auto stageManager = context->GetStageManager();
+    CHECK_NULL_RETURN(stageManager, false);
+    std::function<bool()> pushIntentPageCallback = [weak = AceType::WeakClaim(this)]() {
+        auto pageRouterManager = weak.Upgrade();
+        CHECK_NULL_RETURN(pageRouterManager, false);
+        pageRouterManager->RunIntentPageExtender();
+        return true;
+    };
+    return stageManager->PushPage(pageNode, needHideLast, false, std::move(pushIntentPageCallback));
+}
+
+void PageRouterManager::RunIntentPageExtender()
+{
+    if (!intentInfo_.has_value()) {
+        return;
+    }
+    auto intentInfo = intentInfo_.value();
+
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto frontend = container->GetFrontend();
+    CHECK_NULL_VOID(frontend);
+
+    auto pageInfo = FindIntentPageInStack();
+    if (pageInfo.second) {
+        intentInfo_.reset();
+        bool routerNeedTransition = pageInfo.first != static_cast<int32_t>(pageRouterStack_.size()) - 1;
+        if (!routerNeedTransition && intentInfo.isColdStart) {
+            StageManager::FirePageShow(pageInfo.second, PageTransitionType::NONE);
+        }
+        bool fireNavigationIntentActivelySuccess = FireNavigationIntentActively(
+            pageInfo.second->GetId(), !routerNeedTransition);
+        if (!fireNavigationIntentActivelySuccess) {
+            auto pagePattern = pageInfo.second->GetPattern<PagePattern>();
+            if (pagePattern) {
+                NotifyForceFullScreenChangeIfNeeded(pagePattern->GetPageUrl(), pageInfo.second->GetContextRefPtr());
+                pagePattern->FireOnNewParam(intentInfo.param);
+            }
+        }
+        frontend->CallRunIntentPageFromNative(intentInfo.pagePath, intentInfo.param);
+        return;
+    }
+
+    intentInfo_.reset();
+    auto loadPageCallback = intentInfo.loadPageCallback;
+    if (loadPageCallback) {
+        loadPageCallback();
+    }
+    frontend->CallRunIntentPageFromNative(intentInfo.pagePath, intentInfo.param);
 }
 } // namespace OHOS::Ace::NG

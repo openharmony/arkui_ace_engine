@@ -1875,6 +1875,8 @@ typedef struct NavExtender_OnUpdateStack NavExtender_OnUpdateStack;
 typedef struct Opt_NavExtender_OnUpdateStack Opt_NavExtender_OnUpdateStack;
 typedef struct NavExtender_PageMapNodeBuilder NavExtender_PageMapNodeBuilder;
 typedef struct Opt_NavExtender_PageMapNodeBuilder Opt_NavExtender_PageMapNodeBuilder;
+typedef struct NavExtender_PushDestinationInner NavExtender_PushDestinationInner;
+typedef struct Opt_NavExtender_PushDestinationInner Opt_NavExtender_PushDestinationInner;
 typedef struct OnAdsBlockedCallback OnAdsBlockedCallback;
 typedef struct Opt_OnAdsBlockedCallback Opt_OnAdsBlockedCallback;
 typedef struct OnAISessionCallback OnAISessionCallback;
@@ -13644,6 +13646,16 @@ typedef struct Opt_NavExtender_PageMapNodeBuilder {
     Ark_Tag tag;
     NavExtender_PageMapNodeBuilder value;
 } Opt_NavExtender_PageMapNodeBuilder;
+typedef struct NavExtender_PushDestinationInner {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_NativePointer pathStack, const Ark_String name, const Ark_String params, const Ark_Boolean needTransition);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer pathStack, const Ark_String name, const Ark_String params, const Ark_Boolean needTransition);
+} NavExtender_PushDestinationInner;
+typedef struct Opt_NavExtender_PushDestinationInner {
+    Ark_Tag tag;
+    NavExtender_PushDestinationInner value;
+} Opt_NavExtender_PushDestinationInner;
 typedef struct OnAdsBlockedCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -30383,6 +30395,8 @@ typedef struct GENERATED_ArkUINavExtenderAccessor {
     Array_String (*getRouteMapInConfig)(Ark_NativePointer context);
     void (*setSplitPlaceholder)(Ark_NativePointer navigation,
                                 Ark_NativePointer placeholderNode);
+    void (*setPushDestinationInnerCallback)(Ark_NavPathStack peer,
+                                            const NavExtender_PushDestinationInner* callback);
 } GENERATED_ArkUINavExtenderAccessor;
 
 typedef struct GENERATED_ArkUINavigationTransitionProxyAccessor {

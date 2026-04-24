@@ -18,8 +18,11 @@
 #include "core/components/theme/shadow_theme.h"
 #include "core/components/toast/toast_theme.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "interfaces/inner_api/ace_kit/include/ui/view/theme/token_colors.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
+#include "core/components_ng/render/render_context.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/pattern/toast/toast_layout_property.h"
 
@@ -121,38 +124,143 @@ void ToastView::UpdateTextLayoutProperty(
     }
 }
 
-void ToastView::SetToastSystemMaterial(const RefPtr<FrameNode>& toastNode, const ToastInfo& toastInfo)
+bool ToastView::SetToastSystemMaterial(const RefPtr<FrameNode>& toastNode, const ToastInfo& toastInfo)
 {
-    if (SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::SMOOTH ||
-        MaterialUtils::IsMaterialDisabled()) {
-        return;
+    if (MaterialUtils::IsMaterialDisabled()) {
+        return false;
     }
     if (toastInfo.systemMaterial && !MaterialUtils::IsEnableMaterialParam(toastInfo.systemMaterial)) {
-        return;
+        return false;
     }
-    CHECK_NULL_VOID(toastNode);
+    CHECK_NULL_RETURN(toastNode, false);
     auto renderContext = toastNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
+    CHECK_NULL_RETURN(renderContext, false);
 
-    // Check if user has explicitly set systemMaterial
+    // Handle low-end devices with IMMERSIVE material
+    if (HandleLowEndImmersiveMaterial(toastNode, toastInfo, renderContext)) {
+        return true;
+    }
+
+    // Handle user explicitly set systemMaterial
+    if (HandleUserSetMaterial(toastNode, toastInfo, renderContext)) {
+        return true;
+    }
+
+    // Apply default material for API 26+
+    return ApplyDefaultMaterial(toastNode, toastInfo, renderContext);
+}
+
+bool ToastView::HandleLowEndImmersiveMaterial(
+    const RefPtr<FrameNode>& toastNode,
+    const ToastInfo& toastInfo,
+    const RefPtr<RenderContext>& renderContext)
+{
+    if (SystemProperties::GetUiMaterialLevel() != UiMaterialLevel::SMOOTH) {
+        return false;
+    }
+
+    if (!toastInfo.systemMaterial ||
+        toastInfo.systemMaterial->GetType() != static_cast<int32_t>(Ace::MaterialType::IMMERSIVE)) {
+        return false;
+    }
+
+    auto pipelineContext = toastNode->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto themeManager = pipelineContext->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, false);
+    auto themeConstants = themeManager->GetThemeConstants();
+    CHECK_NULL_RETURN(themeConstants, false);
+
+    SetLowEndImmersiveBackground(renderContext, themeConstants);
+    SetLowEndImmersiveShadow(toastNode, toastInfo, renderContext, pipelineContext);
+
+    return true;
+}
+
+void ToastView::SetLowEndImmersiveBackground(
+    const RefPtr<RenderContext>& renderContext,
+    const RefPtr<ThemeConstants>& themeConstants)
+{
+    auto resId = Ace::TokenColors::GetSystemColorResIdByIndex(Ace::TokenColors::COMP_BACKGROUND_PRIMARY);
+    auto backgroundColor = themeConstants->GetColor(resId);
+    renderContext->UpdateBackgroundColor(backgroundColor);
+}
+
+void ToastView::SetLowEndImmersiveShadow(
+    const RefPtr<FrameNode>& toastNode,
+    const ToastInfo& toastInfo,
+    const RefPtr<RenderContext>& renderContext,
+    const RefPtr<PipelineContext>& pipelineContext)
+{
+    // Check if shadow should be applied
+    bool applyShadow = false;
     if (toastInfo.systemMaterial) {
-        renderContext->UpdateBackBlurStyle(std::nullopt);
-        ViewAbstract::SetSystemMaterial(AceType::RawPtr(toastNode), AceType::RawPtr(toastInfo.systemMaterial));
+        auto immersiveOptions = toastInfo.systemMaterial->GetImmersiveOptions();
+        applyShadow = immersiveOptions && immersiveOptions->applyShadow;
+    } else {
+        // For default material case, apply shadow
+        applyShadow = true;
+    }
+
+    if (!applyShadow) {
         return;
     }
 
-    // Apply default MATERIAL_TYPE_THICK when user hasn't set backgroundColor,
-    // backgroundBlurStyle, shadow, and systemMaterial (API 26+)
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
-        bool hasCustomStyle = toastInfo.backgroundColor.has_value() ||
-                              toastInfo.backgroundBlurStyle.has_value() ||
-                              toastInfo.shadow.has_value();
-        if (!hasCustomStyle) {
-            auto defaultMaterial = MaterialUtils::GetInitMaterial(UiMaterialStyle::THICK);
-            renderContext->UpdateBackBlurStyle(std::nullopt);
-            ViewAbstract::SetSystemMaterial(AceType::RawPtr(toastNode), AceType::RawPtr(defaultMaterial));
-        }
+    auto dipScale = pipelineContext->GetDipScale();
+    auto shadow = Ace::MaterialUtils::GetImmersiveShadow(dipScale);
+    renderContext->UpdateBackShadow(shadow);
+}
+
+bool ToastView::HandleUserSetMaterial(
+    const RefPtr<FrameNode>& toastNode,
+    const ToastInfo& toastInfo,
+    const RefPtr<RenderContext>& renderContext)
+{
+    if (!toastInfo.systemMaterial) {
+        return false;
     }
+
+    renderContext->UpdateBackBlurStyle(std::nullopt);
+    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    ViewAbstract::SetSystemMaterial(AceType::RawPtr(toastNode), AceType::RawPtr(toastInfo.systemMaterial));
+    return true;
+}
+
+bool ToastView::ApplyDefaultMaterial(
+    const RefPtr<FrameNode>& toastNode,
+    const ToastInfo& toastInfo,
+    const RefPtr<RenderContext>& renderContext)
+{
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return false;
+    }
+
+    bool hasCustomStyle = toastInfo.backgroundColor.has_value() ||
+                          toastInfo.backgroundBlurStyle.has_value() ||
+                          toastInfo.shadow.has_value();
+    if (hasCustomStyle) {
+        return false;
+    }
+
+    // Handle low-end devices
+    if (SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::SMOOTH) {
+        auto pipelineContext = toastNode->GetContextRefPtr();
+        CHECK_NULL_RETURN(pipelineContext, false);
+        auto themeManager = pipelineContext->GetThemeManager();
+        CHECK_NULL_RETURN(themeManager, false);
+        auto themeConstants = themeManager->GetThemeConstants();
+        CHECK_NULL_RETURN(themeConstants, false);
+
+        SetLowEndImmersiveBackground(renderContext, themeConstants);
+        SetLowEndImmersiveShadow(toastNode, toastInfo, renderContext, pipelineContext);
+        return true;
+    }
+
+    auto defaultMaterial = MaterialUtils::GetInitMaterial(UiMaterialStyle::THICK);
+    renderContext->UpdateBackBlurStyle(std::nullopt);
+    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    ViewAbstract::SetSystemMaterial(AceType::RawPtr(toastNode), AceType::RawPtr(defaultMaterial));
+    return true;
 }
 
 void ToastView::UpdateToastContext(const RefPtr<FrameNode>& toastNode)
@@ -201,12 +309,73 @@ void ToastView::UpdateToastNodeStyle(const RefPtr<FrameNode>& toastNode)
     CHECK_NULL_VOID(toastContext);
     auto pattern = toastNode->GetPattern<ToastPattern>();
     CHECK_NULL_VOID(pattern);
-    auto pipelineContext = toastNode->GetContext();
+    auto pipelineContext = toastNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
     CHECK_NULL_VOID(toastTheme);
     auto toastInfo = pattern->GetToastInfo();
 
+    // Set SystemMaterial first, before updating background color, blur style and shadow
+    bool isUserSetMaterial = SetToastSystemMaterial(toastNode, toastInfo);
+
+    // Update background color and blur style only if SystemMaterial is not set
+    UpdateToastBackgroundAndBlur(toastContext, toastInfo, toastTheme, isUserSetMaterial);
+
+    // Update shadow based on SystemMaterial and applyShadow
+    UpdateToastShadow(toastContext, toastInfo, toastTheme, pipelineContext, isUserSetMaterial);
+}
+
+void ToastView::UpdateToastBackgroundAndBlur(
+    const RefPtr<RenderContext>& renderContext,
+    const ToastInfo& toastInfo,
+    const RefPtr<ToastTheme>& toastTheme,
+    bool isUserSetMaterial)
+{
+    if (isUserSetMaterial) {
+        return;  // Don't update background color and blur when material is set
+    }
+
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        renderContext->UpdateBackgroundColor(toastInfo.backgroundColor.value_or(toastTheme->GetDefaultBGColor()));
+        BlurStyleOption styleOption;
+        styleOption.blurStyle = static_cast<BlurStyle>(
+            toastInfo.backgroundBlurStyle.value_or(toastTheme->GetToastBackgroundBlurStyle()));
+        styleOption.policy = BlurStyleActivePolicy::ALWAYS_ACTIVE;
+        if (!toastInfo.backgroundColor.has_value()) {
+            styleOption.colorMode = static_cast<ThemeColorMode>(toastTheme->GetBgThemeColorMode());
+        }
+        renderContext->UpdateBackBlurStyle(styleOption);
+    } else {
+        auto toastBackgroundColor = toastTheme->GetBackgroundColor();
+        renderContext->UpdateBackgroundColor(toastBackgroundColor);
+    }
+}
+
+bool ToastView::ShouldSkipShadowUpdate(const ToastInfo& toastInfo, bool isUserSetMaterial)
+{
+    if (!isUserSetMaterial) {
+        return false;
+    }
+
+    auto systemMaterial = toastInfo.systemMaterial;
+    if (!systemMaterial) {
+        return false;
+    }
+
+    auto materialType = static_cast<Ace::MaterialType>(systemMaterial->GetType());
+    if (materialType != Ace::MaterialType::IMMERSIVE) {
+        return true;
+    }
+
+    auto immersiveOptions = systemMaterial->GetImmersiveOptions();
+    return immersiveOptions && immersiveOptions->applyShadow;
+}
+
+Shadow ToastView::GetToastShadow(
+    const ToastInfo& toastInfo,
+    const RefPtr<ToastTheme>& toastTheme,
+    const RefPtr<PipelineContext>& pipelineContext)
+{
     // Get shadow from theme if user hasn't set it
     Shadow shadow;
     if (toastInfo.shadow.has_value()) {
@@ -228,21 +397,22 @@ void ToastView::UpdateToastNodeStyle(const RefPtr<FrameNode>& toastNode)
             shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
         }
     }
-    toastContext->UpdateBackShadow(shadow);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        toastContext->UpdateBackgroundColor(toastInfo.backgroundColor.value_or(toastTheme->GetDefaultBGColor()));
-        BlurStyleOption styleOption;
-        styleOption.blurStyle = static_cast<BlurStyle>(
-            toastInfo.backgroundBlurStyle.value_or(toastTheme->GetToastBackgroundBlurStyle()));
-        styleOption.policy = BlurStyleActivePolicy::ALWAYS_ACTIVE;
-        if (!toastInfo.backgroundColor.has_value()) {
-            styleOption.colorMode = static_cast<ThemeColorMode>(toastTheme->GetBgThemeColorMode());
-        }
-        toastContext->UpdateBackBlurStyle(styleOption);
-    } else {
-        auto toastBackgroundColor = toastTheme->GetBackgroundColor();
-        toastContext->UpdateBackgroundColor(toastBackgroundColor);
+
+    return shadow;
+}
+
+void ToastView::UpdateToastShadow(
+    const RefPtr<RenderContext>& renderContext,
+    const ToastInfo& toastInfo,
+    const RefPtr<ToastTheme>& toastTheme,
+    const RefPtr<PipelineContext>& pipelineContext,
+    bool isUserSetMaterial)
+{
+    if (ShouldSkipShadowUpdate(toastInfo, isUserSetMaterial)) {
+        return;
     }
-    SetToastSystemMaterial(toastNode, toastInfo);
+
+    auto shadow = GetToastShadow(toastInfo, toastTheme, pipelineContext);
+    renderContext->UpdateBackShadow(shadow);
 }
 } // namespace OHOS::Ace::NG

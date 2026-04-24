@@ -5669,6 +5669,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _NavExtender_setSplitPlaceholder(navigation: KPointer, placeholderNode: KPointer): void
     @ani.unsafe.Direct
+    native static _NavExtender_setPushDestinationInnerCallback(peer: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _NavigationTransitionProxy_construct(): KPointer
     @ani.unsafe.Direct
     native static _NavigationTransitionProxy_getFinalizer(): KPointer

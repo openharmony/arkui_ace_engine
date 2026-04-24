@@ -20,6 +20,7 @@ import arkui.component.navigation.NavigationOptions as NavigationOptions;
 
 callback NavExtender_OnUpdateStack = void ();
 callback NavExtender_PageMapNodeBuilder = pointer (String url, optional Object params);
+callback NavExtender_PushDestinationInner = void (pointer pathStack, String name, String params, boolean needTransition);
 
 [Entity=Class]
 interface NavExtender {
@@ -39,4 +40,5 @@ interface NavExtender {
   static void setNavDestinationRouterMapBuilderCallback(pointer navigation, NavExtender_PageMapNodeBuilder callback);
   static sequence<String> getRouteMapInConfig(pointer context);
   static void setSplitPlaceholder(pointer navigation, pointer placeholderNode);
+  static void setPushDestinationInnerCallback(NavPathStack peer, NavExtender_PushDestinationInner callback);
 };

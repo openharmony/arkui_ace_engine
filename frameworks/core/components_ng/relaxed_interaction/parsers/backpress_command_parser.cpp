@@ -28,6 +28,7 @@ BackpressCommandParser::BackpressCommandParser(WeakPtr<PipelineContext> context)
 
 std::vector<std::unique_ptr<BaseExecutor>> BackpressCommandParser::Parse(const std::unique_ptr<JsonValue>& json)
 {
+    (void)json;
     std::vector<std::unique_ptr<BaseExecutor>> executors;
     executors.emplace_back(std::make_unique<BackpressExecutor>(context_));
     return executors;

@@ -261,6 +261,7 @@ public:
     bool IsUnrestoreByIndex(int32_t index);
 
     void RunIntentPage();
+    void RunIntentPageExtender();
     bool FireNavigationIntentActively(int32_t pageId, bool needTransition);
     void SetRouterIntentInfo(const std::string& intentInfoSerialized, bool isColdStart,
         const std::function<void()>&& loadPageCallback);
@@ -350,6 +351,7 @@ protected:
     static bool OnPageReady(const RefPtr<FrameNode>& pageNode, bool needHideLast, bool needTransition,
         bool isCardRouter = false, int64_t cardId = 0);
     bool OnPageReadyAndHandleIntent(const RefPtr<FrameNode>& pageNode, bool needHideLast);
+    bool OnPageReadyAndHandleIntentExtender(const RefPtr<FrameNode>& pageNode, bool needHideLast);
     bool OnPopPage(bool needShowNext, bool needTransition);
     static bool OnPopPageToIndex(int32_t index, bool needShowNext, bool needTransition);
     static bool OnCleanPageStack();

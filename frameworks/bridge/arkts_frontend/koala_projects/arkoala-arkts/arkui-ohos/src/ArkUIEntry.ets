@@ -400,7 +400,9 @@ export class Application {
         // Here we request to draw a frame and call custom components callbacks.
 
         // Here we request to draw a frame and call custom components callbacks.
-        rootState!.value;
+        if (rootState) {
+            rootState!.value;
+        }
         if (preState) {
             preState!.value;
         }
