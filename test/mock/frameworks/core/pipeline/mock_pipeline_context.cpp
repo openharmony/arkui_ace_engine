@@ -1273,7 +1273,7 @@ void PipelineContext::DumpForceColor(const std::vector<std::string>& params) con
 void PipelineContext::AddFrameCallback(FrameCallbackFunc&& frameCallbackFunc, IdleCallbackFunc&& idleCallbackFunc,
     int64_t delayMillis) {}
 
-RefPtr<FrameNode> PipelineContext::GetContainerModalNode()
+RefPtr<FrameNode> PipelineContext::GetContainerModalNode() const
 {
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {
         return nullptr;

@@ -905,7 +905,7 @@ public:
     void ResetDragging() override;
     const RefPtr<PostEventManager>& GetPostEventManager();
 
-    RefPtr<FrameNode> GetContainerModalNode();
+    RefPtr<FrameNode> GetContainerModalNode() const;
     void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow);
     void SetContainerModalTitleHeight(int32_t height);
     int32_t GetContainerModalTitleHeight();
@@ -1424,6 +1424,8 @@ private:
 
     void DumpSimplifyTreeJsonEntrance(
         std::shared_ptr<JsonValue> root, RefPtr<NG::FrameNode> startNode, ParamConfig config) const;
+
+    void DumpVisibleInspectorTree(std::shared_ptr<JsonValue>& rootJson, ParamConfig config) const;
 
     uint64_t GetResampleStamp() const;
     void ConsumeTouchEvents(std::list<TouchEvent>& touchEvents, std::unordered_map<int, TouchEvent>& idToTouchPoints);
