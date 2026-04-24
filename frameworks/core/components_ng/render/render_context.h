@@ -27,14 +27,12 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
-#include "core/animation/page_transition_common.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/depth_option.h"
 #include "core/components/common/properties/effect_option.h"
 #include "core/components_ng/base/modifier.h"
-#include "core/components_ng/pattern/render_node/render_node_properties.h"
 #include "core/components_ng/property/attraction_effect.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/overlay_property.h"
@@ -73,6 +71,9 @@ class Modifier;
 }
 
 namespace OHOS::Ace::NG {
+
+struct ShapeMaskProperty;
+
 typedef enum {
     OPINC_INVALID,
     OPINC_NODE,

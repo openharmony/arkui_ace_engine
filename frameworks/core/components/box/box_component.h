@@ -21,6 +21,7 @@
 #include "core/components/common/properties/animatable_color.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
+#include "core/components/common/properties/state_attributes.h"
 #include "core/gestures/gesture_group.h"
 #include "core/gestures/raw_recognizer.h"
 
