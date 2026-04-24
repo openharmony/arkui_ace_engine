@@ -1330,6 +1330,7 @@
       "OHOS::Ace::NG::ImagePainter::DrawImage(OHOS::Rosen::Drawing::Canvas&, OHOS::Ace::NG::OffsetT<float> const&, OHOS::Ace::NG::SizeT<float> const&) const";
       "OHOS::Ace::NG::ImagePattern::ImagePattern()";
       "OHOS::Ace::NG::ImageSpanItem::SetImageSpanOptions(OHOS::Ace::ImageSpanOptions const&)";
+      "OHOS::Ace::NG::ImageSpanItem::UpdateLpxUnitFlag()";
       "OHOS::Ace::NG::InputEventActuator::InputEventActuator(OHOS::Ace::WeakPtr<OHOS::Ace::NG::InputEventHub> const&)";
       "OHOS::Ace::NG::InspectorFilter::IsFastFilter() const";
       "OHOS::Ace::NG::LayoutConstraintT<float>::Constrain(OHOS::Ace::NG::SizeT<float> const&) const";
@@ -1825,6 +1826,8 @@
       "OHOS::Ace::NG::SpanItem::AddResObj(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> const&, std::__h::function<void (OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> const&)>&&)";
       "OHOS::Ace::NG::SpanItem::GetSpanContent()";
       "OHOS::Ace::NG::SpanItem::GetSpanContent(std::__h::basic_string<char16_t, std::__h::char_traits<char16_t>, std::__h::allocator<char16_t>> const&, bool)";
+      "OHOS::Ace::NG::SpanItem::HasLpxUnitStyle() const";
+      "OHOS::Ace::NG::SpanItem::UpdateLpxUnitFlag()";
       "OHOS::Ace::NG::SpanNode::GetOrCreateSpanNode(int)";
       "OHOS::Ace::NG::SpanNode::GetOrCreateSpanNode(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, int)";
       "OHOS::Ace::NG::SpanNode::RequestTextFlushDirty(bool)";

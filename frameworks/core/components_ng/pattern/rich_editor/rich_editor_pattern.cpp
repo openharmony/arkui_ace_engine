@@ -157,6 +157,7 @@ const std::string EDITOR_BLUR_EVENT = "blur";
 const std::string EDITOR_FOCUS_EVENT = "focus";
 const static std::regex REMOVE_SPACE_CHARS{SPACE_CHARS};
 const auto URL_SPAN_FILTER = [](const RefPtr<SpanItem>& span){ return (span->urlOnRelease); };
+const auto LPX_UNIT_SPAN_FILTER = [](const RefPtr<SpanItem>& span) { return span && span->HasLpxUnitStyle(); };
 
 std::list<RefPtr<FrameNode>> GetDragImageChildren(const RefPtr<FrameNode>& contentHost)
 {
@@ -264,6 +265,7 @@ void RichEditorPattern::UpdateSpanItems(const std::list<RefPtr<NG::SpanItem>>& s
 {
     SetSpanItemChildren(spanItems);
     ProcessStyledString();
+    UpdateLpxUnitFlag();
 }
 
 void RichEditorPattern::ProcessStyledString()
@@ -309,6 +311,7 @@ void RichEditorPattern::MountImageNode(const RefPtr<ImageSpanItem>& imageItem)
     auto host = GetContentHost();
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(imageItem);
+    imageItem->SetImageSpanOptions(imageItem->options); // update LPX flag
     auto options = imageItem->options;
     auto imageNode = ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
@@ -330,6 +333,7 @@ void RichEditorPattern::MountImageNode(const RefPtr<ImageSpanItem>& imageItem)
         HandleImageDrag(imageNode);
     }
     SetImageLayoutProperty(imageNode, options);
+    UpdateLpxUnitFlag();
     imageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     imageNode->MarkModifyDone();
     imageItem->nodeId_ = imageNode->GetId();
@@ -1121,6 +1125,7 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, TextCha
     ResetSelectionAfterAddSpan(isPaste);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     host->MarkModifyDone();
+    UpdateLpxUnitFlag();
     IF_TRUE(!isUndoRedo, AfterContentChange(changeValue));
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "end");
     return spanIndex;
@@ -1678,6 +1683,7 @@ int32_t RichEditorPattern::AddTextSpanOperation(
     }
     ResetSelectionAfterAddSpan(isPaste);
     SpanNodeFission(spanNode);
+    UpdateLpxUnitFlag();
     return spanIndex;
 }
 
@@ -1832,6 +1838,7 @@ int32_t RichEditorPattern::AddSymbolSpanOperation(const SymbolSpanOptions& optio
     SetCaretPosition(insertIndex + spanItem->content.length());
     ResetSelectionAfterAddSpan(false);
     SpanNodeFission(spanNode);
+    UpdateLpxUnitFlag();
     return spanIndex;
 }
 
@@ -2025,6 +2032,7 @@ void RichEditorPattern::RemoveEmptySpans()
 {
     RemoveEmptySpanItems();
     RemoveEmptySpanNodes();
+    UpdateLpxUnitFlag();
 }
 
 void RichEditorPattern::DeleteSpanByRange(int32_t start, int32_t end, SpanPositionInfo info)
@@ -2526,6 +2534,23 @@ void RichEditorPattern::SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyl
     updateSpanStyle_ = updateSpanStyle;
 }
 
+bool RichEditorPattern::HasLpxUnitStyle() const
+{
+    return hasLpxUnitStyle_;
+}
+
+void RichEditorPattern::UpdateLpxUnitFlag()
+{
+    bool placeholderWithLpx = isShowPlaceholder_ && hasPlaceholderLpxUnitStyle_;
+    bool hasLpx = placeholderWithLpx || std::any_of(spans_.begin(), spans_.end(), LPX_UNIT_SPAN_FILTER);
+    CHECK_NULL_VOID(hasLpxUnitStyle_ != hasLpx);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "hasLpx -> %{public}d", hasLpx);
+    hasLpxUnitStyle_ = hasLpx;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    hasLpx ? host->RegisterLpxAttribute(LpxAttribute::ALWAYS) : host->UnRegisterLpxAttribute(LpxAttribute::ALWAYS);
+}
+
 void RichEditorPattern::MarkAISpanStyleChanged()
 {
     std::for_each(spans_.begin(), spans_.end(), [](const auto& span) {
@@ -2799,6 +2824,7 @@ void RichEditorPattern::UpdateImageAttribute(RefPtr<FrameNode>& imageNode, const
     if (updateSpanStyle_.marginProp.has_value()) {
         imageAttribute->marginProp = imageStyle.marginProp;
     }
+    imageSpanItem->SetImageSpanOptions(imageSpanItem->options); // update LPX flag
     imageSpanItem->MarkDirty();
 }
 
@@ -2837,9 +2863,7 @@ void RichEditorPattern::UpdateSpanStyle(
         } else {
             spanNode->GetSpanItem()->GetIndex(spanStart, spanEnd);
         }
-        if (spanEnd < start) {
-            continue;
-        }
+        CHECK_NULL_CONTINUE(spanEnd >= start);
 
         if (spanStart >= start && spanEnd <= end) {
             if (spanNode) {
@@ -2862,6 +2886,7 @@ void RichEditorPattern::UpdateSpanStyle(
             break;
         }
     }
+    UpdateLpxUnitFlag();
     IF_TRUE(isExternal, undoManager_->RecordOperationAfterChange(start, end - start, styledRecord));
 }
 
@@ -3478,6 +3503,7 @@ void RichEditorPattern::UpdateParagraphStyle(int32_t start, int32_t end, const s
     for (const auto& spanNode : spanNodes) {
         UpdateParagraphStyle(spanNode, style);
     }
+    UpdateLpxUnitFlag();
     undoManager_->RecordOperationAfterChange(changeStart, changeEnd - changeStart, styledRecord);
 }
 
@@ -6899,6 +6925,7 @@ void RichEditorPattern::CreateTextSpanNode(
         UpdateTextStyle(spanNode, typingStyle_.value(), typingTextStyle_.value());
         auto spanItem = spanNode->GetSpanItem();
         spanItem->SetTextStyle(typingTextStyle_);
+        UpdateLpxUnitFlag();
     } else {
         spanNode->UpdateFontSize(Dimension(DEFAULT_TEXT_SIZE, DimensionUnit::FP));
         SetDefaultColor(spanNode);
@@ -8224,6 +8251,7 @@ int32_t RichEditorPattern::ProcessDeleteNodes(std::list<RichEditorAbstractSpanRe
         }
     }
     RemoveEmptySpan(deleteNodes);
+    UpdateLpxUnitFlag();
     return eraseLength;
 }
 
@@ -11694,10 +11722,15 @@ void RichEditorPattern::MountPlaceholderImageNode(const std::list<RefPtr<NG::Spa
 bool RichEditorPattern::SetPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList)
 {
     if (!spans_.empty()) {
+        bool placeholderWithLpx = isShowPlaceholder_ && hasPlaceholderLpxUnitStyle_;
         isShowPlaceholder_ = false;
+        hasPlaceholderLpxUnitStyle_ = false;
+        IF_TRUE(placeholderWithLpx, UpdateLpxUnitFlag());
         return false;
     }
-    return styledPlaceholder_ ? SetStyledPlaceholder(spanItemList) : SetStringPlaceholder(spanItemList);
+    bool setSuccess = styledPlaceholder_ ? SetStyledPlaceholder(spanItemList) : SetStringPlaceholder(spanItemList);
+    IF_TRUE(setSuccess, UpdateLpxUnitFlag());
+    return setSuccess;
 }
 
 bool RichEditorPattern::SetStyledPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList)
@@ -11711,6 +11744,7 @@ bool RichEditorPattern::SetStyledPlaceholder(std::vector<std::list<RefPtr<SpanIt
         richTextRect_.SetOffset(contentRect_.GetOffset());
     }
     isShowPlaceholder_ = true;
+    hasPlaceholderLpxUnitStyle_ = std::any_of(spans.begin(), spans.end(), LPX_UNIT_SPAN_FILTER);
     return true;
 }
 
@@ -11722,6 +11756,7 @@ bool RichEditorPattern::SetStringPlaceholder(std::vector<std::list<RefPtr<SpanIt
     CHECK_NULL_RETURN(layoutProperty, false);
     if (!layoutProperty->HasPlaceholder() || layoutProperty->GetPlaceholder().value().empty()) {
         isShowPlaceholder_ = false;
+        hasPlaceholderLpxUnitStyle_ = false;
         return false;
     }
     auto placeholderValue = layoutProperty->GetPlaceholder().value();
@@ -11752,6 +11787,7 @@ bool RichEditorPattern::SetStringPlaceholder(std::vector<std::list<RefPtr<SpanIt
     spanItemList.clear();
     spanItemList.push_back({ { {spanItem} } });
     isShowPlaceholder_ = true;
+    hasPlaceholderLpxUnitStyle_ = spanItem->HasLpxUnitStyle();
     return true;
 }
 
