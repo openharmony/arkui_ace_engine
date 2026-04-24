@@ -32,6 +32,7 @@ namespace OHOS::Ace {
 
 namespace OHOS::Ace::NG {
 class NavigationStack;
+class NavDestinationGroupNode;
 struct NavigationInfo {
     int32_t nodeId = -1;
     std::string navigationId; // inspectorId
@@ -71,9 +72,16 @@ struct NavdestinationRecoveryInfo {
     std::string param;
     // mode of navdestination, 0 for standard page and 1 for dialog page
     int32_t mode;
+    int32_t launchMode = 0;
 
-    NavdestinationRecoveryInfo(const std::string& name, const std::string& param, int32_t mode)
-        : name(std::move(name)), param(std::move(param)), mode(mode) {}
+    NavdestinationRecoveryInfo(const std::string& name, const std::string& param, int32_t mode,
+        int32_t launchMode = 0)
+        : name(std::move(name)), param(std::move(param)), mode(mode), launchMode(launchMode) {}
+};
+
+struct SequentialNavdestinationRecoveryInfo {
+    NavdestinationRecoveryInfo primaryInfo { "", "", 0 };
+    std::optional<NavdestinationRecoveryInfo> secondaryInfo;
 };
 
 using GetSystemColorCallback = std::function<bool(const std::string&, Color&)>;
@@ -227,6 +235,8 @@ public:
 
     std::string GetTopNavDestinationInfo(int32_t pageId, bool onlyFullScreen, bool needParam);
     void RestoreNavDestinationInfo(const std::string& navDestinationInfo, bool isColdStart);
+    void HandleSequentialRestoreOnShown(const RefPtr<NavDestinationGroupNode>& navDestination,
+        const std::string& shownName);
 
     //-------force split begin-------
     void IsTargetForceSplitNav(const RefPtr<FrameNode>& navigationNode);
@@ -292,6 +302,20 @@ private:
     bool IsOverlayValid(const RefPtr<UINode>& frameNode);
     bool IsCustomDialogValid(const RefPtr<UINode>& node);
     NavigationIntentInfo ParseNavigationIntentInfo(const std::string& intentInfoSerialized);
+    bool CheckSequentialRestoreArray(const std::unique_ptr<JsonValue>& navPathArray, int32_t& arraySize) const;
+    std::optional<NavdestinationRecoveryInfo> ParseNavdestinationRecoveryInfo(
+        const std::unique_ptr<JsonValue>& navdestinationJson) const;
+    std::optional<std::pair<std::string, NavdestinationRecoveryInfo>> ParsePrimaryRecoveryInfo(
+        const std::unique_ptr<JsonValue>& navPathArray) const;
+    std::optional<NavdestinationRecoveryInfo> ParseSecondaryRecoveryInfo(
+        const std::unique_ptr<JsonValue>& navPathArray, int32_t arraySize, const std::string& navigationId) const;
+    bool RestorePrimaryRecoveryInfo(
+        const std::string& navigationId, const NavdestinationRecoveryInfo& primaryInfo, bool isColdStart);
+    void UpdatePendingSequentialRecoveryInfo(const std::string& navigationId,
+        const NavdestinationRecoveryInfo& primaryInfo, const std::optional<NavdestinationRecoveryInfo>& secondaryInfo);
+    void RestoreNavDestinationInfoInSequence(const std::unique_ptr<JsonValue>& navDestinationJson, bool isColdStart);
+    bool RestoreNavdestinationToNavigationStack(
+        const std::string& navigationId, const NavdestinationRecoveryInfo& recoveryInfo);
 
     //-------force split begin-------
     void TryFindNewTargetNavigation();
@@ -300,6 +324,7 @@ private:
 
     std::unordered_map<std::string, WeakPtr<AceType>> recoverableNavigationMap_;
     std::unordered_map<std::string, std::vector<NavdestinationRecoveryInfo>> navigationRecoveryInfo_;
+    std::unordered_map<std::string, SequentialNavdestinationRecoveryInfo> pendingSequentialRecoveryInfo_;
     // record all the navigation in current UI-Context. The key is the page/model id where the navigation is located.
     std::unordered_map<int32_t, std::vector<NavigationInfo>> navigationMap_;
     std::vector<std::function<void()>> updateCallbacks_;

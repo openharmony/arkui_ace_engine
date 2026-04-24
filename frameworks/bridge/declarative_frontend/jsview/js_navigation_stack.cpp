@@ -1544,11 +1544,14 @@ void JSNavigationStack::CallPushDestinationInner(const NG::NavdestinationRecover
         navPathInfo->SetPropertyObject("param", JSRef<JSObject>::New()->ToJsonObject(infoParam.c_str()));
     }
     navPathInfo->SetProperty<int32_t>("mode", infoMode);
+    JSRef<JSObject> navigationOptions = JSRef<JSObject>::New();
+    navigationOptions->SetProperty<int32_t>("launchMode", navdestinationsInfo.launchMode);
 
     auto func = JSRef<JSFunc>::Cast(pushNavDestinationFunc);
-    JSRef<JSVal> arg[1];
+    JSRef<JSVal> arg[ARGC_COUNT_TWO];
     arg[0] = navPathInfo;
-    func->Call(dataSourceObj_, 1, arg);
+    arg[1] = navigationOptions;
+    func->Call(dataSourceObj_, ARGC_COUNT_TWO, arg);
 }
 
 bool JSNavigationStack::IsFromRecovery(int32_t index)
