@@ -79,6 +79,8 @@ public:
     }
 
 #ifdef RENDER_EXTRACT_SUPPORTED
+    std::shared_ptr<Media::PixelMap> SurfaceCapture() override;
+
     void GetTextureIsVideo(int32_t& type);
 
     void SetPatternType(int type)
@@ -95,6 +97,8 @@ private:
     RefPtr<ExtTexture> extTexture_;
     RefPtr<ExtSurfaceCallbackInterface> extSurfaceCallback_;
     int64_t textureId_ = -1;
+    int32_t surfaceWidth_ = 0;
+    int32_t surfaceHeight_ = 0;
 #ifdef RENDER_EXTRACT_SUPPORTED
     void* nativeWindow_ = nullptr;
     int patternType_ = 0;

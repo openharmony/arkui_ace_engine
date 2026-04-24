@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "core/components_ng/render/adapter/sync_customized_callback.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -153,123 +154,6 @@ public:
 
 private:
     ComponentSnapshot::NormalCallback callback_;
-};
-
-class SyncCustomizedCallback : public Rosen::SurfaceCaptureCallback {
-public:
-    SyncCustomizedCallback() = default;
-    ~SyncCustomizedCallback() override = default;
-    void OnSurfaceCapture(std::shared_ptr<Media::PixelMap> pixelMap) override
-    {
-        // For compatibility, delegate to OnSurfaceCaptureWithErrorCode method
-        OnSurfaceCaptureWithErrorCode(pixelMap, nullptr, Rosen::CaptureError::CAPTURE_OK);
-    }
-
-    void OnSurfaceCaptureWithErrorCode(std::shared_ptr<Media::PixelMap> pixelMap,
-        std::shared_ptr<Media::PixelMap> pixelMapHDR, Rosen::CaptureError captureErrorCode) override
-    {
-        errorCode_ = ERROR_CODE_NO_ERROR;
-        pixelMap_ = nullptr;
-
-        switch (captureErrorCode) {
-            case Rosen::CaptureError::CAPTURE_NO_PERMISSION:
-                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-                    "Permission verification failed. A non-system application calls a system API.");
-                errorCode_ = ERROR_CODE_VERIFICATION_FAILED;
-                break;
-            case Rosen::CaptureError::CAPTURE_NO_SECURE_PERMISSION:
-                TAG_LOGW(
-                    AceLogTag::ACE_COMPONENT_SNAPSHOT, "Taking screenshots of other processes, nodes is not allowed.");
-                errorCode_ = ERROR_CODE_INTERNAL_ERROR;
-                break;
-            case Rosen::CaptureError::CAPTURE_NO_NODE:
-                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "The specified node to capture does not exist.");
-                errorCode_ = ERROR_CODE_INTERNAL_ERROR;
-                break;
-            case Rosen::CaptureError::CAPTURE_CONFIG_WRONG:
-                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "The capture configuration is invalid.");
-                errorCode_ = ERROR_CODE_INTERNAL_ERROR;
-                break;
-            case Rosen::CaptureError::CAPTURE_PIXELMAP_NULL:
-                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "The capture pixelmap is null.");
-                errorCode_ = ERROR_CODE_INTERNAL_ERROR;
-                break;
-            case Rosen::CaptureError::CAPTURE_PIXELMAP_COPY_ERROR:
-                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Failed to copy pixel data to pixelmap.");
-                errorCode_ = ERROR_CODE_INTERNAL_ERROR;
-                break;
-            case Rosen::CaptureError::CAPTURE_NULL_FAIL:
-                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "The capture handle is null.");
-                errorCode_ = ERROR_CODE_INTERNAL_ERROR;
-                break;
-            case Rosen::CaptureError::HDR_SET_FAIL:
-                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Failed to set HDR parameters.");
-                errorCode_ = ERROR_CODE_INTERNAL_ERROR;
-                break;
-
-            case Rosen::CaptureError::AUTO_NOT_SUPPORT:
-                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "The isAuto parameter of the color space or dynamic range "
-                                                            "mode is set to true for offscreen node snapshot.");
-                errorCode_ = ERROR_CODE_COMPONENT_SNAPSHOT_AUTO_NOT_SUPPORTED;
-                break;
-
-            case Rosen::CaptureError::COLOR_SPACE_NOT_SUPPORT:
-                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "The provided color space is not supported.");
-                errorCode_ = ERROR_CODE_COMPONENT_SNAPSHOT_MODE_NOT_SUPPORTED;
-                break;
-            case Rosen::CaptureError::DYNAMIC_RANGE_NOT_SUPPORT:
-                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "The provided dynamic range mode is not supported.");
-                errorCode_ = ERROR_CODE_COMPONENT_SNAPSHOT_MODE_NOT_SUPPORTED;
-                break;
-
-            case Rosen::CaptureError::CAPTURE_OK:
-                if (!pixelMap) {
-                    TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "ComponentSnapshotSync Internal error! "
-                                                                "The pixelmap returned by the system is null");
-                    errorCode_ = ERROR_CODE_INTERNAL_ERROR;
-                } else {
-                    TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-                        "ComponentSnapshotSync successful! pixelMap.width=%{public}d pixelMap.height=%{public}d",
-                        pixelMap->GetWidth(), pixelMap->GetHeight());
-                    pixelMap_ = pixelMap;
-                }
-                break;
-
-            default:
-                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Unknown capture error.");
-                errorCode_ = ERROR_CODE_INTERNAL_ERROR;
-                break;
-        }
-
-        std::unique_lock<std::mutex> lock(mutex_);
-        cv_.notify_all();
-    }
-
-    void OnSurfaceCaptureHDR(std::shared_ptr<Media::PixelMap> pixelMap,
-        std::shared_ptr<Media::PixelMap> hdrPixelMap) override {}
-
-    std::pair<int32_t, std::shared_ptr<Media::PixelMap>> GetPixelMap(std::chrono::duration<int, std::milli> timeout)
-    {
-        std::pair<int32_t, std::shared_ptr<Media::PixelMap>> result(ERROR_CODE_INTERNAL_ERROR, nullptr);
-        std::unique_lock<std::mutex> lock(mutex_);
-        auto status = cv_.wait_for(lock, timeout);
-        if (ERROR_CODE_NO_ERROR != errorCode_) {
-            return { errorCode_, nullptr };
-        }
-        if (status == std::cv_status::timeout) {
-            return { ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT, nullptr };
-        }
-        if (pixelMap_) {
-            result = { ERROR_CODE_NO_ERROR, pixelMap_ };
-        }
-        return result;
-    }
-
-private:
-    mutable std::mutex mutex_;
-    std::condition_variable cv_;
-    std::shared_ptr<Media::PixelMap> pixelMap_;
-    int32_t errorCode_ = ERROR_CODE_NO_ERROR;
 };
 } // namespace
 

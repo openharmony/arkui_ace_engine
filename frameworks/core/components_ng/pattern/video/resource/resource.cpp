@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,14 @@ const char PARAM_BEGIN[] = "#HWJS-?-#";
 const char METHOD[] = "method";
 const char EVENT[] = "event";
 const char RESULT_FAIL[] = "fail";
+
+#ifdef RENDER_EXTRACT_SUPPORTED
+namespace {
+const char SURFACE_CAPTURE_METHOD[] = "surfaceCapture";
+const char NATIVE_BUFFER_PARAM[] = "nativeBuffer";
+const char SUCCESS_RESULT[] = "success";
+}
+#endif
 
 void Resource::Release(const std::function<void(bool)>& onRelease)
 {
@@ -203,6 +211,21 @@ bool Resource::IsResultSuccess(const std::string& result) const
 
     return pos != 0;
 }
+
+#ifdef RENDER_EXTRACT_SUPPORTED
+bool Resource::CaptureToNativeBuffer(const std::string& widthParam, const std::string& heightParam,
+    uintptr_t pointerVal, int32_t width, int32_t height)
+{
+    std::stringstream paramStream;
+    paramStream << NATIVE_BUFFER_PARAM << PARAM_EQUALS << pointerVal << PARAM_AND << widthParam << PARAM_EQUALS << width
+                << PARAM_AND << heightParam << PARAM_EQUALS << height;
+    std::string param = paramStream.str();
+    bool success = false;
+    CallSyncResRegisterMethod(MakeMethodHash(SURFACE_CAPTURE_METHOD), param,
+        [&success](std::string& result) { success = (result == SUCCESS_RESULT); });
+    return success;
+}
+#endif
 
 void Resource::OnError(const std::string& errorCode, const std::string& errorMsg)
 {
