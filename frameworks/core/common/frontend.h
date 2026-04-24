@@ -47,6 +47,10 @@ class TaskExecutor;
 class AccessibilityManager;
 enum class ContentInfoType;
 
+namespace NG {
+class FrameNode;
+}
+
 #ifndef WEARABLE_PRODUCT
 constexpr int32_t DEFAULT_DESIGN_WIDTH = 720;
 #else
@@ -548,6 +552,11 @@ public:
     bool IsUseSubFrontendManagerNeeded() const
     {
         return isUseSubFrontendManagerNeeded_;
+    }
+
+    virtual bool IsPageInStack(const RefPtr<NG::FrameNode>& page) const
+    {
+        return false;
     }
 
 protected:

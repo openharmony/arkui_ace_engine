@@ -2723,12 +2723,14 @@ void NavigationPattern::TransitionWithAnimation(RefPtr<NavDestinationGroupNode> 
     if (isSecondaryPushToPrimaryScene_) {
         isSecondaryPushToPrimaryScene_ = false;
         auto pushExitNode = splitPushExitNode_.Upgrade();
+        ClearNavigationCustomTransition();
         navigationNode->StartSplitPushAnimation(pushExitNode, preTopNavDestination, newTopNavDestination);
         return;
     }
     if (isPrimaryPopToSecondaryScene_) {
         isPrimaryPopToSecondaryScene_ = false;
         auto popEnterNode = splitPopEnterNode_.Upgrade();
+        ClearNavigationCustomTransition();
         navigationNode->StartSplitPopAnimation(popEnterNode, preTopNavDestination, newTopNavDestination);
         return;
     }
@@ -6541,17 +6543,22 @@ NavigationPattern::SplitDisplaySyncScenario NavigationPattern::BuildSplitDisplay
             return item.first == target.first && item.second == target.second;
         });
     bool secondaryPageTriggered = touchedSecondaryDest && touchedSecondaryDest == scenario.preTopDest;
+    RefPtr<NavDestinationGroupNode> prePrimaryTopDest =
+        prePrimaryNodes_.empty() ? nullptr : prePrimaryNodes_.back().Upgrade();
     if (it != curAllNodes.end() && secondaryPageTriggered &&
         IsTransitionShouldMovePageToPrimary(scenario.preTopDest, scenario.curTopDest) &&
         scenario.preTopDest->GetNavDestinationType() == NavDestinationType::DETAIL &&
         !scenario.preTopDest->IsShowInPrimaryPartition() &&
         (navBarIsHome_ || scenario.preTopDest->GetIndex() > forceSplitHomeDest->GetIndex()) &&
-        scenario.curTopDest->GetNavDestinationType() == NavDestinationType::DETAIL) {
+        scenario.curTopDest->GetNavDestinationType() == NavDestinationType::DETAIL &&
+        scenario.curTopDest != prePrimaryTopDest) {
         scenario.isSecondaryPushToPrimaryScene = true;
     }
 
-    if (scenario.curTopDest->GetNavDestinationType() == NavDestinationType::DETAIL &&
-        scenario.curTopDest->IsShowInPrimaryPartition()) {
+    if (!scenario.isSecondaryPushToPrimaryScene &&
+        scenario.curTopDest->GetNavDestinationType() == NavDestinationType::DETAIL &&
+        scenario.curTopDest->IsShowInPrimaryPartition() &&
+        scenario.curTopDest == prePrimaryTopDest) {
         scenario.isPrimaryPopToSecondaryScene = true;
     }
     return scenario;
@@ -6568,16 +6575,32 @@ void NavigationPattern::RebuildSplitDisplayNodes(const RefPtr<NavDestinationNode
     primaryNodes_.clear();
     secondaryNodes_.clear();
     auto curAllNodes = navigationStack_->GetAllNavDestinationNodes();
+    auto forceSplitHomeDest = forceSplitHomeDest_.Upgrade();
+    int32_t homePageIndex = -1;
+    std::vector<RefPtr<NavDestinationGroupNode>> allDestNodes;
     for (auto& pair : curAllNodes) {
         auto node = pair.second;
         CHECK_NULL_CONTINUE(node);
-        auto destNode = AceType::DynamicCast<NavDestinationGroupNode>(NavigationGroupNode::GetNavDestinationNode(node));
+        auto destNode = AceType::DynamicCast<NavDestinationGroupNode>(
+            NavigationGroupNode::GetNavDestinationNode(node));
         CHECK_NULL_CONTINUE(destNode);
-        if (destNode->GetNavDestinationType() == NavDestinationType::HOME) {
+        if (destNode == forceSplitHomeDest) {
+            homePageIndex = static_cast<int32_t>(allDestNodes.size());
+        }
+        allDestNodes.push_back(destNode);
+    }
+    for (int32_t idx = 0; idx < static_cast<int32_t>(allDestNodes.size()); ++idx) {
+        auto destNode = allDestNodes[idx];
+        auto columnType = destNode->GetColumnType();
+        if (idx <= homePageIndex) {
             if (!destNode->IsShowInPrimaryPartition()) {
                 ReplaceNodeWithProxyNodeIfNeeded(navContentNode, destNode);
             }
-            destNode->SetColumnType(ForceSplitPageColumnType::PRIMARY);
+            if (idx == homePageIndex) {
+                destNode->SetColumnType(ForceSplitPageColumnType::PRIMARY);
+            } else if (columnType == ForceSplitPageColumnType::NONE) {
+                destNode->SetColumnType(ForceSplitPageColumnType::SECONDARY);
+            }
             primaryNodes_.push_back(destNode);
             continue;
         }
@@ -6603,7 +6626,6 @@ void NavigationPattern::RebuildSplitDisplayNodes(const RefPtr<NavDestinationNode
             secondaryNodes_.push_back(destNode);
             continue;
         }
-        auto columnType = destNode->GetColumnType();
         if (columnType == ForceSplitPageColumnType::NONE) {
             destNode->SetColumnType(ForceSplitPageColumnType::SECONDARY);
             columnType = ForceSplitPageColumnType::SECONDARY;

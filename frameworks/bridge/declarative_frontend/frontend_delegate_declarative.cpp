@@ -4045,4 +4045,14 @@ std::string FrontendDelegateDeclarative::GetPagePathByUrl(const std::string& url
     pageRouterManager_->GetPageNameAndPath(url, name, path);
     return path + name;
 }
+
+bool FrontendDelegateDeclarative::IsPageInStack(const RefPtr<NG::FrameNode>& page) const
+{
+    CHECK_NULL_RETURN(page, false);
+    if (!Container::IsCurrentUseNewPipeline()) {
+        return false;
+    }
+    CHECK_NULL_RETURN(pageRouterManager_, false);
+    return pageRouterManager_->IsPageInStack(page);
+}
 } // namespace OHOS::Ace::Framework

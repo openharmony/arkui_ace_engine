@@ -2541,7 +2541,7 @@ void NavigationGroupNode::InitPopPreList(const RefPtr<FrameNode>& preNode, std::
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
     CHECK_NULL_VOID(navigationPattern);
     const auto& preNavDestinationNodes = navigationPattern->GetAllNavDestinationNodesPrev();
-
+    bool isForceSplitSuccess = navigationPattern->IsForceSplitSuccess();
     // find the nodes need to do EXIT_POP
     for (int32_t index = preStartIndex; index < static_cast<int32_t>(preNavDestinationNodes.size()); index++) {
         auto node = GetNavDestinationNode(preNavDestinationNodes[index].second.Upgrade());
@@ -2557,7 +2557,12 @@ void NavigationGroupNode::InitPopPreList(const RefPtr<FrameNode>& preNode, std::
             continue;
         }
         auto preNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
-        if (preNavDestination && TriggerNavDestinationTransition(
+        CHECK_NULL_CONTINUE(preNavDestination);
+        // In the scenario of force split, the primaryPage does not have animation
+        if (isForceSplitSuccess && preNavDestination->IsShowInPrimaryPartition()) {
+            continue;
+        }
+        if (TriggerNavDestinationTransition(
             preNavDestination, NavigationOperation::POP, false) == INVALID_ANIMATION_ID) {
             preNavDestination->SystemTransitionPopStart(false);
             preNavList.emplace_back(WeakPtr<FrameNode>(preNode));
@@ -2590,18 +2595,23 @@ void NavigationGroupNode::InitPopCurList(const RefPtr<FrameNode>& curNode, std::
     if (size == 0) {
         return;
     }
+    bool isForceSplitSuccess = navigationPattern->IsForceSplitSuccess();
     // find the nodes need to do ENTER_POP
     for (int32_t index = curStartIndex; index < size; index++) {
         auto node = GetNavDestinationNode(curNavdestionNodes[index].second);
         CHECK_NULL_VOID(node);
         auto curNode = AceType::DynamicCast<FrameNode>(node);
-        if (curNode) {
-            auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
-            if (navDestination && TriggerNavDestinationTransition(
-                navDestination, NavigationOperation::POP, true) == INVALID_ANIMATION_ID) {
-                navDestination->SystemTransitionPopStart(true);
-                curNavList.emplace_back(WeakPtr<FrameNode>(curNode));
-            }
+        CHECK_NULL_CONTINUE(curNode);
+        auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
+        CHECK_NULL_CONTINUE(navDestination);
+        // In the scenario of force split, the primaryPage does not have animation
+        if (isForceSplitSuccess && navDestination->IsShowInPrimaryPartition()) {
+            continue;
+        }
+        if (TriggerNavDestinationTransition(
+            navDestination, NavigationOperation::POP, true) == INVALID_ANIMATION_ID) {
+            navDestination->SystemTransitionPopStart(true);
+            curNavList.emplace_back(WeakPtr<FrameNode>(curNode));
         }
     }
 }
@@ -2633,6 +2643,7 @@ void NavigationGroupNode::InitPushPreList(const RefPtr<FrameNode>& preNode,
     if (size == 0) {
         return;
     }
+    bool isForceSplitSuccess = navigationPattern->IsForceSplitSuccess();
     // find the nodes need to do EXIT_PUSH
     for (int32_t index = preStartIndex; index < size; index++) {
         auto node = GetNavDestinationNode(preNavdestinationNodes[index].second.Upgrade());
@@ -2648,7 +2659,12 @@ void NavigationGroupNode::InitPushPreList(const RefPtr<FrameNode>& preNode,
             continue;
         }
         auto preNavdestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
-        if (preNavdestination && TriggerNavDestinationTransition(
+        CHECK_NULL_CONTINUE(preNavdestination);
+        // In the scenario of force split, the primaryPage does not have animation
+        if (isForceSplitSuccess && preNavdestination->IsShowInPrimaryPartition()) {
+            continue;
+        }
+        if (TriggerNavDestinationTransition(
             preNavdestination, NavigationOperation::PUSH, false) == INVALID_ANIMATION_ID) {
             preNavdestination->SystemTransitionPushStart(false);
             prevNavList.emplace_back(WeakPtr<FrameNode>(preNode));
@@ -2666,12 +2682,18 @@ void NavigationGroupNode::InitPushCurList(const RefPtr<FrameNode>& curNode, std:
     auto curEndIndex = curNavdestinationNode->GetIndex();
     auto curStartIndex = lastStandardIndex_;
     auto stack = navigationPattern->GetNavigationStack();
+    bool isForceSplitSuccess = navigationPattern->IsForceSplitSuccess();
     for (int32_t index = curStartIndex; index <= curEndIndex; index++) {
         auto node = GetNavDestinationNode(stack->Get(index));
         CHECK_NULL_VOID(node);
         auto curNode = AceType::DynamicCast<FrameNode>(node);
         CHECK_NULL_VOID(curNode);
         auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
+        CHECK_NULL_VOID(curNavDestination);
+        // In the scenario of force split, the primaryPage does not have animation
+        if (isForceSplitSuccess && curNavDestination->IsShowInPrimaryPartition()) {
+            continue;
+        }
         if (curNavDestination && TriggerNavDestinationTransition(
             curNavDestination, NavigationOperation::PUSH, true) == INVALID_ANIMATION_ID) {
             curNavDestination->SystemTransitionPushStart(true);

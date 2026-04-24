@@ -1547,6 +1547,8 @@ private:
 
     void OnShowHideForAccessibility(bool isOnShow);
 
+    void SetupPageStackCallbacks();
+
     std::unique_ptr<UITaskScheduler> taskScheduler_ = std::make_unique<UITaskScheduler>();
 
     std::unordered_map<uint32_t, WeakPtr<ScheduleTask>> scheduleTasks_;

@@ -1824,12 +1824,7 @@ void PipelineContext::SetupRootElement()
     if (!stageManager_) {
         stageManager_ = MakeRefPtr<StageManager>(stageNode);
     }
-    auto getPagePathCallback = [weakFrontend = weakFrontend_](const std::string& url) -> std::string {
-        auto frontend = weakFrontend.Upgrade();
-        CHECK_NULL_RETURN(frontend, "");
-        return frontend->GetPagePathByUrl(url);
-    };
-    stageManager_->SetGetPagePathCallback(std::move(getPagePathCallback));
+    SetupPageStackCallbacks();
     auto frameNode = DynamicCast<FrameNode>(installationFree_ ? atomicService->GetParent() : stageNode->GetParent());
     overlayManager_ = MakeRefPtr<OverlayManager>(frameNode);
     inspectorOffscreenNodesMgr_ = MakeRefPtr<InspectorOffscreenNodesMgr>();
@@ -1905,6 +1900,23 @@ void PipelineContext::RSTransactionBeginAndCommit(const std::shared_ptr<Rosen::R
 #endif
 }
 
+void PipelineContext::SetupPageStackCallbacks()
+{
+    CHECK_NULL_VOID(stageManager_);
+    auto getPagePathCallback = [weakFrontend = weakFrontend_](const std::string& url) -> std::string {
+        auto frontend = weakFrontend.Upgrade();
+        CHECK_NULL_RETURN(frontend, "");
+        return frontend->GetPagePathByUrl(url);
+    };
+    stageManager_->SetGetPagePathCallback(std::move(getPagePathCallback));
+    auto isPageInStackCallback = [weakFrontend = weakFrontend_](const RefPtr<FrameNode>& page) {
+        auto frontend = weakFrontend.Upgrade();
+        CHECK_NULL_RETURN(frontend, false);
+        return frontend->IsPageInStack(page);
+    };
+    stageManager_->SetIsPageInStackCallback(std::move(isPageInStackCallback));
+}
+
 void PipelineContext::SetupSubRootElement()
 {
     CHECK_RUN_ON(UI);
@@ -1947,12 +1959,7 @@ void PipelineContext::SetupSubRootElement()
     if (!stageManager_) {
         stageManager_ = MakeRefPtr<StageManager>(nullptr);
     }
-    auto getPagePathCallback = [weakFrontend = weakFrontend_](const std::string& url) -> std::string {
-        auto frontend = weakFrontend.Upgrade();
-        CHECK_NULL_RETURN(frontend, "");
-        return frontend->GetPagePathByUrl(url);
-    };
-    stageManager_->SetGetPagePathCallback(std::move(getPagePathCallback));
+    SetupPageStackCallbacks();
     overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
     inspectorOffscreenNodesMgr_ = MakeRefPtr<InspectorOffscreenNodesMgr>();
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);

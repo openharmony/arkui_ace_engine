@@ -1053,7 +1053,8 @@ void NavigationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             LayoutNavBarOrHomeDestination(
                 layoutWrapper, hostNode, navigationLayoutProperty, navBarPosition, navBarOffset);
         }
-        navBarOrPrimarNodeWidth = LayoutPrimaryContentNode(layoutWrapper, hostNode, navigationLayoutProperty);
+        LayoutPrimaryContentNode(layoutWrapper, hostNode, navigationLayoutProperty);
+        navBarOrPrimarNodeWidth = primaryNodeSize_.Width();
     } else {
         navBarPosition = pattern->IsForceSplitUseNavBar() ? NavBarPosition::START :
             navigationLayoutProperty->GetNavBarPositionValue(NavBarPosition::START);
@@ -1062,6 +1063,7 @@ void NavigationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             layoutWrapper, hostNode, navigationLayoutProperty, navBarPosition, navBarOffset);
         if (pattern->IsForceSplitSuccess()) {
             LayoutPrimaryContentNode(layoutWrapper, hostNode, navigationLayoutProperty);
+            navBarOrPrimarNodeWidth = primaryNodeSize_.Width();
         }
     }
 
