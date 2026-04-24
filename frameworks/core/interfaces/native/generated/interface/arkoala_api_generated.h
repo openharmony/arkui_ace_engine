@@ -1249,6 +1249,8 @@ typedef struct Array_font_UIFontGenericInfo Array_font_UIFontGenericInfo;
 typedef struct Opt_Array_font_UIFontGenericInfo Opt_Array_font_UIFontGenericInfo;
 typedef struct Array_FractionStop Array_FractionStop;
 typedef struct Opt_Array_FractionStop Opt_Array_FractionStop;
+typedef struct Array_FrameNodeCreateInfo Array_FrameNodeCreateInfo;
+typedef struct Opt_Array_FrameNodeCreateInfo Opt_Array_FrameNodeCreateInfo;
 typedef struct Array_GestureActionPhase Array_GestureActionPhase;
 typedef struct Opt_Array_GestureActionPhase Opt_Array_GestureActionPhase;
 typedef struct Array_GestureRecognizer Array_GestureRecognizer;
@@ -2389,6 +2391,8 @@ typedef struct Ark_FormInfo Ark_FormInfo;
 typedef struct Opt_FormInfo Opt_FormInfo;
 typedef struct Ark_FormLinkOptions Ark_FormLinkOptions;
 typedef struct Opt_FormLinkOptions Opt_FormLinkOptions;
+typedef struct Ark_FrameNodeCreateInfo Ark_FrameNodeCreateInfo;
+typedef struct Opt_FrameNodeCreateInfo Opt_FrameNodeCreateInfo;
 typedef struct Ark_FullScreenEnterEvent Ark_FullScreenEnterEvent;
 typedef struct Opt_FullScreenEnterEvent Opt_FullScreenEnterEvent;
 typedef struct Ark_GaugeOptions Ark_GaugeOptions;
@@ -10595,6 +10599,15 @@ typedef struct Opt_Array_FractionStop {
     Ark_Tag tag;
     Array_FractionStop value;
 } Opt_Array_FractionStop;
+typedef struct Array_FrameNodeCreateInfo {
+    /* kind: ContainerType */
+    Ark_FrameNodeCreateInfo* array;
+    Ark_Int32 length;
+} Array_FrameNodeCreateInfo;
+typedef struct Opt_Array_FrameNodeCreateInfo {
+    Ark_Tag tag;
+    Array_FrameNodeCreateInfo value;
+} Opt_Array_FrameNodeCreateInfo;
 typedef struct Array_GestureActionPhase {
     /* kind: ContainerType */
     Ark_GestureActionPhase* array;
@@ -16215,6 +16228,16 @@ typedef struct Opt_FormLinkOptions {
     Ark_Tag tag;
     Ark_FormLinkOptions value;
 } Opt_FormLinkOptions;
+typedef struct Ark_FrameNodeCreateInfo {
+    /* kind: Interface */
+    Ark_NativePointer frameNodePeer;
+    Ark_NativePointer renderNodePeer;
+    Ark_Int32 id;
+} Ark_FrameNodeCreateInfo;
+typedef struct Opt_FrameNodeCreateInfo {
+    Ark_Tag tag;
+    Ark_FrameNodeCreateInfo value;
+} Opt_FrameNodeCreateInfo;
 typedef struct Ark_FullScreenEnterEvent {
     /* kind: Interface */
     Ark_FullScreenExitHandler handler;
@@ -29518,13 +29541,11 @@ typedef struct GENERATED_ArkUIFrameNodeExtenderAccessor {
     Array_F64 (*convertPositionFromWindow)(Ark_FrameNode peer,
                                            const Ark_Vector2* positionByWindow);
     void (*applyAttributesFinish)(Ark_FrameNode peer);
-    Array_Pointer (*createFrameNodes)(Ark_Int32 count);
-    Array_Pointer (*getRenderNodeByFrameNodes)(const Array_Pointer* ptrs);
-    Array_I32 (*getIdByFrameNodes)(const Array_Pointer* ptrs);
     Ark_NativePointer (*getFrameNodeById1)(Ark_FrameNode peer,
                                            const Ark_String* id);
     Ark_NativePointer (*getFrameNodeByUniqueId1)(Ark_FrameNode peer,
                                                  Ark_Int32 id);
+    Array_FrameNodeCreateInfo (*getFrameNodeCreateInfoArray)(Ark_Int32 count);
 } GENERATED_ArkUIFrameNodeExtenderAccessor;
 
 typedef struct GENERATED_ArkUIFullScreenExitHandlerAccessor {
