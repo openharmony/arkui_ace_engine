@@ -40,7 +40,6 @@ common_sources = [
   "utility/accessor_utils.cpp",
   "utility/callback_helper.cpp",
   "utility/converter_enums.cpp",
-  "utility/error_message_manager.cpp",
   "utility/peer_utils.cpp",
   "utility/reverse_converter.cpp",
   "utility/reverse_converter_enums.cpp",
