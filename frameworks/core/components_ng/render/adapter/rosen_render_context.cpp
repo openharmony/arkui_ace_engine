@@ -346,14 +346,6 @@ float RosenRenderContext::ConvertDimensionToScaleBySize(const Dimension& dimensi
     return size > 0.0f ? static_cast<float>(dimension.ConvertToPx() / size) : 0.5f;
 }
 
-class RosenRenderContext::EdgeLightImpl {
-public:
-    std::shared_ptr<Rosen::RSNGSDFEdgeLightEffect> edgeLightFilter_;
-    std::shared_ptr<Rosen::RSNGFrameGradientMask> lightMask_;
-};
-
-RosenRenderContext::RosenRenderContext() {}
-
 RosenRenderContext::~RosenRenderContext()
 {
     StopRecordingIfNeeded();
@@ -8885,13 +8877,7 @@ void RosenRenderContext::UpdateEdgeLightFilter(const SizeF& frameSize)
     constexpr float OUTERBORDERBLOOMWIDTH_RATIO = 0.2f;
     constexpr float COLOR_RATIO = 255.0f;
 
-    if (!edgeLightImpl_) {
-        edgeLightImpl_ = std::make_unique<EdgeLightImpl>();
-    }
-    auto& edgeLightFilter_ = edgeLightImpl_->edgeLightFilter_;
-    if (!edgeLightFilter_) {
-        edgeLightFilter_ = std::make_shared<Rosen::RSNGSDFEdgeLightEffect>();
-    }
+    auto edgeLightFilter_ = std::make_shared<Rosen::RSNGSDFEdgeLightEffect>();
     auto edgeLightThicknessValue = 0.0f;
     edgeLightThicknessValue = edgeLightParam->thickness.ConvertToPx();
     if (LessNotEqual(edgeLightThicknessValue, 0.0f)) {
@@ -8917,7 +8903,7 @@ void RosenRenderContext::UpdateEdgeLightFilter(const SizeF& frameSize)
     edgeLightFilter_->Setter<Rosen::SDFEdgeLightEffectColorTag>(
         Rosen::Vector3f(edgeLightParam->color.GetRed() / COLOR_RATIO, edgeLightParam->color.GetGreen() / COLOR_RATIO,
             edgeLightParam->color.GetBlue() / COLOR_RATIO));
-    rsNode_->SetForegroundShader(edgeLightFilter_);
+    rsNode_->SetOverlayNGShader(edgeLightFilter_);
     RequestNextFrame();
 #endif
 }
@@ -8944,17 +8930,8 @@ void RosenRenderContext::UpdateEdgeLightFilterWithLightMask(const SizeF& frameSi
     const Rosen::Vector4f OUTERBEZIER_DEFAULT = Rosen::Vector4f(0.0f, 0.0f, 0.0f, 0.0f);
     const Rosen::Vector2f AXIALDIRECTION_DEFAULT = Rosen::Vector2f(0.0f, 0.1f);
 
-    if (!edgeLightImpl_) {
-        edgeLightImpl_ = std::make_unique<EdgeLightImpl>();
-    }
-    auto& edgeLightFilter_ = edgeLightImpl_->edgeLightFilter_;
-    auto& lightMask_ = edgeLightImpl_->lightMask_;
-    if (!edgeLightFilter_) {
-        edgeLightFilter_ = std::make_shared<Rosen::RSNGSDFEdgeLightEffect>();
-    }
-    if (!lightMask_) {
-        lightMask_ = std::make_shared<Rosen::RSNGFrameGradientMask>();
-    }
+    auto edgeLightFilter_ = std::make_shared<Rosen::RSNGSDFEdgeLightEffect>();
+    auto lightMask_ = std::make_shared<Rosen::RSNGFrameGradientMask>();
 
     auto edgeLightLengthValue = 0.0f;
     edgeLightLengthValue = edgeLightParam->length.ConvertToPx();
@@ -8988,7 +8965,7 @@ void RosenRenderContext::UpdateEdgeLightFilterWithLightMask(const SizeF& frameSi
 
     edgeLightFilter_->Setter<Rosen::SDFEdgeLightEffectLightMaskTag>(
         std::static_pointer_cast<Rosen::RSNGMaskBase>(lightMask_));
-    rsNode_->SetForegroundShader(edgeLightFilter_);
+    rsNode_->SetOverlayNGShader(edgeLightFilter_);
     RequestNextFrame();
 #endif
 }
@@ -9007,15 +8984,7 @@ void RosenRenderContext::ResetEdgeLightFilter()
 {
 #ifndef PREVIEW
     CHECK_NULL_VOID(rsNode_);
-    if (!edgeLightImpl_) {
-        return;
-    }
-    auto& edgeLightFilter_ = edgeLightImpl_->edgeLightFilter_;
-    if (!edgeLightFilter_) {
-        return;
-    }
-    rsNode_->SetForegroundShader(nullptr);
-    edgeLightFilter_ = nullptr;
+    rsNode_->SetOverlayNGShader(nullptr);
     RequestNextFrame();
 #endif
 }
