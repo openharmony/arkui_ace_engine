@@ -72,7 +72,7 @@ class PipelineContext;
 class RosenRenderContext : public RenderContext {
     DECLARE_ACE_TYPE(RosenRenderContext, NG::RenderContext);
 public:
-    RosenRenderContext();
+    RosenRenderContext() = default;
     ~RosenRenderContext() override;
 
     void SetEffectLayer(const ContextParam& param);
@@ -986,8 +986,6 @@ private:
     static std::timed_mutex taskMtx_;
     CancelableCallback<void()> pendingDecodeTask_;
     CancelableCallback<void()> pendingUITask_;
-    class EdgeLightImpl;
-    std::unique_ptr<EdgeLightImpl> edgeLightImpl_;
 };
 } // namespace OHOS::Ace::NG
 
