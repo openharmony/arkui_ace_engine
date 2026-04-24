@@ -14,7 +14,8 @@
 import("//build/ohos.gni")
 import("//build/templates/abc/ohos_abc.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
-import("//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/npm_op/npm_op.gni")
+import(
+    "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/npm_op/npm_op.gni")
 import("files_to_watch.gni")
 
 npm_install_op("npm_install_prefetcher") {
@@ -27,17 +28,18 @@ npm_run_op("npm_build_prefetcher") {
   watched_files = ark_prefetcher_files_to_watch
   out_dir = "dist"
   out_file = "jsPrefetcher.js"
-  deps = [
-    # the host_toolchain is needed to avoid file corruption caused by parallel operations.
-    ":npm_install_prefetcher($host_toolchain)"
-  ]
+
+  # the host_toolchain is needed to avoid file corruption caused by parallel operations.
+  deps = [ ":npm_install_prefetcher($host_toolchain)" ]
 }
 
 ohos_abc("prefetcher") {
-  sources = [ "$target_gen_dir/jsPrefetcher.js" ]
+  # the host_toolchain is needed to avoid file corruption caused by parallel operations.
+  deps = [ ":npm_build_prefetcher($host_toolchain)" ]
+  basepath =
+      get_label_info(":npm_build_prefetcher($host_toolchain)", "target_gen_dir")
+  sources = [ "$basepath/jsPrefetcher.js" ]
   output_name = "prefetcher"
-  deps = [":npm_build_prefetcher"]
-
   install_images = [ "system" ]
   module_install_dir = "etc/abc/arkui"
   subsystem_name = ace_engine_subsystem
