@@ -1196,6 +1196,23 @@ void JSText::JsDataDetectorConfig(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetTextDetectConfig(textDetectConfig);
 }
 
+bool JSText::BindPreviewMenu(const JSRef<JSVal> argsMenuOptions, NG::TextResponseType responseType,
+    NG::TextSpanType textSpanType, std::function<void()>& buildFunc, NG::SelectMenuParam& menuParam)
+{
+    JSRef<JSObject> menuOptions = JSRef<JSObject>::Cast(argsMenuOptions);
+    auto menuType = menuOptions->GetProperty("menuType");
+    bool isPreviewMenu = !menuType->IsUndefined() && !menuType->IsNull() && menuType->IsNumber() &&
+                        (menuType->ToNumber<int32_t>() == 1);
+    bool bindImagePreviewMenu = isPreviewMenu && responseType == NG::TextResponseType::LONG_PRESS;
+    if (bindImagePreviewMenu) {
+        TextModel::GetInstance()->BindPreviewMenu(textSpanType, buildFunc, menuParam);
+        return true;
+    } else {
+        TextModel::GetInstance()->UnBindPreviewMenu();
+        return false;
+    }
+}
+
 void JSText::BindSelectionMenu(const JSCallbackInfo& info)
 {
     // TextSpanType
@@ -1244,7 +1261,11 @@ void JSText::BindSelectionMenu(const JSCallbackInfo& info)
     if (info.Length() > static_cast<uint32_t>(resquiredParameterCount)) {
         JSRef<JSVal> argsMenuOptions = info[resquiredParameterCount];
         if (argsMenuOptions->IsObject()) {
-            ParseMenuParam(info, argsMenuOptions, menuParam);
+            auto menuOptions = JSRef<JSObject>::Cast(argsMenuOptions);
+            ParseMenuParam(info, menuOptions, menuParam);
+            if (BindPreviewMenu(menuOptions, responseType, textSpanType, buildFunc, menuParam)) {
+                return;
+            }
         }
     }
 
