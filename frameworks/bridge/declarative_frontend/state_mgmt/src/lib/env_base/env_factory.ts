@@ -156,6 +156,14 @@ const simpleEnvMetaMap = {
     prop: 'displayId',
     type: 'number',
   },
+  'system.window.focused': {
+    prop: 'isFocused',
+    type: 'boolean',
+  },
+  'system.window.highlighted': {
+    prop: 'isHighlighted',
+    type: 'boolean',
+  },
 } as const satisfies SimpleEnvMeta;
 
 type SimpleTypeEnvKey = keyof typeof simpleEnvMetaMap;
