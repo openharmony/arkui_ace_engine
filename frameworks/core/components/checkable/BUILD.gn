@@ -24,6 +24,8 @@ build_component("checkable") {
     "render_checkbox_creator.cpp",
     "render_radio.cpp",
     "render_radio_creator.cpp",
+    "$ace_root/frameworks/core/components/rating/rating_theme.cpp",
+    "$ace_root/frameworks/core/components/toggle/toggle_theme.cpp",
   ]
 
   rosen_sources = [
