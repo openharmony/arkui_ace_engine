@@ -106,6 +106,33 @@ HWTEST_F(SimulateTouchExecutorExecuteStepTest, ExecuteStep_NullContext_ReturnsFa
     EXPECT_EQ(result, ExecutorResult::FAILED);
 }
 
+HWTEST_F(SimulateTouchExecutorExecuteStepTest, ExecuteStep_ValidContext_ReturnsSuccess, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    PointF coordinates(100.0f, 200.0f);
+    SimulateTouchExecutor executor(context, coordinates);
+    auto result = executor.ExecuteStep();
+    EXPECT_EQ(result, ExecutorResult::SUCCESS);
+}
+
+HWTEST_F(SimulateTouchExecutorExecuteStepTest, ExecuteStep_DifferentCoordinates_ReturnsSuccess, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    PointF coordinates(50.5f, 75.5f);
+    SimulateTouchExecutor executor(context, coordinates);
+    auto result = executor.ExecuteStep();
+    EXPECT_EQ(result, ExecutorResult::SUCCESS);
+}
+
+HWTEST_F(SimulateTouchExecutorExecuteStepTest, ExecuteStep_ZeroCoordinates_ReturnsSuccess, TestSize.Level1)
+{
+    auto context = WeakPtr<PipelineContext>(mockPipelineContext_);
+    PointF coordinates(0.0f, 0.0f);
+    SimulateTouchExecutor executor(context, coordinates);
+    auto result = executor.ExecuteStep();
+    EXPECT_EQ(result, ExecutorResult::SUCCESS);
+}
+
 HWTEST_F(SimulateTouchExecutorGetTypeTest, GetType_ReturnsSimulateTouch, TestSize.Level1)
 {
     auto context = WeakPtr<PipelineContext>(mockPipelineContext_);

@@ -4291,8 +4291,10 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         DumpLog::GetInstance().Print(info);
 #endif
 #ifdef RELAXED_INTERACTION_SUPPORT
+    } else if (params[0] == "-relaxedinteractioncmd" && params.size() >= PARAM_NUM) {
+        UiSessionManager::GetInstance()->SendCommand(params[1]);
     } else if (params[0] == "-relaxedinteractionlog") {
-        DumpLog::GetInstance().Print(1, WorkflowDumper::GetInstance().Dump());
+        DumpLog::GetInstance().Print(WorkflowDumper::GetInstance().Dump());
 #endif
     }
     return true;

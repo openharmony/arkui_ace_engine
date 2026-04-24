@@ -50,12 +50,12 @@ std::vector<std::unique_ptr<BaseExecutor>> FallbackCommandParser::Parse(const st
         return executors;
     }
 
-    if (identity->IsString()) {
+    if (JsonUtils::IsString(identity)) {
         executors.emplace_back(std::make_unique<FallbackExecutor>(context_, identity->GetString(), body->ToString()));
     } else if (JsonUtils::IsUint(identity)) {
         executors.emplace_back(std::make_unique<FallbackExecutor>(context_, identity->GetInt(), body->ToString()));
     } else {
-        TAG_LOGW(AceLogTag::ACE_UIEVENT, "Identity is not string or integer");
+        TAG_LOGW(AceLogTag::ACE_UIEVENT, "Identity is not valid string or integer");
     }
 
     return executors;
