@@ -9692,6 +9692,13 @@ bool WebDelegate::OnNestedScrollV2(float& x, float& y)
     return webPattern->OnNestedScrollV2(x, y);
 }
 
+bool WebDelegate::OnNestedFling(float& xVelocity, float& yVelocity)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_RETURN(webPattern, false);
+    return webPattern->OnNestedFling(xVelocity, yVelocity);
+}
+
 void WebDelegate::OnStatusBarClick()
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::OnStatusBarClick");
