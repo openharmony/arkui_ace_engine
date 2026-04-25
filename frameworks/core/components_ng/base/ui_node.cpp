@@ -2772,6 +2772,10 @@ void UINode::FindTopNavDestination(std::list<RefPtr<FrameNode>>& result)
             auto lastStandardIndex = navigationGroupNode->GetLastStandardIndex();
             int32_t startIndex = lastStandardIndex >= 0 ? lastStandardIndex : 0;
             int32_t endIndex = navigationStack->Size();
+            auto navBarNode = AceType::DynamicCast<FrameNode>(navigationGroupNode->GetNavBarNode());
+            if (navBarNode) {
+                result.emplace_back(navBarNode);
+            }
             for (int32_t i = startIndex; i < endIndex; ++i) {
                 result.emplace_back(AceType::DynamicCast<FrameNode>(
                     NavigationGroupNode::GetNavDestinationNode(navigationStack->Get(i))));

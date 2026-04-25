@@ -895,6 +895,12 @@ void FrameNode::InitializePatternAndContext()
 {
 }
 
+RectF FrameNode::GetTransformRectRelativeToWindow(bool checkBoundary) const
+{
+    float defaultRectValue = 100;
+    return {defaultRectValue, defaultRectValue, defaultRectValue, defaultRectValue};
+}
+
 bool FrameNode::IsVisibleAndActive() const
 {
     return {};

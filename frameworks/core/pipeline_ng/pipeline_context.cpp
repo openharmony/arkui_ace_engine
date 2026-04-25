@@ -179,6 +179,42 @@ ParamConfig ParseDumpParamConfig(const std::vector<std::string>& params)
     return config;
 }
 
+ void AddJsonChild(std::shared_ptr<JsonValue> parentJson, std::shared_ptr<JsonValue> childJson)
+{
+    CHECK_NULL_VOID(parentJson && childJson);
+    if (!parentJson->Contains("$children")) {
+        auto array = JsonUtil::CreateArray();
+        parentJson->PutRef("$children", std::move(array));
+    }
+    auto childrenJson = parentJson->GetValue("$children");
+    childrenJson->Put(childJson);
+}
+
+RefPtr<NG::FrameNode> GetContainerModalDumpRootNode(const RefPtr<NG::FrameNode>& containerModalNode)
+{
+    RefPtr<NG::FrameNode> result = nullptr;
+    if (!containerModalNode) {
+        return nullptr;
+    }
+    auto containerModalPattern = containerModalNode->GetPattern<NG::ContainerModalPattern>();
+    if (containerModalPattern) {
+        result = containerModalPattern->GetStackNode();
+    }
+    return result;
+}
+
+RefPtr<NG::UINode> GetAtomicServiceDumpNode(const RefPtr<NG::FrameNode>& dumpBeginNode)
+{
+    CHECK_NULL_RETURN(dumpBeginNode, nullptr);
+    auto rootChildren = dumpBeginNode->GetChildren();
+    for (const auto& rootChild : rootChildren) {
+        if (rootChild->GetTag() == V2::ATOMIC_SERVICE_ETS_TAG) {
+            return rootChild;
+        }
+    }
+    return nullptr;
+}
+
 class TestAICaller : public AICallerHelper {
 public:
     TestAICaller() = default;
@@ -4242,26 +4278,8 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         GetAppInfo(root);
         RefPtr<NG::FrameNode> atomicServiceNode = nullptr;
         auto rootChildren = rootNode_->GetChildren();
-        auto config = ParamConfig { true, true, true, true };
-        for (auto rootChild : rootChildren) {
-            if (rootChild->GetTag() == V2::ATOMIC_SERVICE_ETS_TAG) {
-                atomicServiceNode = AceType::DynamicCast<NG::FrameNode>(rootChild);
-                break;
-            }
-        }
-        if (atomicServiceNode) {
-            auto atomicRoot = JsonUtil::CreateSharedPtrJson(true);
-            DumpSimplifyTreeJsonEntrance(atomicRoot, atomicServiceNode, config);
-            GetOverlayInspector(root, rootNode_, config);
-            if (!root->Contains("$children")) {
-                auto array = JsonUtil::CreateArray();
-                root->PutRef("$children", std::move(array));
-            }
-            auto childrenJson = root->GetValue("$children");
-            childrenJson->Put(atomicRoot);
-        } else {
-            DumpSimplifyTreeJsonEntrance(root, rootNode_, config);
-        }
+        auto config = ParamConfig{true, true, true, true};
+        DumpVisibleInspectorTree(root, config);
         DumpLog::GetInstance().Print(root->ToString());
     } else if (params[0] == "-infoOfRootNode") {
         auto root = JsonUtil::CreateSharedPtrJson(true);
@@ -6579,7 +6597,7 @@ int32_t PipelineContext::GetContainerModalTitleHeight()
     return containerPattern->GetContainerModalTitleHeight();
 }
 
-RefPtr<FrameNode> PipelineContext::GetContainerModalNode()
+RefPtr<FrameNode> PipelineContext::GetContainerModalNode() const
 {
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {
         return nullptr;
@@ -6978,15 +6996,6 @@ void PipelineContext::GetComponentOverlayInspector(
     auto subWindowOverlayArray = JsonUtil::CreateArray();
     bool hasOverlay =
         ProcessOverlayChildrenDumpInfo(startNode, overlayChildrenArray, subWindowOverlayArray, isInSubWindow, config);
-    // check if the startNode is a atomicServiceNode
-    if (startNode != rootNode_) {
-        auto atomicServiceContainer =
-            AceType::DynamicCast<FrameNode>(overlayManager_->FindChildNodeByKey(startNode, "AtomicServiceContainerId"));
-        if (atomicServiceContainer) {
-            hasOverlay |= ProcessOverlayChildrenDumpInfo(
-                atomicServiceContainer, overlayChildrenArray, subWindowOverlayArray, isInSubWindow, config);
-        }
-    }
 
     if (isInSubWindow) {
         subRoot->PutRef("$children", std::move(subWindowOverlayArray));
@@ -7022,7 +7031,6 @@ void PipelineContext::GetOverlayInspector(
 void PipelineContext::DumpSimplifyTreeJsonFromTopNavNode(RefPtr<NG::FrameNode> startNode,
     std::shared_ptr<JsonValue>& root, std::list<RefPtr<NG::FrameNode>>& navNodeList, const ParamConfig& config) const
 {
-    GetOverlayInspector(root, startNode, config);
     if (!root->Contains("$children")) {
         auto array = JsonUtil::CreateArray();
         root->PutRef("$children", std::move(array));
@@ -7041,6 +7049,10 @@ void PipelineContext::DumpSimplifyTreeJsonFromTopNavNode(RefPtr<NG::FrameNode> s
 void PipelineContext::DumpSimplifyTreeJsonEntrance(
     std::shared_ptr<JsonValue> root, RefPtr<NG::FrameNode> startNode, ParamConfig config) const
 {
+    auto startNodeRect = startNode->GetTransformRectRelativeToWindow();
+    if (NearEqual(startNodeRect.Width(), 0) && NearEqual(startNodeRect.Height(), 0)) {
+        return;
+    }
     // step1: Get the topPageNode if onlyNeedVisible, avoid fetching hidden page.
     auto lastPageNode = stageManager_->GetLastPage();
     CHECK_NULL_VOID(lastPageNode);
@@ -7054,6 +7066,55 @@ void PipelineContext::DumpSimplifyTreeJsonEntrance(
         navNodes.emplace_back(lastPageNode);
     }
     DumpSimplifyTreeJsonFromTopNavNode(startNode, root, navNodes, config);
+}
+
+void PipelineContext::DumpVisibleInspectorTree(std::shared_ptr<JsonValue>& rootJson, ParamConfig config) const
+{
+    auto containerModalNode = GetContainerModalNode();
+    auto containerModalDumpNode = GetContainerModalDumpRootNode(containerModalNode);
+    auto dumpBeginNode = containerModalDumpNode ? containerModalDumpNode : rootNode_;
+    auto atomicServiceDumpNode = GetAtomicServiceDumpNode(dumpBeginNode);
+    // pseudoRootJson deals with containerModal case, containerModalStack will be the actual root.
+    std::shared_ptr<JsonValue> pseudoRootJson = rootJson;
+    std::shared_ptr<JsonValue> containerModalTitleJson = nullptr;
+    if (dumpBeginNode != rootNode_) {
+        // ContainerModal case
+        containerModalTitleJson = JsonUtil::CreateSharedPtrJson();
+        // In this case, ContainerModalPattern can not be nullptr
+        auto titleRow = GetContainerModalNode()->GetPattern<NG::ContainerModalPattern>()->GetCustomTitleRow();
+        if (titleRow) {
+            DumpSimplifyTreeJsonEntrance(containerModalTitleJson, titleRow, config);
+        }
+        pseudoRootJson = JsonUtil::CreateSharedPtrJson();
+        // ContainerModal root doesn't has an actual root wrapper, so we need wrap it up
+        rootNode_->DumpSimplifyTreeBase(rootJson);
+        rootNode_->DumpSimplifyInfoWithParamConfig(rootJson, config);
+    }
+    GetOverlayInspector(pseudoRootJson, dumpBeginNode, config);
+    if (atomicServiceDumpNode) {
+        auto atomicRootJson = JsonUtil::CreateSharedPtrJson(true);
+        auto atomicMenuBarJson = JsonUtil::CreateSharedPtrJson(true);
+        auto atomicServiceRoot = AceType::DynamicCast<FrameNode>(
+            overlayManager_->FindChildNodeByKey(atomicServiceDumpNode, "AtomicServiceContainerId"));
+        if (atomicServiceRoot) {
+            // dump component-overlay only, sub-window overlay has been dumped in rootJson
+            GetComponentOverlayInspector(atomicRootJson, atomicServiceRoot, config, false);
+            DumpSimplifyTreeJsonEntrance(atomicRootJson, atomicServiceRoot, config);
+            AddJsonChild(pseudoRootJson, atomicRootJson);
+        }
+        auto atomicServiceMenuBar = AceType::DynamicCast<FrameNode>(
+            overlayManager_->FindChildNodeByKey(atomicServiceRoot, "AtomicServiceMenubarRowId"));
+        if (atomicServiceMenuBar) {
+            DumpSimplifyTreeJsonEntrance(atomicMenuBarJson, atomicServiceMenuBar, config);
+            AddJsonChild(atomicRootJson, atomicMenuBarJson);
+        }
+    } else {
+        DumpSimplifyTreeJsonEntrance(pseudoRootJson, dumpBeginNode, config);
+    }
+    if (pseudoRootJson != rootJson) {
+        AddJsonChild(rootJson, containerModalTitleJson);
+        AddJsonChild(rootJson, pseudoRootJson);
+    }
 }
 
 void PipelineContext::GetInspectorTree(bool onlyNeedVisible, ParamConfig config)
@@ -7075,27 +7136,7 @@ void PipelineContext::GetInspectorTree(bool onlyNeedVisible, ParamConfig config)
                      "[config.accessibilityInfo:%d][config.cacheNodes:%d][config.withWeb:%d]",
         onlyNeedVisible, config.interactionInfo, config.accessibilityInfo, config.cacheNodes, config.withWeb);
     if (onlyNeedVisible) {
-        RefPtr<NG::FrameNode> atomicServiceNode = nullptr;
-        auto rootChildren = rootNode_->GetChildren();
-        for (auto rootChild : rootChildren) {
-            if (rootChild->GetTag() == V2::ATOMIC_SERVICE_ETS_TAG) {
-                atomicServiceNode = AceType::DynamicCast<NG::FrameNode>(rootChild);
-                break;
-            }
-        }
-        if (atomicServiceNode) {
-            auto atomicRoot = JsonUtil::CreateSharedPtrJson(true);
-            DumpSimplifyTreeJsonEntrance(atomicRoot, atomicServiceNode, config);
-            GetOverlayInspector(root, rootNode_, config);
-            if (!root->Contains("$children")) {
-                auto array = JsonUtil::CreateArray();
-                root->PutRef("$children", std::move(array));
-            }
-            auto childrenJson = root->GetValue("$children");
-            childrenJson->Put(atomicRoot);
-        } else {
-            DumpSimplifyTreeJsonEntrance(root, rootNode_, config);
-        }
+        DumpVisibleInspectorTree(root, config);
         taskExecutor_->PostTask(cb, TaskExecutor::TaskType::BACKGROUND, "ArkUIGetVisibleInspectorTree");
     } else {
         rootNode_->DumpSimplifyTreeWithParamConfig(0, root, false, config);
