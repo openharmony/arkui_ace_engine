@@ -111,7 +111,7 @@ HWTEST_F(SmartLayoutTestCore, SmartLayoutTestCore004, TestSize.Level1)
     info.isBlank = false;
 
     EdgesSpaces spaces;
-    auto childNode = rootNode->CreateChildNode(info, spaces);
+    auto childNode = rootNode->CreateChildNode(info, spaces, false);
 
     EXPECT_NE(childNode, nullptr);
     EXPECT_EQ(childNode->GetNodeId(), 100);

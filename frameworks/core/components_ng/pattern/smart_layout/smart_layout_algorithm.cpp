@@ -72,6 +72,8 @@ void SmartLayoutAlgorithm::PerformSmartLayout(LayoutWrapper* layoutWrapper)
 {
     AceTraceBegin("PerformSmartLayout");
     auto layoutType = GetLayoutTypeFromWrapper(layoutWrapper);
+    LOGD("SmartLayout: Detected layout %{public}s content overflow!!",
+        layoutWrapper ? layoutWrapper->GetHostTag().c_str() : "UNKNOWN");
     ExecuteLayout(layoutWrapper, layoutType);
     AceTraceEnd();
 }
@@ -215,7 +217,8 @@ void SmartLayoutAlgorithm::ApplyChildLayout(
     hostNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     childWrapper->Layout();
 
-    LOGD("Applied layout for child %{public}s: offset=(%{public}f, %{public}f), size=(%{public}f, %{public}f)",
+    LOGD("SmartLayout: Applied layout for child %{public}s: \
+        offset=(%{public}f, %{public}f), size=(%{public}f, %{public}f)",
         layoutNode->GetName().c_str(),
         layoutNode->GetPosition().offsetX.value,
         layoutNode->GetPosition().offsetY.value,
@@ -302,7 +305,7 @@ bool SmartLayoutAlgorithm::InitializeLayoutContext(LayoutWrapper* layoutWrapper)
     auto hostNode = layoutWrapper->GetHostNode();
     if (hostNode) {
         OffsetF absoluteOffset = hostNode->GetTransformRelativeOffset();
-        if (absoluteOffset.GetY() == 0) {
+        if (NearZero(absoluteOffset.GetY())) {
             rootNode_->SetAvoidSafeArea(true);
         }
     }

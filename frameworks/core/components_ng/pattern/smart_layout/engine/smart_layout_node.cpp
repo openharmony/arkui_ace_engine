@@ -50,14 +50,14 @@ SmartLayoutNode::SmartLayoutNode(std::shared_ptr<localsmt::Engine> engine, const
 }
 
 std::shared_ptr<SmartLayoutNode> SmartLayoutNode::CreateChildNode(
-    const ChildLayoutInfo& info, const EdgesSpaces& spaces)
+    const ChildLayoutInfo& info, const EdgesSpaces& spaces, bool firstChild)
 {
     std::string childName = CHILD_NODE_PREFIX + std::to_string(info.id);
     auto node = std::make_shared<SmartLayoutNode>(engine_, childName);
     node->id_ = info.id;
 
     // Set size (Blank node: height is 0 for Column, width is 0 for Row)
-    if (info.isBlank) {
+    if (info.isBlank && !(firstChild && context_.avoidSafeArea)) {
         if (context_.layoutType == SmartLayoutType::COLUMN) {
             node->SetFixedSize(info.width, 0);
         } else {
@@ -133,7 +133,7 @@ void SmartLayoutNode::CreateChildrenFromInfos(const std::vector<ChildLayoutInfo>
 
         auto spaces = CalculateChildSpaces(childInfos[i], prevInfo, nextInfo,
             context_.layoutType, context_.size);
-        auto node = CreateChildNode(childInfos[i], spaces);
+        auto node = CreateChildNode(childInfos[i], spaces, i == 0);
         childNodes.push_back(node);
     }
 

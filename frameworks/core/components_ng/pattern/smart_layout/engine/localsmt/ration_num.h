@@ -93,11 +93,13 @@ struct RationNum {
         rNew.Simplify();
         return rNew;
     }
+
     RationNum& operator*=(const RationNum& r1)
     {
         *this = *this * r1;
         return *this;
     }
+
     RationNum& operator*=(const int64_t& r1)
     {
         *this = ((*this) * RationNum(r1));

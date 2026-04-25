@@ -51,12 +51,15 @@ public:
 
     /**
      * @brief Create a child node sharing the same engine
-     * @param info Child layout info
-     * @param spaces Edge spaces for the child
-     * @return Created child node
+     * @param info Child layout info containing id, size, position and blank flag
+     * @param spaces Edge spaces (top, left, bottom, right) for the child
+     * @param firstChild Whether this is the first child node
+     * @return Created child node with fixed size and initial position set
+     * @note For blank nodes: height is set to 0 for Column layout, width is set to 0 for Row layout,
+     *       unless it's the first child and avoidSafeArea is enabled
      */
     std::shared_ptr<SmartLayoutNode> CreateChildNode(
-        const ChildLayoutInfo& info, const EdgesSpaces& spaces);
+        const ChildLayoutInfo& info, const EdgesSpaces& spaces, bool firstChild);
 
     /**
      * @brief Solve the constraint system

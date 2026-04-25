@@ -253,7 +253,7 @@ private:
     void BuildConstraintLiterals(niaOverall::LsSolver& solver, const std::vector<ActiveConstraint>& active);
     void BuildBoundLiterals(niaOverall::LsSolver& solver, const std::vector<BoundLit>& boundLits);
     void BuildClauses(niaOverall::LsSolver& solver, const std::vector<ActiveConstraint>& active,
-        const std::vector<BoundLit>& boundLits, std::map<int, int>& userToSolver);
+        const std::vector<BoundLit>& boundLits);
     void FinalizeSolver(niaOverall::LsSolver& solver);
     bool SolveAndExtract(niaOverall::LsSolver& solver, int width, int height);
 };

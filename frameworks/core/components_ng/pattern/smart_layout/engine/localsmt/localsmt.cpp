@@ -14,7 +14,7 @@
  */
 
 #include "localsmt.h"
-
+#include <unordered_set>
 #include <algorithm>
 #include <cmath>
 #include <set>
@@ -360,10 +360,12 @@ struct NormExpr {
 
 // normalize is called from Engine::buildAndSolve (Engine is friend of Expr)
 static NormExpr NormalizeExprs(const std::vector<Expr::Term>& lhsTerms, double lhsConst,
-    const std::vector<Expr::Term>& rhsTerms, double rhsConst)
+    const std::vector<Expr::Term>& rhsTerms, double rhsConst, std::unordered_map<std::string, double>& combined)
 {
     NormExpr result;
-    std::map<std::string, double> combined;
+    combined.clear();
+    combined.reserve(lhsTerms.size() + rhsTerms.size());
+
     for (auto& t : lhsTerms) {
         combined[t.varName] += t.coeff;
     }
@@ -372,6 +374,7 @@ static NormExpr NormalizeExprs(const std::vector<Expr::Term>& lhsTerms, double l
     }
     double c = lhsConst - rhsConst;
 
+    result.terms.reserve(combined.size());
     for (auto& kv : combined) {
         RationNum rc = RationNum::FromDouble(kv.second);
         if (rc != 0) {
@@ -394,8 +397,7 @@ bool Engine::BuildAndSolve(int width, int height)
     BuildConstraintLiterals(solver, active);
     BuildBoundLiterals(solver, boundLits);
 
-    std::map<int, int> userToSolver;
-    BuildClauses(solver, active, boundLits, userToSolver);
+    BuildClauses(solver, active, boundLits);
     FinalizeSolver(solver);
 
     if (!SolveAndExtract(solver, width, height)) {
@@ -447,23 +449,28 @@ void Engine::AllocateSolverLits(niaOverall::LsSolver& solver, const std::vector<
     solver.MakeLitsSpace(totalLits + 1);
     solver.lits[0].litsIndex = 0;
 
+    solver.vars.reserve(varNames_.size());
+    solver.niaVarVec.reserve(varNames_.size());
+    solver.boolVarVec.reserve(varNames_.size());
     for (auto& name : varNames_) {
         solver.TransferNameToVar(name, true);
     }
     solver.TransferNameToVar(".w", true);
-    solver.TransferNameToVar("BC_hight", true);
+    solver.TransferNameToVar("BC_height", true);
 }
 
 void Engine::BuildConstraintLiterals(niaOverall::LsSolver& solver, const std::vector<ActiveConstraint>& active)
 {
+    std::unordered_map<std::string, double> buffer;
     for (auto& ac : active) {
         auto& ci = constraints_[ac.idx];
         niaOverall::Lit& l = solver.lits[ac.solverLitId];
         l.isNiaLit = true;
         l.litsIndex = ac.solverLitId;
 
-        NormExpr ne = NormalizeExprs(ci.lhs.terms_, ci.lhs.constant_, ci.rhs.terms_, ci.rhs.constant_);
+        NormExpr ne = NormalizeExprs(ci.lhs.terms_, ci.lhs.constant_, ci.rhs.terms_, ci.rhs.constant_, buffer);
 
+        l.coffVars.reserve(ne.terms.size());
         for (auto& t : ne.terms) {
             uint64_t vi = solver.name2var[t.var];
             l.coffVars.push_back(niaOverall::CoffVar(static_cast<int>(vi), t.coeff));
@@ -511,13 +518,18 @@ void Engine::BuildBoundLiterals(niaOverall::LsSolver& solver, const std::vector<
 }
 
 void Engine::BuildClauses(niaOverall::LsSolver& solver, const std::vector<ActiveConstraint>& active,
-    const std::vector<BoundLit>& boundLits, std::map<int, int>& userToSolver)
+    const std::vector<BoundLit>& boundLits)
 {
+    std::unordered_map<int, int> userToSolver;
+    userToSolver.reserve(active.size());
+
     for (auto& ac : active) {
         userToSolver[constraints_[ac.idx].litId] = ac.solverLitId;
     }
 
-    std::set<int> inUserClause;
+    std::unordered_set<int> inUserClause;
+    inUserClause.reserve(clauses_.size());
+
     for (auto& cl : clauses_) {
         for (int uid : cl) {
             inUserClause.insert(std::abs(uid));
@@ -534,6 +546,8 @@ void Engine::BuildClauses(niaOverall::LsSolver& solver, const std::vector<Active
 
     for (auto& cl : clauses_) {
         std::vector<int> solverCl;
+        solverCl.reserve(cl.size());
+
         for (int uid : cl) {
             int sign = (uid > 0) ? 1 : -1;
             auto it = userToSolver.find(std::abs(uid));
@@ -549,15 +563,13 @@ void Engine::BuildClauses(niaOverall::LsSolver& solver, const std::vector<Active
     for (auto& bl : boundLits) {
         ov.push_back({ bl.solverLitId });
     }
-
-    solver.DeleteRedundantClauses(ov);
 }
 
 void Engine::FinalizeSolver(niaOverall::LsSolver& solver)
 {
     solver.basicComponentName = "BC";
     solver.bcWidthIdx = static_cast<int>(solver.name2var[".w"]);
-    solver.bcHightIdx = static_cast<int>(solver.name2var["BC_hight"]);
+    solver.bcHeightIdx = static_cast<int>(solver.name2var["BC_height"]);
     solver.numVars = static_cast<int>(solver.vars.size());
     solver.litAppear.resize(solver.numLits);
     solver.litsInCls = new Array(solver.numLits);

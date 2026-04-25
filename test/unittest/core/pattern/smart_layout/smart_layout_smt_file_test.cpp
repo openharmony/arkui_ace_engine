@@ -110,8 +110,8 @@ const char* EMBEDDED_LAYOUT_SMT = R"(8
 0 true
 1 (>= BC_width 0.0)
 2 (<= BC_width 4000.0)
-3 (>= BC_hight 0.0)
-4 (= BC_hight 0.0)
+3 (>= BC_height 0.0)
+4 (= BC_height 0.0)
 5 BC_feasible
 6 (= BC_x 0.0)
 7 (= BC_y 0.0)
@@ -128,8 +128,8 @@ const char* RADIUS_BOUNDED_SMT = R"(8
 0 true
 1 (>= BC_width 0)
 2 (<= BC_width 4000)
-3 (>= BC_hight 0)
-4 (= BC_hight 0)
+3 (>= BC_height 0)
+4 (= BC_height 0)
 5 (>= radius 0)
 6 (<= radius 10)
 7 BC_feasible
@@ -150,7 +150,7 @@ const char* BOOL_PROPAGATION_SMT = R"(7
 2 b2
 3 (>= BC_width 0)
 4 (<= BC_width 4000)
-5 (= BC_hight 0)
+5 (= BC_height 0)
 6 BC_feasible
 0
 5
@@ -650,7 +650,7 @@ HWTEST_F(SmartLayoutSmtFileTest, SmartLayoutSmtFileTest004, TestSize.Level1)
     std::string eqTwoNamesLine = "5 (= left right)";
     std::string simpleBoundLine = "6 (<= BC_width 4000)";
     std::string reverseBoundLine = "7 (>= 0 BC_width)";
-    std::string multiTermLine = "8 (>= (+ BC_width (* -1 BC_hight)) 0)";
+    std::string multiTermLine = "8 (>= (+ BC_width (* -1 BC_height)) 0)";
 
     BuildLitsWithNormalizedInput(solver, trueLine);
     BuildLitsWithNormalizedInput(solver, boolOrLine);
@@ -1722,11 +1722,11 @@ HWTEST_F(SmartLayoutSmtFileTest, SmartLayoutSmtFileTest035, TestSize.Level1)
         ASSERT_TRUE(solver.name2var.find(".h") != solver.name2var.end());
         EXPECT_TRUE(solver.basicComponentName == "BC" || solver.basicComponentName.empty());
         EXPECT_EQ(solver.bcWidthIdx, solver.name2var[".w"]);
-        auto bcHightIt = solver.name2var.find("BC_hight");
-        if (bcHightIt != solver.name2var.end()) {
-            EXPECT_EQ(solver.bcHightIdx, static_cast<int>(bcHightIt->second));
+        auto bcHeightIt = solver.name2var.find("BC_height");
+        if (bcHeightIt != solver.name2var.end()) {
+            EXPECT_EQ(solver.bcHeightIdx, static_cast<int>(bcHeightIt->second));
         } else {
-            EXPECT_EQ(solver.bcHightIdx, solver.name2var[".h"]);
+            EXPECT_EQ(solver.bcHeightIdx, solver.name2var[".h"]);
         }
 
         solver.BuildInstanceOriginal();

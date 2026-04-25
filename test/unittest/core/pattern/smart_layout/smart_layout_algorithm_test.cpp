@@ -1142,4 +1142,41 @@ HWTEST_F(SmartLayoutAlgorithmTest, SmartLayoutAlgorithmTest029, TestSize.Level1)
     EXPECT_EQ(root->GetContext().crossAxisAlign, SmartLayoutAlign::CENTER);
 }
 
+/**
+ * @tc.name: SmartLayoutAlgorithmTest032
+ * @tc.desc: Test CalculateBoundingBoxOffsets with normal children
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartLayoutAlgorithmTest, SmartLayoutAlgorithmTest032, TestSize.Level1)
+{
+    SmartLayoutAlgorithm algorithm;
+    auto root = std::make_shared<SmartLayoutAlgorithmFakeNode>(0, "root");
+    root->SetNodeSize(200.0, 200.0);
+    root->SetBoundingBox(SmartLayoutRect(10.0, 20.0, 80.0, 60.0));
+    algorithm.rootNode_ = root;
+
+    auto offsets = algorithm.CalculateBoundingBoxOffsets();
+
+    // bx = (200 - 80) / 2 - 10 = 50
+    // by = (200 - 60) / 2 - 20 = 50
+    EXPECT_NEAR(offsets.first, 50.0, 0.001);
+    EXPECT_NEAR(offsets.second, 50.0, 0.001);
+}
+
+/**
+ * @tc.name: SmartLayoutAlgorithmTest033
+ * @tc.desc: Test CalculateBoundingBoxOffsets with nullptr rootNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartLayoutAlgorithmTest, SmartLayoutAlgorithmTest033, TestSize.Level1)
+{
+    SmartLayoutAlgorithm algorithm;
+    algorithm.rootNode_ = nullptr;
+
+    auto offsets = algorithm.CalculateBoundingBoxOffsets();
+
+    EXPECT_NEAR(offsets.first, 0.0, 0.001);
+    EXPECT_NEAR(offsets.second, 0.0, 0.001);
+}
+
 } // namespace OHOS::Ace::NG
