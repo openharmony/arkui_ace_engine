@@ -46,7 +46,8 @@ public:
             auto offset = paintWrapper->GetContentOffset();
             bool isRtl = direction_ == TextDirection::AUTO ? AceApplicationInfo::GetInstance().IsRightToLeft()
                                                            : direction_ == TextDirection::RTL;
-            auto pointOffset = isSelect_ ^ isRtl ? size.Width() - size.Height() : 0.0f;
+            auto pointOffset = isSelect_ ^ isRtl ? size.Width() - static_cast<float>(size.Height() / NUM_TWO)
+                                                 : static_cast<float>(size.Height() / NUM_TWO);
             auto renderContext = paintWrapper->GetRenderContext();
             CHECK_NULL_RETURN(renderContext, nullptr);
             auto host = renderContext->GetHost();
@@ -237,6 +238,13 @@ public:
     void SetHasSystemMaterial(bool has)
     {
         hasSystemMaterial_ = has;
+    }
+
+    void SetMaterialNodePositionCallback(SwitchModifier::MaterialNodePositionCallback&& callback)
+    {
+        if (switchModifier_) {
+            switchModifier_->SetMaterialNodePositionCallback(std::move(callback));
+        }
     }
 
     void SetShowHoverEffect(bool showHoverEffect)

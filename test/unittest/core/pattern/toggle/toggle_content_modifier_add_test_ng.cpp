@@ -1382,7 +1382,7 @@ HWTEST_F(ToggleContentModifierAddTestNg, ToggleContentModifierAddTestNg038, Test
     float pointOffset = FIFTY_FLOAT;
     switchModifier.pointOffset_->Set(pointOffset);
     switchModifier.FixPointOffset();
-    EXPECT_EQ(switchModifier.pointOffset_->Get(), TEN_FLOAT);
+    EXPECT_EQ(switchModifier.pointOffset_->Get(), FIFTY_FLOAT - FORTY_FLOAT / 2.0f);
 }
 
 /**

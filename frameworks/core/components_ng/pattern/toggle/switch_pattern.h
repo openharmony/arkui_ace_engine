@@ -213,18 +213,14 @@ private:
     void CreateDragFrameNode();
     void CreateDragPointNode();
     void CreateBlurCoverNode();
-    void UpdateMaterialNodePosition();
-    float CalculatePointCenterX(float pointRadius, float actualGap) const;
+    void UpdateMaterialNodePosition(float centerX, float centerY, float pointRadius);
+    void RegisterMaterialNodePositionCallback();
     void ShowMaterialNode();
     void HideMaterialNode();
-    bool PredictFinalToggleState() const;
-    void CalculateHideTargetPosition(float& targetFrameX, float& targetFrameY,
-        float& targetPointNodeX, float& targetPointNodeY);
     void ResetMaterialNodeAppearance(const RefPtr<RenderContext>& pointRC,
         const RefPtr<RenderContext>& blurRC);
     void AnimateHighGradeHide(const RefPtr<RenderContext>& pointRC,
-        const RefPtr<RenderContext>& blurRC, const RefPtr<SwitchModifier>& switchModifier,
-        float targetFrameX, float targetFrameY, float targetPointNodeX, float targetPointNodeY);
+        const RefPtr<RenderContext>& blurRC, const RefPtr<SwitchModifier>& switchModifier);
     void AnimateToDragState();
     float GetPointRadius() const;
     float GetActualGap() const;
@@ -234,7 +230,7 @@ private:
 
     // Drag animation helpers
     AnimationOption CreateDragAnimationOption() const;
-    BlurStyleOption CreateDragBlurStyleOption() const;
+    BlurStyleOption CreateDragBlurStyleOption(float scale) const;
     AnimationOption CreateLowGradeSpringOption() const;
     void HideMaterialNodes();
 
@@ -286,7 +282,6 @@ private:
     RefPtr<FrameNode> dragFrameNode_;
     RefPtr<FrameNode> dragPointNode_;
     RefPtr<FrameNode> blurCoverNode_;
-    bool isDragActive_ = false;
     bool isFrameNodeVisible_ = false;
     CancelableCallback<void()> longPressTask_;
 
