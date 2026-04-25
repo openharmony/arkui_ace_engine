@@ -142,10 +142,8 @@ public:
     void SaveReportStub(sptr<IRemoteObject> reportStub, int32_t processId);
 
 private:
-    std::mutex mutex_;
-    std::shared_mutex reportObjectMutex_;
-    std::shared_mutex processMapMutex_;
     std::map<int32_t, sptr<IRemoteObject>> reportObjectMap_;
+    std::shared_mutex reportObjectMutex_;
 };
 
 } // namespace OHOS::Ace

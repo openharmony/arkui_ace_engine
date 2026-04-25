@@ -249,6 +249,7 @@ protected:
     virtual ~UiSessionManager() = default;
 
     std::map<std::string, std::set<int32_t>> processMap_;
+    std::shared_mutex processMapMutex_;
     std::atomic<int32_t> clickEventRegisterProcesses_ = 0;
     std::atomic<int32_t> searchEventRegisterProcesses_ = 0;
     std::atomic<int32_t> textChangeEventRegisterProcesses_ = 0;
@@ -259,33 +260,53 @@ protected:
     std::atomic<int32_t> lifeCycleEventRegisterProcesses_ = 0;
     std::atomic<int32_t> selectTextEventRegisterProcesses_ = 0;
     bool webFocusEventRegistered = false;
+    std::mutex webFocusEventRegisteredMutex_;
     InspectorFunction inspectorFunction_ = 0;
+    std::mutex inspectorFunctionMutex_;
     NotifyAllWebFunction notifyWebFunction_ = 0;
+    std::mutex notifyWebFunctionMutex_;
     GetPixelMapFunction getPixelMapFunction_ = 0;
+    std::mutex getPixelMapFunctionMutex_;
     GetHitTestInfoFunction getHitTestInfoFunction_ = 0;
+    std::mutex getHitTestInfoFunctionMutex_;
     GetImagesByIdFunction getImagesByIdFunction_ = 0;
+    std::mutex getImagesByIdFunctionMutex_;
     NotifySendCommandFunction notifySendCommandFunction_ = 0;
+    std::mutex notifySendCommandFunctionMutex_;
     NotifySendCommandAsyncFunction notifySendCommandAsyncFunction_ = 0;
+    std::mutex notifySendCommandAsyncFunctionMutex_;
     GetStateMgmtInfoFunction getStateMgmtInfoFunction_ = 0;
+    std::mutex getStateMgmtInfoFunctionMutex_;
     std::shared_ptr<InspectorJsonValue> jsonValue_ = nullptr;
+    std::mutex jsonValueMutex_;
     std::atomic<int32_t> webTaskNums_ = 0;
     std::string baseInfo_;
+    std::mutex baseInfoMutex_;
     std::map<int32_t, std::shared_ptr<UiTranslateManager>> translateManagerMap_;
     std::shared_mutex translateManagerMutex_;
     std::function<int32_t()> getInstanceIdCallback_;
     std::shared_mutex getInstanceIdCallbackMutex_;
     std::function<std::string()> pipelineContextPageNameCallback_;
+    std::mutex pipelineContextPageNameCallbackMutex_;
     std::function<std::vector<std::pair<float, float>>(int32_t id,
         const std::string& content)> getSpecifiedContentOffsetsCallback_;
+    std::mutex getSpecifiedContentOffsetsCallbackMutex_;
     std::function<void(
         int32_t id, const std::string& content, const std::vector<std::string>& nodeIds, const std::string& configs)>
         highlightSpecifiedContentCallback_;
+    std::mutex highlightSpecifiedContentCallbackMutex_;
     std::function<void()> selectTextCallback_;
+    std::mutex selectTextCallbackMutex_;
     SendCommandFunction sendCommandFunction_ = 0;
+    std::mutex sendCommandFunctionMutex_;
     std::function<uint32_t(const std::string& funcName, const std::string& params)> pipelineExeAppAIFunctionCallback_;
+    std::mutex pipelineExeAppAIFunctionCallbackMutex_;
     std::function<void(ContentChangeConfig)> startContentChangeDetectCallback_;
+    std::mutex startContentChangeDetectCallbackMutex_;
     std::function<void()> stopContentChangeDetectCallback_;
+    std::mutex stopContentChangeDetectCallbackMutex_;
     GetWebInfoByRequestFunction getWebInfoByRequestCallback_;
+    std::mutex getWebInfoByRequestCallbackMutex_;
     RelaxedCommandFunction relaxedCommandFunction_ = nullptr;
 };
 } // namespace OHOS::Ace
