@@ -7025,6 +7025,11 @@ export class ColorMetricsExt {
     alpha: int32 = initializers.arkui.component.idlize.ColorMetricsExtNS.alpha;
     colorSpace: ColorSpace = initializers.arkui.component.idlize.ColorMetricsExtNS.colorSpace;
     resourceId: int32 = initializers.arkui.component.idlize.ColorMetricsExtNS.resourceId;
+    redValue: double = initializers.arkui.component.idlize.ColorMetricsExtNS.redValue;
+    greenValue: double = initializers.arkui.component.idlize.ColorMetricsExtNS.greenValue;
+    blueValue: double = initializers.arkui.component.idlize.ColorMetricsExtNS.blueValue;
+    headRoom: double = initializers.arkui.component.idlize.ColorMetricsExtNS.headRoom;
+    isHDR: boolean = initializers.arkui.component.idlize.ColorMetricsExtNS.isHDR;
 }
 export type CustomNodeBuilder = (parentNode: KPointer) => KPointer;
 export type CustomNodeBuilderT<T> = (parentNode: KPointer, t: T) => KPointer;
@@ -7750,6 +7755,16 @@ export class ColorMetricsExt_serializer {
         valueSerializer.writeInt32(valueHolderForColorSpace.valueOf())
         const valueHolderForResourceId = value.resourceId
         valueSerializer.writeInt32(valueHolderForResourceId)
+        const valueHolderForRedValue = value.redValue
+        valueSerializer.writeFloat64(valueHolderForRedValue)
+        const valueHolderForGreenValue = value.greenValue
+        valueSerializer.writeFloat64(valueHolderForGreenValue)
+        const valueHolderForBlueValue = value.blueValue
+        valueSerializer.writeFloat64(valueHolderForBlueValue)
+        const valueHolderForHeadRoom = value.headRoom
+        valueSerializer.writeFloat64(valueHolderForHeadRoom)
+        const valueHolderForIsHDR = value.isHDR
+        valueSerializer.writeBoolean(valueHolderForIsHDR)
     }
     public static read(buffer: DeserializerBase): ColorMetricsExt {
         let valueDeserializer: DeserializerBase = buffer
@@ -7759,7 +7774,12 @@ export class ColorMetricsExt_serializer {
         const alphaTmpResult: int32 = valueDeserializer.readInt32()
         const colorSpaceTmpResult: ColorSpace = ColorSpace.fromValue(valueDeserializer.readInt32())
         const resourceIdTmpResult: int32 = valueDeserializer.readInt32()
-        let value: ColorMetricsExt = ({red: redTmpResult, green: greenTmpResult, blue: blueTmpResult, alpha: alphaTmpResult, colorSpace: colorSpaceTmpResult, resourceId: resourceIdTmpResult} as ColorMetricsExt)
+        const redValueTmpResult: double = valueDeserializer.readFloat64()
+        const greenValueTmpResult: double = valueDeserializer.readFloat64()
+        const blueValueTmpResult: double = valueDeserializer.readFloat64()
+        const headRoomTmpResult: double = valueDeserializer.readFloat64()
+        const isHDRTmpResult: boolean = valueDeserializer.readBoolean()
+        let value: ColorMetricsExt = ({red: redTmpResult, green: greenTmpResult, blue: blueTmpResult, alpha: alphaTmpResult, colorSpace: colorSpaceTmpResult, resourceId: resourceIdTmpResult, redValue: redValueTmpResult, greenValue: greenValueTmpResult, blueValue: blueValueTmpResult, headRoom: headRoomTmpResult, isHDR: isHDRTmpResult} as ColorMetricsExt)
         return value
     }
 }
