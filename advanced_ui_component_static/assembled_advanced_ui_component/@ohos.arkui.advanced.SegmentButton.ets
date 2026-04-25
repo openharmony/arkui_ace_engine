@@ -1807,7 +1807,6 @@ export struct SegmentButton {
         .size(this.componentSize)
         .animation({ duration: 0 })
         .borderRadius(this.getBackgroundBorderRadius())
-        .clip(true)
 
         SegmentButtonItemArrayComponent({
           pressArray: this.pressArray,
@@ -2081,11 +2080,15 @@ export struct SegmentButton {
               this.isPanGestureMoved = true;
             }
             if (this.isBackgroundSystemMaterialEnabled()) {
-              let nowX = fingerInfo.globalX - this.panGestureStartPoint.x +
-                (this.buttonItemsPosition[this.selectedIndexes[0]].start?.value as number)
-              nowX = Math.max(this.buttonItemsPosition[0].start?.value as number, nowX);
+              const startX = this.buttonItemsPosition[0].start?.value as number;
               let buttonLength: int = Math.min(this.options!.buttons!.length, this.buttonItemsSize!.length).toInt();
-              nowX = Math.min(this.buttonItemsPosition[buttonLength - 1].start?.value as number, nowX);
+              const endX = this.buttonItemsPosition[buttonLength - 1].start?.value as number;
+
+              const offset = this.isShouldMirror() ? this.panGestureStartPoint.x - fingerInfo.globalX :
+                fingerInfo.globalX - this.panGestureStartPoint.x
+              let nowX =  offset + (this.buttonItemsPosition[this.selectedIndexes[0]].start?.value as number)
+              nowX = Math.max(startX, nowX);
+              nowX = Math.min(endX, nowX);
 
               this.selectedItemPosition = {
                 start: LengthMetrics.vp(nowX),
@@ -2217,7 +2220,7 @@ export struct SegmentButton {
       this.getUIContext().animateTo({
         curve: curves.interpolatingSpring(0, 1, 195, 14),
       }, () => {
-        this.selectedItemScale = { x: 1.23, y: 1.18 }
+        this.selectedItemScale = { x: 1.05, y: 1.18 }
         this.openSelectedItemSystemMaterial = true;
       })
     }
@@ -2226,7 +2229,7 @@ export struct SegmentButton {
   finishSelectMaterialAnimation() {
     if (this.openSelectedItemSystemMaterial) {
       this.getUIContext().animateTo({ curve: curves.interpolatingSpring(0, 1, 195, 14) }, () => {
-        this.selectedItemScale = { x: 1.23, y: 1.18 };
+        this.selectedItemScale = { x: 1.05, y: 1.18 };
       })
       this.getUIContext()
         .animateTo({
