@@ -111,9 +111,16 @@ struct ActionParam {
 struct AccessibilityFocusInfo {
     int64_t currentFocusNodeId;
     int64_t currentFocusVirtualNodeParentId;
+    bool isFocusMoveAction = false;
 
-    explicit AccessibilityFocusInfo(int64_t nodeId = -1, int64_t parentId = -1)
-        : currentFocusNodeId(nodeId), currentFocusVirtualNodeParentId(parentId) {}
+    explicit AccessibilityFocusInfo(int64_t nodeId = -1, int64_t parentId = -1, bool isFocusMove = false)
+        : currentFocusNodeId(nodeId), currentFocusVirtualNodeParentId(parentId), isFocusMoveAction(isFocusMove) {}
+};
+
+enum class AccessibilityFocusActionType : int32_t {
+    HOVER_FOCUS = 1,
+    SWIPE_FOCUS = 2,
+    SCROLL_FOCUS = 3,
 };
 
 struct GetInfoByNodeId {
@@ -745,6 +752,7 @@ private:
     bool CheckDumpInfoParams(const std::vector<std::string> &params);
     void DumpSendEventTest(int64_t nodeId, int32_t eventId, const std::vector<std::string>& params);
     void DumpInjectActionTest(const std::vector<std::string>& params);
+    void DumpExecuteActionTest(const std::vector<std::string>& params);
     void DumpEmbedSearchTest(const std::vector<std::string>& params);
     void DumpEmbedHoverTestNG(const std::vector<std::string>& params, uint32_t windowId);
     void DumpSetCheckListTest(const std::vector<std::string>& params);

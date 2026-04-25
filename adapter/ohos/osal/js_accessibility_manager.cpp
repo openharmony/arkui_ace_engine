@@ -26,7 +26,6 @@
 #include "core/components_ng/base/observer_handler.h"
 #include "base/log/event_report.h"
 #include "core/accessibility/accessibility_manager_ng.h"
-#include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/components_ng/pattern/web/web_accessibility_child_tree_callback.h"
 #include "core/components_ng/base/frame_node.h"
@@ -86,6 +85,9 @@ constexpr size_t MAX_DUMP_INFO_SIZE = 5000;
 
 const std::string ACTION_ARGU_SCROLL_STUB = "scrolltype"; // wait for change
 const std::string ACTION_DEFAULT_PARAM = "ACCESSIBILITY_ACTION_INVALID";
+const std::string ACTION_ARGU_FOCUS_TYPE_STUB = "ActAccessibilityFocus";
+const std::string ACTION_ARGU_FOCUS_MOVE_VALUE =
+    std::to_string(static_cast<int32_t>(AccessibilityFocusActionType::SWIPE_FOCUS));
 
 const std::set<std::string> TAGS_EMBED_COMPONENT = {
     "embeddedObject",
@@ -2535,6 +2537,9 @@ bool ActAccessibilityFocus(int64_t elementId, const RefPtr<NG::FrameNode>& frame
     CHECK_NULL_RETURN(accessibilityProperty, false);
     accessibilityProperty->OnAccessibilityFocusCallback(true);
     accessibilityProperty->SetAccessibilityFocusState(true);
+    if (focusInfo.isFocusMoveAction) {
+        NG::AccessibilityFrameNodeUtils::ProcessFocusScroll(frameNode, context);
+    }
     return true;
 }
 
@@ -4660,6 +4665,17 @@ bool JsAccessibilityManager::GetDumpInfoArgument(const std::vector<std::string>&
 
 bool JsAccessibilityManager::DumpInfoParams(const std::vector<std::string>& params, DumpInfoArgument& argument)
 {
+    static const std::unordered_map<std::string, DumpMode> BREAK_MODE_MAP = {
+        { "--inject-action", DumpMode::INJECT_ACTION_TEST },
+        { "--embed-search", DumpMode::EMBED_SEARCH_TEST },
+        { "--embed-hover", DumpMode::EMBED_HOVER_TEST },
+        { "--specific-search", DumpMode::SPECIFIC_SEARCH_TEST },
+        { "--set-whitelist", DumpMode::SET_CHECKLIST_TEST },
+        { "--get-whitelist", DumpMode::GET_CHECKLIST_TEST },
+        { "--execute-action", DumpMode::EXECUTE_ACTION_TEST },
+        { "-json", DumpMode::TREE },
+    };
+
     for (auto arg = params.begin() + 1; arg != params.end(); ++arg) {
         if (*arg == "-w") {
             argument.useWindowId = true;
@@ -4677,34 +4693,18 @@ bool JsAccessibilityManager::DumpInfoParams(const std::vector<std::string>& para
             }
         } else if (*arg == "--event-test") {
             return CheckAndGetEventTestArgument(arg, params, argument);
-        } else if (*arg == "--inject-action") {
-            argument.mode = DumpMode::INJECT_ACTION_TEST;
-            break;
-        } else if (*arg == "--embed-search") {
-            argument.mode = DumpMode::EMBED_SEARCH_TEST;
-            break;
-        } else if (*arg == "--embed-hover") {
-            argument.mode = DumpMode::EMBED_HOVER_TEST;
-            break;
-        } else if (*arg == "--specific-search") {
-            argument.mode = DumpMode::SPECIFIC_SEARCH_TEST;
-            break;
-        } else if (*arg == "--set-whitelist") {
-            argument.mode = DumpMode::SET_CHECKLIST_TEST;
-            break;
-        } else if (*arg == "--get-whitelist") {
-            argument.mode = DumpMode::GET_CHECKLIST_TEST;
-            break;
         } else if (*arg == "-v") {
             argument.verbose = true;
-        } else if (*arg == "-json") {
-            argument.mode = DumpMode::TREE;
 #ifdef WEB_SUPPORTED
         } else if (*arg == "-webAccId" || *arg == "-webAccFun") {
             return DumpWebInfoParams(params, argument);
 #endif
+        } else if (HandleNodeModeParam(*arg, argument)) {
+            break;
         } else {
-            if (HandleNodeModeParam(*arg, argument)) {
+            auto it = BREAK_MODE_MAP.find(*arg);
+            if (it != BREAK_MODE_MAP.end()) {
+                argument.mode = it->second;
                 break;
             }
         }
@@ -4780,6 +4780,9 @@ void JsAccessibilityManager::ChooseDumpEvent(const std::vector<std::string>& par
             break;
         case DumpMode::GET_CHECKLIST_TEST:
             DumpGetCheckListTest(params);
+            break;
+        case DumpMode::EXECUTE_ACTION_TEST:
+            DumpExecuteActionTest(params);
             break;
 #ifdef WEB_SUPPORTED
         case DumpMode::WEB_ACC_DUMP:
@@ -6980,6 +6983,15 @@ bool conversionDirection(std::string dir)
     return false;
 }
 
+bool IsFocusMoveAction(const std::map<std::string, std::string>& actionArguments)
+{
+    auto iter = actionArguments.find(ACTION_ARGU_FOCUS_TYPE_STUB);
+    if (iter == actionArguments.end()) {
+        return false;
+    }
+    return iter->second == ACTION_ARGU_FOCUS_MOVE_VALUE;
+}
+
 int32_t getArgumentByKey(const std::map<std::string, std::string>& actionArguments, const std::string& checkKey)
 {
     auto iter = actionArguments.find(checkKey);
@@ -7229,6 +7241,7 @@ bool JsAccessibilityManager::ConvertActionTypeToBoolen(ActionType action, RefPtr
             SaveLast(elementId, frameNode);
             SaveCurrentFocusNodeSize(frameNode);
             AccessibilityFocusInfo focusInfo{ currentFocusNodeId_, currentFocusVirtualNodeParentId_ };
+            focusInfo.isFocusMoveAction = IsFocusMoveAction(actionArguments);
             result = ActAccessibilityFocus(elementId, frameNode, context, focusInfo, false);
             currentFocusNodeId_ = focusInfo.currentFocusNodeId;
             currentFocusVirtualNodeParentId_ = focusInfo.currentFocusVirtualNodeParentId;

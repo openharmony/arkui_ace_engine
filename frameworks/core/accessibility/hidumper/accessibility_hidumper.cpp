@@ -55,4 +55,36 @@ bool AccessibilityHidumper::DumpProcessInjectActionParameters(
     }
     return false;
 }
+
+bool AccessibilityHidumper::DumpProcessExecuteActionParameters(
+    const std::vector<std::string>& params,
+    ExecuteActionArgument& argument)
+{
+    constexpr size_t MIN_EXECUTE_ACTION_PARAMS = 2;
+    for (auto arg = params.begin(); arg != params.end(); ++arg) {
+        if (*arg != "--execute-action") {
+            continue;
+        }
+        if (std::distance(arg, params.end()) <= static_cast<int32_t>(MIN_EXECUTE_ACTION_PARAMS)) {
+            DumpLog::GetInstance().Print("Error: --execute-action needs elementId and actionType");
+            return false;
+        }
+        ++arg;
+        argument.elementId = StringUtils::StringToLongInt(*arg, -1);
+        ++arg;
+        argument.actionType = StringUtils::StringToInt(*arg, 0);
+        while (std::distance(arg, params.end()) > 1) {
+            ++arg;
+            std::string key = *arg;
+            if (std::distance(arg, params.end()) <= 1) {
+                DumpLog::GetInstance().Print("Error: key without value");
+                return false;
+            }
+            ++arg;
+            argument.actionArguments[key] = *arg;
+        }
+        return true;
+    }
+    return false;
+}
 }  // namespace OHOS::Ace
