@@ -18,6 +18,7 @@
 
 #include "compatible/components/rating/rating_component.h"
 #include "core/event/ace_event_helper.h"
+#include "core/event/key_event.h"
 
 namespace OHOS::Ace {
 

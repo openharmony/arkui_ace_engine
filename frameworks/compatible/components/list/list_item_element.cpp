@@ -17,6 +17,7 @@
 
 #include "compatible/components/list/list_element.h"
 #include "compatible/components/list/list_item_group_element.h"
+#include "core/event/key_event.h"
 
 namespace OHOS::Ace {
 

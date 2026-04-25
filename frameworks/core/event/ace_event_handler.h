@@ -21,12 +21,12 @@
 #include "base/memory/ace_type.h"
 #include "core/common/container_scope.h"
 #include "core/event/ace_events.h"
-#include "core/event/key_event.h"
 #include "core/event/rotation_event.h"
 
 namespace OHOS::Ace {
 
 class GestureEvent;
+struct KeyEvent;
 
 class EventMarker final {
 public:

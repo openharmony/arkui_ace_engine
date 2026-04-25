@@ -14,6 +14,7 @@
  */
 
 #include "core/components/root/root_element.h"
+#include "core/event/key_event.h"
 
 #include "core/components/container_modal/container_modal_element.h"
 #include "core/components/dialog_modal/dialog_modal_element.h"

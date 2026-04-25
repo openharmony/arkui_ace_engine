@@ -16,6 +16,7 @@
 #include "compatible/components/stepper/stepper_element.h"
 
 #include "compatible/components/stepper/render_stepper.h"
+#include "core/event/key_event.h"
 
 namespace OHOS::Ace {
 namespace {

@@ -15,6 +15,8 @@
 
 #include "compatible/components/video/video_element.h"
 
+#include "core/event/key_event.h"
+
 #include <cstdio>
 #include <iomanip>
 #include <regex>

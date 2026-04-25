@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SLIDER_SLIDER_ELEMENT_H
 
 #include "core/components/slider/render_slider.h"
+#include "core/event/key_event.h"
 #include "core/pipeline/base/render_element.h"
 
 namespace OHOS::Ace {

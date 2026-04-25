@@ -15,6 +15,7 @@
 
 #include "core/components/option/option_element.h"
 #include "core/accessibility/accessibility_manager.h"
+#include "core/event/key_event.h"
 
 #include "core/components/select_popup/render_select_popup.h"
 
