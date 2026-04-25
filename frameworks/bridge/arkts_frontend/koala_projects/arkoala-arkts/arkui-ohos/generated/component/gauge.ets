@@ -127,7 +127,7 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
                     thisSerializer.writeInt32(0)
                 } else {
                     const valueTmpValueElem = valueTmpValue[0]
-                    if ((valueTmpValueElem instanceof [ ResourceColor | LinearGradient, double ]) && ((valueTmpValue.length) == (2))) {
+                    if ((valueTmpValueElem instanceof [ ResourceColor | LinearGradient, double ]) && ((valueTmpValueElem.length) == (2))) {
                         thisSerializer.writeInt8((2).toByte())
                         const valueTmpValueForIdx2 = valueTmpValue as Array<[ ResourceColor | LinearGradient, double ]>
                         thisSerializer.writeInt32((valueTmpValueForIdx2.length).toInt())
