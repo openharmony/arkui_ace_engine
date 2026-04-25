@@ -698,6 +698,191 @@ HWTEST_F(DragEventTestNg, DragEventTestNg006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DragEventActionStartTest001
+ * @tc.desc: Verify onActionStart returns early when pre-drag status reaches landing finished.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventActionStartTest001, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->SetDraggable(true);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    ASSERT_NE(dragEventActuator, nullptr);
+
+    double unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
+    GestureEventFunc actionStart = [&unknownPropertyValue](GestureEvent& info) {
+        unknownPropertyValue = info.GetScale();
+    };
+    GestureEventFunc actionUpdate = [](GestureEvent& info) {};
+    GestureEventFunc actionEnd = [](GestureEvent& info) {};
+    GestureEventNoParameter actionCancel = []() {};
+    auto dragEvent = AceType::MakeRefPtr<DragEvent>(
+        std::move(actionStart), std::move(actionUpdate), std::move(actionEnd), std::move(actionCancel));
+    dragEventActuator->ReplaceDragEvent(dragEvent);
+    dragEventActuator->SetCustomDragEvent(dragEvent);
+
+    auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
+    ASSERT_NE(getEventTargetImpl, nullptr);
+    TouchTestResult finalResult;
+    ResponseLinkResult responseLinkResult;
+    frameNode->GetOrCreateFocusHub();
+    dragEventActuator->OnCollectTouchTarget(
+        COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
+    ASSERT_NE(dragEventActuator->panRecognizer_->onActionStart_, nullptr);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+    ASSERT_EQ(frameNode->GetContextRefPtr(), pipeline);
+    dragDropManager->ResetDragging();
+    DragDropGlobalController::GetInstance().SetPrepareDragFrameNode(nullptr);
+    DragDropGlobalController::GetInstance().SetPreDragStatus(PreDragStatus::PREVIEW_LANDING_FINISHED);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().GetPrepareDragFrameNode().Upgrade(), nullptr);
+
+    GestureEvent info;
+    info.SetScale(GESTURE_EVENT_PROPERTY_VALUE);
+    info.SetSourceDevice(SourceType::TOUCH);
+    (*(dragEventActuator->panRecognizer_->onActionStart_))(info);
+
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_DEFAULT_VALUE);
+    EXPECT_FALSE(dragDropManager->IsAboutToPreview());
+    DragDropGlobalController::GetInstance().SetPreDragStatus(PreDragStatus::ACTION_DETECTING_STATUS);
+}
+
+/**
+ * @tc.name: DragEventActionStartTest002
+ * @tc.desc: Verify onActionStart returns early when prepareDragFrameNode is empty for touch drag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventActionStartTest002, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->SetDraggable(true);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    ASSERT_NE(dragEventActuator, nullptr);
+
+    double unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
+    GestureEventFunc actionStart = [&unknownPropertyValue](GestureEvent& info) {
+        unknownPropertyValue = info.GetScale();
+    };
+    GestureEventFunc actionUpdate = [](GestureEvent& info) {};
+    GestureEventFunc actionEnd = [](GestureEvent& info) {};
+    GestureEventNoParameter actionCancel = []() {};
+    auto dragEvent = AceType::MakeRefPtr<DragEvent>(
+        std::move(actionStart), std::move(actionUpdate), std::move(actionEnd), std::move(actionCancel));
+    dragEventActuator->ReplaceDragEvent(dragEvent);
+    dragEventActuator->SetCustomDragEvent(dragEvent);
+
+    auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
+    ASSERT_NE(getEventTargetImpl, nullptr);
+    TouchTestResult finalResult;
+    ResponseLinkResult responseLinkResult;
+    frameNode->GetOrCreateFocusHub();
+    dragEventActuator->OnCollectTouchTarget(
+        COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
+    ASSERT_NE(dragEventActuator->panRecognizer_->onActionStart_, nullptr);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+    ASSERT_EQ(frameNode->GetContextRefPtr(), pipeline);
+    dragDropManager->ResetDragging();
+    dragDropManager->SetIsDragNodeNeedClean(false);
+    dragEventActuator->isForDragDrop_ = false;
+    DragDropGlobalController::GetInstance().SetPrepareDragFrameNode(nullptr);
+    DragDropGlobalController::GetInstance().SetPreDragStatus(PreDragStatus::ACTION_DETECTING_STATUS);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().GetPrepareDragFrameNode().Upgrade(), nullptr);
+
+    GestureEvent info;
+    info.SetScale(GESTURE_EVENT_PROPERTY_VALUE);
+    info.SetSourceDevice(SourceType::TOUCH);
+    (*(dragEventActuator->panRecognizer_->onActionStart_))(info);
+
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_DEFAULT_VALUE);
+    DragDropGlobalController::GetInstance().SetPreDragStatus(PreDragStatus::ACTION_DETECTING_STATUS);
+}
+
+/**
+ * @tc.name: DragEventActionStartTest003
+ * @tc.desc: Verify onActionStart continues when prepareDragFrameNode is empty but drag-drop mode is enabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventActionStartTest003, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->SetDraggable(true);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    ASSERT_NE(dragEventActuator, nullptr);
+
+    double unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
+    GestureEventFunc actionStart = [&unknownPropertyValue](GestureEvent& info) {
+        unknownPropertyValue = info.GetScale();
+    };
+    GestureEventFunc actionUpdate = [](GestureEvent& info) {};
+    GestureEventFunc actionEnd = [](GestureEvent& info) {};
+    GestureEventNoParameter actionCancel = []() {};
+    auto dragEvent = AceType::MakeRefPtr<DragEvent>(
+        std::move(actionStart), std::move(actionUpdate), std::move(actionEnd), std::move(actionCancel));
+    dragEventActuator->ReplaceDragEvent(dragEvent);
+    dragEventActuator->SetCustomDragEvent(dragEvent);
+
+    auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
+    ASSERT_NE(getEventTargetImpl, nullptr);
+    TouchTestResult finalResult;
+    ResponseLinkResult responseLinkResult;
+    frameNode->GetOrCreateFocusHub();
+    dragEventActuator->OnCollectTouchTarget(
+        COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
+    ASSERT_NE(dragEventActuator->panRecognizer_->onActionStart_, nullptr);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+    ASSERT_EQ(frameNode->GetContextRefPtr(), pipeline);
+    dragDropManager->ResetDragging();
+    dragDropManager->SetIsDragNodeNeedClean(false);
+    dragEventActuator->isForDragDrop_ = true;
+    DragDropGlobalController::GetInstance().SetPrepareDragFrameNode(nullptr);
+    DragDropGlobalController::GetInstance().SetPreDragStatus(PreDragStatus::ACTION_DETECTING_STATUS);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().GetPrepareDragFrameNode().Upgrade(), nullptr);
+
+    GestureEvent info;
+    info.SetScale(GESTURE_EVENT_PROPERTY_VALUE);
+    info.SetSourceDevice(SourceType::TOUCH);
+    (*(dragEventActuator->panRecognizer_->onActionStart_))(info);
+
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
+    DragDropGlobalController::GetInstance().SetPreDragStatus(PreDragStatus::ACTION_DETECTING_STATUS);
+}
+
+/**
  * @tc.name: DragEventTestNg007
  * @tc.desc: Create DragEventActuator and invoke onActionCancel callback.
  * @tc.type: FUNC
