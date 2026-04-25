@@ -1149,7 +1149,7 @@ float HandleAxisEventCurrentLocalX(const ArkUI_UIInputEvent* event)
 PointerEventResult HandleCTouchEventCurrentLocalXByIndex(const ArkUI_UIInputEvent* event, uint32_t pointerIndex)
 {
     const auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
-    if (touchEvent && touchEvent->subKind == ON_HOVER_MOVE) {
+    if (touchEvent) {
         if (pointerIndex != 0) {
             return { 0.0f, ARKUI_ERROR_CODE_PARAM_INVALID };
         }
@@ -1179,7 +1179,7 @@ PointerEventResult HandleCTouchEventCurrentLocalXByIndex(const ArkUI_UIInputEven
 float OH_ArkUI_PointerEvent_GetCurrentLocalX(const ArkUI_UIInputEvent* event)
 {
     const int32_t supportedScenario = S_NODE_TOUCH_EVENT | S_NODE_ON_TOUCH_INTERCEPT | S_NODE_ON_MOUSE |
-                                      S_NODE_ON_AXIS | S_NODE_ON_CLICK_EVENT | S_NODE_ON_HOVER_MOVE |
+                                      S_NODE_ON_AXIS | S_NODE_ON_CLICK_EVENT | S_GESTURE_CLICK_EVENT |
                                       S_GESTURE_TOUCH_EVENT | S_GESTURE_AXIS_EVENT | S_GESTURE_MOUSE_EVENT |
                                       S_NXC_ON_TOUCH_INTERCEPT | S_NXC_DISPATCH_AXIS_EVENT;
     CheckSupportedScenarioAndResetEventStatus(supportedScenario, event);
@@ -1205,7 +1205,7 @@ float OH_ArkUI_PointerEvent_GetCurrentLocalX(const ArkUI_UIInputEvent* event)
 float OH_ArkUI_PointerEvent_GetCurrentLocalXByIndex(const ArkUI_UIInputEvent* event, uint32_t pointerIndex)
 {
     const int32_t supportedScenario = S_NODE_TOUCH_EVENT | S_NODE_ON_TOUCH_INTERCEPT | S_NODE_ON_MOUSE |
-                                      S_NODE_ON_AXIS | S_NODE_ON_HOVER_MOVE | S_GESTURE_TOUCH_EVENT |
+                                      S_NODE_ON_AXIS | S_GESTURE_CLICK_EVENT | S_GESTURE_TOUCH_EVENT |
                                       S_GESTURE_AXIS_EVENT | S_GESTURE_MOUSE_EVENT;
     CheckSupportedScenarioAndResetEventStatus(supportedScenario, event);
     if (!event) {
@@ -1346,7 +1346,7 @@ float HandleAxisEventCurrentLocalY(const ArkUI_UIInputEvent* event)
 PointerEventResult HandleCTouchEventCurrentLocalYByIndex(const ArkUI_UIInputEvent* event, uint32_t pointerIndex)
 {
     const auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
-    if (touchEvent && touchEvent->subKind == ON_HOVER_MOVE) {
+    if (touchEvent) {
         if (pointerIndex != 0) {
             return { 0.0f, ARKUI_ERROR_CODE_PARAM_INVALID };
         }
@@ -1357,7 +1357,7 @@ PointerEventResult HandleCTouchEventCurrentLocalYByIndex(const ArkUI_UIInputEven
         auto ret = fullImpl->getNodeModifiers()->getCommonModifier()->getCurrentLocation(event->nodeId,
             { touchEvent->actionTouchPoint.windowX, touchEvent->actionTouchPoint.windowY },
             { touchEvent->actionTouchPoint.nodeX, touchEvent->actionTouchPoint.nodeY }, event->usePXUnit);
-        return { ret.yComponent, ARKUI_ERROR_CODE_PARAM_INVALID };
+        return { ret.yComponent, ARKUI_ERROR_CODE_NO_ERROR };
     }
     if (!isCurrentCTouchEventParamValid(touchEvent, pointerIndex)) {
         return { 0.0f, ARKUI_ERROR_CODE_PARAM_INVALID };
@@ -1376,7 +1376,7 @@ PointerEventResult HandleCTouchEventCurrentLocalYByIndex(const ArkUI_UIInputEven
 float OH_ArkUI_PointerEvent_GetCurrentLocalY(const ArkUI_UIInputEvent* event)
 {
     const int32_t supportedScenario = S_NODE_TOUCH_EVENT | S_NODE_ON_TOUCH_INTERCEPT | S_NODE_ON_MOUSE |
-                                      S_NODE_ON_AXIS | S_NODE_ON_CLICK_EVENT | S_NODE_ON_HOVER_MOVE |
+                                      S_NODE_ON_AXIS | S_NODE_ON_CLICK_EVENT | S_GESTURE_CLICK_EVENT |
                                       S_GESTURE_TOUCH_EVENT | S_GESTURE_AXIS_EVENT | S_GESTURE_MOUSE_EVENT |
                                       S_NXC_ON_TOUCH_INTERCEPT | S_NXC_DISPATCH_AXIS_EVENT;
     CheckSupportedScenarioAndResetEventStatus(supportedScenario, event);
@@ -1402,7 +1402,7 @@ float OH_ArkUI_PointerEvent_GetCurrentLocalY(const ArkUI_UIInputEvent* event)
 float OH_ArkUI_PointerEvent_GetCurrentLocalYByIndex(const ArkUI_UIInputEvent* event, uint32_t pointerIndex)
 {
     const int32_t supportedScenario = S_NODE_TOUCH_EVENT | S_NODE_ON_TOUCH_INTERCEPT | S_NODE_ON_MOUSE |
-                                      S_NODE_ON_AXIS | S_NODE_ON_HOVER_MOVE | S_GESTURE_TOUCH_EVENT |
+                                      S_NODE_ON_AXIS | S_GESTURE_CLICK_EVENT | S_GESTURE_TOUCH_EVENT |
                                       S_GESTURE_AXIS_EVENT | S_GESTURE_MOUSE_EVENT;
     CheckSupportedScenarioAndResetEventStatus(supportedScenario, event);
     if (!event) {

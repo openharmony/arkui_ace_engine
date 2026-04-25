@@ -257,6 +257,11 @@ public:
         userData_ = userData;
     }
 
+    void* GetUserData() const
+    {
+        return userData_;
+    }
+
     virtual RefPtr<NGGestureRecognizer> CreateRecognizer() = 0;
 
     void SetDisposeTag(bool tag)
