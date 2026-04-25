@@ -26305,6 +26305,10 @@ typedef struct GENERATED_ArkUISelectModifier {
                                               const Opt_BackgroundBlurStyleOptions* value);
     void (*setMenuBackgroundEffect)(Ark_NativePointer node,
                                     const Opt_BackgroundEffectOptions* value);
+    void (*setMenuDistortionMode)(Ark_NativePointer node,
+                                  const Opt_DistortionMode* value);
+    void (*setMenuEdgeLightMode)(Ark_NativePointer node,
+                                 const Opt_EdgeLightMode* value);
     void (*setMenuAlign)(Ark_NativePointer node,
                          const Opt_MenuAlignType* alignType,
                          const Opt_Offset* offset);
